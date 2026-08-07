@@ -143,13 +143,22 @@ final class CartContext {
 	 * removes shipping from `total` and `shipping_total`, so a reward can
 	 * never change the value it was granted on.
 	 *
+	 * Phase 6 (Cart Context): the optional 'categories' arg carries a
+	 * preloaded product-id => category-ids map (built by CartIntegration in
+	 * one batched query) so no per-item term queries run. Category lookups
+	 * use the canonical product id: for variations that is the parent id
+	 * (WooCommerce assigns categories to the parent product), so category
+	 * goals count variations correctly.
+	 *
 	 * @param \WC_Cart                $cart Live cart.
 	 * @param array<string, mixed>    $args Optional overrides: currency,
-	 *                                      user_id, is_guest, exclude_shipping.
+	 *                                      user_id, is_guest, exclude_shipping,
+	 *                                      categories (preloaded map).
 	 * @return CartContext
 	 */
 	public static function from_cart( \WC_Cart $cart, array $args = array() ) {
-		$items = array();
+		$items        = array();
+		$category_map = isset( $args['categories'] ) && is_array( $args['categories'] ) ? $args['categories'] : array();
 
 		foreach ( $cart->get_cart() as $cart_item ) {
 			$product = isset( $cart_item['data'] ) && $cart_item['data'] instanceof \WC_Product ? $cart_item['data'] : null;
@@ -157,6 +166,16 @@ final class CartContext {
 			if ( null === $product ) {
 				continue;
 			}
+
+			// Canonical id for category lookups: the cart item's product_id
+			// (the parent for variations, where WC stores the categories).
+			$category_product_id = isset( $cart_item['product_id'] ) && (int) $cart_item['product_id'] > 0
+				? (int) $cart_item['product_id']
+				: (int) $product->get_id();
+
+			$categories = isset( $category_map[ $category_product_id ] )
+				? array_map( 'intval', (array) $category_map[ $category_product_id ] )
+				: ( function_exists( 'wp_get_post_terms' ) ? wp_get_post_terms( $category_product_id, 'product_cat', array( 'fields' => 'ids' ) ) : array() );
 
 			$items[] = new CartItem(
 				array(
@@ -168,7 +187,7 @@ final class CartContext {
 					'line_total'    => isset( $cart_item['line_total'] ) ? (float) $cart_item['line_total'] : 0.0,
 					'price'         => (float) $product->get_price(),
 					'weight'        => (float) $product->get_weight(),
-					'categories'    => function_exists( 'wp_get_post_terms' ) ? wp_get_post_terms( $product->get_id(), 'product_cat', array( 'fields' => 'ids' ) ) : array(),
+					'categories'    => $categories,
 					'virtual'       => $product->is_virtual(),
 					'downloadable'  => $product->is_downloadable(),
 				)

@@ -7,6 +7,7 @@
 
 namespace GoalCart\Rewards;
 
+use GoalCart\Cart\CartIntegration;
 use GoalCart\Goals\CartContext;
 use GoalCart\Goals\Goal;
 use GoalCart\Goals\GoalEngine;
@@ -85,6 +86,13 @@ final class RewardEngine {
 	protected $registry;
 
 	/**
+	 * Cart integration service (single source of the cart snapshot, Phase 6).
+	 *
+	 * @var CartIntegration|null
+	 */
+	protected $cart_integration;
+
+	/**
 	 * Reward results for the current request: goal_id => RewardResult.
 	 *
 	 * @var array<int, RewardResult>|null
@@ -101,15 +109,17 @@ final class RewardEngine {
 	/**
 	 * Constructor.
 	 *
-	 * @param GoalEngine|null        $engine     Goal engine.
-	 * @param GoalRepository|null    $repository Goal repository.
-	 * @param Settings|null          $settings   Plugin settings.
+	 * @param GoalEngine|null        $engine           Goal engine.
+	 * @param GoalRepository|null    $repository       Goal repository.
+	 * @param Settings|null          $settings         Plugin settings.
+	 * @param CartIntegration|null   $cart_integration Cart integration service.
 	 */
-	public function __construct( ?GoalEngine $engine = null, ?GoalRepository $repository = null, ?Settings $settings = null ) {
-		$this->engine     = null !== $engine ? $engine : new GoalEngine();
-		$this->repository = $repository;
-		$this->settings   = $settings;
-		$this->registry   = new RewardApplicatorRegistry();
+	public function __construct( ?GoalEngine $engine = null, ?GoalRepository $repository = null, ?Settings $settings = null, ?CartIntegration $cart_integration = null ) {
+		$this->engine           = null !== $engine ? $engine : new GoalEngine();
+		$this->repository       = $repository;
+		$this->settings         = $settings;
+		$this->registry         = new RewardApplicatorRegistry();
+		$this->cart_integration = $cart_integration;
 	}
 
 	/**
@@ -236,8 +246,13 @@ final class RewardEngine {
 			}
 
 			// Evaluation context: Goal Cart's own fees and shipping are
-			// excluded so a reward can never un-grant itself.
-			$context = CartContext::from_cart( $cart, array( 'exclude_shipping' => true ) );
+			// excluded so a reward can never un-grant itself. The cart
+			// snapshot comes from the CartIntegration service (Phase 6) —
+			// the single source of truth — falling back to a direct build
+			// when the engine is constructed without it (tests/headless).
+			$context = null !== $this->cart_integration
+				? $this->cart_integration->context( $cart, array( 'exclude_shipping' => true ) )
+				: CartContext::from_cart( $cart, array( 'exclude_shipping' => true ) );
 
 			$results         = array();
 			$already_applied = array();

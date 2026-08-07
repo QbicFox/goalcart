@@ -83,6 +83,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
+### Phase 6 — Cart Context & WooCommerce Integration (100% complete)
+
+- **P06-T01 Objective** — Created `includes/Cart/CartIntegration.php` (`GoalCart\Cart`): the single, request-level source of truth for the live-cart snapshot. The reward engine now consumes `CartIntegration::context()` instead of building the context itself (falling back to a direct build when the service is absent, so the Phase 5 tests stay untouched).
+- **P06-T02 Integrate With** — Registered 10 cart-lifecycle invalidation hooks: cart init/session restore (`woocommerce_cart_loaded_from_session`), add (`woocommerce_add_to_cart`), remove/restore (`woocommerce_cart_item_removed` / `_restored`), quantity updates (`woocommerce_after_cart_item_quantity_update`), coupon apply/remove (`woocommerce_applied_coupon` / `woocommerce_removed_coupon`), shipping changes (`woocommerce_shipping_method_chosen` + Store API `woocommerce_store_api_cart_select_shipping_rate`), and checkout AJAX (`woocommerce_checkout_update_order_review`). WooCommerce Blocks cart mutations funnel through the classic `WC_Cart` methods, so the classic hooks cover Blocks automatically.
+- **P06-T03 Cart Context** — `CartContext::from_cart()` now accepts a preloaded product-id → category-ids map and resolves variation categories from the **parent** product (the WC convention — categories live on the parent), so category goals count variations correctly; per-item term queries only run as a fallback.
+- **P06-T04 Performance** — Request-level memoization of the built context (cache keyed by shopper-controlled line data + args, rebuilt automatically when contents change), batched category preloading via a single `wp_get_object_terms()` call (WP object-cache backed), and the existing per-request-cached `GoalRepository`/`GoalEngine` retained. Verified on the live store: a 6-item cart builds its context in **1 query** (previously 6+), the memoized second build runs **0 queries**.
+- Added files: `includes/Cart/CartIntegration.php`, `tests/cart-integration-test.php`, `docs/cart-integration.md`.
+- **Verification:** `php -l` clean; cart-integration test suite 22/22 (hook wiring, memoization, invalidation, cache keying, preloaded variation categories, null-cart guard); reward test suite 72/72 and engine test suite 75/75 (no regressions); live-cart behavior verified read-only against the real WordPress 7.0.2 + WooCommerce 11.0.0 environment (no products created, no database writes, plugin not activated).
+
+**Overall project progress: 32%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 weight 5% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

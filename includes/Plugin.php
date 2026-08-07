@@ -9,6 +9,7 @@ namespace GoalCart;
 
 use GoalCart\Admin\Admin;
 use GoalCart\Admin\AssetLoader;
+use GoalCart\Cart\CartIntegration;
 use GoalCart\Compatibility;
 use GoalCart\Database\Installer;
 use GoalCart\Goals\GoalEngine;
@@ -139,6 +140,7 @@ final class Plugin {
 
 		// Register hooks from every core service.
 		$this->hooks()->register( $this->settings() );
+		$this->hooks()->register( $this->cart_integration() );
 		$this->hooks()->register( $this->reward_engine() );
 		$this->hooks()->register( $this->admin() );
 
@@ -175,13 +177,21 @@ final class Plugin {
 			return new GoalRepository();
 		} );
 
+		// Cart integration (Phase 6): the single source of the live-cart
+		// snapshot — memoized, lifecycle-aware, with batched category
+		// preloading — consumed by the reward engine (and later REST/frontend).
+		$this->container->singleton( CartIntegration::class, function () {
+			return new CartIntegration();
+		} );
+
 		// Reward engine (Phase 5): decoupled from goal calculation — consumes
 		// GoalResult objects, applies rewards on the WooCommerce cart.
 		$this->container->singleton( RewardEngine::class, function ( Container $container ) {
 			return new RewardEngine(
 				$container->get( GoalEngine::class ),
 				$container->get( GoalRepository::class ),
-				$container->get( Settings::class )
+				$container->get( Settings::class ),
+				$container->get( CartIntegration::class )
 			);
 		} );
 
@@ -237,6 +247,15 @@ final class Plugin {
 	 */
 	public function reward_engine() {
 		return $this->container->get( RewardEngine::class );
+	}
+
+	/**
+	 * Get the cart integration service (Phase 6).
+	 *
+	 * @return CartIntegration
+	 */
+	public function cart_integration() {
+		return $this->container->get( CartIntegration::class );
 	}
 
 	/**
