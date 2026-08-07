@@ -11,6 +11,7 @@ use GoalCart\Admin\Admin;
 use GoalCart\Admin\AssetLoader;
 use GoalCart\Compatibility;
 use GoalCart\Database\Installer;
+use GoalCart\Goals\GoalEngine;
 use GoalCart\Hooks\HookManager;
 use GoalCart\Settings\Settings;
 
@@ -159,6 +160,12 @@ final class Plugin {
 			return new Settings();
 		} );
 
+		// Goal engine (Phase 4): stateless calculation engine, resolved
+		// lazily on first use by the frontend integration / REST layers.
+		$this->container->singleton( GoalEngine::class, function () {
+			return new GoalEngine();
+		} );
+
 		$this->container->singleton( AssetLoader::class, function ( Container $container ) {
 			return new AssetLoader( $container->get( Settings::class ) );
 		} );
@@ -193,6 +200,15 @@ final class Plugin {
 	 */
 	public function settings() {
 		return $this->container->get( Settings::class );
+	}
+
+	/**
+	 * Get the goal engine (Phase 4).
+	 *
+	 * @return GoalEngine
+	 */
+	public function goal_engine() {
+		return $this->container->get( GoalEngine::class );
 	}
 
 	/**
