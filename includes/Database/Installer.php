@@ -158,8 +158,8 @@ class Installer {
 			);
 
 			if ( ! empty( $wpdb->last_error ) ) {
-				// Log the failure (e.g. non-InnoDB posts table) without
-				// blocking activation; missing FKs can be retried later.
+				// Log the failure without blocking activation; missing FKs
+				// can be retried on the next upgrade.
 				error_log( 'Goal Cart: failed to add foreign key ' . $fk['name'] . ': ' . $wpdb->last_error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			}
 		}
@@ -168,15 +168,27 @@ class Installer {
 	/**
 	 * Remove every plugin table and option. Called from uninstall.php.
 	 *
+	 * Foreign keys are disabled around the drops: child tables
+	 * (analytics_events -> goals/campaigns, goals -> campaigns) reference
+	 * their parents, and MySQL refuses to DROP a parent table while a
+	 * child FK still references it. Wrapping the drops in
+	 * FOREIGN_KEY_CHECKS=0 makes uninstall order-independent and safe to
+	 * re-run. (Improvement over the reference installer, which drops in
+	 * dependency order and can leave parent tables behind.)
+	 *
 	 * @return void
 	 */
 	public static function uninstall() {
 		global $wpdb;
 
+		$wpdb->query( 'SET FOREIGN_KEY_CHECKS = 0' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
 		foreach ( Schema::tables() as $table_name ) {
 			$table = Schema::table( $table_name );
 			$wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
 		}
+
+		$wpdb->query( 'SET FOREIGN_KEY_CHECKS = 1' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 		delete_option( self::DB_VERSION_OPTION );
 	}

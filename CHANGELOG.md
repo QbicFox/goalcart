@@ -40,7 +40,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 - Added files: `goalcart.php`, `uninstall.php`, `composer.json`, `.editorconfig`, `.gitignore`, `README.md`, `includes/{Plugin,Container,Compatibility}.php`, `includes/Hooks/HookManager.php`, `includes/Database/{Schema,Installer}.php`, `includes/Settings/Settings.php`, `includes/Admin/{Admin,AssetLoader}.php`, `assets/css/admin-fullscreen.css`, `languages/.gitkeep`, `tests/.gitkeep`, and the `admin-app/` Vite + TypeScript + MUI scaffold.
 - **Verification:** `php -l` clean on all PHP files; `composer dump-autoload` generates the PSR-4 autoloader; `npm install` + `npm run typecheck` + `npm run lint` + `npm run build` all pass (production bundle + Vite manifest generated); read-only WP-context smoke test passes. The plugin was **not** activated on the live site.
 
-**Overall project progress: 12%** (Phase 0 5% + Phase 1 3% + Phase 2 weight 4% × 100%).
+**Overall project progress: 15%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 weight 3% × 100%).
+
+---
+
+### Phase 3 — Database & Domain Model (100% complete)
+
+- **P03-T01 Objective** — Designed the persistence layer to store goals, campaigns, and analytics events, following the reference (`wooinsights`) migration strategy: `Schema::get_schema()` table definitions + `Installer::maybe_upgrade()` version-gated `dbDelta` migrations with `WOOINSIGHTS_DB_VERSION`-style version constant.
+- **P03-T02 Recommended Domain Entities** — Implemented three tables in `includes/Database/Schema.php`: `goalcart_goals` (goal definition: type, target, calculation_mode, reward_type, campaign FK, priority, menu_order), `goalcart_campaigns` (name, status, starts_at, ends_at, priority), `goalcart_analytics_events` (goal/campaign/product/order FKs, event_type, session_id, cart_value). Added foreign keys with cascading deletes and indexes on lookup columns (campaign_id, goal_id, status, dates, event_type).
+- **P03-T03 Database Rules** — Applied the rules: indexes on all FK + frequently-filtered columns; JSON used only where genuinely needed (deferred); no duplication of WC data (product/order values referenced by ID, never copied); safe upgrades via version-gated `dbDelta`; foreign-key-aware uninstall (FK checks disabled around table drops).
+- Added files: `docs/database.md` (domain model, schema DDL, ERD, index/FK rationale, migration & upgrade policy, uninstall behavior).
+- **Verification:** `php -l` clean; WP-context DB round-trip test passes against the real WordPress 7.0.2 + WooCommerce 11.0.0 database — all three tables created, all 5 foreign keys verified, insert/delete round-trip OK, uninstall drops everything leaving zero `goalcart_` tables (no trace). DB version bumped to `0.2.0` (`GOALCART_DB_VERSION`). Tables are **not** left installed on the live site (test cleans up after itself); plugin not activated.
 
 ---
 

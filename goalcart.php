@@ -59,8 +59,9 @@ if ( ! defined( 'GOALCART_BASENAME' ) ) {
 if ( ! defined( 'GOALCART_DB_VERSION' ) ) {
 	/**
 	 * Database schema version. Bump this to trigger Installer migrations.
+	 * 0.2.0 = Phase 3: goals, campaigns and analytics_events tables.
 	 */
-	define( 'GOALCART_DB_VERSION', '0.1.0' );
+	define( 'GOALCART_DB_VERSION', '0.2.0' );
 }
 
 // Load the Composer autoloader (PSR-4: GoalCart\ => includes/).
