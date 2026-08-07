@@ -26,6 +26,16 @@ defined( 'ABSPATH' ) || exit;
 final class CartContext {
 
 	/**
+	 * Prefix of the negative fees the reward engine adds for discounts.
+	 *
+	 * CartContext excludes these fees from the `total` basis so a reward can
+	 * never change the value it was granted on (reward-loop safety, Phase 5).
+	 *
+	 * @var string
+	 */
+	const OWN_FEE_PREFIX = 'goalcart_reward_';
+
+	/**
 	 * Line subtotal before cart discounts, excluding tax.
 	 *
 	 * @var float
@@ -116,8 +126,26 @@ final class CartContext {
 	 * Extracts the normalized snapshot the engine needs. Amount bases use
 	 * the 'edit' context so raw floats come back (no display rounding).
 	 *
+	 * Timing note (Phase 5): the WooCommerce cart integration evaluates
+	 * goals on 'woocommerce_before_calculate_totals', which fires AFTER
+	 * WC_Cart::reset_totals() has zeroed the cart's aggregate getters, so
+	 * get_subtotal()/get_total() read 0 at that point. The money bases are
+	 * therefore computed from the cart LINE ITEMS, which always carry their
+	 * values (set at add-to-cart time and refreshed by each totals pass).
+	 * Post-calculation callers (REST, admin) get the same numbers because
+	 * WC's subtotal is the sum of the line subtotals. The grand `total`
+	 * falls back to the after-discount line value while totals are reset;
+	 * tax is a cart-level refinement for Phase 6 (shipping is excluded
+	 * below anyway).
+	 *
+	 * Reward-loop safety (Phase 5): Goal Cart's own discount fees are
+	 * subtracted from the `total` basis, and passing `exclude_shipping`
+	 * removes shipping from `total` and `shipping_total`, so a reward can
+	 * never change the value it was granted on.
+	 *
 	 * @param \WC_Cart                $cart Live cart.
-	 * @param array<string, mixed>    $args Optional overrides (currency, user_id, is_guest).
+	 * @param array<string, mixed>    $args Optional overrides: currency,
+	 *                                      user_id, is_guest, exclude_shipping.
 	 * @return CartContext
 	 */
 	public static function from_cart( \WC_Cart $cart, array $args = array() ) {
@@ -147,19 +175,73 @@ final class CartContext {
 			);
 		}
 
+		// Money bases come from the line items — always current, including
+		// while the cart's aggregate totals are reset mid-calculation (see
+		// the timing note above).
+		$subtotal      = 0.0;
+		$after_discount = 0.0;
+
+		foreach ( $items as $item ) {
+			$subtotal       += $item->line_subtotal();
+			$after_discount += $item->line_total();
+		}
+
+		$exclude_shipping = ! empty( $args['exclude_shipping'] );
+
+		// Aggregate getters are authoritative after a totals pass; while
+		// they read 0 (reset state) the line-derived values are used.
+		$total          = (float) $cart->get_total( 'edit' );
+		$discount_total = (float) $cart->get_discount_total();
+		$taxes_total    = (float) $cart->get_total_tax();
+		$shipping_total = (float) $cart->get_shipping_total();
+
+		if ( $total <= 0 && $subtotal > 0 ) {
+			$total          = $after_discount;
+			$discount_total = max( 0.0, $subtotal - $after_discount );
+			$taxes_total    = 0.0;
+		}
+
+		// Reward-loop safety: our own discount fees are added back so a
+		// discount reward can never reduce the `total` basis it was granted on.
+		$total = max( 0.0, $total + self::own_fees_total( $cart ) );
+
+		if ( $exclude_shipping ) {
+			$total          = max( 0.0, $total - $shipping_total );
+			$shipping_total = 0.0;
+		}
+
 		return new self(
 			array(
-				'subtotal'       => (float) $cart->get_subtotal(),
-				'total'          => (float) $cart->get_total( 'edit' ),
-				'discount_total' => (float) $cart->get_discount_total(),
-				'taxes_total'    => (float) $cart->get_total_tax(),
-				'shipping_total' => (float) $cart->get_shipping_total(),
+				'subtotal'       => $subtotal,
+				'total'          => $total,
+				'discount_total' => $discount_total,
+				'taxes_total'    => $taxes_total,
+				'shipping_total' => $shipping_total,
 				'currency'       => isset( $args['currency'] ) ? (string) $args['currency'] : ( function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '' ),
 				'user_id'        => isset( $args['user_id'] ) ? (int) $args['user_id'] : ( function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0 ),
 				'is_guest'       => isset( $args['is_guest'] ) ? (bool) $args['is_guest'] : ( function_exists( 'is_user_logged_in' ) ? ! is_user_logged_in() : true ),
 				'items'          => $items,
 			)
 		);
+	}
+
+	/**
+	 * Sum of Goal Cart's own (negative) discount fees in the cart.
+	 *
+	 * @param \WC_Cart $cart Live cart.
+	 * @return float Positive magnitude of the own fees (0 when none).
+	 */
+	protected static function own_fees_total( \WC_Cart $cart ) {
+		$total = 0.0;
+
+		foreach ( $cart->fees_api()->get_fees() as $fee ) {
+			if ( isset( $fee->id ) && 0 === strpos( (string) $fee->id, self::OWN_FEE_PREFIX ) ) {
+				$total += (float) $fee->amount;
+			}
+		}
+
+		// Fees are negative (discounts); return the positive magnitude.
+		return max( 0.0, -1 * $total );
 	}
 
 	/**

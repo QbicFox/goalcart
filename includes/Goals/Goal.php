@@ -172,6 +172,16 @@ final class Goal {
 	protected $reward_max_value;
 
 	/**
+	 * Extended reward configuration (Phase 5): eligible products/categories,
+	 * excluded products, stacking rules, shipping zone/method filters, gift
+	 * product, coupon settings. Stored as JSON in `reward_meta`; parsed to
+	 * an array here so the Rewards layer can read it without re-decoding.
+	 *
+	 * @var array<string, mixed>
+	 */
+	protected $reward_meta;
+
+	/**
 	 * Build a goal from a config array / database row.
 	 *
 	 * Accepts a superset of the Schema columns plus composite-only keys:
@@ -197,6 +207,27 @@ final class Goal {
 		$this->reward_type       = isset( $data['reward_type'] ) ? (string) $data['reward_type'] : null;
 		$this->reward_value      = isset( $data['reward_value'] ) ? (float) $data['reward_value'] : null;
 		$this->reward_max_value  = isset( $data['reward_max_value'] ) ? (float) $data['reward_max_value'] : null;
+		$this->reward_meta       = $this->meta( isset( $data['reward_meta'] ) ? $data['reward_meta'] : array() );
+	}
+
+	/**
+	 * Parse a reward_meta value (JSON string or array) into an array.
+	 *
+	 * @param mixed $value Raw reward_meta.
+	 * @return array<string, mixed>
+	 */
+	protected function meta( $value ) {
+		if ( is_array( $value ) ) {
+			return $value;
+		}
+
+		if ( is_string( $value ) && '' !== $value ) {
+			$decoded = json_decode( $value, true );
+
+			return is_array( $decoded ) ? $decoded : array();
+		}
+
+		return array();
 	}
 
 	/**
@@ -363,5 +394,14 @@ final class Goal {
 	 */
 	public function reward_max_value() {
 		return $this->reward_max_value;
+	}
+
+	/**
+	 * Extended reward configuration array (Phase 5).
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function reward_meta() {
+		return $this->reward_meta;
 	}
 }

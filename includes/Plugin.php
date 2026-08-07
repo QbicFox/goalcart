@@ -12,7 +12,9 @@ use GoalCart\Admin\AssetLoader;
 use GoalCart\Compatibility;
 use GoalCart\Database\Installer;
 use GoalCart\Goals\GoalEngine;
+use GoalCart\Goals\GoalRepository;
 use GoalCart\Hooks\HookManager;
+use GoalCart\Rewards\RewardEngine;
 use GoalCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -137,6 +139,7 @@ final class Plugin {
 
 		// Register hooks from every core service.
 		$this->hooks()->register( $this->settings() );
+		$this->hooks()->register( $this->reward_engine() );
 		$this->hooks()->register( $this->admin() );
 
 		// Apply everything to WordPress.
@@ -164,6 +167,22 @@ final class Plugin {
 		// lazily on first use by the frontend integration / REST layers.
 		$this->container->singleton( GoalEngine::class, function () {
 			return new GoalEngine();
+		} );
+
+		// Goal repository (Phase 5): loads active goals from the database so
+		// the reward engine can decide rewards on the live cart.
+		$this->container->singleton( GoalRepository::class, function () {
+			return new GoalRepository();
+		} );
+
+		// Reward engine (Phase 5): decoupled from goal calculation — consumes
+		// GoalResult objects, applies rewards on the WooCommerce cart.
+		$this->container->singleton( RewardEngine::class, function ( Container $container ) {
+			return new RewardEngine(
+				$container->get( GoalEngine::class ),
+				$container->get( GoalRepository::class ),
+				$container->get( Settings::class )
+			);
 		} );
 
 		$this->container->singleton( AssetLoader::class, function ( Container $container ) {
@@ -209,6 +228,15 @@ final class Plugin {
 	 */
 	public function goal_engine() {
 		return $this->container->get( GoalEngine::class );
+	}
+
+	/**
+	 * Get the reward engine (Phase 5).
+	 *
+	 * @return RewardEngine
+	 */
+	public function reward_engine() {
+		return $this->container->get( RewardEngine::class );
 	}
 
 	/**

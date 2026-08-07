@@ -70,6 +70,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
+### Phase 5 — Reward Engine (100% complete)
+
+- **P05-T01 Objective** — Decoupled rewards from goal calculation: the GoalEngine (Phase 4) computes a `GoalResult` and the RewardEngine turns it into a `RewardResult` using the goal's reward configuration, so rewards can be changed, stacked, and safety-checked independently of the math.
+- **P05-T02 Reward Types** — Implemented the reward layer in `includes/Rewards/`: `Reward` value object (typed accessors over the reward columns + JSON `reward_meta`), `RewardResult` (5 states + blocking reasons), `RewardApplicator` interface, `RewardApplicatorRegistry` (filterable via `goalcart_reward_applicator_classes`), and five applicators — free shipping (shipping zones + method instances, via `woocommerce_package_rates`), percentage discount (cap + eligible/excluded products & categories, negative cart fee), fixed discount (clamped to the eligible value), free gift (automatic or optional), and coupon (existing validated codes or deterministic generated coupons, cleaned up on uninstall). The `RewardEngine` registers the WooCommerce hooks (`woocommerce_before_calculate_totals` ×2, `woocommerce_cart_calculate_fees`, `woocommerce_package_rates`) and is DI-wired via `Plugin::reward_engine()`; `Goals\GoalRepository` loads active goals (with campaign gating) once per request.
+- **P05-T03 Reward Safety** — Enforced every Phase 5 guarantee: duplicate/stacking rules (`RewardSafety::stacking_allows()`), reward-loop prevention (own-fee exclusion in `CartContext::own_fees_total()` + idempotent reconciliation), stale-reward reversal (coupons/gifts session-tracked and reconciled on **every** totals pass, so a goal that stops qualifying without any cart change — schedule expiry, admin deactivation — has its reward revoked immediately; discount fees rebuilt per pass), invalid-coupon validation (+ generated-coupon ownership marker and save-failure guard), and excluded-product exclusion in discount bases and generated coupons.
+- **Live-cart correctness (review-driven)** — Verified empirically that WC zeroes the cart's aggregate totals before `woocommerce_before_calculate_totals` fires; `CartContext::from_cart()` now derives the money bases from the cart line items (always current) so amount-mode goals evaluate honestly on the live cart, with the grand total falling back to the after-discount line value until totals are computed (tax refinement deferred to Phase 6).
+- Added files: `includes/Rewards/` (12 classes), `includes/Goals/GoalRepository.php`, `tests/reward-test.php`, `docs/rewards.md`.
+- **Verification:** `php -l` clean; reward test suite 72/72 (free-shipping rate filtering, stacking, coupon/gift safety, WC hook wiring, `from_cart` line-item bases); engine test suite 75/75 (no regressions); PHP 8.4 implicit-nullable deprecations removed from the applicator interface; tests stay read-only (no products created, no database writes, plugin not activated).
+
+**Overall project progress: 27%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 weight 5% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.
