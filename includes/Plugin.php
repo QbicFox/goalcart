@@ -9,12 +9,18 @@ namespace GoalCart;
 
 use GoalCart\Admin\Admin;
 use GoalCart\Admin\AssetLoader;
+use GoalCart\Campaigns\CampaignRepository;
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Compatibility;
 use GoalCart\Database\Installer;
 use GoalCart\Goals\GoalEngine;
 use GoalCart\Goals\GoalRepository;
 use GoalCart\Hooks\HookManager;
+use GoalCart\REST\CampaignsController;
+use GoalCart\REST\FrontendController;
+use GoalCart\REST\GoalsController;
+use GoalCart\REST\SearchController;
+use GoalCart\REST\SettingsController;
 use GoalCart\Rewards\RewardEngine;
 use GoalCart\Settings\Settings;
 
@@ -144,6 +150,14 @@ final class Plugin {
 		$this->hooks()->register( $this->reward_engine() );
 		$this->hooks()->register( $this->admin() );
 
+		// REST controllers (Phase 7): each registers its routes on
+		// rest_api_init through the same HookManager.
+		$this->hooks()->register( $this->container->get( GoalsController::class ) );
+		$this->hooks()->register( $this->container->get( SettingsController::class ) );
+		$this->hooks()->register( $this->container->get( SearchController::class ) );
+		$this->hooks()->register( $this->container->get( CampaignsController::class ) );
+		$this->hooks()->register( $this->container->get( FrontendController::class ) );
+
 		// Apply everything to WordPress.
 		$this->hooks()->run();
 
@@ -191,6 +205,38 @@ final class Plugin {
 				$container->get( GoalEngine::class ),
 				$container->get( GoalRepository::class ),
 				$container->get( Settings::class ),
+				$container->get( CartIntegration::class )
+			);
+		} );
+
+		// Campaign repository (Phase 7): read-only campaign access for the
+		// REST layer; extended with CRUD by Phase 10 (Campaign Builder).
+		$this->container->singleton( CampaignRepository::class, function () {
+			return new CampaignRepository();
+		} );
+
+		// REST controllers (Phase 7: REST API / AJAX Layer) — admin CRUD,
+		// settings, search, campaigns and the public cart-progress endpoint.
+		$this->container->singleton( GoalsController::class, function ( Container $container ) {
+			return new GoalsController( $container->get( GoalRepository::class ) );
+		} );
+
+		$this->container->singleton( SettingsController::class, function ( Container $container ) {
+			return new SettingsController( $container->get( Settings::class ) );
+		} );
+
+		$this->container->singleton( SearchController::class, function () {
+			return new SearchController();
+		} );
+
+		$this->container->singleton( CampaignsController::class, function ( Container $container ) {
+			return new CampaignsController( $container->get( CampaignRepository::class ) );
+		} );
+
+		$this->container->singleton( FrontendController::class, function ( Container $container ) {
+			return new FrontendController(
+				$container->get( GoalEngine::class ),
+				$container->get( GoalRepository::class ),
 				$container->get( CartIntegration::class )
 			);
 		} );

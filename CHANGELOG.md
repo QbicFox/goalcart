@@ -96,6 +96,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
+### Phase 7 — REST API / AJAX Layer (100% complete)
+
+- **P07-T01 Objective** — Exposed a clean API for the React admin and frontend components through a `goalcart/v1` REST namespace (`includes/REST/BaseController`), mirroring the reference plugin's REST conventions: the `{ data, meta, pagination }` response envelope (matching the `ApiEnvelope` type already in `admin-app/src/types.ts`), capability + rate-limited permission callbacks, and structured `WP_Error` responses.
+- **P07-T02 Admin API** — Implemented the admin endpoints: goals list (paginated, status filter, name search), goal details, create, update (partial — only provided keys written), delete, and duplicate (`GoalsController`); settings GET/POST (`SettingsController`); product/category/coupon search for the goal builder (`SearchController`, capped at 50 results, server-side); and a read-only campaigns list/detail (`CampaignsController` + `CampaignRepository`) so the builder can assign goals to campaigns — full campaign CRUD arrives with Phase 10. Analytics endpoints are deliberately deferred to Phases 16–17 (no analytics data exists yet). `GoalRepository` gained the full CRUD layer (`all`/`get`/`create`/`update`/`delete`/`duplicate`) plus a fix that spreads the persisted `conditions` JSON onto the Goal model's `categories`/`products`/`excluded_products`/`operator`/`children` keys — so stored category/product/composite goals now evaluate correctly.
+- **P07-T03 Frontend API** — Added the public `GET /goalcart/v1/progress` endpoint (`FrontendController`): evaluates every active goal against the live cart snapshot (via `CartIntegration`) and exposes only the minimum necessary data — `current, target, remaining, percentage, completed, message, reward, suggestions` (plus reward state, eligibility and reason) — with a minimal built-in message until the Phase 13 template engine and empty suggestions until Phase 14.
+- **P07-T04 Security** — Every endpoint implements: capability checks (`manage_options`, filterable via `goalcart_rest_capability`), per-user rate limiting on admin routes and per-IP rate limiting on the public progress route, REST arg-schema validation/sanitization (enums, types, ranges, datetime + campaign-existence validate callbacks, sanitize callbacks), predictable `{ code, message, data: { status } }` errors, and payload shaping that serializes only known fields. Anonymous admin access is rejected with 403 (verified through a real `WP_REST_Server` dispatch).
+- Added files: `includes/REST/` (BaseController + 5 controllers), `includes/Campaigns/CampaignRepository.php`, `tests/rest-api-test.php`, `docs/api.md`.
+- **Verification:** `php -l` clean; REST test suite 62/62 (route registration, response envelope, permission callbacks, schema validation, transactional goal CRUD + duplicate, progress payload, search, settings — every write wrapped in a rolled-back transaction and asserted absent afterwards); reward 72/72, engine 75/75, cart-integration 22/22 (no regressions); end-to-end dispatch verified read-only against the real WordPress 7.0.2 + WooCommerce 11.0.0 store with a real admin user (create/list/rollback through the live dispatch path, real product search, guest progress).
+
+**Overall project progress: 35%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 weight 3% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.
