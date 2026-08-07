@@ -1,0 +1,97 @@
+/**
+ * Admin chrome CSS for the Goal Cart dashboard page.
+ *
+ * Enqueued only on the Goal Cart admin screen (see
+ * includes/Admin/Admin.php, which adds the always-on `goalcart-admin-page`
+ * body class plus the optional `goalcart-fullscreen` class).
+ *
+ * The `goalcart-admin-page` rules apply in both display modes (the app's
+ * own header is the top bar, so the WP admin toolbar's reserved #wpbody
+ * padding is removed). The `goalcart-fullscreen` rules hide the rest of
+ * the WordPress admin chrome — admin bar, left admin menu, notices and
+ * footer — and lock the viewport so the React app (admin-app) owns the
+ * whole screen with its own header, sidebar and scrollable content area.
+ */
+
+/* Hide the WP admin bar (the app's own header replaces it). */
+body.goalcart-fullscreen #wpadminbar {
+	display: none !important;
+}
+
+/* WP core also reserves the bar's height on the root element
+   (html.wp-toolbar { padding-top: 32px }), which pushes the whole page
+   down even when the bar is hidden above. Remove it in full-screen mode
+   only — html is the body's ancestor, so a descendant selector can't
+   express this; :has() targets the root when the full-screen body class
+   is present and re-evaluates live as the React provider toggles it. */
+html.wp-toolbar:has(body.goalcart-fullscreen) {
+	padding-top: 0 !important;
+}
+
+/* Remove the admin toolbar's reserved top padding (html.wp-toolbar #wpbody
+   { padding-top: 32px }) on the Goal Cart page in BOTH display modes —
+   the app's own header is the top bar. The html.wp-toolbar ancestor keeps
+   the specificity above WP core's rule regardless of stylesheet order. */
+html.wp-toolbar body.goalcart-admin-page #wpbody,
+body.goalcart-admin-page #wpbody {
+	padding-top: 0 !important;
+}
+
+/* Hide the left admin menu (all its wrapper layers). */
+body.goalcart-fullscreen #adminmenumain,
+body.goalcart-fullscreen #adminmenuback,
+body.goalcart-fullscreen #adminmenuwrap,
+body.goalcart-fullscreen #adminmenu {
+	display: none !important;
+}
+
+/* Drop the menu offset and the default content padding. */
+body.goalcart-fullscreen #wpcontent,
+body.goalcart-fullscreen #wpbody-content {
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+	padding: 0 !important;
+}
+
+/* Ancillary admin chrome: footer, screen options, update nags and any
+   admin notices/errors WP core or other plugins might print. */
+body.goalcart-fullscreen #wpfooter,
+body.goalcart-fullscreen #screen-meta,
+body.goalcart-fullscreen #screen-meta-links,
+body.goalcart-fullscreen #wpbody-content .notice,
+body.goalcart-fullscreen #wpbody-content .error,
+body.goalcart-fullscreen #wpbody-content .updated,
+body.goalcart-fullscreen #wpbody-content .update-nag {
+	display: none !important;
+}
+
+/* Keep the plugin's own "app not built yet" notice visible — without it
+   a broken build would silently render a blank full-screen page. The
+   selector mirrors the hide rule's ID anchor so its `!important` wins the
+   specificity tie against the generic .notice rule above. */
+body.goalcart-fullscreen #wpbody-content .goalcart-build-notice {
+	display: block !important;
+	margin: 0 !important;
+	padding: 12px 20px !important;
+}
+
+/* The page wrapper and React mount point fill the viewport. */
+body.goalcart-fullscreen .wrap,
+body.goalcart-fullscreen #goalcart-admin {
+	margin: 0 !important;
+	padding: 0 !important;
+	max-width: none !important;
+}
+
+body.goalcart-fullscreen #goalcart-admin {
+	height: 100vh;
+	/* Mobile browsers: 100dvh tracks the visible area (URL bar included). */
+	height: 100dvh;
+}
+
+/* Lock scrolling at the document level — the React app shell scrolls its
+   own content area instead of the page. */
+body.goalcart-fullscreen,
+body.goalcart-fullscreen #wpcontent {
+	overflow: hidden !important;
+}

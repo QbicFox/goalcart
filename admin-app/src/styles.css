@@ -1,0 +1,46 @@
+/* Scoped styles for the Goal Cart admin mount point.
+ *
+ * MUI (emotion) injects class-scoped component styles, so WP admin styles
+ * do not bleed into the app. CssBaseline is intentionally NOT used — its
+ * `* { box-sizing }` and `body` resets would leak into the whole WP admin
+ * page — so the equivalents are scoped to the mount point here. */
+#goalcart-admin {
+  /* Full-screen dashboard: the mount point fills the viewport and the
+     app shell (AdminLayout) scrolls its own content area. */
+  height: 100vh;
+  height: 100dvh;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
+    'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  color: #1d2327;
+}
+
+#goalcart-admin *,
+#goalcart-admin *::before,
+#goalcart-admin *::after {
+  box-sizing: border-box;
+}
+
+#goalcart-admin .goalcart-admin-loading {
+  padding: 48px 0;
+  color: #50575e;
+}
+
+/* Placeholder shell rendered before Phase 8 replaces it. */
+#goalcart-admin .goalcart-admin-placeholder {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+#goalcart-admin .goalcart-admin-placeholder h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+#goalcart-admin .goalcart-admin-meta {
+  color: #50575e;
+}

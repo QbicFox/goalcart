@@ -1,0 +1,33 @@
+{
+    "name": "goalcart/goalcart",
+    "description": "Increase average order value by showing cart goals, progress bars, rewards, milestones, and smart product suggestions for WooCommerce.",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "keywords": [
+        "wordpress",
+        "woocommerce",
+        "cart",
+        "goals",
+        "aov",
+        "upsell"
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "GoalCart\\": "includes/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "GoalCart\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

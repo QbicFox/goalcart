@@ -1,0 +1,183 @@
+<?php
+/**
+ * Database installer and migrator for Goal Cart.
+ *
+ * @package GoalCart
+ */
+
+namespace GoalCart\Database;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class Installer
+ *
+ * Creates, upgrades, and removes the plugin database tables.
+ * Wired to the WordPress activation/deactivation hooks and to
+ * admin_init for version-driven upgrades.
+ *
+ * Mirrors the reference plugin (WooInsights\Database\Installer). The
+ * schema itself is defined in Schema (empty until Phase 3), so every
+ * method here is already table-driven and needs no changes when the
+ * tables land.
+ */
+class Installer {
+
+	/**
+	 * Option name storing the installed database schema version.
+	 *
+	 * @var string
+	 */
+	const DB_VERSION_OPTION = 'goalcart_db_version';
+
+	/**
+	 * Run on plugin activation: create all tables and schedule crons.
+	 *
+	 * @return void
+	 */
+	public static function activate() {
+		self::maybe_create_tables();
+		update_option( self::DB_VERSION_OPTION, GOALCART_DB_VERSION, false );
+	}
+
+	/**
+	 * Run on plugin deactivation.
+	 *
+	 * Data is intentionally preserved; only transient/runtime state is
+	 * cleared (scheduled events, etc.). Destructive cleanup happens on
+	 * uninstall.
+	 *
+	 * @return void
+	 */
+	public static function deactivate() {
+		foreach ( self::cron_events() as $event ) {
+			wp_clear_scheduled_hook( $event );
+		}
+	}
+
+	/**
+	 * Scheduled event names owned by the plugin.
+	 *
+	 * Later phases (analytics, notifications, …) append their cron events
+	 * here so activation schedules and deactivation clears them through
+	 * the same list.
+	 *
+	 * @return string[]
+	 */
+	public static function cron_events() {
+		return array();
+	}
+
+	/**
+	 * Check the installed schema version and run pending migrations.
+	 *
+	 * Hooked to plugins_loaded and admin_init so upgrades also run for
+	 * users who update the plugin files without going through the normal
+	 * update flow.
+	 *
+	 * @return void
+	 */
+	public static function maybe_upgrade() {
+		$installed = get_option( self::DB_VERSION_OPTION, '0.0.0' );
+
+		if ( version_compare( $installed, GOALCART_DB_VERSION, '>=' ) ) {
+			return;
+		}
+
+		self::maybe_create_tables();
+		update_option( self::DB_VERSION_OPTION, GOALCART_DB_VERSION, false );
+	}
+
+	/**
+	 * Register a weekly cron interval.
+	 *
+	 * WordPress core only ships hourly/twicedaily/daily, so the plugin
+	 * adds its own weekly interval for recurring jobs (analytics
+	 * roll-ups in later phases).
+	 *
+	 * @param array<string, array<string, mixed>> $schedules Cron schedules.
+	 * @return array<string, array<string, mixed>>
+	 */
+	public static function cron_schedules( $schedules ) {
+		$schedules['goalcart_weekly'] = array(
+			'interval' => WEEK_IN_SECONDS,
+			'display'  => __( 'Once Weekly', 'goalcart' ),
+		);
+
+		return $schedules;
+	}
+
+	/**
+	 * Create or update all plugin tables (idempotent via dbDelta).
+	 *
+	 * @return void
+	 */
+	public static function maybe_create_tables() {
+		global $wpdb;
+
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+		foreach ( Schema::create_statements() as $statement ) {
+			dbDelta( $statement );
+		}
+
+		self::maybe_add_foreign_keys();
+	}
+
+	/**
+	 * Add foreign keys that dbDelta cannot manage.
+	 *
+	 * Uses INFORMATION_SCHEMA to skip constraints that already exist, making
+	 * the operation safe to re-run on every activation/upgrade.
+	 *
+	 * @return void
+	 */
+	protected static function maybe_add_foreign_keys() {
+		global $wpdb;
+
+		foreach ( Schema::foreign_keys() as $fk ) {
+			$table = $fk['table'];
+
+			$exists = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = %s AND TABLE_NAME = %s AND CONSTRAINT_NAME = %s',
+					$wpdb->dbname,
+					$table,
+					$fk['name']
+				)
+			);
+
+			if ( $exists > 0 ) {
+				continue;
+			}
+
+			$wpdb->query(
+				"ALTER TABLE `{$table}` ADD CONSTRAINT `{$fk['name']}` " .
+				"FOREIGN KEY (`{$fk['column']}`) REFERENCES `{$fk['references']}` (`{$fk['referenced_column']}`) " .
+				"ON DELETE {$fk['on_delete']}"
+			);
+
+			if ( ! empty( $wpdb->last_error ) ) {
+				// Log the failure (e.g. non-InnoDB posts table) without
+				// blocking activation; missing FKs can be retried later.
+				error_log( 'Goal Cart: failed to add foreign key ' . $fk['name'] . ': ' . $wpdb->last_error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			}
+		}
+	}
+
+	/**
+	 * Remove every plugin table and option. Called from uninstall.php.
+	 *
+	 * @return void
+	 */
+	public static function uninstall() {
+		global $wpdb;
+
+		foreach ( Schema::tables() as $table_name ) {
+			$table = Schema::table( $table_name );
+			$wpdb->query( "DROP TABLE IF EXISTS `{$table}`" );
+		}
+
+		delete_option( self::DB_VERSION_OPTION );
+	}
+}

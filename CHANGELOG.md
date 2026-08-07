@@ -32,6 +32,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 **Overall project progress: 8%** (Phase 0 5% + Phase 1 weight 3% × 100%).
 
+### Phase 2 — Plugin Foundation (100% complete)
+
+- **P02-T01 Objective** — Created the Goal Cart plugin using the exact architectural conventions discovered in Phase 0 (reference: `wooinsights`): namespace `GoalCart\` → `includes/`, singleton bootstrap at file scope, DI container, HookManager, Schema/Installer migration framework, Vite admin-app.
+- **P02-T02 Tasks** — Implemented all foundation tasks: plugin slug `goalcart` (`goalcart.php`); plugin bootstrap; Composer config (PSR-4, PHP ≥ 7.4); frontend build stack (`admin-app/`: Vite 5, TypeScript strict, ESLint 9 flat, Prettier, npm scripts); activation/deactivation/uninstall (`Installer` + `uninstall.php`); plugin constants; WooCommerce dependency checks; WP/PHP/WC minimum version compatibility checks (`Compatibility`, load-order-safe `plugins_loaded` gate); capability checks (`goalcart_admin_capability` filter); nonce strategy (`wp_rest` nonce in admin boot data + `X-WP-Nonce` client header); translation loading (`load_plugin_textdomain`); logging strategy consistent with the reference (`error_log` with phpcs annotations).
+- **P02-T03 Definition of Done** — Plugin loads and boots without fatal errors in a real WordPress 7.0.2 + WooCommerce 11.0.0 context (verified via read-only WP smoke test: constants, DI wiring, all hooks, compatibility gate, admin shell); follows the reference architecture.
+- Added files: `goalcart.php`, `uninstall.php`, `composer.json`, `.editorconfig`, `.gitignore`, `README.md`, `includes/{Plugin,Container,Compatibility}.php`, `includes/Hooks/HookManager.php`, `includes/Database/{Schema,Installer}.php`, `includes/Settings/Settings.php`, `includes/Admin/{Admin,AssetLoader}.php`, `assets/css/admin-fullscreen.css`, `languages/.gitkeep`, `tests/.gitkeep`, and the `admin-app/` Vite + TypeScript + MUI scaffold.
+- **Verification:** `php -l` clean on all PHP files; `composer dump-autoload` generates the PSR-4 autoloader; `npm install` + `npm run typecheck` + `npm run lint` + `npm run build` all pass (production bundle + Vite manifest generated); read-only WP-context smoke test passes. The plugin was **not** activated on the live site.
+
+**Overall project progress: 12%** (Phase 0 5% + Phase 1 3% + Phase 2 weight 4% × 100%).
+
 ---
 
 ## [0.0.0] — Unreleased (project scaffold)
