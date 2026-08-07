@@ -4,9 +4,11 @@
  * do not bleed into the app. CssBaseline is intentionally NOT used — its
  * `* { box-sizing }` and `body` resets would leak into the whole WP admin
  * page — so the equivalents are scoped to the mount point here. */
+
 #goalcart-admin {
   /* Full-screen dashboard: the mount point fills the viewport and the
-     app shell (AdminLayout) scrolls its own content area. */
+     app shell (AdminLayout) scrolls its own content area. Embedded mode:
+     the page grows normally inside the WP admin chrome. */
   height: 100vh;
   height: 100dvh;
   font-family:
@@ -22,25 +24,8 @@
   box-sizing: border-box;
 }
 
+/* The React app replaces the server-rendered loading placeholder. */
 #goalcart-admin .goalcart-admin-loading {
   padding: 48px 0;
-  color: #50575e;
-}
-
-/* Placeholder shell rendered before Phase 8 replaces it. */
-#goalcart-admin .goalcart-admin-placeholder {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 64px 24px;
-  text-align: center;
-}
-
-#goalcart-admin .goalcart-admin-placeholder h1 {
-  margin: 0 0 8px;
-  font-size: 24px;
-  font-weight: 600;
-}
-
-#goalcart-admin .goalcart-admin-meta {
   color: #50575e;
 }

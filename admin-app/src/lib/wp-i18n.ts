@@ -13,13 +13,7 @@ export interface WpI18n {
   __: (text: string, domain?: string) => string;
   _x: (text: string, context: string, domain?: string) => string;
   _n: (single: string, plural: string, number: number, domain?: string) => string;
-  _nx: (
-    single: string,
-    plural: string,
-    number: number,
-    context: string,
-    domain?: string
-  ) => string;
+  _nx: (single: string, plural: string, number: number, context: string, domain?: string) => string;
   sprintf: (format: string, ...args: Array<string | number>) => string;
   setLocaleData: (data: unknown, domain?: string) => void;
   isRTL: () => boolean;
@@ -37,8 +31,7 @@ const i18n: WpI18n =
         _x: (text) => text,
         _n: (single, plural, number) => (number === 1 ? single : plural),
         _nx: (single, plural, number) => (number === 1 ? single : plural),
-        sprintf: (format, ...args) =>
-          format.replace(/%[sd]/g, () => String(args.shift() ?? '')),
+        sprintf: (format, ...args) => format.replace(/%[sd]/g, () => String(args.shift() ?? '')),
         setLocaleData: () => undefined,
         isRTL: () => false,
       };

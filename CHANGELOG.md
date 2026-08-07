@@ -109,6 +109,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
+### Phase 8 — React Admin Foundation (100% complete)
+
+- **P08-T01 Objective** — Built the complete admin shell in `admin-app/src/` using the reference plugin's React architecture: MUI theme (WP-admin palette), dedicated RTL-aware Emotion cache, TanStack Query, `createHashRouter` data router, responsive `AdminLayout`, sidebar navigation, page containers, and the six admin pages — Dashboard, Goals, Campaigns, Analytics, Settings, Appearance.
+- **P08-T02 Required** — Implemented every required capability: React 18 + TypeScript (strict); hash routing with lazy-loaded secondary routes (code splitting — Settings/Campaigns/Analytics/Appearance are separate chunks); shared layout with collapsible nav groups (persisted in localStorage) + mobile drawer + user menu + full-screen mode (FullscreenProvider owns the `goalcart-fullscreen` body class, switching instantly when saved); page container (`PageContainer`); API client (`apiFetch` with `X-WP-Nonce` + Phase 7 envelope unwrap) with typed `api/goals.ts` + `api/settings.ts`; server state (TanStack Query mutations/queries); forms (react-hook-form in Settings); validation (RHF + REST contract); notifications (shared `SnackbarProvider` + `useSnackbar`); loading states (skeletons); error states (query error alerts + `ErrorBoundary` with retry); confirmation dialogs (`ConfirmDialog`, wired into goal deletion).
+- **P08-T03 Admin Pages** — Initial navigation matches the spec (Dashboard / Goals / Campaigns / Analytics / Settings / Appearance). Dashboard is live REST-backed (goal counts, currency, version); Goals shows a read-only list (name, type, target, reward, status) with delete-through-confirmation + snackbar + refetch (Phase 9 replaces it with the full CRUD builder); Settings is fully functional (enabled + full-screen toggles saved via the Phase 7 REST API, full-screen mode previews live); Campaigns/Analytics/Appearance are page containers with empty states for their phases (10, 16–17, 12); `NotFound` 404 route added. `types.ts` gained the `Goal` / `GoalCartSettings` / pagination types mirroring the Phase 7 payloads.
+- Added files: `docs/frontend.md`, plus `admin-app/src/{theme,providers,api,components,routes}/` (16 new modules).
+- **Verification:** `npm run typecheck`, `npm run lint`, Prettier check and `npm run build` all pass (manifest regenerated; lazy chunks emitted). Browser smoke test of the built bundle with injected boot data renders every route correctly — Dashboard shows live summary (Total 2 / Active 1 / Inactive 1), Goals lists both goals, Settings renders both toggles, empty states render for Campaigns/Analytics/Appearance, unknown routes hit the 404 page — with zero console errors. PHP regression suites unaffected (no PHP changes): reward 72/72, engine 75/75, cart-integration 22/22, rest-api 67/67.
+
+**Overall project progress: 39%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 weight 4% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.
