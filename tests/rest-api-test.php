@@ -15,6 +15,9 @@
  *  - Phase 12 progress-template settings: sanitization of the template
  *    enum, color fallbacks, range clamping, tag-stripping, and the REST
  *    schema validation of the new keys
+ *  - Phase 13 dynamic messaging: the public /progress payload carries the
+ *    engine-rendered message (no unresolved placeholders) and the message
+ *    state
  *
  * Read-only like the other suites: the only writes (goal rows, the
  * settings option, rate-limit transients) happen inside a single
@@ -323,6 +326,12 @@ try {
 	check( 'progress message present', null !== $found && '' !== $found['message'] );
 	check( 'progress reward shape', null !== $found && 'percent_discount' === $found['reward']['type'] );
 	check( 'progress icon key present', null !== $found && array_key_exists( 'icon', $found ) && '' === $found['icon'] );
+	check( 'progress state key present', null !== $found && in_array(
+		$found['state'],
+		array( 'inactive', 'unavailable', 'progressing', 'nearly_complete', 'completed', 'reward_activated' ),
+		true
+	) );
+	check( 'progress message rendered by the engine', null !== $found && false === strpos( $found['message'], '{' ) );
 	check( 'progress suggestions is array', null !== $found && is_array( $found['suggestions'] ) );
 	check( 'progress currency present', '' !== $resp->get_data()['data']['currency'] || is_string( $resp->get_data()['data']['currency'] ) );
 

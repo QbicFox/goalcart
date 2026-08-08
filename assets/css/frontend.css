@@ -185,6 +185,15 @@
 	flex-wrap: wrap;
 }
 
+/* Message states (Phase 13): the payload `state` lands as a card class.
+   The completed fill color is already handled by
+   .goalcart-progress--complete, so the state classes only refine copy. */
+
+.goalcart-state--nearly_complete .goalcart-message {
+	color: var(--goalcart-accent);
+	font-weight: 600;
+}
+
 /* Animation off: the fill snaps instead of sliding. */
 
 .goalcart-widget--no-anim .goalcart-progress__fill,

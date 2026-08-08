@@ -12,6 +12,7 @@ use GoalCart\Goals\Goal;
 use GoalCart\Goals\GoalEngine;
 use GoalCart\Goals\GoalRepository;
 use GoalCart\Goals\GoalResult;
+use GoalCart\Goals\MessageEngine;
 use GoalCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
@@ -31,13 +32,12 @@ defined( 'ABSPATH' ) || exit;
  *
  *    one entry per active goal, plus cart/currency metadata. The progress
  *    widgets (Phase 11) poll this endpoint and re-render.
- *
- * Security (P07-T04): public by design — guests must be able to read their
- * own cart progress — so it requires no capability, returns only aggregate
- * numbers (no PII), and is rate limited per IP. The message field is a
- * minimal built-in placeholder; the template engine (Phase 13) owns
- * message copy. Suggestions are always empty until Phase 14.
- */
+ *	 * Security (P07-T04): public by design — guests must be able to read their
+	 * own cart progress — so it requires no capability, returns only aggregate
+	 * numbers (no PII), and is rate limited per IP. Message copy is rendered
+	 * by the Phase 13 MessageEngine (state-aware, display-settings
+	 * overridable). Suggestions are always empty until Phase 14.
+	 */
 class FrontendController extends BaseController {
 
 	/**
@@ -62,16 +62,25 @@ class FrontendController extends BaseController {
 	protected $cart_integration;
 
 	/**
+	 * Message engine instance (Phase 13: dynamic messaging).
+	 *
+	 * @var MessageEngine
+	 */
+	protected $messages;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param GoalEngine       $engine          Goal engine.
 	 * @param GoalRepository   $goals           Goal repository.
 	 * @param CartIntegration  $cart_integration Cart snapshot service.
+	 * @param MessageEngine    $messages        Message template engine.
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration ) {
-		$this->engine          = $engine;
-		$this->goals           = $goals;
+	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages ) {
+		$this->engine           = $engine;
+		$this->goals            = $goals;
 		$this->cart_integration = $cart_integration;
+		$this->messages         = $messages;
 	}
 
 	/**
@@ -120,6 +129,10 @@ class FrontendController extends BaseController {
 
 		$items = array();
 
+		$extra = array(
+			'quantity' => $context->total_quantity(),
+		);
+
 		foreach ( $goals as $goal ) {
 			$result = $this->engine->evaluate( $goal, $context );
 
@@ -134,7 +147,8 @@ class FrontendController extends BaseController {
 				'remaining'    => $result->remaining(),
 				'percentage'   => $result->percentage(),
 				'completed'    => $result->completed(),
-				'message'      => $this->message( $result ),
+				'state'        => $this->messages->state( $goal, $result ),
+				'message'      => $this->messages->message( $goal, $result, $extra ),
 				'reward'       => $this->reward( $goal ),
 				'suggestions'  => array(),
 				'reward_state' => $result->reward_state(),
@@ -155,42 +169,27 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * Minimal built-in progress message.
-	 *
-	 * Placeholder copy until the message template engine (Phase 13) ships;
-	 * money-based goals get a currency-formatted remaining amount, other
-	 * goals get a plain number.
-	 *
-	 * @param GoalResult $result Evaluation result.
-	 * @return string
-	 */
-	protected function message( GoalResult $result ) {
-		if ( $result->completed() ) {
-			return __( 'You reached your goal!', 'goalcart' );
-		}
-
-		$remaining = $this->is_money_goal( $result->goal() )
-			? $this->format_money( $result->remaining() )
-			: (string) number_format_i18n( $result->remaining() );
-
-		return sprintf(
-			/* translators: %s: remaining amount to reach the goal. */
-			__( 'Only %s left to reach your goal', 'goalcart' ),
-			$remaining
-		);
-	}
-
-	/**
 	 * Whether a goal's progress is measured in money.
 	 *
-	 * Quantity-mode and weight goals are not; every other calculation basis
-	 * is a money amount.
+	 * Quantity/distinct-quantity/weight goals count items, not money, and
+	 * quantity-mode category/product goals do too. Quantity goals default
+	 * to the subtotal calculation mode (Goal::default_calculation_mode),
+	 * so the type is checked in addition to the mode — keeps the widget
+	 * milestone labels and the Phase 13 message numbers consistent.
 	 *
 	 * @param Goal $goal Goal.
 	 * @return bool
 	 */
 	protected function is_money_goal( Goal $goal ) {
-		return Goal::TYPE_WEIGHT !== $goal->type() && Goal::MODE_QUANTITY !== $goal->calculation_mode();
+		if ( in_array(
+			$goal->type(),
+			array( Goal::TYPE_QUANTITY, Goal::TYPE_DISTINCT_QUANTITY, Goal::TYPE_WEIGHT ),
+			true
+		) ) {
+			return false;
+		}
+
+		return Goal::MODE_QUANTITY !== $goal->calculation_mode();
 	}
 
 	/**
@@ -207,20 +206,6 @@ class FrontendController extends BaseController {
 		$display = $goal->display_settings();
 
 		return isset( $display['icon'] ) && is_string( $display['icon'] ) ? trim( $display['icon'] ) : '';
-	}
-
-	/**
-	 * Format a money amount with the store currency.
-	 *
-	 * @param float $value Amount.
-	 * @return string
-	 */
-	protected function format_money( $value ) {
-		if ( function_exists( 'wc_price' ) ) {
-			return wp_strip_all_tags( wc_price( (float) $value ) );
-		}
-
-		return (string) number_format_i18n( (float) $value, 2 );
 	}
 
 	/**

@@ -439,7 +439,11 @@
 	 * @return {HTMLElement}
 	 */
 	function goalContainer( goal, goals, currency, variant, template ) {
-		var card = el( 'div', 'goalcart-card goalcart-template--' + template );
+		// The Phase 13 message state (inactive / unavailable / progressing /
+		// nearly_complete / completed / reward_activated) lands as a modifier
+		// class so the stylesheet can highlight near-completion etc.
+		var stateClass = goal.state ? ' goalcart-state--' + goal.state : '';
+		var card = el( 'div', 'goalcart-card goalcart-template--' + template + stateClass );
 
 		var compact = 'compact' === variant;
 

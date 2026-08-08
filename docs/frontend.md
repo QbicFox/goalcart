@@ -58,7 +58,8 @@ Each widget renders one featured goal (the first eligible one):
   reward chip.
 - **ProgressBar** — percentage fill bar (animated, logical-property
   based so it fills right-to-left on RTL sites).
-- **GoalMessage** — the goal's progress message (Phase 13 owns the copy).
+- **GoalMessage** — the goal's progress message (rendered by the Phase 13
+  MessageEngine).
 - **GoalMilestones** — the active goals as an ordered ladder with target
   labels (currency-aware via the payload `is_money` flag); shown when
   there is more than one goal.
@@ -99,6 +100,64 @@ when present (WooCommerce fires these as jQuery events) with a native
 - Assets load only on pages that can render a widget (cart / checkout /
   shop / product / a page containing the shortcode) via
   `page_needs_widget()`.
+
+---
+
+# Dynamic Messaging (Phase 13)
+
+Every progress message — the widget's `GoalMessage`, the sticky bar copy,
+the milestone labels — is rendered server-side by
+`GoalCart\Goals\MessageEngine` (`includes/Goals/MessageEngine.php`), a
+stateless, database-free template engine fed a `Goal` + `GoalResult`.
+The `GET /goalcart/v1/progress` payload exposes the result as `message`
+plus the raw `state` for styling.
+
+## States
+
+| State | When | Default copy |
+|---|---|---|
+| `inactive` | goal not active (status / campaign folded) | “This offer is not active right now.” |
+| `unavailable` | goal cannot apply to this cart (no matching items, out of schedule, invalid target) | “This offer is not available for your cart.” |
+| `progressing` | eligible, below 80% | “Only {remaining} left to reach your goal” |
+| `nearly_complete` | eligible, ≥ 80% | “Almost there! Only {remaining} left” |
+| `completed` | target reached, no reward configured | “You reached your goal!” |
+| `reward_activated` | target reached with a reward | “Reward unlocked: {reward}” |
+
+## Variables
+
+```text
+{current}  {target}  {remaining}  {percentage}
+{quantity} {remaining_quantity}  {reward}  {goal_name}  {campaign_name}
+```
+
+- Money-based goals format `current`/`target`/`remaining` as currency
+  (`wc_price` when WooCommerce is active); quantity, weight and
+  distinct-quantity goals format plain locale numbers (the type-aware
+  `is_money` check — quantity-type goals default to the subtotal mode, so
+  the type is what decides).
+- `quantity`/`remaining_quantity` come from the cart (the controller
+  passes the cart's total quantity) and fall back to current/remaining for
+  quantity-mode goals.
+- `reward` is value-aware (“10% discount”, “Fixed $20.00 off”).
+- `campaign_name` is folded into the goal by the repository's campaign
+  join (`Goal::campaign_name()`).
+- Unknown placeholders are left untouched — a template can never render
+  empty tokens or throw.
+
+## Templates
+
+The goal builder's Display settings override the per-state defaults:
+`display_settings.message` drives progress copy (progressing + nearly
+complete), `display_settings.completed_message` drives completion copy
+(completed + reward activated). Example:
+
+```text
+Only {remaining} left until {reward}
+```
+
+renders as “Only $38.00 left until Free shipping”. The payload `state`
+lands as a `goalcart-state--{state}` class on the widget card, so themes
+can highlight near-completion (`goalcart-state--nearly_complete`) etc.
 
 ---
 

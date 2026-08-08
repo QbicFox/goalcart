@@ -182,6 +182,17 @@ final class Goal {
 	protected $reward_meta;
 
 	/**
+	 * Name of the campaign the goal belongs to (empty when standalone).
+	 *
+	 * Folded in by the repository's campaign join (like campaign status and
+	 * schedule) so display layers can reference {campaign_name} without an
+	 * extra query.
+	 *
+	 * @var string
+	 */
+	protected $campaign_name;
+
+	/**
 	 * Display configuration (Phase 9 builder): title, message,
 	 * completed_message, icon, template. Stored as JSON in
 	 * `display_settings`; parsed to an array here so the frontend can read
@@ -219,6 +230,7 @@ final class Goal {
 		$this->reward_max_value  = isset( $data['reward_max_value'] ) ? (float) $data['reward_max_value'] : null;
 		$this->reward_meta       = $this->meta( isset( $data['reward_meta'] ) ? $data['reward_meta'] : array() );
 		$this->display_settings = $this->meta( isset( $data['display_settings'] ) ? $data['display_settings'] : array() );
+		$this->campaign_name    = isset( $data['campaign_name'] ) ? (string) $data['campaign_name'] : '';
 	}
 
 	/**
@@ -423,5 +435,14 @@ final class Goal {
 	 */
 	public function display_settings() {
 		return $this->display_settings;
+	}
+
+	/**
+	 * Name of the campaign this goal belongs to ('' when standalone).
+	 *
+	 * @return string
+	 */
+	public function campaign_name() {
+		return $this->campaign_name;
 	}
 }

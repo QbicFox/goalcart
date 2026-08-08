@@ -166,6 +166,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
+### Phase 13 — Dynamic Messaging (100% complete)
+
+- **P13-T01 Objective** — New `includes/Goals/MessageEngine.php` (`GoalCart\Goals`): a stateless, database-free message template engine (Phase 4 engine contract) that turns a `Goal` + `GoalResult` into localized copy. Rendered server-side by the frontend controller, so every storefront message (widget, sticky bar, milestones) shares one engine; wired into the DI container (`Plugin.php`).
+- **P13-T02 Variables** — Nine placeholders: `{current}` `{target}` `{remaining}` `{percentage}` `{quantity}` `{remaining_quantity}` `{reward}` `{goal_name}` `{campaign_name}`. Money-based goals format currency via `wc_price` (plain locale numbers otherwise); `quantity`/`remaining_quantity` come from the cart (controller passes `CartContext::total_quantity()`) with quantity-mode fallback; `reward` is value-aware ("10% discount", "Fixed $20.00 off"); `campaign_name` is folded into the goal by the repository's campaign join (`Goal::campaign_name()`); unknown placeholders stay untouched. Also fixed a Phase 11 bug surfaced here: quantity/distinct-quantity/weight goals default to the subtotal calculation mode, so `is_money_goal` is now type-aware (both `MessageEngine` and `FrontendController` mirror the fix) — quantity goals no longer format as currency.
+- **P13-T03 States** — Six-state detection: `inactive` (goal inactive), `unavailable` (no matching items / out of schedule / invalid target), `progressing` (< 80%), `nearly_complete` (≥ 80%), `completed` (no reward), `reward_activated` (with reward) — each with localized default copy; the goal builder's `display_settings.message` / `completed_message` override progress/completion copy. The public `/progress` payload now carries `state`; the widget maps it to a `goalcart-state--{state}` card class (near-completion copy highlighted).
+- **P13-T04 Example** — `Only {remaining} left until {reward}` → “Only $38.00 left until Free shipping”; documented in `docs/frontend.md` (states/variables/templates tables) and `docs/api.md` (payload `state` + engine-rendered `message`).
+- **Verification:** `php -l` clean; new message suite 47/47 (container wiring, all six states, all nine variables incl. currency-agnostic money formatting, reward labels, display-settings overrides, unknown-placeholder safety); REST suite 116/116 (payload `state` + no unresolved placeholders); engine 75/75, reward 72/72, cart-integration 22/22, frontend 50/50 (no regressions); `node --check` on the JS; headless-Chrome smoke renders the `goalcart-state--nearly_complete` class + engine message with zero console errors. No database changes; plugin not activated.
+
+**Overall project progress: 53%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 weight 2% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

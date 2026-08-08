@@ -16,6 +16,7 @@ use GoalCart\Database\Installer;
 use GoalCart\Frontend\ProgressUI;
 use GoalCart\Goals\GoalEngine;
 use GoalCart\Goals\GoalRepository;
+use GoalCart\Goals\MessageEngine;
 use GoalCart\Hooks\HookManager;
 use GoalCart\REST\CampaignsController;
 use GoalCart\REST\FrontendController;
@@ -196,6 +197,13 @@ final class Plugin {
 			return new GoalRepository();
 		} );
 
+		// Message engine (Phase 13): stateless dynamic-message template
+		// engine — state detection, variable substitution and localized
+		// per-state copy, consumed by the frontend REST layer.
+		$this->container->singleton( MessageEngine::class, function () {
+			return new MessageEngine();
+		} );
+
 		// Cart integration (Phase 6): the single source of the live-cart
 		// snapshot — memoized, lifecycle-aware, with batched category
 		// preloading — consumed by the reward engine (and later REST/frontend).
@@ -242,7 +250,8 @@ final class Plugin {
 			return new FrontendController(
 				$container->get( GoalEngine::class ),
 				$container->get( GoalRepository::class ),
-				$container->get( CartIntegration::class )
+				$container->get( CartIntegration::class ),
+				$container->get( MessageEngine::class )
 			);
 		} );
 

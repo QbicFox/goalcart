@@ -297,6 +297,7 @@ exposes only the minimum data the widgets need:
         "remaining": 250000,
         "percentage": 50,
         "completed": false,
+        "state": "progressing",
         "message": "Only ۲۵۰٬۰۰۰ left to reach your goal",
         "reward": { "type": "free_shipping", "value": null, "max_value": null, "meta": {} },
         "suggestions": [],
@@ -313,8 +314,13 @@ exposes only the minimum data the widgets need:
 
 Notes:
 
-- `message` is a minimal built-in placeholder until the Phase 13 message
-  template engine ships; `suggestions` is always empty until Phase 14.
+- `message` is rendered by the Phase 13 MessageEngine: state-aware
+  (inactive / unavailable / progressing / nearly_complete / completed /
+  reward_activated), variable-substituted ({current}, {target},
+  {remaining}, {percentage}, {quantity}, {remaining_quantity}, {reward},
+  {goal_name}, {campaign_name}) and overridable through the goal's
+  `display_settings.message` / `completed_message`. `state` carries the
+  raw state for styling. `suggestions` is always empty until Phase 14.
 - `is_money` tells the widgets whether to format the goal's numbers as
   currency (amount/category/product/composite) or as plain numbers
   (quantity / distinct-quantity / weight) — it drives the milestone
@@ -356,12 +362,11 @@ Notes:
 |---|---|
 | Analytics endpoints | Phase 16 (events) / Phase 17 (dashboard) — no analytics data exists yet |
 | Customer-state campaign rules | Phase 32 (needs schema fields) |
-| Message templates | Phase 13 (Dynamic Messaging) |
 | Suggestions payload | Phase 14 (Smart Product Suggestions) |
 
 ## 6. Testing
 
-`tests/rest-api-test.php` (113 checks, `php tests/rest-api-test.php`):
+`tests/rest-api-test.php` (116 checks, `php tests/rest-api-test.php`):
 
 - route registration for every endpoint
 - response envelope + pagination
@@ -373,6 +378,9 @@ Notes:
 - settings read + save (success and error paths) — including Phase 12
   progress-template sanitization (enum fallback, color fallback, range
   clamping, tag-stripping) and the REST schema validation of the new keys
+- Phase 13 messaging: the public /progress payload carries the
+  engine-rendered message (no unresolved placeholders) and the message
+  state
 - campaign CRUD + milestone ordering: create, order/reorder goals,
   duplicate (inactive copy with copied milestones), delete (goals
   detached), schema + 404 paths

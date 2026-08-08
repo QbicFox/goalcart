@@ -1,0 +1,352 @@
+<?php
+/**
+ * Dynamic message template engine for Goal Cart.
+ *
+ * @package GoalCart
+ */
+
+namespace GoalCart\Goals;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class MessageEngine
+ *
+ * Phase 13 (Dynamic Messaging) — a reusable, UI-independent message
+ * template engine. Given a Goal + GoalResult it decides the message
+ * state (inactive / unavailable / progressing / nearly complete /
+ * completed / reward activated) and renders a localized message from a
+ * template, substituting variables such as:
+ *
+ * ```text
+ * {current}  {target}  {remaining}  {percentage}
+ * {quantity} {remaining_quantity}  {reward}  {goal_name}  {campaign_name}
+ * ```
+ *
+ * Template selection: the goal's Display settings
+ * (`display_settings.message` for progress, `display_settings.completed_message`
+ * for completion) win when set; otherwise a localized default per state
+ * applies. Unknown placeholders are left untouched (never a throw), and
+ * every value is formatted locale-aware (currency via `wc_price` when
+ * WooCommerce is active, plain numbers via `number_format_i18n`).
+ *
+ * The engine is stateless and database-free (Phase 4 contract) — callers
+ * supply the Goal + GoalResult. The frontend controller (Phase 7) renders
+ * every progress message through this service.
+ */
+final class MessageEngine {
+
+	/**
+	 * Message states.
+	 */
+	const STATE_INACTIVE          = 'inactive';
+	const STATE_UNAVAILABLE       = 'unavailable';
+	const STATE_PROGRESSING       = 'progressing';
+	const STATE_NEARLY_COMPLETE   = 'nearly_complete';
+	const STATE_COMPLETED         = 'completed';
+	const STATE_REWARD_ACTIVATED  = 'reward_activated';
+
+	/**
+	 * The progress percentage at or above which a goal is "nearly complete".
+	 *
+	 * @var float
+	 */
+	const NEARLY_COMPLETE_PERCENTAGE = 80.0;
+
+	/**
+	 * All supported placeholder variables, in substitution order.
+	 *
+	 * @var string[]
+	 */
+	const VARIABLES = array(
+		'current',
+		'target',
+		'remaining',
+		'percentage',
+		'quantity',
+		'remaining_quantity',
+		'reward',
+		'goal_name',
+		'campaign_name',
+	);
+
+	/**
+	 * The message state for a goal evaluation.
+	 *
+	 * State semantics (P13-T03):
+	 *  - inactive          goal is not active (status/campaign folded)
+	 *  - unavailable       goal cannot apply to this cart/shopper
+	 *  - progressing       eligible, target not reached, below the
+	 *                      "nearly complete" threshold
+	 *  - nearly_complete   eligible, >= NEARLY_COMPLETE_PERCENTAGE
+	 *  - completed         target reached, no reward configured
+	 *  - reward_activated  target reached and a reward is configured
+	 *
+	 * @param Goal       $goal   Goal.
+	 * @param GoalResult $result Evaluation result.
+	 * @return string One of the STATE_* constants.
+	 */
+	public function state( Goal $goal, GoalResult $result ) {
+		if ( ! $result->eligible() ) {
+			return GoalResult::REASON_GOAL_INACTIVE === $result->reason()
+				? self::STATE_INACTIVE
+				: self::STATE_UNAVAILABLE;
+		}
+
+		if ( $result->completed() ) {
+			return empty( $goal->reward_type() )
+				? self::STATE_COMPLETED
+				: self::STATE_REWARD_ACTIVATED;
+		}
+
+		return $result->percentage() >= self::NEARLY_COMPLETE_PERCENTAGE
+			? self::STATE_NEARLY_COMPLETE
+			: self::STATE_PROGRESSING;
+	}
+
+	/**
+	 * Render the message for a goal evaluation.
+	 *
+	 * @param Goal                  $goal   Goal.
+	 * @param GoalResult            $result Evaluation result.
+	 * @param array<string, mixed>  $extra  Extra variables (quantity,
+	 *                                      remaining_quantity, campaign_name
+	 *                                      overrides). Values may be ints,
+	 *                                      floats or strings; formatted by
+	 *                                      the engine.
+	 * @return string
+	 */
+	public function message( Goal $goal, GoalResult $result, array $extra = array() ) {
+		$state    = $this->state( $goal, $result );
+		$template = $this->template( $goal, $state );
+
+		return $this->render( $template, $goal, $result, $extra );
+	}
+
+	/**
+	 * The message template for a state.
+	 *
+	 * The goal's Display settings override the per-state defaults:
+	 * `display_settings.message` drives progress copy (progressing +
+	 * nearly complete), `display_settings.completed_message` drives
+	 * completion copy (completed + reward activated).
+	 *
+	 * @param Goal   $goal  Goal.
+	 * @param string $state STATE_* constant.
+	 * @return string
+	 */
+	public function template( Goal $goal, $state ) {
+		$display = $goal->display_settings();
+		$message = isset( $display['message'] ) && is_string( $display['message'] ) ? trim( $display['message'] ) : '';
+		$done    = isset( $display['completed_message'] ) && is_string( $display['completed_message'] ) ? trim( $display['completed_message'] ) : '';
+
+		switch ( $state ) {
+			case self::STATE_INACTIVE:
+				return __( 'This offer is not active right now.', 'goalcart' );
+
+			case self::STATE_UNAVAILABLE:
+				return __( 'This offer is not available for your cart.', 'goalcart' );
+
+			case self::STATE_NEARLY_COMPLETE:
+				return '' !== $message
+					? $message
+					: __( 'Almost there! Only {remaining} left', 'goalcart' );
+
+			case self::STATE_COMPLETED:
+			case self::STATE_REWARD_ACTIVATED:
+				if ( '' !== $done ) {
+					return $done;
+				}
+
+				if ( self::STATE_REWARD_ACTIVATED === $state ) {
+					return __( 'Reward unlocked: {reward}', 'goalcart' );
+				}
+
+				return __( 'You reached your goal!', 'goalcart' );
+
+			case self::STATE_PROGRESSING:
+			default:
+				return '' !== $message
+					? $message
+					: __( 'Only {remaining} left to reach your goal', 'goalcart' );
+		}
+	}
+
+	/**
+	 * The variable map for a goal evaluation.
+	 *
+	 * Money-based goals format current/target/remaining as currency; every
+	 * other basis (quantity, weight, distinct quantity) formats plain
+	 * locale-aware numbers. `quantity` / `remaining_quantity` come from the
+	 * optional extra values, or fall back to the current/remaining for
+	 * quantity-mode goals. `campaign_name` comes from the goal (the
+	 * repository folds it in) or an extra override.
+	 *
+	 * @param Goal                  $goal   Goal.
+	 * @param GoalResult            $result Evaluation result.
+	 * @param array<string, mixed>  $extra  Extra variables.
+	 * @return array<string, string> Placeholder => formatted value.
+	 */
+	public function variables( Goal $goal, GoalResult $result, array $extra = array() ) {
+		$is_money = $this->is_money_goal( $goal );
+
+		$format = function ( $value ) use ( $is_money ) {
+			return $this->format_number( (float) $value, $is_money );
+		};
+
+		$quantity = isset( $extra['quantity'] ) ? $extra['quantity'] : null;
+		$remaining_quantity = isset( $extra['remaining_quantity'] ) ? $extra['remaining_quantity'] : null;
+
+		if ( Goal::MODE_QUANTITY === $goal->calculation_mode() ) {
+			$quantity           = null === $quantity ? $result->current() : $quantity;
+			$remaining_quantity = null === $remaining_quantity ? $result->remaining() : $remaining_quantity;
+		}
+
+		$campaign_name = (string) $goal->campaign_name();
+
+		if ( '' === $campaign_name && isset( $extra['campaign_name'] ) ) {
+			$campaign_name = (string) $extra['campaign_name'];
+		}
+
+		return array(
+			'current'            => $format( $result->current() ),
+			'target'             => $format( $result->target() ),
+			'remaining'          => $format( $result->remaining() ),
+			'percentage'         => (string) number_format_i18n( $result->percentage(), 0 ),
+			'quantity'           => $this->format_number( (float) $quantity, false ),
+			'remaining_quantity' => $this->format_number( (float) $remaining_quantity, false ),
+			'reward'             => $this->reward_label( $goal ),
+			'goal_name'          => $goal->name(),
+			'campaign_name'      => $campaign_name,
+		);
+	}
+
+	/**
+	 * Substitute the known placeholders in a template.
+	 *
+	 * Unknown placeholders (typos, future variables) are left as-is so a
+	 * template can never render empty tokens the author did not intend.
+	 *
+	 * @param string                $template Template with {placeholders}.
+	 * @param Goal                  $goal     Goal.
+	 * @param GoalResult            $result   Evaluation result.
+	 * @param array<string, mixed>  $extra    Extra variables.
+	 * @return string
+	 */
+	public function render( $template, Goal $goal, GoalResult $result, array $extra = array() ) {
+		$template = (string) $template;
+
+		if ( '' === $template ) {
+			return '';
+		}
+
+		$variables = $this->variables( $goal, $result, $extra );
+
+		// Only the documented VARIABLES set is ever substituted, so a
+		// template can never pick up an undocumented placeholder.
+		$search  = array();
+		$replace = array();
+
+		foreach ( self::VARIABLES as $key ) {
+			if ( ! array_key_exists( $key, $variables ) ) {
+				continue;
+			}
+
+			$search[]  = '{' . $key . '}';
+			$replace[] = (string) $variables[ $key ];
+		}
+
+		return str_replace( $search, $replace, $template );
+	}
+
+	/**
+	 * The localized reward label for a goal.
+	 *
+	 * Value-aware where it reads naturally ("10% discount", "Fixed $20
+	 * off"); falls back to a bare type label for rewards without a value.
+	 *
+	 * @param Goal $goal Goal.
+	 * @return string
+	 */
+	public function reward_label( Goal $goal ) {
+		$type  = $goal->reward_type();
+		$value = $goal->reward_value();
+
+		switch ( $type ) {
+			case 'free_shipping':
+				return __( 'Free shipping', 'goalcart' );
+
+			case 'percent_discount':
+				return null === $value
+					? __( 'Percentage discount', 'goalcart' )
+					: sprintf(
+						/* translators: %d: discount percentage. */
+						__( '%d%% discount', 'goalcart' ),
+						(int) round( (float) $value )
+					);
+
+			case 'fixed_discount':
+				if ( null === $value ) {
+					return __( 'Fixed discount', 'goalcart' );
+				}
+
+				return sprintf(
+					/* translators: %s: formatted discount amount. */
+					__( 'Fixed %s off', 'goalcart' ),
+					$this->format_number( (float) $value, true )
+				);
+
+			case 'free_gift':
+				return __( 'Free gift', 'goalcart' );
+
+			case 'coupon':
+				return __( 'Coupon', 'goalcart' );
+
+			default:
+				return '';
+		}
+	}
+
+	/**
+	 * Whether a goal's progress is measured in money.
+	 *
+	 * Quantity/distinct-quantity/weight goals count items, not money, and
+	 * quantity-mode category/product goals do too. Quantity goals default
+	 * to the subtotal calculation mode (Goal::default_calculation_mode),
+	 * so the type is checked in addition to the mode. Mirrors the frontend
+	 * controller's is_money flag so message numbers and widget labels
+	 * format consistently.
+	 *
+	 * @param Goal $goal Goal.
+	 * @return bool
+	 */
+	protected function is_money_goal( Goal $goal ) {
+		if ( in_array(
+			$goal->type(),
+			array( Goal::TYPE_QUANTITY, Goal::TYPE_DISTINCT_QUANTITY, Goal::TYPE_WEIGHT ),
+			true
+		) ) {
+			return false;
+		}
+
+		return Goal::MODE_QUANTITY !== $goal->calculation_mode();
+	}
+
+	/**
+	 * Format a number: currency when money, plain locale number otherwise.
+	 *
+	 * @param float  $value   Number.
+	 * @param bool   $is_money Whether to format as currency.
+	 * @return string
+	 */
+	protected function format_number( $value, $is_money ) {
+		if ( $is_money && function_exists( 'wc_price' ) ) {
+			return wp_strip_all_tags( wc_price( (float) $value ) );
+		}
+
+		// Currency without WooCommerce: 2 decimals, locale-aware.
+		$decimals = $is_money ? 2 : 0;
+
+		return (string) number_format_i18n( (float) $value, $decimals );
+	}
+}
