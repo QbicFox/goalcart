@@ -274,6 +274,59 @@ Margin-aware and AI-ranked recommendations remain roadmap futures
 
 ---
 
+# Admin Preview System (Phase 15)
+
+Administrators can see the **exact customer experience before
+publishing**: the preview buttons on the Goals and Campaigns lists open a
+dialog that evaluates the real engine against a **simulated cart** and
+renders the real storefront widget (React mirror of `assets/js/frontend.js`)
+at the chosen device width.
+
+## Backend — `POST /goalcart/v1/preview` (admin-only)
+
+`GoalCart\REST\PreviewController` (`includes/REST/PreviewController.php`)
+accepts `goal_id` XOR `campaign_id` plus a `simulated` object
+(`{ amount, quantity }`), builds a **synthetic `CartContext`** (one
+simulated cart line carrying the amount / quantity / weight / categories /
+product id — so amount, quantity, distinct-quantity, category, product and
+weight goals all evaluate honestly; composite goals union their children's
+constraints), runs it through the GoalEngine + MessageEngine +
+SuggestionEngine, and returns the **same per-goal payload shape as the
+public `/progress` endpoint** (built by the shared
+`FrontendController::shape_goal()`, so the two can never drift).
+
+Preview **never touches the real WooCommerce cart**: no cart is loaded, no
+session is touched, no fees or coupons are applied. It also **ignores
+publish gating** on purpose — goals are evaluated as active and
+in-schedule — so drafts, inactive goals and scheduled campaigns can be
+seen before they go live.
+
+## Preview States
+
+- empty cart · 25% · 50% · 75% · completed (single goals; anchored to the
+goal target)
+- multiple milestones (campaigns; anchored to the top milestone target, so
+mid states naturally show several completed rungs)
+
+## Preview Controls
+
+- **Simulated cart amount** — drives money-based goals (subtotal / total).
+- **Simulated quantity** — drives quantity, distinct-quantity and weight
+goals.
+- **Simulated reward** — auto (from completion) / locked / unlocked chip
+state.
+- **Device width** — mobile (375px) / tablet (768px) / desktop (1280px)
+preview frame.
+- **Template** — basic / percentage / milestone / card (defaults to the
+goal's Display template, then the store-wide Appearance template — the
+widget's own resolution order).
+
+The dialog debounces the simulated values (300ms), keeps the previous
+frame while refetching (`placeholderData`), and applies the Phase 12
+appearance tokens, so what the admin sees matches the storefront 1:1.
+
+---
+
 # Goal Cart React Admin App (Phase 8)
 
 The admin dashboard is a React + TypeScript SPA (Vite + MUI) mounted
@@ -299,15 +352,22 @@ admin-app/src/
 │   ├── goals.ts                 typed goal CRUD + duplicate
 │   ├── campaigns.ts             typed campaign CRUD + duplicate
 │   ├── search.ts                typed /search/{products,categories,coupons}
-│   └── settings.ts              typed GET/POST /settings
+│   ├── settings.ts              typed GET/POST /settings
+│   └── preview.ts               typed POST /preview (Phase 15)
 ├── components/
 │   ├── layout/                  AdminLayout (header + sidebar + main) + navigation
 │   ├── notifications/           SnackbarProvider + useSnackbar()
 │   ├── ConfirmDialog.tsx        reusable destructive-action dialog
 │   ├── EmptyState.tsx           no-data panel
 │   ├── ErrorBoundary.tsx        render-error fallback with retry
-│   ├── GoalPreviewDialog.tsx    lightweight goal preview (simulated progress)
-│   ├── CampaignPreviewDialog.tsx  lightweight milestone-ladder preview
+│   ├── GoalPreviewDialog.tsx    server-driven goal preview (Phase 15)
+│   ├── CampaignPreviewDialog.tsx  server-driven campaign preview (Phase 15)
+│   ├── preview/                 Phase 15 admin preview system
+│   │   ├── PreviewWidget.tsx    React mirror of the storefront widget
+│   │   ├── PreviewControls.tsx  state presets + amount/quantity/reward/
+│   │   │                        device width/template controls
+│   │   ├── usePreviewDialog.ts  shared preview state + queries hook
+│   │   └── types.ts             control types, tokens, device widths
 │   ├── goal-builder/            Phase 9 builder sections
 │   │   ├── SectionCard.tsx      titled section wrapper
 │   │   ├── EntityAutocomplete.tsx  debounced async search picker

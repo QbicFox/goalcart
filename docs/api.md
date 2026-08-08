@@ -51,6 +51,8 @@ status codes are always set. The common codes:
 | `goalcart_forbidden` | 403 | Missing capability |
 | `goalcart_rate_limited` | 429 | Rate limit exceeded (`retry_after` in data) |
 | `goalcart_goal_not_found` / `goalcart_campaign_not_found` | 404 | Resource missing |
+| `goalcart_preview_target_required` | 400 | Neither / both of `goal_id` + `campaign_id` given |
+| `goalcart_preview_not_found` | 404 | Preview target (goal/campaign) missing |
 | `goalcart_settings_empty` | 400 | No known settings keys in the payload |
 | `rest_invalid_param` | 400 | Arg-schema validation failure |
 | `goalcart_*_create/update/delete_failed` | 500 | Persistence failure |
@@ -273,6 +275,76 @@ removed from the list. Validation: `name` (required on create),
 `Y-m-d H:i:s`), `priority` (≥ 0), `display_rules` (object),
 `goals` (array of positive ints).
 
+### 2.5 Preview (Phase 15)
+
+#### `POST /preview` — admin-only, rate limited per user
+
+Evaluates a goal (or a campaign's milestone goals) against a **simulated
+cart** and returns the exact same per-goal payload shape as the public
+`GET /progress` endpoint, so the admin preview renders the real
+storefront widget before publishing. The simulation never touches the
+real WooCommerce cart, and publish gating is ignored (goals preview as
+active and in-schedule) so drafts and scheduled campaigns can be seen
+first.
+
+Body args:
+
+| Arg | Type | Default | Notes |
+|---|---|---|---|
+| `goal_id` | int ≥ 0 | 0 | Preview a single goal (XOR with `campaign_id`) |
+| `campaign_id` | int ≥ 0 | 0 | Preview a campaign's milestone ladder |
+| `simulated.amount` | number ≥ 0 | 0 | Simulated cart amount (money goals) |
+| `simulated.quantity` | number ≥ 0 | 0 | Simulated item quantity (count goals) |
+
+Exactly one of `goal_id` / `campaign_id` is required — neither or both
+returns `goalcart_preview_target_required` (400); a missing target
+returns `goalcart_preview_not_found` (404). Unknown keys inside
+`simulated` are rejected by the arg schema.
+
+```json
+{
+  "goal_id": 5,
+  "simulated": { "amount": 500000, "quantity": 1 }
+}
+```
+
+Response:
+
+```json
+{
+  "data": {
+    "goals": [
+      {
+        "goal_id": 5,
+        "goal_name": "Free shipping",
+        "goal_type": "amount",
+        "is_money": true,
+        "current": 250000,
+        "target": 500000,
+        "remaining": 250000,
+        "percentage": 50,
+        "completed": false,
+        "state": "progressing",
+        "message": "Only ۲۵۰٬۰۰۰ left to reach your goal",
+        "reward": { "type": "free_shipping", "value": null, "max_value": null, "meta": {} },
+        "suggestions": [],
+        "reward_state": "locked",
+        "eligible": true,
+        "reason": ""
+      }
+    ],
+    "currency": "IRR",
+    "simulated": { "amount": 500000, "quantity": 1 }
+  },
+  "meta": { "mode": "goal" }
+}
+```
+
+`meta.mode` is `goal` or `campaign`; campaign previews return every
+milestone goal in `menu_order` (each with the same shape), which is what
+drives the admin's milestone-ladder rendering. The payload is built by
+the shared `FrontendController::shape_goal()` — identical to `/progress`.
+
 ---
 
 ## 3. Frontend API
@@ -394,6 +466,21 @@ Notes:
 | Customer-state campaign rules | Phase 32 (needs schema fields) |
 
 ## 6. Testing
+
+`tests/preview-test.php` (90 checks, `php tests/preview-test.php`):
+
+- route registration + arg-schema validation (simulated object, negative
+  values, unknown keys, exactly-one-target rule)
+- permission: anonymous rejected on `/preview` (admin-only)
+- preview states against a simulated cart (empty / 50% / completed) with
+the live cart's contents asserted byte-identical afterwards
+- every goal type's simulated context: quantity, distinct-quantity,
+category (quantity + money modes), product (and the honest
+no-matching-items ineligibility), weight and composite (AND) goals
+- publish-gating bypass (inactive goal previews as active)
+- campaign preview: all milestone goals evaluated in order (the
+"multiple milestones" state)
+- error paths (400 / 404) and full rollback verification
 
 `tests/rest-api-test.php` (120 checks, `php tests/rest-api-test.php`):
 

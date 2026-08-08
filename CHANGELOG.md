@@ -219,6 +219,65 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
+### Phase 15 — Admin Preview System (100% complete)
+
+- **P15-T01 Objective** — Administrators can now see the customer
+experience before publishing: the Preview buttons on the Goals and
+Campaigns lists open a server-driven dialog that evaluates the **real
+goal engine** against a **simulated cart** and renders the real storefront
+widget (templates, messages, rewards, suggestions) at the chosen device
+width. New `includes/REST/PreviewController.php` registers
+`POST /goalcart/v1/preview` (admin-only, `manage_options` + rate limit):
+it builds a synthetic `CartContext` (one simulated line carrying amount /
+quantity / weight / categories / product id, so amount / quantity /
+distinct-quantity / category / product / weight / composite goals all
+evaluate honestly) and returns the **same per-goal payload shape as the
+public `/progress` endpoint** via a newly extracted shared
+`FrontendController::shape_goal()` — the two payload builders can never
+drift. **Preview never touches the real WooCommerce cart** (no cart
+loaded, no session touched, no fees/coupons applied — verified by test)
+and ignores publish gating on purpose, so drafts, inactive goals and
+scheduled campaigns are previewable before going live.
+- **P15-T02 Preview States** — Empty cart / 25% / 50% / 75% / Completed
+presets for single goals (anchored to the goal target) and **multiple
+milestones** for campaigns (every milestone evaluated against the same
+simulated cart, anchored to the top milestone target so mid states show
+several completed rungs).
+- **P15-T03 Preview Controls** — Simulated cart amount and simulated
+quantity fields (debounced 300 ms), simulated reward state (auto / locked
+/ unlocked chip), device width (mobile 375 / tablet 768 / desktop 1280)
+and template variant (basic / percentage / milestone / card, defaulting
+through the goal's Display template → the store-wide Appearance template
+— the widget's own resolution order). The React side is a faithful mirror
+of `assets/js/frontend.js`: new `components/preview/` (`PreviewWidget`,
+`PreviewControls`, `usePreviewDialog` shared hook, `types`), rewritten
+`GoalPreviewDialog` / `CampaignPreviewDialog`, `api/preview.ts`, and the
+`ProgressGoal` / `PreviewPayload` types. Appearance tokens come from the
+Phase 12 settings, so the admin sees the storefront 1:1.
+- Added files: `includes/REST/PreviewController.php`, `tests/preview-test.php`,
+`admin-app/src/api/preview.ts`, `admin-app/src/components/preview/`
+(4 modules). Also extended `admin-app/src/types.ts` (progress/preview
+payload types) and `admin-app/src/lib/format.ts` (optional currency param
+for the preview's payload-currency formatting).
+- **Verification:** `php -l` clean; new preview suite 90/90 (routes,
+schema, anonymous 403, empty/50%/completed states, live-cart-unchanged,
+publish-gating bypass, every goal type's simulated context — quantity,
+distinct-quantity, category (both modes), product, weight, composite —
+quantity goals, campaign milestones in order, 400/404 paths, rollback);
+rest-api 120/120, engine 75/75, reward 72/72, cart-integration 22/22,
+message 47/47, suggestion 28/28 (no regressions); `npm run typecheck`,
+`npm run lint` and `npm run build` all pass (the preview widgets are part
+of the main chunk). Note: `frontend-test.php`
+reports 4 pre-existing failures in this environment because the live
+site's saved Appearance settings differ from the defaults the suite
+asserts (template `milestone`, bar height 28, accent `#cf20b8`) —
+unrelated to this phase's changes. No database changes; plugin not
+activated.
+
+**Overall project progress: 59%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 4% + Phase 15 weight 2% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

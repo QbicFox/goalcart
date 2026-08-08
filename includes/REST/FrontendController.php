@@ -8,6 +8,7 @@
 namespace GoalCart\REST;
 
 use GoalCart\Cart\CartIntegration;
+use GoalCart\Goals\CartContext;
 use GoalCart\Goals\Goal;
 use GoalCart\Goals\GoalEngine;
 use GoalCart\Goals\GoalRepository;
@@ -33,6 +34,11 @@ defined( 'ABSPATH' ) || exit;
  *
  *    one entry per active goal, plus cart/currency metadata. The progress
  *    widgets (Phase 11) poll this endpoint and re-render.
+ *
+ *  - `shape_goal()` — the shared per-goal payload shaper, the single
+ *    source of truth for the item shape above. It is consumed by this
+ *    endpoint and by the Phase 15 PreviewController, so the admin preview
+ *    and the storefront payload can never drift.
  *	 * Security (P07-T04): public by design — guests must be able to read their
 	 * own cart progress — so it requires no capability, returns only aggregate
 	 * numbers (no PII), and is rate limited per IP. Message copy is rendered
@@ -147,26 +153,7 @@ class FrontendController extends BaseController {
 		foreach ( $goals as $goal ) {
 			$result = $this->engine->evaluate( $goal, $context );
 
-			$items[] = array(
-				'goal_id'      => $goal->id(),
-				'goal_name'    => $goal->name(),
-				'goal_type'    => $goal->type(),
-				'is_money'     => $this->is_money_goal( $goal ),
-				'icon'         => $this->goal_icon( $goal ),
-				'template'     => $this->goal_template( $goal ),
-				'current'      => $result->current(),
-				'target'       => $result->target(),
-				'remaining'    => $result->remaining(),
-				'percentage'   => $result->percentage(),
-				'completed'    => $result->completed(),
-				'state'        => $this->messages->state( $goal, $result ),
-				'message'      => $this->messages->message( $goal, $result, $extra ),
-				'reward'       => $this->reward( $goal ),
-				'suggestions'  => $this->suggestions->suggest( $goal, $result, $context ),
-				'reward_state' => $result->reward_state(),
-				'eligible'     => $result->eligible(),
-				'reason'       => $result->reason(),
-			);
+			$items[] = $this->shape_goal( $goal, $result, $context, $extra );
 		}
 
 		return $this->success(
@@ -177,6 +164,45 @@ class FrontendController extends BaseController {
 			array(
 				'total_goals' => count( $items ),
 			)
+		);
+	}
+
+	/**
+	 * Shape one goal evaluation into the shared progress payload item.
+	 *
+	 * Single source of truth for the per-goal payload shape, used by both
+	 * the public `GET /progress` endpoint (live cart) and the admin
+	 * PreviewController (Phase 15, simulated cart) so the two can never
+	 * drift apart. Mirrors the documented payload in docs/api.md.
+	 *
+	 * @param Goal        $goal    Goal.
+	 * @param GoalResult  $result  Evaluation result.
+	 * @param CartContext $context Cart snapshot the goal was evaluated on
+	 *                             (drives suggestions).
+	 * @param array<string, mixed> $extra Extra message variables (quantity,
+	 *                             remaining_quantity, campaign_name).
+	 * @return array<string, mixed>
+	 */
+	public function shape_goal( Goal $goal, GoalResult $result, CartContext $context, array $extra = array() ) {
+		return array(
+			'goal_id'      => $goal->id(),
+			'goal_name'    => $goal->name(),
+			'goal_type'    => $goal->type(),
+			'is_money'     => $this->is_money_goal( $goal ),
+			'icon'         => $this->goal_icon( $goal ),
+			'template'     => $this->goal_template( $goal ),
+			'current'      => $result->current(),
+			'target'       => $result->target(),
+			'remaining'    => $result->remaining(),
+			'percentage'   => $result->percentage(),
+			'completed'    => $result->completed(),
+			'state'        => $this->messages->state( $goal, $result ),
+			'message'      => $this->messages->message( $goal, $result, $extra ),
+			'reward'       => $this->reward( $goal ),
+			'suggestions'  => $this->suggestions->suggest( $goal, $result, $context ),
+			'reward_state' => $result->reward_state(),
+			'eligible'     => $result->eligible(),
+			'reason'       => $result->reason(),
 		);
 	}
 

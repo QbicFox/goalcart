@@ -1,198 +1,177 @@
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import LinearProgress from '@mui/material/LinearProgress';
+import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import Slider from '@mui/material/Slider';
-import Stack from '@mui/material/Stack';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
-import { __ } from '@wordpress/i18n';
-import { useMemo, useState } from 'react';
+import { __, sprintf } from '@wordpress/i18n';
 
-import { formatCurrency, formatNumber } from '../lib/format';
-import type { Campaign } from '../types';
+import type { Campaign, CampaignGoal, FrontendTemplate } from '../types';
+import PreviewControls from './preview/PreviewControls';
+import PreviewWidget from './preview/PreviewWidget';
+import { usePreviewDialog } from './preview/usePreviewDialog';
+import { DEVICE_WIDTHS, tokensFromSettings } from './preview/types';
+import type { PreviewDevice } from './preview/types';
 
 interface CampaignPreviewDialogProps {
   campaign: Campaign | null;
   onClose: () => void;
 }
 
-const PRESETS = [0, 25, 50, 75, 100];
+const COUNT_TYPES = ['quantity', 'distinct_quantity', 'weight'];
 
-const REWARD_LABELS: Record<string, string> = {
-  free_shipping: __('Free shipping', 'goalcart'),
-  percent_discount: __('% discount', 'goalcart'),
-  fixed_discount: __('Fixed discount', 'goalcart'),
-  free_gift: __('Free gift', 'goalcart'),
-  coupon: __('Coupon', 'goalcart'),
-};
-
-function targetLabel(type: string, mode: string | undefined, target: number): string {
-  if (
-    type === 'quantity' ||
-    type === 'distinct_quantity' ||
-    type === 'weight' ||
-    mode === 'quantity'
-  ) {
-    return formatNumber(target);
-  }
-  return formatCurrency(target);
+/** Whether a milestone type measures money (mirrors Goal::is_money_goal). */
+function isMoneyType(type: string): boolean {
+  return !COUNT_TYPES.includes(type);
 }
 
+/** The campaign's top milestone — the anchor for the state presets. */
+function topMilestone(campaign: Campaign): CampaignGoal | null {
+  let top: CampaignGoal | null = null;
+
+  for (const goal of campaign.goals) {
+    if (!top || goal.target > top.target) {
+      top = goal;
+    }
+  }
+
+  return top;
+}
+
+/** Amount/quantity implied by a state preset relative to the top target. */
+function presetTargets(campaign: Campaign, fraction: number): { amount: number; quantity: number } {
+  const top = topMilestone(campaign);
+  const value = (top ? Number(top.target) : 0) * fraction;
+
+  return top && isMoneyType(top.type)
+    ? { amount: value, quantity: 0 }
+    : { amount: 0, quantity: value };
+}
+
+const DEVICE_LABELS: Record<PreviewDevice, string> = {
+  mobile: __('Mobile', 'goalcart'),
+  tablet: __('Tablet', 'goalcart'),
+  desktop: __('Desktop', 'goalcart'),
+};
+
 /**
- * Campaign preview (Phase 10 "preview" feature). A lightweight mock of the
- * milestone ladder — how the campaign reads as an ordered set of
- * thresholds — with a simulated progress state. The full admin preview
- * system (simulated cart, device widths, template rendering) is Phase 15.
- * Read-only: preview never touches the real cart.
+ * Campaign preview (Phase 15: Admin Preview System). The milestone ladder
+ * as customers see it — every milestone goal evaluated server-side
+ * against the same SIMULATED cart, rendered with the real storefront
+ * widget mirror at the chosen device width and template. The presets
+ * (empty cart / 25% / 50% / 75% / completed) are anchored to the
+ * campaign's top milestone target, so mid states naturally show several
+ * completed milestones ("multiple milestones"). Read-only: preview never
+ * touches the real WooCommerce cart, and publish gating is ignored so
+ * scheduled campaigns can be seen before they go live.
  */
 export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPreviewDialogProps) {
-  const [percent, setPercent] = useState(50);
+  const { controls, patch, applyPreset, previewQuery, settingsQuery } = usePreviewDialog({
+    target: campaign,
+    derive: (current: Campaign) => ({
+      templateDefault: '',
+      targetsFor: (fraction) => presetTargets(current, fraction),
+      paramsFor: () => ({ campaignId: current.id }),
+    }),
+  });
 
-  const completedIndex = useMemo(() => {
-    if (!campaign || campaign.goals.length === 0) {
-      return -1;
-    }
-
-    return Math.min(campaign.goals.length - 1, Math.floor((campaign.goals.length * percent) / 100));
-  }, [campaign, percent]);
-
-  const milestones = campaign?.goals ?? [];
+  const settings = settingsQuery.data;
+  const resolvedTemplate: FrontendTemplate =
+    controls.template || settings?.frontend_template || 'basic';
+  const tokens = tokensFromSettings(settings);
+  const frameWidth = DEVICE_WIDTHS[controls.deviceWidth];
+  const goals = previewQuery.data?.goals ?? [];
+  const completedCount = goals.filter((goal) => goal.completed).length;
 
   return (
-    <Dialog open={campaign !== null} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{__('Campaign preview', 'goalcart')}</DialogTitle>
+    <Dialog open={campaign !== null} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogTitle>
+        {campaign
+          ? sprintf(__('Preview: %s', 'goalcart'), campaign.name)
+          : __('Campaign preview', 'goalcart')}
+      </DialogTitle>
       <DialogContent>
-        <Stack spacing={3}>
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Stack spacing={1}>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                {campaign?.name}
-              </Typography>
-              {campaign?.description && (
-                <Typography variant="body2" color="text.secondary">
-                  {campaign.description}
-                </Typography>
-              )}
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={4} lg={3}>
+            <Paper variant="outlined" sx={{ p: 2.5 }}>
+              <PreviewControls
+                value={{ ...controls, template: resolvedTemplate }}
+                onPatch={patch}
+                onApplyPreset={applyPreset}
+              />
+            </Paper>
+          </Grid>
 
-              {milestones.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  {__('No milestones in this campaign yet.', 'goalcart')}
+          <Grid item xs={12} md={8} lg={9}>
+            <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, bgcolor: '#f6f7f7' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 2,
+                  gap: 1,
+                }}
+              >
+                <Typography variant="subtitle2" color="text.secondary">
+                  {DEVICE_LABELS[controls.deviceWidth]} · {frameWidth}px
                 </Typography>
-              ) : (
-                <Stack spacing={1} sx={{ mt: 1 }}>
-                  {milestones.map((milestone, index) => {
-                    const reached = index <= completedIndex;
-                    const reward = milestone.reward_type
-                      ? (REWARD_LABELS[milestone.reward_type] ?? milestone.reward_type)
-                      : '';
-
-                    return (
-                      <Box
-                        key={milestone.id}
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 1.5,
-                          p: 1.25,
-                          borderRadius: 1,
-                          border: '1px solid',
-                          borderColor: reached ? 'success.main' : 'divider',
-                          bgcolor: reached ? 'success.light' : 'transparent',
-                          transition: 'background-color 200ms ease, border-color 200ms ease',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: reached ? 'success.contrastText' : 'text.secondary',
-                            bgcolor: reached ? 'success.main' : 'action.hover',
-                            fontSize: 13,
-                            fontWeight: 600,
-                            flexShrink: 0,
-                          }}
-                        >
-                          {index + 1}
-                        </Box>
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-                            {targetLabel(milestone.type, undefined, milestone.target)}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary" noWrap>
-                            {milestone.name}
-                          </Typography>
-                        </Box>
-                        {reward && (
-                          <Chip
-                            size="small"
-                            variant={reached ? 'filled' : 'outlined'}
-                            color={reached ? 'success' : 'default'}
-                            label={reward}
-                          />
-                        )}
-                      </Box>
-                    );
-                  })}
-                </Stack>
-              )}
-
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-                <Box sx={{ flex: 1 }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={percent}
-                    color={percent >= 100 ? 'success' : 'primary'}
-                    sx={{ height: 8, borderRadius: 4 }}
-                  />
-                </Box>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ minWidth: 44, textAlign: 'right' }}
-                >
-                  {percent}%
-                </Typography>
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={sprintf(
+                    /* translators: %1$d: completed milestones, %2$d: total milestones. */
+                    __('%1$d/%2$d milestones', 'goalcart'),
+                    completedCount,
+                    goals.length
+                  )}
+                />
               </Box>
-            </Stack>
-          </Paper>
 
-          <Box>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              {__('Simulated progress', 'goalcart')}
-            </Typography>
-            <ToggleButtonGroup
-              size="small"
-              exclusive
-              value={percent}
-              onChange={(_event, value) => value !== null && setPercent(value)}
-              aria-label={__('Simulated progress', 'goalcart')}
-            >
-              {PRESETS.map((value) => (
-                <ToggleButton key={value} value={value}>
-                  {value}%
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-            <Slider
-              value={percent}
-              min={0}
-              max={100}
-              step={5}
-              onChange={(_event, value) => setPercent(value as number)}
-              aria-label={__('Simulated progress slider', 'goalcart')}
-              sx={{ mt: 2 }}
-            />
-          </Box>
-        </Stack>
+              <Box sx={{ maxWidth: frameWidth, margin: '0 auto' }}>
+                {previewQuery.isError ? (
+                  <Alert severity="error" variant="outlined">
+                    {previewQuery.error instanceof Error
+                      ? previewQuery.error.message
+                      : __('Could not load the preview.', 'goalcart')}
+                  </Alert>
+                ) : previewQuery.data ? (
+                  goals.length === 0 ? (
+                    <Alert severity="info" variant="outlined">
+                      {__('No milestones in this campaign yet.', 'goalcart')}
+                    </Alert>
+                  ) : (
+                    <>
+                      <PreviewWidget
+                        goals={goals}
+                        currency={previewQuery.data.currency}
+                        tokens={tokens}
+                        template={resolvedTemplate}
+                        rewardState={controls.rewardState}
+                        animation={settings?.frontend_animation ?? true}
+                      />
+                      {previewQuery.isFetching && previewQuery.isPlaceholderData && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: 'block', mt: 1, textAlign: 'center' }}
+                        >
+                          {__('Updating…', 'goalcart')}
+                        </Typography>
+                      )}
+                    </>
+                  )
+                ) : (
+                  <Skeleton variant="rounded" height={180} />
+                )}
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
       </DialogContent>
     </Dialog>
   );

@@ -149,6 +149,73 @@ export interface Goal {
   updated_at: string;
 }
 
+/** Message states produced by the Phase 13 MessageEngine. */
+export type ProgressState =
+  'inactive' | 'unavailable' | 'progressing' | 'nearly_complete' | 'completed' | 'reward_activated';
+
+/** The flat reward summary in the progress/preview payload. */
+export interface ProgressReward {
+  type: RewardType;
+  value: number | null;
+  max_value: number | null;
+  meta: RewardMetaInput;
+}
+
+/** A suggested product in the progress payload (Phase 14). */
+export interface SuggestionProduct {
+  id: number;
+  name: string;
+  permalink: string;
+  price: number | null;
+  price_html: string;
+  image: string;
+  stock_status: string;
+  source: string;
+}
+
+/**
+ * One goal entry in the public `GET /progress` payload and the Phase 15
+ * admin `POST /preview` payload (same shape, built by
+ * `FrontendController::shape_goal()`).
+ */
+export interface ProgressGoal {
+  goal_id: number;
+  goal_name: string;
+  goal_type: GoalType;
+  is_money: boolean;
+  icon: string;
+  template: string;
+  current: number;
+  target: number;
+  remaining: number;
+  percentage: number;
+  completed: boolean;
+  state: ProgressState;
+  message: string;
+  reward: ProgressReward | null;
+  suggestions: SuggestionProduct[];
+  reward_state: 'not_applicable' | 'locked' | 'unlocked';
+  eligible: boolean;
+  reason: string;
+}
+
+/** Simulated cart values sent to the preview endpoint (Phase 15). */
+export interface PreviewSimulated {
+  amount: number;
+  quantity: number;
+}
+
+/**
+ * The admin preview endpoint payload (`POST /goalcart/v1/preview`,
+ * Phase 15). Same per-goal shape as /progress, plus the simulated values
+ * echoed back so the preview frame can label itself.
+ */
+export interface PreviewPayload {
+  goals: ProgressGoal[];
+  currency: string;
+  simulated: PreviewSimulated;
+}
+
 /** Search endpoint result item (`GET /search/products`). */
 export interface SearchProduct {
   id: number;

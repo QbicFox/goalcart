@@ -5,13 +5,13 @@ import { getBootData } from '../boot';
  * the boot data (Phase 12: currency-aware formatting). Falls back to a
  * plain "1,234" when Intl cannot handle the locale/currency pair.
  */
-export function formatCurrency(value: number): string {
+export function formatCurrency(value: number, currency?: string): string {
   const boot = getBootData();
 
   try {
     return new Intl.NumberFormat(boot.locale.replace('_', '-'), {
       style: 'currency',
-      currency: boot.currency,
+      currency: currency || boot.currency,
       maximumFractionDigits: 0,
     }).format(value);
   } catch {

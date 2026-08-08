@@ -21,6 +21,7 @@ use GoalCart\Hooks\HookManager;
 use GoalCart\REST\CampaignsController;
 use GoalCart\REST\FrontendController;
 use GoalCart\REST\GoalsController;
+use GoalCart\REST\PreviewController;
 use GoalCart\REST\SearchController;
 use GoalCart\REST\SettingsController;
 use GoalCart\Rewards\RewardEngine;
@@ -164,6 +165,7 @@ final class Plugin {
 		$this->hooks()->register( $this->container->get( SearchController::class ) );
 		$this->hooks()->register( $this->container->get( CampaignsController::class ) );
 		$this->hooks()->register( $this->container->get( FrontendController::class ) );
+		$this->hooks()->register( $this->container->get( PreviewController::class ) );
 
 		// Apply everything to WordPress.
 		$this->hooks()->run();
@@ -261,6 +263,18 @@ final class Plugin {
 				$container->get( CartIntegration::class ),
 				$container->get( MessageEngine::class ),
 				$container->get( SuggestionEngine::class )
+			);
+		} );
+
+		// Admin preview system (Phase 15): evaluates a goal/campaign against
+		// a SIMULATED cart through the real engine, reusing the frontend
+		// controller's shared payload shape — never touches the live cart.
+		$this->container->singleton( PreviewController::class, function ( Container $container ) {
+			return new PreviewController(
+				$container->get( GoalEngine::class ),
+				$container->get( GoalRepository::class ),
+				$container->get( CampaignRepository::class ),
+				$container->get( FrontendController::class )
 			);
 		} );
 

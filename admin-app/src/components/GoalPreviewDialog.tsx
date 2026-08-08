@@ -1,162 +1,162 @@
+import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import LinearProgress from '@mui/material/LinearProgress';
+import Grid from '@mui/material/Grid';
 import Paper from '@mui/material/Paper';
-import Slider from '@mui/material/Slider';
-import Stack from '@mui/material/Stack';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
+import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
-import { __ } from '@wordpress/i18n';
-import { useMemo, useState } from 'react';
+import { __, sprintf } from '@wordpress/i18n';
 
-import { formatCurrency } from '../lib/format';
-import type { DisplaySettingsInput, Goal } from '../types';
+import type { FrontendTemplate, Goal } from '../types';
+import PreviewControls from './preview/PreviewControls';
+import PreviewWidget from './preview/PreviewWidget';
+import { usePreviewDialog } from './preview/usePreviewDialog';
+import { DEVICE_WIDTHS, tokensFromSettings } from './preview/types';
+import type { PreviewDevice } from './preview/types';
 
 interface GoalPreviewDialogProps {
   goal: Goal | null;
   onClose: () => void;
 }
 
-const PRESETS = [0, 25, 50, 75, 100];
+const TEMPLATE_VARIANTS: FrontendTemplate[] = ['basic', 'percentage', 'milestone', 'card'];
 
-const REWARD_LABELS: Record<string, string> = {
-  free_shipping: __('Free shipping', 'goalcart'),
-  percent_discount: __('% discount', 'goalcart'),
-  fixed_discount: __('Fixed discount', 'goalcart'),
-  free_gift: __('Free gift', 'goalcart'),
-  coupon: __('Coupon', 'goalcart'),
+/** Whether a goal's progress is measured in money (mirrors Goal::is_money_goal). */
+function isMoneyGoal(goal: Goal): boolean {
+  const countTypes = ['quantity', 'distinct_quantity', 'weight'];
+
+  return !countTypes.includes(goal.type) && goal.calculation_mode !== 'quantity';
+}
+
+/** The goal's own Display template, sanitized to the enum ('' = auto). */
+function goalTemplate(goal: Goal): FrontendTemplate | '' {
+  const template = goal.display_settings?.template;
+
+  return template && (TEMPLATE_VARIANTS as string[]).includes(template)
+    ? (template as FrontendTemplate)
+    : '';
+}
+
+/** Amount/quantity implied by a state preset for a goal. */
+function presetTargets(goal: Goal, fraction: number): { amount: number; quantity: number } {
+  const value = (Number(goal.target) || 0) * fraction;
+
+  // Composite goals drive both bases so their children all move.
+  if (goal.type === 'composite') {
+    return { amount: value, quantity: value };
+  }
+
+  return isMoneyGoal(goal) ? { amount: value, quantity: 0 } : { amount: 0, quantity: value };
+}
+
+const DEVICE_LABELS: Record<PreviewDevice, string> = {
+  mobile: __('Mobile', 'goalcart'),
+  tablet: __('Tablet', 'goalcart'),
+  desktop: __('Desktop', 'goalcart'),
 };
 
 /**
- * Substitute the Phase 13 message placeholders with the simulated values.
- */
-function interpolate(template: string, goal: Goal, percent: number) {
-  const current = (goal.target * percent) / 100;
-  const remaining = Math.max(0, goal.target - current);
-  const reward = goal.reward_type ? (REWARD_LABELS[goal.reward_type] ?? goal.reward_type) : '';
-
-  return template
-    .replace(/\{current\}/g, formatCurrency(current))
-    .replace(/\{target\}/g, formatCurrency(goal.target))
-    .replace(/\{remaining\}/g, formatCurrency(remaining))
-    .replace(/\{percentage\}/g, String(percent))
-    .replace(/\{reward\}/g, reward)
-    .replace(/\{goal_name\}/g, goal.name);
-}
-
-/**
- * Goal preview (Phase 9 "preview" action). A lightweight mock of the
- * customer progress card at a simulated progress state — the full admin
- * preview system (simulated cart, device widths, template rendering) is
- * Phase 15. Read-only: preview never touches the real cart.
+ * Goal preview (Phase 15: Admin Preview System). The full customer
+ * experience, evaluated server-side against a SIMULATED cart — state
+ * presets (empty cart / 25% / 50% / 75% / completed), simulated cart
+ * amount & quantity, simulated reward state, device width and template
+ * variant — and rendered with the real storefront widget mirror at the
+ * chosen width. Read-only: preview never touches the real WooCommerce
+ * cart, and publish gating is ignored so drafts can be seen first.
  */
 export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogProps) {
-  const [percent, setPercent] = useState(50);
+  const { controls, patch, applyPreset, previewQuery, settingsQuery } = usePreviewDialog({
+    target: goal,
+    derive: (current: Goal) => ({
+      templateDefault: goalTemplate(current),
+      targetsFor: (fraction) => presetTargets(current, fraction),
+      paramsFor: () => ({ goalId: current.id }),
+    }),
+  });
 
-  const display = (goal?.display_settings ?? {}) as DisplaySettingsInput;
-
-  const message = useMemo(() => {
-    if (!goal) {
-      return '';
-    }
-
-    if (percent >= 100) {
-      return display.completed_message
-        ? interpolate(display.completed_message, goal, percent)
-        : __('Goal reached — your reward is unlocked!', 'goalcart');
-    }
-
-    const template = display.message ?? __('Only {remaining} left to unlock {reward}!', 'goalcart');
-
-    return interpolate(template, goal, percent);
-  }, [goal, percent, display.message, display.completed_message]);
-
-  const completed = goal !== null && percent >= 100;
+  const settings = settingsQuery.data;
+  const resolvedTemplate: FrontendTemplate =
+    controls.template || settings?.frontend_template || 'basic';
+  const tokens = tokensFromSettings(settings);
+  const frameWidth = DEVICE_WIDTHS[controls.deviceWidth];
+  const featured = previewQuery.data?.goals[0];
+  const percent = featured ? Math.round(featured.percentage) : 0;
 
   return (
-    <Dialog open={goal !== null} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>{__('Goal preview', 'goalcart')}</DialogTitle>
+    <Dialog open={goal !== null} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogTitle>
+        {goal ? sprintf(__('Preview: %s', 'goalcart'), goal.name) : __('Goal preview', 'goalcart')}
+      </DialogTitle>
       <DialogContent>
-        <Stack spacing={3}>
-          <Paper
-            variant="outlined"
-            sx={{
-              p: 3,
-              border: '1px solid',
-              borderColor: 'divider',
-              borderRadius: 2,
-            }}
-          >
-            <Stack spacing={1.5}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                  {display.title || goal?.name}
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={4} lg={3}>
+            <Paper variant="outlined" sx={{ p: 2.5 }}>
+              <PreviewControls
+                value={{ ...controls, template: resolvedTemplate }}
+                onPatch={patch}
+                onApplyPreset={applyPreset}
+              />
+            </Paper>
+          </Grid>
+
+          <Grid item xs={12} md={8} lg={9}>
+            <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, bgcolor: '#f6f7f7' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 2,
+                  gap: 1,
+                }}
+              >
+                <Typography variant="subtitle2" color="text.secondary">
+                  {DEVICE_LABELS[controls.deviceWidth]} · {frameWidth}px
                 </Typography>
-                {completed && goal?.reward_type && (
-                  <Chip
-                    size="small"
-                    color="success"
-                    label={REWARD_LABELS[goal.reward_type] ?? goal.reward_type}
-                  />
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={sprintf(__('%d%% progress', 'goalcart'), percent)}
+                />
+              </Box>
+
+              <Box sx={{ maxWidth: frameWidth, margin: '0 auto' }}>
+                {previewQuery.isError ? (
+                  <Alert severity="error" variant="outlined">
+                    {previewQuery.error instanceof Error
+                      ? previewQuery.error.message
+                      : __('Could not load the preview.', 'goalcart')}
+                  </Alert>
+                ) : previewQuery.data ? (
+                  <>
+                    <PreviewWidget
+                      goals={previewQuery.data.goals}
+                      currency={previewQuery.data.currency}
+                      tokens={tokens}
+                      template={resolvedTemplate}
+                      rewardState={controls.rewardState}
+                      animation={settings?.frontend_animation ?? true}
+                    />
+                    {previewQuery.isFetching && previewQuery.isPlaceholderData && (
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: 'block', mt: 1, textAlign: 'center' }}
+                      >
+                        {__('Updating…', 'goalcart')}
+                      </Typography>
+                    )}
+                  </>
+                ) : (
+                  <Skeleton variant="rounded" height={180} />
                 )}
               </Box>
-
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <Box sx={{ flex: 1 }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={percent}
-                    color={completed ? 'success' : 'primary'}
-                    sx={{ height: 10, borderRadius: 5 }}
-                  />
-                </Box>
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  sx={{ minWidth: 44, textAlign: 'right' }}
-                >
-                  {percent}%
-                </Typography>
-              </Box>
-
-              <Typography variant="body2" color="text.secondary">
-                {message}
-              </Typography>
-            </Stack>
-          </Paper>
-
-          <Box>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
-              {__('Simulated progress', 'goalcart')}
-            </Typography>
-            <ToggleButtonGroup
-              size="small"
-              exclusive
-              value={percent}
-              onChange={(_event, value) => value !== null && setPercent(value)}
-              aria-label={__('Simulated progress', 'goalcart')}
-            >
-              {PRESETS.map((value) => (
-                <ToggleButton key={value} value={value}>
-                  {value}%
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
-            <Slider
-              value={percent}
-              min={0}
-              max={100}
-              step={5}
-              onChange={(_event, value) => setPercent(value as number)}
-              aria-label={__('Simulated progress slider', 'goalcart')}
-              sx={{ mt: 2 }}
-            />
-          </Box>
-        </Stack>
+            </Paper>
+          </Grid>
+        </Grid>
       </DialogContent>
     </Dialog>
   );
