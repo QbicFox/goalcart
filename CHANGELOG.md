@@ -121,6 +121,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
+### Phase 9 — Goal Management UI (100% complete)
+
+- **P09-T01 Objective** — Built a professional Goal CRUD experience on top of the Phase 7 REST layer: a full goal list and a seven-section goal builder, replacing the Phase 8 read-only list.
+- **P09-T02 Goal List** — `routes/Goals.tsx` now shows all required columns — name (with target + campaign), type, reward, status, priority, schedule, completion stats (placeholder until Phase 16–17 analytics), actions — with server-side search, status filter and pagination (Phase 23 admin-list pattern). Actions: create (→ builder), edit (→ `/goals/:id/edit`), duplicate (`POST /goals/{id}/duplicate`), enable/disable (partial status update), delete (confirm dialog), and preview (lightweight simulated-progress dialog; the full preview system is Phase 15).
+- **P09-T03 Goal Builder** — New `routes/GoalBuilder.tsx` (`/goals/new` + `/goals/:id/edit`, lazy-loaded) with all seven sections: Basic Information (name, description, status), Goal Type (7 types, visual picker), Target (dynamic per type — amount/quantity/distinct_quantity/weight targets, category/product scoped pickers + calculation basis, composite children with AND/OR), Reward (dynamic per reward type — free shipping, percentage/fixed discount with eligible/excluded products & categories + cap, free gift product + mode, coupon via existing-code search or generated rules, label, stacking), Conditions (excluded products + schedule window; roles/customer-state/cart-state conditions are roadmap Phase 32 deferrals that need schema fields), Display (title, message, completed message, icon, template), and Priority. Backed by `api/goals.ts` (fetchGoal/createGoal/updateGoal/duplicateGoal), new `api/search.ts`, new `lib/format.ts` (locale/currency-aware formatting), and the `goal-builder/` component set (`EntityAutocomplete` debounced async picker with id preload, `SectionCard`, `GoalTypePicker`, `TargetFields`, `CompositeChildrenEditor`, `RewardFields`, `ConditionFields`, `DisplayFields`).
+- Backend: `SearchController` search routes now accept an `ids` array param (positive ints, schema-validated) to preload saved builder selections; `types.ts` gained `GoalInput`, `RewardMetaInput`, `DisplaySettingsInput`, `GoalChildInput` and the search-result types.
+- **Verification:** `php -l` clean on changed PHP; REST suite now 75/75 (new `ids` param checks); `npm run typecheck`, `npm run lint`, Prettier and `npm run build` all pass (GoalBuilder emitted as its own lazy chunk). No database changes; plugin not activated.
+
+**Overall project progress: 43%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 weight 4% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

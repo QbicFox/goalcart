@@ -15,6 +15,7 @@ const Campaigns = lazy(() => import('./routes/Campaigns'));
 const Analytics = lazy(() => import('./routes/Analytics'));
 const Appearance = lazy(() => import('./routes/Appearance'));
 const Settings = lazy(() => import('./routes/Settings'));
+const GoalBuilder = lazy(() => import('./routes/GoalBuilder'));
 
 /** Skeleton shown while a lazy route loads. */
 function RouteFallback() {
@@ -47,6 +48,8 @@ const router = createHashRouter([
       { index: true, element: <Navigate to="/dashboard" replace /> },
       { path: '/dashboard', element: <Dashboard /> },
       { path: '/goals', element: <Goals /> },
+      { path: '/goals/new', element: lazyRoute(<GoalBuilder />) },
+      { path: '/goals/:id/edit', element: lazyRoute(<GoalBuilder />) },
       { path: '/campaigns', element: lazyRoute(<Campaigns />) },
       { path: '/analytics', element: lazyRoute(<Analytics />) },
       { path: '/appearance', element: lazyRoute(<Appearance />) },

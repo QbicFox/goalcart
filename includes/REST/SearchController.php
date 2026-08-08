@@ -16,10 +16,15 @@ defined( 'ABSPATH' ) || exit;
  *
  * Phase 7 (REST API / AJAX Layer) admin search endpoints used by the goal
  * builder to pick products, categories and coupons:
- *	 *  - `GET /goalcart/v1/search/products`    — products/variations by name or
-	 *    SKU (q), capped at 50 results.
-	 *  - `GET /goalcart/v1/search/categories`  — product_cat terms by name.
-	 *  - `GET /goalcart/v1/search/coupons`     — shop_coupon posts by code.
+ * *  - `GET /goalcart/v1/search/products`    — products/variations by name or
+ *    SKU (q), capped at 50 results.
+ *  - `GET /goalcart/v1/search/categories`  — product_cat terms by name.
+ *  - `GET /goalcart/v1/search/coupons`     — shop_coupon posts by code.
+ *
+ * Every route also accepts an `ids` array: when present, the search is
+ * narrowed to exactly those ids (Phase 9: the goal builder uses it to
+ * preload already-selected products/categories/coupons when editing a
+ * goal, since the search endpoints are the only admin lookup available).
  *
  * Searches are admin-only (manage_options). Results are capped so the
  * builder never loads thousands of products at once (Phase 23 performance
@@ -87,6 +92,9 @@ class SearchController extends BaseController {
 	/**
 	 * Shared search arg schema.
 	 *
+	 * `ids` narrows the result to exactly the given positive ids (used by
+	 * the goal builder to preload saved selections).
+	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function search_args() {
@@ -95,6 +103,14 @@ class SearchController extends BaseController {
 				'type'              => 'string',
 				'default'           => '',
 				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'ids'      => array(
+				'type'  => 'array',
+				'items' => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+				),
+				'default' => array(),
 			),
 			'per_page' => array(
 				'type'    => 'integer',
@@ -114,6 +130,7 @@ class SearchController extends BaseController {
 	public function handle_products( $request ) {
 		$q        = (string) $request->get_param( 'q' );
 		$per_page = min( self::MAX_RESULTS, max( 1, (int) $request->get_param( 'per_page' ) ) );
+		$ids      = $this->positive_ints( $request->get_param( 'ids' ) );
 
 		$args = array(
 			'post_type'        => array( 'product', 'product_variation' ),
@@ -124,6 +141,12 @@ class SearchController extends BaseController {
 			'suppress_filters' => true,
 			'no_found_rows'    => true,
 		);
+
+		if ( ! empty( $ids ) ) {
+			$args['post__in']    = $ids;
+			$args['orderby']     = 'post__in';
+			$args['no_found_rows'] = true;
+		}
 
 		if ( '' !== $q ) {
 			$args['s'] = $q;
@@ -169,16 +192,21 @@ class SearchController extends BaseController {
 	public function handle_categories( $request ) {
 		$q        = (string) $request->get_param( 'q' );
 		$per_page = min( self::MAX_RESULTS, max( 1, (int) $request->get_param( 'per_page' ) ) );
+		$ids      = $this->positive_ints( $request->get_param( 'ids' ) );
 
-		$terms = get_terms(
-			array(
-				'taxonomy'   => 'product_cat',
-				'hide_empty' => false,
-				'number'     => $per_page,
-				'orderby'    => 'name',
-				'search'     => '' !== $q ? $q : '',
-			)
+		$args = array(
+			'taxonomy'   => 'product_cat',
+			'hide_empty' => false,
+			'number'     => $per_page,
+			'orderby'    => 'name',
+			'search'     => '' !== $q ? $q : '',
 		);
+
+		if ( ! empty( $ids ) ) {
+			$args['include'] = $ids;
+		}
+
+		$terms = get_terms( $args );
 
 		if ( is_wp_error( $terms ) ) {
 			$terms = array();
@@ -208,6 +236,7 @@ class SearchController extends BaseController {
 	public function handle_coupons( $request ) {
 		$q        = (string) $request->get_param( 'q' );
 		$per_page = min( self::MAX_RESULTS, max( 1, (int) $request->get_param( 'per_page' ) ) );
+		$ids      = $this->positive_ints( $request->get_param( 'ids' ) );
 
 		$args = array(
 			'post_type'        => 'shop_coupon',
@@ -218,6 +247,12 @@ class SearchController extends BaseController {
 			'suppress_filters' => true,
 			'no_found_rows'    => true,
 		);
+
+		if ( ! empty( $ids ) ) {
+			$args['post__in']    = $ids;
+			$args['orderby']     = 'post__in';
+			$args['no_found_rows'] = true;
+		}
 
 		if ( '' !== $q ) {
 			$args['s'] = $q;
@@ -237,5 +272,21 @@ class SearchController extends BaseController {
 		}
 
 		return $this->success( array( 'items' => $items ) );
+	}
+
+	/**
+	 * Cast a mixed value to a list of positive ints.
+	 *
+	 * @param mixed $value Raw value (REST array param).
+	 * @return int[]
+	 */
+	protected function positive_ints( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		return array_values( array_filter( array_map( 'intval', $value ), function ( $id ) {
+			return $id > 0;
+		} ) );
 	}
 }

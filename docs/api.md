@@ -189,9 +189,15 @@ Server-side, capped at 50 results (`no_found_rows`).
 
 | Endpoint | Returns |
 |---|---|
-| `GET /search/products?q=&per_page=` | `{ id, name, type, sku, price, stock_status, permalink }` for products & variations |
-| `GET /search/categories?q=&per_page=` | `{ id, name, slug, parent, count }` product_cat terms |
-| `GET /search/coupons?q=&per_page=` | `{ id, code, discount_type, amount }` shop_coupon posts |
+| `GET /search/products?q=&ids=&per_page=` | `{ id, name, type, sku, price, stock_status, permalink }` for products & variations |
+| `GET /search/categories?q=&ids=&per_page=` | `{ id, name, slug, parent, count }` product_cat terms |
+| `GET /search/coupons?q=&ids=&per_page=` | `{ id, code, discount_type, amount }` shop_coupon posts |
+
+All three accept an optional `ids` array (repeated query args, e.g.
+`ids=5&ids=12`). When present, the result is narrowed to exactly those
+ids — the Phase 9 goal builder uses this to preload already-selected
+products/categories/coupons when editing a goal. Non-positive ids are
+rejected by the arg schema.
 
 ### 2.4 Campaigns
 

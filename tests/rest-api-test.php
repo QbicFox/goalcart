@@ -179,6 +179,33 @@ $resp = $campaigns_ctrl->handle_index( new \WP_REST_Request( 'GET', '/goalcart/v
 $data = $resp->get_data();
 check( 'campaign list returns envelope', isset( $data['data']['items'] ) && is_array( $data['data']['items'] ) );
 
+// Phase 9: the `ids` param narrows search to exactly the given ids
+// (the goal builder preloads saved product/category/coupon selections).
+$req = new \WP_REST_Request( 'GET', '/goalcart/v1/search/products' );
+$req->set_param( 'ids', array( 99999999 ) );
+$resp = $search_ctrl->handle_products( $req );
+$data = $resp->get_data();
+check( 'product search by ids returns envelope', isset( $data['data']['items'] ) && is_array( $data['data']['items'] ) );
+check( 'product search by unknown id returns no items', empty( $data['data']['items'] ) );
+
+$req = new \WP_REST_Request( 'GET', '/goalcart/v1/search/categories' );
+$req->set_param( 'ids', array( 99999999 ) );
+$resp = $search_ctrl->handle_categories( $req );
+$data = $resp->get_data();
+check( 'category search by ids returns envelope', isset( $data['data']['items'] ) && is_array( $data['data']['items'] ) );
+check( 'category search by unknown id returns no items', empty( $data['data']['items'] ) );
+
+$req = new \WP_REST_Request( 'GET', '/goalcart/v1/search/coupons' );
+$req->set_param( 'ids', array( 99999999 ) );
+$resp = $search_ctrl->handle_coupons( $req );
+$data = $resp->get_data();
+check( 'coupon search by ids returns envelope', isset( $data['data']['items'] ) && is_array( $data['data']['items'] ) );
+check( 'coupon search by unknown id returns no items', empty( $data['data']['items'] ) );
+
+$search_args = $search_ctrl->search_args();
+check( 'ids arg schema exists', isset( $search_args['ids'] ) );
+check( 'non-positive ids rejected by schema', is_wp_error( rest_validate_value_from_schema( array( 0, -3 ), $search_args['ids'], 'ids' ) ) );
+
 // ---------------------------------------------------------------------------
 // 5. Transactional checks: permission, CRUD, progress, settings save.
 //    Every write is rolled back at the end; absence of residue is asserted.

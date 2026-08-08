@@ -56,6 +56,67 @@ export type GoalType =
 export type RewardType =
   'free_shipping' | 'percent_discount' | 'fixed_discount' | 'free_gift' | 'coupon' | null;
 
+/** Extended reward configuration (stored in the `reward_meta` JSON). */
+export interface RewardMetaInput {
+  label?: string;
+  stacking?: 'none' | 'stack';
+  eligible_products?: number[];
+  eligible_categories?: number[];
+  excluded_products?: number[];
+  shipping_zone_ids?: number[];
+  shipping_method_ids?: string[];
+  gift_product_id?: number;
+  gift_add_mode?: 'automatic' | 'optional';
+  coupon_code?: string;
+  coupon_generate?: boolean;
+  coupon_discount_type?: 'percent' | 'fixed_cart';
+}
+
+/** Display configuration (stored in the `display_settings` JSON). */
+export interface DisplaySettingsInput {
+  title?: string;
+  message?: string;
+  completed_message?: string;
+  icon?: string;
+  template?: string;
+}
+
+/** A composite child config — a Goal::from_array() payload (Phase 4). */
+export interface GoalChildInput {
+  type: GoalType;
+  target: number;
+  calculation_mode: string;
+  categories: number[];
+  products: number[];
+}
+
+/**
+ * The payload accepted by `POST /goals` and `PUT /goals/{id}` (Phase 9
+ * builder form model — mirrors the Goal REST payload without the
+ * server-managed id/timestamps).
+ */
+export interface GoalInput {
+  name: string;
+  description: string;
+  status: GoalStatus;
+  type: GoalType;
+  target: number;
+  calculation_mode: string;
+  categories: number[];
+  products: number[];
+  excluded_products: number[];
+  operator: 'and' | 'or';
+  children: GoalChildInput[];
+  reward_type: RewardType;
+  reward_value: number | null;
+  reward_max_value: number | null;
+  reward_meta: RewardMetaInput;
+  priority: number;
+  starts_at: string | null;
+  ends_at: string | null;
+  display_settings: DisplaySettingsInput;
+}
+
 /**
  * A goal as served by the Phase 7 REST API (`GET /goalcart/v1/goals`).
  * Mirrors the Goal model's payload shape 1:1.
@@ -76,16 +137,44 @@ export interface Goal {
   reward_type: RewardType;
   reward_value: number | null;
   reward_max_value: number | null;
-  reward_meta: Record<string, unknown>;
+  reward_meta: RewardMetaInput;
   priority: number;
   campaign_id: number | null;
   menu_order: number;
   starts_at: string | null;
   ends_at: string | null;
-  display_settings: Record<string, unknown>;
+  display_settings: DisplaySettingsInput;
   limits: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+}
+
+/** Search endpoint result item (`GET /search/products`). */
+export interface SearchProduct {
+  id: number;
+  name: string;
+  type: string;
+  sku: string;
+  price: number | null;
+  stock_status: string;
+  permalink: string;
+}
+
+/** Search endpoint result item (`GET /search/categories`). */
+export interface SearchCategory {
+  id: number;
+  name: string;
+  slug: string;
+  parent: number;
+  count: number;
+}
+
+/** Search endpoint result item (`GET /search/coupons`). */
+export interface SearchCoupon {
+  id: number;
+  code: string;
+  discount_type: string;
+  amount: number | null;
 }
 
 /**
@@ -95,9 +184,4 @@ export interface Goal {
 export interface GoalCartSettings {
   enabled: boolean;
   fullscreen_dashboard: boolean;
-}
-
-/** Paginated goals list payload (envelope `data` for GET /goals). */
-export interface GoalsList {
-  items: Goal[];
 }

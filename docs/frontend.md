@@ -20,7 +20,8 @@ admin-app/src/
 │   └── (SnackbarProvider lives in components/notifications/)
 ├── api/
 │   ├── client.ts                apiFetch: X-WP-Nonce + envelope unwrap
-│   ├── goals.ts                 typed GET /goals, DELETE /goals/{id}
+│   ├── goals.ts                 typed goal CRUD + duplicate
+│   ├── search.ts                typed /search/{products,categories,coupons}
 │   └── settings.ts              typed GET/POST /settings
 ├── components/
 │   ├── layout/                  AdminLayout (header + sidebar + main) + navigation
@@ -28,10 +29,22 @@ admin-app/src/
 │   ├── ConfirmDialog.tsx        reusable destructive-action dialog
 │   ├── EmptyState.tsx           no-data panel
 │   ├── ErrorBoundary.tsx        render-error fallback with retry
+│   ├── GoalPreviewDialog.tsx    lightweight goal preview (simulated progress)
+│   ├── goal-builder/            Phase 9 builder sections
+│   │   ├── SectionCard.tsx      titled section wrapper
+│   │   ├── EntityAutocomplete.tsx  debounced async search picker
+│   │   ├── GoalTypePicker.tsx   goal type selector cards
+│   │   ├── goalTypes.tsx        shared GOAL_TYPES definitions
+│   │   ├── TargetFields.tsx     dynamic target by goal type
+│   │   ├── CompositeChildrenEditor.tsx  AND/OR child goals
+│   │   ├── RewardFields.tsx     dynamic reward configuration
+│   │   ├── ConditionFields.tsx  excluded products + schedule
+│   │   └── DisplayFields.tsx    message/template/icon
 │   └── PageContainer.tsx        shared page header + content wrapper
 └── routes/
     ├── Dashboard.tsx            live goal summary (REST-backed)
-    ├── Goals.tsx                read-only goal list + delete confirmation
+    ├── Goals.tsx                full goal CRUD list (Phase 9)
+    ├── GoalBuilder.tsx          goal create/edit builder (Phase 9)
     ├── Campaigns.tsx            container (Phase 10)
     ├── Analytics.tsx            container (Phase 16–17)
     ├── Appearance.tsx           container (Phase 12)
@@ -100,7 +113,8 @@ it.
 | Page | Phase 8 status | Full implementation |
 |---|---|---|
 | Dashboard | live summary: goal counts, currency, version | 16–17 (analytics) |
-| Goals | read-only list + delete confirm | 9 (Goal Management UI) |
+| Goals | full goal CRUD list (search/filter/pagination, edit, duplicate, enable/disable, delete, preview) | 9 (Goal Management UI) |
+| GoalBuilder | — | 9 (Goal Builder, `/goals/new` + `/goals/:id/edit`) |
 | Campaigns | container | 10 (Campaign Builder) |
 | Analytics | container | 16–17 |
 | Appearance | container | 12 (Progress Templates) |
