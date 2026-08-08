@@ -291,6 +291,67 @@ export interface CampaignInput {
 /** Storefront progress template variants (Phase 12). */
 export type FrontendTemplate = 'basic' | 'percentage' | 'milestone' | 'card';
 
+/** Reward-type filter on the analytics dashboard ('' = all rewards). */
+export type AnalyticsRewardFilter =
+  | ''
+  | 'free_shipping'
+  | 'percent_discount'
+  | 'fixed_discount'
+  | 'free_gift'
+  | 'coupon';
+
+/** The seven Phase 16 summary KPIs, computed over the filtered window. */
+export interface AnalyticsSummary {
+  impressions: number;
+  completions: number;
+  completion_rate: number;
+  average_cart_value: number;
+  revenue_influenced: number;
+  suggestion_ctr: number;
+  suggestion_add_to_cart_rate: number;
+}
+
+/** One daily bucket of the Phase 17 trend series. */
+export interface AnalyticsTrendPoint {
+  date: string; // Y-m-d
+  impressions: number;
+  completions: number;
+  revenue: number;
+}
+
+/** One top campaign / top goal entry (same shape from the backend). */
+export interface AnalyticsTopEntry {
+  id: number;
+  name: string;
+  impressions: number;
+  completions: number;
+  revenue: number;
+  completion_rate: number;
+}
+
+/** One top suggested product entry (Phase 17). */
+export interface AnalyticsSuggestedProduct {
+  product_id: number;
+  name: string;
+  impressions: number;
+  clicks: number;
+  added: number;
+  ctr: number;
+  add_to_cart_rate: number;
+}
+
+/**
+ * The full Phase 17 dashboard payload served by
+ * `GET /goalcart/v1/analytics`.
+ */
+export interface AnalyticsPayload {
+  summary: AnalyticsSummary;
+  trend: AnalyticsTrendPoint[];
+  top_campaigns: AnalyticsTopEntry[];
+  top_goals: AnalyticsTopEntry[];
+  top_suggested_products: AnalyticsSuggestedProduct[];
+}
+
 /**
  * The settings object persisted by the Phase 7 REST API
  * (`GET/POST /goalcart/v1/settings`). Grows with the Phase 18 surface.

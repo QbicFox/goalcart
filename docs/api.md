@@ -351,9 +351,75 @@ milestone goal in `menu_order` (each with the same shape), which is what
 drives the admin's milestone-ladder rendering. The payload is built by
 the shared `FrontendController::shape_goal()` — identical to `/progress`.
 
----
+### 2.6 Analytics (Phase 17)
 
-## 3. Frontend API
+#### `GET /analytics` — admin-only, rate limited per user
+
+The single read-only endpoint powering the admin Analytics dashboard.
+It computes the Phase 16 metrics over the filtered window and returns
+them in one payload, so the page renders with a single request.
+
+Query args (all validated by the route arg schema):
+
+| Arg | Type | Default | Notes |
+|---|---|---|---|
+| `from` / `to` | `Y-m-d` or `Y-m-d H:i:s` | last 30 days | Inclusive window (`from` is taken from 00:00:00, `to` to 23:59:59 on the trend) |
+| `campaign_id` | int ≥ 0 | 0 | Restrict to one campaign |
+| `goal_id` | int ≥ 0 | 0 | Restrict to one goal |
+| `goal_ids` | int[] ≥ 1 | — | Restrict to a set of goals (`IN` clause) |
+| `reward` | enum | `''` | `free_shipping` `percent_discount` `fixed_discount` `free_gift` `coupon` (empty = all) |
+| `product_id` | int ≥ 0 | 0 | Restrict to one product (suggestion metrics) |
+| `limit` | int 1–20 | 5 | Max entries per top list |
+
+Response:
+
+```json
+{
+  "data": {
+    "summary": {
+      "impressions": 512,
+      "completions": 87,
+      "completion_rate": 0.1699,
+      "average_cart_value": 142.0,
+      "revenue_influenced": 760.0,
+      "suggestion_ctr": 0.3333,
+      "suggestion_add_to_cart_rate": 0.5
+    },
+    "trend": [
+      { "date": "2026-07-10", "impressions": 12, "completions": 3, "revenue": 300.0 }
+    ],
+    "top_campaigns": [
+      { "id": 3, "name": "Summer Sale", "impressions": 40, "completions": 10, "revenue": 5000.0, "completion_rate": 0.25 }
+    ],
+    "top_goals": [
+      { "id": 8, "name": "Free shipping", "impressions": 30, "completions": 9, "revenue": 4500.0, "completion_rate": 0.3 }
+    ],
+    "top_suggested_products": [
+      { "product_id": 42, "name": "Wireless Charger", "impressions": 120, "clicks": 18, "added": 6, "ctr": 0.15, "add_to_cart_rate": 0.3333 }
+    ]
+  },
+  "meta": {
+    "applied": { "from": "2026-07-10", "to": "2026-08-08", "campaign_id": 0, "goal_id": 0, "goal_ids": null, "product_id": 0, "reward": "", "limit": 5 }
+  }
+}
+```
+
+Semantics:
+
+- `summary` is the seven Phase 16 metrics (impressions, completions =
+  goal_completed + reward_activated, completion rate, average cart value
+  at impression, revenue associated with completed goals, suggestion
+  CTR, suggestion add-to-cart rate), all with zero-denominator guards.
+- `trend` is one daily point per day of the window (default last 30
+  days), zero-filled so the chart is continuous; `revenue` sums
+  `cart_value` at completion events.
+- `top_campaigns` / `top_goals` rank by completions (then impressions),
+  joining the campaigns/goals tables for names; `top_suggested_products`
+  ranks by conversions (added → clicks → impressions) and joins
+  `wp_posts` for product names.
+- `meta.applied` echoes the exact filters that produced the payload.
+
+Errors: `goalcart_forbidden` (403, anonymous).
 
 ### `GET /progress` — public, rate limited per IP
 
@@ -506,7 +572,6 @@ bad event type or field), `goalcart_track_failed` (500).
 
 | Surface | Where it lands |
 |---|---|
-| Analytics dashboard endpoints | Phase 17 (Analytics Dashboard) — Phase 16 records the events (`/track`) and computes the metrics server-side |
 | Customer-state campaign rules | Phase 32 (needs schema fields) |
 
 ## 6. Testing
@@ -530,6 +595,25 @@ bad event type or field), `goalcart_track_failed` (500).
   completion rate, average cart value, revenue on completed goals,
   suggestion CTR, suggestion add-to-cart rate) + campaign/goal/date
   filters + zero-denominator guards
+- full rollback verification (no residue)
+
+`tests/analytics-dashboard-test.php` (82 checks,
+`php tests/analytics-dashboard-test.php`):
+
+- service wiring + route registration (GET-only `/analytics`)
+- arg-schema validation: dates, the reward-type whitelist, `goal_ids`
+  items, the `limit` clamp
+- permissions: anonymous dispatch → 403, authenticated administrator
+  dispatch → 200 with the full payload
+- summary KPIs over seeded events (impressions 5, completions 3,
+  completion rate 0.6, average cart value 142, revenue influenced 760,
+  CTR 0.3333, add-to-cart rate 0.5)
+- the daily trend: window-length zero-filled series summing exactly to
+  the seeded totals, multi-day buckets
+- top goals / top campaigns / top suggested products: ranking, resolved
+  names, derived rates
+- every filter (campaign, goal, goal ids, reward type, product, future
+  window, limit) slicing the payload correctly
 - full rollback verification (no residue)
 
 `tests/preview-test.php` (90 checks, `php tests/preview-test.php`):

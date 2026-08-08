@@ -409,16 +409,23 @@ admin-app/src/
 │   │                            Fullscreen + Snackbar providers
 │   ├── FullscreenProvider.tsx   owns the goalcart-fullscreen body class
 │   └── (SnackbarProvider lives in components/notifications/)
+├── date-range/
+│   ├── types.ts                 DateRange / preset types
+│   ├── dateRange.ts             Gregorian range math + labels (Phase 17)
+│   └── DateRangeContext.tsx     global range provider + useDateRange()
 ├── api/
 │   ├── client.ts                apiFetch: X-WP-Nonce + envelope unwrap
 │   ├── goals.ts                 typed goal CRUD + duplicate
 │   ├── campaigns.ts             typed campaign CRUD + duplicate
 │   ├── search.ts                typed /search/{products,categories,coupons}
 │   ├── settings.ts              typed GET/POST /settings
-│   └── preview.ts               typed POST /preview (Phase 15)
+│   ├── preview.ts               typed POST /preview (Phase 15)
+│   └── analytics.ts             typed GET /analytics (Phase 17)
 ├── components/
 │   ├── layout/                  AdminLayout (header + sidebar + main) + navigation
 │   ├── notifications/           SnackbarProvider + useSnackbar()
+│   ├── date-range/              Phase 17 filter (DateRangeFilter +
+│   │                            lazy CustomRangePicker month grid)
 │   ├── ConfirmDialog.tsx        reusable destructive-action dialog
 │   ├── EmptyState.tsx           no-data panel
 │   ├── ErrorBoundary.tsx        render-error fallback with retry
@@ -448,7 +455,8 @@ admin-app/src/
     ├── Campaigns.tsx            full campaign CRUD list (Phase 10)
     ├── CampaignBuilder.tsx      campaign builder: basics, schedule, priority,
     │                            milestone ordering (Phase 10)
-    ├── Analytics.tsx            container (Phase 16–17)
+    ├── Analytics.tsx            full analytics dashboard: KPI cards,
+    │                            trend chart, top lists + filters (Phase 17)
     ├── Appearance.tsx           container (Phase 12)
     ├── Settings.tsx             functional react-hook-form settings page
     └── NotFound.tsx             404
@@ -519,9 +527,42 @@ it.
 | GoalBuilder | — | 9 (Goal Builder, `/goals/new` + `/goals/:id/edit`) |
 | Campaigns | full campaign CRUD list (milestones, status, priority, schedule, edit, duplicate, enable/disable, delete, preview) | 10 (Campaign Builder) |
 | CampaignBuilder | — | 10 (Campaign Builder, `/campaigns/new` + `/campaigns/:id/edit`) |
-| Analytics | container | 16–17 |
+| Analytics | full dashboard: date-range + campaign/goal/reward/product filters, 7 KPI cards, daily trend chart, top campaigns / top goals / top suggested products | 17 (Analytics Dashboard) |
 | Appearance | full: template picker (live thumbnails), colors, bar height/radius sliders, animation switch, custom class + custom CSS, live preview, reset-to-defaults | 12 (Progress Templates) |
 | Settings | functional: enabled + fullscreen toggles (react-hook-form) | 18 (full surface) |
+
+## Analytics Dashboard (Phase 17)
+
+The `/analytics` page turns the Phase 16 event pipeline into a full
+measurement dashboard, served by the single admin endpoint
+`GET /goalcart/v1/analytics` (`GoalCart\REST\AnalyticsController`, see
+`docs/api.md` §2.6) so every slice renders in one request.
+
+**Filters** — the toolbar shares one date range through
+`DateRangeProvider` (wired inside the data router in `App.tsx`, so it
+syncs the `?preset=`/`?from=`/`?to=` hash params and persists to
+localStorage) plus campaign / goal / reward selects (options from the
+existing `/campaigns` + `/goals` list endpoints) and a product filter via
+the reusable `EntityAutocomplete`. Every change refetches the whole
+payload (the query key embeds the range + filters).
+
+**KPIs** — seven cards: impressions, completions, completion rate,
+revenue influenced, average cart value, suggestion CTR and add-to-cart
+rate (all zero-denominator guarded server-side).
+
+**Charts** (recharts, the reference plugin's charting library):
+
+- a daily **ComposedChart** — impressions + completions bars on the left
+  axis, a revenue line on the right (compact axis labels), legend and
+  localized tooltips; the series is zero-filled over the whole window
+- **Top campaigns** — a horizontal bar chart of completions
+- **Top goals** — a ranked list with completion-rate progress bars
+- **Top suggested products** — a table of impressions / clicks / added
+  (+ a success chip for converters) / CTR / add-to-cart rate
+
+The dashboard is lazy-loaded (its own route chunk, like the reference's
+report pages), with loading skeletons, an error alert and an empty state
+when the range has no impressions.
 
 ## Build & verification
 

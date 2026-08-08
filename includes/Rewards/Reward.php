@@ -55,6 +55,23 @@ final class Reward {
 	const COUPON_FIXED_CART = 'fixed_cart';
 
 	/**
+	 * The whitelist of reward types.
+	 *
+	 * Used by the analytics layer to validate the reward-type filter and
+	 * by the admin app for the reward dropdown options.
+	 *
+	 * @return string[]
+	 */
+	public static function types() {
+		return array(
+			self::TYPE_FREE_SHIPPING,
+			self::TYPE_PERCENT_DISCOUNT,
+			self::TYPE_FIXED_DISCOUNT,
+			self::TYPE_FREE_GIFT,
+			self::TYPE_COUPON,
+		);
+	}
+	/**
 	 * Reward type (one of the TYPE_* constants, null when no reward).
 	 *
 	 * @var string|null

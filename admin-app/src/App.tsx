@@ -4,6 +4,7 @@ import Box from '@mui/material/Box';
 import Skeleton from '@mui/material/Skeleton';
 
 import AdminLayout from './components/layout/AdminLayout';
+import { DateRangeProvider } from './date-range/DateRangeContext';
 import Dashboard from './routes/Dashboard';
 import Goals from './routes/Goals';
 import NotFound from './routes/NotFound';
@@ -40,11 +41,19 @@ function lazyRoute(element: ReactNode) {
  * changes, as the reference Settings page uses) are available later. The
  * URL shape is unchanged — still `#/route` inside the single admin page.
  *
+ * `DateRangeProvider` (Phase 17) sits inside the router — it syncs the
+ * analytics date range with the URL hash params via `useSearchParams` —
+ * and above the layout so routed pages can share the selection.
+ *
  * Mirrors the reference plugin (WooInsights App router).
  */
 const router = createHashRouter([
   {
-    element: <AdminLayout />,
+    element: (
+      <DateRangeProvider>
+        <AdminLayout />
+      </DateRangeProvider>
+    ),
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
       { path: '/dashboard', element: <Dashboard /> },

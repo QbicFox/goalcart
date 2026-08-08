@@ -21,6 +21,7 @@ use GoalCart\Goals\GoalEngine;
 use GoalCart\Goals\GoalRepository;
 use GoalCart\Goals\MessageEngine;
 use GoalCart\Hooks\HookManager;
+use GoalCart\REST\AnalyticsController;
 use GoalCart\REST\CampaignsController;
 use GoalCart\REST\FrontendController;
 use GoalCart\REST\GoalsController;
@@ -176,6 +177,7 @@ final class Plugin {
 		$this->hooks()->register( $this->container->get( FrontendController::class ) );
 		$this->hooks()->register( $this->container->get( PreviewController::class ) );
 		$this->hooks()->register( $this->container->get( TrackController::class ) );
+		$this->hooks()->register( $this->container->get( AnalyticsController::class ) );
 
 		// Apply everything to WordPress.
 		$this->hooks()->run();
@@ -311,6 +313,13 @@ final class Plugin {
 		// limited — the storefront JS reports events through it.
 		$this->container->singleton( TrackController::class, function ( Container $container ) {
 			return new TrackController( $container->get( Tracker::class ) );
+		} );
+
+		// Analytics dashboard endpoint (Phase 17): admin-only read of the
+		// Phase 16 metrics repository — summary, daily trend and the top
+		// campaigns / goals / suggested products lists, all filterable.
+		$this->container->singleton( AnalyticsController::class, function ( Container $container ) {
+			return new AnalyticsController( $container->get( AnalyticsRepository::class ) );
 		} );
 
 		$this->container->singleton( AssetLoader::class, function ( Container $container ) {

@@ -335,6 +335,58 @@ ships since Phase 3); plugin not activated.
 
 ---
 
+### Phase 17 — Analytics Dashboard (100% complete)
+
+- **P17-T01 Dashboard** — The admin `/analytics` page is now a full
+measurement dashboard served by one admin endpoint,
+`GET /goalcart/v1/analytics` (`includes/REST/AnalyticsController.php`, DI
+wired in `Plugin.php`): seven KPI cards (impressions, completions,
+completion rate, revenue influenced, average cart value, suggestion CTR,
+suggestion add-to-cart rate), a daily trend chart, top campaigns / top
+goals / top suggested products, loading skeletons, an error alert and an
+empty state when the range has no impressions.
+- **P17-T02 Filters** — The dashboard toolbar shares one date range
+through a new `date-range/` module (`DateRangeContext` provider wired
+inside the data router in `App.tsx`, `DateRangeFilter` + a lazy-loaded
+Gregorian `CustomRangePicker` — mirroring the reference plugin's date
+filter, minus the Jalali calendar) plus campaign / goal / reward selects
+and a product filter reusing `EntityAutocomplete`. Server-side, the
+`AnalyticsRepository` gained `goal_ids`, `product_id` and `reward_type`
+(goal-join subquery, whitelisted against `Reward::types()`) filters with
+table-alias support, and `AnalyticsController` validates every filter
+through its route arg schema (dates, reward enum, goal_ids items, the
+1–20 limit clamp).
+- **P17-T03 Charts** — recharts (the reference plugin's charting
+convention): a ComposedChart with impressions/completions bars and a
+revenue line over a zero-filled daily window, a horizontal top-campaigns
+bar chart, completion-rate progress bars for top goals, and a top
+suggested products table — all localized, WP-admin-palette themed, with
+formatted tooltips.
+- New `AnalyticsRepository` queries: `trend()` (daily buckets, default
+30-day window, zero-filled gaps), `top_campaigns()`, `top_goals()`
+(INNER JOIN campaigns/goals for names, ranked by completions) and
+`top_suggested_products()` (INNER JOIN `wp_posts` for product names,
+ranked by conversions) — every query fully `$wpdb->prepare`-bound.
+- Added files: `includes/REST/AnalyticsController.php`,
+`tests/analytics-dashboard-test.php`, `admin-app/src/date-range/*`,
+`admin-app/src/components/date-range/*`,
+`admin-app/src/api/analytics.ts`; extended
+`includes/Analytics/AnalyticsRepository.php`, `includes/Rewards/Reward.php`
+(`types()`), `admin-app/src/{types,App}.tsx` and
+`admin-app/src/routes/Analytics.tsx`.
+- **Verification:** `php -l` clean; new analytics-dashboard suite 82/82
+(wiring + GET-only route, arg schema, anonymous 403 + authenticated 200
+dispatch, summary KPIs, multi-day zero-filled trend, top-list ranking
+and derived rates, every filter slice, rollback); analytics 72/72,
+rest-api 120/120, engine 75/75, reward 72/72, cart-integration 22/22,
+message 47/47, suggestion 28/28, preview 90/90 (no regressions); `npm
+run typecheck`, `npm run lint` and `npm run build` all pass (recharts
+ships in the lazy-loaded Analytics chunk). No database changes.
+
+**Overall project progress: 63%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 4% + Phase 15 2% + Phase 16 2% + Phase 17 weight 2% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.
