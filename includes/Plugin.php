@@ -25,6 +25,7 @@ use GoalCart\REST\SearchController;
 use GoalCart\REST\SettingsController;
 use GoalCart\Rewards\RewardEngine;
 use GoalCart\Settings\Settings;
+use GoalCart\Suggestions\SuggestionEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -204,6 +205,13 @@ final class Plugin {
 			return new MessageEngine();
 		} );
 
+		// Suggestion engine (Phase 14): product recommendations that close
+		// the goal gap — six sources, stock filter, relevance + price
+		// proximity ranking — consumed by the frontend REST layer.
+		$this->container->singleton( SuggestionEngine::class, function () {
+			return new SuggestionEngine();
+		} );
+
 		// Cart integration (Phase 6): the single source of the live-cart
 		// snapshot — memoized, lifecycle-aware, with batched category
 		// preloading — consumed by the reward engine (and later REST/frontend).
@@ -251,7 +259,8 @@ final class Plugin {
 				$container->get( GoalEngine::class ),
 				$container->get( GoalRepository::class ),
 				$container->get( CartIntegration::class ),
-				$container->get( MessageEngine::class )
+				$container->get( MessageEngine::class ),
+				$container->get( SuggestionEngine::class )
 			);
 		} );
 

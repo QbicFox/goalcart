@@ -65,8 +65,9 @@ Each widget renders one featured goal (the first eligible one):
   there is more than one goal.
 - **RewardStatus** — locked 🔒 / unlocked ✓ reward chip, labels
   localized server-side (`frontend_config()` → `labels`).
-- **SuggestionList** — renders `goal.suggestions` when present (empty
-  until Phase 14).
+- **SuggestionList** — renders `goal.suggestions` when present (filled
+  by the Phase 14 SuggestionEngine — upsells, cross-sells, related,
+  in-category and best-seller products ranked by price proximity).
 - **StickyGoalBar** — fixed bottom bar with the featured goal's progress
   and a dismiss button; hidden when the cart has no progress to show.
 
@@ -163,10 +164,12 @@ can highlight near-completion (`goalcart-state--nearly_complete`) etc.
 
 # Progress Templates & Appearance (Phase 12)
 
-The widget body renders per an active **template variant**, chosen in the
-admin Appearance page and delivered to the storefront through the config
-(`cfg.template`) or a per-widget `data-goalcart-template` override on the
-shortcode: `[goalcart_progress template="card"]`.
+The widget body renders per an active **template variant**. Resolution
+order: a per-widget `data-goalcart-template` override on the shortcode
+(`[goalcart_progress template="card"]`), then the goal's own Display
+template (`display_settings.template`, served per goal in the progress
+payload as `template` — the goal builder's template picker), then the
+store-wide Appearance setting (`cfg.template`), then `basic`.
 
 ## Templates
 
@@ -219,6 +222,55 @@ responsive, motion-safe (respects `prefers-reduced-motion`), and
 `--goalcart-bar-height`, …) — the Phase 12 Appearance controls override
 the same tokens, and the `frontend_custom_css` setting appends custom CSS
 to the same inline style block (`ProgressUI::appearance_css()`).
+
+---
+
+# Smart Product Suggestions (Phase 14)
+
+The widget's **SuggestionList** is served by
+`GoalCart\Suggestions\SuggestionEngine`
+(`includes/Suggestions/SuggestionEngine.php`), evaluated server-side per
+goal and shipped in the `/progress` payload as `goal.suggestions` — the
+widget renders each item's name + server-formatted price
+(`price_html`, falling back to the raw price for hand-built payloads)
+linked to the product.
+
+## Sources
+
+Candidates are gathered from, in order of priority:
+
+1. the goal's own `products` (they count toward it)
+2. products in the goal's `categories` (category goals)
+3. the cart items' upsells (`_upsell_ids`)
+4. the cart items' cross-sells (`_crosssell_ids`)
+5. `wc_get_related_products()` of the cart items
+6. the shopper's `woocommerce_recently_viewed` cookie
+7. best sellers by `total_sales` (low-scoring fallback filler)
+
+## Filters & ranking
+
+Never suggested: out-of-stock, unpublished or unpriced products, the
+cart's own items, `excluded_products`, and ghost/missing ids (a stale
+upsell id can never break the engine — loads fall back to the direct
+product data store when the `wc_product_meta_lookup` table lags, e.g.
+after bulk imports).
+
+Ranking score (higher wins, then id asc):
+
+| Signal | Bonus |
+|---|---:|
+| Manual — in the goal's `products` | +3 |
+| Counts toward the goal (product / category) | +2 |
+| Price in the 0.6–1.4× band of `remaining` (money goals) | +2 |
+| Shares a category with a cart item | +1 |
+| Cheaper than the band (still helps) | +0.75 |
+| WC-endorsed source (upsell / cross-sell / related) | +0.5 |
+
+Completed or ineligible goals return no suggestions; the list is capped
+at `SuggestionEngine::MAX_SUGGESTIONS` (4) and filterable via the
+`goalcart_suggestions` filter (4 args: items, goal, result, context).
+Margin-aware and AI-ranked recommendations remain roadmap futures
+(P14-T05).
 
 ---
 

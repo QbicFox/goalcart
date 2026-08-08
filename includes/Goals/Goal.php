@@ -445,4 +445,28 @@ final class Goal {
 	public function campaign_name() {
 		return $this->campaign_name;
 	}
+
+	/**
+	 * Whether this goal's progress is measured in money.
+	 *
+	 * Quantity/distinct-quantity/weight goals count items, not money, and
+	 * quantity-mode category/product goals do too. Quantity goals default
+	 * to the subtotal calculation mode (default_calculation_mode), so the
+	 * type is checked in addition to the mode. Single source of truth for
+	 * the display layers (message engine, frontend payload, suggestion
+	 * engine) so money-vs-plain formatting never drifts.
+	 *
+	 * @return bool
+	 */
+	public function is_money_goal() {
+		if ( in_array(
+			$this->type,
+			array( self::TYPE_QUANTITY, self::TYPE_DISTINCT_QUANTITY, self::TYPE_WEIGHT ),
+			true
+		) ) {
+			return false;
+		}
+
+		return self::MODE_QUANTITY !== $this->calculation_mode;
+	}
 }

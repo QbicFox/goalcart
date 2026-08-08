@@ -14,6 +14,7 @@ use GoalCart\Goals\GoalRepository;
 use GoalCart\Goals\GoalResult;
 use GoalCart\Goals\MessageEngine;
 use GoalCart\Hooks\HookManager;
+use GoalCart\Suggestions\SuggestionEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,7 +37,8 @@ defined( 'ABSPATH' ) || exit;
 	 * own cart progress — so it requires no capability, returns only aggregate
 	 * numbers (no PII), and is rate limited per IP. Message copy is rendered
 	 * by the Phase 13 MessageEngine (state-aware, display-settings
-	 * overridable). Suggestions are always empty until Phase 14.
+	 * overridable); suggestions come from the Phase 14 SuggestionEngine
+	 * (published, in-stock products only).
 	 */
 class FrontendController extends BaseController {
 
@@ -69,18 +71,27 @@ class FrontendController extends BaseController {
 	protected $messages;
 
 	/**
+	 * Suggestion engine instance (Phase 14: smart product suggestions).
+	 *
+	 * @var SuggestionEngine
+	 */
+	protected $suggestions;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param GoalEngine       $engine          Goal engine.
-	 * @param GoalRepository   $goals           Goal repository.
-	 * @param CartIntegration  $cart_integration Cart snapshot service.
-	 * @param MessageEngine    $messages        Message template engine.
+	 * @param GoalEngine        $engine          Goal engine.
+	 * @param GoalRepository    $goals           Goal repository.
+	 * @param CartIntegration   $cart_integration Cart snapshot service.
+	 * @param MessageEngine     $messages        Message template engine.
+	 * @param SuggestionEngine  $suggestions     Suggestion engine.
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages ) {
+	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, SuggestionEngine $suggestions ) {
 		$this->engine           = $engine;
 		$this->goals            = $goals;
 		$this->cart_integration = $cart_integration;
 		$this->messages         = $messages;
+		$this->suggestions      = $suggestions;
 	}
 
 	/**
@@ -142,6 +153,7 @@ class FrontendController extends BaseController {
 				'goal_type'    => $goal->type(),
 				'is_money'     => $this->is_money_goal( $goal ),
 				'icon'         => $this->goal_icon( $goal ),
+				'template'     => $this->goal_template( $goal ),
 				'current'      => $result->current(),
 				'target'       => $result->target(),
 				'remaining'    => $result->remaining(),
@@ -150,7 +162,7 @@ class FrontendController extends BaseController {
 				'state'        => $this->messages->state( $goal, $result ),
 				'message'      => $this->messages->message( $goal, $result, $extra ),
 				'reward'       => $this->reward( $goal ),
-				'suggestions'  => array(),
+				'suggestions'  => $this->suggestions->suggest( $goal, $result, $context ),
 				'reward_state' => $result->reward_state(),
 				'eligible'     => $result->eligible(),
 				'reason'       => $result->reason(),
@@ -181,15 +193,7 @@ class FrontendController extends BaseController {
 	 * @return bool
 	 */
 	protected function is_money_goal( Goal $goal ) {
-		if ( in_array(
-			$goal->type(),
-			array( Goal::TYPE_QUANTITY, Goal::TYPE_DISTINCT_QUANTITY, Goal::TYPE_WEIGHT ),
-			true
-		) ) {
-			return false;
-		}
-
-		return Goal::MODE_QUANTITY !== $goal->calculation_mode();
+		return $goal->is_money_goal();
 	}
 
 	/**
@@ -206,6 +210,26 @@ class FrontendController extends BaseController {
 		$display = $goal->display_settings();
 
 		return isset( $display['icon'] ) && is_string( $display['icon'] ) ? trim( $display['icon'] ) : '';
+	}
+
+	/**
+	 * The goal's display template for the progress widget (Phase 12).
+	 *
+	 * Comes from the goal builder's Display section
+	 * (`display_settings.template`) and is normalized to the template enum
+	 * so a bad stored value never reaches the widget. Empty when none was
+	 * configured — the widget falls back to the store-wide Appearance
+	 * template.
+	 *
+	 * @param Goal $goal Goal.
+	 * @return string
+	 */
+	protected function goal_template( Goal $goal ) {
+		$display   = $goal->display_settings();
+		$template  = isset( $display['template'] ) ? (string) $display['template'] : '';
+		$templates = array( 'basic', 'percentage', 'milestone', 'card' );
+
+		return in_array( $template, $templates, true ) ? $template : '';
 	}
 
 	/**

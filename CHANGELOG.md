@@ -7,6 +7,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+### Fixed
+
+- **Per-goal display template now reaches the storefront** — the goal
+  builder's Display → Template picker (`display_settings.template`) was
+  saved but never served: `GET /goalcart/v1/progress` exposed the goal's
+  `icon` but not its `template`, and `frontend.js` only honored the
+  per-widget `data-goalcart-template` override or the store-wide
+  Appearance setting. The payload now carries each goal's normalized
+  `template` (`goal_template()` in `FrontendController`), and the widget
+  resolves it per goal — container override → goal template → global
+  Appearance template → `basic` — so a goal set to Milestones/Card/
+  Percentage renders that variant on the storefront.
+
 ### Phase 0 — Reference Plugin Discovery (100% complete)
 
 - **P00-T01 Objective** — Phase 0 objective defined: reverse-engineer `wooinsights` and produce a reusable architectural specification.
@@ -175,6 +188,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 - **Verification:** `php -l` clean; new message suite 47/47 (container wiring, all six states, all nine variables incl. currency-agnostic money formatting, reward labels, display-settings overrides, unknown-placeholder safety); REST suite 116/116 (payload `state` + no unresolved placeholders); engine 75/75, reward 72/72, cart-integration 22/22, frontend 50/50 (no regressions); `node --check` on the JS; headless-Chrome smoke renders the `goalcart-state--nearly_complete` class + engine message with zero console errors. No database changes; plugin not activated.
 
 **Overall project progress: 53%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 weight 2% × 100%).
+
+---
+
+### Phase 14 — Smart Product Suggestions (100% complete)
+
+- **P14-T01 Objective** — Turned Goal Cart into an actual revenue-optimization feature: new `includes/Suggestions/SuggestionEngine.php` (`GoalCart\Suggestions`, DI-wired in `Plugin.php`) turns goal progress into product recommendations that close the gap, consumed by the public `/progress` payload and rendered by the Phase 11 `SuggestionList`.
+- **P14-T02 Recommendation Sources** — Seven candidate sources, deduped with the first (highest-priority) source kept for the badge: manual (the goal's own `products`), category (goal categories via a term-relationship query — no `wc_product_meta_lookup` dependency, so products created outside WC CRUD are found), the cart items' upsells/cross-sells/`wc_get_related_products()`, the shopper's `woocommerce_recently_viewed` cookie, and best sellers by `total_sales`. Bounded (per-source limits, `MAX_CANDIDATES` 40, batched load with a `wc_get_product` fallback when the lookup table lags).
+- **P14-T03 Ranking** — Stock availability filters first (published, in stock, priced); then a score from goal eligibility (manual +3, counts toward the goal +2), relevance (shares a cart-item category +1), WC-endorsed sources (+0.5) and — for money goals — price proximity to `remaining` (0.6–1.4× band +2, cheaper +0.75; the spec's "prefer 150K–220K when 180K is left"). Capped at `MAX_SUGGESTIONS` (4), deterministic (score desc, id asc), never suggests cart items / excluded / out-of-stock / ghost ids, and the final list is filterable via the `goalcart_suggestions` filter.
+- **P14-T04 Example** — In-band products rank above arbitrary expensive ones; verified in `tests/suggestion-test.php` (28 checks, transactional products rolled back): sources, stock filter, ranking, cap, dedupe, exclusion, cart-item skip, quantity-goal no-price-banding, and the filter.
+- **P14-T05 Future** — Margin-aware recommendations and AI optimization remain documented roadmap deferrals (Phases 32–34).
+- Refactor: the type-aware `is_money_goal()` check moved onto the `Goal` model (single source of truth); `MessageEngine` and `FrontendController` delegate to it. `frontend.js` prefers the server-formatted `price_html` in the suggestion list (raw `price` fallback) and keeps the suggestion-URL protocol guard.
+- **Verification:** `php -l` clean; new suggestion suite 28/28; engine 75/75, reward 72/72, cart-integration 22/22, rest-api 120/120, frontend 50/50, message 47/47 (no regressions); `node --check` on the JS; `npm run typecheck`, `npm run lint` and `npm run build` all pass. No database changes; plugin not activated.
+
+**Overall project progress: 57%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 weight 4% × 100%).
 
 ---
 

@@ -245,6 +245,11 @@ try {
 	$req->set_param( 'reward_type', 'percent_discount' );
 	$req->set_param( 'reward_value', 10 );
 	$req->set_param( 'categories', array( 5, 6 ) );
+	$req->set_param( 'display_settings', array(
+		'title'    => 'Card template goal',
+		'template' => 'card',
+		'message'  => 'Only {remaining} left!',
+	) );
 
 	$resp = $goals_ctrl->handle_create( $req );
 	$data = $resp->get_data();
@@ -257,6 +262,7 @@ try {
 	check( 'created goal target persisted', near( 1000, $data['data']['target'] ) );
 	check( 'created goal reward type persisted', 'percent_discount' === $data['data']['reward_type'] );
 	check( 'created goal categories persisted', array( 5, 6 ) === $data['data']['categories'] );
+	check( 'created goal display template persisted', 'card' === $data['data']['display_settings']['template'] );
 
 	// 5.3 Get the created goal.
 	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/goals/' . $goal_id );
@@ -326,6 +332,13 @@ try {
 	check( 'progress message present', null !== $found && '' !== $found['message'] );
 	check( 'progress reward shape', null !== $found && 'percent_discount' === $found['reward']['type'] );
 	check( 'progress icon key present', null !== $found && array_key_exists( 'icon', $found ) && '' === $found['icon'] );
+	check( 'progress template key present', null !== $found && array_key_exists( 'template', $found ) );
+	check( 'progress template from goal display settings', null !== $found && 'card' === $found['template'] );
+	check( 'progress template normalized to enum', null !== $found && in_array(
+		$found['template'],
+		array( 'basic', 'percentage', 'milestone', 'card' ),
+		true
+	) );
 	check( 'progress state key present', null !== $found && in_array(
 		$found['state'],
 		array( 'inactive', 'unavailable', 'progressing', 'nearly_complete', 'completed', 'reward_activated' ),

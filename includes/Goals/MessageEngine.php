@@ -310,26 +310,14 @@ final class MessageEngine {
 	/**
 	 * Whether a goal's progress is measured in money.
 	 *
-	 * Quantity/distinct-quantity/weight goals count items, not money, and
-	 * quantity-mode category/product goals do too. Quantity goals default
-	 * to the subtotal calculation mode (Goal::default_calculation_mode),
-	 * so the type is checked in addition to the mode. Mirrors the frontend
-	 * controller's is_money flag so message numbers and widget labels
-	 * format consistently.
+	 * Delegates to the single source of truth (Goal::is_money_goal) so
+	 * message numbers and widget labels never drift from the payload flag.
 	 *
 	 * @param Goal $goal Goal.
 	 * @return bool
 	 */
 	protected function is_money_goal( Goal $goal ) {
-		if ( in_array(
-			$goal->type(),
-			array( Goal::TYPE_QUANTITY, Goal::TYPE_DISTINCT_QUANTITY, Goal::TYPE_WEIGHT ),
-			true
-		) ) {
-			return false;
-		}
-
-		return Goal::MODE_QUANTITY !== $goal->calculation_mode();
+		return $goal->is_money_goal();
 	}
 
 	/**

@@ -12,7 +12,8 @@
  *   GoalMessage      the goal's progress message
  *   GoalMilestones   ordered ladder of the active goals
  *   RewardStatus     locked / unlocked reward chip
- *   SuggestionList   product suggestions (empty until Phase 14)
+ *   SuggestionList   product suggestions (Phase 14: served by the
+ *                     SuggestionEngine, price shown server-formatted)
  *   StickyGoalBar    fixed bottom bar (cart/checkout progress at a glance)
  *
  * Templates (P12): the goal body renders per the active variant — basic
@@ -305,7 +306,9 @@
 				var link = el( 'a', 'goalcart-suggestion__link' );
 				link.href = String( item.permalink );
 				link.appendChild( el( 'span', 'goalcart-suggestion__name', String( item.name || '' ) ) );
-				link.appendChild( el( 'span', 'goalcart-suggestion__price', String( item.price || '' ) ) );
+				// price_html is the server-formatted price (Phase 14); fall
+				// back to the raw price for hand-built payloads.
+				link.appendChild( el( 'span', 'goalcart-suggestion__price', String( item.price_html || item.price || '' ) ) );
 				li.appendChild( link );
 			} else {
 				li.appendChild( el( 'span', 'goalcart-suggestion__name', String( item.name || '' ) ) );
@@ -318,17 +321,26 @@
 	}
 
 	/**
-	 * The per-widget template: container override, else the global config.
+	 * The per-widget template: an explicit container override wins, then
+	 * the goal's own Display template (the goal builder's template picker),
+	 * then the store-wide Appearance template.
 	 *
 	 * @param {HTMLElement} container Widget container.
+	 * @param {Object}      goal     Featured goal entry.
 	 * @return {string}
 	 */
-	function widgetTemplate( container ) {
+	function widgetTemplate( container, goal ) {
 		var override = container.getAttribute( 'data-goalcart-template' );
 		var names = [ 'basic', 'percentage', 'milestone', 'card' ];
 
 		if ( override && names.indexOf( override ) !== -1 ) {
 			return override;
+		}
+
+		// The goal's Display settings can pin a template per goal; it wins
+		// over the store-wide Appearance template.
+		if ( goal && goal.template && names.indexOf( goal.template ) !== -1 ) {
+			return goal.template;
 		}
 
 		if ( cfg.template && names.indexOf( cfg.template ) !== -1 ) {
@@ -498,7 +510,7 @@
 		var goals = ( data && data.goals ) || [];
 		var goal = featuredGoal( goals );
 		var variant = 'compact' === container.getAttribute( 'data-goalcart-variant' ) ? 'compact' : 'full';
-		var template = widgetTemplate( container );
+		var template = widgetTemplate( container, goal );
 
 		// The animation toggle (Phase 12) freezes the fill transition via a
 		// class; re-render in place on every refresh so live cart updates

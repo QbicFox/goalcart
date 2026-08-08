@@ -289,19 +289,29 @@ exposes only the minimum data the widgets need:
       {
         "goal_id": 5,
         "goal_name": "Free shipping",
-        "goal_type": "amount",
-        "is_money": true,
-        "icon": "",
-        "current": 250000,
+        "goal_type": "amount",		"is_money": true,
+		"icon": "",
+		"template": "card",
+		"current": 250000,
         "target": 500000,
         "remaining": 250000,
         "percentage": 50,
         "completed": false,
-        "state": "progressing",
-        "message": "Only ۲۵۰٬۰۰۰ left to reach your goal",
-        "reward": { "type": "free_shipping", "value": null, "max_value": null, "meta": {} },
-        "suggestions": [],
-        "reward_state": "locked",
+        "state": "progressing",		"message": "Only ۲۵۰٬۰۰۰ left to reach your goal",
+		"reward": { "type": "free_shipping", "value": null, "max_value": null, "meta": {} },
+		"suggestions": [
+			{
+				"id": 42,
+				"name": "Wireless Charger",
+				"permalink": "https://site/product/wireless-charger/",
+				"price": 150000,
+				"price_html": "۱۵۰٬۰۰۰ تومان",
+				"image": "",
+				"stock_status": "instock",
+				"source": "upsell"
+			}
+		],
+		"reward_state": "locked",
         "eligible": true,
         "reason": ""
       }
@@ -317,10 +327,24 @@ Notes:
 - `message` is rendered by the Phase 13 MessageEngine: state-aware
   (inactive / unavailable / progressing / nearly_complete / completed /
   reward_activated), variable-substituted ({current}, {target},
-  {remaining}, {percentage}, {quantity}, {remaining_quantity}, {reward},
-  {goal_name}, {campaign_name}) and overridable through the goal's
+  {remaining}, {percentage}, {quantity}, {remaining_quantity},  {reward}, {goal_name}, {campaign_name}) and overridable through the goal's
   `display_settings.message` / `completed_message`. `state` carries the
-  raw state for styling. `suggestions` is always empty until Phase 14.
+  raw state for styling.
+- `suggestions` (Phase 14 — Smart Product Suggestions) is a capped list
+  (max 4) of products that close the gap to the goal. Each item carries
+  `id`, `name`, `permalink`, `price`, `price_html` (server-formatted via
+  `wc_price` — the widget renders this, falling back to the raw price),
+  `image`, `stock_status` and `source` (`manual` `category` `upsell`
+  `cross_sell` `related` `recently_viewed` `best_seller`). Candidates
+  come from the goal's own products, its categories, the cart items'
+  upsells/cross-sells/related products, the shopper's recently-viewed
+  cookie, and best sellers; out-of-stock products, cart items, excluded
+  products and ghost ids are never suggested. Ranking: stock first, then
+  goal eligibility (+3 manual, +2 counts toward the goal), relevance
+  (shares a cart category +1), WC-endorsed sources (+0.5) and, for money
+  goals, price proximity to `remaining` — products in the 0.6–1.4× band
+  score +2 (the spec's "prefer 150K–220K when 180K is left"). The final
+  list is filterable via the `goalcart_suggestions` filter.
 - `is_money` tells the widgets whether to format the goal's numbers as
   currency (amount/category/product/composite) or as plain numbers
   (quantity / distinct-quantity / weight) — it drives the milestone
@@ -328,6 +352,12 @@ Notes:
 - `icon` is the goal's Display icon (`display_settings.icon`, empty when
   none was configured) — the Phase 12 card template renders it, falling
   back to its own default icon.
+- `template` is the goal's own Display template
+  (`display_settings.template`, normalized to the `basic` `percentage`
+  `milestone` `card` enum, empty when none was configured). The widget
+  uses it for that goal (container override → goal template → global
+  Appearance template → `basic`), so the goal builder's template picker
+  takes effect on the storefront per goal.
 - The payload contains only aggregate numbers for the shopper's own cart
   — no PII — which is what allows it to be public.
 - The Phase 11 progress widgets poll this endpoint and re-render on every
@@ -362,11 +392,10 @@ Notes:
 |---|---|
 | Analytics endpoints | Phase 16 (events) / Phase 17 (dashboard) — no analytics data exists yet |
 | Customer-state campaign rules | Phase 32 (needs schema fields) |
-| Suggestions payload | Phase 14 (Smart Product Suggestions) |
 
 ## 6. Testing
 
-`tests/rest-api-test.php` (116 checks, `php tests/rest-api-test.php`):
+`tests/rest-api-test.php` (120 checks, `php tests/rest-api-test.php`):
 
 - route registration for every endpoint
 - response envelope + pagination
@@ -381,6 +410,9 @@ Notes:
 - Phase 13 messaging: the public /progress payload carries the
   engine-rendered message (no unresolved placeholders) and the message
   state
+- per-goal display template: `display_settings.template` persists on
+  create and the /progress payload carries the normalized per-goal
+  `template`
 - campaign CRUD + milestone ordering: create, order/reorder goals,
   duplicate (inactive copy with copied milestones), delete (goals
   detached), schema + 404 paths
