@@ -15,6 +15,13 @@
  *   SuggestionList   product suggestions (empty until Phase 14)
  *   StickyGoalBar    fixed bottom bar (cart/checkout progress at a glance)
  *
+ * Templates (P12): the goal body renders per the active variant — basic
+ * (bar), percentage (big % + bar), milestone (ladder + bar) or card
+ * (icon + title + bar) — driven by `cfg.template` or a per-container
+ * `data-goalcart-template` override. Appearance tokens (colors, radius,
+ * bar height) come from the same config; the animation toggle adds a
+ * no-transition class when disabled.
+ *
  * Contracts:
  *   - config comes from `window.goalcartFrontend` (printed early in
  *     wp_footer before this script)
@@ -311,22 +318,133 @@
 	}
 
 	/**
+	 * The per-widget template: container override, else the global config.
+	 *
+	 * @param {HTMLElement} container Widget container.
+	 * @return {string}
+	 */
+	function widgetTemplate( container ) {
+		var override = container.getAttribute( 'data-goalcart-template' );
+		var names = [ 'basic', 'percentage', 'milestone', 'card' ];
+
+		if ( override && names.indexOf( override ) !== -1 ) {
+			return override;
+		}
+
+		if ( cfg.template && names.indexOf( cfg.template ) !== -1 ) {
+			return cfg.template;
+		}
+
+		return 'basic';
+	}
+
+	/**
+	 * Percentage template — a large percent readout above the bar.
+	 *
+	 * @param {Object} goal Progress goal entry.
+	 * @return {HTMLElement}
+	 */
+	function percentagePanel( goal ) {
+		var wrap = el( 'div', 'goalcart-percentage' );
+		var percent = Math.max( 0, Math.min( 100, Number( goal.percentage ) || 0 ) );
+
+		wrap.appendChild( el( 'span', 'goalcart-percentage__value', Math.round( percent ) + '%' ) );
+		wrap.appendChild( progressBar( goal ) );
+
+		return wrap;
+	}
+
+	/**
+	 * Milestone template — the goal ladder as the primary visual, with the
+	 * featured bar underneath. Falls back to the bare bar when there is no
+	 * ladder (a single goal has nothing to ladder). Compact widgets skip
+	 * the ladder (a mini-cart has no room for it) and keep just the bar.
+	 *
+	 * @param {Object}  goal     Featured goal.
+	 * @param {Array}   goals    All active goals.
+	 * @param {string}  currency ISO currency code.
+	 * @param {boolean} compact  Compact variant flag.
+	 * @return {HTMLElement}
+	 */
+	function milestonePanel( goal, goals, currency, compact ) {
+		var wrap = el( 'div', 'goalcart-milestone-panel' );
+
+		if ( ! compact ) {
+			var ladder = goalMilestones( goals, currency );
+
+			if ( ladder ) {
+				wrap.appendChild( ladder );
+			}
+		}
+
+		wrap.appendChild( progressBar( goal ) );
+
+		return wrap;
+	}
+
+	/**
+	 * Card template — icon + goal title above the bar (the reward chip and
+	 * message come from the standard flow; suggestions act as the CTA once
+	 * Phase 14 fills them).
+	 *
+	 * @param {Object} goal Progress goal entry.
+	 * @return {HTMLElement}
+	 */
+	function cardPanel( goal ) {
+		var panel = el( 'div', 'goalcart-card-panel' );
+
+		panel.appendChild( el( 'span', 'goalcart-card-panel__icon', String( goal.icon || '\uD83C\uDFAF' ) ) );
+		panel.appendChild( el( 'span', 'goalcart-card-panel__title', String( goal.goal_name || '' ) ) );
+		panel.appendChild( progressBar( goal ) );
+
+		return panel;
+	}
+
+	/**
+	 * The template's core visual (everything except the shared message /
+	 * reward chip / suggestion flow).
+	 *
+	 * @param {Object}  goal     Featured goal.
+	 * @param {Array}   goals    All active goals (for the ladder).
+	 * @param {string}  currency ISO currency code.
+	 * @param {string}  template Template variant.
+	 * @param {boolean} compact  Compact variant flag.
+	 * @return {HTMLElement}
+	 */
+	function templateBody( goal, goals, currency, template, compact ) {
+		switch ( template ) {
+			case 'percentage':
+				return percentagePanel( goal );
+			case 'milestone':
+				return milestonePanel( goal, goals, currency, compact );
+			case 'card':
+				return cardPanel( goal );
+			default:
+				return progressBar( goal );
+		}
+	}
+
+	/**
 	 * GoalContainer — the widget body for one featured goal.
 	 *
-	 * Full: reward chip + progress + message + milestones + suggestions.
-	 * Compact: progress + message + reward chip (no milestones).
+	 * Full: reward chip + template body + message + milestones (except the
+	 * milestone template, which shows the ladder in its body) + suggestions.
+	 * Compact: template body + message + reward chip.
 	 *
 	 * @param {Object} goal     Featured goal.
 	 * @param {Array}  goals    All active goals (for the ladder).
 	 * @param {string} currency ISO currency code.
 	 * @param {string} variant  full|compact.
+	 * @param {string} template Template variant.
 	 * @return {HTMLElement}
 	 */
-	function goalContainer( goal, goals, currency, variant ) {
-		var card = el( 'div', 'goalcart-card' );
+	function goalContainer( goal, goals, currency, variant, template ) {
+		var card = el( 'div', 'goalcart-card goalcart-template--' + template );
 
-		if ( 'compact' === variant ) {
-			card.appendChild( progressBar( goal ) );
+		var compact = 'compact' === variant;
+
+		if ( compact ) {
+			card.appendChild( templateBody( goal, goals, currency, template, true ) );
 			card.appendChild( goalMessage( goal ) );
 			card.appendChild( rewardStatus( goal ) );
 			return card;
@@ -336,12 +454,14 @@
 		head.appendChild( rewardStatus( goal ) );
 		card.appendChild( head );
 
-		card.appendChild( progressBar( goal ) );
+		card.appendChild( templateBody( goal, goals, currency, template, false ) );
 		card.appendChild( goalMessage( goal ) );
 
-		var milestones = goalMilestones( goals, currency );
-		if ( milestones ) {
-			card.appendChild( milestones );
+		if ( 'milestone' !== template ) {
+			var milestones = goalMilestones( goals, currency );
+			if ( milestones ) {
+				card.appendChild( milestones );
+			}
 		}
 
 		var suggestions = suggestionList( goal );
@@ -374,10 +494,13 @@
 		var goals = ( data && data.goals ) || [];
 		var goal = featuredGoal( goals );
 		var variant = 'compact' === container.getAttribute( 'data-goalcart-variant' ) ? 'compact' : 'full';
+		var template = widgetTemplate( container );
 
-		// Re-render in place on every refresh so live cart updates (AJAX
-		// add-to-cart, quantity changes, fragment refreshes) always show
-		// the current progress — no mount-once freeze.
+		// The animation toggle (Phase 12) freezes the fill transition via a
+		// class; re-render in place on every refresh so live cart updates
+		// (AJAX add-to-cart, quantity changes, fragment refreshes) always
+		// show the current progress — no mount-once freeze.
+		container.classList.toggle( 'goalcart-widget--no-anim', false === cfg.animation );
 		container.replaceChildren();
 
 		if ( ! goal ) {
@@ -386,7 +509,7 @@
 		}
 
 		container.classList.remove( 'goalcart-widget--empty' );
-		container.appendChild( goalContainer( goal, goals, data.currency || cfg.currency, variant ) );
+		container.appendChild( goalContainer( goal, goals, data.currency || cfg.currency, variant, template ) );
 	}
 
 	/**
@@ -424,6 +547,7 @@
 		}
 
 		bar.classList.add( 'goalcart-sticky--visible' );
+		bar.classList.toggle( 'goalcart-no-anim', false === cfg.animation );
 		bar.setAttribute( 'aria-hidden', 'false' );
 
 		// Rebuild the bar content on every refresh so the fill and message

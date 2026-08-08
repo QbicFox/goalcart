@@ -12,6 +12,9 @@
  *  - goal CRUD + duplicate, the public /progress payload, search, and
  *    settings — through direct handler calls and one end-to-end server
  *    dispatch
+ *  - Phase 12 progress-template settings: sanitization of the template
+ *    enum, color fallbacks, range clamping, tag-stripping, and the REST
+ *    schema validation of the new keys
  *
  * Read-only like the other suites: the only writes (goal rows, the
  * settings option, rate-limit transients) happen inside a single
@@ -319,6 +322,7 @@ try {
 	check( 'progress completed false', null !== $found && false === $found['completed'] );
 	check( 'progress message present', null !== $found && '' !== $found['message'] );
 	check( 'progress reward shape', null !== $found && 'percent_discount' === $found['reward']['type'] );
+	check( 'progress icon key present', null !== $found && array_key_exists( 'icon', $found ) && '' === $found['icon'] );
 	check( 'progress suggestions is array', null !== $found && is_array( $found['suggestions'] ) );
 	check( 'progress currency present', '' !== $resp->get_data()['data']['currency'] || is_string( $resp->get_data()['data']['currency'] ) );
 
@@ -356,6 +360,34 @@ try {
 	$req->set_param( 'enabled', false );
 	$resp = $settings_ctrl->handle_save( $req );
 	check( 'settings save returns updated value', false === $resp->get_data()['data']['enabled'] );
+
+	// 5.12 Progress-template settings sanitization (Phase 12). Direct
+	// handler calls skip REST schema validation, so the sanitizer itself
+	// must normalize enums, clamp ranges and clean string fields.
+	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/settings' );
+	$req->set_param( 'frontend_template', 'card' );
+	$req->set_param( 'frontend_accent', 'zzz' );
+	$req->set_param( 'frontend_bar_height', 999 );
+	$req->set_param( 'frontend_radius', -3 );
+	$req->set_param( 'frontend_animation', false );
+	$req->set_param( 'frontend_css_class', 'my <b>class</b>' );
+	$req->set_param( 'frontend_custom_css', '<script>alert(1)</script>.goalcart-card { color: red; }' );
+	$resp = $settings_ctrl->handle_save( $req );
+	$data = $resp->get_data()['data'];
+	check( 'frontend template sanitized', 'card' === $data['frontend_template'] );
+	check( 'invalid color falls back to default', '#2271b1' === $data['frontend_accent'] );
+	check( 'bar height clamped to max', 48 === $data['frontend_bar_height'] );
+	check( 'radius clamped to min', 0 === $data['frontend_radius'] );
+	check( 'animation persisted false', false === $data['frontend_animation'] );
+	check( 'css class stripped of tags', 'my class' === $data['frontend_css_class'] );
+	check( 'custom css stripped of tags', false === strpos( $data['frontend_custom_css'], '<script' ) );
+
+	// The REST schema validates the template enum + ranges on dispatch.
+	$save = $settings_ctrl->save_args();
+	check( 'template enum in schema', isset( $save['frontend_template']['enum'] ) );
+	check( 'invalid template rejected by schema', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['frontend_template'], 'frontend_template' ) ) );
+	check( 'valid template accepted by schema', true === rest_validate_value_from_schema( 'milestone', $save['frontend_template'], 'frontend_template' ) );
+	check( 'bar height range in schema', is_wp_error( rest_validate_value_from_schema( 999, $save['frontend_bar_height'], 'frontend_bar_height' ) ) );
 
 	// 5.13 Campaign CRUD + milestone ordering (Phase 10).
 	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/campaigns' );

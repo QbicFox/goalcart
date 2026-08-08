@@ -14,6 +14,14 @@
  *   --goalcart-text-muted    secondary text
  *   --goalcart-radius        corner radius
  *   --goalcart-shadow        card elevation
+ *   --goalcart-bar-height    progress bar thickness
+ *
+ * Phase 12 (Progress Templates): the goal body renders per the active
+ * template variant (basic / percentage / milestone / card) via
+ * .goalcart-template--* classes, the bar reads --goalcart-bar-height, and
+ * .goalcart-widget--no-anim / .goalcart-no-anim disable the fill
+ * transition. The Appearance settings override every token through an
+ * inline style block printed by ProgressUI::appearance_css().
  *
  * @package GoalCart
  */
@@ -83,7 +91,7 @@
 
 .goalcart-progress {
 	position: relative;
-	height: 10px;
+	height: var(--goalcart-bar-height, 10px);
 	background: var(--goalcart-track);
 	border-radius: 999px;
 	overflow: hidden;
@@ -102,6 +110,86 @@
 
 .goalcart-progress--complete .goalcart-progress__fill {
 	background: #00a32a;
+}
+
+/* ------------------------------------------------------------------ *
+ * Progress Templates (Phase 12)
+ * ------------------------------------------------------------------ */
+
+/* Percentage template: large readout above the bar. */
+
+.goalcart-percentage {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.goalcart-percentage__value {
+	font-size: 1.75rem;
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
+	color: var(--goalcart-accent);
+	min-width: 3.2em;
+}
+
+.goalcart-template--percentage .goalcart-progress {
+	flex: 1 1 auto;
+}
+
+/* Milestone template: the ladder is the hero element. */
+
+.goalcart-template--milestone .goalcart-milestones {
+	margin-block-start: 0;
+	margin-block-end: 0.875rem;
+	justify-content: space-between;
+}
+
+.goalcart-template--milestone .goalcart-milestone__dot {
+	width: 12px;
+	height: 12px;
+	border: 2px solid var(--goalcart-bg);
+	box-shadow: 0 0 0 1px var(--goalcart-border);
+}
+
+.goalcart-template--milestone .goalcart-milestone--complete .goalcart-milestone__dot {
+	box-shadow: 0 0 0 1px var(--goalcart-accent);
+}
+
+/* Card template: icon + title header above the bar. */
+
+.goalcart-card-panel {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+}
+
+.goalcart-card-panel__icon {
+	font-size: 1.5rem;
+	line-height: 1;
+}
+
+.goalcart-card-panel__title {
+	flex: 1 1 auto;
+	min-width: 0;
+	font-weight: 700;
+}
+
+.goalcart-template--card .goalcart-progress {
+	flex: 0 0 100%;
+	margin-block-start: 0.625rem;
+}
+
+.goalcart-template--card .goalcart-card-panel {
+	flex-wrap: wrap;
+}
+
+/* Animation off: the fill snaps instead of sliding. */
+
+.goalcart-widget--no-anim .goalcart-progress__fill,
+.goalcart-no-anim .goalcart-progress__fill {
+	transition: none;
 }
 
 /* ------------------------------------------------------------------ *
@@ -271,7 +359,7 @@
 }
 
 .goalcart-sticky__content .goalcart-progress {
-	height: 8px;
+	height: min(var(--goalcart-bar-height, 10px), 8px);
 }
 
 .goalcart-sticky__content .goalcart-message {

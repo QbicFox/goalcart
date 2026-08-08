@@ -220,11 +220,37 @@ export interface CampaignInput {
   goals: number[];
 }
 
+/** Storefront progress template variants (Phase 12). */
+export type FrontendTemplate = 'basic' | 'percentage' | 'milestone' | 'card';
+
 /**
  * The settings object persisted by the Phase 7 REST API
  * (`GET/POST /goalcart/v1/settings`). Grows with the Phase 18 surface.
+ *
+ * The `frontend_*` keys are the Phase 12 progress-template + appearance
+ * surface consumed by the storefront widgets and the Appearance page.
  */
 export interface GoalCartSettings {
   enabled: boolean;
   fullscreen_dashboard: boolean;
+  /** Storefront template variant: basic | percentage | milestone | card. */
+  frontend_template: FrontendTemplate;
+  /** Animate the progress-bar fill on updates. */
+  frontend_animation: boolean;
+  /** Progress bar thickness in px (4–48). */
+  frontend_bar_height: number;
+  /** Primary accent color (hex). */
+  frontend_accent: string;
+  /** Widget surface color (hex). */
+  frontend_bg: string;
+  /** Hairline border color (hex). */
+  frontend_border: string;
+  /** Primary text color (hex). */
+  frontend_text: string;
+  /** Widget corner radius in px (0–40). */
+  frontend_radius: number;
+  /** Extra CSS class(es) added to every widget container. */
+  frontend_css_class: string;
+  /** Custom CSS appended to the storefront widget styles. */
+  frontend_custom_css: string;
 }

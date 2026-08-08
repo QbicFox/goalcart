@@ -60,6 +60,13 @@ final class ProgressUI {
 	const HANDLE = 'goalcart-frontend';
 
 	/**
+	 * Storefront progress template variants (Phase 12).
+	 *
+	 * @var string[]
+	 */
+	const TEMPLATES = array( 'basic', 'percentage', 'milestone', 'card' );
+
+	/**
 	 * Settings instance.
 	 *
 	 * @var Settings
@@ -183,6 +190,11 @@ final class ProgressUI {
 			GOALCART_VERSION,
 			array( 'in_footer' => true )
 		);
+
+		// The appearance tokens + custom CSS ride along with the stylesheet
+		// (WP's canonical inline-style channel), so the storefront gets one
+		// style payload and the theme can still override any token.
+		wp_add_inline_style( self::HANDLE, $this->appearance_css() );
 	}
 
 	/**
@@ -208,26 +220,109 @@ final class ProgressUI {
 	/**
 	 * The frontend config payload (endpoint, labels, page metadata).
 	 *
+	 * Phase 12 adds the active template, the animation flag and the
+	 * resolved appearance tokens so the JS can render template variants
+	 * and mirror the Appearance settings without another round-trip.
 	 * Kept as its own method so tests can assert the shape without
 	 * capturing output.
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function frontend_config() {
+		$appearance = $this->appearance();
+
 		return array(
-			'endpoint' => esc_url_raw( rest_url( 'goalcart/v1/progress' ) ),
-			'refresh'  => (int) apply_filters( 'goalcart_frontend_refresh_interval', 0 ),
-			'currency' => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
-			'isRtl'    => is_rtl(),
-			'labels'   => $this->reward_labels(),
+			'endpoint'  => esc_url_raw( rest_url( 'goalcart/v1/progress' ) ),
+			'refresh'   => (int) apply_filters( 'goalcart_frontend_refresh_interval', 0 ),
+			'currency'  => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
+			'isRtl'     => is_rtl(),
+			'template'  => $this->template(),
+			'animation' => (bool) apply_filters( 'goalcart_frontend_animation', $this->settings->get( 'frontend_animation', true ) ),
+			'appearance' => $appearance,
+			'labels'    => $this->reward_labels(),
 		);
+	}
+
+	/**
+	 * The active storefront template variant.
+	 *
+	 * Settings-driven, overridable with the `goalcart_frontend_template`
+	 * filter, and normalized to the template enum so a bad stored value
+	 * can never reach the JS.
+	 *
+	 * @return string
+	 */
+	public function template() {
+		$template = apply_filters( 'goalcart_frontend_template', $this->settings->get( 'frontend_template', 'basic' ) );
+
+		return in_array( $template, self::TEMPLATES, true ) ? $template : 'basic';
+	}
+
+	/**
+	 * The resolved appearance tokens (colors, radius, bar height).
+	 *
+	 * Every value is normalized (hex colors fall back to their defaults)
+	 * so the inline style output and the JS config always carry safe,
+	 * well-formed CSS values.
+	 *
+	 * @return array<string, string|int>
+	 */
+	public function appearance() {
+		$defaults = $this->settings->defaults();
+		$colors   = array( 'frontend_accent', 'frontend_bg', 'frontend_border', 'frontend_text' );
+
+		$appearance = array();
+
+		foreach ( $colors as $key ) {
+			$color = sanitize_hex_color( $this->settings->get( $key ) );
+			$appearance[ str_replace( 'frontend_', '', $key ) ] = $color ? $color : $defaults[ $key ];
+		}
+
+		$appearance['radius']    = min( 40, max( 0, (int) $this->settings->get( 'frontend_radius', 10 ) ) );
+		$appearance['barHeight'] = min( 48, max( 4, (int) $this->settings->get( 'frontend_bar_height', 10 ) ) );
+
+		return $appearance;
+	}
+
+	/**
+	 * The inline stylesheet for the storefront widgets.
+	 *
+	 * A small token block overriding the CSS custom properties with the
+	 * resolved appearance (the stylesheet reads `var(--goalcart-*)`), plus
+	 * the admin-authored custom CSS appended verbatim. Injected through
+	 * wp_add_inline_style so it is versioned and scoped with the main
+	 * stylesheet.
+	 *
+	 * @return string
+	 */
+	public function appearance_css() {
+		$a = $this->appearance();
+
+		$css = sprintf(
+			'.goalcart-widget, #goalcart-sticky { --goalcart-accent:%1$s; --goalcart-bg:%2$s; --goalcart-border:%3$s; --goalcart-text:%4$s; --goalcart-radius:%5$dpx; --goalcart-bar-height:%6$dpx; }',
+			$a['accent'],
+			$a['bg'],
+			$a['border'],
+			$a['text'],
+			(int) $a['radius'],
+			(int) $a['barHeight']
+		);
+
+		$custom = trim( (string) $this->settings->get( 'frontend_custom_css', '' ) );
+
+		if ( '' !== $custom ) {
+			$css .= "\n" . $custom;
+		}
+
+		return $css;
 	}
 
 	/**
 	 * Shortcode callback: `[goalcart_progress variant="full|compact"]`.
 	 *
 	 * Every instance renders its own uniquely-id'd container so a page can
-	 * host several widgets without collisions.
+	 * host several widgets without collisions. The optional `template`
+	 * attribute overrides the global Appearance template per widget.
 	 *
 	 * @param array|string $atts Shortcode attributes.
 	 * @return string
@@ -238,14 +333,17 @@ final class ProgressUI {
 		}
 
 		$atts = shortcode_atts(
-			array( 'variant' => 'full' ),
+			array(
+				'variant'  => 'full',
+				'template' => '',
+			),
 			(array) $atts,
 			self::SHORTCODE
 		);
 
 		$this->shortcode_index++;
 
-		return $this->widget_container( 'goalcart-shortcode-' . $this->shortcode_index, $atts['variant'] );
+		return $this->widget_container( 'goalcart-shortcode-' . $this->shortcode_index, $atts['variant'], $atts['template'] );
 	}
 
 	/**
@@ -319,22 +417,43 @@ final class ProgressUI {
 	/**
 	 * Build an empty widget container.
 	 *
-	 * The container carries `data-goalcart-widget` (JS mount marker) and a
+	 * The container carries `data-goalcart-widget` (JS mount marker), a
 	 * variant flag the JS uses to decide which components to render
 	 * (full = progress + milestones + reward + suggestions, compact =
-	 * progress + message + reward chip). Output is `esc_html`'d attribute
-	 * values over static strings.
+	 * progress + message + reward chip), and — when a per-widget template
+	 * override exists — a `data-goalcart-template` marker. The configured
+	 * custom CSS class is appended to the container so theme authors can
+	 * target it. Output is `esc_html`'d attribute values over static
+	 * strings.
 	 *
-	 * @param string $id      Unique container id.
-	 * @param string $variant full|compact.
+	 * @param string $id       Unique container id.
+	 * @param string $variant  full|compact.
+	 * @param string $template Optional template override (normalized).
 	 * @return string
 	 */
-	public function widget_container( $id, $variant = 'full' ) {
+	public function widget_container( $id, $variant = 'full', $template = '' ) {
 		$variant = 'compact' === $variant ? 'compact' : 'full';
 
-		return '<div id="' . esc_attr( $id ) . '" class="goalcart-widget goalcart-widget--' . esc_attr( $variant ) . '"'
+		$class = 'goalcart-widget goalcart-widget--' . esc_attr( $variant );
+		$extra = trim( (string) $this->settings->get( 'frontend_css_class', '' ) );
+
+		if ( '' !== $extra ) {
+			$class .= ' ' . esc_attr( $extra );
+		}
+
+		$markup = '<div id="' . esc_attr( $id ) . '" class="' . $class . '"'
 			. ' data-goalcart-widget data-goalcart-variant="' . esc_attr( $variant ) . '"'
 			. ' role="status" aria-live="polite"></div>';
+
+		if ( in_array( $template, self::TEMPLATES, true ) ) {
+			$markup = str_replace(
+				' data-goalcart-widget',
+				' data-goalcart-widget data-goalcart-template="' . esc_attr( $template ) . '"',
+				$markup
+			);
+		}
+
+		return $markup;
 	}
 
 	/**

@@ -12,6 +12,9 @@
  *  - the frontend config payload (endpoint, currency, reward labels)
  *  - the master enabled gate (settings toggle + goalcart_frontend_enabled)
  *  - page gating: the shortcode in a post content enables assets
+ *  - progress templates & appearance (Phase 12): config template/
+ *    animation/appearance keys, per-widget shortcode template override,
+ *    custom container class, token + custom CSS output, template filter
  *
  * Read-only like the other suites: no DB writes, no product/cart
  * creation. Settings are flipped in memory only and restored.
@@ -242,6 +245,53 @@ if ( isset( $post_id ) && ! is_wp_error( $post_id ) ) {
 	clean_post_cache( $post_id );
 	check( 'shortcode post rolled back', null === get_post( $post_id ) );
 }
+
+// ---------------------------------------------------------------------------
+// 8. Progress templates & appearance (P12-T01 / P12-T02)
+// ---------------------------------------------------------------------------
+echo "\n== 8. Templates & appearance ==\n";
+
+$config = $ui->frontend_config();
+check( 'config carries the template', isset( $config['template'] ) && 'basic' === $config['template'] );
+check( 'config carries the animation flag', array_key_exists( 'animation', $config ) && true === $config['animation'] );
+check( 'config appearance has accent', isset( $config['appearance']['accent'] ) && '#2271b1' === $config['appearance']['accent'] );
+check( 'config appearance has radius', isset( $config['appearance']['radius'] ) && 10 === $config['appearance']['radius'] );
+check( 'config appearance has bar height', isset( $config['appearance']['barHeight'] ) && 10 === $config['appearance']['barHeight'] );
+
+// Shortcode template override lands on the container (per-widget template).
+$out = do_shortcode( '[goalcart_progress template="card"]' );
+check( 'shortcode template override', false !== strpos( $out, 'data-goalcart-template="card"' ) );
+$out = do_shortcode( '[goalcart_progress template="bogus"]' );
+check( 'bogus shortcode template ignored', false === strpos( $out, 'data-goalcart-template' ) );
+
+// Settings drive the config, the container class and the inline CSS.
+$settings->set( 'frontend_template', 'percentage' );
+$settings->set( 'frontend_css_class', 'fancy-store' );
+$settings->set( 'frontend_custom_css', '.goalcart-card { padding: 2rem; }' );
+$settings->set( 'frontend_accent', 'nonsense' );
+
+check( 'config template follows settings', 'percentage' === $ui->frontend_config()['template'] );
+check( 'invalid color falls back in config', '#2271b1' === $ui->frontend_config()['appearance']['accent'] );
+
+$markup = $ui->widget_container( 'goalcart-test', 'full' );
+check( 'custom css class on container', false !== strpos( $markup, 'fancy-store' ) );
+
+$css = $ui->appearance_css();
+check( 'token css sets accent', false !== strpos( $css, '--goalcart-accent:#2271b1' ) );
+check( 'token css sets bar height', false !== strpos( $css, '--goalcart-bar-height:10px' ) );
+check( 'custom css appended', false !== strpos( $css, 'padding: 2rem' ) );
+
+add_filter( 'goalcart_frontend_template', function () {
+	return 'milestone';
+} );
+check( 'template filter overrides', 'milestone' === $ui->template() );
+remove_all_filters( 'goalcart_frontend_template' );
+
+// Restore the Phase 11-visible defaults.
+$settings->set( 'frontend_template', 'basic' );
+$settings->set( 'frontend_css_class', '' );
+$settings->set( 'frontend_custom_css', '' );
+$settings->set( 'frontend_accent', '#2271b1' );
 
 // ---------------------------------------------------------------------------
 // Summary

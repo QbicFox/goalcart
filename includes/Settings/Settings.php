@@ -33,11 +33,27 @@ class Settings {
 	/**
 	 * Default settings, merged with stored values on load.
 	 *
+	 * The frontend_* keys are the Phase 12 progress-template surface
+	 * (template variant + appearance tokens consumed by the storefront
+	 * widgets and the Appearance admin page). Phase 18 grows the general /
+	 * goal-calculation / performance / advanced sections without touching
+	 * these.
+	 *
 	 * @var array<string, mixed>
 	 */
 	protected $defaults = array(
-		'enabled'              => true,
-		'fullscreen_dashboard' => true,
+		'enabled'               => true,
+		'fullscreen_dashboard'  => true,
+		'frontend_template'     => 'basic',
+		'frontend_animation'    => true,
+		'frontend_bar_height'   => 10,
+		'frontend_accent'       => '#2271b1',
+		'frontend_bg'           => '#ffffff',
+		'frontend_border'       => '#dcdcde',
+		'frontend_text'         => '#1d2327',
+		'frontend_radius'       => 10,
+		'frontend_css_class'    => '',
+		'frontend_custom_css'   => '',
 	);
 
 	/**

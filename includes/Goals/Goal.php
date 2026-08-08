@@ -182,6 +182,16 @@ final class Goal {
 	protected $reward_meta;
 
 	/**
+	 * Display configuration (Phase 9 builder): title, message,
+	 * completed_message, icon, template. Stored as JSON in
+	 * `display_settings`; parsed to an array here so the frontend can read
+	 * the card icon without re-decoding.
+	 *
+	 * @var array<string, mixed>
+	 */
+	protected $display_settings;
+
+	/**
 	 * Build a goal from a config array / database row.
 	 *
 	 * Accepts a superset of the Schema columns plus composite-only keys:
@@ -208,6 +218,7 @@ final class Goal {
 		$this->reward_value      = isset( $data['reward_value'] ) ? (float) $data['reward_value'] : null;
 		$this->reward_max_value  = isset( $data['reward_max_value'] ) ? (float) $data['reward_max_value'] : null;
 		$this->reward_meta       = $this->meta( isset( $data['reward_meta'] ) ? $data['reward_meta'] : array() );
+		$this->display_settings = $this->meta( isset( $data['display_settings'] ) ? $data['display_settings'] : array() );
 	}
 
 	/**
@@ -403,5 +414,14 @@ final class Goal {
 	 */
 	public function reward_meta() {
 		return $this->reward_meta;
+	}
+
+	/**
+	 * Display configuration array (title, message, icon, template).
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function display_settings() {
+		return $this->display_settings;
 	}
 }

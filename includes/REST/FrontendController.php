@@ -128,6 +128,7 @@ class FrontendController extends BaseController {
 				'goal_name'    => $goal->name(),
 				'goal_type'    => $goal->type(),
 				'is_money'     => $this->is_money_goal( $goal ),
+				'icon'         => $this->goal_icon( $goal ),
 				'current'      => $result->current(),
 				'target'       => $result->target(),
 				'remaining'    => $result->remaining(),
@@ -190,6 +191,22 @@ class FrontendController extends BaseController {
 	 */
 	protected function is_money_goal( Goal $goal ) {
 		return Goal::TYPE_WEIGHT !== $goal->type() && Goal::MODE_QUANTITY !== $goal->calculation_mode();
+	}
+
+	/**
+	 * The goal's display icon for the card template (Phase 12).
+	 *
+	 * Comes from the goal builder's Display section (`display_settings.icon`);
+	 * empty when none was configured — the widget falls back to its own
+	 * default icon.
+	 *
+	 * @param Goal $goal Goal.
+	 * @return string
+	 */
+	protected function goal_icon( Goal $goal ) {
+		$display = $goal->display_settings();
+
+		return isset( $display['icon'] ) && is_string( $display['icon'] ) ? trim( $display['icon'] ) : '';
 	}
 
 	/**

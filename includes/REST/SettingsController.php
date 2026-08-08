@@ -152,14 +152,28 @@ class SettingsController extends BaseController {
 	 *
 	 * Each known setting is validated by the REST layer (types, ranges) so
 	 * a bad request fails with a structured 400 before any option is
-	 * touched.
+	 * touched. Phase 12 adds the storefront progress-template surface
+	 * (variant enum, ranges for height/radius, boolean animation).
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function save_args() {
 		return array(
-			'enabled'             => array( 'type' => 'boolean' ),
-			'fullscreen_dashboard' => array( 'type' => 'boolean' ),
+			'enabled'               => array( 'type' => 'boolean' ),
+			'fullscreen_dashboard'  => array( 'type' => 'boolean' ),
+			'frontend_template'     => array(
+				'type' => 'string',
+				'enum' => array( 'basic', 'percentage', 'milestone', 'card' ),
+			),
+			'frontend_animation'    => array( 'type' => 'boolean' ),
+			'frontend_bar_height'   => array( 'type' => 'integer', 'minimum' => 4, 'maximum' => 48 ),
+			'frontend_accent'       => array( 'type' => 'string' ),
+			'frontend_bg'           => array( 'type' => 'string' ),
+			'frontend_border'       => array( 'type' => 'string' ),
+			'frontend_text'         => array( 'type' => 'string' ),
+			'frontend_radius'       => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 40 ),
+			'frontend_css_class'    => array( 'type' => 'string' ),
+			'frontend_custom_css'   => array( 'type' => 'string' ),
 		);
 	}
 
@@ -167,17 +181,50 @@ class SettingsController extends BaseController {
 	 * Sanitize a single setting value by key.
 	 *
 	 * Runs after the REST schema validation; normalizes the value before it
-	 * is persisted.
+	 * is persisted. Color keys fall back to their defaults on invalid
+	 * input, template values normalize to the enum, and ranges are clamped
+	 * (schema catches most of this on server dispatch; direct saves still
+	 * land here).
 	 *
 	 * @param string $key   Setting key.
 	 * @param mixed  $value Raw value from the request.
 	 * @return mixed
 	 */
 	protected function sanitize_setting( $key, $value ) {
+		$defaults = $this->settings->defaults();
+
 		switch ( $key ) {
 			case 'fullscreen_dashboard':
 			case 'enabled':
+			case 'frontend_animation':
 				return (bool) $value;
+
+			case 'frontend_template':
+				$templates = array( 'basic', 'percentage', 'milestone', 'card' );
+
+				return in_array( $value, $templates, true ) ? $value : $defaults['frontend_template'];
+
+			case 'frontend_bar_height':
+				return min( 48, max( 4, (int) $value ) );
+
+			case 'frontend_accent':
+			case 'frontend_bg':
+			case 'frontend_border':
+			case 'frontend_text':
+				$color = sanitize_hex_color( $value );
+
+				return $color ? $color : $defaults[ $key ];
+
+			case 'frontend_radius':
+				return min( 40, max( 0, (int) $value ) );
+
+			case 'frontend_css_class':
+				return trim( sanitize_text_field( (string) $value ) );
+
+			case 'frontend_custom_css':
+				// Admin-authored CSS (manage_options gate on the route); keep
+				// it tag-free and bounded.
+				return substr( trim( wp_strip_all_tags( (string) $value ) ), 0, 16000 );
 
 			default:
 				return $value;

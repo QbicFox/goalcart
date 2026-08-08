@@ -86,12 +86,69 @@ when present (WooCommerce fires these as jQuery events) with a native
 - **Master toggle:** the `enabled` setting (filter `goalcart_frontend_enabled`).
 - **Locations:** filter `goalcart_frontend_locations` (Phase 18 wires the
   settings UI to it).
+- **Template:** the `frontend_template` setting, overridable per widget
+  with the shortcode `template` attribute and globally with the
+  `goalcart_frontend_template` filter.
+- **Animation:** the `frontend_animation` setting, filterable via
+  `goalcart_frontend_animation` (offs add the no-transition classes).
 - **Config payload** (`frontend_config()`): `endpoint`, `refresh`,
   `currency`, `isRtl`, `labels` — printed as `window.goalcartFrontend` at
-  `wp_footer` priority 5, before the enqueued footer script.
+  `wp_footer` priority 5, before the enqueued footer script. Phase 12 adds
+  `template` (active variant), `animation` and `appearance` (resolved
+  tokens).
 - Assets load only on pages that can render a widget (cart / checkout /
   shop / product / a page containing the shortcode) via
   `page_needs_widget()`.
+
+---
+
+# Progress Templates & Appearance (Phase 12)
+
+The widget body renders per an active **template variant**, chosen in the
+admin Appearance page and delivered to the storefront through the config
+(`cfg.template`) or a per-widget `data-goalcart-template` override on the
+shortcode: `[goalcart_progress template="card"]`.
+
+## Templates
+
+| Variant | Layout |
+|---|---|
+| `basic` | Progress bar + message (the Phase 11 layout) |
+| `percentage` | Large percent readout (`goalcart-percentage__value`) above the bar |
+| `milestone` | The goal ladder (`goalcart-milestones`) as the hero visual, bar underneath |
+| `card` | Icon + goal-title header (`goalcart-card-panel`) above the bar |
+
+In JS terms the shared flow (message, reward chip, suggestions, sticky
+bar) stays identical — only `templateBody()` swaps the core visual per
+variant (`progressBar`, `percentagePanel`, `milestonePanel`,
+`cardPanel`). The card icon comes from the goal's Display settings
+(`display_settings.icon`, served in the progress payload as `icon`); the
+widget falls back to 🎯 when a goal has no icon. Compact widgets keep
+their slim footprint — the milestone ladder is skipped in the compact
+variant.
+
+Typography and spacing have no dedicated settings: they are tuned through
+the shared tokens (bar height, radius) and the custom-CSS field, keeping
+the settings surface small (Phase 18 grows the general/frontend
+sections).
+
+## Customization
+
+All keys live under the `frontend_*` settings (see `docs/api.md` §2.2),
+edited in the Appearance page and applied two ways:
+
+- **Tokens** — `ProgressUI::appearance_css()` prints an inline style block
+  (via `wp_add_inline_style`) overriding the `--goalcart-*` custom
+  properties on `.goalcart-widget, #goalcart-sticky`: colors (accent /
+  bg / border / text), corner radius and bar height
+  (`--goalcart-bar-height`).
+- **Custom CSS** — the `frontend_custom_css` setting is appended verbatim
+  to the same inline block; `frontend_css_class` is added to every widget
+  container so themes can target the widgets.
+- **Animation** — when `frontend_animation` is off, the JS adds
+  `goalcart-widget--no-anim` / `goalcart-no-anim` classes that disable the
+  fill transition (`transition: none`), complementing the
+  `prefers-reduced-motion` CSS.
 
 ## Styling
 
@@ -99,8 +156,10 @@ The stylesheet is scoped under `.goalcart-widget` / `#goalcart-sticky`,
 responsive, motion-safe (respects `prefers-reduced-motion`), and
 **themeable through CSS custom properties** (`--goalcart-accent`,
 `--goalcart-bg`, `--goalcart-border`, `--goalcart-text`,
-`--goalcart-text-muted`, `--goalcart-radius`, `--goalcart-shadow`, …) —
-the Phase 12 Appearance controls override the same tokens.
+`--goalcart-text-muted`, `--goalcart-radius`, `--goalcart-shadow`,
+`--goalcart-bar-height`, …) — the Phase 12 Appearance controls override
+the same tokens, and the `frontend_custom_css` setting appends custom CSS
+to the same inline style block (`ProgressUI::appearance_css()`).
 
 ---
 
@@ -228,7 +287,7 @@ it.
 | Campaigns | full campaign CRUD list (milestones, status, priority, schedule, edit, duplicate, enable/disable, delete, preview) | 10 (Campaign Builder) |
 | CampaignBuilder | — | 10 (Campaign Builder, `/campaigns/new` + `/campaigns/:id/edit`) |
 | Analytics | container | 16–17 |
-| Appearance | container | 12 (Progress Templates) |
+| Appearance | full: template picker (live thumbnails), colors, bar height/radius sliders, animation switch, custom class + custom CSS, live preview, reset-to-defaults | 12 (Progress Templates) |
 | Settings | functional: enabled + fullscreen toggles (react-hook-form) | 18 (full surface) |
 
 ## Build & verification

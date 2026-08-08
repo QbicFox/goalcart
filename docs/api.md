@@ -172,7 +172,22 @@ category/product/composite goals evaluate correctly.
 #### `GET /settings`
 
 ```json
-{ "data": { "enabled": true, "fullscreen_dashboard": true } }
+{
+  "data": {
+    "enabled": true,
+    "fullscreen_dashboard": true,
+    "frontend_template": "basic",
+    "frontend_animation": true,
+    "frontend_bar_height": 10,
+    "frontend_accent": "#2271b1",
+    "frontend_bg": "#ffffff",
+    "frontend_border": "#dcdcde",
+    "frontend_text": "#1d2327",
+    "frontend_radius": 10,
+    "frontend_css_class": "",
+    "frontend_custom_css": ""
+  }
+}
 ```
 
 #### `POST /settings`
@@ -180,8 +195,23 @@ category/product/composite goals evaluate correctly.
 Saves a partial or full settings object. Only known keys are applied
 (unknown keys are ignored), so saving the whole object never clobbers
 keys the client does not know about. Returns the persisted settings, or
-`goalcart_settings_empty` (400) when no known keys are present. The full
-settings surface grows here in Phase 18.
+`goalcart_settings_empty` (400) when no known keys are present.
+
+Phase 12 adds the storefront progress-template surface, validated by the
+route arg schema and normalized by the sanitizer (direct saves included):
+
+| Key | Type / constraints | Sanitization |
+|---|---|---|
+| `frontend_template` | enum `basic` `percentage` `milestone` `card` | unknown → `basic` |
+| `frontend_animation` | boolean | cast |
+| `frontend_bar_height` | int 4–48 | clamped |
+| `frontend_accent` / `bg` / `border` / `text` | string (hex color) | `sanitize_hex_color`, invalid → default |
+| `frontend_radius` | int 0–40 | clamped |
+| `frontend_css_class` | string | `sanitize_text_field` (tags stripped) |
+| `frontend_custom_css` | string | tag-stripped, capped at 16 KB (admin-authored CSS) |
+
+The full general/goal-calculation/performance/advanced surface grows here
+in Phase 18.
 
 ### 2.3 Search (goal builder)
 
@@ -261,6 +291,7 @@ exposes only the minimum data the widgets need:
         "goal_name": "Free shipping",
         "goal_type": "amount",
         "is_money": true,
+        "icon": "",
         "current": 250000,
         "target": 500000,
         "remaining": 250000,
@@ -288,12 +319,19 @@ Notes:
   currency (amount/category/product/composite) or as plain numbers
   (quantity / distinct-quantity / weight) — it drives the milestone
   labels in `assets/js/frontend.js`.
+- `icon` is the goal's Display icon (`display_settings.icon`, empty when
+  none was configured) — the Phase 12 card template renders it, falling
+  back to its own default icon.
 - The payload contains only aggregate numbers for the shopper's own cart
   — no PII — which is what allows it to be public.
 - The Phase 11 progress widgets poll this endpoint and re-render on every
   WooCommerce cart event (`added_to_cart`, `updated_cart_totals`,
   `wc_fragments_refreshed`, …), driven by the config object printed by
-  `GoalCart\Frontend\ProgressUI` (`window.goalcartFrontend`).
+  `GoalCart\Frontend\ProgressUI` (`window.goalcartFrontend`). The config
+  also carries the Phase 12 template variant, the animation flag and the
+  resolved appearance tokens (`template`, `animation`, `appearance`), so
+  the widgets render the configured storefront template without another
+  round-trip.
 
 ---
 
@@ -323,7 +361,7 @@ Notes:
 
 ## 6. Testing
 
-`tests/rest-api-test.php` (102 checks, `php tests/rest-api-test.php`):
+`tests/rest-api-test.php` (113 checks, `php tests/rest-api-test.php`):
 
 - route registration for every endpoint
 - response envelope + pagination
@@ -332,7 +370,9 @@ Notes:
 - arg-schema validation (enums, ranges, datetime + campaign callbacks)
 - goal create → get → list → duplicate → update → delete through the
   handlers, plus an end-to-end server dispatch of `/progress`
-- settings read + save (success and error paths)
+- settings read + save (success and error paths) — including Phase 12
+  progress-template sanitization (enum fallback, color fallback, range
+  clamping, tag-stripping) and the REST schema validation of the new keys
 - campaign CRUD + milestone ordering: create, order/reorder goals,
   duplicate (inactive copy with copied milestones), delete (goals
   detached), schema + 404 paths

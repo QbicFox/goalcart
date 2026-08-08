@@ -156,6 +156,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
+### Phase 12 — Progress Templates (100% complete)
+
+- **P12-T01 Templates** — The storefront widget body now renders per an active template variant. `assets/js/frontend.js` gained a `widgetTemplate()` resolver (per-widget `data-goalcart-template` override, else the config) and `templateBody()` variants: **basic** (bar + message), **percentage** (large percent readout above the bar), **milestone** (the goal ladder as the hero visual, bar underneath), and **card** (icon + goal-title header above the bar). The shared flow — message, reward chip, suggestions, sticky bar — stays identical across variants. `assets/css/frontend.css` adds the `.goalcart-template--*` styles, a `--goalcart-bar-height` token, and the milestone/card/percentage layouts.
+- **P12-T02 Customization** — Full appearance surface: new `frontend_*` settings (template, animation, bar height, accent/bg/border/text colors, radius, CSS class, custom CSS) with defaults in `Settings`, REST schema + sanitizer in `SettingsController` (enum validation, hex-color fallbacks, range clamping, tag-stripping). `ProgressUI` resolves `template()`/`appearance()`, prints the token + custom-CSS inline block via `wp_add_inline_style`, appends the custom class to every container, and exposes the shortcode `template` attribute. The admin **Appearance** page (`routes/Appearance.tsx`) is now fully functional: a 4-card template picker with live thumbnails, color pickers, bar-height/radius sliders, an animation switch, custom class + custom CSS fields, a live preview panel driven by the form values, and reset-to-defaults — all persisted through `POST /goalcart/v1/settings`.
+- **Verification:** `php -l` clean; frontend suite 50/50 (config template/animation/appearance keys, shortcode template override, custom container class, token + custom CSS output, template filter), REST suite 113/113 (Phase 12 settings sanitization + schema checks); engine 75/75, reward 72/72, cart-integration 22/22 (no regressions); `node --check` on the JS; `npm run typecheck`, `npm run lint` and `npm run build` all pass (Appearance emitted as its own lazy chunk); headless-Chrome smoke test renders all four templates against a mock `/progress` endpoint (58% readout, milestone ladder targets, card icon/title, no-anim classes on and off) with zero console errors. No database changes; plugin not activated.
+
+**Overall project progress: 51%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 weight 2% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.
