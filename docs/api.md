@@ -201,13 +201,47 @@ rejected by the arg schema.
 
 ### 2.4 Campaigns
 
-Read-only in Phase 7 (the goal builder needs the list to assign goals):
+Campaign CRUD + milestone ordering (Phase 10 — Campaign Builder):
 
-- `GET /campaigns` — all campaigns.
-- `GET /campaigns/{id}` — one campaign, or `goalcart_campaign_not_found`.
+- `GET /campaigns` — all campaigns, each with `goal_count`.
+- `GET /campaigns/{id}` — one campaign (with its ordered `goals`), or
+  `goalcart_campaign_not_found` (404).
+- `POST /campaigns` — create. `name` is required.
+- `PUT /campaigns/{id}` — partial update.
+- `DELETE /campaigns/{id}` — delete; the campaign's goals are detached
+  (`campaign_id` → null) and survive for reuse.
+- `POST /campaigns/{id}/duplicate` — copy the campaign (name ` (copy)`
+  suffix, starts **inactive**) plus its goals as new goal rows.
 
-Full campaign CRUD, milestone ordering and scheduling arrive in Phase 10
-(Campaign Builder) on the same `CampaignRepository`.
+#### Campaign object
+
+```json
+{
+  "id": 3,
+  "name": "Summer Sale",
+  "description": "",
+  "status": "active",
+  "starts_at": null,
+  "ends_at": null,
+  "priority": 10,
+  "display_rules": {},
+  "goal_count": 2,
+  "goals": [
+    { "id": 8, "name": "Free shipping", "type": "amount", "target": 500000, "reward_type": "free_shipping", "menu_order": 1 },
+    { "id": 9, "name": "Free gift", "type": "amount", "target": 1000000, "reward_type": "free_gift", "menu_order": 2 }
+  ],
+  "created_at": "2026-08-08 10:00:00",
+  "updated_at": "2026-08-08 10:00:00"
+}
+```
+
+Milestone ordering: create/update accept an ordered `goals` array of goal
+ids (e.g. `{ "goals": [8, 9] }`); the repository assigns
+`goals.campaign_id` + `goals.menu_order` accordingly and detaches goals
+removed from the list. Validation: `name` (required on create),
+`status` (`active`/`inactive`), `starts_at`/`ends_at` (`Y-m-d` or
+`Y-m-d H:i:s`), `priority` (≥ 0), `display_rules` (object),
+`goals` (array of positive ints).
 
 ---
 
@@ -275,13 +309,13 @@ Notes:
 | Surface | Where it lands |
 |---|---|
 | Analytics endpoints | Phase 16 (events) / Phase 17 (dashboard) — no analytics data exists yet |
-| Campaign CRUD, milestone ordering | Phase 10 (Campaign Builder) |
+| Customer-state campaign rules | Phase 32 (needs schema fields) |
 | Message templates | Phase 13 (Dynamic Messaging) |
 | Suggestions payload | Phase 14 (Smart Product Suggestions) |
 
 ## 6. Testing
 
-`tests/rest-api-test.php` (62 checks, `php tests/rest-api-test.php`):
+`tests/rest-api-test.php` (102 checks, `php tests/rest-api-test.php`):
 
 - route registration for every endpoint
 - response envelope + pagination
@@ -291,5 +325,8 @@ Notes:
 - goal create → get → list → duplicate → update → delete through the
   handlers, plus an end-to-end server dispatch of `/progress`
 - settings read + save (success and error paths)
+- campaign CRUD + milestone ordering: create, order/reorder goals,
+  duplicate (inactive copy with copied milestones), delete (goals
+  detached), schema + 404 paths
 - all writes run inside a single database transaction that is rolled
   back; residue is asserted absent afterwards (read-only guarantee)

@@ -133,6 +133,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
+### Phase 10 — Campaign Builder (100% complete)
+
+- **P10-T01 Objective** — Built the Campaign Builder on the Phase 7 read-only campaign layer: multiple goals now work as a scheduled, prioritized campaign with ordered milestones (e.g. 500K → Free Shipping, 1M → Free Gift, 1.5M → 10% discount).
+- **P10-T02 Features** — Backend: `CampaignRepository` gained the full CRUD surface (`create`/`update`/`delete`/`duplicate`) plus milestone ordering — an ordered `goals` array of goal ids becomes `goals.campaign_id` + `goals.menu_order`, and goals removed from the list are detached for reuse; reads carry `goal_count` (list) and `goals` (detail). `CampaignsController` gained `POST /campaigns`, `PUT /campaigns/{id}`, `DELETE /campaigns/{id}` and `POST /campaigns/{id}/duplicate` (copy starts inactive, its goals are copied as new rows). Frontend: new `api/campaigns.ts`; `routes/Campaigns.tsx` is now a full CRUD list (name, milestone count, status + enable/disable switch, priority, schedule, actions: preview/edit/duplicate/delete, create → builder); new `routes/CampaignBuilder.tsx` (`/campaigns/new` + `/campaigns/:id/edit`, lazy-loaded) with Basic information (name/description/status), Schedule & priority (datetime window + conflict priority) and Milestones (goal ordering with move up/down/remove + add-from-goals chips); `CampaignPreviewDialog` shows the milestone ladder at simulated progress. Activation, scheduling, priority, customer-facing milestone copy and preview all covered — customer-state rules remain a roadmap deferral (Phase 32, needs schema fields).
+- Also fixed a Phase 9 list bug found during review: `fetchGoals` read `envelope.data.items`, but `GET /goals` returns `data` as a plain array — the Dashboard and Goals page silently showed an empty list even with stored goals. The client now reads the array directly (verified against the live envelope shape).
+- **Verification:** `php -l` clean; REST suite 102/102 (new campaign create/order/reorder/duplicate/delete + rollback checks); engine 75/75, reward 72/72, cart-integration 22/22 (no regressions); `npm run typecheck`, `npm run lint`, Prettier and `npm run build` all pass (CampaignBuilder emitted as its own lazy chunk). No database changes; plugin not activated.
+
+**Overall project progress: 45%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 weight 2% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

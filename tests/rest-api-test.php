@@ -105,6 +105,7 @@ check( '/search/categories registered', route_exists( $routes, '/goalcart/v1/sea
 check( '/search/coupons registered', route_exists( $routes, '/goalcart/v1/search/coupons' ) );
 check( '/campaigns registered', route_exists( $routes, '/goalcart/v1/campaigns' ) );
 check( '/campaigns/{id} registered', route_exists( $routes, '/goalcart/v1/campaigns/(?P<id>[\d]+)' ) );
+check( '/campaigns/{id}/duplicate registered', route_exists( $routes, '/goalcart/v1/campaigns/(?P<id>[\d]+)/duplicate' ) );
 check( '/progress registered', route_exists( $routes, '/goalcart/v1/progress' ) );
 
 // ---------------------------------------------------------------------------
@@ -215,7 +216,8 @@ echo "\n== 5. Permissions, CRUD, progress (rolled back) ==\n";
 $settings_option = \GoalCart\Settings\Settings::OPTION_NAME;
 $option_before   = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $settings_option ) );
 
-$created_ids = array();
+$created_ids         = array();
+$created_campaign_ids = array();
 
 $wpdb->query( 'START TRANSACTION' );
 
@@ -355,7 +357,97 @@ try {
 	$resp = $settings_ctrl->handle_save( $req );
 	check( 'settings save returns updated value', false === $resp->get_data()['data']['enabled'] );
 
-	// 5.12 Stored vs folded campaign state: the admin CRUD shows the
+	// 5.13 Campaign CRUD + milestone ordering (Phase 10).
+	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/campaigns' );
+	$req->set_param( 'name', 'Summer Sale' );
+	$req->set_param( 'description', 'Milestone campaign' );
+	$req->set_param( 'status', 'active' );
+	$req->set_param( 'priority', 5 );
+	$resp = $campaigns_ctrl->handle_create( $req );
+	$data = $resp->get_data();
+	check( 'campaign create returns envelope', isset( $data['data']['id'] ) );
+
+	$campaign_id = (int) $data['data']['id'];
+	$created_campaign_ids[] = $campaign_id;
+	check( 'created campaign id > 0', $campaign_id > 0 );
+	check( 'created campaign name matches', 'Summer Sale' === $data['data']['name'] );
+	check( 'created campaign priority persisted', 5 === $data['data']['priority'] );
+	check( 'created campaign has 0 milestones', 0 === $data['data']['goal_count'] );
+
+	// Name-less create fails predictably (repository returns 0 → 500).
+	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/campaigns' );
+	$resp = $campaigns_ctrl->handle_create( $req );
+	check( 'campaign create without name → 500', is_wp_error( $resp ) && 500 === $resp->get_error_data()['status'] );
+
+	// Assign two goals as milestones (ordered).
+	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req->set_param( 'name', 'Campaign Milestone One' );
+	$req->set_param( 'type', 'amount' );
+	$req->set_param( 'target', 100 );
+	$resp = $goals_ctrl->handle_create( $req );
+	$milestone_one = (int) $resp->get_data()['data']['id'];
+	$created_ids[] = $milestone_one;
+
+	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req->set_param( 'name', 'Campaign Milestone Two' );
+	$req->set_param( 'type', 'amount' );
+	$req->set_param( 'target', 200 );
+	$resp = $goals_ctrl->handle_create( $req );
+	$milestone_two = (int) $resp->get_data()['data']['id'];
+	$created_ids[] = $milestone_two;
+
+	$req = new \WP_REST_Request( 'PUT', '/goalcart/v1/campaigns/' . $campaign_id );
+	$req->set_param( 'id', $campaign_id );
+	$req->set_param( 'goals', array( $milestone_one, $milestone_two ) );
+	$resp = $campaigns_ctrl->handle_update( $req );
+	$data = $resp->get_data();
+	check( 'campaign update returns envelope', isset( $data['data']['goals'] ) );
+	check( 'campaign has 2 milestones', 2 === $data['data']['goal_count'] );
+	check( 'milestone order one first', $milestone_one === $data['data']['goals'][0]['id'] );
+	check( 'milestone order two second', $milestone_two === $data['data']['goals'][1]['id'] );
+	check( 'milestone menu_order persisted', 1 === $data['data']['goals'][0]['menu_order'] );
+
+	// Reorder milestones (2 → 1).
+	$req = new \WP_REST_Request( 'PUT', '/goalcart/v1/campaigns/' . $campaign_id );
+	$req->set_param( 'id', $campaign_id );
+	$req->set_param( 'goals', array( $milestone_two, $milestone_one ) );
+	$resp = $campaigns_ctrl->handle_update( $req );
+	$data = $resp->get_data();
+	check( 'milestone reorder swaps order', $milestone_two === $data['data']['goals'][0]['id'] );
+
+	// Goal detail reflects the campaign assignment.
+	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/goals/' . $milestone_one );
+	$req->set_param( 'id', $milestone_one );
+	$resp = $goals_ctrl->handle_get( $req );
+	check( 'goal kept campaign_id', $campaign_id === $resp->get_data()['data']['campaign_id'] );
+
+	// Duplicate the campaign: copy starts inactive, milestones copied.
+	$req  = new \WP_REST_Request( 'POST', '/goalcart/v1/campaigns/' . $campaign_id . '/duplicate' );
+	$req->set_param( 'id', $campaign_id );
+	$resp = $campaigns_ctrl->handle_duplicate( $req );
+	$copy = $resp->get_data()['data'];
+	$created_campaign_ids[] = (int) $copy['id'];
+	check( 'campaign duplicate creates a new id', (int) $copy['id'] !== $campaign_id );
+	check( 'campaign duplicate name has copy suffix', false !== strpos( $copy['name'], '(copy)' ) );
+	check( 'campaign duplicate starts inactive', 'inactive' === $copy['status'] );
+	check( 'campaign duplicate copied milestones', 2 === $copy['goal_count'] );
+	check( 'campaign duplicate keeps milestone order', $copy['goals'][0]['id'] !== $copy['goals'][1]['id'] );
+
+	// Deleting the original detaches its goals (they survive).
+	$req  = new \WP_REST_Request( 'DELETE', '/goalcart/v1/campaigns/' . $campaign_id );
+	$req->set_param( 'id', $campaign_id );
+	$resp = $campaigns_ctrl->handle_delete( $req );
+	check( 'campaign delete reports deleted', true === $resp->get_data()['data']['deleted'] );
+
+	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/campaigns/' . $campaign_id );
+	$req->set_param( 'id', $campaign_id );
+	$resp = $campaigns_ctrl->handle_get( $req );
+	check( 'deleted campaign returns 404', is_wp_error( $resp ) && 404 === $resp->get_error_data()['status'] );
+
+	$repo = $container->get( \GoalCart\Campaigns\CampaignRepository::class );
+	check( 'deleted campaign detached milestone one', null === $repo->get( $campaign_id ) );
+
+	// 5.14 Stored vs folded campaign state: the admin CRUD shows the
 	// stored status, the engine path folds the (inactive) campaign.
 	$campaigns_table = \GoalCart\Database\Schema::table( 'campaigns' );
 	$wpdb->insert(
@@ -404,6 +496,16 @@ foreach ( $created_ids as $id ) {
 	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE id = %d", $id ) );
 	check( "rolled-back goal {$id} is gone", 0 === $count );
 }
+
+$campaigns_table = \GoalCart\Database\Schema::table( 'campaigns' );
+
+foreach ( $created_campaign_ids as $id ) {
+	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$campaigns_table} WHERE id = %d", $id ) );
+	check( "rolled-back campaign {$id} is gone", 0 === $count );
+}
+
+$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$campaigns_table} WHERE name = %s", 'Summer Sale' ) );
+check( 'no rolled-back campaign remains by name', 0 === $count );
 
 $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE name = %s", 'REST Test Goal' ) );
 check( 'no rolled-back goal remains by name', 0 === $count );

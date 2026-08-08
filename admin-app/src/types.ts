@@ -177,6 +177,49 @@ export interface SearchCoupon {
   amount: number | null;
 }
 
+/** A milestone inside a campaign (Phase 10 payload shape). */
+export interface CampaignGoal {
+  id: number;
+  name: string;
+  type: GoalType;
+  target: number;
+  reward_type: RewardType;
+  menu_order: number;
+}
+
+/**
+ * A campaign as served by the Phase 10 REST API
+ * (`GET /goalcart/v1/campaigns`). Groups goals into scheduled,
+ * prioritized milestones (Phase 3 `campaigns` table + `goals.menu_order`).
+ */
+export interface Campaign {
+  id: number;
+  name: string;
+  description: string;
+  status: GoalStatus;
+  starts_at: string | null;
+  ends_at: string | null;
+  priority: number;
+  display_rules: Record<string, unknown>;
+  goal_count: number;
+  goals: CampaignGoal[];
+  created_at: string;
+  updated_at: string;
+}
+
+/** The payload accepted by `POST /campaigns` and `PUT /campaigns/{id}`. */
+export interface CampaignInput {
+  name: string;
+  description: string;
+  status: GoalStatus;
+  starts_at: string | null;
+  ends_at: string | null;
+  priority: number;
+  display_rules: Record<string, unknown>;
+  /** Ordered goal ids — the campaign's milestone ordering. */
+  goals: number[];
+}
+
 /**
  * The settings object persisted by the Phase 7 REST API
  * (`GET/POST /goalcart/v1/settings`). Grows with the Phase 18 surface.

@@ -21,6 +21,7 @@ admin-app/src/
 ├── api/
 │   ├── client.ts                apiFetch: X-WP-Nonce + envelope unwrap
 │   ├── goals.ts                 typed goal CRUD + duplicate
+│   ├── campaigns.ts             typed campaign CRUD + duplicate
 │   ├── search.ts                typed /search/{products,categories,coupons}
 │   └── settings.ts              typed GET/POST /settings
 ├── components/
@@ -30,6 +31,7 @@ admin-app/src/
 │   ├── EmptyState.tsx           no-data panel
 │   ├── ErrorBoundary.tsx        render-error fallback with retry
 │   ├── GoalPreviewDialog.tsx    lightweight goal preview (simulated progress)
+│   ├── CampaignPreviewDialog.tsx  lightweight milestone-ladder preview
 │   ├── goal-builder/            Phase 9 builder sections
 │   │   ├── SectionCard.tsx      titled section wrapper
 │   │   ├── EntityAutocomplete.tsx  debounced async search picker
@@ -45,7 +47,9 @@ admin-app/src/
     ├── Dashboard.tsx            live goal summary (REST-backed)
     ├── Goals.tsx                full goal CRUD list (Phase 9)
     ├── GoalBuilder.tsx          goal create/edit builder (Phase 9)
-    ├── Campaigns.tsx            container (Phase 10)
+    ├── Campaigns.tsx            full campaign CRUD list (Phase 10)
+    ├── CampaignBuilder.tsx      campaign builder: basics, schedule, priority,
+    │                            milestone ordering (Phase 10)
     ├── Analytics.tsx            container (Phase 16–17)
     ├── Appearance.tsx           container (Phase 12)
     ├── Settings.tsx             functional react-hook-form settings page
@@ -115,7 +119,8 @@ it.
 | Dashboard | live summary: goal counts, currency, version | 16–17 (analytics) |
 | Goals | full goal CRUD list (search/filter/pagination, edit, duplicate, enable/disable, delete, preview) | 9 (Goal Management UI) |
 | GoalBuilder | — | 9 (Goal Builder, `/goals/new` + `/goals/:id/edit`) |
-| Campaigns | container | 10 (Campaign Builder) |
+| Campaigns | full campaign CRUD list (milestones, status, priority, schedule, edit, duplicate, enable/disable, delete, preview) | 10 (Campaign Builder) |
+| CampaignBuilder | — | 10 (Campaign Builder, `/campaigns/new` + `/campaigns/:id/edit`) |
 | Analytics | container | 16–17 |
 | Appearance | container | 12 (Progress Templates) |
 | Settings | functional: enabled + fullscreen toggles (react-hook-form) | 18 (full surface) |
