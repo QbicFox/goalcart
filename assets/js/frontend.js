@@ -48,6 +48,20 @@
 	var STICKY_ID = 'goalcart-sticky';
 	var stickyDismissed = false;
 
+	// Phase 16 analytics: window.goalcartTracking (printed by the Tracker)
+	// carries the track endpoint, the nonce and the session id. Absent =
+	// tracking disabled — every tracker call is a guarded no-op.
+	var tracking = window.goalcartTracking || null;
+
+	// Per-session dedup: impressions / completions / suggestion impressions
+	// are reported once per goal (or goal+product); progress only when the
+	// percentage actually changed. Keeps refreshes quiet while still
+	// capturing the funnel events.
+	var reportedImpressions = {};
+	var reportedCompletions = {};
+	var reportedSuggestionImpressions = {};
+	var reportedProgress = {};
+
 	/**
 	 * Guard every entry point: a thrown error must never reach the page.
 	 *
@@ -112,6 +126,162 @@
 		request.onerror = function () {};
 		request.ontimeout = function () {};
 		request.send();
+	}
+
+	/**
+	 * Report an analytics event to the track endpoint (Phase 16).
+	 *
+	 * Fire-and-forget, must never throw: a failed report (network, JSON
+	 * body, disabled endpoint) must not disturb the storefront. Uses
+	 * sendBeacon when available so the report survives page unload.
+	 *
+	 * @param {string} eventType Event type (whitelisted server-side).
+	 * @param {Object} data      Optional event fields.
+	 * @return {void}
+	 */
+	function sendTrack( eventType, data ) {
+		if ( ! tracking || ! tracking.endpoint ) {
+			return;
+		}
+
+		var payload = {
+			event_type: eventType,
+			nonce: tracking.nonce || '',
+			session_id: tracking.sessionId || '',
+		};
+
+		if ( data ) {
+			for ( var key in data ) {
+				if ( Object.prototype.hasOwnProperty.call( data, key ) ) {
+					payload[ key ] = data[ key ];
+				}
+			}
+		}
+
+		var body;
+		try {
+			body = JSON.stringify( payload );
+		} catch ( error ) {
+			return;
+		}
+
+		if ( navigator.sendBeacon ) {
+			try {
+				navigator.sendBeacon( tracking.endpoint, new Blob( [ body ], { type: 'application/json' } ) );
+				return;
+			} catch ( error ) {
+				// Fall through to the XHR path.
+			}
+		}
+
+		var request = new XMLHttpRequest();
+		request.open( 'POST', tracking.endpoint, true );
+		request.setRequestHeader( 'Content-Type', 'application/json' );
+		request.send( body );
+	}
+
+	/**
+	 * The cart money value for event payloads.
+	 *
+	 * Uses the first money-based goal's current value (the storefront
+	 * payload carries per-goal values, not a cart total).
+	 *
+	 * @param {Array} goals Progress goal entries.
+	 * @return {number}
+	 */
+	function cartValue( goals ) {
+		if ( ! goals ) {
+			return 0;
+		}
+
+		for ( var i = 0; i < goals.length; i++ ) {
+			if ( goals[ i ].is_money && Number( goals[ i ].current ) > 0 ) {
+				return Number( goals[ i ].current ) || 0;
+			}
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Report the per-goal analytics events for a payload (Phase 16).
+	 *
+	 * Runs after every render: impressions once per goal per session,
+	 * progress when the percentage changed, completion events once per
+	 * goal, and suggestion impressions once per goal+product.
+	 *
+	 * @param {Object} data Progress payload data.
+	 * @return {void}
+	 */
+	function trackGoals( data ) {
+		var goals = ( data && data.goals ) || [];
+		var value = cartValue( goals );
+
+		for ( var i = 0; i < goals.length; i++ ) {
+			var goal = goals[ i ];
+			var goalId = String( goal.goal_id || 0 );
+
+			if ( ! reportedImpressions[ goalId ] && goal.eligible !== false ) {
+				reportedImpressions[ goalId ] = true;
+				sendTrack( 'goal_impression', {
+					goal_id: goalId,
+					campaign_id: goal.campaign_id || 0,
+					cart_value: value,
+				} );
+			}
+
+			var percentage = Math.round( Number( goal.percentage ) || 0 );
+
+			// Progress is reported only for eligible goals (an ineligible
+			// goal never renders a widget — no ghost events for hidden ones).
+			if ( goal.eligible !== false && reportedProgress[ goalId ] !== percentage ) {
+				reportedProgress[ goalId ] = percentage;
+				sendTrack( 'goal_progress', {
+					goal_id: goalId,
+					campaign_id: goal.campaign_id || 0,
+					cart_value: value,
+					percentage: percentage,
+				} );
+			}
+
+			if ( goal.completed && ! reportedCompletions[ goalId ] ) {
+				reportedCompletions[ goalId ] = true;
+				sendTrack( goal.reward && goal.reward.type ? 'reward_activated' : 'goal_completed', {
+					goal_id: goalId,
+					campaign_id: goal.campaign_id || 0,
+					cart_value: value,
+				} );
+			}
+
+			if ( goal.suggestions && goal.suggestions.length ) {
+				for ( var j = 0; j < goal.suggestions.length; j++ ) {
+					var productId = String( goal.suggestions[ j ].id || 0 );
+					var key = goalId + ':' + productId;
+
+					if ( productId && ! reportedSuggestionImpressions[ key ] ) {
+						reportedSuggestionImpressions[ key ] = true;
+						sendTrack( 'suggestion_impression', {
+							goal_id: goalId,
+							product_id: productId,
+						} );
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Report a suggestion click (Phase 16).
+	 *
+	 * @param {string} goalId    Goal id (data attribute, may be '').
+	 * @param {string} productId Product id (data attribute, may be '').
+	 * @return {void}
+	 */
+	function trackSuggestionClick( goalId, productId ) {
+		sendTrack( 'suggestion_clicked', {
+			goal_id: goalId || 0,
+			product_id: productId || 0,
+		} );
 	}
 
 	/**
@@ -305,6 +475,15 @@
 			if ( item.permalink && isSafeUrl( item.permalink ) ) {
 				var link = el( 'a', 'goalcart-suggestion__link' );
 				link.href = String( item.permalink );
+				// Phase 16 analytics: the ids ride on the link so a delegated
+				// click handler can report suggestion_clicked without
+				// resolving the product again.
+				if ( item.id ) {
+					link.setAttribute( 'data-goalcart-suggestion-id', String( item.id ) );
+				}
+				if ( goal && goal.goal_id ) {
+					link.setAttribute( 'data-goalcart-goal-id', String( goal.goal_id ) );
+				}
 				link.appendChild( el( 'span', 'goalcart-suggestion__name', String( item.name || '' ) ) );
 				// price_html is the server-formatted price (Phase 14); fall
 				// back to the raw price for hand-built payloads.
@@ -637,6 +816,7 @@
 					}
 
 					renderSticky( data );
+					trackGoals( data );
 				} );
 			} );
 		} );
@@ -674,12 +854,41 @@
 	}
 
 	/**
+	 * Bind the delegated suggestion-click tracker (Phase 16).
+	 *
+	 * One listener on document.body covers every widget and the sticky
+	 * bar; the suggestion ids ride on the link's data attributes.
+	 *
+	 * @return {void}
+	 */
+	function bindSuggestionTracking() {
+		if ( ! tracking || ! tracking.endpoint ) {
+			return;
+		}
+
+		document.body.addEventListener( 'click', function ( event ) {
+			var target = event.target;
+
+			while ( target && target !== document.body ) {
+				if ( target.classList && target.classList.contains( 'goalcart-suggestion__link' ) ) {
+					var goalId = target.getAttribute( 'data-goalcart-goal-id' ) || '';
+					var productId = target.getAttribute( 'data-goalcart-suggestion-id' ) || '';
+					trackSuggestionClick( goalId, productId );
+					return;
+				}
+				target = target.parentNode;
+			}
+		} );
+	}
+
+	/**
 	 * Boot the widgets.
 	 *
 	 * @return {void}
 	 */
 	function init() {
 		bindCartEvents();
+		bindSuggestionTracking();
 
 		refresh();
 

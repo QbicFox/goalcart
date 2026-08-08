@@ -9,6 +9,9 @@ namespace GoalCart;
 
 use GoalCart\Admin\Admin;
 use GoalCart\Admin\AssetLoader;
+use GoalCart\Analytics\AnalyticsRepository;
+use GoalCart\Analytics\Session;
+use GoalCart\Analytics\Tracker;
 use GoalCart\Campaigns\CampaignRepository;
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Compatibility;
@@ -24,6 +27,7 @@ use GoalCart\REST\GoalsController;
 use GoalCart\REST\PreviewController;
 use GoalCart\REST\SearchController;
 use GoalCart\REST\SettingsController;
+use GoalCart\REST\TrackController;
 use GoalCart\Rewards\RewardEngine;
 use GoalCart\Settings\Settings;
 use GoalCart\Suggestions\SuggestionEngine;
@@ -154,6 +158,11 @@ final class Plugin {
 		$this->hooks()->register( $this->reward_engine() );
 		$this->hooks()->register( $this->admin() );
 
+		// Analytics (Phase 16): session cookie, event recording, the
+		// frontend config print and the server-side suggested-product
+		// attribution all register through the Tracker.
+		$this->hooks()->register( $this->container->get( Tracker::class ) );
+
 		// Storefront progress UI (Phase 11): shortcode, display-location
 		// injection, sticky bar and frontend assets.
 		$this->hooks()->register( $this->container->get( ProgressUI::class ) );
@@ -166,6 +175,7 @@ final class Plugin {
 		$this->hooks()->register( $this->container->get( CampaignsController::class ) );
 		$this->hooks()->register( $this->container->get( FrontendController::class ) );
 		$this->hooks()->register( $this->container->get( PreviewController::class ) );
+		$this->hooks()->register( $this->container->get( TrackController::class ) );
 
 		// Apply everything to WordPress.
 		$this->hooks()->run();
@@ -212,6 +222,25 @@ final class Plugin {
 		// proximity ranking — consumed by the frontend REST layer.
 		$this->container->singleton( SuggestionEngine::class, function () {
 			return new SuggestionEngine();
+		} );
+
+		// Analytics (Phase 16): anonymous session, event recorder, and the
+		// metrics repository consumed by the Phase 17 dashboard. The
+		// Tracker registers the session cookie, the frontend config print
+		// and the add-to-cart attribution hook.
+		$this->container->singleton( Session::class, function () {
+			return new Session();
+		} );
+
+		$this->container->singleton( Tracker::class, function ( Container $container ) {
+			return new Tracker(
+				$container->get( Settings::class ),
+				$container->get( Session::class )
+			);
+		} );
+
+		$this->container->singleton( AnalyticsRepository::class, function () {
+			return new AnalyticsRepository();
 		} );
 
 		// Cart integration (Phase 6): the single source of the live-cart
@@ -276,6 +305,12 @@ final class Plugin {
 				$container->get( CampaignRepository::class ),
 				$container->get( FrontendController::class )
 			);
+		} );
+
+		// Public track endpoint (Phase 16): nonce-guarded, per-IP rate
+		// limited — the storefront JS reports events through it.
+		$this->container->singleton( TrackController::class, function ( Container $container ) {
+			return new TrackController( $container->get( Tracker::class ) );
 		} );
 
 		$this->container->singleton( AssetLoader::class, function ( Container $container ) {

@@ -1,0 +1,244 @@
+<?php
+/**
+ * REST controller for frontend analytics event tracking.
+ *
+ * @package GoalCart
+ */
+
+namespace GoalCart\REST;
+
+use GoalCart\Analytics\Session;
+use GoalCart\Analytics\Tracker;
+use GoalCart\Hooks\HookManager;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class TrackController
+ *
+ * Phase 16 (Analytics Foundation — Events): registers and handles
+ * `POST /goalcart/v1/track`, the public endpoint the storefront JS uses
+ * to report analytics events (goal_impression, goal_progress,
+ * goal_completed, reward_activated, suggestion_impression,
+ * suggestion_clicked).
+ *
+ * The endpoint is public — guests are the analytics population — so
+ * instead of REST cookie auth it is protected by the plugin's own
+ * tracking nonce (created in the frontend config printed by the
+ * Tracker) verified in permission_callback(), plus per-IP rate
+ * limiting. The event type is validated against the whitelist and every
+ * other field is typed in the arg schema, so a forged payload can only
+ * ever record a well-formed aggregate row.
+ *	 * `suggested_product_added` is intentionally NOT accepted here: it is
+	 * attributed server-side on woocommerce_add_to_cart (see Tracker), so a
+	 * client can never self-report a conversion.
+	 *
+	 * Known limitation (documented): the remaining six events — including
+	 * goal_completed / reward_activated — are client-reported, so a
+	 * determined visitor holding the page nonce could inflate completion
+	 * metrics. This matches the reference plugin's client-side analytics
+	 * trust boundary (and the JS dedupes per page session); the dashboard
+	 * treats these as directional signals, not audited conversion
+	 * counters. Server-side verification of completions/rewards is a
+	 * possible Phase 32 refinement.
+	 *
+	 * Mirrors the reference plugin (WooInsights\REST\ClickController).
+	 */
+class TrackController extends BaseController {
+
+	/**
+	 * Rate-limit budget for the track route (requests per window, per IP).
+	 *
+	 * Higher than the default public 120/min: the widget fires
+	 * impression/progress events on every cart refresh, so a busy
+	 * shopper can legitimately exceed the generic budget.
+	 *
+	 * @var int
+	 */
+	const TRACK_RATE_LIMIT_COUNT = 300;
+
+	/**
+	 * Tracker instance.
+	 *
+	 * @var Tracker
+	 */
+	protected $tracker;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param Tracker $tracker Tracker instance.
+	 */
+	public function __construct( Tracker $tracker ) {
+		$this->tracker = $tracker;
+	}
+
+	/**
+	 * Register REST hooks.
+	 *
+	 * @param HookManager $hooks Hook manager.
+	 * @return void
+	 */
+	public function register( HookManager $hooks ) {
+		$hooks->add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+	}
+
+	/**
+	 * Register the track route.
+	 *
+	 * @return void
+	 */
+	public function register_routes() {
+		register_rest_route(
+			self::NAMESPACE,
+			'/track',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'handle' ),
+				'permission_callback' => array( $this, 'permission_callback' ),
+				'args'                => array(
+					'event_type' => array(
+						'required'          => true,
+						'type'              => 'string',
+						'validate_callback' => function ( $value ) {
+							return Tracker::is_event_type( $value );
+						},
+					),
+					'goal_id'    => array(
+						'type'              => 'integer',
+						'default'           => 0,
+						'minimum'           => 0,
+						'sanitize_callback' => 'absint',
+					),
+					'campaign_id' => array(
+						'type'              => 'integer',
+						'default'           => 0,
+						'minimum'           => 0,
+						'sanitize_callback' => 'absint',
+					),
+					'product_id' => array(
+						'type'              => 'integer',
+						'default'           => 0,
+						'minimum'           => 0,
+						'sanitize_callback' => 'absint',
+					),
+					'cart_value' => array(
+						'type'    => 'number',
+						'default' => 0,
+						'minimum' => 0,
+					),
+					'percentage' => array(
+						'type'    => 'number',
+						'default' => 0,
+						'minimum' => 0,
+						'maximum' => 100,
+					),
+					'session_id' => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+					'nonce'      => array(
+						'required' => true,
+						'type'     => 'string',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Verify the tracking nonce before the route runs.
+	 *
+	 * Public endpoint: this replaces the base controller's admin
+	 * capability check with the plugin's own tracking nonce, then applies
+	 * the per-IP rate limit.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return true|\WP_Error
+	 */
+	public function permission_callback( $request ) {
+		if ( ! wp_verify_nonce( (string) $request->get_param( 'nonce' ), Tracker::TRACK_NONCE_ACTION ) ) {
+			return $this->error(
+				'goalcart_invalid_nonce',
+				__( 'Invalid tracking nonce.', 'goalcart' ),
+				403
+			);
+		}
+
+		$limited = $this->rate_limit_ip( $request, self::TRACK_RATE_LIMIT_COUNT );
+
+		if ( is_wp_error( $limited ) ) {
+			return $limited;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Handle a tracking request.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function handle( $request ) {
+		if ( ! $this->tracker->tracking_enabled() ) {
+			return $this->error(
+				'goalcart_tracking_disabled',
+				__( 'Tracking is disabled.', 'goalcart' ),
+				403
+			);
+		}
+
+		$event_type = (string) $request->get_param( 'event_type' );
+
+		// event_type is whitelist-validated by the arg schema, but the
+		// whitelist check is repeated here for direct-handler callers.
+		if ( ! Tracker::is_event_type( $event_type ) ) {
+			return $this->error(
+				'goalcart_invalid_event_type',
+				__( 'Unknown event type.', 'goalcart' ),
+				400
+			);
+		}
+
+		$session_id = (string) $request->get_param( 'session_id' );
+
+		// A well-formed client session id wins; otherwise the request's
+		// own cookie (set on the page view) identifies the session.
+		if ( ! Session::is_valid( $session_id ) ) {
+			$session_id = $this->tracker->get_session_id();
+		}
+
+		$percentage = round( (float) $request->get_param( 'percentage' ), 2 );
+
+		// percentage is only meaningful on goal_progress; keep the meta JSON
+		// clean (no spurious keys) for every other event type.
+		$meta = array();
+
+		if ( $percentage > 0 ) {
+			$meta['percentage'] = $percentage;
+		}
+
+		$id = $this->tracker->record(
+			$event_type,
+			array(
+				'goal_id'     => (int) $request->get_param( 'goal_id' ),
+				'campaign_id' => (int) $request->get_param( 'campaign_id' ),
+				'product_id'  => (int) $request->get_param( 'product_id' ),
+				'cart_value'  => (float) $request->get_param( 'cart_value' ),
+				'session_id'  => $session_id,
+				'meta'        => $meta,
+			)
+		);
+
+		if ( $id < 1 ) {
+			return $this->error(
+				'goalcart_track_failed',
+				__( 'Could not record the event.', 'goalcart' ),
+				500
+			);
+		}
+
+		return $this->success( array( 'id' => $id ) );
+	}
+}

@@ -57,8 +57,19 @@ Append-only event log (`docs/PRODUCT_SPEC.md` §5.5 / Phase 16). Stored in `goal
 | event type | `event_type` | `varchar(40)` — `goal_impression`, `goal_progress`, `goal_completed`, `reward_activated`, `suggestion_impression`, `suggestion_clicked`, `suggested_product_added` |
 | session / customer | `session_id` (32-char anon id), `user_id` | privacy-first: anonymous session id, never raw IP |
 | cart/order context | `cart_value` `decimal(19,4)`, `order_id`, `product_id` | order/product reference WooCommerce data by ID as plain indexed columns (no FKs into WC tables — see §2) |
-| value | `cart_value` + `meta` | `meta` JSON carries event-specific payload |
+| value | `cart_value` + `meta` | `meta` JSON carries event-specific payload (e.g. `percentage`) |
 | timestamp | `created_at` | `datetime`, site timezone |
+
+**Write path (Phase 16):** six events are recorded by `GoalCart\Analytics\Tracker`
+when the storefront JS reports them to the public `POST /goalcart/v1/track`
+endpoint (nonce-guarded); `suggested_product_added` is attributed
+server-side on `woocommerce_add_to_cart` (only when the session saw a
+`suggestion_impression` for that product within 24h). Rows carry only
+aggregate numbers, ids and the anonymous session token — no PII. The
+`Tracker` retries an insert once without the FK ids when a referenced
+goal/campaign was deleted between impression and report (the FK's
+`SET NULL` semantics for a deleted parent), so events are never silently
+dropped.
 
 ---
 

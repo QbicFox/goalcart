@@ -278,6 +278,63 @@ activated.
 
 ---
 
+### Phase 16 — Analytics Foundation (100% complete)
+
+- **P16-T01 Objective** — Goal Cart now measures whether it actually
+increases revenue: an append-only analytics event pipeline records what
+shoppers see and do (goal impressions, progress, completions, reward
+activations, suggestion impressions/clicks/adds) into the existing
+`goalcart_analytics_events` table, keyed by anonymous sessions.
+- **P16-T02 Events** — New `includes/Analytics/` services (DI-wired in
+`Plugin.php`): `Session` (32-hex HttpOnly SameSite=Lax cookie, sliding
+30-day expiry), `Tracker` (the event recorder — whitelisted event types,
+FK-resilient inserts, the `goalcart_tracking_enabled` filter, frontend
+config print `window.goalcartTracking` at `wp_footer` priority 4, and the
+`woocommerce_add_to_cart` hook that attributes `suggested_product_added`
+server-side only when the session saw a `suggestion_impression` for that
+product within 24h), and `AnalyticsRepository` (all seven P16-T03
+metrics). New `includes/REST/TrackController.php` registers the public
+`POST /goalcart/v1/track` endpoint — nonce-guarded (own tracking nonce
+instead of an admin capability), 300 req/min per-IP budget, arg schema
+validating the event-type whitelist, and `suggested_product_added`
+rejected from the client so conversions can never be self-reported. The
+storefront `assets/js/frontend.js` reports six events with a
+must-never-throw contract (sendBeacon with XHR fallback): impressions
+once per goal per page session, progress on percentage change, completion
+/reward events once per goal, suggestion impressions once per goal +
+product, and suggestion clicks through a delegated listener on the
+`data-goalcart-suggestion-id` / `data-goalcart-goal-id` link attributes.
+- **P16-T03 Metrics** — `AnalyticsRepository` computes impressions,
+completions (goal_completed + reward_activated), completion rate,
+average cart value at impression, revenue associated with completed
+goals (SUM of cart_value at completion events), suggestion CTR and
+suggestion add-to-cart rate — each filterable by date range (from/to),
+campaign and goal for the Phase 17 dashboard, with zero-denominator
+guards. The shared progress payload and `Goal` model now carry
+`campaign_id` so events attribute to campaigns.
+- **P16-T04 Privacy** — The events table stores only aggregate numbers
+(cart value, percentage), goal/campaign/product/order ids and the
+anonymous session token — no IP, user agent, email or other PII (the
+table has no PII columns at all); `user_id` is recorded only when the
+shopper is logged in; guests stay anonymous. Tracking respects the master
+`enabled` toggle + the `goalcart_tracking_enabled` filter (Phase 18 adds
+a settings toggle).
+- Added files: `includes/Analytics/{Session,Tracker,AnalyticsRepository}.php`,
+`includes/REST/TrackController.php`, `tests/analytics-test.php`.
+- **Verification:** `php -l` clean; new analytics suite 72/72 (wiring,
+sessions, whitelist, recording, privacy columns, gates, /track schema +
+nonce + dispatch, suggestion-add attribution incl. FK-resilience and
+fresh-session negatives, all seven metrics + filters + zero-denominator
+guards, rollback); rest-api 120/120, engine 75/75, reward 72/72,
+cart-integration 22/22, message 47/47, suggestion 28/28, preview 90/90
+(no regressions); `node --check` on the JS; `npm run typecheck` and
+`npm run lint` pass. No database changes (the analytics_events table
+ships since Phase 3); plugin not activated.
+
+**Overall project progress: 61%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 4% + Phase 15 2% + Phase 16 weight 2% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

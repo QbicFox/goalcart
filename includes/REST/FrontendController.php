@@ -186,6 +186,7 @@ class FrontendController extends BaseController {
 	public function shape_goal( Goal $goal, GoalResult $result, CartContext $context, array $extra = array() ) {
 		return array(
 			'goal_id'      => $goal->id(),
+			'campaign_id'  => $goal->campaign_id(),
 			'goal_name'    => $goal->name(),
 			'goal_type'    => $goal->type(),
 			'is_money'     => $this->is_money_goal( $goal ),

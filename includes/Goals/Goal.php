@@ -182,6 +182,13 @@ final class Goal {
 	protected $reward_meta;
 
 	/**
+	 * Id of the campaign the goal belongs to (0 when standalone).
+	 *
+	 * @var int
+	 */
+	protected $campaign_id;
+
+	/**
 	 * Name of the campaign the goal belongs to (empty when standalone).
 	 *
 	 * Folded in by the repository's campaign join (like campaign status and
@@ -230,6 +237,7 @@ final class Goal {
 		$this->reward_max_value  = isset( $data['reward_max_value'] ) ? (float) $data['reward_max_value'] : null;
 		$this->reward_meta       = $this->meta( isset( $data['reward_meta'] ) ? $data['reward_meta'] : array() );
 		$this->display_settings = $this->meta( isset( $data['display_settings'] ) ? $data['display_settings'] : array() );
+		$this->campaign_id      = isset( $data['campaign_id'] ) ? (int) $data['campaign_id'] : 0;
 		$this->campaign_name    = isset( $data['campaign_name'] ) ? (string) $data['campaign_name'] : '';
 	}
 
@@ -435,6 +443,15 @@ final class Goal {
 	 */
 	public function display_settings() {
 		return $this->display_settings;
+	}
+
+	/**
+	 * Id of the campaign this goal belongs to (0 when standalone).
+	 *
+	 * @return int
+	 */
+	public function campaign_id() {
+		return $this->campaign_id;
 	}
 
 	/**

@@ -53,6 +53,10 @@ status codes are always set. The common codes:
 | `goalcart_goal_not_found` / `goalcart_campaign_not_found` | 404 | Resource missing |
 | `goalcart_preview_target_required` | 400 | Neither / both of `goal_id` + `campaign_id` given |
 | `goalcart_preview_not_found` | 404 | Preview target (goal/campaign) missing |
+| `goalcart_invalid_nonce` | 403 | Invalid tracking nonce (`/track`) |
+| `goalcart_tracking_disabled` | 403 | Tracking master toggle off (`/track`) |
+| `goalcart_invalid_event_type` | 400 | Unknown event type (`/track`, direct handler) |
+| `goalcart_track_failed` | 500 | Event insert failed (`/track`) |
 | `goalcart_settings_empty` | 400 | No known settings keys in the payload |
 | `rest_invalid_param` | 400 | Arg-schema validation failure |
 | `goalcart_*_create/update/delete_failed` | 500 | Persistence failure |
@@ -70,7 +74,9 @@ status codes are always set. The common codes:
 ### 1.4 Rate limiting
 
 Fixed-window limiters, keyed by user + route (admin) or IP + route
-(public), stored in transients. Admin: 60 req/min. Public: 120 req/min.
+(public), stored in transients. Admin: 60 req/min. Public: 120 req/min
+(the `/track` route gets 300 req/min per IP — the widgets report events
+on every cart refresh).
 
 ---
 
@@ -441,6 +447,44 @@ Notes:
   the widgets render the configured storefront template without another
   round-trip.
 
+### `POST /track` — public, nonce-guarded, rate limited per IP (Phase 16)
+
+The storefront JS reports analytics events to this endpoint. It is public
+(guests are the analytics population) but protected by the plugin's own
+tracking nonce (from the `window.goalcartTracking` config printed by
+`GoalCart\Analytics\Tracker`) instead of an admin capability, plus a
+generous per-IP rate limit (300/min — the widgets fire events on every
+cart refresh).
+
+Body args (all typed in the route arg schema):
+
+| Arg | Type | Default | Notes |
+|---|---|---|---|
+| `event_type` | string (required) | — | One of the seven event types (below) — validated against the whitelist |
+| `goal_id` | int ≥ 0 | 0 | Goal the event is about |
+| `campaign_id` | int ≥ 0 | 0 | Campaign the goal belongs to |
+| `product_id` | int ≥ 0 | 0 | Suggested product (suggestion events) |
+| `cart_value` | number ≥ 0 | 0 | Cart money value at event time |
+| `percentage` | number 0–100 | 0 | Progress percentage (goal_progress), stored in `meta` |
+| `session_id` | string | cookie | Anonymous session id; the request cookie is the fallback |
+| `nonce` | string (required) | — | `goalcart_track` nonce from the tracking config |
+
+Event types (whitelist): `goal_impression`, `goal_progress`,
+`goal_completed`, `reward_activated`, `suggestion_impression`,
+`suggestion_clicked` — plus `suggested_product_added`, which is
+**server-side only** (attributed on `woocommerce_add_to_cart`, never
+accepted from the client, so a conversion can never be self-reported).
+
+**Trust boundary:** the six client-reported events are directional
+analytics signals, not audited counters — a visitor holding the page
+nonce could inflate completion counts. The JS dedupes per page session
+and the `suggested_product_added` conversion is server-verified; treat
+the dashboard metrics accordingly.
+
+Response: `{ "data": { "id": 42 } }`. Errors: `goalcart_invalid_nonce`
+(403), `goalcart_tracking_disabled` (403), `rest_invalid_param` (400,
+bad event type or field), `goalcart_track_failed` (500).
+
 ---
 
 ## 4. Security checklist (P07-T04)
@@ -462,10 +506,31 @@ Notes:
 
 | Surface | Where it lands |
 |---|---|
-| Analytics endpoints | Phase 16 (events) / Phase 17 (dashboard) — no analytics data exists yet |
+| Analytics dashboard endpoints | Phase 17 (Analytics Dashboard) — Phase 16 records the events (`/track`) and computes the metrics server-side |
 | Customer-state campaign rules | Phase 32 (needs schema fields) |
 
 ## 6. Testing
+
+`tests/analytics-test.php` (72 checks, `php tests/analytics-test.php`):
+
+- service wiring (Session / Tracker / AnalyticsRepository / TrackController
+  resolve and register their hooks)
+- anonymous sessions: 32-hex ids, cookie validation
+- the event-type whitelist (all seven types, nothing else)
+- recording: rows carry goal/campaign/product ids, cart value, session,
+  scalar-only meta; guest `user_id` stays NULL
+- privacy: the events table has no PII columns; the `goalcart_tracking_enabled`
+  filter and the master toggle both gate recording
+- the public `/track` route: arg-schema whitelist, bad nonce → 403, valid
+  dispatch records end-to-end
+- `suggested_product_added` attribution: attributed only when the session
+  saw a suggestion_impression for that product (fresh/unseen sessions are
+  never attributed), and the FK-resilience retry for deleted goals
+- all seven metrics over seeded events (impressions, completions,
+  completion rate, average cart value, revenue on completed goals,
+  suggestion CTR, suggestion add-to-cart rate) + campaign/goal/date
+  filters + zero-denominator guards
+- full rollback verification (no residue)
 
 `tests/preview-test.php` (90 checks, `php tests/preview-test.php`):
 

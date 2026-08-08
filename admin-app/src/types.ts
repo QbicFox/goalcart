@@ -180,6 +180,7 @@ export interface SuggestionProduct {
  */
 export interface ProgressGoal {
   goal_id: number;
+  campaign_id: number;
   goal_name: string;
   goal_type: GoalType;
   is_money: boolean;

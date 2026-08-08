@@ -97,7 +97,8 @@ when present (WooCommerce fires these as jQuery events) with a native
   `currency`, `isRtl`, `labels` — printed as `window.goalcartFrontend` at
   `wp_footer` priority 5, before the enqueued footer script. Phase 12 adds
   `template` (active variant), `animation` and `appearance` (resolved
-  tokens).
+  tokens). The Phase 16 Tracker prints a second object,
+  `window.goalcartTracking`, at priority 4 (see “Analytics Events”).
 - Assets load only on pages that can render a widget (cart / checkout /
   shop / product / a page containing the shortcode) via
   `page_needs_widget()`.
@@ -222,6 +223,67 @@ responsive, motion-safe (respects `prefers-reduced-motion`), and
 `--goalcart-bar-height`, …) — the Phase 12 Appearance controls override
 the same tokens, and the `frontend_custom_css` setting appends custom CSS
 to the same inline style block (`ProgressUI::appearance_css()`).
+
+---
+
+# Analytics Events (Phase 16)
+
+The storefront widgets report goal-cart analytics events to
+`POST /goalcart/v1/track` (see `docs/api.md` §3). Tracking is baked into
+`assets/js/frontend.js` — no separate tracker file — with the same
+must-never-throw contract as the widgets: a failed or missing report can
+never disturb the storefront.
+
+## Config
+
+`GoalCart\Analytics\Tracker` prints a second small inline config object,
+`window.goalcartTracking`, at `wp_footer` priority 4 (before the widget
+config at 5):
+
+```js
+{ endpoint, nonce, sessionId }
+```
+
+The endpoint + nonce guard the `/track` route; `sessionId` is the
+anonymous session cookie (32-hex, HttpOnly, SameSite=Lax — never an IP or
+any PII) that groups all of one visitor's events.
+
+## Events reported
+
+| Event | When | Dedup |
+|---|---|---|
+| `goal_impression` | an eligible goal renders in a widget | once per goal per page session |
+| `goal_progress` | the goal's percentage changes | per goal + percentage |
+| `goal_completed` | a goal without a reward reaches 100% | once per goal per page session |
+| `reward_activated` | a goal with a reward reaches 100% | once per goal per page session |
+| `suggestion_impression` | a suggested product renders | once per goal + product per page session |
+| `suggestion_clicked` | a suggestion link is clicked | every click (delegated listener) |
+
+`cart_value` is the featured money goal's current value at event time;
+`goal_progress` carries the rounded `percentage` in `meta`. Suggestion
+clicks are reported through a delegated `document.body` click listener
+using the `data-goalcart-suggestion-id` / `data-goalcart-goal-id`
+attributes the widget puts on each suggestion link.
+
+`goal_impression` is deliberately gated on an *eligible* goal rendering —
+no payload fetch, no ineligible goal, no bot-poll, no event. Reports use
+`navigator.sendBeacon` when available (so they survive page unload) with
+an XHR fallback, and the events fire on every widget refresh, deduped
+per page session so cart updates don't spam the funnel.
+
+## Server-side attribution
+
+`suggested_product_added` is **not** client-reported: `GoalCart\Analytics\Tracker`
+hooks `woocommerce_add_to_cart` and records the event only when the
+session saw a `suggestion_impression` for that product within the last
+24 hours — so a suggestion conversion can never be self-reported, and an
+add-to-cart from anywhere else is simply not attributed.
+
+## Gate
+
+Tracking respects the master `enabled` setting plus the
+`goalcart_tracking_enabled` filter (default on). Phase 18 adds a
+first-class settings toggle; until then the filter is the privacy switch.
 
 ---
 
