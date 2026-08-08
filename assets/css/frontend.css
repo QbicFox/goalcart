@@ -1,0 +1,315 @@
+/**
+ * Goal Cart storefront progress widgets (Phase 11).
+ *
+ * Scoped under .goalcart-widget / #goalcart-sticky so styles never leak
+ * into the theme. RTL-aware (logical properties), responsive, and
+ * themeable through a small set of CSS custom properties (Phase 12
+ * Appearance overrides the same tokens).
+ *
+ * Tokens:
+ *   --goalcart-accent        primary bar/reward color
+ *   --goalcart-bg            widget surface
+ *   --goalcart-border        hairline borders
+ *   --goalcart-text          primary text
+ *   --goalcart-text-muted    secondary text
+ *   --goalcart-radius        corner radius
+ *   --goalcart-shadow        card elevation
+ *
+ * @package GoalCart
+ */
+
+.goalcart-widget,
+#goalcart-sticky {
+	--goalcart-accent: #2271b1;
+	--goalcart-bg: #ffffff;
+	--goalcart-border: #dcdcde;
+	--goalcart-text: #1d2327;
+	--goalcart-text-muted: #646970;
+	--goalcart-radius: 10px;
+	--goalcart-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+	--goalcart-track: #f0f0f1;
+
+	color: var(--goalcart-text);
+	font-family: inherit;
+	font-size: 14px;
+	line-height: 1.5;
+	box-sizing: border-box;
+}
+
+.goalcart-widget *,
+#goalcart-sticky * {
+	box-sizing: border-box;
+}
+
+/* ------------------------------------------------------------------ *
+ * GoalContainer
+ * ------------------------------------------------------------------ */
+
+.goalcart-widget {
+	width: 100%;
+	max-width: 640px;
+	margin: 0 auto;
+}
+
+.goalcart-widget--full {
+	margin-block: 1.5rem;
+}
+
+.goalcart-widget--compact {
+	margin-block: 0.75rem;
+}
+
+.goalcart-card {
+	background: var(--goalcart-bg);
+	border: 1px solid var(--goalcart-border);
+	border-radius: var(--goalcart-radius);
+	box-shadow: var(--goalcart-shadow);
+	padding: 1rem 1.125rem;
+}
+
+.goalcart-widget--empty {
+	display: none;
+}
+
+.goalcart-card__head {
+	display: flex;
+	justify-content: flex-end;
+	margin-block-end: 0.5rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * ProgressBar
+ * ------------------------------------------------------------------ */
+
+.goalcart-progress {
+	position: relative;
+	height: 10px;
+	background: var(--goalcart-track);
+	border-radius: 999px;
+	overflow: hidden;
+}
+
+.goalcart-progress__fill {
+	position: absolute;
+	inset-inline-start: 0;
+	inset-block-start: 0;
+	height: 100%;
+	width: 0;
+	background: var(--goalcart-accent);
+	border-radius: inherit;
+	transition: width 0.45s ease;
+}
+
+.goalcart-progress--complete .goalcart-progress__fill {
+	background: #00a32a;
+}
+
+/* ------------------------------------------------------------------ *
+ * GoalMessage
+ * ------------------------------------------------------------------ */
+
+.goalcart-message {
+	margin: 0.625rem 0 0;
+	color: var(--goalcart-text);
+	font-weight: 500;
+}
+
+.goalcart-message:first-child {
+	margin-block-start: 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * RewardStatus
+ * ------------------------------------------------------------------ */
+
+.goalcart-reward {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.25rem 0.625rem;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1.6;
+}
+
+.goalcart-reward--locked {
+	background: var(--goalcart-track);
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-reward--unlocked {
+	background: rgba(0, 163, 42, 0.12);
+	color: #007017;
+}
+
+.goalcart-reward__icon {
+	font-size: 13px;
+	line-height: 1;
+}
+
+/* ------------------------------------------------------------------ *
+ * GoalMilestones
+ * ------------------------------------------------------------------ */
+
+.goalcart-milestones {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	margin: 0.875rem 0 0;
+	padding: 0;
+	list-style: none;
+	flex-wrap: wrap;
+}
+
+.goalcart-milestone {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	color: var(--goalcart-text-muted);
+	font-size: 12px;
+	font-weight: 500;
+}
+
+.goalcart-milestone + .goalcart-milestone::before {
+	content: "";
+	width: 22px;
+	height: 2px;
+	background: var(--goalcart-border);
+}
+
+.goalcart-milestone__dot {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	background: var(--goalcart-border);
+	transition: background 0.3s ease;
+}
+
+.goalcart-milestone--complete {
+	color: var(--goalcart-text);
+}
+
+.goalcart-milestone--complete .goalcart-milestone__dot {
+	background: var(--goalcart-accent);
+}
+
+.goalcart-milestone--complete .goalcart-milestone__dot::after {
+	content: "\2713";
+	display: none;
+}
+
+/* ------------------------------------------------------------------ *
+ * SuggestionList (fills in Phase 14)
+ * ------------------------------------------------------------------ */
+
+.goalcart-suggestions {
+	margin: 0.875rem 0 0;
+	padding: 0.75rem 0 0;
+	list-style: none;
+	border-top: 1px dashed var(--goalcart-border);
+}
+
+.goalcart-suggestion + .goalcart-suggestion {
+	margin-block-start: 0.375rem;
+}
+
+.goalcart-suggestion__link {
+	display: flex;
+	justify-content: space-between;
+	gap: 0.75rem;
+	text-decoration: none;
+	color: inherit;
+}
+
+.goalcart-suggestion__link:hover {
+	text-decoration: underline;
+}
+
+.goalcart-suggestion__price {
+	color: var(--goalcart-text-muted);
+	white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ *
+ * StickyGoalBar
+ * ------------------------------------------------------------------ */
+
+.goalcart-sticky {
+	position: fixed;
+	inset-inline: 0;
+	inset-block-end: 0;
+	z-index: 99999;
+	padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+	pointer-events: none;
+	transform: translateY(110%);
+	transition: transform 0.35s ease;
+}
+
+.goalcart-sticky--visible {
+	transform: translateY(0);
+	pointer-events: auto;
+}
+
+.goalcart-sticky__inner {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	max-width: 640px;
+	margin-inline: auto;
+	padding: 0.75rem 1rem;
+	background: var(--goalcart-bg);
+	border: 1px solid var(--goalcart-border);
+	border-radius: var(--goalcart-radius);
+	box-shadow: var(--goalcart-shadow);
+}
+
+.goalcart-sticky__content {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.goalcart-sticky__content .goalcart-progress {
+	height: 8px;
+}
+
+.goalcart-sticky__content .goalcart-message {
+	margin-block-start: 0.375rem;
+	font-size: 13px;
+}
+
+.goalcart-sticky__content .goalcart-reward {
+	margin-block-start: 0.375rem;
+}
+
+.goalcart-sticky__close {
+	flex: 0 0 auto;
+	width: 28px;
+	height: 28px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--goalcart-text-muted);
+	font-size: 20px;
+	line-height: 1;
+	cursor: pointer;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.goalcart-sticky__close:hover {
+	background: var(--goalcart-track);
+	color: var(--goalcart-text);
+}
+
+/* ------------------------------------------------------------------ *
+ * Accessibility & motion
+ * ------------------------------------------------------------------ */
+
+@media ( prefers-reduced-motion: reduce ) {
+	.goalcart-progress__fill,
+	.goalcart-sticky {
+		transition: none;
+	}
+}

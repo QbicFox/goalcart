@@ -144,6 +144,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
+### Phase 11 — Frontend Progress UI (100% complete)
+
+- **P11-T01 Objective** — Built reusable, customer-facing progress components on the storefront, following the reference plugin's frontend convention: hand-written vanilla JS in `assets/js/` (no build step), a single inline `window.goalcartFrontend` config printed early in `wp_footer`, and a must-never-throw contract in the JS.
+- **P11-T02 Components** — New `assets/js/frontend.js` implements the full component set (GoalContainer, ProgressBar, GoalMessage, GoalMilestones, RewardStatus, SuggestionList, StickyGoalBar) fed by the public `GET /goalcart/v1/progress` endpoint: full widgets render reward chip + progress + message + milestone ladder + suggestions, compact widgets render progress + message + reward chip, the sticky bar is a fixed dismissible bottom bar, and empty/no-eligible-goal states hide the widget. The progress payload gained an `is_money` flag so the JS formats milestone labels as currency vs plain numbers correctly. New `assets/css/frontend.css` is scoped, responsive, RTL-aware (logical properties), motion-safe, and themeable via `--goalcart-*` custom properties (Phase 12 Appearance reuses the tokens).
+- **P11-T03 Display Locations** — New `includes/Frontend/ProgressUI.php` service (wired into the DI container + HookManager in `Plugin.php`) prints empty widget containers at every location with a rendered-location registry guarding against double injection: cart (`woocommerce_before_cart`), mini cart (`woocommerce_after_mini_cart`, re-mounted after fragment refreshes), checkout (`woocommerce_before_checkout_form`), shop/archives (`woocommerce_archive_description`), product pages (`woocommerce_single_product_summary` prio 45), the `[goalcart_progress variant="full|compact"]` shortcode (unique ids per instance), and the sticky bar (`wp_footer`). The UI is gated by the `enabled` setting (`goalcart_frontend_enabled` filter), locations are filterable (`goalcart_frontend_locations`), assets load only on widget-capable pages, and the JS refreshes on WooCommerce's cart events (jQuery-bound with a native fallback) plus an optional `goalcart_frontend_refresh_interval` poll.
+- Added files: `includes/Frontend/ProgressUI.php`, `assets/js/frontend.js`, `assets/css/frontend.css`, `tests/frontend-test.php`.
+- **Verification:** `php -l` clean; new frontend suite 36/36 (container resolution, hook registration incl. priorities, shortcode markup + unique ids, duplicate-render guard, config payload, enabled gate + filter, page gating with a rolled-back shortcode post); engine 75/75, reward 72/72, cart-integration 22/22, rest-api 102/102 (no regressions); `node --check` on the JS; headless-Chrome smoke test against a mock `/progress` endpoint renders the full/compact/sticky widgets (42.5% fill, milestone targets, reward chips, completed state) with zero console errors. No database changes; plugin not activated.
+
+**Overall project progress: 49%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 weight 4% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

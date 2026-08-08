@@ -260,6 +260,7 @@ exposes only the minimum data the widgets need:
         "goal_id": 5,
         "goal_name": "Free shipping",
         "goal_type": "amount",
+        "is_money": true,
         "current": 250000,
         "target": 500000,
         "remaining": 250000,
@@ -283,9 +284,16 @@ Notes:
 
 - `message` is a minimal built-in placeholder until the Phase 13 message
   template engine ships; `suggestions` is always empty until Phase 14.
+- `is_money` tells the widgets whether to format the goal's numbers as
+  currency (amount/category/product/composite) or as plain numbers
+  (quantity / distinct-quantity / weight) — it drives the milestone
+  labels in `assets/js/frontend.js`.
 - The payload contains only aggregate numbers for the shopper's own cart
   — no PII — which is what allows it to be public.
-- The progress widgets (Phase 11) poll this endpoint and re-render.
+- The Phase 11 progress widgets poll this endpoint and re-render on every
+  WooCommerce cart event (`added_to_cart`, `updated_cart_totals`,
+  `wc_fragments_refreshed`, …), driven by the config object printed by
+  `GoalCart\Frontend\ProgressUI` (`window.goalcartFrontend`).
 
 ---
 

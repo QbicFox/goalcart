@@ -127,6 +127,7 @@ class FrontendController extends BaseController {
 				'goal_id'      => $goal->id(),
 				'goal_name'    => $goal->name(),
 				'goal_type'    => $goal->type(),
+				'is_money'     => $this->is_money_goal( $goal ),
 				'current'      => $result->current(),
 				'target'       => $result->target(),
 				'remaining'    => $result->remaining(),

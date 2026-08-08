@@ -13,6 +13,7 @@ use GoalCart\Campaigns\CampaignRepository;
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Compatibility;
 use GoalCart\Database\Installer;
+use GoalCart\Frontend\ProgressUI;
 use GoalCart\Goals\GoalEngine;
 use GoalCart\Goals\GoalRepository;
 use GoalCart\Hooks\HookManager;
@@ -150,6 +151,10 @@ final class Plugin {
 		$this->hooks()->register( $this->reward_engine() );
 		$this->hooks()->register( $this->admin() );
 
+		// Storefront progress UI (Phase 11): shortcode, display-location
+		// injection, sticky bar and frontend assets.
+		$this->hooks()->register( $this->container->get( ProgressUI::class ) );
+
 		// REST controllers (Phase 7): each registers its routes on
 		// rest_api_init through the same HookManager.
 		$this->hooks()->register( $this->container->get( GoalsController::class ) );
@@ -247,6 +252,12 @@ final class Plugin {
 
 		$this->container->singleton( Admin::class, function ( Container $container ) {
 			return new Admin( $container->get( Settings::class ), $container->get( AssetLoader::class ) );
+		} );
+
+		// Storefront progress UI (Phase 11): renders widget containers and
+		// enqueues the vanilla frontend JS/CSS (assets/js, assets/css).
+		$this->container->singleton( ProgressUI::class, function ( Container $container ) {
+			return new ProgressUI( $container->get( Settings::class ) );
 		} );
 	}
 

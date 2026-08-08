@@ -1,3 +1,109 @@
+# Goal Cart Frontend
+
+This document covers both frontends:
+
+- **Storefront progress UI (Phase 11)** — the customer-facing widgets
+  (vanilla JS + CSS in `assets/`), below.
+- **React Admin App (Phase 8–10)** — the WP-admin dashboard, further down.
+
+---
+
+# Storefront Progress UI (Phase 11)
+
+The customer-facing widget layer turns the public `GET /goalcart/v1/progress`
+endpoint into live progress widgets on the storefront. It follows the
+reference plugin's frontend convention exactly: **hand-written vanilla JS in
+`assets/js/` (no build step)**, enqueued with `GOALCART_VERSION` + `in_footer`,
+a single inline config object (`window.goalcartFrontend`) printed early in
+`wp_footer`, and a **must-never-throw contract** in the JS.
+
+## Architecture
+
+```text
+includes/Frontend/ProgressUI.php        server-side widget service
+assets/js/frontend.js                   vanilla JS widget library
+assets/css/frontend.css                 RTL-aware widget styles
+GET /goalcart/v1/progress               public progress payload (Phase 7)
+```
+
+The PHP side never renders progress markup. It prints empty widget
+containers at the display locations; the JS fetches `/progress` and fills
+each container in, so cart changes update the UI through WooCommerce's
+own JS events without a page reload.
+
+## Display locations
+
+| Location | Hook | Variant |
+|---|---|---|
+| Cart page | `woocommerce_before_cart` | full |
+| Mini cart | `woocommerce_after_mini_cart` (inside the fragment) | compact |
+| Checkout | `woocommerce_before_checkout_form` | full |
+| Shop / archives | `woocommerce_archive_description` | compact |
+| Product page | `woocommerce_single_product_summary` (prio 45) | compact |
+| Anywhere | `[goalcart_progress variant="full|compact"]` shortcode | full/compact |
+| Sticky bar | `wp_footer` | fixed bottom bar |
+
+Every location renders **at most once per request** (a rendered-location
+registry in `ProgressUI`) and each container has a unique id; the JS
+mounts each container exactly once (`data-goalcart-mounted`), so a page
+can never end up with two widgets in the same spot — including after
+mini-cart fragment refreshes.
+
+## Components (`assets/js/frontend.js`)
+
+Each widget renders one featured goal (the first eligible one):
+
+- **GoalContainer** — the widget body; `full` = reward chip + progress +
+  message + milestones + suggestions, `compact` = progress + message +
+  reward chip.
+- **ProgressBar** — percentage fill bar (animated, logical-property
+  based so it fills right-to-left on RTL sites).
+- **GoalMessage** — the goal's progress message (Phase 13 owns the copy).
+- **GoalMilestones** — the active goals as an ordered ladder with target
+  labels (currency-aware via the payload `is_money` flag); shown when
+  there is more than one goal.
+- **RewardStatus** — locked 🔒 / unlocked ✓ reward chip, labels
+  localized server-side (`frontend_config()` → `labels`).
+- **SuggestionList** — renders `goal.suggestions` when present (empty
+  until Phase 14).
+- **StickyGoalBar** — fixed bottom bar with the featured goal's progress
+  and a dismiss button; hidden when the cart has no progress to show.
+
+Empty state: when no goals are eligible the container is hidden
+(`goalcart-widget--empty`) instead of showing a broken bar.
+
+## Refresh & events
+
+The library refetches on every WooCommerce cart event (`added_to_cart`,
+`removed_from_cart`, `updated_cart_totals`, `updated_wc_div`,
+`wc_fragments_refreshed`, `wc_fragments_loaded`) — bound through jQuery
+when present (WooCommerce fires these as jQuery events) with a native
+`CustomEvent` fallback — plus an optional poll interval from the config
+(`goalcart_frontend_refresh_interval` filter, seconds).
+
+## Gate & configuration
+
+- **Master toggle:** the `enabled` setting (filter `goalcart_frontend_enabled`).
+- **Locations:** filter `goalcart_frontend_locations` (Phase 18 wires the
+  settings UI to it).
+- **Config payload** (`frontend_config()`): `endpoint`, `refresh`,
+  `currency`, `isRtl`, `labels` — printed as `window.goalcartFrontend` at
+  `wp_footer` priority 5, before the enqueued footer script.
+- Assets load only on pages that can render a widget (cart / checkout /
+  shop / product / a page containing the shortcode) via
+  `page_needs_widget()`.
+
+## Styling
+
+The stylesheet is scoped under `.goalcart-widget` / `#goalcart-sticky`,
+responsive, motion-safe (respects `prefers-reduced-motion`), and
+**themeable through CSS custom properties** (`--goalcart-accent`,
+`--goalcart-bg`, `--goalcart-border`, `--goalcart-text`,
+`--goalcart-text-muted`, `--goalcart-radius`, `--goalcart-shadow`, …) —
+the Phase 12 Appearance controls override the same tokens.
+
+---
+
 # Goal Cart React Admin App (Phase 8)
 
 The admin dashboard is a React + TypeScript SPA (Vite + MUI) mounted
