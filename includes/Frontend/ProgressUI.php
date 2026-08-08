@@ -180,14 +180,14 @@ final class ProgressUI {
 			self::HANDLE,
 			GOALCART_URL . 'assets/css/frontend.css',
 			array(),
-			GOALCART_VERSION
+			$this->asset_version( 'assets/css/frontend.css' )
 		);
 
 		wp_enqueue_script(
 			self::HANDLE,
 			GOALCART_URL . 'assets/js/frontend.js',
 			array(),
-			GOALCART_VERSION,
+			$this->asset_version( 'assets/js/frontend.js' ),
 			array( 'in_footer' => true )
 		);
 
@@ -195,6 +195,26 @@ final class ProgressUI {
 		// (WP's canonical inline-style channel), so the storefront gets one
 		// style payload and the theme can still override any token.
 		wp_add_inline_style( self::HANDLE, $this->appearance_css() );
+	}
+
+	/**
+	 * Cache-busting version for a frontend asset.
+	 *
+	 * The static GOALCART_VERSION only changes between releases, so the
+	 * storefront would keep serving stale cached JS/CSS after every edit
+	 * in between. filemtime() gives each file change a fresh version —
+	 * the standard WP pattern for versioned static assets — and falls
+	 * back to GOALCART_VERSION when the file cannot be stat'd.
+	 *
+	 * @param string $relative Asset path relative to the plugin root.
+	 * @return string
+	 */
+	protected function asset_version( $relative ) {
+		// @phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- stat
+		// failure is handled by the fallback below; silence keeps the log clean.
+		$mtime = @filemtime( GOALCART_PATH . $relative );
+
+		return false === $mtime ? GOALCART_VERSION : (string) $mtime;
 	}
 
 	/**

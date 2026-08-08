@@ -236,6 +236,20 @@ try {
 
 	check( 'shortcode post enables page widget detection', true === $ref->invoke( $ui ) );
 
+	// Assets must be versioned by filemtime so the storefront never
+	// serves a stale cached frontend.js/css after an edit — the static
+	// GOALCART_VERSION only changes between releases, which would leave
+	// every browser on the old bundle (and every template looking the
+	// same).
+	$ui->enqueue_assets();
+
+	$scripts = isset( wp_scripts()->registered[ ProgressUI::HANDLE ] ) ? wp_scripts()->registered[ ProgressUI::HANDLE ] : null;
+	$styles  = isset( wp_styles()->registered[ ProgressUI::HANDLE ] ) ? wp_styles()->registered[ ProgressUI::HANDLE ] : null;
+
+	check( 'frontend js enqueued', null !== $scripts && isset( $scripts->src ) && false !== strpos( $scripts->src, 'assets/js/frontend.js' ) );
+	check( 'frontend js versioned by filemtime', isset( $scripts->ver ) && (string) filemtime( GOALCART_PATH . 'assets/js/frontend.js' ) === (string) $scripts->ver );
+	check( 'frontend css versioned by filemtime', isset( $styles->ver ) && (string) filemtime( GOALCART_PATH . 'assets/css/frontend.css' ) === (string) $styles->ver );
+
 	$GLOBALS['post'] = $previous_post;
 } finally {
 	$wpdb->query( 'ROLLBACK' );

@@ -19,6 +19,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   resolves it per goal — container override → goal template → global
   Appearance template → `basic` — so a goal set to Milestones/Card/
   Percentage renders that variant on the storefront.
+- **All templates looked identical on the storefront — two causes
+  fixed.** (1) The frontend JS/CSS were enqueued with the static
+  `GOALCART_VERSION`, which never changes between releases, so browsers
+  kept serving the stale cached bundle no matter what template was
+  chosen; `ProgressUI::enqueue_assets()` now versions both assets by
+  `filemtime()` (falling back to `GOALCART_VERSION`), so every edit
+  cache-busts. (2) The milestone template with a single goal rendered as
+  a bare progress bar (the ladder needs ≥2 rungs), visually identical to
+  basic; `milestonePanel()` in `assets/js/frontend.js` now renders the
+  single threshold as one rung (dot + target label) — in full *and*
+  compact widgets — so Milestones is visibly distinct even with one
+  goal. Also hardened `goalContainer()` with a null guard for
+  reward-less goals (an unguarded `appendChild` of the optional reward
+  chip crashed the widget, leaving reward-less goals invisible).
 
 ### Phase 0 — Reference Plugin Discovery (100% complete)
 

@@ -380,13 +380,33 @@
 	 */
 	function milestonePanel( goal, goals, currency, compact ) {
 		var wrap = el( 'div', 'goalcart-milestone-panel' );
+		var ladder = goalMilestones( goals, currency );
 
-		if ( ! compact ) {
-			var ladder = goalMilestones( goals, currency );
+		if ( ladder && ! compact ) {
+			// The multi-goal ladder is a full-size hero visual — too big
+			// for a compact widget (mini cart, shop, product page).
+			wrap.appendChild( ladder );
+		} else if ( goals && goals.length === 1 ) {
+			// A single goal has no ladder to climb, but the milestone
+			// template should still show its one threshold as a rung
+			// (dot + target label) so it reads as "milestones" rather
+			// than a bare bar that looks identical to the basic template.
+			// One rung is tiny, so it fits the compact variant too — the
+			// template stays visually distinct everywhere.
+			var rung = el( 'ol', 'goalcart-milestones' );
+			var step = el( 'li', 'goalcart-milestone' );
+			var target = goal.is_money
+				? formatMoney( goal.target, currency )
+				: formatNumber( goal.target );
 
-			if ( ladder ) {
-				wrap.appendChild( ladder );
+			if ( goal.completed ) {
+				step.classList.add( 'goalcart-milestone--complete' );
 			}
+
+			step.appendChild( el( 'span', 'goalcart-milestone__dot' ) );
+			step.appendChild( el( 'span', 'goalcart-milestone__target', target ) );
+			rung.appendChild( step );
+			wrap.appendChild( rung );
 		}
 
 		wrap.appendChild( progressBar( goal ) );
@@ -458,16 +478,21 @@
 		var card = el( 'div', 'goalcart-card goalcart-template--' + template + stateClass );
 
 		var compact = 'compact' === variant;
+		var reward = rewardStatus( goal );
 
 		if ( compact ) {
 			card.appendChild( templateBody( goal, goals, currency, template, true ) );
 			card.appendChild( goalMessage( goal ) );
-			card.appendChild( rewardStatus( goal ) );
+			if ( reward ) {
+				card.appendChild( reward );
+			}
 			return card;
 		}
 
 		var head = el( 'div', 'goalcart-card__head' );
-		head.appendChild( rewardStatus( goal ) );
+		if ( reward ) {
+			head.appendChild( reward );
+		}
 		card.appendChild( head );
 
 		card.appendChild( templateBody( goal, goals, currency, template, false ) );

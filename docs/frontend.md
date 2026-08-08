@@ -177,7 +177,7 @@ store-wide Appearance setting (`cfg.template`), then `basic`.
 |---|---|
 | `basic` | Progress bar + message (the Phase 11 layout) |
 | `percentage` | Large percent readout (`goalcart-percentage__value`) above the bar |
-| `milestone` | The goal ladder (`goalcart-milestones`) as the hero visual, bar underneath |
+| `milestone` | The goal ladder (`goalcart-milestones`) as the hero visual, bar underneath. With a single active goal the one threshold renders as a single rung (dot + target label) so the template is distinct even without a ladder |
 | `card` | Icon + goal-title header (`goalcart-card-panel`) above the bar |
 
 In JS terms the shared flow (message, reward chip, suggestions, sticky
