@@ -122,7 +122,16 @@ final class ProgressUI {
 		$hooks->add_action( 'woocommerce_archive_description', array( $this, 'render_shop_widget' ) );
 		$hooks->add_action( 'woocommerce_single_product_summary', array( $this, 'render_product_widget' ), 45 );
 
-		// Sticky bottom bar (rendered after the config, on widget pages).
+		// WooCommerce Blocks (Phase 19): the classic WooCommerce actions
+		// (woocommerce_before_cart, woocommerce_before_checkout_form) only
+		// fire on the classic templates, so a store running the Cart or
+		// Checkout block never triggers them. The render_block filter is a
+		// public WordPress API: append the full widget after the Cart and
+		// Checkout blocks. The duplicate-render registry already guarantees
+		// at most one widget per location, so a page can never show it twice.
+		$hooks->add_filter( 'render_block', array( $this, 'render_block_widget' ), 10, 2 );
+
+		// Sticky bottom bar (rendered after the footer, on widget pages).
 		$hooks->add_action( 'wp_footer', array( $this, 'render_sticky_bar' ), 20 );
 	}
 
@@ -519,6 +528,61 @@ final class ProgressUI {
 		}
 
 		return $markup;
+	}
+
+	/**
+	 * Append the full progress widget after WooCommerce Cart/Checkout blocks.
+	 *
+	 * Phase 19 (WooCommerce Compatibility): the classic template actions
+	 * (woocommerce_before_cart, woocommerce_before_checkout_form,
+	 * woocommerce_after_mini_cart) never fire on pages rendered from the
+	 * WooCommerce Blocks Cart/Checkout, so this `render_block` filter is the
+	 * supported public hook that covers block-based storefronts. The
+	 * duplicate-render registry keeps the widget at most once per location,
+	 * so a classic + block hybrid page can never show it twice.
+	 *
+	 * The Mini Cart block gets a compact widget (the header toggle has no
+	 * room for a full widget); the Cart and Checkout blocks get the full
+	 * widget, matching the classic locations' variants.
+	 *
+	 * @param string $block_content Rendered block markup.
+	 * @param array  $block         Block data (blockName, attrs).
+	 * @return string
+	 */
+	public function render_block_widget( $block_content, $block ) {
+		if ( is_admin() || ! $this->is_enabled() ) {
+			return $block_content;
+		}
+
+		if ( ! is_array( $block ) || empty( $block['blockName'] ) ) {
+			return $block_content;
+		}
+
+		$block_name = (string) $block['blockName'];
+		$location   = '';
+		$variant    = 'full';
+
+		if ( 'woocommerce/cart' === $block_name ) {
+			$location = 'cart';
+		} elseif ( 'woocommerce/checkout' === $block_name ) {
+			$location = 'checkout';
+		} elseif ( 'woocommerce/mini-cart' === $block_name ) {
+			$location = 'mini-cart';
+			$variant  = 'compact';
+		}
+
+		if ( '' === $location || ! in_array( $location, $this->locations(), true ) ) {
+			return $block_content;
+		}
+
+		// Duplicate-render guard shared with the classic actions.
+		if ( isset( $this->rendered[ $location ] ) ) {
+			return $block_content;
+		}
+		$this->rendered[ $location ] = true;
+
+		// phpcs:ignore WordPress.Security.EscapeOutput -- widget_container escapes its own attributes.
+		return $block_content . $this->widget_container( 'goalcart-' . $location, $variant );
 	}
 
 	/**

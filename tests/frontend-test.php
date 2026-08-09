@@ -308,6 +308,47 @@ $settings->set( 'frontend_custom_css', '' );
 $settings->set( 'frontend_accent', '#2271b1' );
 
 // ---------------------------------------------------------------------------
+// 9. WooCommerce Blocks compatibility (P19 — render_block for Cart/Checkout/Mini Cart)
+// ---------------------------------------------------------------------------
+echo "\n== 9. WooCommerce Blocks compatibility ==\n";
+
+// A fresh instance: earlier sections already rendered the classic cart
+// widget (and the plugin's duplicate guard is location-scoped per
+// instance), so block tests run against an untouched widget registry.
+$block_ui = new \GoalCart\Frontend\ProgressUI( $settings );
+
+// The render_block filter is registered on the booted shared instance.
+check( 'render_block filter wired', false !== has_filter( 'render_block', array( $ui, 'render_block_widget' ) ) );
+
+// Block widget appends after the block markup; unrelated blocks pass through.
+$out = $block_ui->render_block_widget( '<figure>cart block</figure>', array( 'blockName' => 'woocommerce/cart' ) );
+check( 'cart block gains the full widget container', false !== strpos( $out, 'id="goalcart-cart"' ) );
+check( 'cart block widget is the full variant', false !== strpos( $out, 'data-goalcart-variant="full"' ) );
+check( 'cart block content preserved', false !== strpos( $out, '<figure>cart block</figure>' ) );
+
+$out = $block_ui->render_block_widget( '<div>checkout</div>', array( 'blockName' => 'woocommerce/checkout' ) );
+check( 'checkout block gains the widget container', false !== strpos( $out, 'id="goalcart-checkout"' ) );
+
+$out = $block_ui->render_block_widget( '<div>mini cart</div>', array( 'blockName' => 'woocommerce/mini-cart' ) );
+check( 'mini-cart block gains a compact widget', false !== strpos( $out, 'id="goalcart-mini-cart"' ) && false !== strpos( $out, 'data-goalcart-variant="compact"' ) );
+
+$out = $block_ui->render_block_widget( '<p>plain</p>', array( 'blockName' => 'core/paragraph' ) );
+check( 'non-woocommerce block untouched', '<p>plain</p>' === $out );
+
+// Duplicate-guard across the two render paths: a fresh instance renders
+// the classic mini-cart action once, then a second injection through the
+// block path is suppressed (one widget per page location).
+$guard_ui = new \GoalCart\Frontend\ProgressUI( $settings );
+
+ob_start();
+$guard_ui->render_mini_cart_widget();
+$mini_out = ob_get_clean();
+check( 'mini-cart widget renders exactly once through the classic action', 1 === substr_count( $mini_out, 'id="goalcart-mini-cart"' ) );
+
+$out = $guard_ui->render_block_widget( '<p>late</p>', array( 'blockName' => 'woocommerce/mini-cart' ) );
+check( 'duplicate-guard suppresses the second mini-cart widget', '<p>late</p>' === $out );
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 echo "\n==========================================\n";

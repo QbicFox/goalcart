@@ -7,6 +7,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+### Added
+
+- **WooCommerce Blocks storefront widgets (P19-T01)** — the progress
+  widget now renders on cart/checkout/mini-cart pages built from WooCommerce
+  Blocks. The classic template actions (`woocommerce_before_cart`,
+  `woocommerce_before_checkout_form`, `woocommerce_after_mini_cart`) never
+  fire on block-based storefronts, so `ProgressUI::render_block_widget()`
+  hooks the public `render_block` filter and appends the widget after the
+  `woocommerce/cart`, `woocommerce/checkout` (full variant) and
+  `woocommerce/mini-cart` (compact variant) blocks. The duplicate-render
+  registry is shared across both render paths, so a hybrid classic + block
+  page can never show the widget twice.
+- **WooCommerce compatibility test suite (P19)** —
+  `tests/woocommerce-compatibility-test.php` verifies the full Phase 19
+  must-test matrix against the installed WooCommerce: classic Cart, classic
+  Checkout, Mini Cart, Cart/Checkout/Mini Cart blocks, variable products and
+  variants, coupons, sale prices, tax folds, shipping zones + multiple
+  shipping methods, guest and logged-in contexts, and the HPOS
+  (`custom_order_tables`) feature declaration. `docs/compatibility.md`
+  documents the support matrix and the public hook/API contract.
+
 ### Fixed
 
 - **Per-goal display template now reaches the storefront** — the goal
