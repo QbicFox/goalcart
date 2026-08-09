@@ -83,6 +83,15 @@ when present (WooCommerce fires these as jQuery events) with a native
 `CustomEvent` fallback — plus an optional poll interval from the config
 (`goalcart_frontend_refresh_interval` filter, seconds).
 
+Every fetch is **cache-busted with a `?_=<timestamp>` parameter**: the
+guest `/progress` payload carries no `Cache-Control` header (WP core only
+sends nocache headers for cookie-authenticated requests), so a bare GET
+could be heuristically cached by the browser and the widgets would keep
+showing the previous cart's progress after the shopper adds or removes
+items. The endpoint also stamps the response
+`Cache-Control: no-store, no-cache, must-revalidate, max-age=0` — both
+layers are asserted by `tests/frontend-test.php`.
+
 ## Gate & configuration
 
 - **Master toggle:** the `enabled` setting (filter `goalcart_frontend_enabled`).

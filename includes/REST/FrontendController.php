@@ -192,7 +192,10 @@ class FrontendController extends BaseController {
 			$cached = get_transient( $cache_key );
 
 			if ( is_array( $cached ) ) {
-				return rest_ensure_response( $cached );
+				$cached_response = rest_ensure_response( $cached );
+				$this->prevent_progress_caching( $cached_response );
+
+				return $cached_response;
 			}
 		}
 
@@ -230,7 +233,27 @@ class FrontendController extends BaseController {
 			set_transient( $cache_key, $response->get_data(), self::PROGRESS_CACHE_TTL );
 		}
 
+		$this->prevent_progress_caching( $response );
+
 		return $response;
+	}
+
+	/**
+	 * Mark the public progress payload as non-cacheable.
+	 *
+	 * The guest `/progress` response carries no Cache-Control by default
+	 * (WP core only sends nocache headers for cookie-authenticated
+	 * requests), so browsers may heuristically cache the first payload
+	 * and keep serving it after the shopper's cart changed — the widget
+	 * would render stale progress. `no-store` forbids both browser and
+	 * shared caches from ever reusing the response; the storefront JS
+	 * additionally cache-busts its request with a timestamp parameter.
+	 *
+	 * @param \WP_REST_Response $response Response to annotate.
+	 * @return void
+	 */
+	protected function prevent_progress_caching( \WP_REST_Response $response ) {
+		$response->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0' );
 	}
 
 	/**

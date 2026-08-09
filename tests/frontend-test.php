@@ -176,6 +176,20 @@ check( 'config has a currency key', array_key_exists( 'currency', $config ) );
 check( 'config is RTL-aware', array_key_exists( 'isRtl', $config ) );
 check( 'config labels cover reward types', isset( $config['labels']['free_shipping'], $config['labels']['percent_discount'], $config['labels']['fixed_discount'], $config['labels']['free_gift'], $config['labels']['coupon'] ) );
 
+// The public progress payload must never be cached: WP sends no cache
+// headers for guest REST requests, so a browser holding the first
+// response would keep showing the previous cart's progress after the
+// shopper adds/removes items. The endpoint stamps Cache-Control:
+// no-store and the storefront JS cache-busts every poll.
+$progress_resp = $container->get( \GoalCart\REST\FrontendController::class )
+	->handle_progress( new \WP_REST_Request( 'GET', '/goalcart/v1/progress' ) );
+$progress_headers = $progress_resp->get_headers();
+$progress_cc      = isset( $progress_headers['Cache-Control'] ) ? (string) $progress_headers['Cache-Control'] : '';
+check( 'progress response forbids caching (no-store)', false !== strpos( $progress_cc, 'no-store' ) );
+
+$frontend_js = (string) file_get_contents( GOALCART_PATH . 'assets/js/frontend.js' );
+check( 'frontend JS cache-busts the progress poll', false !== strpos( $frontend_js, "'_='" ) && false !== strpos( $frontend_js, 'Date.now()' ) );
+
 // ---------------------------------------------------------------------------
 // 6. Enabled gate (P11-T03 — master toggle + filter)
 // ---------------------------------------------------------------------------

@@ -63,6 +63,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Storefront progress went stale after cart changes — the widget kept
+  showing the previous cart's numbers.** WP core only sends `Cache-Control`
+  headers for cookie-authenticated REST requests, so the guest
+  `GET /goalcart/v1/progress` response was cacheable; the widget's bare
+  GET poll (no cache-buster) let browsers heuristically cache the first
+  payload (e.g. empty cart → 0%) and serve it on every later poll — the
+  bar and message never reflected items added to the cart, reading as
+  “progress not calculated correctly”. The endpoint now stamps
+  `Cache-Control: no-store, no-cache, must-revalidate, max-age=0` on both
+  the fresh and transient-cached response paths
+  (`FrontendController::prevent_progress_caching()`), and
+  `assets/js/frontend.js` cache-busts every poll with a `?_=<timestamp>`
+  parameter. `tests/frontend-test.php` asserts both layers (75 checks).
 - **Per-goal display template now reaches the storefront** — the goal
   builder's Display → Template picker (`display_settings.template`) was
   saved but never served: `GET /goalcart/v1/progress` exposed the goal's

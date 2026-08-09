@@ -116,13 +116,21 @@
 	/**
 	 * Fetch the progress payload.
 	 *
+	 * Cache-busting: the guest REST payload carries no Cache-Control
+	 * header (WP core only sends nocache headers for cookie-authenticated
+	 * requests), so a bare GET can be heuristically cached by the browser
+	 * and serve a STALE payload — the bar would keep showing the previous
+	 * cart's progress after the shopper adds or removes items. A unique
+	 * timestamp query parameter forces a fresh evaluation every poll.
+	 *
 	 * @param {Function} done Callback receiving the parsed `data` object.
 	 * @return {void}
 	 */
 	function fetchProgress( done ) {
 		var request = new XMLHttpRequest();
+		var separator = cfg.endpoint.indexOf( '?' ) >= 0 ? '&' : '?';
 
-		request.open( 'GET', cfg.endpoint, true );
+		request.open( 'GET', cfg.endpoint + separator + '_=' + Date.now(), true );
 		request.timeout = 10000;
 
 		request.onload = function () {

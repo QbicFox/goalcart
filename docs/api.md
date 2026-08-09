@@ -562,6 +562,14 @@ Notes:
   `docs/conflicts.md` for the full rule set.
 - The payload contains only aggregate numbers for the shopper's own cart
   — no PII — which is what allows it to be public.
+- **Never cached** — the response carries
+  `Cache-Control: no-store, no-cache, must-revalidate, max-age=0`. WP
+  core only sends nocache headers for cookie-authenticated requests, so a
+  bare guest GET could otherwise be heuristically cached by the browser
+  and the widget would keep showing the previous cart's progress after
+  the shopper adds or removes items. `assets/js/frontend.js` additionally
+  cache-busts each poll with a `?_=<timestamp>` parameter (both are
+  asserted by `tests/frontend-test.php`).
 - The Phase 11 progress widgets poll this endpoint and re-render on every
   WooCommerce cart event (`added_to_cart`, `updated_cart_totals`,
   `wc_fragments_refreshed`, …), driven by the config object printed by
