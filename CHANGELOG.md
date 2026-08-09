@@ -578,6 +578,66 @@ all pass (Settings ships as its own lazy chunk). No database changes.
 
 ---
 
+### Phase 23 — Performance Optimization (100% complete)
+
+- **P23-T01 Frontend** — Audit of the React admin app: secondary routes
+  were already lazy-loaded (`React.lazy` + `Suspense` in `App.tsx` —
+  Campaigns, Analytics, Appearance, Settings, and both builders split into
+  their own chunks), server state is cached via TanStack Query
+  (`staleTime: 60s`, `refetchOnWindowFocus: false` in `AppProviders`),
+  product/category/coupon searches are debounced (300 ms) and capped
+  (`per_page: 20`) in `EntityAutocomplete`, the goal list search is
+  debounced client-side and paginated server-side, and the analytics trend
+  series is `useMemo`-memoized. **New: bundle-size minimization** —
+  `admin-app/vite.config.ts` now splits vendors with `manualChunks`
+  (react, router, mui, query, charts, pickers, vendor groups). The entry
+  dropped from **646 kB → 41 kB** and the Analytics chunk from **417 kB →
+  13 kB**, eliminating Vite's >500 kB chunk warning. Documented deviation
+  from the reference plugin (AGENT.md rule 15): the reference ships the
+  same minimal config without `manualChunks`, and the deviation is driven
+  by the Phase 23 roadmap requirement to minimize bundle size — the
+  routing/base/manifest architecture is unchanged.
+- **P23-T02 WooCommerce Frontend** — Audit of the storefront path: goal
+  evaluation is cached within a request (`GoalRepository` per-request
+  active-goal cache — verified: a second `active_goals()` call runs zero
+  queries; `CartIntegration` memoizes the cart context per cart contents;
+  `RewardEngine` caches per-request reward results), product categories
+  are preloaded in one batched `wp_get_object_terms` call (no per-item
+  term queries), repeated widget polls are served from the 10-second
+  progress transient when `performance_caching` is enabled, and goal
+  calculations are snapshot-based (no per-render re-computation). **New:
+  update only changed UI fragments** — `assets/js/frontend.js` now
+  computes a payload fingerprint (`payloadFingerprint`) per refresh and
+  skips the DOM rebuild for every widget whose fingerprint is unchanged
+  (and already holds content), so the poll interval and cart events only
+  touch fragments whose numbers actually moved; a freshly swapped
+  mini-cart container still mounts (empty containers always render), the
+  sticky bar follows the same rule, and the mobile-hide toggle is folded
+  into the fingerprint so breakpoint crossings still re-render.
+- **P23-T03 Admin** — Audit of the admin list surfaces: the goal list is
+  server-paginated (page/per_page + envelope) with server-side search
+  (name `LIKE`) and status filtering (verified behaviorally), the list
+  endpoint clamps `per_page` to 100, the search endpoints declare
+  `per_page` maximum 50 in the arg schema and clamp in the handler (so
+  the product/category/coupon pickers never load thousands of records at
+  once), and the picker UI requests `per_page: 20`.
+- Added files: `tests/performance-test.php` (38 checks covering all
+  three P23 areas — React source guarantees, request-level caching,
+  progress transient + JS change-detection, server-side pagination /
+  search / filtering, per_page caps, rollback hygiene).
+- **Verification:** new performance suite 38/38; full regression run —
+  analytics-dashboard 82/82, analytics 72/72, cart-integration 22/22,
+  engine 75/75, frontend 73/73, message 47/47, performance 38/38,
+  preview 90/90, rest-api 120/120, reward 72/72, security 65/65,
+  settings 119/119, suggestion 28/28, woocommerce-compatibility 29/29,
+  wordpress-compatibility 28/28 (all pass, zero failures); `npm run
+  typecheck`, `npm run lint` and `npm run build` all pass (main 41 kB,
+  Analytics 13 kB, no chunk-size warning).
+
+**Overall project progress: 76%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 4% + Phase 15 2% + Phase 16 2% + Phase 17 2% + Phase 18 2% + Phase 19 2% + Phase 20 2% + Phase 21 1% + Phase 22 3% + Phase 23 weight 3% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

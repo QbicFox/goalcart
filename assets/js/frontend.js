@@ -62,6 +62,15 @@
 	var reportedSuggestionImpressions = {};
 	var reportedProgress = {};
 
+	// Phase 23 (Performance → update only changed UI fragments): each
+	// widget records a fingerprint of the payload it last rendered.
+	// refresh() skips the DOM rebuild for containers whose fingerprint is
+	// unchanged (the poll interval and cart events fire refresh() even
+	// when nothing moved), so only the fragments whose numbers actually
+	// changed are touched.
+	var renderedFingerprints = {};
+	var stickyFingerprint = null;
+
 	/**
 	 * Guard every entry point: a thrown error must never reach the page.
 	 *
@@ -326,6 +335,52 @@
 		}
 
 		return window.matchMedia( '(max-width: 782px)' ).matches;
+	}
+
+	/**
+	 * A stable fingerprint of the parts of the progress payload the
+	 * widgets render, plus the viewport-driven mobile state.
+	 *
+	 * Phase 23 (Performance → update only changed UI fragments): two
+	 * payloads with the same fingerprint render identically, so refresh()
+	 * skips the DOM rebuild for a container that already shows it. The
+	 * mobile state is folded in so a resize that crosses the breakpoint
+	 * still triggers the hide/show toggle.
+	 *
+	 * @param {Object} data Progress payload data.
+	 * @return {string}
+	 */
+	function payloadFingerprint( data ) {
+		var goals = ( data && data.goals ) || [];
+		var parts = [];
+
+		for ( var i = 0; i < goals.length; i++ ) {
+			var goal = goals[ i ] || {};
+			var suggestionIds = ( goal.suggestions || [] ).map( function ( suggestion ) {
+				return String( suggestion.id || 0 ) + ':' + String( suggestion.name || '' );
+			} ).join( ',' );
+
+			parts.push(
+				[
+					String( goal.goal_id || 0 ),
+					String( goal.goal_name || '' ),
+					String( goal.icon || '' ),
+					String( goal.template || '' ),
+					String( goal.current || 0 ),
+					String( goal.target || 0 ),
+					String( goal.percentage || 0 ),
+					goal.completed ? '1' : '0',
+					goal.eligible === false ? '0' : '1',
+					String( goal.state || '' ),
+					String( goal.message || '' ),
+					String( ( goal.reward && goal.reward.type ) || '' ),
+					String( ( goal.reward && goal.reward.value ) || '' ),
+					suggestionIds,
+				].join( '|' )
+			);
+		}
+
+		return ( ( data && data.currency ) || '' ) + '::' + ( mobileHidden() ? 'm' : 'd' ) + '::' + parts.join( ';' );
 	}
 
 	/**
@@ -837,6 +892,13 @@
 	 * Re-runs mount discovery so containers added by fragment refreshes
 	 * (mini cart) get mounted after the DOM swap.
 	 *
+	 * Phase 23 (Performance → update only changed UI fragments): each
+	 * container is skipped when the payload fingerprint matches its last
+	 * render AND it already holds content — a freshly swapped container
+	 * (mini-cart fragment refresh) is empty, so it always mounts. The
+	 * sticky bar follows the same rule, and analytics stay on their own
+	 * per-session dedup.
+	 *
 	 * @return {void}
 	 */
 	function refresh() {
@@ -844,12 +906,25 @@
 			fetchProgress( function ( data ) {
 				safe( function () {
 					var containers = document.querySelectorAll( WIDGET_SELECTOR );
+					var fingerprint = payloadFingerprint( data );
 
 					for ( var i = 0; i < containers.length; i++ ) {
-						renderWidget( containers[ i ], data );
+						var container = containers[ i ];
+						var hasContent = !! container.firstChild;
+
+						if ( hasContent && renderedFingerprints[ container.id ] === fingerprint ) {
+							continue;
+						}
+
+						renderWidget( container, data );
+						renderedFingerprints[ container.id ] = fingerprint;
 					}
 
-					renderSticky( data );
+					if ( stickyFingerprint !== fingerprint ) {
+						renderSticky( data );
+						stickyFingerprint = fingerprint;
+					}
+
 					trackGoals( data );
 				} );
 			} );
