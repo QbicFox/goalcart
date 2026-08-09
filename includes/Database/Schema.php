@@ -122,6 +122,7 @@ class Schema {
 				conditions longtext,
 				display_settings longtext,
 				priority int(10) unsigned NOT NULL DEFAULT 10,
+				exclusive tinyint(1) NOT NULL DEFAULT 0,
 				campaign_id bigint(20) unsigned DEFAULT NULL,
 				menu_order int(10) unsigned NOT NULL DEFAULT 0,
 				starts_at datetime DEFAULT NULL,

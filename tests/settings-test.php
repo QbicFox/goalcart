@@ -160,6 +160,7 @@ $d = $settings->defaults();
 
 check( 'currency_display defaults to symbol', 'symbol' === $d['currency_display'] );
 check( 'default_goal_behavior defaults to all', 'all' === $d['default_goal_behavior'] );
+check( 'conflict_resolution defaults to cumulative', 'cumulative' === $d['conflict_resolution'] );
 check( 'calculation_mode defaults to subtotal', 'subtotal' === $d['calculation_mode'] );
 check( 'frontend_locations defaults to six locations', 6 === count( $d['frontend_locations'] ) );
 check( 'frontend_mobile defaults to show', 'show' === $d['frontend_mobile'] );
@@ -201,6 +202,10 @@ check( 'default_goal_behavior schema enum', isset( $save['default_goal_behavior'
 check( 'invalid behavior rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['default_goal_behavior'], 'default_goal_behavior' ) ) );
 check( 'valid behavior accepted', true === rest_validate_value_from_schema( 'closest', $save['default_goal_behavior'], 'default_goal_behavior' ) );
 
+check( 'conflict_resolution schema enum', isset( $save['conflict_resolution']['enum'] ) );
+check( 'invalid conflict mode rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['conflict_resolution'], 'conflict_resolution' ) ) );
+check( 'valid conflict mode accepted', true === rest_validate_value_from_schema( 'best', $save['conflict_resolution'], 'conflict_resolution' ) );
+
 check( 'calculation_mode schema enum', isset( $save['calculation_mode']['enum'] ) );
 check( 'invalid calculation_mode rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['calculation_mode'], 'calculation_mode' ) ) );
 
@@ -227,6 +232,7 @@ try {
 	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/settings' );
 	$req->set_param( 'currency_display', 'bogus' );
 	$req->set_param( 'default_goal_behavior', 'bogus' );
+	$req->set_param( 'conflict_resolution', 'bogus' );
 	$req->set_param( 'calculation_mode', 'bogus' );
 	$req->set_param( 'frontend_mobile', 'bogus' );
 	$req->set_param( 'frontend_locations', array( 'cart', 'bogus', 'sticky', 'sticky' ) );
@@ -247,6 +253,7 @@ try {
 
 	check( 'invalid currency falls back to symbol', 'symbol' === $data['currency_display'] );
 	check( 'invalid behavior falls back to all', 'all' === $data['default_goal_behavior'] );
+	check( 'invalid conflict mode falls back to cumulative', 'cumulative' === $data['conflict_resolution'] );
 	check( 'invalid mode falls back to subtotal', 'subtotal' === $data['calculation_mode'] );
 	check( 'invalid mobile falls back to show', 'show' === $data['frontend_mobile'] );
 	check( 'locations filtered + deduped', array( 'cart', 'sticky' ) === $data['frontend_locations'] );
@@ -494,6 +501,7 @@ try {
 		),
 		'goals'       => array( $goal_a, $goal_b ),
 		'behavior'    => 'all',
+		'conflict'    => 'cumulative',
 		'suggestions' => true,
 	) ) );
 

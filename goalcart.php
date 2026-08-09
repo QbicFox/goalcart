@@ -63,8 +63,10 @@ if ( ! defined( 'GOALCART_DB_VERSION' ) ) {
 	 * 0.2.1 = Phase 22: composite analytics indexes (goal_event,
 	 *         campaign_event) — dbDelta cannot add indexes to existing
 	 *         tables, so Installer::maybe_add_indexes() applies them.
+	 * 0.3.0 = Phase 26: goals.exclusive (mutually exclusive goals) —
+	 *         dbDelta adds the missing column on upgrade.
 	 */
-	define( 'GOALCART_DB_VERSION', '0.2.1' );
+	define( 'GOALCART_DB_VERSION', '0.3.0' );
 }
 
 // Load the Composer autoloader (PSR-4: GoalCart\ => includes/).

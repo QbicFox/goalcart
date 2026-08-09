@@ -25,6 +25,7 @@ A target the customer can reach (see `docs/PRODUCT_SPEC.md` §2.1). Stored in th
 | conditions | `conditions` | JSON — category/product/role/cart conditions (grow in later phases) |
 | display settings | `display_settings` | JSON — title, message, completed message, icon, template |
 | priority | `priority` | `int(10) unsigned`, default `10` — conflict resolution (Phase 26) |
+| exclusive | `exclusive` | `tinyint(1)`, default `0` — mutually exclusive goal: when reached, lower-priority goals are skipped (Phase 26) |
 | schedule | `starts_at` / `ends_at` | `datetime`, nullable — independent scheduling |
 | campaign membership | `campaign_id` + `menu_order` | `menu_order` expresses milestone ordering inside a campaign (Phase 10) |
 | limits | `limits` | JSON — e.g. per-customer, per-session, stack limits |
@@ -111,8 +112,9 @@ reference plugin's convention.
 
 ## 3. Database rules applied (P03-T03)
 
-1. **Reference migration strategy** — version-driven: `GOALCART_DB_VERSION` (now `0.2.0`) vs the
-   `goalcart_db_version` option; `Installer::maybe_upgrade()` runs on `plugins_loaded` + `admin_init`;
+1. **Reference migration strategy** — version-driven: `GOALCART_DB_VERSION` (now `0.3.0` —
+   Phase 26 added `goals.exclusive`) vs the `goalcart_db_version` option;
+   `Installer::maybe_upgrade()` runs on `plugins_loaded` + `admin_init`;
    schema recreated idempotently via `dbDelta`; foreign keys added with `INFORMATION_SCHEMA`-guarded
    `ALTER TABLE` (safe to re-run; failures logged, never fatal).
 2. **Proper indexes** — every query path is covered: status/type filters, campaign grouping,

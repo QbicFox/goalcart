@@ -190,6 +190,7 @@ class SettingsController extends BaseController {
 			'fullscreen_dashboard'  => $bool,
 			'currency_display'      => array( 'type' => 'string', 'enum' => array( 'symbol', 'code', 'name' ) ),
 			'default_goal_behavior' => array( 'type' => 'string', 'enum' => array( 'all', 'first', 'closest' ) ),
+			'conflict_resolution'   => array( 'type' => 'string', 'enum' => array( 'cumulative', 'best', 'first' ) ),
 			'calculation_mode'      => array(
 				'type' => 'string',
 				'enum' => array( 'subtotal', 'discounted_subtotal', 'total' ),
@@ -275,6 +276,9 @@ class SettingsController extends BaseController {
 
 			case 'default_goal_behavior':
 				return in_array( $value, array( 'all', 'first', 'closest' ), true ) ? $value : $defaults['default_goal_behavior'];
+
+			case 'conflict_resolution':
+				return in_array( $value, array( 'cumulative', 'best', 'first' ), true ) ? $value : $defaults['conflict_resolution'];
 
 			case 'calculation_mode':
 				return in_array( $value, array( 'subtotal', 'discounted_subtotal', 'total' ), true ) ? $value : $defaults['calculation_mode'];

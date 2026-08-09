@@ -255,7 +255,9 @@
 
 			if ( goal.completed && ! reportedCompletions[ goalId ] ) {
 				reportedCompletions[ goalId ] = true;
-				sendTrack( goal.reward && goal.reward.type ? 'reward_activated' : 'goal_completed', {
+				// A conflict-suppressed reward never reports as activated
+				// (Phase 26): only the completion is recorded.
+				sendTrack( goal.reward && goal.reward.type && ! rewardBlocked( goal ) ? 'reward_activated' : 'goal_completed', {
 					goal_id: goalId,
 					campaign_id: goal.campaign_id || 0,
 					cart_value: value,
@@ -371,6 +373,7 @@
 					String( goal.percentage || 0 ),
 					goal.completed ? '1' : '0',
 					goal.eligible === false ? '0' : '1',
+					rewardBlocked( goal ) ? '0' : '1',
 					String( goal.state || '' ),
 					String( goal.message || '' ),
 					String( ( goal.reward && goal.reward.type ) || '' ),
@@ -510,6 +513,20 @@
 	}
 
 	/**
+	 * Whether a goal's reward is suppressed by a conflict (Phase 26).
+	 *
+	 * The progress payload resolves conflicts with the same rules the
+	 * reward engine grants with; a suppressed reward must never render as
+	 * unlocked (the shopper would see a claim the cart does not grant).
+	 *
+	 * @param {Object} goal Progress goal entry.
+	 * @return {boolean}
+	 */
+	function rewardBlocked( goal ) {
+		return !!( goal.conflict && goal.conflict.resolved === false );
+	}
+
+	/**
 	 * RewardStatus — a locked/unlocked chip for the goal's reward.
 	 *
 	 * @param {Object} goal Progress goal entry.
@@ -522,13 +539,18 @@
 			return null;
 		}
 
+		var blocked = rewardBlocked( goal );
+		var unlocked = goal.completed && ! blocked;
 		var label = ( cfg.labels && cfg.labels[ reward.type ] ) || reward.type;
 		var chip = el( 'span', 'goalcart-reward' );
 
-		chip.classList.add(
-			goal.completed ? 'goalcart-reward--unlocked' : 'goalcart-reward--locked'
-		);
-		chip.appendChild( el( 'span', 'goalcart-reward__icon', goal.completed ? '\u2713' : '\uD83D\uDD12' ) );
+		chip.classList.add( unlocked ? 'goalcart-reward--unlocked' : 'goalcart-reward--locked' );
+
+		if ( blocked && goal.conflict && goal.conflict.reason ) {
+			chip.setAttribute( 'title', String( goal.conflict.reason ) );
+		}
+
+		chip.appendChild( el( 'span', 'goalcart-reward__icon', unlocked ? '\u2713' : '\uD83D\uDD12' ) );
 		chip.appendChild( el( 'span', 'goalcart-reward__label', label ) );
 
 		return chip;

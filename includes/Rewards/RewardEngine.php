@@ -9,6 +9,7 @@ namespace GoalCart\Rewards;
 
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Goals\CartContext;
+use GoalCart\Goals\ConflictResolver;
 use GoalCart\Goals\Goal;
 use GoalCart\Goals\GoalEngine;
 use GoalCart\Goals\GoalRepository;
@@ -34,20 +35,31 @@ defined( 'ABSPATH' ) || exit;
  *  - 'woocommerce_before_calculate_totals'  zero automatic-gift prices
  *  - 'woocommerce_cart_calculate_fees'      apply percentage/fixed fees
  *  - 'woocommerce_package_rates'            apply free shipping
- *	 * Reward safety (P05-T03) is enforced here and in RewardSafety:
-	 *  - duplicates / stacking   -> first reward of each type wins unless the
-	 *                               reward opts into stacking
-	 *  - reward loops            -> own-fee exclusion in CartContext plus
-	 *                               idempotent reconciliation mean reward
-	 *                               mutations never re-trigger evaluation
-	 *  - stale rewards           -> every totals pass re-evaluates and
-	 *                               reconciles; coupons and gifts granted by
-	 *                               this engine are removed the moment a goal
-	 *                               becomes incomplete, even without a cart
-	 *                               change (schedule expiry, admin
-	 *                               deactivation)
-	 *  - invalid coupons         -> validated before application
-	 *  - excluded products       -> discount bases exclude them (applicators)
+ *
+ * Reward safety (P05-T03) is enforced here and in RewardSafety:
+ *  - duplicates / stacking   -> first reward of each type wins unless the
+ *                               reward opts into stacking
+ *  - reward loops            -> own-fee exclusion in CartContext plus
+ *                               idempotent reconciliation mean reward
+ *                               mutations never re-trigger evaluation
+ *  - stale rewards           -> every totals pass re-evaluates and
+ *                               reconciles; coupons and gifts granted by
+ *                               this engine are removed the moment a goal
+ *                               becomes incomplete, even without a cart
+ *                               change (schedule expiry, admin
+ *                               deactivation)
+ *  - invalid coupons         -> validated before application
+ *  - excluded products       -> discount bases exclude them (applicators)
+ *
+ * Conflict resolution (Phase 26) is enforced here and in ConflictResolver:
+ *  - deterministic order     -> active_goals() sorts by campaign
+ *                               priority, then goal priority, then id
+ *  - cumulative mode         -> every completed goal grants (default)
+ *  - best / first modes      -> only the best reward / the first matching
+ *                               goal grants; losers are blocked with a
+ *                               resolution reason
+ *  - mutually exclusive goals-> a completed exclusive goal suppresses
+ *                               every lower-priority goal
  */
 final class RewardEngine {
 
@@ -93,6 +105,15 @@ final class RewardEngine {
 	protected $cart_integration;
 
 	/**
+	 * Conflict resolver (Phase 26): deterministic winner selection when
+	 * multiple goals complete — cumulative / best / first modes plus
+	 * mutually exclusive goals.
+	 *
+	 * @var ConflictResolver
+	 */
+	protected $resolver;
+
+	/**
 	 * Reward results for the current request: goal_id => RewardResult.
 	 *
 	 * @var array<int, RewardResult>|null
@@ -113,13 +134,15 @@ final class RewardEngine {
 	 * @param GoalRepository|null    $repository       Goal repository.
 	 * @param Settings|null          $settings         Plugin settings.
 	 * @param CartIntegration|null   $cart_integration Cart integration service.
+	 * @param ConflictResolver|null  $resolver         Conflict resolver (Phase 26).
 	 */
-	public function __construct( ?GoalEngine $engine = null, ?GoalRepository $repository = null, ?Settings $settings = null, ?CartIntegration $cart_integration = null ) {
+	public function __construct( ?GoalEngine $engine = null, ?GoalRepository $repository = null, ?Settings $settings = null, ?CartIntegration $cart_integration = null, ?ConflictResolver $resolver = null ) {
 		$this->engine           = null !== $engine ? $engine : new GoalEngine();
 		$this->repository       = $repository;
 		$this->settings         = $settings;
 		$this->registry         = new RewardApplicatorRegistry();
 		$this->cart_integration = $cart_integration;
+		$this->resolver         = null !== $resolver ? $resolver : new ConflictResolver();
 	}
 
 	/**
@@ -254,29 +277,91 @@ final class RewardEngine {
 				? $this->cart_integration->context( $cart, array( 'exclude_shipping' => true ) )
 				: CartContext::from_cart( $cart, array( 'exclude_shipping' => true ) );
 
-			$results         = array();
-			$already_applied = array();
+			$goals = $this->repository->active_goals();
 
-			foreach ( $this->repository->active_goals() as $goal ) {
+			// Pass 1 — evaluate every completed goal's reward WITHOUT the
+			// stacking guard: the conflict-resolution pass decides the
+			// winners first, then stacking applies at grant time in
+			// priority order (unchanged for cumulative mode). The computed
+			// reward amount (scores) lets 'best' compare real discount
+			// values on the current cart.
+			$goal_results   = array();
+			$reward_results = array();
+			$scores         = array();
+
+			foreach ( $goals as $goal ) {
 				$result = $this->engine->evaluate( $goal, $context );
 
 				if ( ! $result->eligible() || GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
 					continue;
 				}
 
+				// Only goals with a reward configured compete for grants;
+				// reward-less goals grant nothing in any mode.
+				if ( empty( $goal->reward_type() ) ) {
+					continue;
+				}
+
 				$reward_result = $this->evaluate(
 					$result,
 					array(
-						'already_applied' => $already_applied,
+						'already_applied' => array(),
 						'cart'            => $context,
 					)
 				);
+
+				$goal_results[ $goal->id() ]   = $result;
+				$reward_results[ $goal->id() ] = $reward_result;
+
+				if ( RewardResult::STATE_AVAILABLE === $reward_result->state() ) {
+					$scores[ $goal->id() ] = $reward_result->amount();
+				}
+			}
+
+			$resolution = $this->resolver->resolve(
+				$goals,
+				$goal_results,
+				$this->conflict_mode(),
+				$scores
+			);
+
+			// Pass 2 — grant in priority order: winners apply subject to
+			// stacking; suppressed goals are blocked with their resolution
+			// reason so the payload communicates exactly why.
+			$results         = array();
+			$already_applied = array();
+
+			foreach ( $goals as $goal ) {
+				$goal_id = (int) $goal->id();
+
+				if ( ! isset( $reward_results[ $goal_id ] ) ) {
+					continue;
+				}
+
+				$reason = isset( $resolution[ $goal_id ] ) ? $resolution[ $goal_id ] : ConflictResolver::REASON_NONE;
+
+				if ( ConflictResolver::REASON_NONE !== $reason ) {
+					$results[ $goal_id ] = RewardResult::blocked( $reward_results[ $goal_id ]->reward(), $goal_id, $reason );
+					continue;
+				}
+
+				$reward_result = $reward_results[ $goal_id ];
+
+				if ( RewardResult::STATE_NOT_APPLICABLE === $reward_result->state() ) {
+					$results[ $goal_id ] = $reward_result;
+					continue;
+				}
+
+				if ( ! RewardSafety::stacking_allows( $reward_result->reward(), $already_applied ) ) {
+					$results[ $goal_id ] = RewardResult::blocked( $reward_result->reward(), $goal_id, RewardResult::REASON_STACKING );
+					continue;
+				}
 
 				if ( RewardResult::STATE_AVAILABLE === $reward_result->state() ) {
 					$already_applied[] = $reward_result->type();
 				}
 
-				$results[ $goal->id() ] = $reward_result;
+				$results[ $goal_id ] = $reward_result;
 			}
 
 			$this->results_cache = $results;
@@ -311,6 +396,22 @@ final class RewardEngine {
 				$item['data']->set_price( 0 );
 			}
 		}
+	}
+
+	/**
+	 * The active conflict-resolution mode from the settings.
+	 *
+	 * Falls back to cumulative (the pre-Phase-26 behavior) when the
+	 * setting is missing or invalid.
+	 *
+	 * @return string ConflictResolver::MODE_* constant.
+	 */
+	protected function conflict_mode() {
+		$mode = null !== $this->settings
+			? (string) $this->settings->get( 'conflict_resolution', ConflictResolver::MODE_CUMULATIVE )
+			: ConflictResolver::MODE_CUMULATIVE;
+
+		return in_array( $mode, ConflictResolver::modes(), true ) ? $mode : ConflictResolver::MODE_CUMULATIVE;
 	}
 
 	/**

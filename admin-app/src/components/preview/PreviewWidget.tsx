@@ -1,4 +1,5 @@
 import Box from '@mui/material/Box';
+import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
@@ -29,6 +30,22 @@ const REWARD_LABELS: Record<string, string> = {
   free_gift: __('Free gift', 'goalcart'),
   coupon: __('Coupon', 'goalcart'),
 };
+
+/** Human-readable reason a goal was suppressed by a conflict (Phase 26). */
+function conflictReasonLabel(reason: string): string {
+  switch (reason) {
+    case 'exclusive':
+      return __('Blocked by an exclusive goal', 'goalcart');
+    case 'not_first':
+      return __('Skipped — a higher-priority goal wins', 'goalcart');
+    case 'not_best':
+      return __('Skipped — another reward is better', 'goalcart');
+    case 'lower_priority':
+      return __('Skipped — lower priority', 'goalcart');
+    default:
+      return __('Skipped by a conflict', 'goalcart');
+  }
+}
 
 /** The featured goal: the first eligible one, else the first listed. */
 function featuredGoal(goals: ProgressGoal[]): ProgressGoal | null {
@@ -375,6 +392,20 @@ export default function PreviewWidget({
       >
         {goal.message}
       </Typography>
+
+      {/* Conflict resolution note (Phase 26): the admin preview shows when
+          a completed goal's reward is suppressed and why, so the behavior
+          is communicated before publishing. */}
+      {goal.conflict && goal.conflict.resolved === false && (
+        <Box sx={{ mt: 1 }}>
+          <Chip
+            size="small"
+            color="warning"
+            variant="outlined"
+            label={conflictReasonLabel(goal.conflict.reason)}
+          />
+        </Box>
+      )}
 
       {/* GoalMilestones below the body (except the milestone template,
           where the ladder is the hero and already rendered above). */}

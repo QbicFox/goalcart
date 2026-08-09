@@ -51,6 +51,7 @@ class Settings {
 		'fullscreen_dashboard'  => true,
 		'currency_display'      => 'symbol',           // symbol | code | name
 		'default_goal_behavior' => 'all',              // all | first | closest
+		'conflict_resolution'   => 'cumulative',       // cumulative | best | first (Phase 26)
 		'calculation_mode'      => 'subtotal',         // subtotal | discounted_subtotal | total
 
 		// Frontend (P18-T02).

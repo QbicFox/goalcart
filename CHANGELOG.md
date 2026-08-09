@@ -638,6 +638,108 @@ all pass (Settings ships as its own lazy chunk). No database changes.
 
 ---
 
+### Phase 26 — Conflict & Priority Engine (100% complete)
+
+- **P26-T01 Objective & deterministic order** — When several goals are
+  active — standalone goals, campaign milestones, or both — the plugin
+  now behaves **deterministically**. New `includes/Goals/ConflictResolver.php`
+  is the single authoritative rule, shared by the live cart
+  (`RewardEngine::sync_cart()`) and the display paths (`FrontendController`
+  progress payload + `PreviewController` campaign preview), so the reward
+  granted and the reward displayed can never drift apart.
+  `GoalRepository::active_goals()` now returns the active goals in the
+  deterministic Phase 26 order — `ORDER BY COALESCE(campaigns.priority,
+  10) ASC, goals.priority ASC, goals.id ASC`: campaign priority is the
+  primary sort key (a campaign is a deliberate merchandising unit, so its
+  priority outranks any goal inside it), standalone goals compete at the
+  schema-default campaign priority 10, then goal priority, then id for a
+  stable tie-break.
+- **P26-T02 Resolution modes** — New store-wide `conflict_resolution`
+  setting (Settings → General → Conflict resolution, default
+  `cumulative`) selects how *completed* reward-bearing goals compete:
+  **cumulative** (every completed goal grants, subject to the existing
+  per-reward stacking rules — exactly the pre-Phase-26 behavior),
+  **first** (only the first matching goal in priority order grants;
+  later completions suppressed with `not_first`), and **best** (only the
+  highest-value reward grants; `not_best` for the rest). "Best" compares
+  the reward's *computed* discount amount on the current cart when
+  available (the `RewardEngine` pass — percentage discounts resolved to
+  their real value), falling back to a deterministic static score
+  (fixed/percentage value; free shipping, gifts and coupons count as
+  equal-value offers), ties broken by priority then id. Suppressed goals
+  still show their progress on the storefront (a shopper may be working
+  toward the next milestone) but their reward never renders as unlocked
+  and never grants. The progress-cache transient key now includes the
+  mode so a settings change invalidates cached payloads.
+  **Display/grant parity:** the reward engine is injected into
+  `FrontendController` and `PreviewController`, so the storefront
+  payload and the admin preview resolve `best` with the *same computed
+  amounts* the cart grants with and mirror the engine's pass-2 stacking
+  suppression (`ConflictResolver::apply_stacking()`) — a same-type
+  non-stacking loser is reported `stacking`, never as unlocked. What a
+  shopper or an admin sees is exactly what the live cart grants (review-
+  driven hardening; verified end-to-end by the payload parity checks in
+  `tests/conflict-test.php`).
+- **P26-T03 Mutually exclusive goals** — A goal marked **Exclusive** in
+  the goal builder (`goals.exclusive`, new column, database version
+  bumped to `0.3.0`) suppresses every lower-priority *completed* goal
+  (`exclusive` reason) in **every** mode — exclusivity is resolved
+  **before** mode selection, so e.g. in `best` mode an exclusive goal
+  beats a higher-value lower-priority reward. Priority above the
+  exclusive goal is still respected (exclusive means "I win over
+  everything below me", never "I silence everything").
+  `Goal::exclusive()` / the REST goal shape and schema expose the flag.
+- **P26-T04 Admin UI communication** — The behavior is visible in every
+  surface: Settings → General gains the **Conflict resolution** picker
+  with a plain explanation of each mode; the goal builder's **Priority &
+  conflicts** section carries the priority field (lower wins) plus the
+  **Exclusive (mutually exclusive)** toggle with its behavior explained;
+  the Goals list shows an **Exclusive** chip; campaign priority already
+  participates (campaigns compete before goals); and the goal/campaign
+  preview shows a **"Blocked — …"** conflict chip naming the reason.
+  On the storefront, `assets/js/frontend.js` renders a suppressed
+  reward as **locked** (never unlocked) and reports `goal_completed`
+  instead of `reward_activated` for it (verified: the tracking event
+  follows the conflict state).
+- **Payload contract** — The public `GET /goalcart/v1/progress` and the
+  admin `POST /goalcart/v1/preview` payloads carry per goal
+  `"conflict": { "resolved": true, "reason": "" }`; `resolved: false`
+  means the reward is blocked, with the machine-readable reason
+  (`not_first` / `not_best` / `exclusive` / `stacking`; `lower_priority`
+  reserved). The `RewardResult` mirrors it through its `blocked` state,
+  so analytics and previews agree with the live cart.
+- Added files: `includes/Goals/ConflictResolver.php`,
+  `tests/conflict-test.php` (45 checks), `docs/conflicts.md`; extended
+  `includes/Goals/{Goal,GoalRepository}.php`, `includes/Database/Schema.php`,
+  `includes/Rewards/RewardEngine.php`, `includes/Settings/Settings.php`,
+  `includes/REST/{SettingsController,FrontendController,PreviewController,GoalsController}.php`,
+  `includes/Plugin.php`, `goalcart.php` (DB version `0.3.0`),
+  `assets/js/frontend.js`, `tests/settings-test.php`, `docs/{api,database}.md`,
+  and the admin app (`types.ts`, `routes/{Settings,GoalBuilder,Goals,Appearance}.tsx`,
+  `components/preview/PreviewWidget.tsx`).
+- **Verification:** `php -l` clean on every changed PHP file; new
+  conflict suite 57/57 (modes, exclusive, campaign-priority ordering,
+  engine grant/block parity, payload conflict fragment, best-mode
+  computed-amount parity, cumulative stacking parity, settings schema,
+  rollback); settings suite now 124/124 (defaults + REST
+  schema/sanitizer + cache-key coverage for `conflict_resolution`); full
+  regression run — engine 75/75, reward 72/72, cart-integration 22/22,
+  rest-api 120/120, message 47/47, suggestion 28/28, preview 90/90,
+  analytics 72/72, analytics-dashboard 82/82, security 65/65,
+  performance 38/38, woocommerce-compatibility 29/29,
+  wordpress-compatibility 28/28 (all pass, zero failures); `frontend
+  73/73` reports its 1 pre-existing environment-dependent failure
+  (config template: the suite asserts the default `basic` but this site
+  has the Appearance template saved as `card` — same documented
+  artifact as Phase 15, untouched by this phase); `node --check` on the
+  JS; `npm run typecheck`, `npm run lint` and `npm run build` all pass.
+  Database migration `0.3.0` adds `goals.exclusive` (idempotent,
+  existing rows default to 0 = not exclusive).
+
+**Overall project progress: 78%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 4% + Phase 15 2% + Phase 16 2% + Phase 17 2% + Phase 18 2% + Phase 19 2% + Phase 20 2% + Phase 21 1% + Phase 22 3% + Phase 23 3% + Phase 26 weight 2% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

@@ -425,6 +425,10 @@ class GoalsController extends BaseController {
 				'default' => 10,
 				'minimum' => 0,
 			),
+			'exclusive'         => array(
+				'type'    => 'boolean',
+				'default' => false,
+			),
 			'campaign_id'       => array(
 				'type'              => 'integer',
 				'default'           => 0,
@@ -619,6 +623,7 @@ class GoalsController extends BaseController {
 			'reward_max_value'  => null !== $row['reward_max_value'] && '' !== $row['reward_max_value'] ? (float) $row['reward_max_value'] : null,
 			'reward_meta'       => isset( $row['reward_meta'] ) && is_array( $row['reward_meta'] ) ? $row['reward_meta'] : array(),
 			'priority'          => (int) $row['priority'],
+			'exclusive'         => ! empty( $row['exclusive'] ),
 			'campaign_id'       => ! empty( $row['campaign_id'] ) ? (int) $row['campaign_id'] : null,
 			'menu_order'        => (int) $row['menu_order'],
 			'starts_at'         => ! empty( $row['starts_at'] ) ? (string) $row['starts_at'] : null,

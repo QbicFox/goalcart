@@ -151,6 +151,16 @@ final class Goal {
 	protected $priority;
 
 	/**
+	 * Whether the goal is mutually exclusive (Phase 26).
+	 *
+	 * A completed exclusive goal suppresses every lower-priority goal's
+	 * reward; priority above it is still respected.
+	 *
+	 * @var bool
+	 */
+	protected $exclusive;
+
+	/**
 	 * Reward type (Phase 5): free_shipping|percent_discount|fixed_discount.
 	 *
 	 * @var string|null
@@ -232,6 +242,7 @@ final class Goal {
 		$this->starts_at         = isset( $data['starts_at'] ) ? (string) $data['starts_at'] : null;
 		$this->ends_at           = isset( $data['ends_at'] ) ? (string) $data['ends_at'] : null;
 		$this->priority          = isset( $data['priority'] ) ? (int) $data['priority'] : 10;
+		$this->exclusive         = ! empty( $data['exclusive'] );
 		$this->reward_type       = isset( $data['reward_type'] ) ? (string) $data['reward_type'] : null;
 		$this->reward_value      = isset( $data['reward_value'] ) ? (float) $data['reward_value'] : null;
 		$this->reward_max_value  = isset( $data['reward_max_value'] ) ? (float) $data['reward_max_value'] : null;
@@ -411,6 +422,15 @@ final class Goal {
 	 */
 	public function priority() {
 		return $this->priority;
+	}
+
+	/**
+	 * Whether the goal is mutually exclusive (Phase 26).
+	 *
+	 * @return bool
+	 */
+	public function is_exclusive() {
+		return $this->exclusive;
 	}
 
 	/**

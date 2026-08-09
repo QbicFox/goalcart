@@ -9,12 +9,15 @@ namespace GoalCart\REST;
 
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Goals\CartContext;
+use GoalCart\Goals\ConflictResolver;
 use GoalCart\Goals\Goal;
 use GoalCart\Goals\GoalEngine;
 use GoalCart\Goals\GoalRepository;
 use GoalCart\Goals\GoalResult;
 use GoalCart\Goals\MessageEngine;
 use GoalCart\Hooks\HookManager;
+use GoalCart\Rewards\RewardEngine;
+use GoalCart\Rewards\RewardResult;
 use GoalCart\Settings\Settings;
 use GoalCart\Suggestions\SuggestionEngine;
 
@@ -92,6 +95,18 @@ class FrontendController extends BaseController {
 	protected $settings;
 
 	/**
+	 * Reward engine (Phase 26 display/grant parity): evaluates each
+	 * completed goal's reward against the same cart snapshot the engine
+	 * grants with, so 'best' mode compares real computed amounts and the
+	 * payload reflects stacking suppression exactly like the live cart.
+	 * Null when unavailable (bare constructions) — falls back to the
+	 * deterministic static scoring and skips the stacking mirror.
+	 *
+	 * @var RewardEngine|null
+	 */
+	protected $reward_engine;
+
+	/**
 	 * Progress payload transient TTL in seconds (performance_caching).
 	 *
 	 * @var int
@@ -107,14 +122,17 @@ class FrontendController extends BaseController {
 	 * @param MessageEngine     $messages        Message template engine.
 	 * @param SuggestionEngine  $suggestions     Suggestion engine.
 	 * @param Settings          $settings        Settings service.
+	 * @param RewardEngine|null $reward_engine   Reward engine (Phase 26
+	 *                                           display/grant parity).
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, SuggestionEngine $suggestions, Settings $settings ) {
+	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, SuggestionEngine $suggestions, Settings $settings, ?RewardEngine $reward_engine = null ) {
 		$this->engine           = $engine;
 		$this->goals            = $goals;
 		$this->cart_integration = $cart_integration;
 		$this->messages         = $messages;
 		$this->suggestions      = $suggestions;
 		$this->settings         = $settings;
+		$this->reward_engine    = $reward_engine;
 	}
 
 	/**
@@ -184,10 +202,18 @@ class FrontendController extends BaseController {
 			'quantity' => $context->total_quantity(),
 		);
 
+		// Phase 26 (Conflict & Priority Engine): the same deterministic
+		// resolution the reward engine grants with is reflected here, so
+		// every goal's payload says whether it won or was suppressed (and
+		// why). The storefront widgets keep rendering every goal's
+		// progress; the conflict flag lets them show the honest reward
+		// state (a suppressed reward never renders as unlocked).
+		$resolved = $this->resolve_conflicts( $goals, $context );
+
 		foreach ( $goals as $goal ) {
 			$result = $this->engine->evaluate( $goal, $context );
 
-			$items[] = $this->shape_goal( $goal, $result, $context, $extra );
+			$items[] = $this->shape_goal( $goal, $result, $context, $extra, false, $this->conflict_for( $resolved, $goal ) );
 		}
 
 		$response = $this->success(
@@ -251,6 +277,88 @@ class FrontendController extends BaseController {
 	}
 
 	/**
+	 * Resolve conflict winners among the given goals for the payload.
+	 *
+	 * Mirrors the RewardEngine pass (Phase 26) so the payload is always
+	 * what the live cart grants: completed goals that carry a reward
+	 * compete under the configured mode ('best' compares the real computed
+	 * reward amounts on the same cart snapshot), and the per-reward
+	 * stacking safety applies to the winners in priority order — a
+	 * same-type non-stacking loser is blocked with the 'stacking' reason.
+	 * Display narrowing (default_goal_behavior) happens before this, so a
+	 * narrowed set resolves within itself.
+	 *
+	 * @param Goal[]      $goals   Goals being served.
+	 * @param CartContext $context Cart snapshot.
+	 * @return array<int, string> goal_id => ConflictResolver::REASON_*.
+	 */
+	protected function resolve_conflicts( array $goals, CartContext $context ) {
+		$mode    = (string) $this->settings->get( 'conflict_resolution', ConflictResolver::MODE_CUMULATIVE );
+		$results = array();
+		$scores  = array();
+		$rewards = array();
+
+		foreach ( $goals as $goal ) {
+			$result = $this->engine->evaluate( $goal, $context );
+
+			if ( ! $result->eligible() || GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+				continue;
+			}
+
+			if ( empty( $goal->reward_type() ) ) {
+				continue;
+			}
+
+			$results[ $goal->id() ] = $result;
+
+			// The reward is evaluated WITHOUT the stacking guard (the empty
+			// already_applied pass), exactly like RewardEngine::sync_cart()
+			// pass 1 — the amount drives 'best', the state drives the
+			// stacking mirror below.
+			if ( null !== $this->reward_engine ) {
+				$reward_result = $this->reward_engine->evaluate(
+					$result,
+					array( 'cart' => $context )
+				);
+
+				$rewards[ $goal->id() ] = $reward_result;
+
+				if ( RewardResult::STATE_AVAILABLE === $reward_result->state() ) {
+					$scores[ $goal->id() ] = $reward_result->amount();
+				}
+			}
+		}
+
+		$resolver  = new ConflictResolver();
+		$resolution = $resolver->resolve( $goals, $results, $mode, $scores );
+
+		if ( null !== $this->reward_engine ) {
+			$resolution = $resolver->apply_stacking( $goals, $resolution, $rewards );
+		}
+
+		return $resolution;
+	}
+
+	/**
+	 * The per-goal conflict payload fragment.
+	 *
+	 * Goals that did not participate in resolution (not completed, no
+	 * reward) are reported as resolved — they are never suppressed.
+	 *
+	 * @param array<int, string> $resolution goal_id => reason.
+	 * @param Goal               $goal       Goal.
+	 * @return array<string, mixed>
+	 */
+	protected function conflict_for( array $resolution, Goal $goal ) {
+		$reason = isset( $resolution[ $goal->id() ] ) ? $resolution[ $goal->id() ] : ConflictResolver::REASON_NONE;
+
+		return array(
+			'resolved' => ConflictResolver::REASON_NONE === $reason,
+			'reason'   => $reason,
+		);
+	}
+
+	/**
 	 * The progress cache key for a cart snapshot + goal set.
 	 *
 	 * @param CartContext $context Cart snapshot.
@@ -276,6 +384,7 @@ class FrontendController extends BaseController {
 					),
 					'goals'       => $goal_ids,
 					'behavior'    => $this->settings->get( 'default_goal_behavior', 'all' ),
+					'conflict'    => $this->settings->get( 'conflict_resolution', ConflictResolver::MODE_CUMULATIVE ),
 					'suggestions' => (bool) $this->settings->get( 'performance_suggestions', true ),
 				)
 			)
@@ -296,9 +405,21 @@ class FrontendController extends BaseController {
 	 *                             (drives suggestions).
 	 * @param array<string, mixed> $extra Extra message variables (quantity,
 	 *                             remaining_quantity, campaign_name).
+	 * @param bool         $full_reward_meta Whether to expose the full reward
+	 *                             meta (admin preview only — P22 redaction).
+	 * @param array<string, mixed>|null $conflict Conflict payload fragment
+	 *                             (resolved/reason, Phase 26); null = goal
+	 *                             was not suppressed.
 	 * @return array<string, mixed>
 	 */
-	public function shape_goal( Goal $goal, GoalResult $result, CartContext $context, array $extra = array(), $full_reward_meta = false ) {
+	public function shape_goal( Goal $goal, GoalResult $result, CartContext $context, array $extra = array(), $full_reward_meta = false, $conflict = null ) {
+		if ( ! is_array( $conflict ) ) {
+			$conflict = array(
+				'resolved' => true,
+				'reason'   => ConflictResolver::REASON_NONE,
+			);
+		}
+
 		return array(
 			'goal_id'      => $goal->id(),
 			'campaign_id'  => $goal->campaign_id(),
@@ -319,6 +440,7 @@ class FrontendController extends BaseController {
 			'reward_state' => $result->reward_state(),
 			'eligible'     => $result->eligible(),
 			'reason'       => $result->reason(),
+			'conflict'     => $conflict,
 		);
 	}
 

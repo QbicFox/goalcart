@@ -269,9 +269,26 @@ export default function Goals() {
                   <TableRow key={goal.id} hover>
                     <TableCell>
                       <Box>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                          {goal.name}
-                        </Typography>
+                        <Stack direction="row" spacing={0.75} alignItems="center">
+                          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                            {goal.name}
+                          </Typography>
+                          {goal.exclusive && (
+                            <Tooltip
+                              title={__(
+                                'Exclusive: when this goal is reached, lower-priority goals are skipped.',
+                                'goalcart'
+                              )}
+                            >
+                              <Chip
+                                label={__('Exclusive', 'goalcart')}
+                                size="small"
+                                color="warning"
+                                variant="outlined"
+                              />
+                            </Tooltip>
+                          )}
+                        </Stack>
                         <Typography variant="caption" color="text.secondary">
                           {targetLabel(goal)}
                         </Typography>

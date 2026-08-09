@@ -292,13 +292,18 @@ final class Plugin {
 		$this->container->singleton( FrontendController::class, function ( Container $container ) {
 			// Phase 18 (Settings): goal behavior, the suggestions gate and
 			// the optional progress cache all read the settings service.
+			// Phase 26 (Conflict & Priority Engine): the reward engine is
+			// injected so the payload resolves 'best' with real computed
+			// amounts and mirrors stacking suppression — the display is
+			// always what the live cart grants.
 			return new FrontendController(
 				$container->get( GoalEngine::class ),
 				$container->get( GoalRepository::class ),
 				$container->get( CartIntegration::class ),
 				$container->get( MessageEngine::class ),
 				$container->get( SuggestionEngine::class ),
-				$container->get( Settings::class )
+				$container->get( Settings::class ),
+				$container->get( RewardEngine::class )
 			);
 		} );
 
@@ -306,11 +311,18 @@ final class Plugin {
 		// a SIMULATED cart through the real engine, reusing the frontend
 		// controller's shared payload shape — never touches the live cart.
 		$this->container->singleton( PreviewController::class, function ( Container $container ) {
+			// Phase 26 (Conflict & Priority Engine): the preview resolves
+			// conflicts across completed milestones with the store's
+			// configured resolution mode — including computed 'best' scores
+			// and stacking suppression via the reward engine — so admins
+			// see the exact behavior before publishing.
 			return new PreviewController(
 				$container->get( GoalEngine::class ),
 				$container->get( GoalRepository::class ),
 				$container->get( CampaignRepository::class ),
-				$container->get( FrontendController::class )
+				$container->get( FrontendController::class ),
+				$container->get( Settings::class ),
+				$container->get( RewardEngine::class )
 			);
 		} );
 

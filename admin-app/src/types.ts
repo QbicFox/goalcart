@@ -112,6 +112,8 @@ export interface GoalInput {
   reward_max_value: number | null;
   reward_meta: RewardMetaInput;
   priority: number;
+  /** Mutually exclusive goal (Phase 26): when reached, lower-priority goals are skipped. */
+  exclusive: boolean;
   starts_at: string | null;
   ends_at: string | null;
   display_settings: DisplaySettingsInput;
@@ -139,6 +141,8 @@ export interface Goal {
   reward_max_value: number | null;
   reward_meta: RewardMetaInput;
   priority: number;
+  /** Mutually exclusive goal (Phase 26): when reached, lower-priority goals are skipped. */
+  exclusive: boolean;
   campaign_id: number | null;
   menu_order: number;
   starts_at: string | null;
@@ -198,6 +202,12 @@ export interface ProgressGoal {
   reward_state: 'not_applicable' | 'locked' | 'unlocked';
   eligible: boolean;
   reason: string;
+  /**
+   * Phase 26 conflict resolution: whether this goal won its conflict and
+   * may grant its reward, plus the machine-readable reason when suppressed
+   * (lower_priority | exclusive | not_best | not_first).
+   */
+  conflict: { resolved: boolean; reason: string };
 }
 
 /** Simulated cart values sent to the preview endpoint (Phase 15). */
@@ -306,6 +316,13 @@ export type CurrencyDisplay = 'symbol' | 'code' | 'name';
 /** How multiple active goals are presented (Phase 18, default_goal_behavior). */
 export type GoalBehavior = 'all' | 'first' | 'closest';
 
+/**
+ * How completed goals grant rewards when several compete (Phase 26,
+ * conflict_resolution): cumulative (all stack), best (only the most
+ * valuable reward), first (only the highest-priority matching goal).
+ */
+export type ConflictResolution = 'cumulative' | 'best' | 'first';
+
 /** Store-wide default money basis (Phase 18, calculation_mode). */
 export type CalculationMode = 'subtotal' | 'discounted_subtotal' | 'total';
 
@@ -387,6 +404,7 @@ export interface GoalCartSettings {
   fullscreen_dashboard: boolean;
   currency_display: CurrencyDisplay;
   default_goal_behavior: GoalBehavior;
+  conflict_resolution: ConflictResolution;
   calculation_mode: CalculationMode;
 
   // Frontend (P18-T02).

@@ -145,6 +145,7 @@ Copies the goal with a ` (copy)` name suffix. Returns the new goal.
   "reward_max_value": null,
   "reward_meta": {},
   "priority": 10,
+  "exclusive": false,
   "campaign_id": null,
   "menu_order": 0,
   "starts_at": null,
@@ -166,6 +167,8 @@ Validation highlights (all enforced by the route arg schemas):
   `free_gift`, `coupon`, or `null`.
 - `status` — `active` / `inactive`; `operator` — `and` / `or`.
 - `target` — number ≥ 0.
+- `priority` — int ≥ 0 (lower wins conflicts); `exclusive` — boolean
+  (mutually exclusive goal, Phase 26).
 - `campaign_id` — 0 (none) or an existing campaign id.
 - `starts_at` / `ends_at` — `Y-m-d` or `Y-m-d H:i:s` or `null`.
 
@@ -186,6 +189,7 @@ category/product/composite goals evaluate correctly.
     "fullscreen_dashboard": true,
     "currency_display": "symbol",
     "default_goal_behavior": "all",
+    "conflict_resolution": "cumulative",
     "calculation_mode": "subtotal",
     "frontend_template": "basic",
     "frontend_animation": true,
@@ -239,6 +243,7 @@ sanitizer (direct handler saves included). The full Phase 18 surface:
 | `enabled` / `fullscreen_dashboard` | boolean | cast |
 | `currency_display` | enum `symbol` `code` `name` | unknown → `symbol` |
 | `default_goal_behavior` | enum `all` `first` `closest` | unknown → `all` |
+| `conflict_resolution` | enum `cumulative` `best` `first` | unknown → `cumulative` |
 | `calculation_mode` | enum `subtotal` `discounted_subtotal` `total` | unknown → `subtotal` |
 | `frontend_template` | enum `basic` `percentage` `milestone` `card` | unknown → `basic` |
 | `frontend_animation` | boolean | cast |
@@ -372,7 +377,8 @@ Response:
         "suggestions": [],
         "reward_state": "locked",
         "eligible": true,
-        "reason": ""
+        "reason": "",
+        "conflict": { "resolved": true, "reason": "" }
       }
     ],
     "currency": "IRR",
@@ -493,7 +499,8 @@ exposes only the minimum data the widgets need:
 		],
 		"reward_state": "locked",
         "eligible": true,
-        "reason": ""
+        "reason": "",
+        "conflict": { "resolved": true, "reason": "" }
       }
     ],
     "currency": "IRR"
@@ -538,6 +545,21 @@ Notes:
   uses it for that goal (container override → goal template → global
   Appearance template → `basic`), so the goal builder's template picker
   takes effect on the storefront per goal.
+- `conflict` (Phase 26) is the per-goal conflict-resolution fragment:
+  `{ "resolved": true|false, "reason": "" | "not_first" | "not_best" |
+  "exclusive" | "stacking" | "lower_priority" }`. `resolved: false`
+  means the goal reached its target but its reward is suppressed by the
+  store's conflict rules (`conflict_resolution` mode, an exclusive goal,
+  or the per-reward stacking safety — a same-type non-stacking reward
+  never both grants and displays as won) — the widget renders such a
+  reward as locked, never unlocked, and the analytics layer records
+  `goal_completed` instead of `reward_activated` for it. The same
+  fragment appears in the admin preview payload, which renders a
+  "Blocked — …" chip for suppressed milestones. The reasons are always
+  exactly what the live cart grants: the payload resolves `best` with
+  the same computed reward amounts the reward engine uses, and applies
+  the same stacking suppression in the same priority order. See
+  `docs/conflicts.md` for the full rule set.
 - The payload contains only aggregate numbers for the shopper's own cart
   — no PII — which is what allows it to be public.
 - The Phase 11 progress widgets poll this endpoint and re-render on every

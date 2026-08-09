@@ -26,6 +26,18 @@ defined( 'ABSPATH' ) || exit;
 final class GoalRepository {
 
 	/**
+	 * The campaign-priority a standalone goal competes at.
+	 *
+	 * Goals inside a campaign sort by their campaign's priority; goals
+	 * without a campaign behave as if their campaign priority were the
+	 * schema default (10), so standalone goals interleave with campaigns
+	 * deterministically (Phase 26).
+	 *
+	 * @var int
+	 */
+	const DEFAULT_CAMPAIGN_PRIORITY = 10;
+
+	/**
 	 * Per-request cache of active goals.
 	 *
 	 * @var Goal[]|null
@@ -35,10 +47,12 @@ final class GoalRepository {
 	/**
 	 * All goals currently eligible to run (status active, campaign active).
 	 *
-	 * Ordered by priority (ascending — lower number wins) then id, which is
-	 * the deterministic conflict-resolution order the RewardEngine relies
-	 * on. Results are cached per request so multiple evaluations during one
-	 * page load run a single query.
+	 * Ordered by campaign priority (ascending — lower number wins;
+	 * standalone goals compete at DEFAULT_CAMPAIGN_PRIORITY), then goal
+	 * priority, then id — the deterministic Phase 26 conflict-resolution
+	 * order the RewardEngine and the storefront payload rely on. Results
+	 * are cached per request so multiple evaluations during one page load
+	 * run a single query.
 	 *
 	 * @return Goal[]
 	 */
@@ -54,15 +68,18 @@ final class GoalRepository {
 
 		// The LEFT JOIN folds campaign gating (status + schedule) into the
 		// goal so a goal inside an inactive or out-of-schedule campaign can
-		// never grant rewards.
+		// never grant rewards. Campaign priority is the primary sort key so
+		// a higher-priority campaign wins conflicts over a lower-priority
+		// one regardless of the individual goals' priorities.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT g.*, c.name AS campaign_name, c.status AS campaign_status, c.starts_at AS campaign_starts_at, c.ends_at AS campaign_ends_at
 				 FROM {$goals} g
 				 LEFT JOIN {$campaigns} c ON c.id = g.campaign_id
 				 WHERE g.status = %s
-				 ORDER BY g.priority ASC, g.id ASC",
-				Goal::STATUS_ACTIVE
+				 ORDER BY COALESCE(c.priority, %d) ASC, g.priority ASC, g.id ASC",
+				Goal::STATUS_ACTIVE,
+				self::DEFAULT_CAMPAIGN_PRIORITY
 			),
 			ARRAY_A
 		);
@@ -337,6 +354,7 @@ protected function map_columns( array $data ) {
 		'reward_value'      => 'float_nullable',
 		'reward_max_value'  => 'float_nullable',
 		'priority'          => 'int',
+		'exclusive'         => 'bool',
 		'campaign_id'       => 'campaign',
 		'menu_order'        => 'int',
 		'starts_at'         => 'datetime_nullable',
@@ -391,6 +409,9 @@ protected function sanitize_column( $type, $value ) {
 
 		case 'int':
 			return (int) $value;
+
+		case 'bool':
+			return (bool) $value;
 
 		case 'campaign':
 			$campaign_id = (int) $value;

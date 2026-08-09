@@ -373,6 +373,29 @@ export default function Settings() {
                   />
                   <SelectField
                     control={control}
+                    name="conflict_resolution"
+                    label={__('Conflict resolution', 'goalcart')}
+                    description={__(
+                      'How completed goals grant rewards when several compete: combine them, grant only the highest-priority matching goal, or grant only the best reward. Per-goal exclusive flags and priorities are respected in every mode.',
+                      'goalcart'
+                    )}
+                    options={[
+                      {
+                        value: 'cumulative',
+                        label: __('Cumulative — all rewards stack', 'goalcart'),
+                      },
+                      {
+                        value: 'first',
+                        label: __('First matching goal only', 'goalcart'),
+                      },
+                      {
+                        value: 'best',
+                        label: __('Best reward only', 'goalcart'),
+                      },
+                    ]}
+                  />
+                  <SelectField
+                    control={control}
                     name="calculation_mode"
                     label={__('Calculation mode', 'goalcart')}
                     description={__(

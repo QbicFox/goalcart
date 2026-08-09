@@ -10,11 +10,15 @@ namespace GoalCart\REST;
 use GoalCart\Campaigns\CampaignRepository;
 use GoalCart\Goals\CartContext;
 use GoalCart\Goals\CartItem;
+use GoalCart\Goals\ConflictResolver;
 use GoalCart\Goals\Goal;
 use GoalCart\Goals\GoalEngine;
 use GoalCart\Goals\GoalRepository;
 use GoalCart\Goals\GoalResult;
 use GoalCart\Hooks\HookManager;
+use GoalCart\Rewards\RewardEngine;
+use GoalCart\Rewards\RewardResult;
+use GoalCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -93,18 +97,40 @@ class PreviewController extends BaseController {
 	protected $frontend;
 
 	/**
+	 * Settings instance (conflict-resolution mode, Phase 26).
+	 *
+	 * @var Settings
+	 */
+	protected $settings;
+
+	/**
+	 * Reward engine (Phase 26 display/grant parity): evaluates each
+	 * completed milestone's reward against its simulated cart so 'best'
+	 * mode compares real computed amounts and the preview reflects
+	 * stacking suppression exactly like the live cart would.
+	 *
+	 * @var RewardEngine|null
+	 */
+	protected $reward_engine;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param GoalEngine         $engine     Goal engine.
-	 * @param GoalRepository     $goals      Goal repository.
-	 * @param CampaignRepository $campaigns  Campaign repository.
-	 * @param FrontendController $frontend   Frontend controller (shape_goal).
+	 * @param GoalEngine         $engine       Goal engine.
+	 * @param GoalRepository     $goals        Goal repository.
+	 * @param CampaignRepository $campaigns    Campaign repository.
+	 * @param FrontendController $frontend     Frontend controller (shape_goal).
+	 * @param Settings           $settings     Settings service.
+	 * @param RewardEngine|null  $reward_engine Reward engine (Phase 26
+	 *                                          display/grant parity).
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CampaignRepository $campaigns, FrontendController $frontend ) {
-		$this->engine    = $engine;
-		$this->goals     = $goals;
-		$this->campaigns = $campaigns;
-		$this->frontend  = $frontend;
+	public function __construct( GoalEngine $engine, GoalRepository $goals, CampaignRepository $campaigns, FrontendController $frontend, Settings $settings, ?RewardEngine $reward_engine = null ) {
+		$this->engine        = $engine;
+		$this->goals         = $goals;
+		$this->campaigns     = $campaigns;
+		$this->frontend      = $frontend;
+		$this->settings      = $settings;
+		$this->reward_engine = $reward_engine;
 	}
 
 	/**
@@ -238,18 +264,35 @@ class PreviewController extends BaseController {
 			);
 		}
 
-		$items = array();
+		// Evaluate every milestone first, then resolve conflicts (Phase 26)
+		// across the completed ones so the preview shows exactly which
+		// milestones grant their rewards — and which are suppressed by the
+		// priority / exclusive / mode rules — before the payload is shaped.
+		$evaluated = array();
 
 		foreach ( $goals as $goal ) {
 			$context = $this->simulated_context( $goal, $amount, $quantity );
 			$result  = $this->engine->evaluate( $goal, $context );
 
+			$evaluated[] = array(
+				'goal'    => $goal,
+				'result'  => $result,
+				'context' => $context,
+			);
+		}
+
+		$resolution = $this->resolve_conflicts( $evaluated );
+
+		$items = array();
+
+		foreach ( $evaluated as $entry ) {
 			$items[] = $this->frontend->shape_goal(
-				$goal,
-				$result,
-				$context,
-				array( 'quantity' => $context->total_quantity() ),
-				true // Admin preview: expose the full reward meta (manage_options-gated).
+				$entry['goal'],
+				$entry['result'],
+				$entry['context'],
+				array( 'quantity' => $entry['context']->total_quantity() ),
+				true, // Admin preview: expose the full reward meta (manage_options-gated).
+				$this->conflict_for( $resolution, $entry['goal'] )
 			);
 		}
 
@@ -265,6 +308,87 @@ class PreviewController extends BaseController {
 			array(
 				'mode' => $campaign_id > 0 ? 'campaign' : 'goal',
 			)
+		);
+	}
+
+	/**
+	 * Resolve conflict winners among the previewed goals.
+	 *
+	 * Same contract as the reward engine (Phase 26): completed goals that
+	 * carry a reward compete under the configured resolution mode — 'best'
+	 * compares the real computed reward amounts on each milestone's
+	 * simulated cart — and the per-reward stacking safety applies to the
+	 * winners in priority order, so the preview's conflict chips are
+	 * exactly what the live cart would grant.
+	 *
+	 * @param array<int, array<string, mixed>> $evaluated Entries with
+	 *                             'goal', 'result' and 'context' keys.
+	 * @return array<int, string> goal_id => ConflictResolver::REASON_*.
+	 */
+	protected function resolve_conflicts( array $evaluated ) {
+		$goals   = array();
+		$results = array();
+		$scores  = array();
+		$rewards = array();
+
+		foreach ( $evaluated as $entry ) {
+			$goal   = $entry['goal'];
+			$result = $entry['result'];
+
+			$goals[] = $goal;
+
+			if ( ! $result->eligible() || GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+				continue;
+			}
+
+			if ( empty( $goal->reward_type() ) ) {
+				continue;
+			}
+
+			$results[ $goal->id() ] = $result;
+
+			// The reward is evaluated WITHOUT the stacking guard (empty
+			// already_applied pass), exactly like RewardEngine::sync_cart()
+			// pass 1 — the amount drives 'best', the state drives the
+			// stacking mirror below.
+			if ( null !== $this->reward_engine ) {
+				$reward_result = $this->reward_engine->evaluate(
+					$result,
+					array( 'cart' => $entry['context'] )
+				);
+
+				$rewards[ $goal->id() ] = $reward_result;
+
+				if ( RewardResult::STATE_AVAILABLE === $reward_result->state() ) {
+					$scores[ $goal->id() ] = $reward_result->amount();
+				}
+			}
+		}
+
+		$mode       = (string) $this->settings->get( 'conflict_resolution', ConflictResolver::MODE_CUMULATIVE );
+		$resolver   = new ConflictResolver();
+		$resolution = $resolver->resolve( $goals, $results, $mode, $scores );
+
+		if ( null !== $this->reward_engine ) {
+			$resolution = $resolver->apply_stacking( $goals, $resolution, $rewards );
+		}
+
+		return $resolution;
+	}
+
+	/**
+	 * The per-goal conflict payload fragment (mirrors the frontend path).
+	 *
+	 * @param array<int, string> $resolution goal_id => reason.
+	 * @param Goal               $goal       Goal.
+	 * @return array<string, mixed>
+	 */
+	protected function conflict_for( array $resolution, Goal $goal ) {
+		$reason = isset( $resolution[ $goal->id() ] ) ? $resolution[ $goal->id() ] : ConflictResolver::REASON_NONE;
+
+		return array(
+			'resolved' => ConflictResolver::REASON_NONE === $reason,
+			'reason'   => $reason,
 		);
 	}
 

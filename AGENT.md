@@ -1565,18 +1565,44 @@ The agent must explicitly test:
 
 # Phase 26 — Conflict & Priority Engine
 
-When multiple goals/campaigns are active, define deterministic behavior.
+**Phase Weight:** 2%  
+**Phase Progress:** 100%  
+**Project Contribution:** 2.00%  
 
-Support:
+```text
+Phase 26: ████████████████████ 100%
+```
 
-- priority
-- mutually exclusive goals
-- cumulative rewards
-- best reward
-- first matching goal
-- campaign priority
+When multiple goals/campaigns are active, the plugin behaves deterministically.
+Implemented in `includes/Goals/ConflictResolver.php`, the single authoritative
+rule shared by the live cart (`RewardEngine::sync_cart()`) and the display paths
+(`FrontendController` / `PreviewController`), so the reward granted and the
+reward displayed can never drift.
 
-The admin UI must clearly communicate the behavior.
+Support (all implemented, documented in `docs/conflicts.md`):
+
+- **priority** — deterministic order `COALESCE(campaigns.priority, 10) ASC,
+  goals.priority ASC, goals.id ASC`; campaign priority outranks any goal
+  inside it, standalone goals compete at campaign priority 10.
+- **mutually exclusive goals** — `goals.exclusive` (DB `0.3.0`): a completed
+  exclusive goal suppresses every lower-priority completed goal, resolved
+  before mode selection so no mode can undo it.
+- **cumulative rewards** — the default `conflict_resolution` mode: every
+  completed goal grants, subject to the existing per-reward stacking rules
+  (exactly the pre-Phase-26 behavior).
+- **best reward** — only the highest-value reward grants (`not_best`):
+  computed discount amount on the live cart when available, deterministic
+  static score otherwise, ties broken by priority then id.
+- **first matching goal** — only the first completed goal in priority order
+  grants (`not_first`).
+- **campaign priority** — campaigns are the primary sort key for resolution.
+
+The admin UI communicates the behavior everywhere: Settings → General
+Conflict resolution picker, goal builder → Priority & conflicts (priority +
+Exclusive toggle), Goals list Exclusive chip, campaign priority in the
+campaign builder, and a "Blocked — …" conflict chip in the goal/campaign
+preview; the storefront renders a suppressed reward as locked and tracks
+`goal_completed` instead of `reward_activated` for it.
 
 ---
 
@@ -2011,6 +2037,10 @@ This is the authoritative task-level progress register. Each task is represented
 | P23-T01 | 23 | Frontend | 33.33% | [x] | 100% | 1.00% |
 | P23-T02 | 23 | WooCommerce Frontend | 33.33% | [x] | 100% | 1.00% |
 | P23-T03 | 23 | Admin | 33.33% | [x] | 100% | 1.00% |
+| P26-T01 | 26 | Objective & Deterministic Order | 25.00% | [x] | 100% | 0.50% |
+| P26-T02 | 26 | Resolution Modes (cumulative / best / first) | 25.00% | [x] | 100% | 0.50% |
+| P26-T03 | 26 | Mutually Exclusive Goals | 25.00% | [x] | 100% | 0.50% |
+| P26-T04 | 26 | Admin UI Communication | 25.00% | [x] | 100% | 0.50% |
 | P24-T01 | 24 | PHP Unit Tests | 25.00% | [ ] | 0% | 0.00% |
 | P24-T02 | 24 | Integration Tests | 25.00% | [ ] | 0% | 0.00% |
 | P24-T03 | 24 | React Tests | 25.00% | [ ] | 0% | 0.00% |
@@ -2080,7 +2110,7 @@ Use this compact dashboard during development:
 | 23 | 3% | 100% | 3.00% |
 | 24 | 4% | 0% | 0.00% |
 | 25 | 2% | 0% | 0.00% |
-| 26 | 2% | 0% | 0.00% |
+| 26 | 2% | 100% | 2.00% |
 | 27 | 1% | 0% | 0.00% |
 | 28 | 1% | 0% | 0.00% |
 | 29 | 1% | 0% | 0.00% |
@@ -2090,7 +2120,7 @@ Use this compact dashboard during development:
 | 33 | 3% | 0% | 0.00% |
 | 34 | 2% | 0% | 0.00% |
 | 35 | 1% | 0% | 0.00% |
-| **TOTAL** | **100%** | **76%** | **76.00%** |
+| **TOTAL** | **100%** | **78%** | **78.00%** |
 
 
 # Phase Completion Rule

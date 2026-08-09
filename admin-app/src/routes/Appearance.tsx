@@ -31,6 +31,7 @@ const DEFAULT_SETTINGS: GoalCartSettings = {
   fullscreen_dashboard: true,
   currency_display: 'symbol',
   default_goal_behavior: 'all',
+  conflict_resolution: 'cumulative',
   calculation_mode: 'subtotal',
   frontend_template: 'basic',
   frontend_animation: true,

@@ -46,6 +46,7 @@ function emptyGoal(): GoalInput {
     reward_max_value: null,
     reward_meta: { stacking: 'none', label: '' },
     priority: 10,
+    exclusive: false,
     starts_at: null,
     ends_at: null,
     display_settings: {},
@@ -83,6 +84,7 @@ function goalToInput(goal: Goal): GoalInput {
       ...(goal.reward_meta ?? {}),
     },
     priority: goal.priority,
+    exclusive: Boolean(goal.exclusive),
     starts_at: goal.starts_at,
     ends_at: goal.ends_at,
     display_settings: goal.display_settings ?? {},
@@ -313,23 +315,46 @@ export default function GoalBuilder() {
           <DisplayFields values={values} onValueChange={patch} />
         </SectionCard>
 
-        {/* 7. Priority */}
+        {/* 7. Priority & conflicts (Phase 26) */}
         <SectionCard
-          title={__('Priority', 'goalcart')}
+          title={__('Priority & conflicts', 'goalcart')}
           description={__(
-            'Conflict resolution: when multiple goals could win, the lowest number wins first.',
+            'How this goal competes when several goals are active. Lower priority numbers win first; a goal inside a campaign is also ordered by its campaign priority.',
             'goalcart'
           )}
         >
-          <TextField
-            label={__('Priority', 'goalcart')}
-            type="number"
-            fullWidth
-            sx={{ maxWidth: 220 }}
-            value={values.priority}
-            helperText={__('Lower numbers win conflicts.', 'goalcart')}
-            onChange={(event) => patch({ priority: Math.max(0, Number(event.target.value) || 0) })}
-          />
+          <Stack spacing={2}>
+            <TextField
+              label={__('Priority', 'goalcart')}
+              type="number"
+              fullWidth
+              sx={{ maxWidth: 220 }}
+              value={values.priority}
+              helperText={__('Lower numbers win conflicts.', 'goalcart')}
+              onChange={(event) => patch({ priority: Math.max(0, Number(event.target.value) || 0) })}
+            />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={values.exclusive}
+                  onChange={(event) => patch({ exclusive: event.target.checked })}
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {__('Exclusive (mutually exclusive)', 'goalcart')}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {__(
+                      'When this goal is reached, every lower-priority goal is skipped and never grants its reward. Higher-priority goals are unaffected.',
+                      'goalcart'
+                    )}
+                  </Typography>
+                </Box>
+              }
+            />
+          </Stack>
         </SectionCard>
 
         <Paper variant="outlined" sx={{ p: 2.5, display: 'flex', gap: 1.5 }}>
