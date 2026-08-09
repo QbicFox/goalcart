@@ -192,6 +192,16 @@ check( 'frontend JS cache-busts the progress poll', false !== strpos( $frontend_
 
 check( 'frontend JS adopts the payload tracking nonce', false !== strpos( $frontend_js, 'tracking_nonce' ) && false !== strpos( $frontend_js, 'tracking.nonce' ) );
 
+// Every eligible goal renders as its own stacked card — a campaign's
+// milestones each get a full card instead of one featured card + a tiny
+// ladder. The stack wrapper, the per-goal loop and the ineligible skip
+// are all asserted on the source so a regression back to the
+// featured-only render cannot slip through.
+check( 'frontend JS stacks one card per eligible goal', false !== strpos( $frontend_js, 'goalcart-widget__goals' ) && false !== strpos( $frontend_js, 'for ( var i = 0; i < goals.length; i++ )' ) );
+check( 'frontend JS skips ineligible goals when rendering', false !== strpos( $frontend_js, 'goal.eligible === false' ) && false !== strpos( $frontend_js, 'continue;' ) );
+check( 'frontend JS renders each goal card with its own template', false !== strpos( $frontend_js, 'goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) )' ) );
+check( 'frontend JS keeps the sticky bar featured-only', false !== strpos( $frontend_js, 'var goal = featuredGoal( goals );' ) );
+
 // Self-healing tracking nonce (Phase 28): every /progress response mints
 // a fresh goalcart_track nonce so frontend.js can adopt it after a
 // cached page served an expired or foreign one. The toggles are pinned

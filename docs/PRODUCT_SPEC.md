@@ -206,7 +206,11 @@ These are the acceptance-level expectations the implementation phases must satis
 - Stacking, deduplication, and exclusion rules enforced (Phase 5 “Reward Safety”).
 
 ### 5.3 Frontend
-- Reusable component set: `GoalContainer`, `ProgressBar`, `GoalMessage`, `GoalMilestones`, `RewardStatus`, `SuggestionList`, `StickyGoalBar` (Phase 11) — names following the reference project conventions.
+- Reusable component set: `GoalContainer` (one card per eligible goal),
+  `ProgressBar`, `GoalMessage`, `RewardStatus`, `SuggestionList`,
+  `StickyGoalBar` (Phase 11) — names following the reference project
+  conventions. Every eligible goal renders as its own stacked card; the
+  cross-goal `GoalMilestones` ladder was removed when that landed.
 - Display locations: cart, mini-cart, checkout, shop, product page, configurable widget/shortcode, sticky bar (later). **Never** inject into locations that could double-render.
 - Templates: basic, percentage, milestone, card (Phase 12); customizable colors, typography, border, radius, spacing, height, icons, animation, CSS class, custom CSS.
 - Message variables: `{current} {target} {remaining} {percentage} {quantity} {remaining_quantity} {reward} {goal_name} {campaign_name}` (Phase 13).

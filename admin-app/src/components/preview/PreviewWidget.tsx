@@ -47,19 +47,15 @@ function conflictReasonLabel(reason: string): string {
   }
 }
 
-/** The featured goal: the first eligible one, else the first listed. */
-function featuredGoal(goals: ProgressGoal[]): ProgressGoal | null {
-  if (!goals.length) {
-    return null;
-  }
-
-  for (const goal of goals) {
-    if (goal.eligible !== false) {
-      return goal;
-    }
-  }
-
-  return goals[0];
+/**
+ * The eligible goals, in payload order.
+ *
+ * The storefront renders every eligible goal as its own card (no
+ * featured-only behavior), so the preview mirrors that 1:1 — ineligible
+ * goals are skipped, not shown.
+ */
+function eligibleGoals(goals: ProgressGoal[]): ProgressGoal[] {
+  return goals.filter((goal) => goal.eligible !== false);
 }
 
 /** Value-aware reward label (mirrors MessageEngine::reward_label). */
@@ -155,25 +151,21 @@ function RewardChip({ label, state }: { label: string; state: 'locked' | 'unlock
 }
 
 /**
- * The milestone ladder (mirrors .goalcart-milestones). Renders every goal
- * as a rung (dot + target); a completed rung fills. When `showSingle`, a
- * lone goal still renders as one rung (the milestone template's hero).
+ * The goal's own threshold as a single milestone rung (dot + target).
+ *
+ * Every goal renders as its own card now, so there is no cross-goal
+ * ladder — the milestone template shows the one threshold this card is
+ * tracking (mirrors milestonePanel() in assets/js/frontend.js).
  */
-function MilestonesLadder({
-  goals,
+function MilestoneRung({
+  goal,
   currency,
   tokens,
-  showSingle,
 }: {
-  goals: ProgressGoal[];
+  goal: ProgressGoal;
   currency: string;
   tokens: PreviewTokens;
-  showSingle: boolean;
 }) {
-  if (goals.length < 2 && !showSingle) {
-    return null;
-  }
-
   return (
     <Box
       component="ol"
@@ -181,49 +173,43 @@ function MilestonesLadder({
         display: 'flex',
         alignItems: 'center',
         gap: 0.375,
-        margin: '0.875rem 0 0',
+        margin: '0 0 0.875rem',
         padding: 0,
         listStyle: 'none',
         flexWrap: 'wrap',
-        '& li + li::before': {
-          content: '""',
-          width: 22,
-          height: 2,
-          background: tokens.border,
-          flexShrink: 0,
-        },
       }}
     >
-      {goals.map((goal) => (
+      <Box
+        component="li"
+        sx={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 0.3,
+          color: goal.completed ? tokens.text : '#646970',
+          fontSize: 12,
+          fontWeight: 500,
+        }}
+      >
         <Box
-          component="li"
-          key={goal.goal_id}
           sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 0.3,
-            color: goal.completed ? tokens.text : '#646970',
-            fontSize: 12,
-            fontWeight: 500,
+            width: 12,
+            height: 12,
+            borderRadius: '50%',
+            border: `2px solid ${tokens.bg}`,
+            boxShadow: `0 0 0 1px ${goal.completed ? tokens.accent : tokens.border}`,
+            background: goal.completed ? tokens.accent : tokens.border,
+            transition: 'background 0.3s ease',
           }}
-        >
-          <Box
-            sx={{
-              width: 9,
-              height: 9,
-              borderRadius: '50%',
-              background: goal.completed ? tokens.accent : tokens.border,
-              transition: 'background 0.3s ease',
-            }}
-          />
-          <Box component="span">
-            {goal.is_money ? formatCurrency(goal.target, currency) : formatNumber(goal.target)}
-          </Box>
+        />
+        <Box component="span">
+          {goal.is_money ? formatCurrency(goal.target, currency) : formatNumber(goal.target)}
         </Box>
-      ))}
+      </Box>
     </Box>
   );
-} /** The Phase 14 suggestion list (name + server-formatted price). */
+}
+
+/** The Phase 14 suggestion list (name + server-formatted price). */
 function SuggestionList({
   goal,
   currency,
@@ -273,26 +259,25 @@ function SuggestionList({
 }
 
 /**
- * The storefront progress widget, rendered in React for the Phase 15
- * admin preview. Mirrors the component flow of assets/js/frontend.js —
- * GoalContainer → RewardStatus + template body + GoalMessage +
- * GoalMilestones + SuggestionList — with the appearance tokens from the
- * Phase 12 settings, so the admin sees exactly what customers see.
+ * One goal's card — mirrors goalContainer() in assets/js/frontend.js:
+ * reward chip + template body + message + suggestions. Every eligible
+ * goal renders as its own card, so there is no cross-goal ladder.
  */
-export default function PreviewWidget({
-  goals,
+function GoalCard({
+  goal,
   currency,
   tokens,
   template,
   rewardState,
   animation,
-}: PreviewWidgetProps) {
-  const goal = featuredGoal(goals);
-
-  if (!goal) {
-    return null;
-  }
-
+}: {
+  goal: ProgressGoal;
+  currency: string;
+  tokens: PreviewTokens;
+  template: FrontendTemplate;
+  rewardState: PreviewRewardState;
+  animation: boolean;
+}) {
   const percent = Math.max(0, Math.min(100, goal.percentage));
   const chipState: 'locked' | 'unlocked' =
     rewardState === 'auto' ? (goal.completed ? 'unlocked' : 'locked') : rewardState;
@@ -344,7 +329,7 @@ export default function PreviewWidget({
 
       {template === 'milestone' && (
         <Box sx={{ mb: 1 }}>
-          <MilestonesLadder goals={goals} currency={currency} tokens={tokens} showSingle />
+          <MilestoneRung goal={goal} currency={currency} tokens={tokens} />
           <PreviewBar
             tokens={tokens}
             percent={percent}
@@ -407,14 +392,46 @@ export default function PreviewWidget({
         </Box>
       )}
 
-      {/* GoalMilestones below the body (except the milestone template,
-          where the ladder is the hero and already rendered above). */}
-      {goals.length >= 2 && template !== 'milestone' && (
-        <MilestonesLadder goals={goals} currency={currency} tokens={tokens} showSingle={false} />
-      )}
-
       {/* SuggestionList (Phase 14). */}
       <SuggestionList goal={goal} currency={currency} tokens={tokens} />
     </Box>
+  );
+}
+
+/**
+ * The storefront progress widget, rendered in React for the Phase 15
+ * admin preview. Mirrors the component flow of assets/js/frontend.js —
+ * one GoalContainer card per eligible goal, stacked — with the
+ * appearance tokens from the Phase 12 settings, so the admin sees
+ * exactly what customers see.
+ */
+export default function PreviewWidget({
+  goals,
+  currency,
+  tokens,
+  template,
+  rewardState,
+  animation,
+}: PreviewWidgetProps) {
+  const cards = eligibleGoals(goals);
+
+  if (!cards.length) {
+    return null;
+  }
+
+  return (
+    <Stack spacing={1} sx={{ width: '100%' }}>
+      {cards.map((goal) => (
+        <GoalCard
+          key={goal.goal_id}
+          goal={goal}
+          currency={currency}
+          tokens={tokens}
+          template={template}
+          rewardState={rewardState}
+          animation={animation}
+        />
+      ))}
+    </Stack>
   );
 }

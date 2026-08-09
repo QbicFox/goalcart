@@ -63,6 +63,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Storefront widgets showed only one goal when a campaign was active —
+  its other milestones were invisible.** The widget layer rendered a
+  single “featured” goal per container plus a tiny milestone ladder
+  (target dots), and compact locations (mini-cart, shop, product,
+  sticky) skipped even that — so a campaign with several milestone
+  goals looked like a single-goal widget. Every eligible goal now
+  renders as its own full card, stacked in a shared
+  `.goalcart-widget__goals` wrapper (`renderWidget()` in
+  `assets/js/frontend.js`), in full *and* compact widgets; the
+  cross-goal ladder was removed (each goal IS a card) and the
+  `milestone` template shows the goal's own threshold as a single rung.
+  The sticky bar keeps the featured (first eligible) goal — a slim bar
+  stays at-a-glance. The admin preview mirror
+  (`admin-app/src/components/preview/PreviewWidget.tsx`) renders the
+  same stacked-card layout so previews stay 1:1 with the storefront.
 - **Storefront progress widgets were shown to logged-in admins browsing
   their own shop.** The widget layer only gated on `is_admin()` (the
   admin *area*) and the `enabled` setting — a site administrator

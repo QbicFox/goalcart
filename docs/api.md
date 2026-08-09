@@ -339,7 +339,7 @@ Body args:
 | Arg | Type | Default | Notes |
 |---|---|---|---|
 | `goal_id` | int ≥ 0 | 0 | Preview a single goal (XOR with `campaign_id`) |
-| `campaign_id` | int ≥ 0 | 0 | Preview a campaign's milestone ladder |
+| `campaign_id` | int ≥ 0 | 0 | Preview a campaign's ordered milestone goals |
 | `simulated.amount` | number ≥ 0 | 0 | Simulated cart amount (money goals) |
 | `simulated.quantity` | number ≥ 0 | 0 | Simulated item quantity (count goals) |
 
@@ -390,8 +390,9 @@ Response:
 
 `meta.mode` is `goal` or `campaign`; campaign previews return every
 milestone goal in `menu_order` (each with the same shape), which is what
-drives the admin's milestone-ladder rendering. The payload is built by
-the shared `FrontendController::shape_goal()` — identical to `/progress`.
+drives the admin's stacked milestone-card rendering. The payload is
+built by the shared `FrontendController::shape_goal()` — identical to
+`/progress`.
 
 ### 2.6 Analytics (Phase 17)
 

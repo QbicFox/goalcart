@@ -67,6 +67,19 @@
 	margin-block: 0.75rem;
 }
 
+/* The stacked goal-card list: every eligible goal renders as its own
+ * card, one under the other, instead of one featured card + a ladder. */
+
+.goalcart-widget__goals {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.goalcart-widget--compact .goalcart-widget__goals {
+	gap: 0.625rem;
+}
+
 .goalcart-card {
 	background: var(--goalcart-bg);
 	border: 1px solid var(--goalcart-border);
@@ -252,8 +265,12 @@
 }
 
 /* ------------------------------------------------------------------ *
- * GoalMilestones
+ * GoalMilestones (single-rung milestone template marker)
  * ------------------------------------------------------------------ */
+
+/* Every goal renders as its own card, so the milestone template shows
+ * exactly one rung (the goal's own threshold). The multi-rung connector
+ * was removed with the cross-goal ladder. */
 
 .goalcart-milestones {
 	display: flex;
@@ -274,13 +291,6 @@
 	font-weight: 500;
 }
 
-.goalcart-milestone + .goalcart-milestone::before {
-	content: "";
-	width: 22px;
-	height: 2px;
-	background: var(--goalcart-border);
-}
-
 .goalcart-milestone__dot {
 	width: 9px;
 	height: 9px;
@@ -295,11 +305,6 @@
 
 .goalcart-milestone--complete .goalcart-milestone__dot {
 	background: var(--goalcart-accent);
-}
-
-.goalcart-milestone--complete .goalcart-milestone__dot::after {
-	content: "\2713";
-	display: none;
 }
 
 /* ------------------------------------------------------------------ *

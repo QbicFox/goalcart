@@ -10,18 +10,23 @@
  *   GoalContainer    wrapper that hosts one goal's UI (full / compact)
  *   ProgressBar      percentage fill bar
  *   GoalMessage      the goal's progress message
- *   GoalMilestones   ordered ladder of the active goals
  *   RewardStatus     locked / unlocked reward chip
  *   SuggestionList   product suggestions (Phase 14: served by the
  *                     SuggestionEngine, price shown server-formatted)
  *   StickyGoalBar    fixed bottom bar (cart/checkout progress at a glance)
  *
+ * Every eligible goal renders as its own card, stacked in a shared
+ * wrapper (`.goalcart-widget__goals`) — a campaign's milestones each get
+ * a full card instead of one featured card + a tiny ladder. Each card
+ * sees only itself, so the milestone template degrades to the goal's own
+ * single rung.
+ *
  * Templates (P12): the goal body renders per the active variant — basic
- * (bar), percentage (big % + bar), milestone (ladder + bar) or card
- * (icon + title + bar) — driven by `cfg.template` or a per-container
- * `data-goalcart-template` override. Appearance tokens (colors, radius,
- * bar height) come from the same config; the animation toggle adds a
- * no-transition class when disabled.
+ * (bar), percentage (big % + bar), milestone (single threshold rung +
+ * bar) or card (icon + title + bar) — driven by `cfg.template` or a
+ * per-container `data-goalcart-template` override. Appearance tokens
+ * (colors, radius, bar height) come from the same config; the animation
+ * toggle adds a no-transition class when disabled.
  *
  * Contracts:
  *   - config comes from `window.goalcartFrontend` (printed early in
@@ -500,41 +505,6 @@
 	}
 
 	/**
-	 * GoalMilestones — the active goals as an ordered ladder.
-	 *
-	 * Each step shows its target and fills once reached. Hidden when there
-	 * is a single goal (a ladder needs at least two rungs).
-	 *
-	 * @param {Array}  goals    Progress goal entries.
-	 * @param {string} currency ISO currency code.
-	 * @return {HTMLElement|null}
-	 */
-	function goalMilestones( goals, currency ) {
-		if ( ! goals || goals.length < 2 ) {
-			return null;
-		}
-
-		var list = el( 'ol', 'goalcart-milestones' );
-
-		for ( var i = 0; i < goals.length; i++ ) {
-			var goal = goals[ i ];
-			var step = el( 'li', 'goalcart-milestone' );
-
-			if ( goal.completed ) {
-				step.classList.add( 'goalcart-milestone--complete' );
-			}
-
-			var target = goal.is_money ? formatMoney( goal.target, currency ) : formatNumber( goal.target );
-
-			step.appendChild( el( 'span', 'goalcart-milestone__dot' ) );
-			step.appendChild( el( 'span', 'goalcart-milestone__target', target ) );
-			list.appendChild( step );
-		}
-
-		return list;
-	}
-
-	/**
 	 * Whether a goal's reward is suppressed by a conflict (Phase 26).
 	 *
 	 * The progress payload resolves conflicts with the same rules the
@@ -628,9 +598,8 @@
 	 * The per-widget template: an explicit container override wins, then
 	 * the goal's own Display template (the goal builder's template picker),
 	 * then the store-wide Appearance template.
-	 *
-	 * @param {HTMLElement} container Widget container.
-	 * @param {Object}      goal     Featured goal entry.
+	 * 	 * @param {HTMLElement} container Widget container.
+	 * @param {Object}      goal     Goal this card renders (may be null).
 	 * @return {string}
 	 */
 	function widgetTemplate( container, goal ) {
@@ -671,48 +640,35 @@
 	}
 
 	/**
-	 * Milestone template — the goal ladder as the primary visual, with the
-	 * featured bar underneath. Falls back to the bare bar when there is no
-	 * ladder (a single goal has nothing to ladder). Compact widgets skip
-	 * the ladder (a mini-cart has no room for it) and keep just the bar.
+	 * Milestone template — the goal's own threshold as a single rung
+	 * (dot + target label) above the bar.
 	 *
-	 * @param {Object}  goal     Featured goal.
-	 * @param {Array}   goals    All active goals.
+	 * Every goal renders as its own card now, so there is no cross-goal
+	 * ladder to climb: the milestone template shows the one threshold this
+	 * card is tracking, keeping the template visually distinct from basic
+	 * without duplicating the other goals' cards. The single rung is tiny,
+	 * so it fits the compact variant too.
+	 *
+	 * @param {Object}  goal     Goal this card renders.
 	 * @param {string}  currency ISO currency code.
-	 * @param {boolean} compact  Compact variant flag.
 	 * @return {HTMLElement}
 	 */
-	function milestonePanel( goal, goals, currency, compact ) {
+	function milestonePanel( goal, currency ) {
 		var wrap = el( 'div', 'goalcart-milestone-panel' );
-		var ladder = goalMilestones( goals, currency );
+		var rung = el( 'ol', 'goalcart-milestones' );
+		var step = el( 'li', 'goalcart-milestone' );
+		var target = goal.is_money
+			? formatMoney( goal.target, currency )
+			: formatNumber( goal.target );
 
-		if ( ladder && ! compact ) {
-			// The multi-goal ladder is a full-size hero visual — too big
-			// for a compact widget (mini cart, shop, product page).
-			wrap.appendChild( ladder );
-		} else if ( goals && goals.length === 1 ) {
-			// A single goal has no ladder to climb, but the milestone
-			// template should still show its one threshold as a rung
-			// (dot + target label) so it reads as "milestones" rather
-			// than a bare bar that looks identical to the basic template.
-			// One rung is tiny, so it fits the compact variant too — the
-			// template stays visually distinct everywhere.
-			var rung = el( 'ol', 'goalcart-milestones' );
-			var step = el( 'li', 'goalcart-milestone' );
-			var target = goal.is_money
-				? formatMoney( goal.target, currency )
-				: formatNumber( goal.target );
-
-			if ( goal.completed ) {
-				step.classList.add( 'goalcart-milestone--complete' );
-			}
-
-			step.appendChild( el( 'span', 'goalcart-milestone__dot' ) );
-			step.appendChild( el( 'span', 'goalcart-milestone__target', target ) );
-			rung.appendChild( step );
-			wrap.appendChild( rung );
+		if ( goal.completed ) {
+			step.classList.add( 'goalcart-milestone--complete' );
 		}
 
+		step.appendChild( el( 'span', 'goalcart-milestone__dot' ) );
+		step.appendChild( el( 'span', 'goalcart-milestone__target', target ) );
+		rung.appendChild( step );
+		wrap.appendChild( rung );
 		wrap.appendChild( progressBar( goal ) );
 
 		return wrap;
@@ -740,19 +696,17 @@
 	 * The template's core visual (everything except the shared message /
 	 * reward chip / suggestion flow).
 	 *
-	 * @param {Object}  goal     Featured goal.
-	 * @param {Array}   goals    All active goals (for the ladder).
+	 * @param {Object}  goal     Goal this card renders.
 	 * @param {string}  currency ISO currency code.
 	 * @param {string}  template Template variant.
-	 * @param {boolean} compact  Compact variant flag.
 	 * @return {HTMLElement}
 	 */
-	function templateBody( goal, goals, currency, template, compact ) {
+	function templateBody( goal, currency, template ) {
 		switch ( template ) {
 			case 'percentage':
 				return percentagePanel( goal );
 			case 'milestone':
-				return milestonePanel( goal, goals, currency, compact );
+				return milestonePanel( goal, currency );
 			case 'card':
 				return cardPanel( goal );
 			default:
@@ -761,20 +715,20 @@
 	}
 
 	/**
-	 * GoalContainer — the widget body for one featured goal.
+	 * GoalContainer — the widget body for one goal's card.
 	 *
-	 * Full: reward chip + template body + message + milestones (except the
-	 * milestone template, which shows the ladder in its body) + suggestions.
-	 * Compact: template body + message + reward chip.
+	 * Full: reward chip + template body + message + suggestions. Compact:
+	 * template body + message + reward chip. Every eligible goal renders
+	 * as its own card (renderWidget stacks them), so there is no
+	 * cross-goal ladder here anymore.
 	 *
-	 * @param {Object} goal     Featured goal.
-	 * @param {Array}  goals    All active goals (for the ladder).
+	 * @param {Object} goal     Goal this card renders.
 	 * @param {string} currency ISO currency code.
 	 * @param {string} variant  full|compact.
 	 * @param {string} template Template variant.
 	 * @return {HTMLElement}
 	 */
-	function goalContainer( goal, goals, currency, variant, template ) {
+	function goalContainer( goal, currency, variant, template ) {
 		// The Phase 13 message state (inactive / unavailable / progressing /
 		// nearly_complete / completed / reward_activated) lands as a modifier
 		// class so the stylesheet can highlight near-completion etc.
@@ -785,7 +739,7 @@
 		var reward = rewardStatus( goal );
 
 		if ( compact ) {
-			card.appendChild( templateBody( goal, goals, currency, template, true ) );
+			card.appendChild( templateBody( goal, currency, template ) );
 			card.appendChild( goalMessage( goal ) );
 			if ( reward ) {
 				card.appendChild( reward );
@@ -799,15 +753,8 @@
 		}
 		card.appendChild( head );
 
-		card.appendChild( templateBody( goal, goals, currency, template, false ) );
+		card.appendChild( templateBody( goal, currency, template ) );
 		card.appendChild( goalMessage( goal ) );
-
-		if ( 'milestone' !== template ) {
-			var milestones = goalMilestones( goals, currency );
-			if ( milestones ) {
-				card.appendChild( milestones );
-			}
-		}
 
 		var suggestions = suggestionList( goal );
 		if ( suggestions ) {
@@ -819,10 +766,15 @@
 
 	/* ------------------------------------------------------------------ *
 	 * Mounting
-	 * ------------------------------------------------------------------ */
-
-	/**
+	 * ------------------------------------------------------------------ */ 	/**
 	 * Render the progress payload into a single widget container.
+	 *
+	 * Every eligible goal renders as its own card, stacked in a shared
+	 * wrapper — a campaign's milestones each get a full card instead of
+	 * one featured card + a tiny ladder. Each card resolves its own
+	 * template (per-widget override → goal Display template → global
+	 * Appearance template) and sees only itself, so the milestone
+	 * template degrades to the goal's own single rung.
 	 *
 	 * Empty state: no eligible goals (or no goals at all) → the container
 	 * is hidden entirely rather than showing a broken bar.
@@ -837,9 +789,7 @@
 		}
 
 		var goals = ( data && data.goals ) || [];
-		var goal = featuredGoal( goals );
 		var variant = 'compact' === container.getAttribute( 'data-goalcart-variant' ) ? 'compact' : 'full';
-		var template = widgetTemplate( container, goal );
 
 		// The animation toggle (Phase 12) freezes the fill transition via a
 		// class; re-render in place on every refresh so live cart updates
@@ -855,13 +805,32 @@
 		}
 		container.classList.remove( 'goalcart-widget--mobile-hidden' );
 
-		if ( ! goal ) {
+		// Stack one card per eligible goal. Ineligible goals never render
+		// a card (they are skipped, not broken), and when nothing is left
+		// the whole widget hides.
+		var rendered = 0;
+		var stack = el( 'div', 'goalcart-widget__goals' );
+
+		for ( var i = 0; i < goals.length; i++ ) {
+			var goal = goals[ i ];
+
+			if ( ! goal || goal.eligible === false ) {
+				continue;
+			}
+
+			stack.appendChild(
+				goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) )
+			);
+			rendered++;
+		}
+
+		if ( ! rendered ) {
 			container.classList.add( 'goalcart-widget--empty' );
 			return;
 		}
 
 		container.classList.remove( 'goalcart-widget--empty' );
-		container.appendChild( goalContainer( goal, goals, data.currency || cfg.currency, variant, template ) );
+		container.appendChild( stack );
 	}
 
 	/**

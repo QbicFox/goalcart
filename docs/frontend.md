@@ -51,28 +51,30 @@ mini-cart fragment refreshes.
 
 ## Components (`assets/js/frontend.js`)
 
-Each widget renders one featured goal (the first eligible one):
+Each widget renders **every eligible goal as its own card**, stacked in a
+shared `.goalcart-widget__goals` wrapper — a campaign's milestones each
+get a full card instead of one featured card + a tiny ladder:
 
-- **GoalContainer** — the widget body; `full` = reward chip + progress +
-  message + milestones + suggestions, `compact` = progress + message +
-  reward chip.
+- **GoalContainer** — one goal's card; `full` = reward chip + progress +
+  message + suggestions, `compact` = progress + message + reward chip.
 - **ProgressBar** — percentage fill bar (animated, logical-property
   based so it fills right-to-left on RTL sites).
 - **GoalMessage** — the goal's progress message (rendered by the Phase 13
   MessageEngine).
-- **GoalMilestones** — the active goals as an ordered ladder with target
-  labels (currency-aware via the payload `is_money` flag); shown when
-  there is more than one goal.
 - **RewardStatus** — locked 🔒 / unlocked ✓ reward chip, labels
   localized server-side (`frontend_config()` → `labels`).
 - **SuggestionList** — renders `goal.suggestions` when present (filled
   by the Phase 14 SuggestionEngine — upsells, cross-sells, related,
   in-category and best-seller products ranked by price proximity).
 - **StickyGoalBar** — fixed bottom bar with the featured goal's progress
+  (the first eligible one — a slim bar keeps a single goal at a glance)
   and a dismiss button; hidden when the cart has no progress to show.
 
-Empty state: when no goals are eligible the container is hidden
-(`goalcart-widget--empty`) instead of showing a broken bar.
+There is no cross-goal ladder anymore: every goal is its own card, so the
+`milestone` template shows just the goal's own threshold as a single rung
+(dot + target label). Ineligible goals never render a card, and when no
+goals are eligible the container is hidden (`goalcart-widget--empty`)
+instead of showing a broken bar.
 
 ## Refresh & events
 
@@ -221,7 +223,7 @@ store-wide Appearance setting (`cfg.template`), then `basic`.
 |---|---|
 | `basic` | Progress bar + message (the Phase 11 layout) |
 | `percentage` | Large percent readout (`goalcart-percentage__value`) above the bar |
-| `milestone` | The goal ladder (`goalcart-milestones`) as the hero visual, bar underneath. With a single active goal the one threshold renders as a single rung (dot + target label) so the template is distinct even without a ladder |
+| `milestone` | The goal's own threshold as a single rung (`goalcart-milestones`: dot + target label), bar underneath. Every goal is its own card now, so there is no cross-goal ladder to climb — the rung keeps the template visually distinct from basic without duplicating the other goals' cards |
 | `card` | Icon + goal-title header (`goalcart-card-panel`) above the bar |
 
 In JS terms the shared flow (message, reward chip, suggestions, sticky
@@ -230,8 +232,8 @@ variant (`progressBar`, `percentagePanel`, `milestonePanel`,
 `cardPanel`). The card icon comes from the goal's Display settings
 (`display_settings.icon`, served in the progress payload as `icon`); the
 widget falls back to 🎯 when a goal has no icon. Compact widgets keep
-their slim footprint — the milestone ladder is skipped in the compact
-variant.
+their slim footprint — every eligible goal still gets its own compact
+card, stacked with a tighter gap.
 
 Typography and spacing have no dedicated settings: they are tuned through
 the shared tokens (bar height, radius) and the custom-CSS field, keeping
@@ -310,7 +312,7 @@ into a `goalcart_invalid_nonce` (403).
 | `suggestion_impression` | a suggested product renders | once per goal + product per page session |
 | `suggestion_clicked` | a suggestion link is clicked | every click (delegated listener) |
 
-`cart_value` is the featured money goal's current value at event time;
+`cart_value` is the first money goal's current value at event time;
 `goal_progress` carries the rounded `percentage` in `meta`. Suggestion
 clicks are reported through a delegated `document.body` click listener
 using the `data-goalcart-suggestion-id` / `data-goalcart-goal-id`
