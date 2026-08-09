@@ -1,0 +1,1982 @@
+# Copyright (C) 2026 Goal Cart Contributors
+# This file is distributed under the same license as the Goal Cart plugin (GPL-2.0-or-later).
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Goal Cart 0.1.0\n"
+"Report-Msgid-Bugs-To: https://goalcart.com/support\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-09T09:38:05Z\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: goalcart\n"
+
+#: admin-app/src/components/preview/PreviewWidget.tsx:28
+#: admin-app/src/routes/Analytics.tsx:69
+#: admin-app/src/routes/CampaignBuilder.tsx:35
+#: admin-app/src/routes/Goals.tsx:45
+msgid "% discount"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:125
+msgid "% off the eligible cart value"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewWidget.tsx:72
+#: includes/Goals/MessageEngine.php:284
+msgid "%d%% discount"
+msgstr ""
+
+#: admin-app/src/components/GoalPreviewDialog.tsx:122
+msgid "%d%% progress"
+msgstr ""
+
+#: includes/Campaigns/CampaignRepository.php:224
+#: includes/Goals/GoalRepository.php:326
+msgid "%s (copy)"
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:150
+msgid "%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page; the frontend widgets are added in a later phase."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/TargetFields.tsx:44
+msgid "(amount)"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/TargetFields.tsx:42
+msgid "(items)"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/TargetFields.tsx:39
+msgid "(weight units)"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:70
+msgid "A big percent readout above the bar."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:310
+msgid "A deterministic coupon is created per customer."
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:75
+msgid "A goal ladder of dots and targets, bar underneath."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:282
+msgid "AND (all children required)"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:512
+msgid "Accent"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:167
+#: admin-app/src/routes/Goals.tsx:264
+msgid "Actions"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:246
+#: admin-app/src/routes/Campaigns.tsx:45
+#: admin-app/src/routes/Dashboard.tsx:117
+#: admin-app/src/routes/GoalBuilder.tsx:238
+#: admin-app/src/routes/Goals.tsx:63
+#: admin-app/src/routes/Goals.tsx:223
+msgid "Active"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:354
+msgid "Activity over time"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:390
+msgid "Add a milestone"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:36
+msgid "Add automatically"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:193
+#: admin-app/src/routes/Campaigns.tsx:122
+msgid "Add campaign"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:177
+msgid "Add condition"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:185
+#: admin-app/src/routes/Goals.tsx:177
+msgid "Add goal"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:493
+msgid "Add line taxes to the subtotal-style money bases."
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:153
+msgid "Add your first campaign"
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:247
+msgid "Add your first goal"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:559
+msgid "Add-to-cart"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:344
+msgid "Add-to-cart rate"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:557
+msgid "Added"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:609
+msgid "Added to every storefront progress widget so your theme can target it."
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:599
+#: admin-app/src/routes/Settings.tsx:327
+#: admin-app/src/routes/Settings.tsx:581
+msgid "Advanced"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:219
+msgid "All campaigns"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:235
+msgid "All goals"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:407
+msgid "All goals are already milestones of this campaign."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:265
+msgid "All products"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:67
+msgid "All rewards"
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:222
+msgid "All statuses"
+msgstr ""
+
+#: includes/Goals/MessageEngine.php:153
+msgid "Almost there! Only {remaining} left"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:24
+#: admin-app/src/routes/Goals.tsx:52
+msgid "Amount"
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:76
+msgid "An overview of your cart goals and the plugin status. Full analytics arrive in a later phase."
+msgstr ""
+
+#: admin-app/src/components/layout/navigation.ts:39
+#: admin-app/src/routes/Analytics.tsx:195
+msgid "Analytics"
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:347
+msgid "Analytics arrive in a later phase."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:558
+msgid "Analytics tracking"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:458
+msgid "Animate progress"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:584
+msgid "Animate progress updates"
+msgstr ""
+
+#: admin-app/src/components/layout/navigation.ts:45
+#: admin-app/src/routes/Appearance.tsx:400
+#: admin-app/src/routes/Appearance.tsx:414
+#: admin-app/src/routes/Appearance.tsx:428
+msgid "Appearance"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:389
+msgid "Appearance saved."
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:624
+msgid "Appended to the storefront widget styles (overrides any token)."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:624
+msgid "Appended to the storefront widget stylesheet (tags are stripped)."
+msgstr ""
+
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:240
+msgid "Apply range"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:116
+msgid "Auto"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:334
+msgid "Avg. cart value"
+msgstr ""
+
+#: admin-app/src/routes/NotFound.tsx:20
+msgid "Back to Dashboard"
+msgstr ""
+
+#: admin-app/src/components/layout/AdminLayout.tsx:369
+msgid "Back to WordPress Admin"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:200
+msgid "Back to campaigns"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:192
+msgid "Back to goals"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:517
+msgid "Background"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:535
+msgid "Bar & animation"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:540
+msgid "Bar height (px)"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:64
+#: admin-app/src/routes/Settings.tsx:449
+msgid "Basic"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:207
+#: admin-app/src/routes/GoalBuilder.tsx:199
+msgid "Basic information"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:14
+msgid "Basic progress bar"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:393
+msgid "Best reward only"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewWidget.tsx:38
+msgid "Blocked by an exclusive goal"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:522
+msgid "Border"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:558
+msgid "CTR"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:549
+msgid "Cache progress payloads"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:543
+msgid "Caching and what the storefront measures."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:118
+#: admin-app/src/components/goal-builder/TargetFields.tsx:88
+msgid "Calculate against"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:400
+msgid "Calculation mode"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:213
+msgid "Campaign"
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:297
+msgid "Campaign #%d"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:180
+msgid "Campaign editor"
+msgstr ""
+
+#: admin-app/src/components/CampaignPreviewDialog.tsx:95
+msgid "Campaign preview"
+msgstr ""
+
+#: admin-app/src/components/layout/navigation.ts:38
+#: admin-app/src/routes/Campaigns.tsx:111
+msgid "Campaigns"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:143
+msgid "Campaigns bundle multiple goals into scheduled, prioritized milestones. Create your first campaign to group goals around an event or season."
+msgstr ""
+
+#: admin-app/src/components/ConfirmDialog.tsx:59
+#: admin-app/src/routes/CampaignBuilder.tsx:427
+#: admin-app/src/routes/GoalBuilder.tsx:373
+msgid "Cancel"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:140
+msgid "Cap the discount at this amount."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:17
+#: admin-app/src/routes/Appearance.tsx:79
+#: admin-app/src/routes/Settings.tsx:452
+msgid "Card"
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:174
+msgid "Cart goals drive the storefront progress bars and rewards."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:118
+msgid "Cart page"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:28
+#: admin-app/src/components/goal-builder/TargetFields.tsx:20
+#: admin-app/src/components/goal-builder/TargetFields.tsx:26
+#: admin-app/src/components/goal-builder/TargetFields.tsx:32
+#: admin-app/src/routes/Settings.tsx:414
+msgid "Cart total (incl. tax & shipping)"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:153
+#: admin-app/src/components/goal-builder/TargetFields.tsx:106
+msgid "Categories"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:42
+#: admin-app/src/routes/Goals.tsx:55
+msgid "Category"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:120
+msgid "Checkout"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:81
+msgid "Child type"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:269
+msgid "Children are evaluated against the same cart. AND requires every child, OR completes at the best child."
+msgstr ""
+
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:229
+msgid "Choose a start and end date."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:556
+msgid "Clicks"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:356
+msgid "Code (USD 100)"
+msgstr ""
+
+#: admin-app/src/components/layout/AdminLayout.tsx:264
+msgid "Collapse all"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:559
+msgid "Collect goal and suggestion events. Keep the goals running while turning event collection off."
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:506
+msgid "Colors"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:61
+msgid "Combine child goals with AND/OR logic."
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:29
+msgid "Complete"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:79
+msgid "Completed message"
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:263
+msgid "Completion"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:324
+msgid "Completion rate"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:319
+#: admin-app/src/routes/Analytics.tsx:410
+#: admin-app/src/routes/Analytics.tsx:483
+msgid "Completions"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:60
+#: admin-app/src/routes/Goals.tsx:58
+msgid "Composite"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:268
+msgid "Composite conditions"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:304
+msgid "Conditions"
+msgstr ""
+
+#: admin-app/src/components/layout/navigation.ts:43
+msgid "Configuration"
+msgstr ""
+
+#: admin-app/src/components/ConfirmDialog.tsx:67
+msgid "Confirm"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:377
+msgid "Conflict resolution"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:558
+msgid "Corner radius (px)"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:274
+msgid "Could not load the analytics."
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:185
+msgid "Could not load the campaign."
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:130
+msgid "Could not load the campaigns."
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:85
+msgid "Could not load the goal summary."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:177
+msgid "Could not load the goal."
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:185
+msgid "Could not load the goals."
+msgstr ""
+
+#: admin-app/src/components/CampaignPreviewDialog.tsx:140
+#: admin-app/src/components/GoalPreviewDialog.tsx:131
+msgid "Could not load the preview."
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:420
+#: admin-app/src/routes/Settings.tsx:299
+msgid "Could not load the settings."
+msgstr ""
+
+#: includes/REST/TrackController.php:253
+msgid "Could not record the event."
+msgstr ""
+
+#: includes/REST/SettingsController.php:153
+msgid "Could not save the settings. Please try again."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:27
+#: admin-app/src/components/preview/PreviewWidget.tsx:31
+#: admin-app/src/routes/Analytics.tsx:72
+#: admin-app/src/routes/CampaignBuilder.tsx:38
+#: admin-app/src/routes/Goals.tsx:48
+#: includes/Frontend/ProgressUI.php:766
+#: includes/Goals/MessageEngine.php:303
+msgid "Coupon"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:348
+msgid "Coupon cap (optional)"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:322
+msgid "Coupon discount type"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:338
+msgid "Coupon value"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:424
+msgid "Create campaign"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:370
+msgid "Create goal"
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:93
+msgid "Create your first goal to start increasing the average order value — progress bars and rewards appear on the storefront once a goal is active."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:385
+msgid "Cumulative — all rewards stack"
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:129
+msgid "Currency"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:349
+msgid "Currency display"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:623
+#: admin-app/src/routes/Settings.tsx:623
+msgid "Custom CSS"
+msgstr ""
+
+#: admin-app/src/components/date-range/DateRangeFilter.tsx:114
+msgid "Custom range…"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:313
+msgid "Customer-facing copy and template for the progress widget."
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:401
+#: admin-app/src/routes/Appearance.tsx:415
+#: admin-app/src/routes/Appearance.tsx:429
+msgid "Customize how the cart progress UI looks on your storefront."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:358
+msgid "Daily impressions, completions and revenue trend"
+msgstr ""
+
+#: admin-app/src/components/layout/navigation.ts:36
+#: admin-app/src/routes/Dashboard.tsx:75
+msgid "Dashboard"
+msgstr ""
+
+#: admin-app/src/components/date-range/DateRangeFilter.tsx:84
+msgid "Date range"
+msgstr ""
+
+#: admin-app/src/components/date-range/DateRangeFilter.tsx:69
+msgid "Date range filter"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:588
+msgid "Debug mode"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:582
+msgid "Debugging, logging and the developer surface."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:363
+msgid "Default goal behavior"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:401
+msgid "Default money basis for goals that do not set their own."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:186
+msgid "Define what shoppers need to reach and what they earn for getting there."
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:256
+#: admin-app/src/routes/Campaigns.tsx:290
+#: admin-app/src/routes/Goals.tsx:383
+#: admin-app/src/routes/Goals.tsx:442
+msgid "Delete"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:260
+#: admin-app/src/routes/Goals.tsx:387
+msgid "Delete %s"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:277
+msgid "Delete this campaign?"
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:432
+msgid "Delete this goal?"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:226
+#: admin-app/src/routes/GoalBuilder.tsx:218
+msgid "Description"
+msgstr ""
+
+#: admin-app/src/components/CampaignPreviewDialog.tsx:58
+#: admin-app/src/components/GoalPreviewDialog.tsx:58
+#: admin-app/src/components/preview/PreviewControls.tsx:37
+msgid "Desktop"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:637
+msgid "Developer hooks"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:130
+#: admin-app/src/components/preview/PreviewControls.tsx:142
+msgid "Device width"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:194
+#: admin-app/src/routes/Goals.tsx:314
+msgid "Disable"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:117
+msgid "Discount amount"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:116
+msgid "Discount percentage"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:27
+#: admin-app/src/components/goal-builder/TargetFields.tsx:19
+#: admin-app/src/components/goal-builder/TargetFields.tsx:25
+#: admin-app/src/components/goal-builder/TargetFields.tsx:31
+#: admin-app/src/routes/Settings.tsx:412
+msgid "Discounted subtotal"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:312
+msgid "Display"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:441
+msgid "Display locations"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:36
+#: admin-app/src/routes/Goals.tsx:54
+msgid "Distinct quantity"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:82
+msgid "Drives money-based goals (subtotal / total)."
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:95
+msgid "Drives quantity, distinct-quantity and weight goals."
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:246
+#: admin-app/src/routes/Goals.tsx:373
+msgid "Duplicate"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:249
+#: admin-app/src/routes/Goals.tsx:376
+msgid "Duplicate %s"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:91
+#: admin-app/src/routes/Goals.tsx:152
+msgid "Duplicated “%s”."
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:237
+#: admin-app/src/routes/Goals.tsx:364
+msgid "Edit"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:240
+#: admin-app/src/routes/Goals.tsx:367
+msgid "Edit %s"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:165
+#: admin-app/src/routes/CampaignBuilder.tsx:179
+#: admin-app/src/routes/CampaignBuilder.tsx:193
+msgid "Edit campaign"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:156
+#: admin-app/src/routes/GoalBuilder.tsx:171
+#: admin-app/src/routes/GoalBuilder.tsx:185
+msgid "Edit goal"
+msgstr ""
+
+#: admin-app/src/components/layout/AdminLayout.tsx:376
+msgid "Edit profile"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:160
+msgid "Eligible categories (optional)"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:153
+msgid "Eligible products (optional)"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:25
+msgid "Empty cart"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:195
+#: admin-app/src/routes/Goals.tsx:315
+msgid "Enable"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:340
+msgid "Enable Goal Cart"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/ConditionFields.tsx:52
+#: admin-app/src/routes/CampaignBuilder.tsx:278
+msgid "Ends at"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/ConditionFields.tsx:30
+msgid "Excluded products"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:171
+msgid "Excluded products (optional)"
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:284
+msgid "Exclusive"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:346
+msgid "Exclusive (mutually exclusive)"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:246
+msgid "Exclusive rewards never combine."
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:278
+msgid "Exclusive: when this goal is reached, lower-priority goals are skipped."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:384
+msgid "Existing coupon code"
+msgstr ""
+
+#: admin-app/src/components/layout/AdminLayout.tsx:264
+msgid "Expand all"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:608
+msgid "Extra CSS class"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:389
+msgid "First matching goal only"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewWidget.tsx:80
+#: includes/Goals/MessageEngine.php:295
+msgid "Fixed %s off"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:42
+#: admin-app/src/components/goal-builder/RewardFields.tsx:126
+msgid "Fixed amount off"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:25
+#: admin-app/src/components/preview/PreviewWidget.tsx:29
+#: admin-app/src/routes/Analytics.tsx:70
+#: admin-app/src/routes/CampaignBuilder.tsx:36
+#: admin-app/src/routes/Goals.tsx:46
+#: includes/Frontend/ProgressUI.php:764
+#: includes/Goals/MessageEngine.php:290
+msgid "Fixed discount"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:26
+#: admin-app/src/components/preview/PreviewWidget.tsx:30
+#: admin-app/src/routes/Analytics.tsx:71
+#: admin-app/src/routes/CampaignBuilder.tsx:37
+#: admin-app/src/routes/Goals.tsx:47
+#: includes/Frontend/ProgressUI.php:765
+#: includes/Goals/MessageEngine.php:300
+msgid "Free gift"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:23
+#: admin-app/src/components/preview/PreviewWidget.tsx:27
+#: admin-app/src/routes/Analytics.tsx:68
+#: admin-app/src/routes/Appearance.tsx:152
+#: admin-app/src/routes/Appearance.tsx:207
+#: admin-app/src/routes/Appearance.tsx:296
+#: admin-app/src/routes/CampaignBuilder.tsx:34
+#: admin-app/src/routes/Goals.tsx:44
+#: includes/Frontend/ProgressUI.php:762
+#: includes/Goals/MessageEngine.php:277
+msgid "Free shipping"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:40
+msgid "Free shipping unlocked"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:320
+#: admin-app/src/routes/Settings.tsx:434
+msgid "Frontend"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:420
+msgid "Full-screen dashboard"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:319
+#: admin-app/src/routes/Settings.tsx:333
+msgid "General"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:307
+msgid "Generate a coupon from these rules"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:207
+msgid "Gift mode"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:196
+msgid "Gift product"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:220
+msgid "Give the campaign a name."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:212
+msgid "Give the goal a name."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:229
+msgid "Goal"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:324
+#: admin-app/src/routes/Settings.tsx:482
+msgid "Goal Calculation"
+msgstr ""
+
+#: admin-app/src/components/layout/navigation.ts:34
+#: includes/Admin/Admin.php:113
+#: includes/Admin/Admin.php:114
+msgid "Goal Cart"
+msgstr ""
+
+#: includes/Frontend/ProgressUI.php:189
+msgid "Goal Cart Progress"
+msgstr ""
+
+#: includes/Compatibility.php:172
+msgid "Goal Cart is inactive because the site does not meet its requirements:"
+msgstr ""
+
+#: includes/Admin/Admin.php:213
+msgid "Goal Cart:"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:172
+msgid "Goal editor"
+msgstr ""
+
+#: admin-app/src/components/GoalPreviewDialog.tsx:91
+msgid "Goal preview"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:84
+msgid "Goal reached — your reward is unlocked!"
+msgstr ""
+
+#: includes/Rewards/Applicators/AbstractDiscountApplicator.php:183
+msgid "Goal reward"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:251
+msgid "Goal type"
+msgstr ""
+
+#: admin-app/src/components/layout/navigation.ts:37
+#: admin-app/src/routes/Goals.tsx:173
+msgid "Goals"
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:237
+msgid "Goals define what you want shoppers to reach — a cart amount, quantity, category spend and more. Create your first goal to start."
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:194
+msgid "Group goals into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds."
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:112
+msgid "Group goals into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:471
+msgid "Hide on mobile"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:421
+msgid "Hide the WordPress admin chrome and let the dashboard fill the whole browser window."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:378
+msgid "How completed goals grant rewards when several compete: combine them, grant only the highest-priority matching goal, or grant only the best reward. Per-goal exclusive flags and priorities are respected in every mode."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:350
+msgid "How money amounts are shown on the storefront widgets."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:364
+msgid "How multiple active goals are presented when the shopper has no campaign."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:321
+msgid "How this goal competes when several goals are active. Lower priority numbers win first; a goal inside a campaign is also ordered by its campaign priority."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:91
+msgid "Icon"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:80
+msgid "Icon, title and reward bundled in a card."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:314
+#: admin-app/src/routes/Analytics.tsx:403
+#: admin-app/src/routes/Analytics.tsx:555
+msgid "Impressions"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:47
+#: admin-app/src/routes/Dashboard.tsx:123
+#: admin-app/src/routes/Goals.tsx:65
+#: admin-app/src/routes/Goals.tsx:224
+msgid "Inactive"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:249
+msgid "Inactive campaigns never evaluate their goals on the storefront."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:241
+msgid "Inactive goals never evaluate on the storefront."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:501
+msgid "Include discounts"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:519
+msgid "Include sale items"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:510
+msgid "Include shipping"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:492
+msgid "Include taxes"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:528
+msgid "Include virtual products"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:221
+#: admin-app/src/routes/GoalBuilder.tsx:213
+msgid "Internal name shown in the admin."
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:231
+msgid "Internal notes about this campaign."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:223
+msgid "Internal notes about this goal."
+msgstr ""
+
+#: includes/REST/TrackController.php:174
+msgid "Invalid tracking nonce."
+msgstr ""
+
+#: admin-app/src/date-range/dateRange.ts:81
+msgid "Last 30 days"
+msgstr ""
+
+#: admin-app/src/date-range/dateRange.ts:78
+msgid "Last 7 days"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/ConditionFields.tsx:58
+msgid "Leave both empty to run the goal at all times. Local site time is used."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:157
+#: admin-app/src/components/goal-builder/RewardFields.tsx:164
+msgid "Leave empty to apply to the whole cart."
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:234
+msgid "Live preview"
+msgstr ""
+
+#: includes/Admin/Admin.php:233
+msgid "Loading Goal Cart…"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:166
+msgid "Loading the campaign…"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:157
+msgid "Loading the goal…"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:119
+msgid "Locked"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:606
+msgid "Log file"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:597
+msgid "Logging"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:290
+#: admin-app/src/routes/GoalBuilder.tsx:333
+msgid "Lower numbers win conflicts."
+msgstr ""
+
+#: admin-app/src/components/layout/AdminLayout.tsx:163
+msgid "Main navigation"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:184
+msgid "Makes every shipping rate free once the goal is reached. Zone/method-specific rules are configured in a later phase."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:334
+msgid "Master toggle, display and default behavior."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:135
+msgid "Maximum discount"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:196
+msgid "Measure whether Goal Cart actually increases your average order value."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:63
+msgid "Message (in progress)"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:74
+#: admin-app/src/routes/Settings.tsx:451
+msgid "Milestone"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:16
+#: admin-app/src/routes/CampaignBuilder.tsx:304
+#: admin-app/src/routes/Campaigns.tsx:163
+msgid "Milestones"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:119
+msgid "Mini cart"
+msgstr ""
+
+#: admin-app/src/components/CampaignPreviewDialog.tsx:56
+#: admin-app/src/components/GoalPreviewDialog.tsx:56
+#: admin-app/src/components/preview/PreviewControls.tsx:35
+msgid "Mobile"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:464
+msgid "Mobile behavior"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:364
+msgid "Move down"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:353
+msgid "Move up"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:212
+#: admin-app/src/routes/Campaigns.tsx:162
+#: admin-app/src/routes/GoalBuilder.tsx:204
+#: admin-app/src/routes/Goals.tsx:257
+msgid "Name"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:357
+msgid "Name (US dollars)"
+msgstr ""
+
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:154
+msgid "Next month"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:31
+msgid "No (exclusive)"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:297
+msgid "No analytics yet"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:444
+msgid "No campaign activity in this range."
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:142
+msgid "No campaigns yet"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:65
+msgid "No child goals yet. Add at least one condition to build the composite goal."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:499
+msgid "No goal activity in this range."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:298
+msgid "No goal impressions were recorded in this range. Widen the date range or check that event tracking is enabled on the storefront."
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:406
+msgid "No goals match your search."
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:92
+#: admin-app/src/routes/Goals.tsx:236
+msgid "No goals yet"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:406
+msgid "No goals yet — create a goal on the Goals page first."
+msgstr ""
+
+#: admin-app/src/components/CampaignPreviewDialog.tsx:145
+msgid "No milestones in this campaign yet."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:22
+#: admin-app/src/routes/CampaignBuilder.tsx:437
+msgid "No reward"
+msgstr ""
+
+#: includes/REST/SettingsController.php:143
+msgid "No settings were provided to save."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:547
+msgid "No suggestion activity in this range."
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:71
+msgid "None"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:283
+msgid "OR (any child completes)"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:37
+msgid "Offer as optional"
+msgstr ""
+
+#: includes/Database/Installer.php:104
+msgid "Once Weekly"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:220
+#: admin-app/src/routes/Appearance.tsx:306
+msgid "Only $38.00 left to reach your goal"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/TargetFields.tsx:110
+msgid "Only products in these categories count toward the target."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/TargetFields.tsx:125
+msgid "Only these products count toward the target. Variations are matched by their parent product."
+msgstr ""
+
+#: includes/Goals/MessageEngine.php:171
+msgid "Only {remaining} left to reach your goal"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:68
+msgid "Only {remaining} left to unlock {reward}!"
+msgstr ""
+
+#: admin-app/src/components/layout/AdminLayout.tsx:309
+msgid "Open navigation"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:276
+msgid "Operator"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:139
+#: admin-app/src/components/goal-builder/RewardFields.tsx:352
+msgid "Optional cap"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:95
+msgid "Optional icon shown next to the progress bar."
+msgstr ""
+
+#: admin-app/src/routes/NotFound.tsx:14
+msgid "Page not found"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:15
+#: admin-app/src/routes/Appearance.tsx:69
+#: admin-app/src/routes/Settings.tsx:450
+msgid "Percentage"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:24
+#: includes/Frontend/ProgressUI.php:763
+#: includes/Goals/MessageEngine.php:281
+msgid "Percentage discount"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:41
+msgid "Percentage off"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:326
+#: admin-app/src/routes/Settings.tsx:542
+msgid "Performance"
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:135
+msgid "Plugin version"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:280
+#: admin-app/src/routes/Settings.tsx:294
+msgid "Plugin-wide configuration."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:308
+msgid "Plugin-wide configuration. Changes apply immediately."
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:228
+#: admin-app/src/routes/Goals.tsx:355
+msgid "Preview"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:231
+#: admin-app/src/routes/Goals.tsx:358
+msgid "Preview %s"
+msgstr ""
+
+#: includes/REST/PreviewController.php:633
+msgid "Preview item"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:52
+#: admin-app/src/components/preview/PreviewControls.tsx:64
+msgid "Preview state"
+msgstr ""
+
+#: admin-app/src/components/CampaignPreviewDialog.tsx:94
+#: admin-app/src/components/GoalPreviewDialog.tsx:91
+msgid "Preview: %s"
+msgstr ""
+
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:144
+msgid "Previous month"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:286
+#: admin-app/src/routes/Campaigns.tsx:165
+#: admin-app/src/routes/GoalBuilder.tsx:328
+#: admin-app/src/routes/Goals.tsx:261
+msgid "Priority"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:320
+msgid "Priority & conflicts"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:48
+#: admin-app/src/routes/Analytics.tsx:260
+#: admin-app/src/routes/Analytics.tsx:554
+#: admin-app/src/routes/Goals.tsx:56
+msgid "Product"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:122
+msgid "Product pages"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:567
+msgid "Product suggestions"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:164
+#: admin-app/src/components/goal-builder/TargetFields.tsx:121
+msgid "Products"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:65
+msgid "Progress bar + message — the classic goal strip."
+msgstr ""
+
+#: includes/REST/PreviewController.php:243
+msgid "Provide exactly one of goal_id or campaign_id to preview."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:25
+#: admin-app/src/components/goal-builder/TargetFields.tsx:23
+#: admin-app/src/components/goal-builder/TargetFields.tsx:29
+#: admin-app/src/components/goal-builder/goalTypes.tsx:30
+#: admin-app/src/routes/Goals.tsx:53
+msgid "Quantity"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:25
+msgid "Reach a cart amount — subtotal, total or discounted subtotal."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:37
+msgid "Reach a number of distinct products in the cart."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:55
+msgid "Reach a total cart weight."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:31
+msgid "Reach a total item quantity in the cart."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:43
+msgid "Reach an amount or quantity across chosen categories."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:49
+msgid "Reach an amount or quantity of specific products."
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:375
+msgid "Remove"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:136
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:141
+msgid "Remove condition"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:667
+msgid "Reset to defaults"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:305
+msgid "Restrictions and schedule for this goal."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:392
+#: admin-app/src/routes/Analytics.tsx:417
+msgid "Revenue"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:329
+msgid "Revenue influenced"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:245
+#: admin-app/src/routes/GoalBuilder.tsx:296
+#: admin-app/src/routes/Goals.tsx:259
+msgid "Reward"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:230
+msgid "Reward label"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:95
+msgid "Reward type"
+msgstr ""
+
+#: includes/Goals/MessageEngine.php:162
+msgid "Reward unlocked: {reward}"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:647
+msgid "Save appearance"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:423
+#: admin-app/src/routes/GoalBuilder.tsx:369
+msgid "Save changes"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:665
+msgid "Save settings"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:647
+#: admin-app/src/routes/CampaignBuilder.tsx:421
+#: admin-app/src/routes/GoalBuilder.tsx:367
+#: admin-app/src/routes/Settings.tsx:665
+msgid "Saving…"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/ConditionFields.tsx:43
+#: admin-app/src/routes/Campaigns.tsx:166
+#: admin-app/src/routes/Goals.tsx:262
+msgid "Schedule"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:262
+msgid "Schedule & priority"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/EntityAutocomplete.tsx:155
+msgid "Search and select…"
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:192
+msgid "Search goals"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/EntityAutocomplete.tsx:155
+msgid "Search…"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:550
+msgid "Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer goal evaluations, at the cost of a brief staleness window after cart changes."
+msgstr ""
+
+#: admin-app/src/components/layout/navigation.ts:46
+#: admin-app/src/routes/Settings.tsx:279
+#: admin-app/src/routes/Settings.tsx:293
+#: admin-app/src/routes/Settings.tsx:307
+msgid "Settings"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:258
+msgid "Settings saved."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:121
+msgid "Shop / archives"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:369
+msgid "Show all goals"
+msgstr ""
+
+#: includes/Frontend/ProgressUI.php:192
+msgid "Show cart goals, progress and rewards (Goal Cart)."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:470
+msgid "Show on mobile"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:568
+msgid "Show recommended products that help reach the goal."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:371
+msgid "Show the closest goal only"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:370
+msgid "Show the first goal only"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:234
+msgid "Shown to the customer (fee/coupon name)."
+msgstr ""
+
+#: admin-app/src/components/layout/AdminLayout.tsx:402
+msgid "Sidebar"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:76
+msgid "Simulated cart amount"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:87
+msgid "Simulated quantity"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:101
+#: admin-app/src/components/preview/PreviewControls.tsx:113
+msgid "Simulated reward"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewWidget.tsx:46
+msgid "Skipped by a conflict"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewWidget.tsx:40
+msgid "Skipped — a higher-priority goal wins"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewWidget.tsx:42
+msgid "Skipped — another reward is better"
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewWidget.tsx:44
+msgid "Skipped — lower priority"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:459
+msgid "Slide the progress-bar fill on updates."
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:587
+msgid "Smoothly slide the bar fill when the cart changes."
+msgstr ""
+
+#: admin-app/src/components/ErrorBoundary.tsx:48
+msgid "Something went wrong"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:242
+msgid "Stack with other rewards?"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/ConditionFields.tsx:47
+#: admin-app/src/routes/CampaignBuilder.tsx:271
+msgid "Starts at"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:164
+#: admin-app/src/routes/Goals.tsx:213
+#: admin-app/src/routes/Goals.tsx:260
+msgid "Status"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:123
+msgid "Sticky bottom bar"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:447
+msgid "Store-wide progress widget variant."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:26
+#: admin-app/src/components/goal-builder/TargetFields.tsx:18
+#: admin-app/src/components/goal-builder/TargetFields.tsx:24
+#: admin-app/src/components/goal-builder/TargetFields.tsx:30
+#: admin-app/src/routes/Settings.tsx:408
+msgid "Subtotal (before discounts)"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:339
+msgid "Suggestion CTR"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:69
+msgid "Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {goal_name}."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:355
+msgid "Symbol ($100)"
+msgstr ""
+
+#: admin-app/src/components/CampaignPreviewDialog.tsx:57
+#: admin-app/src/components/GoalPreviewDialog.tsx:57
+#: admin-app/src/components/preview/PreviewControls.tsx:36
+msgid "Tablet"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:102
+#: admin-app/src/components/goal-builder/TargetFields.tsx:74
+#: admin-app/src/routes/GoalBuilder.tsx:259
+msgid "Target"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:48
+#: admin-app/src/components/preview/PreviewControls.tsx:154
+#: admin-app/src/components/preview/PreviewControls.tsx:157
+#: admin-app/src/routes/Appearance.tsx:440
+#: admin-app/src/routes/Settings.tsx:446
+msgid "Template"
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:527
+msgid "Text"
+msgstr ""
+
+#: includes/Admin/AssetLoader.php:112
+msgid "The admin app is not built yet (%s is missing). Run npm install && npm run build inside the admin-app directory, or start npm run dev in a local/development environment for hot reload."
+msgstr ""
+
+#: includes/REST/CampaignsController.php:183
+msgid "The campaign could not be created."
+msgstr ""
+
+#: includes/REST/CampaignsController.php:239
+msgid "The campaign could not be deleted."
+msgstr ""
+
+#: includes/REST/CampaignsController.php:274
+msgid "The campaign could not be duplicated."
+msgstr ""
+
+#: includes/REST/CampaignsController.php:163
+#: includes/REST/CampaignsController.php:203
+#: includes/REST/CampaignsController.php:231
+#: includes/REST/CampaignsController.php:264
+msgid "The campaign could not be found."
+msgstr ""
+
+#: includes/REST/CampaignsController.php:211
+msgid "The campaign could not be updated."
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:101
+msgid "The campaign status was updated."
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:122
+msgid "The campaign was created."
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:78
+msgid "The campaign was deleted."
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:121
+msgid "The campaign was updated."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:175
+msgid "The discount never applies to these products."
+msgstr ""
+
+#: includes/REST/GoalsController.php:197
+msgid "The goal could not be created."
+msgstr ""
+
+#: includes/REST/GoalsController.php:254
+msgid "The goal could not be deleted."
+msgstr ""
+
+#: includes/REST/GoalsController.php:289
+msgid "The goal could not be duplicated."
+msgstr ""
+
+#: includes/REST/GoalsController.php:177
+#: includes/REST/GoalsController.php:218
+#: includes/REST/GoalsController.php:246
+#: includes/REST/GoalsController.php:279
+msgid "The goal could not be found."
+msgstr ""
+
+#: includes/REST/GoalsController.php:226
+msgid "The goal could not be updated."
+msgstr ""
+
+#: includes/REST/PreviewController.php:262
+msgid "The goal or campaign could not be found."
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:162
+msgid "The goal status was updated."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:126
+msgid "The goal was created."
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:139
+msgid "The goal was deleted."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:126
+msgid "The goal was updated."
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:208
+msgid "The identity and lifecycle of the campaign."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:200
+msgid "The internal identity of the goal."
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:305
+msgid "The ordered goals of the campaign. Shoppers unlock each goal in order as their cart grows."
+msgstr ""
+
+#: admin-app/src/routes/NotFound.tsx:17
+msgid "The page you are looking for does not exist."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:638
+msgid "The plugin’s public actions and filters — a reference for theme and plugin developers."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:201
+msgid "The product added to the cart as a gift."
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:443
+msgid "The progress widget layout shown to customers on the cart, checkout and product pages."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/TargetFields.tsx:79
+msgid "The threshold shoppers need to reach"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:260
+msgid "The threshold shoppers need to reach."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/ConditionFields.tsx:34
+msgid "These products never count toward the goal, even when they would otherwise qualify."
+msgstr ""
+
+#: includes/Goals/MessageEngine.php:145
+msgid "This offer is not active right now."
+msgstr ""
+
+#: includes/Goals/MessageEngine.php:148
+msgid "This offer is not available for your cart."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:37
+msgid "Title"
+msgstr ""
+
+#: admin-app/src/date-range/dateRange.ts:74
+msgid "Today"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:210
+#: admin-app/src/routes/Goals.tsx:330
+msgid "Toggle %s"
+msgstr ""
+
+#: includes/REST/BaseController.php:238
+#: includes/REST/BaseController.php:292
+msgid "Too many requests. Please try again shortly."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:440
+msgid "Top campaigns"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:449
+msgid "Top campaigns by completions"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:495
+msgid "Top goals"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:542
+msgid "Top suggested products"
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:111
+msgid "Total goals"
+msgstr ""
+
+#: includes/REST/TrackController.php:198
+msgid "Tracking is disabled."
+msgstr ""
+
+#: admin-app/src/components/ErrorBoundary.tsx:58
+msgid "Try again"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:341
+msgid "Turn the storefront goals, rewards and progress bars on or off."
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:258
+msgid "Type"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:385
+msgid "Type or pick an existing coupon."
+msgstr ""
+
+#: includes/REST/TrackController.php:210
+msgid "Unknown event type."
+msgstr ""
+
+#: admin-app/src/components/preview/PreviewControls.tsx:122
+msgid "Unlocked"
+msgstr ""
+
+#: admin-app/src/components/CampaignPreviewDialog.tsx:163
+#: admin-app/src/components/GoalPreviewDialog.tsx:149
+msgid "Updating…"
+msgstr ""
+
+#: admin-app/src/components/layout/AdminLayout.tsx:336
+msgid "User menu"
+msgstr ""
+
+#: admin-app/src/components/layout/AdminLayout.tsx:322
+#: admin-app/src/components/layout/AdminLayout.tsx:328
+msgid "View store"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:54
+#: admin-app/src/routes/Goals.tsx:57
+msgid "Weight"
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:145
+msgid "What is Goal Cart?"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:297
+msgid "What the customer earns when the goal is reached."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:252
+msgid "What the goal measures."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:502
+msgid "When off, cart coupons and discounts do not reduce the discounted-subtotal basis."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:520
+msgid "When off, products currently on sale are excluded from every goal."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:529
+msgid "When off, virtual and downloadable products are excluded from every goal."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:511
+msgid "When on, shipping charges count toward the cart-total basis."
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:263
+msgid "When the campaign runs, and how it competes with other campaigns."
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:349
+msgid "When this goal is reached, every lower-priority goal is skipped and never grants its reward. Higher-priority goals are unaffected."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:435
+msgid "Where and how the storefront widgets appear."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:465
+msgid "Whether the widgets render on small screens (≤782px)."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:483
+msgid "Which cart money counts toward goals. Defaults match the storefront behavior before these options existed."
+msgstr ""
+
+#: includes/Compatibility.php:150
+msgid "WooCommerce must be installed and activated."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:589
+msgid "Write detailed (debug-level) entries to the plugin log when logging is enabled."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:598
+msgid "Write errors (and debug entries when debug mode is on) to a log file."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:32
+msgid "Yes (stack with other rewards)"
+msgstr ""
+
+#: admin-app/src/date-range/dateRange.ts:76
+msgid "Yesterday"
+msgstr ""
+
+#: includes/REST/BaseController.php:105
+#: includes/REST/PreviewController.php:180
+msgid "You are not allowed to access this endpoint."
+msgstr ""
+
+#: includes/Goals/MessageEngine.php:165
+msgid "You reached your goal!"
+msgstr ""
+
+#: admin-app/src/routes/GoalBuilder.tsx:208
+msgid "e.g. Free shipping over 500K"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:216
+msgid "e.g. Summer Sale"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/RewardFields.tsx:233
+msgid "e.g. Summer free shipping"
+msgstr ""
+
+#: admin-app/src/components/goal-builder/DisplayFields.tsx:94
+msgid "e.g. 🎁 or a dashicon name"
+msgstr ""
+
+#: admin-app/src/routes/Campaigns.tsx:282
+msgid "“%s” will be permanently deleted. Its goals are kept and detached — they can be reused by other campaigns."
+msgstr ""
+
+#: admin-app/src/routes/Goals.tsx:437
+msgid "“%s” will be permanently deleted. This cannot be undone."
+msgstr ""
+

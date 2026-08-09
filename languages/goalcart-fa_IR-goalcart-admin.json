@@ -1,0 +1,1263 @@
+{
+    "domain": "goalcart",
+    "locale_data": {
+        "goalcart": {
+            "": {
+                "domain": "goalcart",
+                "lang": "fa_IR",
+                "plural-forms": "nplurals=2; plural=(n > 1);"
+            },
+            "%d%% discount": [
+                "تخفیف %d٪"
+            ],
+            "Almost there! Only {remaining} left": [
+                "خیلی نزدیکید! تنها {remaining} باقی مانده است"
+            ],
+            "Coupon": [
+                "کوپن"
+            ],
+            "Fixed %s off": [
+                "تخفیف ثابت %s"
+            ],
+            "Fixed discount": [
+                "تخفیف ثابت"
+            ],
+            "Free gift": [
+                "هدیه رایگان"
+            ],
+            "Free shipping": [
+                "ارسال رایگان"
+            ],
+            "Goal Cart Progress": [
+                "پیشرفت Goal Cart"
+            ],
+            "Goal reward": [
+                "پاداش هدف"
+            ],
+            "Only {remaining} left to reach your goal": [
+                "تنها {remaining} تا رسیدن به هدف شما باقی مانده است"
+            ],
+            "Percentage discount": [
+                "تخفیف درصدی"
+            ],
+            "Reward unlocked: {reward}": [
+                "پاداش فعال شد: {reward}"
+            ],
+            "Show cart goals, progress and rewards (Goal Cart).": [
+                "اهداف سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (Goal Cart)."
+            ],
+            "This offer is not active right now.": [
+                "این پیشنهاد در حال حاضر فعال نیست."
+            ],
+            "This offer is not available for your cart.": [
+                "این پیشنهاد برای سبد خرید شما در دسترس نیست."
+            ],
+            "You reached your goal!": [
+                "به هدف خود رسیدید!"
+            ],
+            "% discount": [
+                "٪ تخفیف"
+            ],
+            "% off the eligible cart value": [
+                "٪ تخفیف از ارزش واجد شرایط سبد خرید"
+            ],
+            "%d%% progress": [
+                "پیشرفت %d٪"
+            ],
+            "%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page; the frontend widgets are added in a later phase.": [
+                "«%s» از اهداف سبد خرید استفاده می‌کند — مانند «برای ارسال رایگان، %s بیشتر خرید کنید» — تا سبدهای بزرگ‌تری تشویق شود. اهداف، پاداش‌ها و نوارهای پیشرفت از صفحهٔ «اهداف» پیکربندی می‌شوند؛ ویجت‌های فروشگاه در فاز بعدی اضافه می‌شوند."
+            ],
+            "(amount)": [
+                "(مبلغ)"
+            ],
+            "(items)": [
+                "(تعداد اقلام)"
+            ],
+            "(weight units)": [
+                "(واحد وزن)"
+            ],
+            "A big percent readout above the bar.": [
+                "نمایش درصد بزرگ بالای نوار."
+            ],
+            "A deterministic coupon is created per customer.": [
+                "برای هر مشتری یک کوپن قطعی ایجاد می‌شود."
+            ],
+            "A goal ladder of dots and targets, bar underneath.": [
+                "نردبانی از نقاط و اهداف با نوار زیر آن."
+            ],
+            "AND (all children required)": [
+                "و (همهٔ زیرشرط‌ها الزامی)"
+            ],
+            "Accent": [
+                "رنگ تأکید"
+            ],
+            "Actions": [
+                "عملیات"
+            ],
+            "Active": [
+                "فعال"
+            ],
+            "Activity over time": [
+                "فعالیت در طول زمان"
+            ],
+            "Add a milestone": [
+                "افزودن نقطهٔ عطف"
+            ],
+            "Add automatically": [
+                "افزودن خودکار"
+            ],
+            "Add campaign": [
+                "افزودن کمپین"
+            ],
+            "Add condition": [
+                "افزودن شرط"
+            ],
+            "Add goal": [
+                "افزودن هدف"
+            ],
+            "Add line taxes to the subtotal-style money bases.": [
+                "مالیات‌های ردیف را به مبناهای پولی نوع جمع فرعی اضافه کنید."
+            ],
+            "Add your first campaign": [
+                "اولین کمپین خود را اضافه کنید"
+            ],
+            "Add your first goal": [
+                "اولین هدف خود را اضافه کنید"
+            ],
+            "Add-to-cart": [
+                "افزودن به سبد"
+            ],
+            "Add-to-cart rate": [
+                "نرخ افزودن به سبد"
+            ],
+            "Added": [
+                "افزوده شد"
+            ],
+            "Added to every storefront progress widget so your theme can target it.": [
+                "به هر ویجت پیشرفت فروشگاه اضافه می‌شود تا قالب شما بتواند آن را هدف قرار دهد."
+            ],
+            "Advanced": [
+                "پیشرفته"
+            ],
+            "All campaigns": [
+                "همهٔ کمپین‌ها"
+            ],
+            "All goals": [
+                "همهٔ اهداف"
+            ],
+            "All goals are already milestones of this campaign.": [
+                "همهٔ اهداف از قبل نقاط عطف این کمپین هستند."
+            ],
+            "All products": [
+                "همهٔ محصولات"
+            ],
+            "All rewards": [
+                "همهٔ پاداش‌ها"
+            ],
+            "All statuses": [
+                "همهٔ وضعیت‌ها"
+            ],
+            "Amount": [
+                "مبلغ"
+            ],
+            "An overview of your cart goals and the plugin status. Full analytics arrive in a later phase.": [
+                "نمای کلی اهداف سبد خرید و وضعیت افزونه. تحلیل کامل در فاز بعدی ارائه می‌شود."
+            ],
+            "Analytics": [
+                "تحلیل‌ها"
+            ],
+            "Analytics arrive in a later phase.": [
+                "تحلیل‌ها در فاز بعدی ارائه می‌شوند."
+            ],
+            "Analytics tracking": [
+                "ردیابی تحلیل‌ها"
+            ],
+            "Animate progress": [
+                "انیمیشن پیشرفت"
+            ],
+            "Animate progress updates": [
+                "انیمیشن به‌روزرسانی پیشرفت"
+            ],
+            "Appearance": [
+                "ظاهر"
+            ],
+            "Appearance saved.": [
+                "ظاهر ذخیره شد."
+            ],
+            "Appended to the storefront widget styles (overrides any token).": [
+                "به استایل‌های ویجت فروشگاه اضافه می‌شود (هر توکنی را لغو می‌کند)."
+            ],
+            "Appended to the storefront widget stylesheet (tags are stripped).": [
+                "به شیوه‌نامهٔ ویجت فروشگاه اضافه می‌شود (تگ‌ها حذف می‌شوند)."
+            ],
+            "Apply range": [
+                "اعمال بازه"
+            ],
+            "Auto": [
+                "خودکار"
+            ],
+            "Avg. cart value": [
+                "میانگین ارزش سبد"
+            ],
+            "Back to Dashboard": [
+                "بازگشت به داشبورد"
+            ],
+            "Back to WordPress Admin": [
+                "بازگشت به مدیریت وردپرس"
+            ],
+            "Back to campaigns": [
+                "بازگشت به کمپین‌ها"
+            ],
+            "Back to goals": [
+                "بازگشت به اهداف"
+            ],
+            "Background": [
+                "پس‌زمینه"
+            ],
+            "Bar & animation": [
+                "نوار و انیمیشن"
+            ],
+            "Bar height (px)": [
+                "ارتفاع نوار (پیکسل)"
+            ],
+            "Basic": [
+                "ساده"
+            ],
+            "Basic information": [
+                "اطلاعات پایه"
+            ],
+            "Basic progress bar": [
+                "نوار پیشرفت ساده"
+            ],
+            "Best reward only": [
+                "فقط بهترین پاداش"
+            ],
+            "Blocked by an exclusive goal": [
+                "توسط یک هدف انحصاری مسدود شد"
+            ],
+            "Border": [
+                "حاشیه"
+            ],
+            "CTR": [
+                "نرخ کلیک"
+            ],
+            "Cache progress payloads": [
+                "ذخیره‌سازی موقت داده‌های پیشرفت"
+            ],
+            "Caching and what the storefront measures.": [
+                "ذخیره‌سازی موقت و آنچه فروشگاه اندازه‌گیری می‌کند."
+            ],
+            "Calculate against": [
+                "محاسبه بر اساس"
+            ],
+            "Calculation mode": [
+                "حالت محاسبه"
+            ],
+            "Campaign": [
+                "کمپین"
+            ],
+            "Campaign #%d": [
+                "کمپین #%d"
+            ],
+            "Campaign editor": [
+                "ویرایشگر کمپین"
+            ],
+            "Campaign preview": [
+                "پیش‌نمایش کمپین"
+            ],
+            "Campaigns": [
+                "کمپین‌ها"
+            ],
+            "Campaigns bundle multiple goals into scheduled, prioritized milestones. Create your first campaign to group goals around an event or season.": [
+                "کمپین‌ها چندین هدف را در نقاط عطف زمان‌بندی‌شده و اولویت‌بندی‌شده جمع می‌کنند. اولین کمپین خود را بسازید تا اهداف را حول یک رویداد یا فصل گروه‌بندی کنید."
+            ],
+            "Cancel": [
+                "انصراف"
+            ],
+            "Cap the discount at this amount.": [
+                "تخفیف را به این مبلغ محدود کنید."
+            ],
+            "Card": [
+                "کارت"
+            ],
+            "Cart goals drive the storefront progress bars and rewards.": [
+                "اهداف سبد خرید، نوارهای پیشرفت و پاداش‌های فروشگاه را هدایت می‌کنند."
+            ],
+            "Cart page": [
+                "صفحهٔ سبد خرید"
+            ],
+            "Cart total (incl. tax & shipping)": [
+                "جمع کل سبد (شامل مالیات و حمل‌ونقل)"
+            ],
+            "Categories": [
+                "دسته‌بندی‌ها"
+            ],
+            "Category": [
+                "دسته‌بندی"
+            ],
+            "Checkout": [
+                "تسویه‌حساب"
+            ],
+            "Child type": [
+                "نوع زیرشرط"
+            ],
+            "Children are evaluated against the same cart. AND requires every child, OR completes at the best child.": [
+                "زیرشرط‌ها روی همان سبد ارزیابی می‌شوند. «و» به همهٔ زیرشرط‌ها نیاز دارد و «یا» با بهترین زیرشرط تکمیل می‌شود."
+            ],
+            "Choose a start and end date.": [
+                "تاریخ شروع و پایان را انتخاب کنید."
+            ],
+            "Clicks": [
+                "کلیک‌ها"
+            ],
+            "Code (USD 100)": [
+                "کد (USD 100)"
+            ],
+            "Collapse all": [
+                "بستن همه"
+            ],
+            "Collect goal and suggestion events. Keep the goals running while turning event collection off.": [
+                "رویدادهای هدف و پیشنهاد را جمع‌آوری کنید. اهداف را فعال نگه دارید در حالی که جمع‌آوری رویداد خاموش است."
+            ],
+            "Colors": [
+                "رنگ‌ها"
+            ],
+            "Combine child goals with AND\/OR logic.": [
+                "اهداف زیرشرطی را با منطق و\/یا ترکیب کنید."
+            ],
+            "Complete": [
+                "تکمیل"
+            ],
+            "Completed message": [
+                "پیام تکمیل"
+            ],
+            "Completion": [
+                "تکمیل"
+            ],
+            "Completion rate": [
+                "نرخ تکمیل"
+            ],
+            "Completions": [
+                "تکمیل‌ها"
+            ],
+            "Composite": [
+                "ترکیبی"
+            ],
+            "Composite conditions": [
+                "شرط‌های ترکیبی"
+            ],
+            "Conditions": [
+                "شرط‌ها"
+            ],
+            "Configuration": [
+                "پیکربندی"
+            ],
+            "Confirm": [
+                "تأیید"
+            ],
+            "Conflict resolution": [
+                "حل تداخل"
+            ],
+            "Corner radius (px)": [
+                "شعاع گوشه (پیکسل)"
+            ],
+            "Could not load the analytics.": [
+                "بارگذاری تحلیل‌ها ممکن نشد."
+            ],
+            "Could not load the campaign.": [
+                "بارگذاری کمپین ممکن نشد."
+            ],
+            "Could not load the campaigns.": [
+                "بارگذاری کمپین‌ها ممکن نشد."
+            ],
+            "Could not load the goal summary.": [
+                "بارگذاری خلاصهٔ هدف ممکن نشد."
+            ],
+            "Could not load the goal.": [
+                "بارگذاری هدف ممکن نشد."
+            ],
+            "Could not load the goals.": [
+                "بارگذاری اهداف ممکن نشد."
+            ],
+            "Could not load the preview.": [
+                "بارگذاری پیش‌نمایش ممکن نشد."
+            ],
+            "Could not load the settings.": [
+                "بارگذاری تنظیمات ممکن نشد."
+            ],
+            "Coupon cap (optional)": [
+                "سقف کوپن (اختیاری)"
+            ],
+            "Coupon discount type": [
+                "نوع تخفیف کوپن"
+            ],
+            "Coupon value": [
+                "ارزش کوپن"
+            ],
+            "Create campaign": [
+                "ایجاد کمپین"
+            ],
+            "Create goal": [
+                "ایجاد هدف"
+            ],
+            "Create your first goal to start increasing the average order value — progress bars and rewards appear on the storefront once a goal is active.": [
+                "اولین هدف خود را ایجاد کنید تا میانگین ارزش سفارش افزایش یابد — نوارهای پیشرفت و پاداش‌ها پس از فعال شدن هدف در فروشگاه ظاهر می‌شوند."
+            ],
+            "Cumulative — all rewards stack": [
+                "تجمعی — همهٔ پاداش‌ها روی هم جمع می‌شوند"
+            ],
+            "Currency": [
+                "واحد پول"
+            ],
+            "Currency display": [
+                "نمایش واحد پول"
+            ],
+            "Custom CSS": [
+                "CSS سفارشی"
+            ],
+            "Custom range…": [
+                "بازهٔ سفارشی…"
+            ],
+            "Customer-facing copy and template for the progress widget.": [
+                "متن و الگوی نمایش به مشتری برای ویجت پیشرفت."
+            ],
+            "Customize how the cart progress UI looks on your storefront.": [
+                "ظاهر رابط پیشرفت سبد خرید را در فروشگاه خود سفارشی کنید."
+            ],
+            "Daily impressions, completions and revenue trend": [
+                "روند روزانهٔ نمایش‌ها، تکمیل‌ها و درآمد"
+            ],
+            "Dashboard": [
+                "داشبورد"
+            ],
+            "Date range": [
+                "بازهٔ تاریخ"
+            ],
+            "Date range filter": [
+                "فیلتر بازهٔ تاریخ"
+            ],
+            "Debug mode": [
+                "حالت اشکال‌زدایی"
+            ],
+            "Debugging, logging and the developer surface.": [
+                "اشکال‌زدایی، ثبت گزارش و سطح توسعه‌دهنده."
+            ],
+            "Default goal behavior": [
+                "رفتار پیش‌فرض هدف"
+            ],
+            "Default money basis for goals that do not set their own.": [
+                "مبنای پولی پیش‌فرض برای اهدافی که مبنای خود را تعیین نمی‌کنند."
+            ],
+            "Define what shoppers need to reach and what they earn for getting there.": [
+                "تعیین کنید مشتریان باید به چه چیزی برسند و در ازای آن چه پاداشی بگیرند."
+            ],
+            "Delete": [
+                "حذف"
+            ],
+            "Delete %s": [
+                "حذف %s"
+            ],
+            "Delete this campaign?": [
+                "این کمپین حذف شود؟"
+            ],
+            "Delete this goal?": [
+                "این هدف حذف شود؟"
+            ],
+            "Description": [
+                "توضیحات"
+            ],
+            "Desktop": [
+                "دسکتاپ"
+            ],
+            "Developer hooks": [
+                "قلاب‌های توسعه‌دهنده"
+            ],
+            "Device width": [
+                "عرض دستگاه"
+            ],
+            "Disable": [
+                "غیرفعال کردن"
+            ],
+            "Discount amount": [
+                "مبلغ تخفیف"
+            ],
+            "Discount percentage": [
+                "درصد تخفیف"
+            ],
+            "Discounted subtotal": [
+                "جمع فرعی پس از تخفیف"
+            ],
+            "Display": [
+                "نمایش"
+            ],
+            "Display locations": [
+                "مکان‌های نمایش"
+            ],
+            "Distinct quantity": [
+                "تعداد متمایز"
+            ],
+            "Drives money-based goals (subtotal \/ total).": [
+                "اهداف مبتنی بر مبلغ (جمع فرعی \/ کل) را هدایت می‌کند."
+            ],
+            "Drives quantity, distinct-quantity and weight goals.": [
+                "اهداف تعداد، تعداد متمایز و وزن را هدایت می‌کند."
+            ],
+            "Duplicate": [
+                "تکراری‌سازی"
+            ],
+            "Duplicate %s": [
+                "تکراری‌سازی %s"
+            ],
+            "Duplicated “%s”.": [
+                "«%s» تکراری‌سازی شد."
+            ],
+            "Edit": [
+                "ویرایش"
+            ],
+            "Edit %s": [
+                "ویرایش %s"
+            ],
+            "Edit campaign": [
+                "ویرایش کمپین"
+            ],
+            "Edit goal": [
+                "ویرایش هدف"
+            ],
+            "Edit profile": [
+                "ویرایش نمایه"
+            ],
+            "Eligible categories (optional)": [
+                "دسته‌بندی‌های واجد شرایط (اختیاری)"
+            ],
+            "Eligible products (optional)": [
+                "محصولات واجد شرایط (اختیاری)"
+            ],
+            "Empty cart": [
+                "سبد خالی"
+            ],
+            "Enable": [
+                "فعال کردن"
+            ],
+            "Enable Goal Cart": [
+                "فعال کردن Goal Cart"
+            ],
+            "Ends at": [
+                "پایان در"
+            ],
+            "Excluded products": [
+                "محصولات مستثنی"
+            ],
+            "Excluded products (optional)": [
+                "محصولات مستثنی (اختیاری)"
+            ],
+            "Exclusive": [
+                "انحصاری"
+            ],
+            "Exclusive (mutually exclusive)": [
+                "انحصاری (متقابلاً انحصاری)"
+            ],
+            "Exclusive rewards never combine.": [
+                "پاداش‌های انحصاری هرگز ترکیب نمی‌شوند."
+            ],
+            "Exclusive: when this goal is reached, lower-priority goals are skipped.": [
+                "انحصاری: وقتی این هدف محقق شود، اهداف با اولویت پایین‌تر رد می‌شوند."
+            ],
+            "Existing coupon code": [
+                "کد کوپن موجود"
+            ],
+            "Expand all": [
+                "باز کردن همه"
+            ],
+            "Extra CSS class": [
+                "کلاس CSS اضافی"
+            ],
+            "First matching goal only": [
+                "فقط اولین هدف منطبق"
+            ],
+            "Fixed amount off": [
+                "تخفیف مبلغ ثابت"
+            ],
+            "Free shipping unlocked": [
+                "ارسال رایگان فعال شد"
+            ],
+            "Frontend": [
+                "فرانت‌اند"
+            ],
+            "Full-screen dashboard": [
+                "داشبورد تمام‌صفحه"
+            ],
+            "General": [
+                "عمومی"
+            ],
+            "Generate a coupon from these rules": [
+                "ایجاد کوپن بر اساس این قوانین"
+            ],
+            "Gift mode": [
+                "حالت هدیه"
+            ],
+            "Gift product": [
+                "محصول هدیه"
+            ],
+            "Give the campaign a name.": [
+                "به کمپین یک نام بدهید."
+            ],
+            "Give the goal a name.": [
+                "به هدف یک نام بدهید."
+            ],
+            "Goal": [
+                "هدف"
+            ],
+            "Goal Calculation": [
+                "محاسبهٔ هدف"
+            ],
+            "Goal Cart": [
+                "Goal Cart"
+            ],
+            "Goal editor": [
+                "ویرایشگر هدف"
+            ],
+            "Goal preview": [
+                "پیش‌نمایش هدف"
+            ],
+            "Goal reached — your reward is unlocked!": [
+                "هدف محقق شد — پاداش شما فعال شد!"
+            ],
+            "Goal type": [
+                "نوع هدف"
+            ],
+            "Goals": [
+                "اهداف"
+            ],
+            "Goals define what you want shoppers to reach — a cart amount, quantity, category spend and more. Create your first goal to start.": [
+                "اهداف مشخص می‌کنند که می‌خواهید مشتریان به چه چیزی برسند — مبلغ سبد، تعداد، هزینه در دسته‌بندی و موارد دیگر. برای شروع، اولین هدف خود را ایجاد کنید."
+            ],
+            "Group goals into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds.": [
+                "اهداف را در نقاط عطف زمان‌بندی‌شده گروه‌بندی کنید — مثلاً فروش تابستانی با ارسال رایگان، هدیه و تخفیف در آستانه‌های مختلف."
+            ],
+            "Group goals into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M.": [
+                "اهداف را در نقاط عطف زمان‌بندی‌شده و اولویت‌بندی‌شده گروه‌بندی کنید — مثلاً ارسال رایگان در ۵۰۰ هزار، هدیه در ۱ میلیون و تخفیف در ۱.۵ میلیون."
+            ],
+            "Hide on mobile": [
+                "مخفی در موبایل"
+            ],
+            "Hide the WordPress admin chrome and let the dashboard fill the whole browser window.": [
+                "قاب مدیریت وردپرس را مخفی کنید و اجازه دهید داشبورد کل پنجرهٔ مرورگر را پر کند."
+            ],
+            "How completed goals grant rewards when several compete: combine them, grant only the highest-priority matching goal, or grant only the best reward. Per-goal exclusive flags and priorities are respected in every mode.": [
+                "نحوهٔ اعطای پاداش اهداف تکمیل‌شده وقتی چند هدف رقابت می‌کنند: ترکیب آن‌ها، اعطای فقط به هدف منطبق با بالاترین اولویت، یا اعطای فقط بهترین پاداش. پرچم‌های انحصاری و اولویت‌های هر هدف در هر حالت رعایت می‌شوند."
+            ],
+            "How money amounts are shown on the storefront widgets.": [
+                "نحوهٔ نمایش مبالغ پولی در ویجت‌های فروشگاه."
+            ],
+            "How multiple active goals are presented when the shopper has no campaign.": [
+                "نحوهٔ نمایش چند هدف فعال وقتی مشتری کمپینی ندارد."
+            ],
+            "How this goal competes when several goals are active. Lower priority numbers win first; a goal inside a campaign is also ordered by its campaign priority.": [
+                "نحوهٔ رقابت این هدف وقتی چند هدف فعال هستند. اعداد اولویت پایین‌تر اول برنده می‌شوند؛ هدف داخل کمپین نیز با اولویت کمپینش مرتب می‌شود."
+            ],
+            "Icon": [
+                "آیکون"
+            ],
+            "Icon, title and reward bundled in a card.": [
+                "آیکون، عنوان و پاداش در یک کارت."
+            ],
+            "Impressions": [
+                "نمایش‌ها"
+            ],
+            "Inactive": [
+                "غیرفعال"
+            ],
+            "Inactive campaigns never evaluate their goals on the storefront.": [
+                "کمپین‌های غیرفعال هرگز اهداف خود را در فروشگاه ارزیابی نمی‌کنند."
+            ],
+            "Inactive goals never evaluate on the storefront.": [
+                "اهداف غیرفعال هرگز در فروشگاه ارزیابی نمی‌شوند."
+            ],
+            "Include discounts": [
+                "شامل تخفیف‌ها"
+            ],
+            "Include sale items": [
+                "شامل اقلام حراج"
+            ],
+            "Include shipping": [
+                "شامل هزینهٔ حمل"
+            ],
+            "Include taxes": [
+                "شامل مالیات‌ها"
+            ],
+            "Include virtual products": [
+                "شامل محصولات مجازی"
+            ],
+            "Internal name shown in the admin.": [
+                "نام داخلی نمایش داده‌شده در مدیریت."
+            ],
+            "Internal notes about this campaign.": [
+                "یادداشت‌های داخلی دربارهٔ این کمپین."
+            ],
+            "Internal notes about this goal.": [
+                "یادداشت‌های داخلی دربارهٔ این هدف."
+            ],
+            "Last 30 days": [
+                "۳۰ روز گذشته"
+            ],
+            "Last 7 days": [
+                "۷ روز گذشته"
+            ],
+            "Leave both empty to run the goal at all times. Local site time is used.": [
+                "برای اجرای همیشگی هدف، هر دو را خالی بگذارید. زمان محلی سایت استفاده می‌شود."
+            ],
+            "Leave empty to apply to the whole cart.": [
+                "برای اعمال روی کل سبد، خالی بگذارید."
+            ],
+            "Live preview": [
+                "پیش‌نمایش زنده"
+            ],
+            "Loading the campaign…": [
+                "در حال بارگذاری کمپین…"
+            ],
+            "Loading the goal…": [
+                "در حال بارگذاری هدف…"
+            ],
+            "Locked": [
+                "قفل شده"
+            ],
+            "Log file": [
+                "فایل گزارش"
+            ],
+            "Logging": [
+                "ثبت گزارش"
+            ],
+            "Lower numbers win conflicts.": [
+                "اعداد کمتر در تداخل‌ها برنده می‌شوند."
+            ],
+            "Main navigation": [
+                "ناوبری اصلی"
+            ],
+            "Makes every shipping rate free once the goal is reached. Zone\/method-specific rules are configured in a later phase.": [
+                "پس از رسیدن به هدف، همهٔ نرخ‌های ارسال رایگان می‌شوند. قوانین ویژهٔ مناطق\/روش‌ها در فاز بعدی پیکربندی می‌شوند."
+            ],
+            "Master toggle, display and default behavior.": [
+                "کلید اصلی، نمایش و رفتار پیش‌فرض."
+            ],
+            "Maximum discount": [
+                "حداکثر تخفیف"
+            ],
+            "Measure whether Goal Cart actually increases your average order value.": [
+                "اندازه‌گیری کنید که آیا Goal Cart واقعاً میانگین ارزش سفارش شما را افزایش می‌دهد."
+            ],
+            "Message (in progress)": [
+                "پیام (در حال پیشرفت)"
+            ],
+            "Milestone": [
+                "نقطهٔ عطف"
+            ],
+            "Milestones": [
+                "نقاط عطف"
+            ],
+            "Mini cart": [
+                "مینی‌سبد"
+            ],
+            "Mobile": [
+                "موبایل"
+            ],
+            "Mobile behavior": [
+                "رفتار موبایل"
+            ],
+            "Move down": [
+                "انتقال به پایین"
+            ],
+            "Move up": [
+                "انتقال به بالا"
+            ],
+            "Name": [
+                "نام"
+            ],
+            "Name (US dollars)": [
+                "نام (دلار آمریکا)"
+            ],
+            "Next month": [
+                "ماه بعد"
+            ],
+            "No (exclusive)": [
+                "خیر (انحصاری)"
+            ],
+            "No analytics yet": [
+                "هنوز تحلیلی وجود ندارد"
+            ],
+            "No campaign activity in this range.": [
+                "هیچ فعالیت کمپینی در این بازه نیست."
+            ],
+            "No campaigns yet": [
+                "هنوز کمپینی وجود ندارد"
+            ],
+            "No child goals yet. Add at least one condition to build the composite goal.": [
+                "هنوز هدف زیرشرطی وجود ندارد. برای ساخت هدف ترکیبی حداقل یک شرط اضافه کنید."
+            ],
+            "No goal activity in this range.": [
+                "هیچ فعالیت هدفی در این بازه نیست."
+            ],
+            "No goal impressions were recorded in this range. Widen the date range or check that event tracking is enabled on the storefront.": [
+                "هیچ نمایش هدفی در این بازه ثبت نشده است. بازهٔ تاریخ را گسترش دهید یا مطمئن شوید ردیابی رویداد در فروشگاه فعال است."
+            ],
+            "No goals match your search.": [
+                "هیچ هدفی با جستجوی شما مطابقت ندارد."
+            ],
+            "No goals yet": [
+                "هنوز هدفی وجود ندارد"
+            ],
+            "No goals yet — create a goal on the Goals page first.": [
+                "هنوز هدفی وجود ندارد — ابتدا در صفحهٔ «اهداف» یک هدف ایجاد کنید."
+            ],
+            "No milestones in this campaign yet.": [
+                "هنوز نقطهٔ عطفی در این کمپین نیست."
+            ],
+            "No reward": [
+                "بدون پاداش"
+            ],
+            "No suggestion activity in this range.": [
+                "هیچ فعالیت پیشنهادی در این بازه نیست."
+            ],
+            "None": [
+                "هیچ‌کدام"
+            ],
+            "OR (any child completes)": [
+                "یا (هر زیرشرطی تکمیل شود)"
+            ],
+            "Offer as optional": [
+                "ارائه به‌صورت اختیاری"
+            ],
+            "Only $38.00 left to reach your goal": [
+                "فقط $38.00 تا رسیدن به هدف شما باقی مانده است"
+            ],
+            "Only products in these categories count toward the target.": [
+                "فقط محصولات این دسته‌بندی‌ها به سمت هدف محاسبه می‌شوند."
+            ],
+            "Only these products count toward the target. Variations are matched by their parent product.": [
+                "فقط این محصولات به سمت هدف محاسبه می‌شوند. تغییرات (variations) با محصول والدشان مطابقت داده می‌شوند."
+            ],
+            "Only {remaining} left to unlock {reward}!": [
+                "فقط {remaining} تا فعال شدن {reward} باقی مانده است!"
+            ],
+            "Open navigation": [
+                "باز کردن ناوبری"
+            ],
+            "Operator": [
+                "عملگر"
+            ],
+            "Optional cap": [
+                "سقف اختیاری"
+            ],
+            "Optional icon shown next to the progress bar.": [
+                "آیکون اختیاری که کنار نوار پیشرفت نمایش داده می‌شود."
+            ],
+            "Page not found": [
+                "صفحه پیدا نشد"
+            ],
+            "Percentage": [
+                "درصد"
+            ],
+            "Percentage off": [
+                "درصد تخفیف"
+            ],
+            "Performance": [
+                "عملکرد"
+            ],
+            "Plugin version": [
+                "نسخهٔ افزونه"
+            ],
+            "Plugin-wide configuration.": [
+                "پیکربندی سراسری افزونه."
+            ],
+            "Plugin-wide configuration. Changes apply immediately.": [
+                "پیکربندی سراسری افزونه. تغییرات بلافاصله اعمال می‌شوند."
+            ],
+            "Preview": [
+                "پیش‌نمایش"
+            ],
+            "Preview %s": [
+                "پیش‌نمایش %s"
+            ],
+            "Preview state": [
+                "وضعیت پیش‌نمایش"
+            ],
+            "Preview: %s": [
+                "پیش‌نمایش: %s"
+            ],
+            "Previous month": [
+                "ماه قبل"
+            ],
+            "Priority": [
+                "اولویت"
+            ],
+            "Priority & conflicts": [
+                "اولویت و تداخل‌ها"
+            ],
+            "Product": [
+                "محصول"
+            ],
+            "Product pages": [
+                "صفحه‌های محصول"
+            ],
+            "Product suggestions": [
+                "پیشنهادهای محصول"
+            ],
+            "Products": [
+                "محصولات"
+            ],
+            "Progress bar + message — the classic goal strip.": [
+                "نوار پیشرفت + پیام — نوار کلاسیک هدف."
+            ],
+            "Quantity": [
+                "تعداد"
+            ],
+            "Reach a cart amount — subtotal, total or discounted subtotal.": [
+                "رسیدن به یک مبلغ سبد — جمع فرعی، کل یا جمع فرعی پس از تخفیف."
+            ],
+            "Reach a number of distinct products in the cart.": [
+                "رسیدن به تعداد محصولات متمایز در سبد."
+            ],
+            "Reach a total cart weight.": [
+                "رسیدن به وزن کل سبد."
+            ],
+            "Reach a total item quantity in the cart.": [
+                "رسیدن به تعداد کل اقلام در سبد."
+            ],
+            "Reach an amount or quantity across chosen categories.": [
+                "رسیدن به مبلغ یا تعداد در دسته‌بندی‌های انتخاب‌شده."
+            ],
+            "Reach an amount or quantity of specific products.": [
+                "رسیدن به مبلغ یا تعداد محصولات مشخص."
+            ],
+            "Remove": [
+                "حذف"
+            ],
+            "Remove condition": [
+                "حذف شرط"
+            ],
+            "Reset to defaults": [
+                "بازنشانی به پیش‌فرض"
+            ],
+            "Restrictions and schedule for this goal.": [
+                "محدودیت‌ها و زمان‌بندی این هدف."
+            ],
+            "Revenue": [
+                "درآمد"
+            ],
+            "Revenue influenced": [
+                "درآمد تأثیرپذیرفته"
+            ],
+            "Reward": [
+                "پاداش"
+            ],
+            "Reward label": [
+                "برچسب پاداش"
+            ],
+            "Reward type": [
+                "نوع پاداش"
+            ],
+            "Save appearance": [
+                "ذخیرهٔ ظاهر"
+            ],
+            "Save changes": [
+                "ذخیرهٔ تغییرات"
+            ],
+            "Save settings": [
+                "ذخیرهٔ تنظیمات"
+            ],
+            "Saving…": [
+                "در حال ذخیره…"
+            ],
+            "Schedule": [
+                "زمان‌بندی"
+            ],
+            "Schedule & priority": [
+                "زمان‌بندی و اولویت"
+            ],
+            "Search and select…": [
+                "جستجو و انتخاب…"
+            ],
+            "Search goals": [
+                "جستجوی اهداف"
+            ],
+            "Search…": [
+                "جستجو…"
+            ],
+            "Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer goal evaluations, at the cost of a brief staleness window after cart changes.": [
+                "ارائهٔ درخواست‌های مکرر ویجت از یک حافظهٔ موقت کوتاه‌مدت (۱۰ ثانیه) کلیدخورده با سبد — ارزیابی‌های هدف کمتر، با هزینهٔ یک پنجرهٔ کوتاه قدیمی شدن پس از تغییرات سبد."
+            ],
+            "Settings": [
+                "تنظیمات"
+            ],
+            "Settings saved.": [
+                "تنظیمات ذخیره شد."
+            ],
+            "Shop \/ archives": [
+                "فروشگاه \/ بایگانی"
+            ],
+            "Show all goals": [
+                "نمایش همهٔ اهداف"
+            ],
+            "Show on mobile": [
+                "نمایش در موبایل"
+            ],
+            "Show recommended products that help reach the goal.": [
+                "نمایش محصولات پیشنهادی که به رسیدن به هدف کمک می‌کنند."
+            ],
+            "Show the closest goal only": [
+                "فقط نزدیک‌ترین هدف را نمایش بده"
+            ],
+            "Show the first goal only": [
+                "فقط اولین هدف را نمایش بده"
+            ],
+            "Shown to the customer (fee\/coupon name).": [
+                "به مشتری نمایش داده می‌شود (نام کارمزد\/کوپن)."
+            ],
+            "Sidebar": [
+                "نوار کناری"
+            ],
+            "Simulated cart amount": [
+                "مبلغ سبد شبیه‌سازی‌شده"
+            ],
+            "Simulated quantity": [
+                "تعداد شبیه‌سازی‌شده"
+            ],
+            "Simulated reward": [
+                "پاداش شبیه‌سازی‌شده"
+            ],
+            "Skipped by a conflict": [
+                "ردشده به دلیل تداخل"
+            ],
+            "Skipped — a higher-priority goal wins": [
+                "رد شد — هدف با اولویت بالاتر برنده می‌شود"
+            ],
+            "Skipped — another reward is better": [
+                "رد شد — پاداش دیگری بهتر است"
+            ],
+            "Skipped — lower priority": [
+                "رد شد — اولویت پایین‌تر"
+            ],
+            "Slide the progress-bar fill on updates.": [
+                "لغزش پر شدن نوار پیشرفت هنگام به‌روزرسانی."
+            ],
+            "Smoothly slide the bar fill when the cart changes.": [
+                "هنگام تغییر سبد، پر شدن نوار را نرم‌انه بلغزانید."
+            ],
+            "Something went wrong": [
+                "مشکلی پیش آمد"
+            ],
+            "Stack with other rewards?": [
+                "با پاداش‌های دیگر ترکیب شود؟"
+            ],
+            "Starts at": [
+                "شروع در"
+            ],
+            "Status": [
+                "وضعیت"
+            ],
+            "Sticky bottom bar": [
+                "نوار پایین چسبان"
+            ],
+            "Store-wide progress widget variant.": [
+                "نسخهٔ ویجت پیشرفت در کل فروشگاه."
+            ],
+            "Subtotal (before discounts)": [
+                "جمع فرعی (پیش از تخفیف‌ها)"
+            ],
+            "Suggestion CTR": [
+                "نرخ کلیک پیشنهادها"
+            ],
+            "Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {goal_name}.": [
+                "از {current}، {target}، {remaining}، {percentage}، {quantity}، {reward} و {goal_name} پشتیبانی می‌کند."
+            ],
+            "Symbol ($100)": [
+                "نماد ($100)"
+            ],
+            "Tablet": [
+                "تبلت"
+            ],
+            "Target": [
+                "هدف"
+            ],
+            "Template": [
+                "الگو"
+            ],
+            "Text": [
+                "متن"
+            ],
+            "The campaign status was updated.": [
+                "وضعیت کمپین به‌روزرسانی شد."
+            ],
+            "The campaign was created.": [
+                "کمپین ایجاد شد."
+            ],
+            "The campaign was deleted.": [
+                "کمپین حذف شد."
+            ],
+            "The campaign was updated.": [
+                "کمپین به‌روزرسانی شد."
+            ],
+            "The discount never applies to these products.": [
+                "این تخفیف هرگز روی این محصولات اعمال نمی‌شود."
+            ],
+            "The goal status was updated.": [
+                "وضعیت هدف به‌روزرسانی شد."
+            ],
+            "The goal was created.": [
+                "هدف ایجاد شد."
+            ],
+            "The goal was deleted.": [
+                "هدف حذف شد."
+            ],
+            "The goal was updated.": [
+                "هدف به‌روزرسانی شد."
+            ],
+            "The identity and lifecycle of the campaign.": [
+                "هویت و چرخهٔ حیات کمپین."
+            ],
+            "The internal identity of the goal.": [
+                "هویت داخلی هدف."
+            ],
+            "The ordered goals of the campaign. Shoppers unlock each goal in order as their cart grows.": [
+                "اهداف مرتب‌شدهٔ کمپین. مشتریان با رشد سبدشان هر هدف را به ترتیب باز می‌کنند."
+            ],
+            "The page you are looking for does not exist.": [
+                "صفحه‌ای که به دنبال آن هستید وجود ندارد."
+            ],
+            "The plugin’s public actions and filters — a reference for theme and plugin developers.": [
+                "اقدام‌ها و فیلترهای عمومی افزونه — مرجعی برای توسعه‌دهندگان قالب و افزونه."
+            ],
+            "The product added to the cart as a gift.": [
+                "محصولی که به‌عنوان هدیه به سبد اضافه می‌شود."
+            ],
+            "The progress widget layout shown to customers on the cart, checkout and product pages.": [
+                "چیدمان ویجت پیشرفت که در صفحات سبد خرید، تسویه‌حساب و محصول به مشتریان نمایش داده می‌شود."
+            ],
+            "The threshold shoppers need to reach": [
+                "آستانه‌ای که مشتریان باید به آن برسند"
+            ],
+            "The threshold shoppers need to reach.": [
+                "آستانه‌ای که مشتریان باید به آن برسند."
+            ],
+            "These products never count toward the goal, even when they would otherwise qualify.": [
+                "این محصولات هرگز به سمت هدف محاسبه نمی‌شوند، حتی وقتی در غیر این صورت واجد شرایط باشند."
+            ],
+            "Title": [
+                "عنوان"
+            ],
+            "Today": [
+                "امروز"
+            ],
+            "Toggle %s": [
+                "تغییر وضعیت %s"
+            ],
+            "Top campaigns": [
+                "کمپین‌های برتر"
+            ],
+            "Top campaigns by completions": [
+                "کمپین‌های برتر بر اساس تکمیل‌ها"
+            ],
+            "Top goals": [
+                "اهداف برتر"
+            ],
+            "Top suggested products": [
+                "محصولات پیشنهادی برتر"
+            ],
+            "Total goals": [
+                "تعداد کل اهداف"
+            ],
+            "Try again": [
+                "تلاش دوباره"
+            ],
+            "Turn the storefront goals, rewards and progress bars on or off.": [
+                "اهداف، پاداش‌ها و نوارهای پیشرفت فروشگاه را روشن یا خاموش کنید."
+            ],
+            "Type": [
+                "نوع"
+            ],
+            "Type or pick an existing coupon.": [
+                "یک کوپن را تایپ کنید یا از بین کوپن‌های موجود انتخاب کنید."
+            ],
+            "Unlocked": [
+                "فعال شد"
+            ],
+            "Updating…": [
+                "در حال به‌روزرسانی…"
+            ],
+            "User menu": [
+                "منوی کاربر"
+            ],
+            "View store": [
+                "مشاهدهٔ فروشگاه"
+            ],
+            "Weight": [
+                "وزن"
+            ],
+            "What is Goal Cart?": [
+                "Goal Cart چیست؟"
+            ],
+            "What the customer earns when the goal is reached.": [
+                "آنچه مشتری با رسیدن به هدف به دست می‌آورد."
+            ],
+            "What the goal measures.": [
+                "آنچه هدف اندازه‌گیری می‌کند."
+            ],
+            "When off, cart coupons and discounts do not reduce the discounted-subtotal basis.": [
+                "وقتی خاموش است، کوپن‌ها و تخفیف‌های سبد، مبنای جمع فرعی پس از تخفیف را کاهش نمی‌دهند."
+            ],
+            "When off, products currently on sale are excluded from every goal.": [
+                "وقتی خاموش است، محصولات در حال حراج از همهٔ اهداف مستثنی می‌شوند."
+            ],
+            "When off, virtual and downloadable products are excluded from every goal.": [
+                "وقتی خاموش است، محصولات مجازی و قابل دانلود از همهٔ اهداف مستثنی می‌شوند."
+            ],
+            "When on, shipping charges count toward the cart-total basis.": [
+                "وقتی روشن است، هزینه‌های ارسال به سمت مبنای کل سبد محاسبه می‌شوند."
+            ],
+            "When the campaign runs, and how it competes with other campaigns.": [
+                "زمان اجرای کمپین و نحوهٔ رقابت آن با کمپین‌های دیگر."
+            ],
+            "When this goal is reached, every lower-priority goal is skipped and never grants its reward. Higher-priority goals are unaffected.": [
+                "وقتی این هدف محقق شود، همهٔ اهداف با اولویت پایین‌تر رد می‌شوند و هرگز پاداش خود را اعطا نمی‌کنند. اهداف با اولویت بالاتر تحت تأثیر قرار نمی‌گیرند."
+            ],
+            "Where and how the storefront widgets appear.": [
+                "کجا و چگونه ویجت‌های فروشگاه ظاهر می‌شوند."
+            ],
+            "Whether the widgets render on small screens (≤782px).": [
+                "آیا ویجت‌ها در صفحه‌های کوچک (≤۷۸۲ پیکسل) نمایش داده می‌شوند."
+            ],
+            "Which cart money counts toward goals. Defaults match the storefront behavior before these options existed.": [
+                "کدام مبلغ سبد به سمت اهداف محاسبه می‌شود. پیش‌فرض‌ها با رفتار فروشگاه پیش از وجود این گزینه‌ها مطابقت دارند."
+            ],
+            "Write detailed (debug-level) entries to the plugin log when logging is enabled.": [
+                "وقتی ثبت گزارش فعال است، ورودی‌های دقیق (سطح اشکال‌زدایی) را در گزارش افزونه بنویسید."
+            ],
+            "Write errors (and debug entries when debug mode is on) to a log file.": [
+                "خطاها (و ورودی‌های اشکال‌زدایی وقتی حالت اشکال‌زدایی روشن است) را در یک فایل گزارش بنویسید."
+            ],
+            "Yes (stack with other rewards)": [
+                "بله (ترکیب با پاداش‌های دیگر)"
+            ],
+            "Yesterday": [
+                "دیروز"
+            ],
+            "e.g. Free shipping over 500K": [
+                "مثلاً ارسال رایگان بالای ۵۰۰ هزار"
+            ],
+            "e.g. Summer Sale": [
+                "مثلاً فروش تابستانی"
+            ],
+            "e.g. Summer free shipping": [
+                "مثلاً ارسال رایگان تابستانی"
+            ],
+            "e.g. 🎁 or a dashicon name": [
+                "مثلاً 🎁 یا نام یک آیکون dashicon"
+            ],
+            "“%s” will be permanently deleted. Its goals are kept and detached — they can be reused by other campaigns.": [
+                "«%s» برای همیشه حذف می‌شود. اهداف آن حفظ و جدا می‌شوند و می‌توانند توسط کمپین‌های دیگر استفاده شوند."
+            ],
+            "“%s” will be permanently deleted. This cannot be undone.": [
+                "«%s» برای همیشه حذف می‌شود. این عمل قابل بازگشت نیست."
+            ]
+        }
+    }
+}

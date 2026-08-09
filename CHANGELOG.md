@@ -9,6 +9,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
+- **Persian (fa_IR) translation of the admin dashboard** —
+  `languages/goalcart-fa_IR.po` now translates all 408 strings
+  referenced from `admin-app/src` (navigation, analytics KPIs, goal &
+  campaign builders, settings, appearance, previews, empty states,
+  confirmations, toasts, …) plus the 16 storefront strings (417 entries).
+  Compiled by `bin/build-i18n.php` into `goalcart-fa_IR.mo` and the
+  `goalcart-fa_IR-goalcart-admin.json` JED the admin app loads via
+  `wp_set_script_translations`. `tests/i18n-test.php` section 1b gained a
+  coverage scan — every admin-app string in the POT must carry a non-empty
+  Persian translation or the suite fails, and duplicate msgids are rejected
+  (now 53 checks) — plus JED label checks.
+  `docs/i18n.md` §2b documents the coverage.
 - **WooCommerce Blocks storefront widgets (P19-T01)** — the progress
   widget now renders on cart/checkout/mini-cart pages built from WooCommerce
   Blocks. The classic template actions (`woocommerce_before_cart`,
@@ -737,6 +749,81 @@ all pass (Settings ships as its own lazy chunk). No database changes.
   existing rows default to 0 = not exclusive).
 
 **Overall project progress: 78%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 4% + Phase 15 2% + Phase 16 2% + Phase 17 2% + Phase 18 2% + Phase 19 2% + Phase 20 2% + Phase 21 1% + Phase 22 3% + Phase 23 3% + Phase 26 weight 2% × 100%).
+
+---
+
+### Phase 27 — Internationalization (100% complete)
+
+- **P27-T01 Text domain** — Verified and hardened the translation
+  posture: the plugin header declares `Text Domain: goalcart` and
+  `Domain Path: /languages`; `Plugin::load_textdomain()` loads the
+  domain on `init`; every PHP string routes through `__()` / `_e()` /
+  `esc_html__()` / `_x()` / `sprintf()` with the `goalcart` domain; and
+  the React admin app imports `__` / `_x` / `_n` / `sprintf` from
+  `@wordpress/i18n` (aliased to the `wp-i18n.ts` shim that delegates to
+  WP core's `wp.i18n`, with the admin script declaring the `wp-i18n`
+  dependency and `wp_set_script_translations` wired to the
+  `languages/` directory — the pipeline was already in place from the
+  foundation phase; Phase 27 proves it with tests and makes it
+  operational). `tests/i18n-test.php` scans every PHP and TS/TSX file
+  and fails on any domain-less translation call.
+- **P27-T02 POT generation & build pipeline** — New self-contained
+  tooling mirroring the reference plugin's `makepot`/`i18n:*` npm
+  scripts, with no wp-cli required: `bin/extract-pot.php` scans
+  `goalcart.php`, `includes/` (PHP) and  `admin-app/src` (TS/TSX — the
+  same `__( '…', 'goalcart' )` syntax) and writes a deterministic
+  `languages/goalcart.pot` (445 entries — including printf positional
+  placeholders like `%1$s` — sorted, deduped, `#: file:line`
+  references) with `--check` for CI freshness; `bin/build-i18n.php`
+  compiles `languages/goalcart-<locale>.po` files into gettext `.mo`
+  (verified magic bytes) and the JED JSON the admin loads — named
+  `goalcart-<locale>-goalcart-admin.json` per WP 7's
+  `load_script_textdomain()` convention (confirmed against the installed
+  core). `admin-app/package.json` gained `makepot`, `i18n:extract`,
+  `i18n:build`, `i18n:verify` and `i18n:all`.
+- **P27-T03 RTL** — Verified end to end: the admin mount sets `dir`
+  from `is_rtl()` (`Admin`), the MUI theme direction flips on
+  `boot.isRtl` (`theme/index.ts`), the Emotion cache is RTL-flipped via
+  `@mui/stylis-plugin-rtl` (`AppProviders.tsx`), the storefront config
+  exposes `isRtl`, and the storefront CSS is physical-direction-free
+  (logical properties only — asserted by the new suite).
+- **P27-T04 Locale-aware formatting** — The storefront config now
+  carries `locale` (`get_locale()`), and `assets/js/frontend.js` passes
+  a BCP-47 tag to `Intl.NumberFormat` in `formatMoney()`/
+  `formatNumber()` instead of the browser default locale — verified
+  behaviorally: `new Intl.NumberFormat('fa-IR').format(1234.5)` →
+  `۱٬۲۳۴٫۵` and the widget path renders `ریال ۲۵۰٬۰۰۰` for `fa_IR`
+  (Persian digits). The admin side was already locale-driven
+  (`lib/format.ts` and the date-range/analytics `Intl.DateTimeFormat`
+  with `boot.locale`) and is now asserted by tests. Persian support is
+  architecture-only: `tests/i18n-test.php` scans all PHP/TS/JS source
+  for Persian/Arabic script characters and finds zero (no hard-coded
+  strings).
+- Added files: `bin/{extract-pot,build-i18n}.php`,
+  `languages/goalcart.pot`, `tests/i18n-test.php` (44 checks),
+  `docs/i18n.md`; extended `includes/Frontend/ProgressUI.php` (config
+  `locale`), `assets/js/frontend.js` (UI_LOCALE Intl formatting),
+  `admin-app/package.json` (i18n npm scripts), `docs/{frontend,
+  compatibility}.md`.
+- **Verification:** `php -l` clean on all changed PHP; new i18n suite
+  44/44 (header + text domain, POT headers/contents/freshness, domain-
+  less-call scan, no-hardcoded-Persian scan, storefront locale/isRtl,
+  RTL setup + physical-free CSS, admin Intl + script-translations
+  wiring, PO→MO+JED build with magic-byte and JED round-trip checks,
+  temp outputs removed); full regression run — engine 75/75, reward
+  72/72, cart-integration 22/22, rest-api 120/120, settings 124/124,
+  preview 90/90, conflict 57/57, analytics 72/72, analytics-dashboard
+  82/82, message 47/47, suggestion 28/28, security 65/65, performance
+  38/38, woocommerce-compatibility 29/29, wordpress-compatibility
+  28/28 (all pass, zero failures); `frontend 73/73` still reports its 1
+  pre-existing environment-dependent failure (config template asserts
+  the default `basic`; this site has it saved as `card` — same
+  documented Phase 15 artifact, untouched by this phase); `node --check`
+  on the JS; Persian-digit and widget-formatting outputs verified
+  behaviorally with Node; `npm run typecheck`, `npm run lint` and
+  `npm run build` all pass. No database changes.
+
+**Overall project progress: 79%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 4% + Phase 15 2% + Phase 16 2% + Phase 17 2% + Phase 18 2% + Phase 19 2% + Phase 20 2% + Phase 21 1% + Phase 22 3% + Phase 23 3% + Phase 26 2% + Phase 27 weight 1% × 100%).
 
 ---
 

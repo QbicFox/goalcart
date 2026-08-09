@@ -15,7 +15,12 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "makepot": "php ../bin/extract-pot.php",
+    "i18n:extract": "php ../bin/extract-pot.php",
+    "i18n:build": "php ../bin/build-i18n.php",
+    "i18n:verify": "php ../bin/extract-pot.php --check && php ../bin/build-i18n.php --check",
+    "i18n:all": "npm run i18n:extract && npm run i18n:verify && npm run i18n:build"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",

@@ -44,6 +44,12 @@
 		return;
 	}
 
+	// Phase 27 (Internationalization): format numbers/money in the site
+	// locale (from the PHP config) so digits and grouping match the store
+	// language — Persian digits for fa_IR, etc. Undefined falls back to
+	// the browser default, preserving the pre-Phase-27 behavior.
+	var uiLocale = ( cfg && cfg.locale ) ? String( cfg.locale ).replace( '_', '-' ) : undefined;
+
 	var WIDGET_SELECTOR = '[data-goalcart-widget]';
 	var STICKY_ID = 'goalcart-sticky';
 	var stickyDismissed = false;
@@ -308,7 +314,7 @@
 	 */
 	function formatMoney( value, currency ) {
 		try {
-			return new Intl.NumberFormat( undefined, {
+			return new Intl.NumberFormat( uiLocale, {
 				style: 'currency',
 				currency: currency || cfg.currency || 'USD',
 				currencyDisplay: cfg.currencyDisplay || 'symbol',
@@ -394,7 +400,7 @@
 	 */
 	function formatNumber( value ) {
 		try {
-			return new Intl.NumberFormat( undefined ).format( Number( value ) || 0 );
+			return new Intl.NumberFormat( uiLocale ).format( Number( value ) || 0 );
 		} catch ( error ) {
 			return String( value );
 		}

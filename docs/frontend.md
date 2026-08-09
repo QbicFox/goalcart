@@ -100,13 +100,17 @@ when present (WooCommerce fires these as jQuery events) with a native
 - **Animation:** the `frontend_animation` setting, filterable via
   `goalcart_frontend_animation` (offs add the no-transition classes).
 - **Config payload** (`frontend_config()`): `endpoint`, `refresh`,
-  `currency`, `isRtl`, `labels` — printed as `window.goalcartFrontend` at
-  `wp_footer` priority 5, before the enqueued footer script. Phase 12 adds
-  `template` (active variant), `animation` and `appearance` (resolved
-  tokens); Phase 18 adds `currencyDisplay` (`symbol` | `code` | `name` —
-  the widget's amount formatter uses it) and `mobile` (`show` | `hide`).
-  The Phase 16 Tracker prints a second object,
-  `window.goalcartTracking`, at priority 4 (see “Analytics Events”).
+  `currency`, `locale`, `isRtl`, `labels` — printed as
+  `window.goalcartFrontend` at `wp_footer` priority 5, before the
+  enqueued footer script. Phase 12 adds `template` (active variant),
+  `animation` and `appearance` (resolved tokens); Phase 18 adds
+  `currencyDisplay` (`symbol` | `code` | `name` — the widget's amount
+  formatter uses it) and `mobile` (`show` | `hide`); Phase 27 adds
+  `locale` (`get_locale()`), which the JS passes to `Intl.NumberFormat`
+  so amounts and numbers render with the site locale's digits and
+  grouping (Persian digits for `fa_IR` — see `docs/i18n.md`). The Phase
+  16 Tracker prints a second object, `window.goalcartTracking`, at
+  priority 4 (see “Analytics Events”).
 - Assets load only on pages that can render a widget (cart / checkout /
   shop / product / a page containing the shortcode) via
   `page_needs_widget()`.

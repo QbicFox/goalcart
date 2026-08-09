@@ -373,6 +373,11 @@ final class ProgressUI {
 			'endpoint'  => esc_url_raw( rest_url( 'goalcart/v1/progress' ) ),
 			'refresh'   => (int) apply_filters( 'goalcart_frontend_refresh_interval', 0 ),
 			'currency'  => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
+			// Phase 27 (Internationalization): the site locale reaches the
+			// JS so Intl.NumberFormat renders locale-aware digits and
+			// grouping (e.g. Persian digits for fa_IR) instead of the
+			// browser's default locale.
+			'locale'    => get_locale(),
 			'isRtl'     => is_rtl(),
 			'template'  => $this->template(),
 			'animation' => (bool) apply_filters( 'goalcart_frontend_animation', $this->settings->get( 'frontend_animation', true ) ),

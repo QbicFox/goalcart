@@ -98,9 +98,16 @@ REST routes or storefront widgets (`Admin::register_menu()` gate).
   WordPress options, and analytics sessions are per-site.
 - **Localization** — translatable via the `goalcart` text domain
   (`load_plugin_textdomain` on `init`, domain path `/languages`); every
-  PHP string uses `__()`/`_e()` with the domain.
+  PHP string uses `__()`/`_e()` with the domain, the React admin is
+  translated through the `wp.i18n` shim + `wp_set_script_translations`,
+  and the POT/build pipeline lives in `bin/` (see `docs/i18n.md`, Phase
+  27).
 - **RTL** — the admin dashboard mount sets an explicit `dir` attribute
-  from `is_rtl()` and the storefront config exposes `isRtl` to widgets.
+  from `is_rtl()` (plus the MUI theme direction + stylis RTL flip), and
+  the storefront config exposes `isRtl` to widgets; the storefront CSS
+  uses logical properties only, so widgets mirror automatically. Locale
+  support includes locale-aware number/currency/date formatting
+  (Persian digits via Intl) with no hard-coded non-Latin strings.
 - **Admin capabilities** — menu and REST endpoints default to
   `manage_options`, both filterable (`goalcart_admin_capability`,
   `goalcart_rest_capability`).

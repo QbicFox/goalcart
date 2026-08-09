@@ -1608,20 +1608,51 @@ preview; the storefront renders a suppressed reward as locked and tracks
 
 # Phase 27 — Internationalization
 
-The plugin must be translation-ready.
+**Phase Weight:** 1%  
+**Phase Progress:** 100%  
+**Project Contribution:** 1.00%  
 
-Requirements:
+```text
+Phase 27: ████████████████████ 100%
+```
 
-- WordPress translation functions
-- text domain
-- POT generation
-- React translations following the reference plugin
-- RTL
-- locale-aware number formatting
-- currency formatting
-- date/time formatting
+The plugin is translation-ready end to end. Implemented and verified in
+`tests/i18n-test.php` (44 checks), documented in `docs/i18n.md`:
 
-Persian must be supported well, but the architecture must not hard-code Persian strings.
+- **WordPress translation functions** — every PHP string uses `__()` /
+  `_e()` / `esc_html__()` / `_x()` / `sprintf()` with the `goalcart`
+  domain; the React admin imports `@wordpress/i18n` (aliased to the
+  `wp-i18n.ts` shim delegating to WP core's `wp.i18n`, with the
+  `wp-i18n` script dependency and `wp_set_script_translations` wired).
+- **text domain** — `goalcart`, declared in the plugin header
+  (`Text Domain`, `Domain Path: /languages`) and loaded on `init` via
+  `load_plugin_textdomain`.
+- **POT generation** — `bin/extract-pot.php` scans the PHP layer and
+  the admin TS/TSX (same `__( '…', 'goalcart' )` syntax) into a
+  deterministic `languages/goalcart.pot` (445 entries) with `--check`
+  freshness guard; `bin/build-i18n.php` compiles `goalcart-<locale>.po`
+  into gettext `.mo` + the JED JSON the admin loads
+  (`goalcart-<locale>-goalcart-admin.json`); `admin-app/package.json`
+  mirrors the reference's `makepot` / `i18n:extract` / `i18n:build` /
+  `i18n:verify` / `i18n:all` scripts — no wp-cli required.
+- **React translations following the reference plugin** — the shim +
+  script-translations pipeline above, exercised by the build tests.
+- **RTL** — admin `dir` attribute from `is_rtl()`, MUI theme direction
+  on `boot.isRtl`, the stylis RTL Emotion flip, storefront `isRtl`
+  config, and physical-direction-free (logical-property) frontend CSS.
+- **locale-aware number formatting** — storefront `formatMoney` /
+  `formatNumber` pass the site locale to `Intl.NumberFormat` (Persian
+  digits for `fa_IR`, verified behaviorally: `۱٬۲۳۴٫۵`); admin
+  `lib/format.ts` uses `boot.locale`.
+- **currency formatting** — the storefront `currencyDisplay` modes
+  render through the locale-aware Intl currency formatter.
+- **date/time formatting** — admin date range + analytics render via
+  `Intl.DateTimeFormat( boot.locale … )`; PHP timestamps use
+  `current_time()`; message-engine money uses `wc_price()`.
+
+Persian is supported well (RTL, Persian digits, plural forms) with zero
+hard-coded Persian strings — the suite scans every PHP/TS/JS source for
+Persian/Arabic script characters.
 
 ---
 
@@ -2041,6 +2072,10 @@ This is the authoritative task-level progress register. Each task is represented
 | P26-T02 | 26 | Resolution Modes (cumulative / best / first) | 25.00% | [x] | 100% | 0.50% |
 | P26-T03 | 26 | Mutually Exclusive Goals | 25.00% | [x] | 100% | 0.50% |
 | P26-T04 | 26 | Admin UI Communication | 25.00% | [x] | 100% | 0.50% |
+| P27-T01 | 27 | WordPress Translation Functions & Text Domain | 25.00% | [x] | 100% | 0.25% |
+| P27-T02 | 27 | POT Generation & Build Pipeline | 25.00% | [x] | 100% | 0.25% |
+| P27-T03 | 27 | RTL | 25.00% | [x] | 100% | 0.25% |
+| P27-T04 | 27 | Locale-aware Number / Currency / Date Formatting | 25.00% | [x] | 100% | 0.25% |
 | P24-T01 | 24 | PHP Unit Tests | 25.00% | [ ] | 0% | 0.00% |
 | P24-T02 | 24 | Integration Tests | 25.00% | [ ] | 0% | 0.00% |
 | P24-T03 | 24 | React Tests | 25.00% | [ ] | 0% | 0.00% |
@@ -2111,7 +2146,7 @@ Use this compact dashboard during development:
 | 24 | 4% | 0% | 0.00% |
 | 25 | 2% | 0% | 0.00% |
 | 26 | 2% | 100% | 2.00% |
-| 27 | 1% | 0% | 0.00% |
+| 27 | 1% | 100% | 1.00% |
 | 28 | 1% | 0% | 0.00% |
 | 29 | 1% | 0% | 0.00% |
 | 30 | 2% | 0% | 0.00% |
@@ -2120,7 +2155,7 @@ Use this compact dashboard during development:
 | 33 | 3% | 0% | 0.00% |
 | 34 | 2% | 0% | 0.00% |
 | 35 | 1% | 0% | 0.00% |
-| **TOTAL** | **100%** | **78%** | **78.00%** |
+| **TOTAL** | **100%** | **79%** | **79.00%** |
 
 
 # Phase Completion Rule

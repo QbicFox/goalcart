@@ -1,0 +1,1298 @@
+# Persian (fa_IR) translation of Goal Cart.
+# Copyright (C) 2026 Goal Cart Contributors
+# This file is distributed under the same license as the Goal Cart plugin (GPL-2.0-or-later).
+#
+# Covers the customer-facing storefront strings (message engine states,
+# reward labels, the cart fee label and the block copy) and the full
+# WordPress admin dashboard (React admin app). Compile with:
+#   php bin/build-i18n.php   (or: cd admin-app && npm run i18n:build)
+msgid ""
+msgstr ""
+"Project-Id-Version: Goal Cart 0.1.0\n"
+"Report-Msgid-Bugs-To: https://goalcart.com/support\n"
+"POT-Creation-Date: 2026-08-09T00:00:00Z\n"
+"PO-Revision-Date: 2026-08-09T00:00:00Z\n"
+"Last-Translator: Goal Cart Contributors <translations@goalcart.com>\n"
+"Language-Team: Persian <fa@li.org>\n"
+"Language: fa_IR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Domain: goalcart\n"
+"X-Generator: Goal Cart i18n\n"
+
+# ---------------------------------------------------------------------------
+# Storefront strings (PHP)
+# ---------------------------------------------------------------------------
+
+#: includes/Goals/MessageEngine.php:284
+msgid "%d%% discount"
+msgstr "تخفیف %d٪"
+
+#: includes/Goals/MessageEngine.php:153
+msgid "Almost there! Only {remaining} left"
+msgstr "خیلی نزدیکید! تنها {remaining} باقی مانده است"
+
+#: includes/Goals/MessageEngine.php:303
+msgid "Coupon"
+msgstr "کوپن"
+
+#: includes/Goals/MessageEngine.php:295
+msgid "Fixed %s off"
+msgstr "تخفیف ثابت %s"
+
+#: includes/Goals/MessageEngine.php:290
+msgid "Fixed discount"
+msgstr "تخفیف ثابت"
+
+#: includes/Goals/MessageEngine.php:300
+msgid "Free gift"
+msgstr "هدیه رایگان"
+
+#: includes/Goals/MessageEngine.php:277
+msgid "Free shipping"
+msgstr "ارسال رایگان"
+
+#: includes/Frontend/ProgressUI.php:189
+msgid "Goal Cart Progress"
+msgstr "پیشرفت Goal Cart"
+
+#: includes/Rewards/Applicators/AbstractDiscountApplicator.php:183
+msgid "Goal reward"
+msgstr "پاداش هدف"
+
+#: includes/Goals/MessageEngine.php:171
+msgid "Only {remaining} left to reach your goal"
+msgstr "تنها {remaining} تا رسیدن به هدف شما باقی مانده است"
+
+#: includes/Goals/MessageEngine.php:281
+msgid "Percentage discount"
+msgstr "تخفیف درصدی"
+
+#: includes/Goals/MessageEngine.php:162
+msgid "Reward unlocked: {reward}"
+msgstr "پاداش فعال شد: {reward}"
+
+#: includes/Frontend/ProgressUI.php:192
+msgid "Show cart goals, progress and rewards (Goal Cart)."
+msgstr "اهداف سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (Goal Cart)."
+
+#: includes/Goals/MessageEngine.php:145
+msgid "This offer is not active right now."
+msgstr "این پیشنهاد در حال حاضر فعال نیست."
+
+#: includes/Goals/MessageEngine.php:148
+msgid "This offer is not available for your cart."
+msgstr "این پیشنهاد برای سبد خرید شما در دسترس نیست."
+
+#: includes/Goals/MessageEngine.php:165
+msgid "You reached your goal!"
+msgstr "به هدف خود رسیدید!"
+
+# ---------------------------------------------------------------------------
+# Admin dashboard (React admin app)
+# ---------------------------------------------------------------------------
+
+msgid "% discount"
+msgstr "٪ تخفیف"
+
+msgid "% off the eligible cart value"
+msgstr "٪ تخفیف از ارزش واجد شرایط سبد خرید"
+
+msgid "%d%% progress"
+msgstr "پیشرفت %d٪"
+
+msgid "%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page; the frontend widgets are added in a later phase."
+msgstr "«%s» از اهداف سبد خرید استفاده می‌کند — مانند «برای ارسال رایگان، %s بیشتر خرید کنید» — تا سبدهای بزرگ‌تری تشویق شود. اهداف، پاداش‌ها و نوارهای پیشرفت از صفحهٔ «اهداف» پیکربندی می‌شوند؛ ویجت‌های فروشگاه در فاز بعدی اضافه می‌شوند."
+
+msgid "(amount)"
+msgstr "(مبلغ)"
+
+msgid "(items)"
+msgstr "(تعداد اقلام)"
+
+msgid "(weight units)"
+msgstr "(واحد وزن)"
+
+msgid "A big percent readout above the bar."
+msgstr "نمایش درصد بزرگ بالای نوار."
+
+msgid "A deterministic coupon is created per customer."
+msgstr "برای هر مشتری یک کوپن قطعی ایجاد می‌شود."
+
+msgid "A goal ladder of dots and targets, bar underneath."
+msgstr "نردبانی از نقاط و اهداف با نوار زیر آن."
+
+msgid "AND (all children required)"
+msgstr "و (همهٔ زیرشرط‌ها الزامی)"
+
+msgid "Accent"
+msgstr "رنگ تأکید"
+
+msgid "Actions"
+msgstr "عملیات"
+
+msgid "Active"
+msgstr "فعال"
+
+msgid "Activity over time"
+msgstr "فعالیت در طول زمان"
+
+msgid "Add a milestone"
+msgstr "افزودن نقطهٔ عطف"
+
+msgid "Add automatically"
+msgstr "افزودن خودکار"
+
+msgid "Add campaign"
+msgstr "افزودن کمپین"
+
+msgid "Add condition"
+msgstr "افزودن شرط"
+
+msgid "Add goal"
+msgstr "افزودن هدف"
+
+msgid "Add line taxes to the subtotal-style money bases."
+msgstr "مالیات‌های ردیف را به مبناهای پولی نوع جمع فرعی اضافه کنید."
+
+msgid "Add your first campaign"
+msgstr "اولین کمپین خود را اضافه کنید"
+
+msgid "Add your first goal"
+msgstr "اولین هدف خود را اضافه کنید"
+
+msgid "Add-to-cart"
+msgstr "افزودن به سبد"
+
+msgid "Add-to-cart rate"
+msgstr "نرخ افزودن به سبد"
+
+msgid "Added"
+msgstr "افزوده شد"
+
+msgid "Added to every storefront progress widget so your theme can target it."
+msgstr "به هر ویجت پیشرفت فروشگاه اضافه می‌شود تا قالب شما بتواند آن را هدف قرار دهد."
+
+msgid "Advanced"
+msgstr "پیشرفته"
+
+msgid "All campaigns"
+msgstr "همهٔ کمپین‌ها"
+
+msgid "All goals"
+msgstr "همهٔ اهداف"
+
+msgid "All goals are already milestones of this campaign."
+msgstr "همهٔ اهداف از قبل نقاط عطف این کمپین هستند."
+
+msgid "All products"
+msgstr "همهٔ محصولات"
+
+msgid "All rewards"
+msgstr "همهٔ پاداش‌ها"
+
+msgid "All statuses"
+msgstr "همهٔ وضعیت‌ها"
+
+msgid "Amount"
+msgstr "مبلغ"
+
+msgid "An overview of your cart goals and the plugin status. Full analytics arrive in a later phase."
+msgstr "نمای کلی اهداف سبد خرید و وضعیت افزونه. تحلیل کامل در فاز بعدی ارائه می‌شود."
+
+msgid "Analytics"
+msgstr "تحلیل‌ها"
+
+msgid "Analytics arrive in a later phase."
+msgstr "تحلیل‌ها در فاز بعدی ارائه می‌شوند."
+
+msgid "Analytics tracking"
+msgstr "ردیابی تحلیل‌ها"
+
+msgid "Animate progress"
+msgstr "انیمیشن پیشرفت"
+
+msgid "Animate progress updates"
+msgstr "انیمیشن به‌روزرسانی پیشرفت"
+
+msgid "Appearance"
+msgstr "ظاهر"
+
+msgid "Appearance saved."
+msgstr "ظاهر ذخیره شد."
+
+msgid "Appended to the storefront widget styles (overrides any token)."
+msgstr "به استایل‌های ویجت فروشگاه اضافه می‌شود (هر توکنی را لغو می‌کند)."
+
+msgid "Appended to the storefront widget stylesheet (tags are stripped)."
+msgstr "به شیوه‌نامهٔ ویجت فروشگاه اضافه می‌شود (تگ‌ها حذف می‌شوند)."
+
+msgid "Apply range"
+msgstr "اعمال بازه"
+
+msgid "Auto"
+msgstr "خودکار"
+
+msgid "Avg. cart value"
+msgstr "میانگین ارزش سبد"
+
+msgid "Back to Dashboard"
+msgstr "بازگشت به داشبورد"
+
+msgid "Back to WordPress Admin"
+msgstr "بازگشت به مدیریت وردپرس"
+
+msgid "Back to campaigns"
+msgstr "بازگشت به کمپین‌ها"
+
+msgid "Back to goals"
+msgstr "بازگشت به اهداف"
+
+msgid "Background"
+msgstr "پس‌زمینه"
+
+msgid "Bar & animation"
+msgstr "نوار و انیمیشن"
+
+msgid "Bar height (px)"
+msgstr "ارتفاع نوار (پیکسل)"
+
+msgid "Basic"
+msgstr "ساده"
+
+msgid "Basic information"
+msgstr "اطلاعات پایه"
+
+msgid "Basic progress bar"
+msgstr "نوار پیشرفت ساده"
+
+msgid "Best reward only"
+msgstr "فقط بهترین پاداش"
+
+msgid "Blocked by an exclusive goal"
+msgstr "توسط یک هدف انحصاری مسدود شد"
+
+msgid "Border"
+msgstr "حاشیه"
+
+msgid "CTR"
+msgstr "نرخ کلیک"
+
+msgid "Cache progress payloads"
+msgstr "ذخیره‌سازی موقت داده‌های پیشرفت"
+
+msgid "Caching and what the storefront measures."
+msgstr "ذخیره‌سازی موقت و آنچه فروشگاه اندازه‌گیری می‌کند."
+
+msgid "Calculate against"
+msgstr "محاسبه بر اساس"
+
+msgid "Calculation mode"
+msgstr "حالت محاسبه"
+
+msgid "Campaign"
+msgstr "کمپین"
+
+msgid "Campaign #%d"
+msgstr "کمپین #%d"
+
+msgid "Campaign editor"
+msgstr "ویرایشگر کمپین"
+
+msgid "Campaign preview"
+msgstr "پیش‌نمایش کمپین"
+
+msgid "Campaigns"
+msgstr "کمپین‌ها"
+
+msgid "Campaigns bundle multiple goals into scheduled, prioritized milestones. Create your first campaign to group goals around an event or season."
+msgstr "کمپین‌ها چندین هدف را در نقاط عطف زمان‌بندی‌شده و اولویت‌بندی‌شده جمع می‌کنند. اولین کمپین خود را بسازید تا اهداف را حول یک رویداد یا فصل گروه‌بندی کنید."
+
+msgid "Cancel"
+msgstr "انصراف"
+
+msgid "Cap the discount at this amount."
+msgstr "تخفیف را به این مبلغ محدود کنید."
+
+msgid "Card"
+msgstr "کارت"
+
+msgid "Cart goals drive the storefront progress bars and rewards."
+msgstr "اهداف سبد خرید، نوارهای پیشرفت و پاداش‌های فروشگاه را هدایت می‌کنند."
+
+msgid "Cart page"
+msgstr "صفحهٔ سبد خرید"
+
+msgid "Cart total (incl. tax & shipping)"
+msgstr "جمع کل سبد (شامل مالیات و حمل‌ونقل)"
+
+msgid "Categories"
+msgstr "دسته‌بندی‌ها"
+
+msgid "Category"
+msgstr "دسته‌بندی"
+
+msgid "Checkout"
+msgstr "تسویه‌حساب"
+
+msgid "Child type"
+msgstr "نوع زیرشرط"
+
+msgid "Children are evaluated against the same cart. AND requires every child, OR completes at the best child."
+msgstr "زیرشرط‌ها روی همان سبد ارزیابی می‌شوند. «و» به همهٔ زیرشرط‌ها نیاز دارد و «یا» با بهترین زیرشرط تکمیل می‌شود."
+
+msgid "Choose a start and end date."
+msgstr "تاریخ شروع و پایان را انتخاب کنید."
+
+msgid "Clicks"
+msgstr "کلیک‌ها"
+
+msgid "Code (USD 100)"
+msgstr "کد (USD 100)"
+
+msgid "Collapse all"
+msgstr "بستن همه"
+
+msgid "Collect goal and suggestion events. Keep the goals running while turning event collection off."
+msgstr "رویدادهای هدف و پیشنهاد را جمع‌آوری کنید. اهداف را فعال نگه دارید در حالی که جمع‌آوری رویداد خاموش است."
+
+msgid "Colors"
+msgstr "رنگ‌ها"
+
+msgid "Combine child goals with AND/OR logic."
+msgstr "اهداف زیرشرطی را با منطق و/یا ترکیب کنید."
+
+msgid "Complete"
+msgstr "تکمیل"
+
+msgid "Completed message"
+msgstr "پیام تکمیل"
+
+msgid "Completion"
+msgstr "تکمیل"
+
+msgid "Completion rate"
+msgstr "نرخ تکمیل"
+
+msgid "Completions"
+msgstr "تکمیل‌ها"
+
+msgid "Composite"
+msgstr "ترکیبی"
+
+msgid "Composite conditions"
+msgstr "شرط‌های ترکیبی"
+
+msgid "Conditions"
+msgstr "شرط‌ها"
+
+msgid "Configuration"
+msgstr "پیکربندی"
+
+msgid "Confirm"
+msgstr "تأیید"
+
+msgid "Conflict resolution"
+msgstr "حل تداخل"
+
+msgid "Corner radius (px)"
+msgstr "شعاع گوشه (پیکسل)"
+
+msgid "Could not load the analytics."
+msgstr "بارگذاری تحلیل‌ها ممکن نشد."
+
+msgid "Could not load the campaign."
+msgstr "بارگذاری کمپین ممکن نشد."
+
+msgid "Could not load the campaigns."
+msgstr "بارگذاری کمپین‌ها ممکن نشد."
+
+msgid "Could not load the goal summary."
+msgstr "بارگذاری خلاصهٔ هدف ممکن نشد."
+
+msgid "Could not load the goal."
+msgstr "بارگذاری هدف ممکن نشد."
+
+msgid "Could not load the goals."
+msgstr "بارگذاری اهداف ممکن نشد."
+
+msgid "Could not load the preview."
+msgstr "بارگذاری پیش‌نمایش ممکن نشد."
+
+msgid "Could not load the settings."
+msgstr "بارگذاری تنظیمات ممکن نشد."
+
+msgid "Coupon cap (optional)"
+msgstr "سقف کوپن (اختیاری)"
+
+msgid "Coupon discount type"
+msgstr "نوع تخفیف کوپن"
+
+msgid "Coupon value"
+msgstr "ارزش کوپن"
+
+msgid "Create campaign"
+msgstr "ایجاد کمپین"
+
+msgid "Create goal"
+msgstr "ایجاد هدف"
+
+msgid "Create your first goal to start increasing the average order value — progress bars and rewards appear on the storefront once a goal is active."
+msgstr "اولین هدف خود را ایجاد کنید تا میانگین ارزش سفارش افزایش یابد — نوارهای پیشرفت و پاداش‌ها پس از فعال شدن هدف در فروشگاه ظاهر می‌شوند."
+
+msgid "Cumulative — all rewards stack"
+msgstr "تجمعی — همهٔ پاداش‌ها روی هم جمع می‌شوند"
+
+msgid "Currency"
+msgstr "واحد پول"
+
+msgid "Currency display"
+msgstr "نمایش واحد پول"
+
+msgid "Custom CSS"
+msgstr "CSS سفارشی"
+
+msgid "Custom range…"
+msgstr "بازهٔ سفارشی…"
+
+msgid "Customer-facing copy and template for the progress widget."
+msgstr "متن و الگوی نمایش به مشتری برای ویجت پیشرفت."
+
+msgid "Customize how the cart progress UI looks on your storefront."
+msgstr "ظاهر رابط پیشرفت سبد خرید را در فروشگاه خود سفارشی کنید."
+
+msgid "Daily impressions, completions and revenue trend"
+msgstr "روند روزانهٔ نمایش‌ها، تکمیل‌ها و درآمد"
+
+msgid "Dashboard"
+msgstr "داشبورد"
+
+msgid "Date range"
+msgstr "بازهٔ تاریخ"
+
+msgid "Date range filter"
+msgstr "فیلتر بازهٔ تاریخ"
+
+msgid "Debug mode"
+msgstr "حالت اشکال‌زدایی"
+
+msgid "Debugging, logging and the developer surface."
+msgstr "اشکال‌زدایی، ثبت گزارش و سطح توسعه‌دهنده."
+
+msgid "Default goal behavior"
+msgstr "رفتار پیش‌فرض هدف"
+
+msgid "Default money basis for goals that do not set their own."
+msgstr "مبنای پولی پیش‌فرض برای اهدافی که مبنای خود را تعیین نمی‌کنند."
+
+msgid "Define what shoppers need to reach and what they earn for getting there."
+msgstr "تعیین کنید مشتریان باید به چه چیزی برسند و در ازای آن چه پاداشی بگیرند."
+
+msgid "Delete"
+msgstr "حذف"
+
+msgid "Delete %s"
+msgstr "حذف %s"
+
+msgid "Delete this campaign?"
+msgstr "این کمپین حذف شود؟"
+
+msgid "Delete this goal?"
+msgstr "این هدف حذف شود؟"
+
+msgid "Description"
+msgstr "توضیحات"
+
+msgid "Desktop"
+msgstr "دسکتاپ"
+
+msgid "Developer hooks"
+msgstr "قلاب‌های توسعه‌دهنده"
+
+msgid "Device width"
+msgstr "عرض دستگاه"
+
+msgid "Disable"
+msgstr "غیرفعال کردن"
+
+msgid "Discount amount"
+msgstr "مبلغ تخفیف"
+
+msgid "Discount percentage"
+msgstr "درصد تخفیف"
+
+msgid "Discounted subtotal"
+msgstr "جمع فرعی پس از تخفیف"
+
+msgid "Display"
+msgstr "نمایش"
+
+msgid "Display locations"
+msgstr "مکان‌های نمایش"
+
+msgid "Distinct quantity"
+msgstr "تعداد متمایز"
+
+msgid "Drives money-based goals (subtotal / total)."
+msgstr "اهداف مبتنی بر مبلغ (جمع فرعی / کل) را هدایت می‌کند."
+
+msgid "Drives quantity, distinct-quantity and weight goals."
+msgstr "اهداف تعداد، تعداد متمایز و وزن را هدایت می‌کند."
+
+msgid "Duplicate"
+msgstr "تکراری‌سازی"
+
+msgid "Duplicate %s"
+msgstr "تکراری‌سازی %s"
+
+msgid "Duplicated “%s”."
+msgstr "«%s» تکراری‌سازی شد."
+
+msgid "Edit"
+msgstr "ویرایش"
+
+msgid "Edit %s"
+msgstr "ویرایش %s"
+
+msgid "Edit campaign"
+msgstr "ویرایش کمپین"
+
+msgid "Edit goal"
+msgstr "ویرایش هدف"
+
+msgid "Edit profile"
+msgstr "ویرایش نمایه"
+
+msgid "Eligible categories (optional)"
+msgstr "دسته‌بندی‌های واجد شرایط (اختیاری)"
+
+msgid "Eligible products (optional)"
+msgstr "محصولات واجد شرایط (اختیاری)"
+
+msgid "Empty cart"
+msgstr "سبد خالی"
+
+msgid "Enable"
+msgstr "فعال کردن"
+
+msgid "Enable Goal Cart"
+msgstr "فعال کردن Goal Cart"
+
+msgid "Ends at"
+msgstr "پایان در"
+
+msgid "Excluded products"
+msgstr "محصولات مستثنی"
+
+msgid "Excluded products (optional)"
+msgstr "محصولات مستثنی (اختیاری)"
+
+msgid "Exclusive"
+msgstr "انحصاری"
+
+msgid "Exclusive (mutually exclusive)"
+msgstr "انحصاری (متقابلاً انحصاری)"
+
+msgid "Exclusive rewards never combine."
+msgstr "پاداش‌های انحصاری هرگز ترکیب نمی‌شوند."
+
+msgid "Exclusive: when this goal is reached, lower-priority goals are skipped."
+msgstr "انحصاری: وقتی این هدف محقق شود، اهداف با اولویت پایین‌تر رد می‌شوند."
+
+msgid "Existing coupon code"
+msgstr "کد کوپن موجود"
+
+msgid "Expand all"
+msgstr "باز کردن همه"
+
+msgid "Extra CSS class"
+msgstr "کلاس CSS اضافی"
+
+msgid "First matching goal only"
+msgstr "فقط اولین هدف منطبق"
+
+msgid "Fixed amount off"
+msgstr "تخفیف مبلغ ثابت"
+
+msgid "Free shipping unlocked"
+msgstr "ارسال رایگان فعال شد"
+
+msgid "Frontend"
+msgstr "فرانت‌اند"
+
+msgid "Full-screen dashboard"
+msgstr "داشبورد تمام‌صفحه"
+
+msgid "General"
+msgstr "عمومی"
+
+msgid "Generate a coupon from these rules"
+msgstr "ایجاد کوپن بر اساس این قوانین"
+
+msgid "Gift mode"
+msgstr "حالت هدیه"
+
+msgid "Gift product"
+msgstr "محصول هدیه"
+
+msgid "Give the campaign a name."
+msgstr "به کمپین یک نام بدهید."
+
+msgid "Give the goal a name."
+msgstr "به هدف یک نام بدهید."
+
+msgid "Goal"
+msgstr "هدف"
+
+msgid "Goal Calculation"
+msgstr "محاسبهٔ هدف"
+
+msgid "Goal Cart"
+msgstr "Goal Cart"
+
+msgid "Goal editor"
+msgstr "ویرایشگر هدف"
+
+msgid "Goal preview"
+msgstr "پیش‌نمایش هدف"
+
+msgid "Goal reached — your reward is unlocked!"
+msgstr "هدف محقق شد — پاداش شما فعال شد!"
+
+msgid "Goal type"
+msgstr "نوع هدف"
+
+msgid "Goals"
+msgstr "اهداف"
+
+msgid "Goals define what you want shoppers to reach — a cart amount, quantity, category spend and more. Create your first goal to start."
+msgstr "اهداف مشخص می‌کنند که می‌خواهید مشتریان به چه چیزی برسند — مبلغ سبد، تعداد، هزینه در دسته‌بندی و موارد دیگر. برای شروع، اولین هدف خود را ایجاد کنید."
+
+msgid "Group goals into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds."
+msgstr "اهداف را در نقاط عطف زمان‌بندی‌شده گروه‌بندی کنید — مثلاً فروش تابستانی با ارسال رایگان، هدیه و تخفیف در آستانه‌های مختلف."
+
+msgid "Group goals into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M."
+msgstr "اهداف را در نقاط عطف زمان‌بندی‌شده و اولویت‌بندی‌شده گروه‌بندی کنید — مثلاً ارسال رایگان در ۵۰۰ هزار، هدیه در ۱ میلیون و تخفیف در ۱.۵ میلیون."
+
+msgid "Hide on mobile"
+msgstr "مخفی در موبایل"
+
+msgid "Hide the WordPress admin chrome and let the dashboard fill the whole browser window."
+msgstr "قاب مدیریت وردپرس را مخفی کنید و اجازه دهید داشبورد کل پنجرهٔ مرورگر را پر کند."
+
+msgid "How completed goals grant rewards when several compete: combine them, grant only the highest-priority matching goal, or grant only the best reward. Per-goal exclusive flags and priorities are respected in every mode."
+msgstr "نحوهٔ اعطای پاداش اهداف تکمیل‌شده وقتی چند هدف رقابت می‌کنند: ترکیب آن‌ها، اعطای فقط به هدف منطبق با بالاترین اولویت، یا اعطای فقط بهترین پاداش. پرچم‌های انحصاری و اولویت‌های هر هدف در هر حالت رعایت می‌شوند."
+
+msgid "How money amounts are shown on the storefront widgets."
+msgstr "نحوهٔ نمایش مبالغ پولی در ویجت‌های فروشگاه."
+
+msgid "How multiple active goals are presented when the shopper has no campaign."
+msgstr "نحوهٔ نمایش چند هدف فعال وقتی مشتری کمپینی ندارد."
+
+msgid "How this goal competes when several goals are active. Lower priority numbers win first; a goal inside a campaign is also ordered by its campaign priority."
+msgstr "نحوهٔ رقابت این هدف وقتی چند هدف فعال هستند. اعداد اولویت پایین‌تر اول برنده می‌شوند؛ هدف داخل کمپین نیز با اولویت کمپینش مرتب می‌شود."
+
+msgid "Icon"
+msgstr "آیکون"
+
+msgid "Icon, title and reward bundled in a card."
+msgstr "آیکون، عنوان و پاداش در یک کارت."
+
+msgid "Impressions"
+msgstr "نمایش‌ها"
+
+msgid "Inactive"
+msgstr "غیرفعال"
+
+msgid "Inactive campaigns never evaluate their goals on the storefront."
+msgstr "کمپین‌های غیرفعال هرگز اهداف خود را در فروشگاه ارزیابی نمی‌کنند."
+
+msgid "Inactive goals never evaluate on the storefront."
+msgstr "اهداف غیرفعال هرگز در فروشگاه ارزیابی نمی‌شوند."
+
+msgid "Include discounts"
+msgstr "شامل تخفیف‌ها"
+
+msgid "Include sale items"
+msgstr "شامل اقلام حراج"
+
+msgid "Include shipping"
+msgstr "شامل هزینهٔ حمل"
+
+msgid "Include taxes"
+msgstr "شامل مالیات‌ها"
+
+msgid "Include virtual products"
+msgstr "شامل محصولات مجازی"
+
+msgid "Internal name shown in the admin."
+msgstr "نام داخلی نمایش داده‌شده در مدیریت."
+
+msgid "Internal notes about this campaign."
+msgstr "یادداشت‌های داخلی دربارهٔ این کمپین."
+
+msgid "Internal notes about this goal."
+msgstr "یادداشت‌های داخلی دربارهٔ این هدف."
+
+msgid "Last 30 days"
+msgstr "۳۰ روز گذشته"
+
+msgid "Last 7 days"
+msgstr "۷ روز گذشته"
+
+msgid "Leave both empty to run the goal at all times. Local site time is used."
+msgstr "برای اجرای همیشگی هدف، هر دو را خالی بگذارید. زمان محلی سایت استفاده می‌شود."
+
+msgid "Leave empty to apply to the whole cart."
+msgstr "برای اعمال روی کل سبد، خالی بگذارید."
+
+msgid "Live preview"
+msgstr "پیش‌نمایش زنده"
+
+msgid "Loading the campaign…"
+msgstr "در حال بارگذاری کمپین…"
+
+msgid "Loading the goal…"
+msgstr "در حال بارگذاری هدف…"
+
+msgid "Locked"
+msgstr "قفل شده"
+
+msgid "Log file"
+msgstr "فایل گزارش"
+
+msgid "Logging"
+msgstr "ثبت گزارش"
+
+msgid "Lower numbers win conflicts."
+msgstr "اعداد کمتر در تداخل‌ها برنده می‌شوند."
+
+msgid "Main navigation"
+msgstr "ناوبری اصلی"
+
+msgid "Makes every shipping rate free once the goal is reached. Zone/method-specific rules are configured in a later phase."
+msgstr "پس از رسیدن به هدف، همهٔ نرخ‌های ارسال رایگان می‌شوند. قوانین ویژهٔ مناطق/روش‌ها در فاز بعدی پیکربندی می‌شوند."
+
+msgid "Master toggle, display and default behavior."
+msgstr "کلید اصلی، نمایش و رفتار پیش‌فرض."
+
+msgid "Maximum discount"
+msgstr "حداکثر تخفیف"
+
+msgid "Measure whether Goal Cart actually increases your average order value."
+msgstr "اندازه‌گیری کنید که آیا Goal Cart واقعاً میانگین ارزش سفارش شما را افزایش می‌دهد."
+
+msgid "Message (in progress)"
+msgstr "پیام (در حال پیشرفت)"
+
+msgid "Milestone"
+msgstr "نقطهٔ عطف"
+
+msgid "Milestones"
+msgstr "نقاط عطف"
+
+msgid "Mini cart"
+msgstr "مینی‌سبد"
+
+msgid "Mobile"
+msgstr "موبایل"
+
+msgid "Mobile behavior"
+msgstr "رفتار موبایل"
+
+msgid "Move down"
+msgstr "انتقال به پایین"
+
+msgid "Move up"
+msgstr "انتقال به بالا"
+
+msgid "Name"
+msgstr "نام"
+
+msgid "Name (US dollars)"
+msgstr "نام (دلار آمریکا)"
+
+msgid "Next month"
+msgstr "ماه بعد"
+
+msgid "No (exclusive)"
+msgstr "خیر (انحصاری)"
+
+msgid "No analytics yet"
+msgstr "هنوز تحلیلی وجود ندارد"
+
+msgid "No campaign activity in this range."
+msgstr "هیچ فعالیت کمپینی در این بازه نیست."
+
+msgid "No campaigns yet"
+msgstr "هنوز کمپینی وجود ندارد"
+
+msgid "No child goals yet. Add at least one condition to build the composite goal."
+msgstr "هنوز هدف زیرشرطی وجود ندارد. برای ساخت هدف ترکیبی حداقل یک شرط اضافه کنید."
+
+msgid "No goal activity in this range."
+msgstr "هیچ فعالیت هدفی در این بازه نیست."
+
+msgid "No goal impressions were recorded in this range. Widen the date range or check that event tracking is enabled on the storefront."
+msgstr "هیچ نمایش هدفی در این بازه ثبت نشده است. بازهٔ تاریخ را گسترش دهید یا مطمئن شوید ردیابی رویداد در فروشگاه فعال است."
+
+msgid "No goals match your search."
+msgstr "هیچ هدفی با جستجوی شما مطابقت ندارد."
+
+msgid "No goals yet"
+msgstr "هنوز هدفی وجود ندارد"
+
+msgid "No goals yet — create a goal on the Goals page first."
+msgstr "هنوز هدفی وجود ندارد — ابتدا در صفحهٔ «اهداف» یک هدف ایجاد کنید."
+
+msgid "No milestones in this campaign yet."
+msgstr "هنوز نقطهٔ عطفی در این کمپین نیست."
+
+msgid "No reward"
+msgstr "بدون پاداش"
+
+msgid "No suggestion activity in this range."
+msgstr "هیچ فعالیت پیشنهادی در این بازه نیست."
+
+msgid "None"
+msgstr "هیچ‌کدام"
+
+msgid "OR (any child completes)"
+msgstr "یا (هر زیرشرطی تکمیل شود)"
+
+msgid "Offer as optional"
+msgstr "ارائه به‌صورت اختیاری"
+
+msgid "Only $38.00 left to reach your goal"
+msgstr "فقط $38.00 تا رسیدن به هدف شما باقی مانده است"
+
+msgid "Only products in these categories count toward the target."
+msgstr "فقط محصولات این دسته‌بندی‌ها به سمت هدف محاسبه می‌شوند."
+
+msgid "Only these products count toward the target. Variations are matched by their parent product."
+msgstr "فقط این محصولات به سمت هدف محاسبه می‌شوند. تغییرات (variations) با محصول والدشان مطابقت داده می‌شوند."
+
+msgid "Only {remaining} left to unlock {reward}!"
+msgstr "فقط {remaining} تا فعال شدن {reward} باقی مانده است!"
+
+msgid "Open navigation"
+msgstr "باز کردن ناوبری"
+
+msgid "Operator"
+msgstr "عملگر"
+
+msgid "Optional cap"
+msgstr "سقف اختیاری"
+
+msgid "Optional icon shown next to the progress bar."
+msgstr "آیکون اختیاری که کنار نوار پیشرفت نمایش داده می‌شود."
+
+msgid "Page not found"
+msgstr "صفحه پیدا نشد"
+
+msgid "Percentage"
+msgstr "درصد"
+
+msgid "Percentage off"
+msgstr "درصد تخفیف"
+
+msgid "Performance"
+msgstr "عملکرد"
+
+msgid "Plugin version"
+msgstr "نسخهٔ افزونه"
+
+msgid "Plugin-wide configuration."
+msgstr "پیکربندی سراسری افزونه."
+
+msgid "Plugin-wide configuration. Changes apply immediately."
+msgstr "پیکربندی سراسری افزونه. تغییرات بلافاصله اعمال می‌شوند."
+
+msgid "Preview"
+msgstr "پیش‌نمایش"
+
+msgid "Preview %s"
+msgstr "پیش‌نمایش %s"
+
+msgid "Preview state"
+msgstr "وضعیت پیش‌نمایش"
+
+msgid "Preview: %s"
+msgstr "پیش‌نمایش: %s"
+
+msgid "Previous month"
+msgstr "ماه قبل"
+
+msgid "Priority"
+msgstr "اولویت"
+
+msgid "Priority & conflicts"
+msgstr "اولویت و تداخل‌ها"
+
+msgid "Product"
+msgstr "محصول"
+
+msgid "Product pages"
+msgstr "صفحه‌های محصول"
+
+msgid "Product suggestions"
+msgstr "پیشنهادهای محصول"
+
+msgid "Products"
+msgstr "محصولات"
+
+msgid "Progress bar + message — the classic goal strip."
+msgstr "نوار پیشرفت + پیام — نوار کلاسیک هدف."
+
+msgid "Quantity"
+msgstr "تعداد"
+
+msgid "Reach a cart amount — subtotal, total or discounted subtotal."
+msgstr "رسیدن به یک مبلغ سبد — جمع فرعی، کل یا جمع فرعی پس از تخفیف."
+
+msgid "Reach a number of distinct products in the cart."
+msgstr "رسیدن به تعداد محصولات متمایز در سبد."
+
+msgid "Reach a total cart weight."
+msgstr "رسیدن به وزن کل سبد."
+
+msgid "Reach a total item quantity in the cart."
+msgstr "رسیدن به تعداد کل اقلام در سبد."
+
+msgid "Reach an amount or quantity across chosen categories."
+msgstr "رسیدن به مبلغ یا تعداد در دسته‌بندی‌های انتخاب‌شده."
+
+msgid "Reach an amount or quantity of specific products."
+msgstr "رسیدن به مبلغ یا تعداد محصولات مشخص."
+
+msgid "Remove"
+msgstr "حذف"
+
+msgid "Remove condition"
+msgstr "حذف شرط"
+
+msgid "Reset to defaults"
+msgstr "بازنشانی به پیش‌فرض"
+
+msgid "Restrictions and schedule for this goal."
+msgstr "محدودیت‌ها و زمان‌بندی این هدف."
+
+msgid "Revenue"
+msgstr "درآمد"
+
+msgid "Revenue influenced"
+msgstr "درآمد تأثیرپذیرفته"
+
+msgid "Reward"
+msgstr "پاداش"
+
+msgid "Reward label"
+msgstr "برچسب پاداش"
+
+msgid "Reward type"
+msgstr "نوع پاداش"
+
+msgid "Save appearance"
+msgstr "ذخیرهٔ ظاهر"
+
+msgid "Save changes"
+msgstr "ذخیرهٔ تغییرات"
+
+msgid "Save settings"
+msgstr "ذخیرهٔ تنظیمات"
+
+msgid "Saving…"
+msgstr "در حال ذخیره…"
+
+msgid "Schedule"
+msgstr "زمان‌بندی"
+
+msgid "Schedule & priority"
+msgstr "زمان‌بندی و اولویت"
+
+msgid "Search and select…"
+msgstr "جستجو و انتخاب…"
+
+msgid "Search goals"
+msgstr "جستجوی اهداف"
+
+msgid "Search…"
+msgstr "جستجو…"
+
+msgid "Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer goal evaluations, at the cost of a brief staleness window after cart changes."
+msgstr "ارائهٔ درخواست‌های مکرر ویجت از یک حافظهٔ موقت کوتاه‌مدت (۱۰ ثانیه) کلیدخورده با سبد — ارزیابی‌های هدف کمتر، با هزینهٔ یک پنجرهٔ کوتاه قدیمی شدن پس از تغییرات سبد."
+
+msgid "Settings"
+msgstr "تنظیمات"
+
+msgid "Settings saved."
+msgstr "تنظیمات ذخیره شد."
+
+msgid "Shop / archives"
+msgstr "فروشگاه / بایگانی"
+
+msgid "Show all goals"
+msgstr "نمایش همهٔ اهداف"
+
+msgid "Show on mobile"
+msgstr "نمایش در موبایل"
+
+msgid "Show recommended products that help reach the goal."
+msgstr "نمایش محصولات پیشنهادی که به رسیدن به هدف کمک می‌کنند."
+
+msgid "Show the closest goal only"
+msgstr "فقط نزدیک‌ترین هدف را نمایش بده"
+
+msgid "Show the first goal only"
+msgstr "فقط اولین هدف را نمایش بده"
+
+msgid "Shown to the customer (fee/coupon name)."
+msgstr "به مشتری نمایش داده می‌شود (نام کارمزد/کوپن)."
+
+msgid "Sidebar"
+msgstr "نوار کناری"
+
+msgid "Simulated cart amount"
+msgstr "مبلغ سبد شبیه‌سازی‌شده"
+
+msgid "Simulated quantity"
+msgstr "تعداد شبیه‌سازی‌شده"
+
+msgid "Simulated reward"
+msgstr "پاداش شبیه‌سازی‌شده"
+
+msgid "Skipped by a conflict"
+msgstr "ردشده به دلیل تداخل"
+
+msgid "Skipped — a higher-priority goal wins"
+msgstr "رد شد — هدف با اولویت بالاتر برنده می‌شود"
+
+msgid "Skipped — another reward is better"
+msgstr "رد شد — پاداش دیگری بهتر است"
+
+msgid "Skipped — lower priority"
+msgstr "رد شد — اولویت پایین‌تر"
+
+msgid "Slide the progress-bar fill on updates."
+msgstr "لغزش پر شدن نوار پیشرفت هنگام به‌روزرسانی."
+
+msgid "Smoothly slide the bar fill when the cart changes."
+msgstr "هنگام تغییر سبد، پر شدن نوار را نرم‌انه بلغزانید."
+
+msgid "Something went wrong"
+msgstr "مشکلی پیش آمد"
+
+msgid "Stack with other rewards?"
+msgstr "با پاداش‌های دیگر ترکیب شود؟"
+
+msgid "Starts at"
+msgstr "شروع در"
+
+msgid "Status"
+msgstr "وضعیت"
+
+msgid "Sticky bottom bar"
+msgstr "نوار پایین چسبان"
+
+msgid "Store-wide progress widget variant."
+msgstr "نسخهٔ ویجت پیشرفت در کل فروشگاه."
+
+msgid "Subtotal (before discounts)"
+msgstr "جمع فرعی (پیش از تخفیف‌ها)"
+
+msgid "Suggestion CTR"
+msgstr "نرخ کلیک پیشنهادها"
+
+msgid "Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {goal_name}."
+msgstr "از {current}، {target}، {remaining}، {percentage}، {quantity}، {reward} و {goal_name} پشتیبانی می‌کند."
+
+msgid "Symbol ($100)"
+msgstr "نماد ($100)"
+
+msgid "Tablet"
+msgstr "تبلت"
+
+msgid "Target"
+msgstr "هدف"
+
+msgid "Template"
+msgstr "الگو"
+
+msgid "Text"
+msgstr "متن"
+
+msgid "The campaign status was updated."
+msgstr "وضعیت کمپین به‌روزرسانی شد."
+
+msgid "The campaign was created."
+msgstr "کمپین ایجاد شد."
+
+msgid "The campaign was deleted."
+msgstr "کمپین حذف شد."
+
+msgid "The campaign was updated."
+msgstr "کمپین به‌روزرسانی شد."
+
+msgid "The discount never applies to these products."
+msgstr "این تخفیف هرگز روی این محصولات اعمال نمی‌شود."
+
+msgid "The goal status was updated."
+msgstr "وضعیت هدف به‌روزرسانی شد."
+
+msgid "The goal was created."
+msgstr "هدف ایجاد شد."
+
+msgid "The goal was deleted."
+msgstr "هدف حذف شد."
+
+msgid "The goal was updated."
+msgstr "هدف به‌روزرسانی شد."
+
+msgid "The identity and lifecycle of the campaign."
+msgstr "هویت و چرخهٔ حیات کمپین."
+
+msgid "The internal identity of the goal."
+msgstr "هویت داخلی هدف."
+
+msgid "The ordered goals of the campaign. Shoppers unlock each goal in order as their cart grows."
+msgstr "اهداف مرتب‌شدهٔ کمپین. مشتریان با رشد سبدشان هر هدف را به ترتیب باز می‌کنند."
+
+msgid "The page you are looking for does not exist."
+msgstr "صفحه‌ای که به دنبال آن هستید وجود ندارد."
+
+msgid "The plugin’s public actions and filters — a reference for theme and plugin developers."
+msgstr "اقدام‌ها و فیلترهای عمومی افزونه — مرجعی برای توسعه‌دهندگان قالب و افزونه."
+
+msgid "The product added to the cart as a gift."
+msgstr "محصولی که به‌عنوان هدیه به سبد اضافه می‌شود."
+
+msgid "The progress widget layout shown to customers on the cart, checkout and product pages."
+msgstr "چیدمان ویجت پیشرفت که در صفحات سبد خرید، تسویه‌حساب و محصول به مشتریان نمایش داده می‌شود."
+
+msgid "The threshold shoppers need to reach"
+msgstr "آستانه‌ای که مشتریان باید به آن برسند"
+
+msgid "The threshold shoppers need to reach."
+msgstr "آستانه‌ای که مشتریان باید به آن برسند."
+
+msgid "These products never count toward the goal, even when they would otherwise qualify."
+msgstr "این محصولات هرگز به سمت هدف محاسبه نمی‌شوند، حتی وقتی در غیر این صورت واجد شرایط باشند."
+
+msgid "Title"
+msgstr "عنوان"
+
+msgid "Today"
+msgstr "امروز"
+
+msgid "Toggle %s"
+msgstr "تغییر وضعیت %s"
+
+msgid "Top campaigns"
+msgstr "کمپین‌های برتر"
+
+msgid "Top campaigns by completions"
+msgstr "کمپین‌های برتر بر اساس تکمیل‌ها"
+
+msgid "Top goals"
+msgstr "اهداف برتر"
+
+msgid "Top suggested products"
+msgstr "محصولات پیشنهادی برتر"
+
+msgid "Total goals"
+msgstr "تعداد کل اهداف"
+
+msgid "Try again"
+msgstr "تلاش دوباره"
+
+msgid "Turn the storefront goals, rewards and progress bars on or off."
+msgstr "اهداف، پاداش‌ها و نوارهای پیشرفت فروشگاه را روشن یا خاموش کنید."
+
+msgid "Type"
+msgstr "نوع"
+
+msgid "Type or pick an existing coupon."
+msgstr "یک کوپن را تایپ کنید یا از بین کوپن‌های موجود انتخاب کنید."
+
+msgid "Unlocked"
+msgstr "فعال شد"
+
+msgid "Updating…"
+msgstr "در حال به‌روزرسانی…"
+
+msgid "User menu"
+msgstr "منوی کاربر"
+
+msgid "View store"
+msgstr "مشاهدهٔ فروشگاه"
+
+msgid "Weight"
+msgstr "وزن"
+
+msgid "What is Goal Cart?"
+msgstr "Goal Cart چیست؟"
+
+msgid "What the customer earns when the goal is reached."
+msgstr "آنچه مشتری با رسیدن به هدف به دست می‌آورد."
+
+msgid "What the goal measures."
+msgstr "آنچه هدف اندازه‌گیری می‌کند."
+
+msgid "When off, cart coupons and discounts do not reduce the discounted-subtotal basis."
+msgstr "وقتی خاموش است، کوپن‌ها و تخفیف‌های سبد، مبنای جمع فرعی پس از تخفیف را کاهش نمی‌دهند."
+
+msgid "When off, products currently on sale are excluded from every goal."
+msgstr "وقتی خاموش است، محصولات در حال حراج از همهٔ اهداف مستثنی می‌شوند."
+
+msgid "When off, virtual and downloadable products are excluded from every goal."
+msgstr "وقتی خاموش است، محصولات مجازی و قابل دانلود از همهٔ اهداف مستثنی می‌شوند."
+
+msgid "When on, shipping charges count toward the cart-total basis."
+msgstr "وقتی روشن است، هزینه‌های ارسال به سمت مبنای کل سبد محاسبه می‌شوند."
+
+msgid "When the campaign runs, and how it competes with other campaigns."
+msgstr "زمان اجرای کمپین و نحوهٔ رقابت آن با کمپین‌های دیگر."
+
+msgid "When this goal is reached, every lower-priority goal is skipped and never grants its reward. Higher-priority goals are unaffected."
+msgstr "وقتی این هدف محقق شود، همهٔ اهداف با اولویت پایین‌تر رد می‌شوند و هرگز پاداش خود را اعطا نمی‌کنند. اهداف با اولویت بالاتر تحت تأثیر قرار نمی‌گیرند."
+
+msgid "Where and how the storefront widgets appear."
+msgstr "کجا و چگونه ویجت‌های فروشگاه ظاهر می‌شوند."
+
+msgid "Whether the widgets render on small screens (≤782px)."
+msgstr "آیا ویجت‌ها در صفحه‌های کوچک (≤۷۸۲ پیکسل) نمایش داده می‌شوند."
+
+msgid "Which cart money counts toward goals. Defaults match the storefront behavior before these options existed."
+msgstr "کدام مبلغ سبد به سمت اهداف محاسبه می‌شود. پیش‌فرض‌ها با رفتار فروشگاه پیش از وجود این گزینه‌ها مطابقت دارند."
+
+msgid "Write detailed (debug-level) entries to the plugin log when logging is enabled."
+msgstr "وقتی ثبت گزارش فعال است، ورودی‌های دقیق (سطح اشکال‌زدایی) را در گزارش افزونه بنویسید."
+
+msgid "Write errors (and debug entries when debug mode is on) to a log file."
+msgstr "خطاها (و ورودی‌های اشکال‌زدایی وقتی حالت اشکال‌زدایی روشن است) را در یک فایل گزارش بنویسید."
+
+msgid "Yes (stack with other rewards)"
+msgstr "بله (ترکیب با پاداش‌های دیگر)"
+
+msgid "Yesterday"
+msgstr "دیروز"
+
+msgid "e.g. Free shipping over 500K"
+msgstr "مثلاً ارسال رایگان بالای ۵۰۰ هزار"
+
+msgid "e.g. Summer Sale"
+msgstr "مثلاً فروش تابستانی"
+
+msgid "e.g. Summer free shipping"
+msgstr "مثلاً ارسال رایگان تابستانی"
+
+msgid "e.g. 🎁 or a dashicon name"
+msgstr "مثلاً 🎁 یا نام یک آیکون dashicon"
+
+msgid "“%s” will be permanently deleted. Its goals are kept and detached — they can be reused by other campaigns."
+msgstr "«%s» برای همیشه حذف می‌شود. اهداف آن حفظ و جدا می‌شوند و می‌توانند توسط کمپین‌های دیگر استفاده شوند."
+
+msgid "“%s” will be permanently deleted. This cannot be undone."
+msgstr "«%s» برای همیشه حذف می‌شود. این عمل قابل بازگشت نیست."

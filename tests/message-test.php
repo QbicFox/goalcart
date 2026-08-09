@@ -16,6 +16,10 @@
  *  - template selection: per-state defaults + display_settings
  *    message/completed_message overrides, unknown placeholders untouched
  *
+ * Locale-independent: the suite forces en_US and unloads the goalcart
+ * domain so label/template assertions see the English source strings
+ * regardless of the site locale or any shipped goalcart-<locale>.mo.
+ *
  * Read-only like the other suites: no DB writes, no products, no cart.
  *
  * Run: php tests/message-test.php   (from the plugin directory)
@@ -70,6 +74,14 @@ function near( $a, $b, $eps = 0.001 ) {
 function goal( array $data ) {
 	return new Goal( $data );
 }
+
+// Force English assertions (the storefront strings are translated for the
+// site locale, which is fa_IR on this install). Switching to en_US and
+// unloading the domain keeps the checks deterministic: since WP 6.5 the
+// just-in-time loader short-circuits for unloaded domains, so __() falls
+// back to the source (English) strings.
+switch_to_locale( 'en_US' );
+unload_textdomain( 'goalcart' );
 
 $engine  = new MessageEngine();
 $version = \GoalCart\Plugin::instance()->container()->get( MessageEngine::class );
