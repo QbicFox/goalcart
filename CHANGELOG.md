@@ -63,6 +63,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Disabling a goal (or campaign) reset its untouched fields — the goal
+  amount was saved as 0.** The Goals/Campaigns list switches send a
+  partial update (`PUT` with only `{ status }`), but the update route
+  schemas declared defaults for every field and WP_REST_Server injects
+  those defaults into params the client did not send during
+  sanitization. `handle_update()` passes the full param set to the
+  repository, so a status-only toggle silently wrote `target = 0`,
+  `campaign_id = null`, `children = []`, `reward_meta/display_settings/limits
+  = []`, `priority = 10`, `exclusive = false`, `description = ''` and the
+  `status/type/calculation_mode/operator` defaults on top of the goal's
+  real values. The update arg schemas in `GoalsController::update_args()`
+  and `CampaignsController::update_args()` now strip every `default`, so
+  only the keys the client actually sent are ever written (the create
+  schemas keep their defaults). `tests/rest-api-test.php` gained
+  dispatched-PUT regression checks that toggle a goal/campaign/composite
+  goal as an admin and assert the untouched fields survive (142 checks).
 - **Saved settings sometimes did not show when opening the Settings page.**
   Three consumers shared the `['settings']` TanStack Query cache but
   disagreed on its shape: the Settings page cached the REST envelope

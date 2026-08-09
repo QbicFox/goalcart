@@ -535,6 +535,107 @@ try {
 	$resp = $goals_ctrl->handle_get( $req );
 	check( 'REST detail shows stored status', 'active' === $resp->get_data()['data']['status'] );
 	check( 'REST detail keeps campaign_id', $campaign_id === $resp->get_data()['data']['campaign_id'] );
+
+	// 5.15 Partial-update regression: a status-only toggle (exactly what
+	// the Goals/Campaigns list switches send) must NOT overwrite untouched
+	// fields. WP_REST_Server applies schema defaults to params the client
+	// did not send during sanitization, so a dispatched { status } toggle
+	// used to write target 0, campaign_id null, reward_type null, children
+	// [] … — the update schemas are default-free so only sent keys are
+	// written. Dispatched through the server (direct handler calls bypass
+	// sanitize_params and never saw the defaults).
+	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req->set_param( 'name', 'Toggle Regression Goal' );
+	$req->set_param( 'type', 'amount' );
+	$req->set_param( 'target', 1000 );
+	$req->set_param( 'reward_type', 'percent_discount' );
+	$req->set_param( 'reward_value', 10 );
+	$req->set_param( 'campaign_id', $campaign_id );
+	$resp = $goals_ctrl->handle_create( $req );
+	$toggle_id = (int) $resp->get_data()['data']['id'];
+	$created_ids[] = $toggle_id;
+	check( 'toggle regression goal created', $toggle_id > 0 );
+
+	$admin_id = wp_insert_user( array(
+		'user_login' => 'goalcart_toggle_admin_' . wp_rand( 1000, 9999 ),
+		'user_pass'  => 'test-pass',
+		'user_email' => 'goalcart-toggle-' . wp_rand( 1000, 9999 ) . '@example.test',
+		'role'       => 'administrator',
+	) );
+	check( 'toggle admin user created', ! is_wp_error( $admin_id ) && $admin_id > 0 );
+
+	wp_set_current_user( (int) $admin_id );
+
+	$req = new \WP_REST_Request( 'PUT', '/goalcart/v1/goals/' . $toggle_id );
+	$req->set_header( 'Content-Type', 'application/json' );
+	$req->set_body( wp_json_encode( array( 'status' => 'inactive' ) ) );
+	$resp = $server->dispatch( $req );
+	check( 'goal toggle dispatch succeeds (200)', 200 === $resp->get_status() );
+
+	$data = $resp->get_data()['data'];
+	check( 'goal toggle sets status inactive', 'inactive' === $data['status'] );
+	check( 'goal toggle keeps the target (regression: was 0)', near( 1000, $data['target'] ) );
+	check( 'goal toggle keeps the reward type', 'percent_discount' === $data['reward_type'] );
+	check( 'goal toggle keeps the campaign assignment', $campaign_id === $data['campaign_id'] );
+
+	$stored = $repo->get( $toggle_id );
+	check( 'goal toggle persisted status', 'inactive' === $stored['status'] );
+	check( 'goal toggle persisted target', near( 1000, (float) $stored['target'] ) );
+
+	wp_set_current_user( 0 );
+
+	// Campaign status toggle behaves the same way.
+	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/campaigns' );
+	$req->set_param( 'name', 'Toggle Regression Campaign' );
+	$req->set_param( 'description', 'Keep me' );
+	$req->set_param( 'priority', 7 );
+	$resp = $campaigns_ctrl->handle_create( $req );
+	$toggle_campaign_id = (int) $resp->get_data()['data']['id'];
+	$created_campaign_ids[] = $toggle_campaign_id;
+	check( 'toggle regression campaign created', $toggle_campaign_id > 0 );
+
+	wp_set_current_user( (int) $admin_id );
+
+	$req = new \WP_REST_Request( 'PUT', '/goalcart/v1/campaigns/' . $toggle_campaign_id );
+	$req->set_header( 'Content-Type', 'application/json' );
+	$req->set_body( wp_json_encode( array( 'status' => 'inactive' ) ) );
+	$resp = $server->dispatch( $req );
+	check( 'campaign toggle dispatch succeeds (200)', 200 === $resp->get_status() );
+
+	$data = $resp->get_data()['data'];
+	check( 'campaign toggle sets status inactive', 'inactive' === $data['status'] );
+	check( 'campaign toggle keeps description', 'Keep me' === $data['description'] );
+	check( 'campaign toggle keeps priority', 7 === $data['priority'] );
+
+	// Composite conditions are part of the same bug class: the schema
+	// default children => [] used to wipe them on a status toggle.
+	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req->set_param( 'name', 'Toggle Regression Composite' );
+	$req->set_param( 'type', 'composite' );
+	$req->set_param( 'target', 10 );
+	$req->set_param( 'operator', 'and' );
+	$req->set_param( 'children', array(
+		array( 'type' => 'amount', 'target' => 100, 'calculation_mode' => 'subtotal' ),
+		array( 'type' => 'quantity', 'target' => 4 ),
+	) );
+	$resp = $goals_ctrl->handle_create( $req );
+	$composite_id = (int) $resp->get_data()['data']['id'];
+	$created_ids[] = $composite_id;
+	check( 'composite regression goal created', $composite_id > 0 );
+
+	wp_set_current_user( (int) $admin_id );
+
+	$req = new \WP_REST_Request( 'PUT', '/goalcart/v1/goals/' . $composite_id );
+	$req->set_header( 'Content-Type', 'application/json' );
+	$req->set_body( wp_json_encode( array( 'status' => 'inactive' ) ) );
+	$resp = $server->dispatch( $req );
+	check( 'composite toggle dispatch succeeds (200)', 200 === $resp->get_status() );
+
+	$data = $resp->get_data()['data'];
+	check( 'composite toggle keeps operator', 'and' === $data['operator'] );
+	check( 'composite toggle keeps children', 2 === count( $data['children'] ) );
+
+	wp_set_current_user( 0 );
 } finally {
 	$wpdb->query( 'ROLLBACK' );
 }
@@ -563,6 +664,11 @@ check( 'no rolled-back campaign remains by name', 0 === $count );
 
 $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE name = %s", 'REST Test Goal' ) );
 check( 'no rolled-back goal remains by name', 0 === $count );
+
+if ( ! is_wp_error( $admin_id ?? 0 ) && ( $admin_id ?? 0 ) > 0 ) {
+	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->users} WHERE ID = %d", (int) $admin_id ) );
+	check( 'toggle admin user rolled back', 0 === $count );
+}
 
 $option_after = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $settings_option ) );
 check( 'settings option unchanged after rollback', $option_before === $option_after );

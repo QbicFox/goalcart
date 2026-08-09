@@ -495,10 +495,28 @@ class GoalsController extends BaseController {
 	/**
 	 * Arg schema for the update route (same fields, nothing required).
 	 *
+	 * Schema defaults are stripped on purpose: WP_REST_Server applies a
+	 * route arg's `default` to every param the client did not send during
+	 * sanitization (only non-null defaults), and handle_update() passes
+	 * the full param set to the repository. A status-only toggle (e.g. the
+	 * Goals list switch) would otherwise silently overwrite untouched
+	 * fields with their defaults — target → 0, campaign_id → null,
+	 * children → [], reward_meta/display_settings/limits → [], priority →
+	 * 10, exclusive → false, description → '', status → 'active',
+	 * type/calculation_mode/operator → their defaults. Keeping the update
+	 * schema default-free means only the keys the client actually sent
+	 * are ever written (the create schema keeps its defaults for omitted
+	 * optional fields).
+	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function update_args() {
 		$args = $this->save_args( false );
+
+		foreach ( $args as $key => $arg ) {
+			unset( $args[ $key ]['default'] );
+		}
+
 		$args['id'] = $this->id_args()['id'];
 
 		return $args;
