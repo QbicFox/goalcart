@@ -511,6 +511,73 @@ all pass (Settings ships as its own lazy chunk). No database changes.
 
 ---
 
+### Phase 22 — Security Hardening (100% complete)
+
+- **P22-T01 PHP** — Full audit of the PHP layer: nonce verification (the
+  public track route rejects a bad nonce with 403 — `wp_verify_nonce` on
+  `goalcart_track`; admin routes rely on WP core `wp_rest` cookie auth),
+  capability checks (`manage_options`, filterable via
+  `goalcart_rest_capability` / `goalcart_admin_capability`, on every admin
+  route and the admin menu), sanitization (REST arg schemas, repository
+  column sanitizers, and the recursive composite-children whitelist
+  `GoalsController::sanitize_children` — unknown keys dropped, strings
+  sanitized, ids positive-int-cast), escaping (widget container attributes,
+  admin page markup, inline config JSON), SQL parameterization (every
+  repository query `$wpdb->prepare`-bound), and safe serialization
+  (`wp_json_encode` only — no unsafe unserialize anywhere). New hardening:
+  `TrackController` now clamps `percentage` to 0–100 and `cart_value` to
+  ≥ 0 in the handler (defense-in-depth on top of the arg-schema ranges, so
+  direct-handler callers can never persist out-of-range values).
+- **P22-T02 REST** — Every `goalcart/v1` route carries a permission
+  callback (verified by iterating the registered routes); arg-schema
+  validation on the full request surface (enums, types, ranges, datetime /
+  campaign-existence validate callbacks); per-user rate limiting on admin
+  routes and per-IP rate limiting on the public routes, verified to 429
+  past the budget; the public `/progress` payload keeps the
+  data-minimization contract — `reward_meta` is redacted for guests, so
+  coupon codes, gift product ids and shipping restrictions never leave the
+  server (verified: the secret string never appears anywhere in the public
+  JSON while the admin detail payload still carries it).
+- **P22-T03 React** — Source scan of `admin-app/src` and the storefront
+  `assets/js/frontend.js` for `dangerouslySetInnerHTML`, `innerHTML`,
+  `document.write`, `insertAdjacentHTML`, `eval` and `new Function`: zero
+  violations. The render path is `createElement` + `textContent` only,
+  suggestion URLs pass the `isSafeUrl` scheme guard, external links carry
+  `rel="noreferrer"`, the API client authenticates with `X-WP-Nonce`, and
+  localStorage/JSON parsing is exception-guarded. `npm run typecheck`,
+  `npm run lint` and `npm run build` all pass.
+- **P22-T04 Database** — Prepared statements throughout: SQL-injection
+  payloads in the goal search/status filters neither error nor widen the
+  result set (verified), the analytics date-range clamp caps any trend
+  window at 366 days (a pathological 2000–2100 range is clamped), and a
+  schema-hygiene audit surfaced a real migration gap — **dbDelta cannot
+  add indexes to an existing table**, so the composite analytics keys
+  (`goal_event`, `campaign_event`) declared in the schema were missing on
+  upgraded installs. `Schema::indexes()` now centralizes the full index
+  set and `Installer::maybe_add_indexes()` applies any missing key
+  idempotently (INFORMATION_SCHEMA check + ALTER TABLE, the existing
+  foreign-key pattern); `GOALCART_DB_VERSION` bumped to `0.2.1` so
+  existing installs migrate once on upgrade. Index and foreign-key
+  presence is now verified against INFORMATION_SCHEMA.
+- Added files: `tests/security-test.php` (65 checks covering all four
+  P22 areas — route protection, nonce, rate limits, sanitization,
+  escaping, injection resistance, date-range clamp, schema indexes/FKs,
+  public-payload redaction, React/frontend source scan, rollback
+  hygiene).
+- **Verification:** `php -l` clean; new security suite 65/65; full
+  regression run — analytics-dashboard 82/82, analytics 72/72,
+  cart-integration 22/22, engine 75/75, frontend 73/73, message 47/47,
+  preview 90/90, rest-api 120/120, reward 72/72, settings 119/119,
+  suggestion 28/28, woocommerce-compatibility 29/29,
+  wordpress-compatibility 28/28 (all pass, zero failures); `node --check`
+  on the JS; `npm run typecheck`, `npm run lint` and `npm run build` all
+  pass. Database migration `0.2.1` (two composite indexes) applied
+  idempotently to the development database.
+
+**Overall project progress: 73%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 4% + Phase 15 2% + Phase 16 2% + Phase 17 2% + Phase 18 2% + Phase 19 2% + Phase 20 2% + Phase 21 1% + Phase 22 weight 3% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

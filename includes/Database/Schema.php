@@ -165,6 +165,64 @@ class Schema {
 	}
 
 	/**
+	 * Index definitions for every plugin table.
+	 *
+	 * dbDelta() creates indexes on NEW tables but CANNOT add an index to an
+	 * existing table, so any index declared after a table first shipped
+	 * (e.g. the analytics composite keys) must be applied by the installer
+	 * with ALTER TABLE — the same pattern as foreign_keys(). The set below
+	 * mirrors the CREATE TABLE statements exactly, so fresh installs get
+	 * their indexes from dbDelta and upgrades get the missing ones from
+	 * Installer::maybe_add_indexes().
+	 *
+	 * Note: this list and the KEY lines in create_statements() are two
+	 * views of the same index set — keep them in sync when adding or
+	 * removing an index (the installer skips keys that already exist by
+	 * name, so a divergence only surfaces as a missing index on upgraded
+	 * installs).
+	 *
+	 * P22 hardening (Database → indexed queries): every query path in the
+	 * repositories and the analytics layer is covered by an index (status /
+	 * type / campaign_id on goals, event_type / session_id / created_at on
+	 * the append-only event log, plus the goal_event and campaign_event
+	 * composite keys the dashboard aggregations group by).
+	 *
+	 * @return array<string, array<string, string[]>> Table => index name => columns.
+	 */
+	public static function indexes() {
+		$campaigns = self::table( 'campaigns' );
+		$goals     = self::table( 'goals' );
+		$events    = self::table( 'analytics_events' );
+
+		return array(
+			$campaigns => array(
+				'status'    => array( 'status' ),
+				'starts_at' => array( 'starts_at' ),
+				'ends_at'   => array( 'ends_at' ),
+			),
+			$goals => array(
+				'status'      => array( 'status' ),
+				'type'        => array( 'type' ),
+				'campaign_id' => array( 'campaign_id' ),
+				'priority'    => array( 'priority' ),
+				'starts_at'   => array( 'starts_at' ),
+				'ends_at'     => array( 'ends_at' ),
+			),
+			$events => array(
+				'goal_id'        => array( 'goal_id' ),
+				'campaign_id'    => array( 'campaign_id' ),
+				'event_type'     => array( 'event_type' ),
+				'session_id'     => array( 'session_id' ),
+				'product_id'     => array( 'product_id' ),
+				'order_id'       => array( 'order_id' ),
+				'created_at'     => array( 'created_at' ),
+				'goal_event'     => array( 'goal_id', 'event_type' ),
+				'campaign_event' => array( 'campaign_id', 'event_type' ),
+			),
+		);
+	}
+
+	/**
 	 * Foreign key definitions.
 	 *
 	 * dbDelta() cannot create foreign keys, so the installer adds them with

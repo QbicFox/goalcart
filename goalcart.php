@@ -60,8 +60,11 @@ if ( ! defined( 'GOALCART_DB_VERSION' ) ) {
 	/**
 	 * Database schema version. Bump this to trigger Installer migrations.
 	 * 0.2.0 = Phase 3: goals, campaigns and analytics_events tables.
+	 * 0.2.1 = Phase 22: composite analytics indexes (goal_event,
+	 *         campaign_event) — dbDelta cannot add indexes to existing
+	 *         tables, so Installer::maybe_add_indexes() applies them.
 	 */
-	define( 'GOALCART_DB_VERSION', '0.2.0' );
+	define( 'GOALCART_DB_VERSION', '0.2.1' );
 }
 
 // Load the Composer autoloader (PSR-4: GoalCart\ => includes/).

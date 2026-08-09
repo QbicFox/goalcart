@@ -121,7 +121,62 @@ class Installer {
 			dbDelta( $statement );
 		}
 
+		self::maybe_add_indexes();
 		self::maybe_add_foreign_keys();
+	}
+
+	/**
+	 * Add indexes that dbDelta cannot manage on existing tables.
+	 *
+	 * dbDelta() creates indexes only on NEW tables — it never adds an
+	 * index to a table that already exists (P22 hardening: the analytics
+	 * composite keys goal_event / campaign_event shipped after the table
+	 * first deployed, so upgrades would silently miss them). Each missing
+	 * index is added with ALTER TABLE after an INFORMATION_SCHEMA check,
+	 * making the operation safe to re-run on every activation/upgrade.
+	 *
+	 * @return void
+	 */
+	protected static function maybe_add_indexes() {
+		global $wpdb;
+
+		// Idempotency is name-based (same as maybe_add_foreign_keys): an
+		// index whose name already exists is assumed to be the one we want.
+		// Index names are plugin constants, so no two schema keys share a
+		// name with different column sets.
+		foreach ( Schema::indexes() as $table => $indexes ) {
+			$existing = $wpdb->get_col(
+				$wpdb->prepare(
+					'SELECT DISTINCT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s',
+					$wpdb->dbname,
+					$table
+				)
+			);
+
+			foreach ( $indexes as $name => $columns ) {
+				if ( in_array( $name, $existing, true ) ) {
+					continue;
+				}
+
+				$columns_sql = implode(
+					', ',
+					array_map(
+						function ( $column ) {
+							return '`' . $column . '`';
+						},
+						$columns
+					)
+				);
+
+				$wpdb->query( "ALTER TABLE `{$table}` ADD KEY `{$name}` ({$columns_sql})" );
+
+				if ( ! empty( $wpdb->last_error ) ) {
+					// Log the failure without blocking activation; missing
+					// indexes can be retried on the next upgrade.
+					error_log( 'Goal Cart: failed to add index ' . $name . ' on ' . $table . ': ' . $wpdb->last_error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				}
+			}
+		}
 	}
 
 	/**

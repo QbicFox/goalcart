@@ -1349,12 +1349,50 @@ Do not add dependencies solely for builder integration unless justified.
 Audit every layer.
 
 **Phase Weight:** 3%  
-**Phase Progress:** 0%  
-**Project Contribution:** 0.00%  
+**Phase Progress:** 100%  
+**Project Contribution:** 3.00%  
 
 ```text
-Phase 22: ░░░░░░░░░░░░░░░░░░░░ 0%
+Phase 22: ████████████████████ 100%
 ```
+
+## Audit Findings & Hardening
+
+All four areas were audited and verified end-to-end by the new
+`tests/security-test.php` suite (65 checks, all passing):
+
+- **P22-T01 PHP** — nonce verification (public track route rejects a bad
+  nonce with 403, admin routes rely on WP core `wp_rest` cookie auth),
+  capability checks (`manage_options`, filterable, on every admin route and
+  the menu), sanitization (REST arg schemas + repository column sanitizers +
+  the recursive composite-children whitelist `sanitize_children`),
+  escaping (widget container attributes, admin page markup, config JSON),
+  SQL parameterization (every repository query `$wpdb->prepare`-bound),
+  safe serialization (`wp_json_encode` only). The track handler now clamps
+  `percentage` (0–100) and `cart_value` (≥ 0) on top of the arg schema.
+- **P22-T02 REST** — every `goalcart/v1` route carries a permission
+  callback; arg-schema validation on the full request surface; per-user
+  (admin) and per-IP (public) rate limiting verified to 429 past the
+  budget; the public `/progress` payload redacts `reward_meta` (coupon
+  codes, gift product ids, shipping restrictions are never exposed to
+  guests — verified by test that the secret never appears in the JSON).
+- **P22-T03 React** — source scan of `admin-app/src` and the storefront JS
+  for `dangerouslySetInnerHTML` / `innerHTML` / `document.write` /
+  `insertAdjacentHTML` / `eval` / `new Function`: zero violations; the
+  render path is `createElement` + `textContent`, suggestion URLs pass an
+  `isSafeUrl` scheme guard, external links carry `rel="noreferrer"`, and
+  the API client authenticates with `X-WP-Nonce`. `npm run typecheck`,
+  `npm run lint` and `npm run build` all pass.
+- **P22-T04 Database** — prepared statements throughout (injection payloads
+  neither error nor widen results — verified), the analytics date-range
+  clamp caps any trend window at 366 days, and the schema hygiene audit
+  found that **dbDelta cannot add indexes to existing tables**: the
+  composite analytics keys (`goal_event`, `campaign_event`) declared in the
+  schema were missing on upgraded installs. `Schema::indexes()` now
+  centralizes the index set and `Installer::maybe_add_indexes()` applies
+  missing keys idempotently (the foreign-key pattern); DB version bumped to
+  `0.2.1`. Index and FK presence are now verified against
+  INFORMATION_SCHEMA in the test.
 
 ## PHP
 
@@ -1966,10 +2004,10 @@ This is the authoritative task-level progress register. Each task is represented
 | P18-T05 | 18 | Advanced | 20.00% | [x] | 100% | 0.40% |
 | P19-T01 | 19 | Must Test | 50.00% | [x] | 100% | 1.00% |
 | P19-T02 | 19 | Important | 50.00% | [x] | 100% | 1.00% |
-| P22-T01 | 22 | PHP | 25.00% | [ ] | 0% | 0.00% |
-| P22-T02 | 22 | REST | 25.00% | [ ] | 0% | 0.00% |
-| P22-T03 | 22 | React | 25.00% | [ ] | 0% | 0.00% |
-| P22-T04 | 22 | Database | 25.00% | [ ] | 0% | 0.00% |
+| P22-T01 | 22 | PHP | 25.00% | [x] | 100% | 0.75% |
+| P22-T02 | 22 | REST | 25.00% | [x] | 100% | 0.75% |
+| P22-T03 | 22 | React | 25.00% | [x] | 100% | 0.75% |
+| P22-T04 | 22 | Database | 25.00% | [x] | 100% | 0.75% |
 | P23-T01 | 23 | Frontend | 33.33% | [ ] | 0% | 0.00% |
 | P23-T02 | 23 | WooCommerce Frontend | 33.33% | [ ] | 0% | 0.00% |
 | P23-T03 | 23 | Admin | 33.33% | [ ] | 0% | 0.00% |
@@ -2038,7 +2076,7 @@ Use this compact dashboard during development:
 | 19 | 2% | 100% | 2.00% |
 | 20 | 2% | 100% | 2.00% |
 | 21 | 1% | 100% | 1.00% |
-| 22 | 3% | 0% | 0.00% |
+| 22 | 3% | 100% | 3.00% |
 | 23 | 3% | 0% | 0.00% |
 | 24 | 4% | 0% | 0.00% |
 | 25 | 2% | 0% | 0.00% |
@@ -2052,7 +2090,7 @@ Use this compact dashboard during development:
 | 33 | 3% | 0% | 0.00% |
 | 34 | 2% | 0% | 0.00% |
 | 35 | 1% | 0% | 0.00% |
-| **TOTAL** | **100%** | **70%** | **70.00%** |
+| **TOTAL** | **100%** | **73%** | **73.00%** |
 
 
 # Phase Completion Rule

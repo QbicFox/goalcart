@@ -220,7 +220,12 @@ class TrackController extends BaseController {
 			$session_id = $this->tracker->get_session_id();
 		}
 
-		$percentage = round( (float) $request->get_param( 'percentage' ), 2 );
+		// P22 hardening: the numeric event fields are clamped here in the
+		// handler (in addition to the arg-schema ranges) so direct-handler
+		// callers and any future dispatch path can never persist
+		// out-of-range values — percentage is a 0–100 progress readout and
+		// cart_value a non-negative money amount.
+		$percentage = round( min( 100.0, max( 0.0, (float) $request->get_param( 'percentage' ) ) ), 2 );
 
 		// percentage is only meaningful on goal_progress; keep the meta JSON
 		// clean (no spurious keys) for every other event type.
@@ -236,7 +241,7 @@ class TrackController extends BaseController {
 				'goal_id'     => (int) $request->get_param( 'goal_id' ),
 				'campaign_id' => (int) $request->get_param( 'campaign_id' ),
 				'product_id'  => (int) $request->get_param( 'product_id' ),
-				'cart_value'  => (float) $request->get_param( 'cart_value' ),
+				'cart_value'  => max( 0.0, (float) $request->get_param( 'cart_value' ) ),
 				'session_id'  => $session_id,
 				'meta'        => $meta,
 			)
