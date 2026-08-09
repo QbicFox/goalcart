@@ -63,6 +63,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **The analytics dashboard showed "No analytics yet" even with recorded
+  events.** The date filter built `created_at <= 'YYYY-MM-DD'` with the
+  raw date-only `to` bound; MySQL casts a bare date to midnight, so every
+  event recorded on the `to` day was excluded. Because the default range
+  ends today (last 30 days), all of today's activity silently vanished
+  and the page rendered the empty state. `AnalyticsRepository::clauses()`
+  now widens date-only bounds to the full day (`00:00:00` / `23:59:59`)
+  via the same `day_bounds_start()` / `day_bounds_end()` helpers the
+  trend query already used — summary KPIs and top lists now include the
+  `to` day. `tests/analytics-dashboard-test.php` gained today-inclusive
+  range checks.
 - **Disabling a goal (or campaign) reset its untouched fields — the goal
   amount was saved as 0.** The Goals/Campaigns list switches send a
   partial update (`PUT` with only `{ status }`), but the update route

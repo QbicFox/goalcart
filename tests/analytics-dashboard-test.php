@@ -398,6 +398,24 @@ try {
 	$summary = $resp->get_data()['data']['summary'];
 	check( 'product filter CTR', near( 0.5, $summary['suggestion_ctr'] ) );
 
+	// Today-inclusive date bound (regression): a date-only `to` must cover
+	// the whole `to` day. MySQL casts a bare 'YYYY-MM-DD' to midnight, so
+	// events recorded on the `to` day were silently dropped and the
+	// dashboard showed "No analytics yet" whenever the range ended on a
+	// day with events (e.g. the default last-30-days window ending today).
+	// Bounds are >= the seeded counts: the analytics table may also hold
+	// live storefront events recorded on the same day (the suite otherwise
+	// assumes a clean table), and every one of them is excluded by the bug.
+	$today = current_time( 'Y-m-d' );
+	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req->set_param( 'from', $today );
+	$req->set_param( 'to', $today );
+	$resp = $analytics_ctrl->handle_get( $req );
+	$summary = $resp->get_data()['data']['summary'];
+	check( 'today range includes today impressions (regression: was 0)', (int) $summary['impressions'] >= 4 );
+	check( 'today range includes today completions', (int) $summary['completions'] >= 2 );
+	check( 'today range trend covers one day', 1 === count( $resp->get_data()['data']['trend'] ) );
+
 	$tomorrow = date( 'Y-m-d', strtotime( current_time( 'mysql' ) ) + DAY_IN_SECONDS );
 	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
 	$req->set_param( 'from', $tomorrow );

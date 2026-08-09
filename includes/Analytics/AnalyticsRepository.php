@@ -515,14 +515,19 @@ final class AnalyticsRepository {
 			$values[]  = $event_type;
 		}
 
+		// Date-only bounds are widened to the full day (00:00:00 / 23:59:59)
+		// so the `to` day is inclusive: a bare 'YYYY-MM-DD' would be cast by
+		// MySQL to midnight, silently dropping every event recorded on the
+		// `to` day (the dashboard's default "last 30 days" ends today).
+		// trend() applies the same widening via day_bounds_start/end.
 		if ( ! empty( $filters['from'] ) && $this->valid_datetime( $filters['from'] ) ) {
 			$clauses[] = $col( 'created_at' ) . ' >= %s';
-			$values[]  = $filters['from'];
+			$values[]  = $this->day_bounds_start( $filters['from'] );
 		}
 
 		if ( ! empty( $filters['to'] ) && $this->valid_datetime( $filters['to'] ) ) {
 			$clauses[] = $col( 'created_at' ) . ' <= %s';
-			$values[]  = $filters['to'];
+			$values[]  = $this->day_bounds_end( $filters['to'] );
 		}
 
 		if ( isset( $filters['campaign_id'] ) && (int) $filters['campaign_id'] > 0 ) {
