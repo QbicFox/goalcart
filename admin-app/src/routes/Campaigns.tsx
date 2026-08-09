@@ -66,10 +66,13 @@ export default function Campaigns() {
     queryKey: ['campaigns'],
     queryFn: fetchCampaigns,
   });
-
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ['campaigns'] });
     void queryClient.invalidateQueries({ queryKey: ['goals'] });
+    // A toggled/duplicated/deleted campaign must not linger in the
+    // detail cache — reopening the builder within the 60 s stale window
+    // would otherwise show the pre-mutation values.
+    void queryClient.invalidateQueries({ queryKey: ['campaign'] });
   };
 
   const deleteMutation = useMutation({

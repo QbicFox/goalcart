@@ -63,6 +63,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Admin builders showed the pre-save values after editing a goal or
+  campaign.** The Goal/Campaign builder detail queries (`['goal', id]`
+  / `['campaign', id]`) were never invalidated after a save — only the
+  list queries (`['goals']` / `['campaigns']`) were — so with the
+  client's 60 s stale window, reopening a just-edited goal or campaign
+  served the cached pre-save row and the form loaded the old settings.
+  The builders now invalidate their detail query on save, and the
+  Goals/Campaigns list mutations (enable/disable, duplicate, delete)
+  invalidate the matching detail prefix too, so a reopened builder
+  always refetches the current row. `tests/rest-api-test.php` already
+  proves the update endpoints return the fresh row (120/120).
 - **Storefront money labels showed raw HTML entity text instead of the
   currency symbol — “&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;1.000.000”
   instead of “تومان 1.000.000”.** WooCommerce ships the IRT symbol as an

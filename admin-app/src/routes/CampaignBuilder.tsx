@@ -123,6 +123,12 @@ export default function CampaignBuilder() {
       );
       void queryClient.invalidateQueries({ queryKey: ['campaigns'] });
       void queryClient.invalidateQueries({ queryKey: ['goals'] });
+      // The detail cache must not serve the pre-save campaign when the
+      // builder is reopened (the list invalidate above only matches
+      // ['campaigns'], not the ['campaign', id] detail query).
+      if (editId !== null) {
+        void queryClient.invalidateQueries({ queryKey: ['campaign', editId] });
+      }
       navigate('/campaigns');
     },
     onError: (error: Error) => {

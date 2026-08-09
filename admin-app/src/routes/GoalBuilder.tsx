@@ -118,7 +118,6 @@ export default function GoalBuilder() {
       setValues(goalToInput(goalQuery.data));
     }
   }, [goalQuery.data]);
-
   const saveMutation = useMutation({
     mutationFn: (input: GoalInput) => (editId ? updateGoal(editId, input) : createGoal(input)),
     onSuccess: () => {
@@ -126,6 +125,12 @@ export default function GoalBuilder() {
         editId ? __('The goal was updated.', 'goalcart') : __('The goal was created.', 'goalcart')
       );
       void queryClient.invalidateQueries({ queryKey: ['goals'] });
+      // The detail cache must not serve the pre-save goal when the
+      // builder is reopened (the list invalidate above only matches
+      // ['goals', …], not the ['goal', id] detail query).
+      if (editId !== null) {
+        void queryClient.invalidateQueries({ queryKey: ['goal', editId] });
+      }
       navigate('/goals');
     },
     onError: (error: Error) => {
@@ -331,7 +336,9 @@ export default function GoalBuilder() {
               sx={{ maxWidth: 220 }}
               value={values.priority}
               helperText={__('Lower numbers win conflicts.', 'goalcart')}
-              onChange={(event) => patch({ priority: Math.max(0, Number(event.target.value) || 0) })}
+              onChange={(event) =>
+                patch({ priority: Math.max(0, Number(event.target.value) || 0) })
+              }
             />
             <FormControlLabel
               control={

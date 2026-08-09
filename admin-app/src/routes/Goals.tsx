@@ -130,8 +130,13 @@ export default function Goals() {
     queryFn: () =>
       fetchGoals({ page: page + 1, per_page: perPage, status, search: debouncedSearch }),
   });
-
-  const invalidate = () => void queryClient.invalidateQueries({ queryKey: ['goals'] });
+  const invalidate = () => {
+    void queryClient.invalidateQueries({ queryKey: ['goals'] });
+    // A toggled/duplicated/deleted goal must not linger in the detail
+    // cache — reopening the builder within the 60 s stale window would
+    // otherwise show the pre-mutation values.
+    void queryClient.invalidateQueries({ queryKey: ['goal'] });
+  };
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteGoal(id),
