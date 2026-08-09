@@ -63,6 +63,37 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Storefront money labels showed raw HTML entity text instead of the
+  currency symbol — “&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;1.000.000”
+  instead of “تومان 1.000.000”.** WooCommerce ships the IRT symbol as an
+  HTML entity in its currency table, and the plugin's plain-text money
+  formatter stripped the `wc_price` markup with `wp_strip_all_tags`
+  without decoding the remaining entities; the payload strings are
+  inserted into the DOM via `textContent`, so the literal entity text
+  was visible to shoppers. `MessageEngine::format_number()` (progress
+  messages, reward labels) and `SuggestionEngine::shape()` (suggestion
+  `price_html`) now decode the stripped markup with
+  `html_entity_decode(…, ENT_QUOTES, 'UTF-8')`, and the money
+  expectation helper in `tests/message-test.php` mirrors the same
+  pipeline.
+- **Storefront progress stayed frozen after an AJAX add-to-cart — the
+  widget never reflected the added item.** The AJAX request only
+  persists the WooCommerce session on PHP `shutdown`, after its
+  response has been flushed to the browser; a poll fired straight from
+  WooCommerce's `added_to_cart` event could race that write and read
+  the previous cart. Because the widget is event-driven (the poll
+  interval defaults to off), a lost race left the bar and message
+  stale until the next cart event. Cart events now poll twice —
+  immediately and once more after 600 ms
+  (`refreshAfterCartChange()` in `assets/js/frontend.js`) — so the
+  follow-up poll lands after the session write and the widgets settle on
+  the persisted cart under normal load; the several cart events WooCommerce
+  fires per mutation are coalesced into a single follow-up poll, and the
+  extra request is cheap because unchanged payloads are skipped by the
+  Phase 23 fingerprint check.
+  Verified against the real WooCommerce 11.0.0 session flow
+  (poll-before-save sees an empty cart, poll-after-save sees the item)
+  and with a simulated DOM run of the cart-event binding.
 - **Storefront analytics went quiet after a cached page or long-lived
   tab — every `/track` report failed with `goalcart_invalid_nonce`
   (403).** The tracking nonce is baked into the page HTML and is only

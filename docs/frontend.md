@@ -83,6 +83,18 @@ when present (WooCommerce fires these as jQuery events) with a native
 `CustomEvent` fallback — plus an optional poll interval from the config
 (`goalcart_frontend_refresh_interval` filter, seconds).
 
+Cart events poll **twice: immediately, and once more after 600 ms**
+(`refreshAfterCartChange()`). The AJAX request that fired the event only
+persists the WooCommerce session on PHP `shutdown` — after its response
+has been flushed to the browser — so a poll fired straight from the
+event can race that write and read the previous cart, freezing the
+widgets on stale progress until the next event. The follow-up poll lands
+after the write, so the widgets settle on the persisted cart under
+normal load; the extra request is cheap because unchanged payloads are
+skipped by the fingerprint check (Phase 23), and the several cart events
+WooCommerce fires per mutation (`added_to_cart`, `wc_fragments_refreshed`,
+`updated_cart_totals`, …) are coalesced into a single follow-up poll.
+
 Every fetch is **cache-busted with a `?_=<timestamp>` parameter**: the
 guest `/progress` payload carries no `Cache-Control` header (WP core only
 sends nocache headers for cookie-authenticated requests), so a bare GET
@@ -324,7 +336,10 @@ The widget's **SuggestionList** is served by
 goal and shipped in the `/progress` payload as `goal.suggestions` — the
 widget renders each item's name + server-formatted price
 (`price_html`, falling back to the raw price for hand-built payloads)
-linked to the product.
+linked to the product. Money labels are plain text: the `wc_price`
+markup is stripped **and** its HTML entities decoded (WooCommerce ships
+symbols like the IRT "تومان" as an entity), so the label never shows raw
+entity text.
 
 ## Sources
 

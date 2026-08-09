@@ -975,6 +975,39 @@
 		} );
 	}
 
+	// Coalesces the 600 ms follow-up poll: WooCommerce fires several cart
+	// events per mutation (added_to_cart, then wc_fragments_refreshed,
+	// then updated_cart_totals …), so only one trailing re-poll should
+	// survive each burst.
+	var cartRefreshTimer = null;
+
+	/**
+	 * Refresh after a WooCommerce cart mutation.
+	 *
+	 * The AJAX request that triggered the cart event only persists the
+	 * session on PHP shutdown — after its response has been flushed to
+	 * the browser. A poll fired straight from the event can therefore
+	 * race that write and read the previous cart, leaving the widgets
+	 * frozen on stale progress until the next cart event. Refresh
+	 * immediately AND once more once the write has had time to land, so
+	 * the widgets settle on the persisted cart. The extra poll is cheap:
+	 * unchanged payloads are skipped by the fingerprint check, and rapid
+	 * successive events collapse into a single follow-up.
+	 *
+	 * @return {void}
+	 */
+	function refreshAfterCartChange() {
+		refresh();
+
+		if ( cartRefreshTimer ) {
+			window.clearTimeout( cartRefreshTimer );
+		}
+		cartRefreshTimer = window.setTimeout( function () {
+			cartRefreshTimer = null;
+			refresh();
+		}, 600 );
+	}
+
 	/**
 	 * Bind the WooCommerce cart-update events.
 	 *
@@ -997,11 +1030,11 @@
 
 		if ( window.jQuery ) {
 			safe( function () {
-				window.jQuery( document.body ).on( events.join( ' ' ), refresh );
+				window.jQuery( document.body ).on( events.join( ' ' ), refreshAfterCartChange );
 			} );
 		} else {
 			for ( var i = 0; i < events.length; i++ ) {
-				document.body.addEventListener( events[ i ], refresh );
+				document.body.addEventListener( events[ i ], refreshAfterCartChange );
 			}
 		}
 	}

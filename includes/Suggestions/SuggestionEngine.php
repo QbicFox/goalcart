@@ -367,6 +367,11 @@ final class SuggestionEngine {
 	/**
 	 * Shape a product into the payload item.
 	 *
+	 * The price label is plain text — the storefront inserts it via
+	 * `textContent` — so the stripped `wc_price` markup has its entities
+	 * decoded too (WooCommerce ships the IRT "\u062A\u0648\u0645\u0627\u0646"
+	 * symbol as an entity, which would otherwise render literally).
+	 *
 	 * @param \WC_Product $product Product.
 	 * @param string      $source  Source key.
 	 * @return array<string, mixed>
@@ -380,7 +385,11 @@ final class SuggestionEngine {
 			'permalink'    => $product->get_permalink(),
 			'price'        => '' !== $price ? (float) $price : null,
 			'price_html'   => '' !== $price && function_exists( 'wc_price' )
-				? wp_strip_all_tags( wc_price( (float) $price ) )
+				? html_entity_decode(
+					wp_strip_all_tags( wc_price( (float) $price ) ),
+					ENT_QUOTES,
+					'UTF-8'
+				)
 				: '',
 			'image'        => $this->image_url( $product ),
 			'stock_status' => $product->get_stock_status(),

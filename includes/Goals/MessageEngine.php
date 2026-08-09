@@ -323,13 +323,26 @@ final class MessageEngine {
 	/**
 	 * Format a number: currency when money, plain locale number otherwise.
 	 *
+	 * Money values use `wc_price` so the store's price format, position
+	 * and currency symbol apply. The result is plain text (messages and
+	 * reward labels are inserted into the DOM via `textContent`, never
+	 * parsed as HTML), so the symbol's markup must be stripped AND its
+	 * entities decoded — WooCommerce ships symbols like the IRT
+	 * "\u062A\u0648\u0645\u0627\u0646" as an HTML entity
+	 * (`&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;`), which would otherwise
+	 * render to the shopper as literal entity text.
+	 *
 	 * @param float  $value   Number.
 	 * @param bool   $is_money Whether to format as currency.
 	 * @return string
 	 */
 	protected function format_number( $value, $is_money ) {
 		if ( $is_money && function_exists( 'wc_price' ) ) {
-			return wp_strip_all_tags( wc_price( (float) $value ) );
+			return html_entity_decode(
+				wp_strip_all_tags( wc_price( (float) $value ) ),
+				ENT_QUOTES,
+				'UTF-8'
+			);
 		}
 
 		// Currency without WooCommerce: 2 decimals, locale-aware.

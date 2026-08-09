@@ -209,6 +209,12 @@ $wpdb->query( 'START TRANSACTION' );	try {
 	$first = $items[0];
 	check( 'item carries id/name/permalink', isset( $first['id'], $first['name'], $first['permalink'] ) );
 	check( 'item carries price + price_html', isset( $first['price'], $first['price_html'] ) && '' !== $first['price_html'] );
+
+	// The price label is plain text with the currency symbol's HTML
+	// entities decoded (WooCommerce ships the IRT "تومان" symbol as an
+	// entity) — a raw "&#x062A;…" would show literally to shoppers.
+	check( 'price label has no raw entity text', false === strpos( (string) $first['price_html'], '&#' ) );
+
 	check( 'item carries source + stock_status', isset( $first['source'], $first['stock_status'] ) );
 	check( 'upsell item tagged with source', $p_e === (int) $items[0]['id'] && SuggestionEngine::SOURCE_UPSELL === $items[0]['source'] );
 

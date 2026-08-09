@@ -144,10 +144,12 @@ $r = new GoalResult( $g, 40, 100 );
 $vars = $engine->variables( $g, $r, array( 'quantity' => 2 ) );
 
 // Money expectations are computed with the same wc_price formatter the
-// engine uses, so the suite passes under any store currency/locale.
+// engine uses (including its entity decoding — WooCommerce ships symbols
+// like the IRT "تومان" as an HTML entity), so the suite passes under any
+// store currency/locale.
 $money = function ( $value ) {
 	return function_exists( 'wc_price' )
-		? wp_strip_all_tags( wc_price( (float) $value ) )
+		? html_entity_decode( wp_strip_all_tags( wc_price( (float) $value ) ), ENT_QUOTES, 'UTF-8' )
 		: (string) number_format_i18n( (float) $value, 2 );
 };
 
@@ -160,6 +162,22 @@ check( 'remaining_quantity renders 0 for money goals', '0' === $vars['remaining_
 check( 'reward label value-aware', '10% discount' === $vars['reward'] );
 check( 'goal_name variable', 'Free shipping' === $vars['goal_name'] );
 check( 'campaign_name empty when standalone', '' === $vars['campaign_name'] );
+
+// Entity decoding: WooCommerce ships the IRT "تومان" symbol as an HTML
+// entity, and the plain-text money formatter must decode it — a literal
+// "&#x062A;…" in the payload would show to shoppers (the widget inserts
+// it via textContent). A test-only symbol filter makes the assertion
+// deterministic under any store currency.
+$irt_symbol = function () {
+	return '&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;';
+};
+add_filter( 'woocommerce_currency_symbol', $irt_symbol );
+$irt_vars = $engine->variables( $g, $r );
+remove_filter( 'woocommerce_currency_symbol', $irt_symbol );
+
+check( 'entity currency symbol decoded to plain text', false !== strpos( $irt_vars['remaining'], 'تومان' ) );
+check( 'no raw entity text in money output', false === strpos( $irt_vars['remaining'], '&#' ) );
+check( 'no raw &nbsp; in money output', false === strpos( $irt_vars['remaining'], '&nbsp;' ) );
 
 // Quantity-mode goal: quantity/remaining_quantity fall back to current/remaining.
 $gq = goal( array( 'type' => Goal::TYPE_QUANTITY, 'target' => 10, 'name' => 'Ten items', 'calculation_mode' => Goal::MODE_QUANTITY ) );
