@@ -78,10 +78,41 @@ No private or version-locked WooCommerce properties, tables, or methods are
 relied on. The compatibility suite pins the public-hook wiring so a WooCommerce
 update that breaks a supported API fails the test before a shopper sees it.
 
-## 6. Test Command
+## 6. WordPress / PHP Support Matrix (P20)
+
+The exact version contract is pinned in the plugin header
+(`goalcart.php`) and enforced by `includes/Compatibility.php`:
+
+| Component | Minimum | Tested | Enforced by |
+|---|---|---|---|
+| WordPress | 6.3 | 7.0 | `Compatibility::REQUIRED_WP` — version gate on `plugins_loaded` |
+| PHP | 7.4 | 8.4 | `Compatibility::REQUIRED_PHP` — version gate on `plugins_loaded` |
+| WooCommerce | 8.0 | 11.0 | `Compatibility::REQUIRED_WC` — version gate on `plugins_loaded` |
+
+When any requirement fails the plugin stops booting its admin UI, shows a
+single admin notice listing exactly what is missing, and never registers
+REST routes or storefront widgets (`Admin::register_menu()` gate).
+
+- **Multisite** — supported. All tables use `$wpdb->prefix` per site
+  (`Schema::table()`), schema version + settings live in per-site
+  WordPress options, and analytics sessions are per-site.
+- **Localization** — translatable via the `goalcart` text domain
+  (`load_plugin_textdomain` on `init`, domain path `/languages`); every
+  PHP string uses `__()`/`_e()` with the domain.
+- **RTL** — the admin dashboard mount sets an explicit `dir` attribute
+  from `is_rtl()` and the storefront config exposes `isRtl` to widgets.
+- **Admin capabilities** — menu and REST endpoints default to
+  `manage_options`, both filterable (`goalcart_admin_capability`,
+  `goalcart_rest_capability`).
+- **Activation / deactivation** — `Installer::activate` /
+  `Installer::deactivate` are registered on the WP hooks; upgrades run
+  via `Installer::maybe_upgrade` on every load.
+
+## 7. Test Command
 
 ```bash
 php tests/woocommerce-compatibility-test.php   # P19 matrix (29 checks)
+php tests/wordpress-compatibility-test.php     # P20 matrix (28 checks)
 php tests/frontend-test.php                    # widget injection incl. blocks
 php tests/cart-integration-test.php            # lifecycle + caching
 ```

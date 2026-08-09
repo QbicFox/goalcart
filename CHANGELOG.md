@@ -27,6 +27,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   shipping methods, guest and logged-in contexts, and the HPOS
   (`custom_order_tables`) feature declaration. `docs/compatibility.md`
   documents the support matrix and the public hook/API contract.
+- **WordPress compatibility test suite (P20)** —
+  `tests/wordpress-compatibility-test.php` verifies the Phase 20 checklist
+  against the installed stack: WordPress / PHP / WooCommerce version gates,
+  the plugin header contract (`Requires at least`, `Requires PHP`, `WC
+  requires at least`, `Text Domain`, `Domain Path`), activation/deactivation
+  hook wiring, multisite-safe per-site table prefix and options, localization
+  (text domain on `init`), RTL (admin dashboard `dir` attribute + storefront
+  `isRtl`), and the filterable admin/REST capabilities. The WordPress/PHP
+  support matrix is documented in `docs/compatibility.md` §6.
 
 ### Fixed
 
