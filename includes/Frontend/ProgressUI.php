@@ -41,7 +41,9 @@ defined( 'ABSPATH' ) || exit;
  * Master toggle: the `enabled` setting gates everything, overridable with
  * the `goalcart_frontend_enabled` filter. The per-location set is
  * filterable via `goalcart_frontend_locations` (Phase 18 wires the
- * frontend settings to it).
+ * frontend settings to it). Logged-in site admins browsing the
+ * storefront do not see the shopper-facing widgets by default
+ * (`is_visible_to_user()`, filterable via `goalcart_frontend_visible_to_user`).
  */
 final class ProgressUI {
 
@@ -247,16 +249,41 @@ final class ProgressUI {
 	}
 
 	/**
-	 * Whether the frontend progress UI is enabled.
+	 * Whether the frontend progress UI is enabled for the current visitor.
 	 *
 	 * Master toggle = the `enabled` setting, overridable with the
 	 * `goalcart_frontend_enabled` filter (reference `is_tracking_allowed()`
-	 * convention).
+	 * convention). A logged-in site admin browsing the storefront is
+	 * additionally hidden from the shopper-facing widgets by default —
+	 * see `is_visible_to_user()`.
 	 *
 	 * @return bool
 	 */
 	public function is_enabled() {
-		return (bool) apply_filters( 'goalcart_frontend_enabled', $this->settings->get( 'enabled', true ) );
+		$enabled = (bool) apply_filters( 'goalcart_frontend_enabled', $this->settings->get( 'enabled', true ) );
+
+		return $enabled && $this->is_visible_to_user();
+	}
+
+	/**
+	 * Whether the current user should see the storefront progress widgets.
+	 *
+	 * Shopper-facing widgets are hidden from logged-in site admins by
+	 * default so staff browsing or testing the storefront never see the
+	 * customer funnel (progress bars, rewards, suggestions, sticky bar).
+	 * "Admin" is the same capability the admin menu uses
+	 * (`goalcart_admin_capability` filter, default `manage_options`), so
+	 * every user who can administer the plugin is treated as staff. The
+	 * whole decision is filterable with `goalcart_frontend_visible_to_user`
+	 * (e.g. hide for every logged-in user, or for shop managers too).
+	 *
+	 * @return bool
+	 */
+	public function is_visible_to_user() {
+		$capability = (string) apply_filters( 'goalcart_admin_capability', 'manage_options' );
+		$visible    = ! ( is_user_logged_in() && current_user_can( $capability ) );
+
+		return (bool) apply_filters( 'goalcart_frontend_visible_to_user', $visible );
 	}
 
 	/**

@@ -63,6 +63,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Storefront progress widgets were shown to logged-in admins browsing
+  their own shop.** The widget layer only gated on `is_admin()` (the
+  admin *area*) and the `enabled` setting — a site administrator
+  visiting the cart, checkout or shop saw the same shopper-facing
+  progress bars, rewards and sticky bar as customers.
+  `ProgressUI::is_enabled()` now also consults a new
+  `is_visible_to_user()` gate: logged-in users with the
+  `goalcart_admin_capability` capability (default `manage_options` — the
+  same capability as the admin menu, so every user who can administer
+  the plugin is treated as staff) no longer get the containers, config,
+  assets or sticky bar. The whole decision is filterable via the new
+  `goalcart_frontend_visible_to_user` filter (e.g. hide for every
+  logged-in user). `tests/frontend-test.php` gained transactional admin
+  checks; docs/frontend.md documents the gate.
 - **Admin builders showed the pre-save values after editing a goal or
   campaign.** The Goal/Campaign builder detail queries (`['goal', id]`
   / `['campaign', id]`) were never invalidated after a save — only the

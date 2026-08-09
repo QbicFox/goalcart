@@ -244,6 +244,61 @@ check( 'goalcart_frontend_enabled filter overrides', false === $ui->is_enabled()
 remove_filter( 'goalcart_frontend_enabled', '__return_false' );
 check( 'filter removal restores enabled', true === $ui->is_enabled() );
 
+// Shopper-facing widgets are hidden from logged-in site admins browsing
+// the storefront (staff testing their own shop shouldn't see the
+// customer funnel). An administrator is created inside a transaction so
+// the check is deterministic on any install; the user + usermeta rows
+// are rolled back afterwards. A fresh ProgressUI instance is used for
+// the location render so the duplicate-render guard (already tripped on
+// the shared instance) cannot mask the result.
+$wpdb = $GLOBALS['wpdb'];
+$wpdb->query( 'START TRANSACTION' );
+
+$admin_id = null;
+
+try {
+	$admin_id = wp_insert_user( array(
+		'user_login' => 'goalcart_admin_visibility_test',
+		'user_pass'  => wp_generate_password(),
+		'user_email' => 'goalcart-admin-visibility@example.test',
+		'role'       => 'administrator',
+	) );
+
+	check( 'admin test user created', ! is_wp_error( $admin_id ) && $admin_id > 0 );
+
+	if ( ! is_wp_error( $admin_id ) && $admin_id > 0 ) {
+		$previous_user = get_current_user_id();
+		wp_set_current_user( (int) $admin_id );
+
+		check( 'logged-in admin does not see the UI', false === $ui->is_enabled() );
+		check( 'admin shortcode renders nothing', '' === do_shortcode( '[goalcart_progress]' ) );
+
+		$fresh_ui = new \GoalCart\Frontend\ProgressUI( $settings );
+		ob_start();
+		$fresh_ui->render_cart_widget();
+		$admin_out = ob_get_clean();
+		check( 'admin widget locations render nothing', '' === $admin_out );
+
+		// The visibility decision is filterable (e.g. hide for every
+		// logged-in user, or for shop managers too).
+		add_filter( 'goalcart_frontend_visible_to_user', '__return_true' );
+		check( 'visibility filter forces the UI back on', true === $ui->is_enabled() );
+		remove_filter( 'goalcart_frontend_visible_to_user', '__return_true' );
+
+		wp_set_current_user( $previous_user );
+	}
+} finally {
+	$wpdb->query( 'ROLLBACK' );
+}
+
+if ( $admin_id && ! is_wp_error( $admin_id ) ) {
+	wp_cache_flush();
+}
+
+// Pin the toggle so the guest assertion is deterministic on its own (the
+// stored option may hold a non-default value), then restore.
+$settings->set( 'enabled', true );
+check( 'guest visitor sees the UI again', true === $ui->is_enabled() );
 $settings->set( 'enabled', $enabled_before );
 
 // ---------------------------------------------------------------------------

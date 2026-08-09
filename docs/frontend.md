@@ -106,7 +106,17 @@ layers are asserted by `tests/frontend-test.php`.
 
 ## Gate & configuration
 
-- **Master toggle:** the `enabled` setting (filter `goalcart_frontend_enabled`).
+- **Master toggle:** the `enabled` setting (filter
+  `goalcart_frontend_enabled`) — the staff-visibility gate below applies
+  on top of it, so the filter alone cannot reveal widgets to a logged-in
+  admin.
+- **Staff visibility:** logged-in site admins browsing the storefront do
+  not see the shopper-facing widgets by default
+  (`ProgressUI::is_visible_to_user()` — "admin" means the
+  `goalcart_admin_capability` capability, default `manage_options`, so
+  whoever can administer the plugin is treated as staff). The whole
+  decision is filterable via `goalcart_frontend_visible_to_user` — e.g.
+  hide the widgets from every logged-in user, or from shop managers too.
 - **Locations:** the `frontend_locations` setting (Phase 18) drives where
   the widgets mount — the cart / mini-cart / checkout / shop / product
   containers plus the sticky bar are all gated on the configured set
