@@ -248,7 +248,8 @@ class PreviewController extends BaseController {
 				$goal,
 				$result,
 				$context,
-				array( 'quantity' => $context->total_quantity() )
+				array( 'quantity' => $context->total_quantity() ),
+				true // Admin preview: expose the full reward meta (manage_options-gated).
 			);
 		}
 

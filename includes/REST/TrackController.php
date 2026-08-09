@@ -134,9 +134,20 @@ class TrackController extends BaseController {
 						'maximum' => 100,
 					),
 					'session_id' => array(
-						'type'    => 'string',
-						'default' => '',
-					),
+					'type'              => 'string',
+					'default'           => '',
+					// Optional: empty means "no session"; when provided it
+					// must match the anonymous 32-hex session format
+					// (defense-in-depth on top of the handler check).
+					'validate_callback' => function ( $value ) {
+						if ( '' === (string) $value ) {
+							return true;
+						}
+
+						return \GoalCart\Analytics\Session::is_valid( $value );
+					},
+					'sanitize_callback' => 'sanitize_text_field',
+				),
 					'nonce'      => array(
 						'required' => true,
 						'type'     => 'string',

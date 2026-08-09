@@ -407,11 +407,18 @@ class GoalsController extends BaseController {
 				'enum'    => array( Goal::OP_AND, Goal::OP_OR ),
 			),
 			'children'          => array(
-				'type'  => 'array',
-				'items' => array(
+				'type'              => 'array',
+				'default'           => array(),
+				'items'             => array(
 					'type'                 => 'object',
 					'additionalProperties' => true,
 				),
+				// P22 hardening: children are Goal payloads persisted into
+				// the conditions JSON; the schema itself is intentionally
+				// open (a child is itself a Goal), so a sanitize_callback
+				// whitelists the keys recursively and casts every value to
+				// its safe scalar type before the payload reaches the DB.
+				'sanitize_callback' => array( $this, 'sanitize_children' ),
 			),
 			'priority'          => array(
 				'type'    => 'integer',
@@ -515,6 +522,76 @@ class GoalsController extends BaseController {
 		);
 
 		return (int) $exists > 0;
+	}
+
+	/**
+	 * Whitelist-and-cast composite children (P22 hardening).
+	 *
+	 * Children are nested Goal payloads persisted into the conditions
+	 * JSON. Each child is filtered through an explicit scalar whitelist so
+	 * arbitrary admin-supplied key/values can never reach the database
+	 * verbatim: unknown keys are dropped, strings are sanitized, money is
+	 * float-cast, ids are positive ints, and nested `children` recurse
+	 * through the same rule.
+	 *
+	 * @param mixed $value Raw children array.
+	 * @return array[] Sanitized children.
+	 */
+	public function sanitize_children( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$scalar = array(
+			'name'             => 'sanitize_text_field',
+			'status'           => 'sanitize_key',
+			'type'             => 'sanitize_key',
+			'calculation_mode' => 'sanitize_key',
+			'operator'         => 'sanitize_key',
+		);
+
+		$float = array( 'target', 'reward_value', 'reward_max_value' );
+		$ints  = array( 'categories', 'products', 'excluded_products' );
+
+		$clean = array();
+
+		foreach ( $value as $child ) {
+			if ( ! is_array( $child ) ) {
+				continue;
+			}
+
+			$node = array();
+
+			foreach ( $scalar as $key => $sanitize ) {
+				if ( array_key_exists( $key, $child ) ) {
+					$node[ $key ] = call_user_func( $sanitize, (string) $child[ $key ] );
+				}
+			}
+
+			foreach ( $float as $key ) {
+				if ( array_key_exists( $key, $child ) ) {
+					$node[ $key ] = (float) $child[ $key ];
+				}
+			}
+
+			foreach ( $ints as $key ) {
+				if ( isset( $child[ $key ] ) && is_array( $child[ $key ] ) ) {
+					$node[ $key ] = array_values(
+						array_filter( array_map( 'intval', $child[ $key ] ), function ( $id ) {
+							return $id > 0;
+						} )
+					);
+				}
+			}
+
+			if ( array_key_exists( 'children', $child ) ) {
+				$node['children'] = $this->sanitize_children( $child['children'] );
+			}
+
+			$clean[] = $node;
+		}
+
+		return $clean;
 	}
 
 	/**

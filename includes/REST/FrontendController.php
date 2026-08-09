@@ -298,7 +298,7 @@ class FrontendController extends BaseController {
 	 *                             remaining_quantity, campaign_name).
 	 * @return array<string, mixed>
 	 */
-	public function shape_goal( Goal $goal, GoalResult $result, CartContext $context, array $extra = array() ) {
+	public function shape_goal( Goal $goal, GoalResult $result, CartContext $context, array $extra = array(), $full_reward_meta = false ) {
 		return array(
 			'goal_id'      => $goal->id(),
 			'campaign_id'  => $goal->campaign_id(),
@@ -314,7 +314,7 @@ class FrontendController extends BaseController {
 			'completed'    => $result->completed(),
 			'state'        => $this->messages->state( $goal, $result ),
 			'message'      => $this->messages->message( $goal, $result, $extra ),
-			'reward'       => $this->reward( $goal ),
+			'reward'       => $this->reward( $goal, ! $full_reward_meta ),
 			'suggestions'  => $this->suggestions_on() ? $this->suggestions->suggest( $goal, $result, $context ) : array(),
 			'reward_state' => $result->reward_state(),
 			'eligible'     => $result->eligible(),
@@ -392,23 +392,39 @@ class FrontendController extends BaseController {
 	/**
 	 * The goal's reward summary for the frontend.
 	 *
-	 * Null when the goal has no reward configured; otherwise the flat
-	 * reward fields (the frontend mirrors the reward offer regardless of
-	 * lock state).
+	 * P22 hardening: the PUBLIC `/goalcart/v1/progress` payload carries only
+	 * the reward offer the widget needs to render (type, value, max_value).
+	 * The full configuration — including configured coupon codes, the
+	 * deterministic generated-coupon code, gift product ids, eligible /
+	 * excluded product and category lists, and shipping restrictions — is
+	 * deliberately NOT exposed: any visitor could otherwise harvest those
+	 * secrets at `wp-json/goalcart/v1/progress` without authentication and
+	 * redeem a coupon reward before its goal is completed.
+	 *
+	 * The admin PreviewController shapes the same goal but may pass
+	 * `$private_meta = true` (it is manage_options-gated), so the admin
+	 * preview can still reflect the configured reward meta.
 	 *
 	 * @param Goal $goal Goal.
+	 * @param bool $redact_meta Whether the meta must be stripped. Default
+	 *                          true (public endpoint contract).
 	 * @return array<string, mixed>|null
 	 */
-	protected function reward( Goal $goal ) {
+	protected function reward( Goal $goal, $redact_meta = true ) {
 		if ( empty( $goal->reward_type() ) ) {
 			return null;
 		}
 
-		return array(
+		$reward = array(
 			'type'      => $goal->reward_type(),
 			'value'     => $goal->reward_value(),
 			'max_value' => $goal->reward_max_value(),
-			'meta'      => $goal->reward_meta(),
 		);
+
+		if ( ! $redact_meta ) {
+			$reward['meta'] = $goal->reward_meta();
+		}
+
+		return $reward;
 	}
 }

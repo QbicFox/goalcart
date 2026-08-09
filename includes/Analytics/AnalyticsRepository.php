@@ -567,19 +567,57 @@ final class AnalyticsRepository {
 	}
 
 	/**
+	 * Maximum spread between the from/to bounds, in seconds.
+	 *
+	 * P22 hardening: the dashboard trend loops day-by-day over the window,
+	 * so an unbounded admin-supplied range (e.g. 1990 → 2100) would loop
+	 * tens of thousands of times. The default_range() clamp below keeps
+	 * every trend query to at most one year of daily buckets (366 days).
+	 *
+	 * @var int
+	 */
+	const MAX_RANGE_SECONDS = 366 * DAY_IN_SECONDS;
+
+	/**
 	 * Fill in the default window: the last 30 days when no valid bounds
-	 * were supplied (mirrors the reference dashboard's default range).
+	 * were supplied (mirrors the reference dashboard's default range), and
+	 * cap the span at MAX_RANGE_SECONDS so a request can never force a
+	 * pathological day-by-day loop in trend().
 	 *
 	 * @param array<string, mixed> $filters Filters.
 	 * @return array<string, mixed>
 	 */
 	protected function default_range( array $filters ) {
+		$now = strtotime( current_time( 'mysql' ) );
+
 		if ( empty( $filters['from'] ) || ! $this->valid_datetime( $filters['from'] ) ) {
-			$filters['from'] = date( 'Y-m-d', strtotime( current_time( 'mysql' ) ) - 29 * DAY_IN_SECONDS );
+			$filters['from'] = date( 'Y-m-d', strtotime( $now ) - 29 * DAY_IN_SECONDS );
 		}
 
 		if ( empty( $filters['to'] ) || ! $this->valid_datetime( $filters['to'] ) ) {
 			$filters['to'] = current_time( 'Y-m-d' );
+		}
+
+		$from_ts = strtotime( (string) $filters['from'] );
+		$to_ts   = strtotime( (string) $filters['to'] );
+
+		if ( false === $from_ts || false === $to_ts ) {
+			return $filters;
+		}
+
+		if ( $to_ts < $from_ts ) {
+			// Backwards range: swap so the query always returns a valid,
+			// ordered window instead of an empty/pathological result.
+			$filters['from'] = date( 'Y-m-d', $to_ts );
+			$filters['to']   = date( 'Y-m-d', $from_ts );
+			$from_ts         = $to_ts;
+			$to_ts           = strtotime( $filters['from'] );
+		}
+
+		if ( ( $to_ts - $from_ts ) > self::MAX_RANGE_SECONDS ) {
+			// Clamp by pushing `from` forward, keeping the requested end
+			// date (the dashboard's natural read: "give me up to here").
+			$filters['from'] = date( 'Y-m-d', $to_ts - self::MAX_RANGE_SECONDS );
 		}
 
 		return $filters;

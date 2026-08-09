@@ -157,7 +157,9 @@ class Schema {
 				KEY session_id (session_id),
 				KEY product_id (product_id),
 				KEY order_id (order_id),
-				KEY created_at (created_at)
+				KEY created_at (created_at),
+				KEY goal_event (goal_id, event_type),
+				KEY campaign_event (campaign_id, event_type)
 			) ENGINE=InnoDB {$collate};",
 		);
 	}
