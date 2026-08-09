@@ -108,11 +108,30 @@ REST routes or storefront widgets (`Admin::register_menu()` gate).
   `Installer::deactivate` are registered on the WP hooks; upgrades run
   via `Installer::maybe_upgrade` on every load.
 
-## 7. Test Command
+## 7. Page Builder & Block Compatibility (P21)
+
+Priority order per roadmap: Gutenberg, WooCommerce Blocks, Elementor, Bricks.
+No dependencies are added for builder integration — every integration below
+reuses the plugin's public shortcode, `render_block` filter, or server-side
+block registration (Phase 21).
+
+| Builder | Integration | Mechanism |
+|---|---|---|
+| **Gutenberg** | `goalcart/progress` block | Server-side `register_block_type()` (api version 2, widgets category), attributes `variant` (full/compact) + `template`; renders the same widget container as the shortcode. Assets auto-load on pages carrying the block (`has_block()` in `ProgressUI::page_needs_widget()`). |
+| **WooCommerce Blocks** | Cart / Checkout / Mini Cart blocks | `render_block` filter appends the widget after `woocommerce/cart`, `woocommerce/checkout` (full) and `woocommerce/mini-cart` (compact) — Phase 19. |
+| **Elementor** | Shortcode element | Drop `[goalcart_progress variant="full"]` into any Elementor shortcode widget; Elementor renders WP shortcodes on the frontend. |
+| **Bricks** | Shortcode element | Same `[goalcart_progress ...]` shortcode works inside a Bricks shortcode element. |
+
+The classic WooCommerce template actions (`woocommerce_before_cart`, …)
+still cover stores that do not use a page builder; the shortcode and the
+block cover every other placement without the store having to switch
+templates.
+
+## 8. Test Command
 
 ```bash
 php tests/woocommerce-compatibility-test.php   # P19 matrix (29 checks)
 php tests/wordpress-compatibility-test.php     # P20 matrix (28 checks)
-php tests/frontend-test.php                    # widget injection incl. blocks
+php tests/frontend-test.php                    # widget injection incl. blocks + Gutenberg block
 php tests/cart-integration-test.php            # lifecycle + caching
 ```

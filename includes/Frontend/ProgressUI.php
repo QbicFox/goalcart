@@ -53,6 +53,20 @@ final class ProgressUI {
 	const SHORTCODE = 'goalcart_progress';
 
 	/**
+	 * Gutenberg block name rendered server-side (Phase 21).
+	 *
+	 * The block renders the same progress widget as the shortcode via a
+	 * render callback, so Gutenberg/Block Editor users can drop the widget
+	 * into any content without a JS block editor build. The admin-app build
+	 * is untouched: no new dependency, matching the reference plugin's
+	 * asset convention (widgets are server-rendered containers filled by
+	 * the existing storefront JS).
+	 *
+	 * @var string
+	 */
+	const BLOCK = 'goalcart/progress';
+
+	/**
 	 * Asset handle for the frontend JS/CSS.
 	 *
 	 * @var string
@@ -104,8 +118,11 @@ final class ProgressUI {
 	 */
 	public function register( HookManager $hooks ) {
 		// Shortcode registration must wait for 'init' (add_shortcode runs
-		// safely from init onward; the_content is always after init).
+		// safely from init onward; the_content is always after init). The
+		// Gutenberg block registers the same init sequencing via
+		// register_block_type (Phase 21).
 		$hooks->add_action( 'init', array( $this, 'register_shortcode' ) );
+		$hooks->add_action( 'init', array( $this, 'register_block' ) );
 
 		// Assets only load on pages that can actually show a widget.
 		$hooks->add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -142,6 +159,91 @@ final class ProgressUI {
 	 */
 	public function register_shortcode() {
 		add_shortcode( self::SHORTCODE, array( $this, 'shortcode' ) );
+	}
+
+	/**
+	 * Register the Gutenberg `goalcart/progress` block (Phase 21).
+	 *
+	 * Server-rendered via render_block_type(): the Block Editor inserts a
+	 * goalcart/progress block and the render callback below outputs the
+	 * same empty widget container the shortcode emits, which the shared
+	 * storefront JS fills. No JS block editor build, no new dependency —
+	 * consistent with the reference plugin's server-rendered widget
+	 * convention.
+	 *
+	 * @return void
+	 */
+	public function register_block() {
+		if ( ! function_exists( 'register_block_type' ) ) {
+			return; // Gutenberg not available.
+		}
+
+		if ( class_exists( 'WP_Block_Type_Registry' ) && \WP_Block_Type_Registry::get_instance()->is_registered( self::BLOCK ) ) {
+			return; // Already registered (repeat init passes / test harness).
+		}
+
+		register_block_type(
+			self::BLOCK,
+			array(
+				'api_version'     => 2,
+				'title'           => __( 'Goal Cart Progress', 'goalcart' ),
+				'category'        => 'widgets',
+				'icon'            => 'cart',
+				'description'     => __( 'Show cart goals, progress and rewards (Goal Cart).', 'goalcart' ),
+				'keywords'        => array( 'goal', 'cart', 'progress', 'aov' ),
+				'supports'        => array(
+					'anchor'     => true,
+					'align'      => true,
+					'html'       => false,
+					'reusable'   => true,
+				),
+				'attributes'      => array(
+					'variant'  => array(
+						'type'    => 'string',
+						'default' => 'full',
+						'enum'    => array( 'full', 'compact' ),
+					),
+					'template' => array(
+						'type'    => 'string',
+						'default' => '',
+					),
+				),
+				'example'         => array(
+					'attributes' => array( 'variant' => 'full' ),
+				),
+				'render_callback' => array( $this, 'render_progress_block' ),
+			)
+		);
+	}
+
+	/**
+	 * Render the `goalcart/progress` block (Phase 21).
+	 *
+	 * Same contract as the shortcode: an inert, uniquely-id'd widget
+	 * container the storefront JS mounts. Block ids share the shortcode
+	 * counter so every container on the page (shortcodes, location
+	 * injections and blocks alike) stays unique.
+	 *
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return string
+	 */
+	public function render_progress_block( $attributes, $content = '' ) {
+		if ( is_admin() || ! $this->is_enabled() ) {
+			return '';
+		}
+
+		$attributes = shortcode_atts(
+			array(
+				'variant'  => 'full',
+				'template' => '',
+			),
+			is_array( $attributes ) ? $attributes : array(),
+			self::BLOCK
+		);
+
+		$this->shortcode_index++;
+
+		return $this->widget_container( 'goalcart-block-' . $this->shortcode_index, $attributes['variant'], $attributes['template'] );
 	}
 
 	/**
@@ -634,7 +736,15 @@ final class ProgressUI {
 
 		$post = get_post();
 
-		return $post instanceof \WP_Post && has_shortcode( $post->post_content, self::SHORTCODE );
+		if ( ! $post instanceof \WP_Post ) {
+			return false;
+		}
+
+		// Direct shortcode in the content, or a Gutenberg page that embeds
+		// the goalcart/progress block (Phase 21) — the block renders
+		// server-side, so the storefront assets must load on the page.
+		return has_shortcode( $post->post_content, self::SHORTCODE )
+			|| ( function_exists( 'has_block' ) && has_block( self::BLOCK, $post ) );
 	}
 
 	/**

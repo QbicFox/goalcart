@@ -37,6 +37,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   `isRtl`), and the filterable admin/REST capabilities. The WordPress/PHP
   support matrix is documented in `docs/compatibility.md` §6.
 
+- **Gutenberg block (P21)** — the progress widget is now available as a
+  native Gutenberg block, `goalcart/progress` (api version 2, widgets
+  category), registered server-side via `register_block_type()` with no JS
+  editor build and no new dependency. Attributes `variant` (full/compact)
+  and `template` map to the shortcode contract; the block renders the same
+  inert widget container the storefront JS mounts, and
+  `ProgressUI::page_needs_widget()` auto-loads the storefront assets on any
+  page carrying the block (`has_block()`). Elementor and Bricks are covered
+  through their shortcode elements (`[goalcart_progress ...]`), consistent
+  with the roadmap priority: Gutenberg → WooCommerce Blocks (Phase 19) →
+  Elementor → Bricks. Documented in `docs/compatibility.md` §7.
+
 ### Fixed
 
 - **Per-goal display template now reaches the storefront** — the goal

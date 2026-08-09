@@ -349,6 +349,68 @@ $out = $guard_ui->render_block_widget( '<p>late</p>', array( 'blockName' => 'woo
 check( 'duplicate-guard suppresses the second mini-cart widget', '<p>late</p>' === $out );
 
 // ---------------------------------------------------------------------------
+// 10. Gutenberg block (P21 — goalcart/progress)
+// ---------------------------------------------------------------------------
+echo "\n== 10. Gutenberg block ==\n";
+
+$ui->register_block();
+
+check(
+	'block type registered',
+	class_exists( 'WP_Block_Type_Registry' ) && \WP_Block_Type_Registry::get_instance()->is_registered( \GoalCart\Frontend\ProgressUI::BLOCK )
+);
+
+$block_type = class_exists( 'WP_Block_Type_Registry' ) ? \WP_Block_Type_Registry::get_instance()->get_registered( \GoalCart\Frontend\ProgressUI::BLOCK ) : null;
+
+if ( $block_type ) {
+	check( 'block has a render callback', is_callable( $block_type->render_callback ) );
+	check( 'block api version 2', isset( $block_type->api_version ) && 2 === (int) $block_type->api_version );
+
+	$block_out = call_user_func( $block_type->render_callback, array( 'variant' => 'compact' ), '' );
+	check( 'block renders a widget container', false !== strpos( $block_out, 'data-goalcart-widget' ) );
+	check( 'block container is compact', false !== strpos( $block_out, 'data-goalcart-variant="compact"' ) );
+	check( 'block container id is unique', preg_match( '/id="goalcart-block-\d+"/', $block_out ) === 1 );
+	check( 'block template attr passes through', false === strpos( $block_out, 'data-goalcart-template' ) );
+
+	$block_out = call_user_func( $block_type->render_callback, array( 'variant' => 'full', 'template' => 'card' ), '' );
+	check( 'block template override lands on container', false !== strpos( $block_out, 'data-goalcart-template="card"' ) );
+	check( 'repeated block ids stay unique', preg_match( '/id="goalcart-block-(\d+)"/', $block_out, $m ) === 1 && $m[1] !== '1' );
+
+	// A page carrying the block needs the storefront assets.
+	$ref_block = new \ReflectionMethod( $ui, 'page_needs_widget' );
+	$ref_block->setAccessible( true );
+
+	$wpdb = $GLOBALS['wpdb'];
+	$wpdb->query( 'START TRANSACTION' );
+
+	try {
+		$post_id = wp_insert_post( array(
+			'post_type'    => 'post',
+			'post_status'  => 'publish',
+			'post_title'   => 'Goal Cart block test',
+			'post_content' => '<!-- wp:goalcart/progress {"variant":"compact"} /-->',
+		), true );
+
+		check( 'block post inserted', ! is_wp_error( $post_id ) && $post_id > 0 );
+
+		$previous_post = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+		$GLOBALS['post'] = get_post( $post_id );
+
+		check( 'block page detected for assets', true === $ref_block->invoke( $ui ) );
+
+		$GLOBALS['post'] = $previous_post;
+	} finally {
+		$wpdb->query( 'ROLLBACK' );
+	}
+
+	if ( isset( $post_id ) && ! is_wp_error( $post_id ) ) {
+		clean_post_cache( $post_id );
+	}
+} else {
+	echo "SKIP Gutenberg block checks (block registry unavailable)\n";
+}
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 echo "\n==========================================\n";
