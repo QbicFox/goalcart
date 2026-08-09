@@ -86,8 +86,14 @@ when present (WooCommerce fires these as jQuery events) with a native
 ## Gate & configuration
 
 - **Master toggle:** the `enabled` setting (filter `goalcart_frontend_enabled`).
-- **Locations:** filter `goalcart_frontend_locations` (Phase 18 wires the
-  settings UI to it).
+- **Locations:** the `frontend_locations` setting (Phase 18) drives where
+  the widgets mount — the cart / mini-cart / checkout / shop / product
+  containers plus the sticky bar are all gated on the configured set
+  (filter `goalcart_frontend_locations`); dropping `sticky` from the list
+  disables the sticky bar entirely.
+- **Mobile behavior:** the `frontend_mobile` setting (`show` | `hide`,
+  Phase 18) — when `hide`, the JS adds a `goalcart-mobile-hidden` class
+  to every container and the CSS hides the widgets under 600 px.
 - **Template:** the `frontend_template` setting, overridable per widget
   with the shortcode `template` attribute and globally with the
   `goalcart_frontend_template` filter.
@@ -97,7 +103,9 @@ when present (WooCommerce fires these as jQuery events) with a native
   `currency`, `isRtl`, `labels` — printed as `window.goalcartFrontend` at
   `wp_footer` priority 5, before the enqueued footer script. Phase 12 adds
   `template` (active variant), `animation` and `appearance` (resolved
-  tokens). The Phase 16 Tracker prints a second object,
+  tokens); Phase 18 adds `currencyDisplay` (`symbol` | `code` | `name` —
+  the widget's amount formatter uses it) and `mobile` (`show` | `hide`).
+  The Phase 16 Tracker prints a second object,
   `window.goalcartTracking`, at priority 4 (see “Analytics Events”).
 - Assets load only on pages that can render a widget (cart / checkout /
   shop / product / a page containing the shortcode) via
@@ -529,7 +537,35 @@ it.
 | CampaignBuilder | — | 10 (Campaign Builder, `/campaigns/new` + `/campaigns/:id/edit`) |
 | Analytics | full dashboard: date-range + campaign/goal/reward/product filters, 7 KPI cards, daily trend chart, top campaigns / top goals / top suggested products | 17 (Analytics Dashboard) |
 | Appearance | full: template picker (live thumbnails), colors, bar height/radius sliders, animation switch, custom class + custom CSS, live preview, reset-to-defaults | 12 (Progress Templates) |
-| Settings | functional: enabled + fullscreen toggles (react-hook-form) | 18 (full surface) |
+| Settings | full: General / Frontend / Goal Calculation / Performance / Advanced five-tab form (react-hook-form) | 18 (Settings) |
+
+## Settings Page (Phase 18)
+
+The `/settings` page is now the full five-tab settings surface
+(`GoalCart\REST\SettingsController`, see `docs/api.md` §2.2), built with
+react-hook-form + zod-less schema validation and saved through `POST
+/goalcart/v1/settings`:
+
+- **General** — master enable/disable, full-screen dashboard, currency
+  display (`symbol` | `code` | `name`), default goal behavior (`all` |
+  `first` | `closest`) and the store-wide default calculation mode
+  (`subtotal` | `discounted_subtotal` | `total`).
+- **Frontend** — display locations (checkbox chips for cart / mini-cart /
+  checkout / shop / product / sticky), mobile behavior (`show` | `hide`),
+  template, animation and the bar-height / color / radius / CSS surface
+  shared with the Appearance page.
+- **Goal Calculation** — five inclusion toggles: tax, discount,
+  shipping, sale items and virtual items (each default preserves the
+  pre-Phase-18 engine behavior; see `docs/goal-engine.md`).
+- **Performance** — progress caching (10 s transient), analytics
+  tracking and product suggestions toggles.
+- **Advanced** — debug mode, file logging (with the live log path shown
+  when enabled) and the developer-hooks switch plus the documented
+  `goalcart_*` hooks reference rendered from the settings meta.
+
+Every change is validated by the REST schema and normalized by the
+sanitizer before persisting; saving identical settings is a successful
+no-op.
 
 ## Analytics Dashboard (Phase 17)
 

@@ -15,6 +15,7 @@ use GoalCart\Goals\GoalRepository;
 use GoalCart\Goals\GoalResult;
 use GoalCart\Goals\MessageEngine;
 use GoalCart\Hooks\HookManager;
+use GoalCart\Settings\Settings;
 use GoalCart\Suggestions\SuggestionEngine;
 
 defined( 'ABSPATH' ) || exit;
@@ -84,6 +85,20 @@ class FrontendController extends BaseController {
 	protected $suggestions;
 
 	/**
+	 * Settings instance (Phase 18: goal behavior, suggestions, caching).
+	 *
+	 * @var Settings
+	 */
+	protected $settings;
+
+	/**
+	 * Progress payload transient TTL in seconds (performance_caching).
+	 *
+	 * @var int
+	 */
+	const PROGRESS_CACHE_TTL = 10;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param GoalEngine        $engine          Goal engine.
@@ -91,13 +106,15 @@ class FrontendController extends BaseController {
 	 * @param CartIntegration   $cart_integration Cart snapshot service.
 	 * @param MessageEngine     $messages        Message template engine.
 	 * @param SuggestionEngine  $suggestions     Suggestion engine.
+	 * @param Settings          $settings        Settings service.
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, SuggestionEngine $suggestions ) {
+	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, SuggestionEngine $suggestions, Settings $settings ) {
 		$this->engine           = $engine;
 		$this->goals            = $goals;
 		$this->cart_integration = $cart_integration;
 		$this->messages         = $messages;
 		$this->suggestions      = $suggestions;
+		$this->settings         = $settings;
 	}
 
 	/**
@@ -141,8 +158,25 @@ class FrontendController extends BaseController {
 	 * @return \WP_REST_Response
 	 */
 	public function handle_progress( $request, ?\WC_Cart $cart = null ) {
+		$caching = (bool) $this->settings->get( 'performance_caching', false );
+
 		$context = $this->cart_integration->context( $cart );
-		$goals   = $this->goals->active_goals();
+		$goals   = $this->active_goals_for( $this->goals->active_goals(), $context );
+
+		// Phase 18 (Performance → caching): a short-lived transient keyed
+		// by the cart snapshot + goals + behavior settings serves repeat
+		// widget polls without re-evaluating every goal. The key embeds the
+		// cart state, so any cart change produces a fresh payload within
+		// one TTL; admin-disabled by default.
+		$cache_key = $caching ? $this->progress_cache_key( $context, $goals ) : '';
+
+		if ( $caching ) {
+			$cached = get_transient( $cache_key );
+
+			if ( is_array( $cached ) ) {
+				return rest_ensure_response( $cached );
+			}
+		}
 
 		$items = array();
 
@@ -156,13 +190,94 @@ class FrontendController extends BaseController {
 			$items[] = $this->shape_goal( $goal, $result, $context, $extra );
 		}
 
-		return $this->success(
+		$response = $this->success(
 			array(
 				'goals'    => $items,
 				'currency' => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
 			),
 			array(
 				'total_goals' => count( $items ),
+			)
+		);
+
+		if ( $caching ) {
+			set_transient( $cache_key, $response->get_data(), self::PROGRESS_CACHE_TTL );
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Narrow the active goals per the default goal behavior setting.
+	 *
+	 * Phase 18 (Settings → General):
+	 *
+	 *  - all     — every active goal (default)
+	 *  - first   — only the first active goal (repository order)
+	 *  - closest — only the eligible goal closest to completion
+	 *
+	 * The storefront still picks an eligible featured goal per render, so
+	 * a narrowed set changes how many goals are advertised at once.
+	 *
+	 * @param Goal[]      $goals   Active goals.
+	 * @param CartContext $context Cart snapshot.
+	 * @return Goal[]
+	 */
+	protected function active_goals_for( array $goals, CartContext $context ) {
+		$behavior = $this->settings->get( 'default_goal_behavior', 'all' );
+
+		if ( 'all' === $behavior || count( $goals ) < 2 ) {
+			return $goals;
+		}
+
+		if ( 'first' === $behavior ) {
+			return array( $goals[0] );
+		}
+
+		// 'closest': the eligible goal with the highest percentage.
+		$best      = null;
+		$best_perc = -1.0;
+
+		foreach ( $goals as $goal ) {
+			$result = $this->engine->evaluate( $goal, $context );
+
+			if ( $result->eligible() && $result->percentage() > $best_perc ) {
+				$best      = $goal;
+				$best_perc = $result->percentage();
+			}
+		}
+
+		return $best ? array( $best ) : array( $goals[0] );
+	}
+
+	/**
+	 * The progress cache key for a cart snapshot + goal set.
+	 *
+	 * @param CartContext $context Cart snapshot.
+	 * @param Goal[]      $goals   Selected goals.
+	 * @return string
+	 */
+	protected function progress_cache_key( CartContext $context, array $goals ) {
+		$goal_ids = array();
+
+		foreach ( $goals as $goal ) {
+			$goal_ids[] = $goal->id();
+		}
+
+		return 'goalcart_progress_' . md5(
+			wp_json_encode(
+				array(
+					'ctx'         => array(
+						$context->subtotal(),
+						$context->total(),
+						$context->total_quantity(),
+						$context->distinct_product_count(),
+						$context->total_weight(),
+					),
+					'goals'       => $goal_ids,
+					'behavior'    => $this->settings->get( 'default_goal_behavior', 'all' ),
+					'suggestions' => (bool) $this->settings->get( 'performance_suggestions', true ),
+				)
 			)
 		);
 	}
@@ -200,11 +315,26 @@ class FrontendController extends BaseController {
 			'state'        => $this->messages->state( $goal, $result ),
 			'message'      => $this->messages->message( $goal, $result, $extra ),
 			'reward'       => $this->reward( $goal ),
-			'suggestions'  => $this->suggestions->suggest( $goal, $result, $context ),
+			'suggestions'  => $this->suggestions_on() ? $this->suggestions->suggest( $goal, $result, $context ) : array(),
 			'reward_state' => $result->reward_state(),
 			'eligible'     => $result->eligible(),
 			'reason'       => $result->reason(),
 		);
+	}
+
+	/**
+	 * Whether the storefront payload carries product suggestions.
+	 *
+	 * Phase 18 (Settings → Performance → suggestions): an opt-out for
+	 * stores that want the goals without the upsell list. Filterable via
+	 * goalcart_suggestions_enabled (the Phase 28 developer API hook).
+	 *
+	 * @return bool
+	 */
+	protected function suggestions_on() {
+		$on = (bool) $this->settings->get( 'performance_suggestions', true );
+
+		return (bool) apply_filters( 'goalcart_suggestions_enabled', $on );
 	}
 
 	/**

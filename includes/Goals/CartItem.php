@@ -56,6 +56,14 @@ final class CartItem {
 	protected $line_total;
 
 	/**
+	 * Tax charged on this line (Phase 18: the `include_tax` calculation
+	 * toggle folds line taxes into the money bases).
+	 *
+	 * @var float
+	 */
+	protected $line_tax;
+
+	/**
 	 * Current unit price.
 	 *
 	 * @var float
@@ -98,6 +106,7 @@ final class CartItem {
 		$this->quantity     = isset( $data['quantity'] ) ? (float) $data['quantity'] : 0.0;
 		$this->line_subtotal = isset( $data['line_subtotal'] ) ? (float) $data['line_subtotal'] : 0.0;
 		$this->line_total    = isset( $data['line_total'] ) ? (float) $data['line_total'] : 0.0;
+		$this->line_tax      = isset( $data['line_tax'] ) ? (float) $data['line_tax'] : 0.0;
 		$this->price         = isset( $data['price'] ) ? (float) $data['price'] : 0.0;
 		$this->weight        = isset( $data['weight'] ) ? (float) $data['weight'] : 0.0;
 		$this->categories    = isset( $data['categories'] ) && is_array( $data['categories'] ) ? array_map( 'intval', $data['categories'] ) : array();
@@ -155,6 +164,13 @@ final class CartItem {
 	 */
 	public function line_total() {
 		return $this->line_total;
+	}
+
+	/**
+	 * @return float
+	 */
+	public function line_tax() {
+		return $this->line_tax;
 	}
 
 	/**

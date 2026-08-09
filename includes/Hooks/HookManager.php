@@ -76,6 +76,37 @@ class HookManager {
 	}
 
 	/**
+	 * The plugin's public developer hooks (Phase 18 → Advanced → developer
+	 * hooks).
+	 *
+	 * A reference list of the documented goalcart_* actions and filters
+	 * surfaced in the admin Settings page (and served in the settings REST
+	 * meta) so theme/plugin developers can see the extension surface
+	 * without digging through the source.
+	 *
+	 * @return array<int, array{type: string, hook: string, description: string}>
+	 */
+	public static function documented_hooks() {
+		return array(
+			array( 'type' => 'action', 'hook' => 'goalcart_loaded', 'description' => 'Fires after the plugin has fully bootstrapped.' ),
+			array( 'type' => 'action', 'hook' => 'goalcart_settings_saved', 'description' => 'Fires after settings are persisted through the REST API.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_rest_capability', 'description' => 'Capability required for the admin REST endpoints.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_admin_capability', 'description' => 'Capability required for the admin menu page.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_enabled', 'description' => 'Master storefront widget toggle.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_locations', 'description' => 'Enabled widget display locations.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_template', 'description' => 'Store-wide widget template variant.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_animation', 'description' => 'Storefront progress-bar animation flag.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_mobile', 'description' => 'Storefront mobile behavior (show|hide).' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_currency_display', 'description' => 'Storefront currency display style (symbol|code|name).' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_refresh_interval', 'description' => 'Widget poll interval in seconds.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_tracking_enabled', 'description' => 'Analytics tracking consent for the current request.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_suggestions_enabled', 'description' => 'Whether product suggestions render on the storefront.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_default_calculation_mode', 'description' => 'Store-wide default money calculation basis.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_suggestions', 'description' => 'The shaped suggestion items for a goal.' ),
+		);
+	}
+
+	/**
 	 * Let a component register its own hooks.
 	 *
 	 * Calls $component->register( $this ) when the method exists.

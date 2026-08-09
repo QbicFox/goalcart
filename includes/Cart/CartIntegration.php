@@ -9,6 +9,7 @@ namespace GoalCart\Cart;
 
 use GoalCart\Goals\CartContext;
 use GoalCart\Hooks\HookManager;
+use GoalCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -42,11 +43,30 @@ defined( 'ABSPATH' ) || exit;
 final class CartIntegration {
 
 	/**
+	 * Settings instance (Phase 18: the Goal Calculation toggles).
+	 *
+	 * @var Settings
+	 */
+	protected $settings;
+
+	/**
 	 * Memoized contexts for the current request (cache key => context).
 	 *
 	 * @var array<string, CartContext>
 	 */
 	protected $cache = array();
+
+	/**
+	 * Constructor.
+	 *
+	 * @param Settings|null $settings Settings instance. Optional so plain
+	 *                                `new CartIntegration()` callers (tests,
+	 *                                headless contexts) keep working with
+	 *                                the default calculation behavior.
+	 */
+	public function __construct( ?Settings $settings = null ) {
+		$this->settings = $settings ? $settings : new Settings();
+	}
 
 	/**
 	 * Register the cart lifecycle invalidation hooks.
@@ -120,8 +140,12 @@ final class CartIntegration {
 		}
 
 		// Preload categories once per build (one batched query) and hand
-		// them to from_cart so no per-item term queries run.
+		// them to from_cart so no per-item term queries run. Phase 18: the
+		// Goal Calculation settings refine the snapshot (tax / discount /
+		// shipping / sale / virtual inclusion), unless the caller passed
+		// explicit overrides.
 		$args['categories'] = $this->load_categories( $cart );
+		$args               = $this->calculation_args( $args );
 
 		$context = CartContext::from_cart( $cart, $args );
 
@@ -137,6 +161,33 @@ final class CartIntegration {
 	 */
 	public function invalidate() {
 		$this->cache = array();
+	}
+
+	/**
+	 * Merge the Goal Calculation settings into the from_cart args.
+	 *
+	 * Explicit caller args always win; otherwise the Phase 18 settings
+	 * apply (each default preserves the pre-Phase-18 behavior).
+	 *
+	 * @param array<string, mixed> $args Context args.
+	 * @return array<string, mixed>
+	 */
+	protected function calculation_args( array $args ) {
+		$keys = array(
+			'include_tax'      => 'calculation_include_tax',
+			'include_discount' => 'calculation_include_discount',
+			'include_shipping' => 'calculation_include_shipping',
+			'include_sale'     => 'calculation_include_sale',
+			'include_virtual'  => 'calculation_include_virtual',
+		);
+
+		foreach ( $keys as $arg => $setting ) {
+			if ( ! array_key_exists( $arg, $args ) ) {
+				$args[ $arg ] = (bool) $this->settings->get( $setting, true );
+			}
+		}
+
+		return $args;
 	}
 
 	/**

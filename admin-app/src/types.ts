@@ -291,6 +291,27 @@ export interface CampaignInput {
 /** Storefront progress template variants (Phase 12). */
 export type FrontendTemplate = 'basic' | 'percentage' | 'milestone' | 'card';
 
+/** Storefront widget display locations (Phase 18, frontend_locations). */
+export type FrontendLocation =
+  | 'cart'
+  | 'mini-cart'
+  | 'checkout'
+  | 'shop'
+  | 'product'
+  | 'sticky';
+
+/** Storefront currency display style (Phase 18, currency_display). */
+export type CurrencyDisplay = 'symbol' | 'code' | 'name';
+
+/** How multiple active goals are presented (Phase 18, default_goal_behavior). */
+export type GoalBehavior = 'all' | 'first' | 'closest';
+
+/** Store-wide default money basis (Phase 18, calculation_mode). */
+export type CalculationMode = 'subtotal' | 'discounted_subtotal' | 'total';
+
+/** Storefront mobile behavior (Phase 18, frontend_mobile). */
+export type MobileBehavior = 'show' | 'hide';
+
 /** Reward-type filter on the analytics dashboard ('' = all rewards). */
 export type AnalyticsRewardFilter =
   | ''
@@ -354,32 +375,63 @@ export interface AnalyticsPayload {
 
 /**
  * The settings object persisted by the Phase 7 REST API
- * (`GET/POST /goalcart/v1/settings`). Grows with the Phase 18 surface.
+ * (`GET/POST /goalcart/v1/settings`). Phase 18 ships the full surface:
+ * general, frontend, goal calculation, performance and advanced.
  *
  * The `frontend_*` keys are the Phase 12 progress-template + appearance
  * surface consumed by the storefront widgets and the Appearance page.
  */
 export interface GoalCartSettings {
+  // General (P18-T01).
   enabled: boolean;
   fullscreen_dashboard: boolean;
-  /** Storefront template variant: basic | percentage | milestone | card. */
+  currency_display: CurrencyDisplay;
+  default_goal_behavior: GoalBehavior;
+  calculation_mode: CalculationMode;
+
+  // Frontend (P18-T02).
   frontend_template: FrontendTemplate;
-  /** Animate the progress-bar fill on updates. */
   frontend_animation: boolean;
-  /** Progress bar thickness in px (4–48). */
+  frontend_locations: FrontendLocation[];
+  frontend_mobile: MobileBehavior;
   frontend_bar_height: number;
-  /** Primary accent color (hex). */
   frontend_accent: string;
-  /** Widget surface color (hex). */
   frontend_bg: string;
-  /** Hairline border color (hex). */
   frontend_border: string;
-  /** Primary text color (hex). */
   frontend_text: string;
-  /** Widget corner radius in px (0–40). */
   frontend_radius: number;
-  /** Extra CSS class(es) added to every widget container. */
   frontend_css_class: string;
-  /** Custom CSS appended to the storefront widget styles. */
   frontend_custom_css: string;
+
+  // Goal Calculation (P18-T03).
+  calculation_include_tax: boolean;
+  calculation_include_discount: boolean;
+  calculation_include_shipping: boolean;
+  calculation_include_sale: boolean;
+  calculation_include_virtual: boolean;
+
+  // Performance (P18-T04).
+  performance_caching: boolean;
+  analytics_enabled: boolean;
+  performance_suggestions: boolean;
+
+  // Advanced (P18-T05).
+  debug_mode: boolean;
+  logging_enabled: boolean;
+  developer_hooks: boolean;
+}
+
+/** One entry of the developer-hooks reference (Phase 18 Advanced). */
+export interface DeveloperHook {
+  type: 'action' | 'filter';
+  hook: string;
+  description: string;
+}
+
+/** Extra settings-page meta served alongside the settings payload. */
+export interface SettingsMeta {
+  /** Public goalcart_* hooks reference (Phase 18, developer hooks). */
+  hooks?: DeveloperHook[];
+  /** Absolute path of the debug log file (present when logging is on). */
+  log_path?: string;
 }

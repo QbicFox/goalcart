@@ -97,6 +97,22 @@ final class CartContext {
 	protected $is_guest;
 
 	/**
+	 * Phase 18 (Goal Calculation): whether line taxes are folded into the
+	 * money bases.
+	 *
+	 * @var bool
+	 */
+	protected $include_tax;
+
+	/**
+	 * Phase 18 (Goal Calculation): whether cart discounts count toward the
+	 * discounted_subtotal basis.
+	 *
+	 * @var bool
+	 */
+	protected $include_discount;
+
+	/**
 	 * Build a context from a data array.
 	 *
 	 * @param array<string, mixed> $data Context data. 'items' entries are
@@ -111,6 +127,8 @@ final class CartContext {
 		$this->currency       = isset( $data['currency'] ) ? (string) $data['currency'] : '';
 		$this->user_id        = isset( $data['user_id'] ) ? (int) $data['user_id'] : 0;
 		$this->is_guest       = isset( $data['is_guest'] ) ? (bool) $data['is_guest'] : ( 0 === $this->user_id );
+		$this->include_tax    = ! empty( $data['include_tax'] );
+		$this->include_discount = ! isset( $data['include_discount'] ) || (bool) $data['include_discount'];
 
 		$this->items = array();
 		if ( isset( $data['items'] ) && is_array( $data['items'] ) ) {
@@ -150,20 +168,59 @@ final class CartContext {
 	 * (WooCommerce assigns categories to the parent product), so category
 	 * goals count variations correctly.
 	 *
+	 * Phase 18 (Settings → Goal Calculation): the optional include_*
+	 * args refine the snapshot at build time. All five default to today's
+	 * behavior, so an unchanged store calculates exactly as before:
+	 *
+	 *  - include_tax      (false)  — fold line taxes into the subtotal /
+	 *                                discounted_subtotal bases
+	 *  - include_discount (true)   — when false the discounted_subtotal
+	 *                                basis ignores cart discounts
+	 *  - include_shipping (true)   — when false shipping is removed from
+	 *                                the total basis (the legacy
+	 *                                exclude_shipping arg still wins)
+	 *  - include_sale     (true)   — when false products currently on sale
+	 *                                are dropped from the snapshot
+	 *  - include_virtual  (true)   — when false virtual/downloadable
+	 *                                products are dropped
+	 *
+	 * When items are excluded (sale/virtual), the grand `total` is rebased
+	 * onto the remaining lines so every money basis describes the same set
+	 * of products.
+	 *
 	 * @param \WC_Cart                $cart Live cart.
 	 * @param array<string, mixed>    $args Optional overrides: currency,
 	 *                                      user_id, is_guest, exclude_shipping,
-	 *                                      categories (preloaded map).
+	 *                                      categories (preloaded map),
+	 *                                      include_tax, include_discount,
+	 *                                      include_shipping, include_sale,
+	 *                                      include_virtual.
 	 * @return CartContext
 	 */
 	public static function from_cart( \WC_Cart $cart, array $args = array() ) {
-		$items        = array();
-		$category_map = isset( $args['categories'] ) && is_array( $args['categories'] ) ? $args['categories'] : array();
+		$items           = array();
+		$category_map    = isset( $args['categories'] ) && is_array( $args['categories'] ) ? $args['categories'] : array();
+		$include_tax     = ! empty( $args['include_tax'] );
+		$include_discount = ! isset( $args['include_discount'] ) || (bool) $args['include_discount'];
+		$include_shipping = ! isset( $args['include_shipping'] ) || (bool) $args['include_shipping'];
+		$include_sale     = ! isset( $args['include_sale'] ) || (bool) $args['include_sale'];
+		$include_virtual  = ! isset( $args['include_virtual'] ) || (bool) $args['include_virtual'];
+
+		$excluded_items = false;
 
 		foreach ( $cart->get_cart() as $cart_item ) {
 			$product = isset( $cart_item['data'] ) && $cart_item['data'] instanceof \WC_Product ? $cart_item['data'] : null;
 
 			if ( null === $product ) {
+				continue;
+			}
+
+			// Phase 18 exclusion toggles (sale / virtual).
+			if (
+				( ! $include_sale && method_exists( $product, 'is_on_sale' ) && $product->is_on_sale() )
+				|| ( ! $include_virtual && ( $product->is_virtual() || $product->is_downloadable() ) )
+			) {
+				$excluded_items = true;
 				continue;
 			}
 
@@ -183,9 +240,10 @@ final class CartContext {
 					'variation_id'  => ! empty( $cart_item['variation_id'] ) ? (int) $cart_item['variation_id'] : 0,
 					'name'          => $product->get_name(),
 					'quantity'      => isset( $cart_item['quantity'] ) ? (float) $cart_item['quantity'] : 1.0,
-					'line_subtotal' => isset( $cart_item['line_subtotal'] ) ? (float) $cart_item['line_subtotal'] : 0.0,
-					'line_total'    => isset( $cart_item['line_total'] ) ? (float) $cart_item['line_total'] : 0.0,
-					'price'         => (float) $product->get_price(),
+				'line_subtotal' => isset( $cart_item['line_subtotal'] ) ? (float) $cart_item['line_subtotal'] : 0.0,
+				'line_total'    => isset( $cart_item['line_total'] ) ? (float) $cart_item['line_total'] : 0.0,
+				'line_tax'      => isset( $cart_item['line_tax'] ) ? (float) $cart_item['line_tax'] : 0.0,
+				'price'         => (float) $product->get_price(),
 					'weight'        => (float) $product->get_weight(),
 					'categories'    => $categories,
 					'virtual'       => $product->is_virtual(),
@@ -196,16 +254,26 @@ final class CartContext {
 
 		// Money bases come from the line items — always current, including
 		// while the cart's aggregate totals are reset mid-calculation (see
-		// the timing note above).
-		$subtotal      = 0.0;
-		$after_discount = 0.0;
+		// the timing note above). Phase 18: include_tax folds each line's
+		// tax into the bases; include_discount=false makes the
+		// discounted_subtotal basis ignore cart discounts.
+		$subtotal = 0.0;
 
 		foreach ( $items as $item ) {
-			$subtotal       += $item->line_subtotal();
-			$after_discount += $item->line_total();
+			$subtotal += $item->line_subtotal() + ( $include_tax ? $item->line_tax() : 0.0 );
 		}
 
-		$exclude_shipping = ! empty( $args['exclude_shipping'] );
+		$after_discount = 0.0;
+
+		if ( $include_discount ) {
+			foreach ( $items as $item ) {
+				$after_discount += $item->line_total() + ( $include_tax ? $item->line_tax() : 0.0 );
+			}
+		} else {
+			$after_discount = $subtotal;
+		}
+
+		$exclude_shipping = ! $include_shipping || ! empty( $args['exclude_shipping'] );
 
 		// Aggregate getters are authoritative after a totals pass; while
 		// they read 0 (reset state) the line-derived values are used.
@@ -220,6 +288,14 @@ final class CartContext {
 			$taxes_total    = 0.0;
 		}
 
+		// When sale/virtual items were excluded, the cart aggregates still
+		// include them — rebase the grand total onto the remaining lines so
+		// the total basis matches the filtered subtotal bases.
+		if ( $excluded_items ) {
+			$total          = $after_discount;
+			$discount_total = max( 0.0, $subtotal - $after_discount );
+		}
+
 		// Reward-loop safety: our own discount fees are added back so a
 		// discount reward can never reduce the `total` basis it was granted on.
 		$total = max( 0.0, $total + self::own_fees_total( $cart ) );
@@ -231,15 +307,17 @@ final class CartContext {
 
 		return new self(
 			array(
-				'subtotal'       => $subtotal,
-				'total'          => $total,
-				'discount_total' => $discount_total,
-				'taxes_total'    => $taxes_total,
-				'shipping_total' => $shipping_total,
-				'currency'       => isset( $args['currency'] ) ? (string) $args['currency'] : ( function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '' ),
-				'user_id'        => isset( $args['user_id'] ) ? (int) $args['user_id'] : ( function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0 ),
-				'is_guest'       => isset( $args['is_guest'] ) ? (bool) $args['is_guest'] : ( function_exists( 'is_user_logged_in' ) ? ! is_user_logged_in() : true ),
-				'items'          => $items,
+				'subtotal'         => $subtotal,
+				'total'            => $total,
+				'discount_total'   => $discount_total,
+				'taxes_total'      => $taxes_total,
+				'shipping_total'   => $shipping_total,
+				'currency'         => isset( $args['currency'] ) ? (string) $args['currency'] : ( function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '' ),
+				'user_id'          => isset( $args['user_id'] ) ? (int) $args['user_id'] : ( function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0 ),
+				'is_guest'         => isset( $args['is_guest'] ) ? (bool) $args['is_guest'] : ( function_exists( 'is_user_logged_in' ) ? ! is_user_logged_in() : true ),
+				'items'            => $items,
+				'include_tax'      => $include_tax,
+				'include_discount' => $include_discount,
 			)
 		);
 	}
@@ -299,29 +377,47 @@ final class CartContext {
 		$mode    = (string) $mode;
 		$exclude = array_map( 'intval', $exclude );
 
-		if ( empty( $exclude ) ) {
-			if ( Goal::MODE_TOTAL === $mode ) {
+		if ( Goal::MODE_TOTAL === $mode ) {
+			if ( empty( $exclude ) ) {
 				return $this->total;
 			}
 
-			if ( Goal::MODE_DISCOUNTED_SUBTOTAL === $mode ) {
-				return $this->sum_lines( 'line_total' );
+			return $this->total - $this->sum_lines( 'line_total', array_flip( $exclude ) );
+		}
+
+		// Phase 18 (Goal Calculation): the include_tax / include_discount
+		// flags shape the subtotal-style bases. The precomputed subtotal
+		// already carries the folded tax, so the no-exclusion subtotal path
+		// returns it directly.
+		if ( Goal::MODE_DISCOUNTED_SUBTOTAL === $mode ) {
+			$field = $this->include_discount ? 'line_total' : 'line_subtotal';
+		} else {
+			$field = 'line_subtotal';
+		}
+
+		if ( empty( $exclude ) ) {
+			if ( Goal::MODE_SUBTOTAL === $mode ) {
+				return $this->subtotal;
 			}
 
-			return $this->subtotal;
+			$sum = $this->sum_lines( $field );
+
+			if ( $this->include_tax ) {
+				$sum += $this->sum_tax();
+			}
+
+			return $sum;
 		}
 
 		$flip = array_flip( $exclude );
 
-		if ( Goal::MODE_TOTAL === $mode ) {
-			return $this->total - $this->sum_lines( 'line_total', $flip );
+		$sum = $this->sum_lines( $field, $flip, true );
+
+		if ( $this->include_tax ) {
+			$sum += $this->sum_tax( $flip, true );
 		}
 
-		if ( Goal::MODE_DISCOUNTED_SUBTOTAL === $mode ) {
-			return $this->sum_lines( 'line_total', $flip, true );
-		}
-
-		return $this->sum_lines( 'line_subtotal', $flip, true );
+		return $sum;
 	}
 
 	/**
@@ -344,6 +440,31 @@ final class CartContext {
 
 			if ( $included ) {
 				$sum += 'line_total' === $field ? $item->line_total() : $item->line_subtotal();
+			}
+		}
+
+		return $sum;
+	}
+
+	/**
+	 * Sum line taxes over cart lines (Phase 18: include_tax).
+	 *
+	 * @param int[] $only      Flipped product-id set to INCLUDE (exclusion mode).
+	 * @param bool  $excluding When true, $only lists ids to exclude instead.
+	 * @return float
+	 */
+	protected function sum_tax( array $only = array(), $excluding = false ) {
+		$sum = 0.0;
+
+		foreach ( $this->items as $item ) {
+			$included = empty( $only ) ? true : isset( $only[ $item->product_id() ] );
+
+			if ( $excluding ) {
+				$included = ! $included;
+			}
+
+			if ( $included ) {
+				$sum += $item->line_tax();
 			}
 		}
 

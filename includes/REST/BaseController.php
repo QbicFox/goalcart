@@ -8,6 +8,7 @@
 namespace GoalCart\REST;
 
 use GoalCart\Hooks\HookManager;
+use GoalCart\Utils\Logger;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -191,6 +192,10 @@ abstract class BaseController {
 	 * @return \WP_Error
 	 */
 	protected function error( $code, $message, $status = 400, array $data = array() ) {
+		// Phase 18 (Advanced → logging): REST failures land in the debug
+		// log when logging is enabled (error level always writes).
+		Logger::error( $code . ' — ' . $message . ' (HTTP ' . (int) $status . ')' );
+
 		$data['status'] = $status;
 
 		return new \WP_Error( $code, $message, $data );

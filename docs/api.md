@@ -184,8 +184,13 @@ category/product/composite goals evaluate correctly.
   "data": {
     "enabled": true,
     "fullscreen_dashboard": true,
+    "currency_display": "symbol",
+    "default_goal_behavior": "all",
+    "calculation_mode": "subtotal",
     "frontend_template": "basic",
     "frontend_animation": true,
+    "frontend_locations": ["cart", "mini-cart", "checkout", "shop", "product", "sticky"],
+    "frontend_mobile": "show",
     "frontend_bar_height": 10,
     "frontend_accent": "#2271b1",
     "frontend_bg": "#ffffff",
@@ -193,10 +198,31 @@ category/product/composite goals evaluate correctly.
     "frontend_text": "#1d2327",
     "frontend_radius": 10,
     "frontend_css_class": "",
-    "frontend_custom_css": ""
+    "frontend_custom_css": "",
+    "calculation_include_tax": false,
+    "calculation_include_discount": true,
+    "calculation_include_shipping": true,
+    "calculation_include_sale": true,
+    "calculation_include_virtual": true,
+    "performance_caching": false,
+    "analytics_enabled": true,
+    "performance_suggestions": true,
+    "debug_mode": false,
+    "logging_enabled": false,
+    "developer_hooks": true
+  },
+  "meta": {
+    "hooks": [
+      { "type": "filter", "hook": "goalcart_suggestions_enabled", "description": "..." }
+    ],
+    "log_path": "/path/to/wp-content/goalcart-debug.log"
   }
 }
 ```
+
+`meta.hooks` (Phase 18 Advanced → developer hooks) carries the public
+`goalcart_*` hooks reference rendered by the Settings page;
+`meta.log_path` is present only while `logging_enabled` is on.
 
 #### `POST /settings`
 
@@ -205,21 +231,31 @@ Saves a partial or full settings object. Only known keys are applied
 keys the client does not know about. Returns the persisted settings, or
 `goalcart_settings_empty` (400) when no known keys are present.
 
-Phase 12 adds the storefront progress-template surface, validated by the
-route arg schema and normalized by the sanitizer (direct saves included):
+Every key is validated by the route arg schema and normalized by the
+sanitizer (direct handler saves included). The full Phase 18 surface:
 
 | Key | Type / constraints | Sanitization |
 |---|---|---|
+| `enabled` / `fullscreen_dashboard` | boolean | cast |
+| `currency_display` | enum `symbol` `code` `name` | unknown → `symbol` |
+| `default_goal_behavior` | enum `all` `first` `closest` | unknown → `all` |
+| `calculation_mode` | enum `subtotal` `discounted_subtotal` `total` | unknown → `subtotal` |
 | `frontend_template` | enum `basic` `percentage` `milestone` `card` | unknown → `basic` |
 | `frontend_animation` | boolean | cast |
+| `frontend_locations` | array of the location enum (`cart` `mini-cart` `checkout` `shop` `product` `sticky`) | filtered + deduped |
+| `frontend_mobile` | enum `show` `hide` | unknown → `show` |
 | `frontend_bar_height` | int 4–48 | clamped |
 | `frontend_accent` / `bg` / `border` / `text` | string (hex color) | `sanitize_hex_color`, invalid → default |
 | `frontend_radius` | int 0–40 | clamped |
 | `frontend_css_class` | string | `sanitize_text_field` (tags stripped) |
 | `frontend_custom_css` | string | tag-stripped, capped at 16 KB (admin-authored CSS) |
+| `calculation_include_tax` / `_discount` / `_shipping` / `_sale` / `_virtual` | boolean | cast |
+| `performance_caching` / `analytics_enabled` / `performance_suggestions` | boolean | cast |
+| `debug_mode` / `logging_enabled` / `developer_hooks` | boolean | cast |
 
-The full general/goal-calculation/performance/advanced surface grows here
-in Phase 18.
+Saving identical settings is a successful no-op (an unchanged option is
+not a failure). A successful save fires the `goalcart_settings_saved`
+action and logs a debug entry when logging is enabled.
 
 ### 2.3 Search (goal builder)
 
@@ -630,6 +666,35 @@ no-matching-items ineligibility), weight and composite (AND) goals
 - campaign preview: all milestone goals evaluated in order (the
 "multiple milestones" state)
 - error paths (400 / 404) and full rollback verification
+
+`tests/settings-test.php` (119 checks, `php tests/settings-test.php`):
+
+- defaults for every Phase 18 key (each preserving the pre-Phase-18
+  behavior) + the `goalcart_default_calculation_mode` filter wiring
+- the store-wide calculation mode: amount/category goals follow it,
+  quantity-style goals keep their type defaults
+- REST schema coverage (enums for currency display / goal behavior /
+  calculation mode / mobile, the location items enum, booleans) and the
+  sanitizer's normalization of invalid values through `handle_save`
+- goal calculation toggles: `include_tax` (line-tax folding into
+  subtotal/discounted bases), `include_discount`, `include_shipping`
+  (incl. legacy `exclude_shipping` precedence), `include_sale` and
+  `include_virtual` (items dropped and bases rebased), plus
+  `CartIntegration` applying the settings to a live cart snapshot
+- frontend: locations follow the setting, sticky gated on the 'sticky'
+  location, the locations filter override, and the config carrying
+  `currencyDisplay` + `mobile`
+- goal behavior `all` / `first` / `closest` narrowing the progress
+  payload, and progress caching (off → no transient, on → payload
+  written, sentinel payload served verbatim on read)
+- performance toggles: `analytics_enabled` gates the tracker and
+  `performance_suggestions` empties the suggestion list (with the
+  `goalcart_suggestions_enabled` filter override)
+- advanced: the GET settings meta carries the developer-hooks reference,
+  and the Logger respects `logging_enabled` + `debug_mode` (error vs
+  debug levels, log path in meta, cleanup)
+- every real write (settings option, goals, transients, log file) is
+  rolled back / removed and residue is asserted
 
 `tests/rest-api-test.php` (120 checks, `php tests/rest-api-test.php`):
 

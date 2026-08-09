@@ -145,16 +145,21 @@ final class Tracker {
 	}
 
 	/**
-	 * The master tracking toggle: enabled setting + consent filter.
+	 * The master tracking toggle: enabled + analytics settings + consent
+	 * filter.
 	 *
-	 * Used by the REST handler and the add-to-cart hook (both can run
-	 * outside plain frontend page views), mirroring the reference which
-	 * checks only the settings toggle for AJAX/add-to-cart paths.
+	 * Phase 18 (Settings → Performance → analytics): the `analytics_enabled`
+	 * setting is the dedicated event-collection toggle — stores can keep
+	 * the goals running while switching the analytics pipeline off (e.g.
+	 * consent concerns). Used by the REST handler and the add-to-cart hook
+	 * (both can run outside plain frontend page views), mirroring the
+	 * reference which checks only the settings toggles for AJAX/add-to-cart
+	 * paths.
 	 *
 	 * @return bool
 	 */
 	public function tracking_enabled() {
-		if ( ! $this->settings->get( 'enabled', true ) ) {
+		if ( ! $this->settings->get( 'enabled', true ) || ! $this->settings->get( 'analytics_enabled', true ) ) {
 			return false;
 		}
 

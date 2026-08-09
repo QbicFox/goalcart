@@ -29,8 +29,13 @@ import { useSnackbar } from '../components/notifications/SnackbarProvider';
 const DEFAULT_SETTINGS: GoalCartSettings = {
   enabled: true,
   fullscreen_dashboard: true,
+  currency_display: 'symbol',
+  default_goal_behavior: 'all',
+  calculation_mode: 'subtotal',
   frontend_template: 'basic',
   frontend_animation: true,
+  frontend_locations: ['cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky'],
+  frontend_mobile: 'show',
   frontend_bar_height: 10,
   frontend_accent: '#2271b1',
   frontend_bg: '#ffffff',
@@ -39,6 +44,17 @@ const DEFAULT_SETTINGS: GoalCartSettings = {
   frontend_radius: 10,
   frontend_css_class: '',
   frontend_custom_css: '',
+  calculation_include_tax: false,
+  calculation_include_discount: true,
+  calculation_include_shipping: true,
+  calculation_include_sale: true,
+  calculation_include_virtual: true,
+  performance_caching: false,
+  analytics_enabled: true,
+  performance_suggestions: true,
+  debug_mode: false,
+  logging_enabled: false,
+  developer_hooks: true,
 };
 
 const TEMPLATES: Array<{ value: FrontendTemplate; label: string; description: string }> = [

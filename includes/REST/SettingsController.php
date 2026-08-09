@@ -9,6 +9,7 @@ namespace GoalCart\REST;
 
 use GoalCart\Hooks\HookManager;
 use GoalCart\Settings\Settings;
+use GoalCart\Utils\Logger;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -23,15 +24,15 @@ defined( 'ABSPATH' ) || exit;
  *    Every key is validated/sanitized through the REST arg schema, unknown
  *    keys are ignored, and the persisted values are returned so the UI can
  *    sync its state.
- *
- * The persisted option (Settings::OPTION_NAME) already drives the plugin
- * toggle and the admin display mode, so saving here changes behavior
- * immediately. The full settings surface (general, frontend, goal
- * calculation, performance, advanced) is designed in Phase 18; the schema
- * grows there without touching the route wiring.
- *
- * Mirrors the reference plugin (WooInsights\REST\SettingsController).
- */
+ *	 * The persisted option (Settings::OPTION_NAME) drives every consumer
+	 * (storefront widgets, goal calculation, tracking, the admin display
+	 * mode), so saving here changes behavior immediately. Phase 18 adds the
+	 * full surface — general, frontend, goal calculation, performance,
+	 * advanced — to the schema and sanitizer, and the GET response carries
+	 * the developer-hooks reference in meta for the Advanced tab.
+	 *
+	 * Mirrors the reference plugin (WooInsights\REST\SettingsController).
+	 */
 class SettingsController extends BaseController {
 
 	/**
@@ -100,7 +101,17 @@ class SettingsController extends BaseController {
 	 * @return \WP_REST_Response
 	 */
 	public function handle_get( $request ) {
-		return $this->success( $this->settings->all() );
+		$meta = array(
+			// Phase 18 (Advanced → developer hooks): the reference list of
+			// public goalcart_* hooks, rendered by the Settings page.
+			'hooks' => HookManager::documented_hooks(),
+		);
+
+		if ( $this->settings->get( 'logging_enabled', false ) ) {
+			$meta['log_path'] = Logger::path();
+		}
+
+		return $this->success( $this->settings->all(), $meta );
 	}
 
 	/**
@@ -144,6 +155,19 @@ class SettingsController extends BaseController {
 			);
 		}
 
+		// Phase 18 (Advanced → logging): record the save when logging is
+		// enabled, and fire the developer-hooks action (Phase 28 API) so
+		// integrations can react to configuration changes.
+		Logger::write( 'Settings saved: ' . wp_json_encode( $clean ), 'debug' );
+
+		/**
+		 * Fires after plugin settings are persisted through the REST API.
+		 *
+		 * @param array<string, mixed> $clean     Sanitized key/value pairs.
+		 * @param Settings             $settings  Settings service.
+		 */
+		do_action( 'goalcart_settings_saved', $clean, $this->settings );
+
 		return $this->success( $this->settings->all() );
 	}
 
@@ -158,14 +182,33 @@ class SettingsController extends BaseController {
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function save_args() {
+		$bool = array( 'type' => 'boolean' );
+
 		return array(
-			'enabled'               => array( 'type' => 'boolean' ),
-			'fullscreen_dashboard'  => array( 'type' => 'boolean' ),
+			// General (P18-T01).
+			'enabled'               => $bool,
+			'fullscreen_dashboard'  => $bool,
+			'currency_display'      => array( 'type' => 'string', 'enum' => array( 'symbol', 'code', 'name' ) ),
+			'default_goal_behavior' => array( 'type' => 'string', 'enum' => array( 'all', 'first', 'closest' ) ),
+			'calculation_mode'      => array(
+				'type' => 'string',
+				'enum' => array( 'subtotal', 'discounted_subtotal', 'total' ),
+			),
+
+			// Frontend (P18-T02).
 			'frontend_template'     => array(
 				'type' => 'string',
 				'enum' => array( 'basic', 'percentage', 'milestone', 'card' ),
 			),
-			'frontend_animation'    => array( 'type' => 'boolean' ),
+			'frontend_animation'    => $bool,
+			'frontend_locations'    => array(
+				'type'  => 'array',
+				'items' => array(
+					'type' => 'string',
+					'enum' => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ),
+				),
+			),
+			'frontend_mobile'       => array( 'type' => 'string', 'enum' => array( 'show', 'hide' ) ),
 			'frontend_bar_height'   => array( 'type' => 'integer', 'minimum' => 4, 'maximum' => 48 ),
 			'frontend_accent'       => array( 'type' => 'string' ),
 			'frontend_bg'           => array( 'type' => 'string' ),
@@ -174,6 +217,23 @@ class SettingsController extends BaseController {
 			'frontend_radius'       => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 40 ),
 			'frontend_css_class'    => array( 'type' => 'string' ),
 			'frontend_custom_css'   => array( 'type' => 'string' ),
+
+			// Goal Calculation (P18-T03).
+			'calculation_include_tax'      => $bool,
+			'calculation_include_discount' => $bool,
+			'calculation_include_shipping' => $bool,
+			'calculation_include_sale'     => $bool,
+			'calculation_include_virtual'  => $bool,
+
+			// Performance (P18-T04).
+			'performance_caching'     => $bool,
+			'analytics_enabled'       => $bool,
+			'performance_suggestions' => $bool,
+
+			// Advanced (P18-T05).
+			'debug_mode'      => $bool,
+			'logging_enabled' => $bool,
+			'developer_hooks' => $bool,
 		);
 	}
 
@@ -197,7 +257,38 @@ class SettingsController extends BaseController {
 			case 'fullscreen_dashboard':
 			case 'enabled':
 			case 'frontend_animation':
+			case 'calculation_include_tax':
+			case 'calculation_include_discount':
+			case 'calculation_include_shipping':
+			case 'calculation_include_sale':
+			case 'calculation_include_virtual':
+			case 'performance_caching':
+			case 'analytics_enabled':
+			case 'performance_suggestions':
+			case 'debug_mode':
+			case 'logging_enabled':
+			case 'developer_hooks':
 				return (bool) $value;
+
+			case 'currency_display':
+				return in_array( $value, array( 'symbol', 'code', 'name' ), true ) ? $value : $defaults['currency_display'];
+
+			case 'default_goal_behavior':
+				return in_array( $value, array( 'all', 'first', 'closest' ), true ) ? $value : $defaults['default_goal_behavior'];
+
+			case 'calculation_mode':
+				return in_array( $value, array( 'subtotal', 'discounted_subtotal', 'total' ), true ) ? $value : $defaults['calculation_mode'];
+
+			case 'frontend_mobile':
+				return in_array( $value, array( 'show', 'hide' ), true ) ? $value : $defaults['frontend_mobile'];
+
+			case 'frontend_locations':
+				$allowed  = array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' );
+				$cleaned  = array_filter( array_map( 'sanitize_key', (array) $value ), function ( $location ) use ( $allowed ) {
+					return in_array( $location, $allowed, true );
+				} );
+
+				return array_values( array_unique( $cleaned ) );
 
 			case 'frontend_template':
 				$templates = array( 'basic', 'percentage', 'milestone', 'card' );

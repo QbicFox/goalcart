@@ -79,6 +79,12 @@
 	display: none;
 }
 
+/* Phase 18 (Settings → Frontend → mobile behavior = hide). */
+
+.goalcart-widget--mobile-hidden {
+	display: none;
+}
+
 .goalcart-card__head {
 	display: flex;
 	justify-content: flex-end;

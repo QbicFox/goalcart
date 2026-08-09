@@ -116,6 +116,28 @@ All verified by `tests/engine-test.php` (71 checks, run with `php tests/engine-t
 | Inactive goal / out of schedule | Ineligible with a specific reason |
 | Unknown goal type | Ineligible with reason `unknown_type` (registry never throws on evaluation) |
 
+## 5.5 Goal Calculation settings (Phase 18, P18-T03)
+
+`CartContext::from_cart()` honors five store-wide inclusion toggles (each
+default preserves the pre-Phase-18 behavior documented in §5), applied by
+`CartIntegration` when it builds the live-cart snapshot. Explicit caller
+args always win over the settings:
+
+| Setting | Effect | Default |
+|---|---|---|
+| `calculation_include_tax` | Line taxes fold into the subtotal / discounted-subtotal bases | `false` (taxes stay out) |
+| `calculation_include_discount` | The discounted basis reflects coupons / line discounts | `true` (discounts count) |
+| `calculation_include_shipping` | The `total` basis keeps the shipping line (legacy `exclude_shipping` arg still wins) | `true` (shipping stays in) |
+| `calculation_include_sale` | Sale items are dropped from the snapshot when `false` (bases rebased onto the remaining lines) | `true` (sale items count) |
+| `calculation_include_virtual` | Virtual / downloadable items are dropped when `false` | `true` (virtual items count) |
+
+`CartItem` carries the line's `line_tax` so the include-tax folding is
+exact. The store-wide default *basis* for money goals is separately
+driven by the General `calculation_mode` setting via the
+`goalcart_default_calculation_mode` filter (`Goal::default_calculation_mode()`):
+amount / category / composite goals follow the store mode; quantity-style
+goals keep their type defaults.
+
 ## 6. Design decisions
 
 | Decision | Rationale |

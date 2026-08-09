@@ -151,15 +151,20 @@ final class ProgressUI {
 	/**
 	 * The enabled display locations.
 	 *
-	 * Filterable so Phase 18 (Settings → Frontend) can configure the set.
+	 * Phase 18 (Settings → Frontend): driven by the `frontend_locations`
+	 * setting (the default set ships all six locations), still filterable
+	 * via goalcart_frontend_locations. Unknown keys are dropped so a bad
+	 * stored value can never register a location.
 	 *
 	 * @return string[]
 	 */
 	public function locations() {
-		return (array) apply_filters(
-			'goalcart_frontend_locations',
-			array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' )
-		);
+		$allowed = array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' );
+		$stored  = array_map( 'strval', (array) $this->settings->get( 'frontend_locations', array() ) );
+
+		$locations = array_values( array_intersect( $allowed, $stored ) );
+
+		return (array) apply_filters( 'goalcart_frontend_locations', $locations );
 	}
 
 	/**
@@ -243,6 +248,8 @@ final class ProgressUI {
 	 * Phase 12 adds the active template, the animation flag and the
 	 * resolved appearance tokens so the JS can render template variants
 	 * and mirror the Appearance settings without another round-trip.
+	 * Phase 18 adds the currency display style and the mobile behavior so
+	 * the JS formats money and hides widgets per the Settings page.
 	 * Kept as its own method so tests can assert the shape without
 	 * capturing output.
 	 *
@@ -258,9 +265,41 @@ final class ProgressUI {
 			'isRtl'     => is_rtl(),
 			'template'  => $this->template(),
 			'animation' => (bool) apply_filters( 'goalcart_frontend_animation', $this->settings->get( 'frontend_animation', true ) ),
+			'currencyDisplay' => $this->currency_display(),
+			'mobile'    => $this->mobile_behavior(),
 			'appearance' => $appearance,
 			'labels'    => $this->reward_labels(),
 		);
+	}
+
+	/**
+	 * The storefront currency display style.
+	 *
+	 * Phase 18 (Settings → General): symbol | code | name — passed to the
+	 * JS so Intl.NumberFormat renders the store currency the configured
+	 * way. Filterable via goalcart_currency_display.
+	 *
+	 * @return string
+	 */
+	public function currency_display() {
+		$display = apply_filters( 'goalcart_currency_display', $this->settings->get( 'currency_display', 'symbol' ) );
+
+		return in_array( $display, array( 'symbol', 'code', 'name' ), true ) ? $display : 'symbol';
+	}
+
+	/**
+	 * The storefront mobile behavior.
+	 *
+	 * Phase 18 (Settings → Frontend): show | hide — when 'hide', the JS
+	 * skips rendering widgets on small screens. Filterable via
+	 * goalcart_frontend_mobile.
+	 *
+	 * @return string
+	 */
+	public function mobile_behavior() {
+		$behavior = apply_filters( 'goalcart_frontend_mobile', $this->settings->get( 'frontend_mobile', 'show' ) );
+
+		return 'hide' === $behavior ? 'hide' : 'show';
 	}
 
 	/**
@@ -420,13 +459,19 @@ final class ProgressUI {
 	/**
 	 * Render the sticky bottom progress bar.
 	 *
-	 * The JS keeps it hidden until the cart has progress to show; the
-	 * container itself is inert markup.
+	 * Gated on the 'sticky' location being enabled (Phase 18: the
+	 * frontend_locations setting), so stores can turn the bar off from
+	 * Settings. The JS keeps it hidden until the cart has progress to
+	 * show; the container itself is inert markup.
 	 *
 	 * @return void
 	 */
 	public function render_sticky_bar() {
 		if ( is_admin() || ! $this->is_enabled() || ! $this->page_needs_widget() ) {
+			return;
+		}
+
+		if ( ! in_array( 'sticky', $this->locations(), true ) ) {
 			return;
 		}
 

@@ -269,11 +269,18 @@ final class Goal {
 	 * defaults to the pre-discount subtotal. Explicit configuration always
 	 * wins.
 	 *
+	 * Phase 18 (Settings → Goal Calculation): the store-wide default money
+	 * basis is applied through the goalcart_default_calculation_mode
+	 * filter (registered by Settings), so a goal without its own mode
+	 * follows the store default while quantity-style types stay unchanged.
+	 *
 	 * @param string $type Goal type.
 	 * @return string
 	 */
 	public static function default_calculation_mode( $type ) {
-		return self::TYPE_PRODUCT === $type ? self::MODE_QUANTITY : self::MODE_SUBTOTAL;
+		$mode = self::TYPE_PRODUCT === $type ? self::MODE_QUANTITY : self::MODE_SUBTOTAL;
+
+		return (string) apply_filters( 'goalcart_default_calculation_mode', $mode, (string) $type );
 	}
 
 	/**

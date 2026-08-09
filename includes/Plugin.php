@@ -248,8 +248,10 @@ final class Plugin {
 		// Cart integration (Phase 6): the single source of the live-cart
 		// snapshot — memoized, lifecycle-aware, with batched category
 		// preloading — consumed by the reward engine (and later REST/frontend).
-		$this->container->singleton( CartIntegration::class, function () {
-			return new CartIntegration();
+		$this->container->singleton( CartIntegration::class, function ( Container $container ) {
+			// Phase 18 (Goal Calculation): the snapshot service applies the
+			// tax / discount / shipping / sale / virtual inclusion settings.
+			return new CartIntegration( $container->get( Settings::class ) );
 		} );
 
 		// Reward engine (Phase 5): decoupled from goal calculation — consumes
@@ -288,12 +290,15 @@ final class Plugin {
 		} );
 
 		$this->container->singleton( FrontendController::class, function ( Container $container ) {
+			// Phase 18 (Settings): goal behavior, the suggestions gate and
+			// the optional progress cache all read the settings service.
 			return new FrontendController(
 				$container->get( GoalEngine::class ),
 				$container->get( GoalRepository::class ),
 				$container->get( CartIntegration::class ),
 				$container->get( MessageEngine::class ),
-				$container->get( SuggestionEngine::class )
+				$container->get( SuggestionEngine::class ),
+				$container->get( Settings::class )
 			);
 		} );
 

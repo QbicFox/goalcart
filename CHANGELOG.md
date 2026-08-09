@@ -387,6 +387,88 @@ ships in the lazy-loaded Analytics chunk). No database changes.
 
 ---
 
+### Phase 18 — Settings (100% complete)
+
+- **P18-T01 General** — The Settings page now carries the full store
+surface: enable/disable, currency display (symbol / code / name, consumed
+by the storefront widget's `currencyDisplay` config and the frontend JS
+number/currency formatter), default goal behavior (all | first | closest
+— `FrontendController::active_goals_for()` narrows the `/progress` goal
+set per the setting, with 'closest' picking the eligible goal with the
+highest percentage) and the store-wide default calculation mode
+(`goalcart_default_calculation_mode` filter in `Settings::register()` +
+`Goal::default_calculation_mode()` — amount/category/composite goals
+follow the store mode, quantity-style goals keep their type defaults;
+each default preserves the pre-Phase-18 behavior).
+- **P18-T02 Frontend** — Display locations are now driven by the
+`frontend_locations` setting (was hard-coded in `ProgressUI`): the widget
+mounts only in the configured locations (cart / mini-cart / checkout /
+shop / product / sticky), the sticky bar is gated on the 'sticky'
+location, `frontend_template`, `frontend_animation`, `frontend_bar_height`
+and the color tokens continue to drive the Appearance page, and
+`frontend_mobile` (show | hide) now reaches the storefront — `ProgressUI`
+prints the `mobile` config key and `assets/js/frontend.js` applies a
+`goalcart-mobile-hidden` class (CSS media query) that hides every widget
+under 600 px.
+- **P18-T03 Goal Calculation** — `CartContext::from_cart()` now honors
+five inclusion toggles, each defaulting to the pre-Phase-18 engine
+behavior: `include_tax` (line taxes fold into the subtotal/discounted
+bases), `include_discount` (when off, the discounted basis ignores
+discounts), `include_shipping` (total basis keeps/drops the shipping
+line; legacy `exclude_shipping` still wins), `include_sale` and
+`include_virtual` (sale/virtual items are dropped from the snapshot and
+the bases rebased onto the remaining lines). `CartItem` gained `line_tax`;
+`CartIntegration::context()` merges the settings into the build args
+(explicit caller args win) and stays optional-injected so `new
+CartIntegration()` callers keep working. `Goal::default_calculation_mode()`
+became filterable for the P18-T01 store mode.
+- **P18-T04 Performance** — Three switches: `performance_caching` (a
+10-second `goalcart_progress_*` transient keyed by cart snapshot + goal
+ids + behavior + suggestions serves repeat widget polls without
+re-evaluating every goal; off by default), `analytics_enabled` (the new
+settings toggle gates the Phase 16 Tracker — the analytics config is only
+printed and events only recorded while on) and `performance_suggestions`
+(the storefront suggestion list is emptied when off; filterable via
+`goalcart_suggestions_enabled`).
+- **P18-T05 Advanced** — `debug_mode` + `logging_enabled` power a new
+`includes/Utils/Logger.php` (mirrors the reference plugin's Utils-folder
+convention): a best-effort `goalcart-debug.log` in `WP_CONTENT_DIR`
+(error lines always write when logging is on, debug lines only with debug
+mode), with the log path surfaced in the settings GET meta and REST
+failures logged through `BaseController::error()`. The Settings page
+rewrite (`admin-app/src/routes/Settings.tsx`) is a five-tab layout —
+General / Frontend / Goal Calculation / Performance / Advanced — with a
+documented-hooks reference (developer hooks toggle) rendered from
+`HookManager::documented_hooks()`.
+- `Settings::save()` no-op fix — `update_option()` returns `false` both
+for real failures and for unchanged values; saving identical settings no
+longer 500s (`goalcart_settings_save_failed`), it is treated as a
+successful save (the reference plugin carries the same latent bug; this
+implementation fixes it).
+- Added files: `includes/Utils/Logger.php`, `tests/settings-test.php`;
+extended `includes/Settings/Settings.php`, `includes/REST/SettingsController.php`,
+`includes/Goals/{Goal,CartItem,CartContext}.php`, `includes/Cart/CartIntegration.php`,
+`includes/Frontend/ProgressUI.php`, `includes/REST/{FrontendController,BaseController}.php`,
+`includes/Analytics/Tracker.php`, `includes/Hooks/HookManager.php`,
+`includes/Plugin.php`, `assets/js/frontend.js`, `assets/css/frontend.css`,
+`admin-app/src/{types.ts,api/settings.ts,routes/Settings.tsx,routes/Appearance.tsx}`.
+- **Verification:** `php -l` clean; new settings suite 119/119 (defaults
+for every new key preserving pre-Phase-18 behavior, REST schema + sanitizer
+normalization, calculation toggles incl. line-tax folding and
+discount/shipping/sale/virtual drops, the store-mode filter, locations +
+sticky gating, currencyDisplay/mobile config, goal behavior all/first/closest,
+progress caching write + read + sentinel serve, analytics/suggestions toggles,
+developer-hooks meta, Logger gating + cleanup — every DB write rolled back
+and residue asserted); regressions: engine 75/75, cart-integration 22/22,
+frontend 53/53, analytics 72/72, rest-api 120/120, reward 72/72, message
+47/47, suggestion 28/28, preview 90/90, analytics-dashboard 82/82; `node
+--check` on the JS; `npm run typecheck`, `npm run lint` and `npm run build`
+all pass (Settings ships as its own lazy chunk). No database changes.
+
+**Overall project progress: 65%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 4% + Phase 15 2% + Phase 16 2% + Phase 17 2% + Phase 18 weight 2% × 100%).
+
+---
+
 ## [0.0.0] — Unreleased (project scaffold)
 
 - Initial `AGENT.md` execution roadmap.

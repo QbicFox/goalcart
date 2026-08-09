@@ -287,6 +287,10 @@
 	/**
 	 * Format a money amount with the store currency.
 	 *
+	 * Phase 18 (Settings → General → currency display): the config's
+	 * currencyDisplay (symbol | code | name) becomes Intl's currencyDisplay
+	 * option, so stores can show $100, USD 100 or US dollars.
+	 *
 	 * @param {number} value    Amount.
 	 * @param {string} currency ISO code.
 	 * @return {string}
@@ -296,10 +300,32 @@
 			return new Intl.NumberFormat( undefined, {
 				style: 'currency',
 				currency: currency || cfg.currency || 'USD',
+				currencyDisplay: cfg.currencyDisplay || 'symbol',
 			} ).format( Number( value ) || 0 );
 		} catch ( error ) {
 			return String( value );
 		}
+	}
+
+	/**
+	 * Whether the widgets should hide on this viewport.
+	 *
+	 * Phase 18 (Settings → Frontend → mobile behavior): when the config
+	 * says 'hide', widgets are suppressed on small screens (the WP admin
+	 * mobile breakpoint of 782px).
+	 *
+	 * @return {boolean}
+	 */
+	function mobileHidden() {
+		if ( ! cfg || cfg.mobile !== 'hide' ) {
+			return false;
+		}
+
+		if ( ! window.matchMedia ) {
+			return false;
+		}
+
+		return window.matchMedia( '(max-width: 782px)' ).matches;
 	}
 
 	/**
@@ -723,6 +749,13 @@
 		container.classList.toggle( 'goalcart-widget--no-anim', false === cfg.animation );
 		container.replaceChildren();
 
+		// Phase 18 (mobile behavior): hide the widget on small screens.
+		if ( mobileHidden() ) {
+			container.classList.add( 'goalcart-widget--mobile-hidden' );
+			return;
+		}
+		container.classList.remove( 'goalcart-widget--mobile-hidden' );
+
 		if ( ! goal ) {
 			container.classList.add( 'goalcart-widget--empty' );
 			return;
@@ -759,7 +792,8 @@
 			}
 		}
 
-		if ( ! goal || ! hasProgress || stickyDismissed ) {
+		// Phase 18 (mobile behavior): the sticky bar hides too.
+		if ( ! goal || ! hasProgress || stickyDismissed || mobileHidden() ) {
 			bar.classList.remove( 'goalcart-sticky--visible' );
 			bar.setAttribute( 'aria-hidden', 'true' );
 			bar.replaceChildren();
@@ -889,6 +923,12 @@
 	function init() {
 		bindCartEvents();
 		bindSuggestionTracking();
+
+		// Phase 18 (mobile behavior): re-render when the viewport crosses
+		// the mobile breakpoint so hidden widgets appear/disappear live.
+		if ( cfg.mobile === 'hide' ) {
+			window.addEventListener( 'resize', refresh );
+		}
 
 		refresh();
 
