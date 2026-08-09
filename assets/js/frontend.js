@@ -141,6 +141,14 @@
 			safe( function () {
 				var payload = JSON.parse( request.responseText );
 				if ( payload && payload.data ) {
+					// Self-healing tracking nonce: every /progress response
+					// carries a freshly minted goalcart_track nonce. Adopt it
+					// before the next event report so a cached page's expired
+					// or foreign nonce can never block analytics for the rest
+					// of the session.
+					if ( tracking && payload.data.tracking_nonce ) {
+						tracking.nonce = payload.data.tracking_nonce;
+					}
 					done( payload.data );
 				}
 			} );

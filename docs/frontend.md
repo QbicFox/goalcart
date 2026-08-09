@@ -269,6 +269,14 @@ The endpoint + nonce guard the `/track` route; `sessionId` is the
 anonymous session cookie (32-hex, HttpOnly, SameSite=Lax — never an IP or
 any PII) that groups all of one visitor's events.
 
+The nonce is **self-healing**: every `/progress` response carries a
+freshly minted `tracking_nonce` (the same `goalcart_track` action) and
+the widget JS adopts it before reporting the next event. The page's own
+nonce is baked into the HTML and expires after its 12-hour tick — or is
+bound to another user's session on a cached page — so without the
+refresh those conditions would turn every subsequent `/track` report
+into a `goalcart_invalid_nonce` (403).
+
 ## Events reported
 
 | Event | When | Dedup |

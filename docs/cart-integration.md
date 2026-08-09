@@ -99,11 +99,17 @@ All covered by `tests/cart-integration-test.php` (22 checks, run with
 | Contents change | A changed line set rebuilds with the new values |
 | Preloaded categories | The map keys by the canonical product id; variations inherit parent categories |
 | Unknown product ids | Batched lookup degrades gracefully (no fatal, empty categories) |
-| Null cart | No `WC()->cart` available → an empty `CartContext` |
+| Custom REST request | Missing `WC()->cart` after WooCommerce init → load the WooCommerce session/cart once, then build the real `CartContext` |
+| Null cart | WooCommerce unavailable, too early, or non-cart CLI/cron/admin context → an empty `CartContext` |
 
 The live-cart behavior with real products (query count, variation inheritance)
 was additionally verified against the real WordPress 7.0.2 + WooCommerce 11.0.0
 environment (read-only; no products created, no database writes).
+
+`php tests/cart-rest-initialization-test.php` is a database-independent
+regression for the custom REST lifecycle: guest/member session restoration,
+empty and populated carts, repeated reads, add/remove/quantity mutations, and
+variation lines.
 
 ## 6. Design decisions
 

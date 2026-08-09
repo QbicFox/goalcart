@@ -111,8 +111,9 @@ final class CartIntegration {
 	 * (see the timing note in CartContext::from_cart).
 	 *
 	 * @param \WC_Cart|null          $cart Live cart; falls back to WC()->cart
-	 *                                     and yields an empty context when
-	 *                                     WooCommerce is not available.
+	 *                                     after safely initializing it for a
+	 *                                     REST request; yields an empty context
+	 *                                     when WooCommerce is not available.
 	 * @param array<string, mixed>   $args CartContext::from_cart() args
 	 *                                     (currency, user_id, is_guest,
 	 *                                     exclude_shipping).
@@ -120,7 +121,9 @@ final class CartIntegration {
 	 */
 	public function context( ?\WC_Cart $cart = null, array $args = array() ) {
 		if ( null === $cart ) {
-			if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			$cart = $this->live_cart();
+
+			if ( null === $cart ) {
 				// No cart available: serve (and memoize) an empty snapshot so
 				// every caller in the request sees the same instance.
 				if ( ! isset( $this->cache['empty'] ) ) {
@@ -129,11 +132,10 @@ final class CartIntegration {
 
 				return $this->cache['empty'];
 			}
-
-			$cart = WC()->cart;
 		}
 
 		$key = $this->cache_key( $cart, $args );
+
 
 		if ( isset( $this->cache[ $key ] ) ) {
 			return $this->cache[ $key ];
@@ -152,6 +154,44 @@ final class CartIntegration {
 		$this->cache[ $key ] = $context;
 
 		return $context;
+	}
+
+	/**
+	 * Return the live WooCommerce cart, loading its session for REST requests.
+	 *
+	 * WooCommerce initializes carts automatically for frontend and AJAX
+	 * requests, but deliberately skips that work for custom REST routes. The
+	 * public progress endpoint is therefore allowed to reach this method with
+	 * a valid customer cart stored in the WooCommerce session while
+	 * `WC()->cart` is still null. Treating that state as an empty cart turns
+	 * real progress into zero.
+	 *
+	 * `wc_load_cart()` is idempotent and is only called after WooCommerce has
+	 * initialized, only during REST requests, and only when the cart is
+	 * missing. Store API requests that already loaded a cart, normal
+	 * storefront/AJAX requests, admin screens, cron, CLI, and explicit-cart
+	 * callers do not initialize it again.
+	 *
+	 * @return \WC_Cart|null
+	 */
+	protected function live_cart() {
+		if ( ! function_exists( 'WC' ) || ! WC() ) {
+			return null;
+		}
+
+		if ( WC()->cart instanceof \WC_Cart ) {
+			return WC()->cart;
+		}
+
+		$is_rest_request = defined( 'REST_REQUEST' ) && REST_REQUEST;
+		$wc_initialized  = function_exists( 'did_action' )
+			&& did_action( 'woocommerce_init' );
+
+		if ( $is_rest_request && $wc_initialized && function_exists( 'wc_load_cart' ) ) {
+			wc_load_cart();
+		}
+
+		return WC()->cart instanceof \WC_Cart ? WC()->cart : null;
 	}
 
 	/**

@@ -503,7 +503,8 @@ exposes only the minimum data the widgets need:
         "conflict": { "resolved": true, "reason": "" }
       }
     ],
-    "currency": "IRR"
+    "currency": "IRR",
+    "tracking_nonce": "<fresh goalcart_track nonce — see below>"
   },
   "meta": { "total_goals": 1 }
 }
@@ -570,6 +571,15 @@ Notes:
   the shopper adds or removes items. `assets/js/frontend.js` additionally
   cache-busts each poll with a `?_=<timestamp>` parameter (both are
   asserted by `tests/frontend-test.php`).
+- **Self-healing tracking nonce** — every response carries
+  `tracking_nonce`, a freshly minted `goalcart_track` nonce (the same
+  action the page config prints). The storefront JS adopts it on each
+  poll before reporting events, so a cached page serving an expired or
+  another user's nonce — or a tab left open past the nonce's ~12 h
+  lifetime — self-heals within one poll instead of producing a stream of
+  `goalcart_invalid_nonce` (403) log lines. The nonce is withheld while
+  `analytics_enabled` is off (the same gate as the config print) and is
+  never stored in the optional progress cache.
 - The Phase 11 progress widgets poll this endpoint and re-render on every
   WooCommerce cart event (`added_to_cart`, `updated_cart_totals`,
   `wc_fragments_refreshed`, …), driven by the config object printed by
@@ -612,6 +622,12 @@ analytics signals, not audited counters — a visitor holding the page
 nonce could inflate completion counts. The JS dedupes per page session
 and the `suggested_product_added` conversion is server-verified; treat
 the dashboard metrics accordingly.
+
+The nonce is **self-healing**: `GET /progress` mints a fresh
+`goalcart_track` nonce per response and the storefront JS adopts it
+before the next event report, so cached pages and long-lived tabs
+recover within one poll instead of logging `goalcart_invalid_nonce`
+(403).
 
 Response: `{ "data": { "id": 42 } }`. Errors: `goalcart_invalid_nonce`
 (403), `goalcart_tracking_disabled` (403), `rest_invalid_param` (400,

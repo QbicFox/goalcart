@@ -7,6 +7,7 @@
 
 namespace GoalCart\REST;
 
+use GoalCart\Analytics\Tracker;
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Goals\CartContext;
 use GoalCart\Goals\ConflictResolver;
@@ -192,6 +193,14 @@ class FrontendController extends BaseController {
 			$cached = get_transient( $cache_key );
 
 			if ( is_array( $cached ) ) {
+				// The cached payload never stores the tracking nonce (the
+				// write path below strips it), so re-inject a fresh one here
+				// — a cached payload can never serve a stale or another
+				// user's nonce.
+				if ( isset( $cached['data'] ) && is_array( $cached['data'] ) ) {
+					$cached['data']['tracking_nonce'] = $this->tracking_nonce();
+				}
+
 				$cached_response = rest_ensure_response( $cached );
 				$this->prevent_progress_caching( $cached_response );
 
@@ -223,6 +232,13 @@ class FrontendController extends BaseController {
 			array(
 				'goals'    => $items,
 				'currency' => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
+				// Self-healing tracking nonce: a freshly minted goalcart_track
+				// nonce rides on every progress response so the storefront JS
+				// can adopt it before reporting events — a cached page serving
+				// an expired or another user's nonce self-heals within one
+				// poll instead of producing a stream of 403s. See
+				// tracking_nonce().
+				'tracking_nonce' => $this->tracking_nonce(),
 			),
 			array(
 				'total_goals' => count( $items ),
@@ -230,12 +246,49 @@ class FrontendController extends BaseController {
 		);
 
 		if ( $caching ) {
-			set_transient( $cache_key, $response->get_data(), self::PROGRESS_CACHE_TTL );
+			// Cache the envelope WITHOUT the tracking nonce: the nonce is
+			// regenerated fresh on every read (see the cache-hit branch
+			// above), so a cached payload can never serve a stale or
+			// another user's nonce.
+			$cache_payload = $response->get_data();
+			unset( $cache_payload['data']['tracking_nonce'] );
+			set_transient( $cache_key, $cache_payload, self::PROGRESS_CACHE_TTL );
 		}
 
 		$this->prevent_progress_caching( $response );
 
 		return $response;
+	}
+
+	/**
+	 * A fresh tracking nonce for the storefront analytics endpoint.
+	 *
+	 * The tracking nonce baked into a cached page expires after its
+	 * 12-hour tick and can be bound to another user's session, which turns
+	 * every subsequent `/track` report into `goalcart_invalid_nonce` (403).
+	 * The progress payload therefore mints a fresh nonce on every poll and
+	 * frontend.js adopts it before the next event report.
+	 *
+	 * The gate mirrors the master toggles of Tracker::tracking_enabled()
+	 * (which additionally applies the goalcart_tracking_enabled filter —
+	 * not re-applied here; the /track handler enforces it anyway, so a
+	 * disabled-by-filter store simply drops events). Keep the two gates in
+	 * sync if a third toggle is ever added.
+	 *
+	 * @return string
+	 */
+	protected function tracking_nonce() {
+		// Mirrors the master toggles of Tracker::tracking_enabled() — keep
+		// the two in sync if a third toggle is ever added.
+		if ( ! $this->settings->get( 'enabled', true ) || ! $this->settings->get( 'analytics_enabled', true ) ) {
+			return '';
+		}
+
+		if ( ! class_exists( Tracker::class ) ) {
+			return '';
+		}
+
+		return wp_create_nonce( Tracker::TRACK_NONCE_ACTION );
 	}
 
 	/**

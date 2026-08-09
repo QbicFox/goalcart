@@ -487,6 +487,14 @@ try {
 
 	$settings->set( 'default_goal_behavior', 'all' );
 
+	// Deterministic baseline for the tracking-nonce assertions below: the
+	// stored option may hold non-default values, so pin the toggles the
+	// nonce gate reads (restored after the caching checks).
+	$analytics_before = $settings->get( 'analytics_enabled', true );
+	$enabled_before   = $settings->get( 'enabled', true );
+	$settings->set( 'analytics_enabled', true );
+	$settings->set( 'enabled', true );
+
 	// ---- Progress caching (P18-T04) ----
 	// Build the context through the same integration (memoized per cart +
 	// args, so the key in the test matches the controller's).
@@ -517,18 +525,28 @@ try {
 	$resp = $frontend->handle_progress( $req, $cart );
 	$cached = get_transient( $cache_key );
 	check( 'cache written when caching on', is_array( $cached ) && 2 === count( $cached['data']['goals'] ) );
+	// The self-healing tracking nonce is never stored in the cache (it is
+	// regenerated fresh on every read), so a cached payload can never
+	// serve a stale or another user's nonce.
+	check( 'cache never stores the tracking nonce', is_array( $cached ) && ! isset( $cached['data']['tracking_nonce'] ) );
 
-	// The read path serves the stored payload verbatim (sentinel overwrite).
+	// The read path serves the stored payload (sentinel overwrite), with a
+	// fresh tracking nonce injected on top.
 	$sentinel = array(
 		'data' => array( 'goals' => array(), 'currency' => 'USD' ),
 		'meta' => array( 'total_goals' => 0 ),
 	);
 	set_transient( $cache_key, $sentinel, 10 );
-	$resp = $frontend->handle_progress( $req, $cart );
-	check( 'cached payload served on read', $sentinel === $resp->get_data() );
+	$resp          = $frontend->handle_progress( $req, $cart );
+	$served        = $resp->get_data();
+	$sentinel_nonce = isset( $served['data']['tracking_nonce'] ) ? (string) $served['data']['tracking_nonce'] : '';
+	check( 'cached payload served on read', $served['data']['goals'] === $sentinel['data']['goals'] && $served['data']['currency'] === $sentinel['data']['currency'] && $served['meta'] === $sentinel['meta'] );
+	check( 'cached payload gets a fresh tracking nonce', '' !== $sentinel_nonce && false !== wp_verify_nonce( $sentinel_nonce, Tracker::TRACK_NONCE_ACTION ) );
 
 	delete_transient( $cache_key );
 	$settings->set( 'performance_caching', false );
+	$settings->set( 'analytics_enabled', $analytics_before );
+	$settings->set( 'enabled', $enabled_before );
 } finally {
 	$wpdb->query( 'ROLLBACK' );
 }

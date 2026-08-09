@@ -190,6 +190,37 @@ check( 'progress response forbids caching (no-store)', false !== strpos( $progre
 $frontend_js = (string) file_get_contents( GOALCART_PATH . 'assets/js/frontend.js' );
 check( 'frontend JS cache-busts the progress poll', false !== strpos( $frontend_js, "'_='" ) && false !== strpos( $frontend_js, 'Date.now()' ) );
 
+check( 'frontend JS adopts the payload tracking nonce', false !== strpos( $frontend_js, 'tracking_nonce' ) && false !== strpos( $frontend_js, 'tracking.nonce' ) );
+
+// Self-healing tracking nonce (Phase 28): every /progress response mints
+// a fresh goalcart_track nonce so frontend.js can adopt it after a
+// cached page served an expired or foreign one. The toggles are pinned
+// on (deterministic baseline — the stored option may hold non-default
+// values) so the assertions are environment-independent.
+$analytics_before = $settings->get( 'analytics_enabled', true );
+$enabled_before   = $settings->get( 'enabled', true );
+$settings->set( 'analytics_enabled', true );
+$settings->set( 'enabled', true );
+
+try {
+	$pinned_resp = $container->get( \GoalCart\REST\FrontendController::class )
+		->handle_progress( new \WP_REST_Request( 'GET', '/goalcart/v1/progress' ) );
+	$pinned_data = $pinned_resp->get_data();
+	$tracking_nonce = isset( $pinned_data['data']['tracking_nonce'] ) ? (string) $pinned_data['data']['tracking_nonce'] : '';
+	check( 'progress payload carries a tracking nonce', '' !== $tracking_nonce );
+	check( 'tracking nonce verifies for the track action', false !== wp_verify_nonce( $tracking_nonce, \GoalCart\Analytics\Tracker::TRACK_NONCE_ACTION ) );
+
+	// The nonce is withheld while analytics are off (mirrors the config print).
+	$settings->set( 'analytics_enabled', false );
+	$off_resp = $container->get( \GoalCart\REST\FrontendController::class )
+		->handle_progress( new \WP_REST_Request( 'GET', '/goalcart/v1/progress' ) );
+	$off_data = $off_resp->get_data();
+	check( 'analytics off withholds the tracking nonce', empty( $off_data['data']['tracking_nonce'] ) );
+} finally {
+	$settings->set( 'analytics_enabled', $analytics_before );
+	$settings->set( 'enabled', $enabled_before );
+}
+
 // ---------------------------------------------------------------------------
 // 6. Enabled gate (P11-T03 — master toggle + filter)
 // ---------------------------------------------------------------------------

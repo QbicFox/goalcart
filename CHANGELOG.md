@@ -63,6 +63,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Storefront analytics went quiet after a cached page or long-lived
+  tab — every `/track` report failed with `goalcart_invalid_nonce`
+  (403).** The tracking nonce is baked into the page HTML and is only
+  valid for ~12–24 h, bound to the rendering user's session; a cached
+  page serving an expired or another user's nonce (or a tab left open
+  past the lifetime) turned every subsequent event report into a 403.
+  The public `GET /goalcart/v1/progress` payload now mints a fresh
+  `goalcart_track` nonce (`tracking_nonce`) on every response and
+  `assets/js/frontend.js` adopts it before reporting the next event —
+  pages self-heal within one poll. The nonce is withheld while
+  `analytics_enabled` is off and is never stored in the optional
+  progress cache (it is re-injected fresh on every cache read), so a
+  cached payload can never serve a stale or another user's nonce.
+  `tests/frontend-test.php` and `tests/settings-test.php` assert the
+  payload nonce and both cache paths. Also removed a leftover
+  `error_log()` debug line in `CartIntegration::live_cart()` that
+  referenced an undefined variable.
 - **Storefront progress went stale after cart changes — the widget kept
   showing the previous cart's numbers.** WP core only sends `Cache-Control`
   headers for cookie-authenticated REST requests, so the guest
