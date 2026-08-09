@@ -168,7 +168,7 @@ excluded from the detailed listing but noted where relevant.
 | `api/client.ts` | `apiFetch<T>()` — fetch helper: `X-WP-Nonce` header from boot data, `credentials: include`, JSON parsing, `ApiError` with status/code/data, unwraps the `{ data, meta, pagination }` envelope. |
 | `api/reports.ts` | Report endpoints: `fetchOverview()`, `regenerateReports()`. |
 | `api/reportPages.ts` | Paginated report fetchers + `PaginatedEnvelope`. |
-| `api/settings.ts` | `fetchSettings()`, `saveSettings()`. |
+| `api/settings.ts` | `fetchSettingsEnvelope()`, `saveSettings()`. |
 | `api/data.ts` | Data management endpoints (status, cleanup, export). |
 | `api/synonyms.ts` | Synonym endpoints. |
 | `api/notifications.ts` | Notification rules endpoints. |

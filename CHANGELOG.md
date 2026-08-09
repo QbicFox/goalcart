@@ -63,6 +63,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Saved settings sometimes did not show when opening the Settings page.**
+  Three consumers shared the `['settings']` TanStack Query cache but
+  disagreed on its shape: the Settings page cached the REST envelope
+  `{ data, meta }`, while the Appearance page wrote a **raw** settings
+  object under the same key on save, and the preview dialogs read the
+  raw shape. After an Appearance save, opening Settings within the
+  60 s stale window served the mismatched cache, `data?.data` resolved
+  to `undefined`, and the form fell back to defaults — the saved
+  settings looked “not shown” (and a Settings save corrupted the
+  Appearance/preview reads the same way). Every consumer now reads and
+  writes the envelope shape: Appearance uses `fetchSettingsEnvelope` and
+  writes `{ data: saved, meta }`, the preview dialogs read
+  `settingsQuery.data?.data`, and the raw `fetchSettings()` helper was
+  removed so the mismatch cannot reappear.
 - **Storefront widgets showed only one goal when a campaign was active —
   its other milestones were invisible.** The widget layer rendered a
   single “featured” goal per container plus a tiny milestone ladder

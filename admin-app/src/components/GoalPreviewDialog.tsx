@@ -77,7 +77,7 @@ export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogPr
     }),
   });
 
-  const settings = settingsQuery.data;
+  const settings = settingsQuery.data?.data;
   const resolvedTemplate: FrontendTemplate =
     controls.template || settings?.frontend_template || 'basic';
   const tokens = tokensFromSettings(settings);

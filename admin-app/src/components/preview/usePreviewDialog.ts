@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchPreview } from '../../api/preview';
-import { fetchSettings } from '../../api/settings';
+import { fetchSettingsEnvelope } from '../../api/settings';
 import type { FrontendTemplate, PreviewSimulated } from '../../types';
 import { PRESET_PERCENTS, defaultControls } from './types';
 import type { PreviewControlsValue, PreviewPreset } from './types';
@@ -116,7 +116,10 @@ export function usePreviewDialog<T extends { id: number }>({
     placeholderData: (previous) => previous,
   });
 
-  const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: fetchSettings });
+  // The shared `['settings']` cache is the envelope shape `{ data, meta }`
+  // (the same shape the Settings/Appearance pages use), so the dialogs
+  // read the settings off `data` like everywhere else.
+  const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: fetchSettingsEnvelope });
 
   return { controls, patch, applyPreset, previewQuery, settingsQuery };
 }

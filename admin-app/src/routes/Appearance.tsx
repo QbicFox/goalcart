@@ -20,7 +20,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
 
-import { fetchSettings, saveSettings } from '../api/settings';
+import { fetchSettingsEnvelope, saveSettings } from '../api/settings';
 import type { FrontendTemplate, GoalCartSettings } from '../types';
 import PageContainer from '../components/PageContainer';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
@@ -276,7 +276,13 @@ function LivePreview({ form }: { form: Partial<GoalCartSettings> }) {
                       background: step.done ? tokens.accent : tokens.border,
                     }}
                   />
-                  <Typography sx={{ fontSize: 12, fontWeight: 500, color: step.done ? tokens.text : '#646970' }}>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: step.done ? tokens.text : '#646970',
+                    }}
+                  >
                     {step.target}
                   </Typography>
                 </Stack>
@@ -370,14 +376,19 @@ export default function Appearance() {
   const queryClient = useQueryClient();
   const { notify } = useSnackbar();
 
+  // The shared `['settings']` cache is the envelope shape `{ data, meta }`
+  // (the same shape the Settings page reads and writes) — never the raw
+  // settings object. Mixing shapes under one query key made the Settings
+  // page read `data?.data` as undefined after an Appearance save and fall
+  // back to defaults, hiding the saved values.
   const settingsQuery = useQuery({
     queryKey: ['settings'],
-    queryFn: fetchSettings,
+    queryFn: fetchSettingsEnvelope,
   });
 
   const { control, handleSubmit, reset } = useForm<GoalCartSettings>({
     defaultValues: DEFAULT_SETTINGS,
-    values: settingsQuery.data,
+    values: settingsQuery.data?.data,
   });
 
   // Live form values for the preview (reacts to every keystroke/slider).
@@ -387,7 +398,14 @@ export default function Appearance() {
     mutationFn: (values: GoalCartSettings) => saveSettings(values),
     onSuccess: (saved) => {
       notify(__('Appearance saved.', 'goalcart'));
-      void queryClient.setQueryData(['settings'], saved);
+
+      // Keep the envelope shape in the shared cache so the Settings page
+      // (and the preview dialogs) still find `data` after this save, then
+      // refetch so the meta (debug log path, hooks reference) stays fresh
+      // — the same post-save refresh the Settings page performs.
+      const meta = settingsQuery.data?.meta ?? {};
+      void queryClient.setQueryData(['settings'], { data: saved, meta });
+      void settingsQuery.refetch();
     },
     onError: (error: Error) => {
       notify(error.message, 'error');
@@ -428,9 +446,7 @@ export default function Appearance() {
       title={__('Appearance', 'goalcart')}
       description={__('Customize how the cart progress UI looks on your storefront.', 'goalcart')}
     >
-      <form
-        onSubmit={handleSubmit((values) => saveMutation.mutate(values as GoalCartSettings))}
-      >
+      <form onSubmit={handleSubmit((values) => saveMutation.mutate(values as GoalCartSettings))}>
         <Stack spacing={3}>
           <Grid container spacing={3}>
             <Grid item xs={12} lg={7}>
@@ -469,13 +485,28 @@ export default function Appearance() {
                                 <CardActionArea
                                   onClick={() => field.onChange(template.value)}
                                   aria-pressed={selected}
-                                  sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}
+                                  sx={{
+                                    p: 2,
+                                    height: '100%',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                  }}
                                 >
                                   <Box sx={{ width: '100%', flex: '1 1 auto', mb: 1.5 }}>
-                                    <TemplateThumb template={template.value} tokens={tokensOf(watched)} />
+                                    <TemplateThumb
+                                      template={template.value}
+                                      tokens={tokensOf(watched)}
+                                    />
                                   </Box>
-                                  <Stack direction="row" alignItems="center" spacing={0.75} sx={{ width: '100%' }}>
-                                    {selected && <CheckCircleIcon color="primary" fontSize="small" />}
+                                  <Stack
+                                    direction="row"
+                                    alignItems="center"
+                                    spacing={0.75}
+                                    sx={{ width: '100%' }}
+                                  >
+                                    {selected && (
+                                      <CheckCircleIcon color="primary" fontSize="small" />
+                                    )}
                                     <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                                       {template.label}
                                     </Typography>
@@ -509,22 +540,46 @@ export default function Appearance() {
               <Controller
                 name="frontend_accent"
                 control={control}
-                render={({ field }) => <ColorField label={__('Accent', 'goalcart')} value={field.value} onChange={field.onChange} />}
+                render={({ field }) => (
+                  <ColorField
+                    label={__('Accent', 'goalcart')}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
               <Controller
                 name="frontend_bg"
                 control={control}
-                render={({ field }) => <ColorField label={__('Background', 'goalcart')} value={field.value} onChange={field.onChange} />}
+                render={({ field }) => (
+                  <ColorField
+                    label={__('Background', 'goalcart')}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
               <Controller
                 name="frontend_border"
                 control={control}
-                render={({ field }) => <ColorField label={__('Border', 'goalcart')} value={field.value} onChange={field.onChange} />}
+                render={({ field }) => (
+                  <ColorField
+                    label={__('Border', 'goalcart')}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
               <Controller
                 name="frontend_text"
                 control={control}
-                render={({ field }) => <ColorField label={__('Text', 'goalcart')} value={field.value} onChange={field.onChange} />}
+                render={({ field }) => (
+                  <ColorField
+                    label={__('Text', 'goalcart')}
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
             </Stack>
           </Paper>
@@ -644,7 +699,9 @@ export default function Appearance() {
               startIcon={<PaletteIcon />}
               sx={{ minWidth: 160 }}
             >
-              {saveMutation.isPending ? __('Saving…', 'goalcart') : __('Save appearance', 'goalcart')}
+              {saveMutation.isPending
+                ? __('Saving…', 'goalcart')
+                : __('Save appearance', 'goalcart')}
             </Button>
             <Button
               variant="outlined"
@@ -658,7 +715,8 @@ export default function Appearance() {
                 const resetValues: GoalCartSettings = {
                   ...DEFAULT_SETTINGS,
                   enabled: watched.enabled ?? DEFAULT_SETTINGS.enabled,
-                  fullscreen_dashboard: watched.fullscreen_dashboard ?? DEFAULT_SETTINGS.fullscreen_dashboard,
+                  fullscreen_dashboard:
+                    watched.fullscreen_dashboard ?? DEFAULT_SETTINGS.fullscreen_dashboard,
                 };
                 reset(resetValues);
                 saveMutation.mutate(resetValues);

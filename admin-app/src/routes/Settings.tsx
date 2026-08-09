@@ -52,7 +52,10 @@ function BooleanField({
       render={({ field }) => (
         <FormControlLabel
           control={
-            <Switch checked={Boolean(field.value)} onChange={(event) => field.onChange(event.target.checked)} />
+            <Switch
+              checked={Boolean(field.value)}
+              onChange={(event) => field.onChange(event.target.checked)}
+            />
           }
           label={
             <Box>
@@ -144,7 +147,12 @@ function LocationField({
             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
               {description}
             </Typography>
-            <Stack direction="row" flexWrap="wrap" useFlexGap sx={{ gap: 0, '& .MuiFormControlLabel-root': { mr: 0, minWidth: 190 } }}>
+            <Stack
+              direction="row"
+              flexWrap="wrap"
+              useFlexGap
+              sx={{ gap: 0, '& .MuiFormControlLabel-root': { mr: 0, minWidth: 190 } }}
+            >
               {LOCATION_OPTIONS.map((option) => {
                 const checked = selected.includes(option.value);
 
@@ -201,7 +209,10 @@ function HookRow({ type, hook, description }: { type: string; hook: string; desc
         label={type}
       />
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="body2" sx={{ fontWeight: 600, fontFamily: 'monospace', wordBreak: 'break-all' }}>
+        <Typography
+          variant="body2"
+          sx={{ fontWeight: 600, fontFamily: 'monospace', wordBreak: 'break-all' }}
+        >
           {hook}
         </Typography>
         <Typography variant="caption" color="text.secondary">
@@ -317,7 +328,11 @@ export default function Settings() {
             sx={{ borderBottom: 1, borderColor: 'divider' }}
           >
             <Tab icon={<TuneIcon />} iconPosition="start" label={__('General', 'goalcart')} />
-            <Tab icon={<StorefrontIcon />} iconPosition="start" label={__('Frontend', 'goalcart')} />
+            <Tab
+              icon={<StorefrontIcon />}
+              iconPosition="start"
+              label={__('Frontend', 'goalcart')}
+            />
             <Tab
               icon={<CalculateIcon />}
               iconPosition="start"
@@ -411,7 +426,10 @@ export default function Settings() {
                         value: 'discounted_subtotal',
                         label: __('Discounted subtotal', 'goalcart'),
                       },
-                      { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+                      {
+                        value: 'total',
+                        label: __('Cart total (incl. tax & shipping)', 'goalcart'),
+                      },
                     ]}
                   />
                   <BooleanField
@@ -605,7 +623,11 @@ export default function Settings() {
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         {__('Log file', 'goalcart')}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}
+                      >
                         {meta.log_path}
                       </Typography>
                     </Box>
