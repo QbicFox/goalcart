@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import Alert from '@mui/material/Alert';
 import Autocomplete from '@mui/material/Autocomplete';
 import Box from '@mui/material/Box';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -191,6 +192,16 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
 
           {type === 'free_gift' && (
             <>
+              {!meta.gift_product_id && (
+                <Grid item xs={12}>
+                  <Alert severity="warning" variant="outlined">
+                    {__(
+                      'Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront.',
+                      'goalcart'
+                    )}
+                  </Alert>
+                </Grid>
+              )}
               <Grid item xs={12} sm={6} lg={4}>
                 <EntityAutocomplete
                   label={__('Gift product', 'goalcart')}

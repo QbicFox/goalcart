@@ -559,6 +559,249 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 }
 
 // ---------------------------------------------------------------------------
+// 11. Free gift cart protection (shoppers cannot remove an earned gift)
+//
+// The gift line is marked with goalcart_gift*, and the engine makes it
+// shopper-proof: zero-priced, no remove link, quantity locked to 1, and a
+// removed gift is restored while its goal still grants it. These checks
+// exercise the guard paths and filters against a non-persisted WC_Cart
+// (no add_to_cart, so no session/customer dependency — consistent with the
+// suite's read-only contract).
+// ---------------------------------------------------------------------------
+echo "\n== 11. Free gift cart protection ==\n";
+
+$re = \GoalCart\Plugin::instance()->reward_engine();
+
+check( 'gift remove-link filter wired', false !== has_filter( 'woocommerce_cart_item_remove_link', array( $re, 'hide_gift_remove_link' ) ) );
+check( 'gift quantity filter wired', false !== has_filter( 'woocommerce_cart_item_quantity', array( $re, 'lock_gift_quantity' ) ) );
+check( 'gift removal-restore action wired', false !== has_action( 'woocommerce_cart_item_removed', array( $re, 'restore_removed_gift' ) ) );
+
+if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
+	$gift_product = new \WC_Product_Simple();
+	$gift_product->set_name( 'Gift' );
+	$gift_product->set_price( 50 );
+	$gift_product->set_regular_price( 50 );
+
+	$normal_product = new \WC_Product_Simple();
+	$normal_product->set_name( 'Normal' );
+	$normal_product->set_price( 25 );
+	$normal_product->set_regular_price( 25 );
+
+	$cart = new \WC_Cart();
+	$cart->cart_contents['gift1'] = array(
+		'key'                 => 'gift1',
+		'product_id'          => 42,
+		'variation_id'        => 0,
+		'quantity'            => 1,
+		'data'                => $gift_product,
+		'goalcart_gift'       => true,
+		'goalcart_gift_goal'  => 1,
+		'goalcart_gift_product' => 42,
+		'line_subtotal'       => 50.0,
+		'line_total'          => 50.0,
+	);
+	$cart->cart_contents['norm1'] = array(
+		'key'           => 'norm1',
+		'product_id'    => 7,
+		'variation_id'  => 0,
+		'quantity'      => 1,
+		'data'          => $normal_product,
+		'line_subtotal' => 25.0,
+		'line_total'    => 25.0,
+	);
+
+	// zero_gift_prices zeroes only gift lines.
+	$re->zero_gift_prices( $cart );
+	check( 'gift line price zeroed', near( 0, $cart->cart_contents['gift1']['data']->get_price() ) );
+	check( 'normal line price untouched', near( 25, $cart->cart_contents['norm1']['data']->get_price() ) );
+
+	// Quantity lock: gift lines are locked to 1, normal lines pass through.
+	$locked = $re->lock_gift_quantity( '<input />', 'gift1', $cart->cart_contents['gift1'] );
+	check( 'gift quantity locked to 1', false !== strpos( (string) $locked, 'value="1"' ) );
+	check( 'gift quantity hidden qty posts', false !== strpos( (string) $locked, 'cart[gift1][qty]' ) );
+	check( 'normal quantity passes through', '<input />' === $re->lock_gift_quantity( '<input />', 'norm1', $cart->cart_contents['norm1'] ) );
+
+	// Remove-link hiding needs the global cart (the filter only receives
+	// the item key). Restore the previous instance afterwards.
+	$previous_cart = WC()->cart;
+	WC()->cart = $cart;
+	try {
+		check( 'gift remove link hidden', '' === $re->hide_gift_remove_link( '<a>x</a>', 'gift1' ) );
+		check( 'normal remove link kept', '<a>x</a>' === $re->hide_gift_remove_link( '<a>x</a>', 'norm1' ) );
+		check( 'unknown key remove link kept', '<a>x</a>' === $re->hide_gift_remove_link( '<a>x</a>', 'nope' ) );
+	} finally {
+		WC()->cart = $previous_cart;
+	}
+
+	// restore_removed_gift: non-gift removals are never restored.
+	$cart->removed_cart_contents['norm1'] = $cart->cart_contents['norm1'];
+	unset( $cart->cart_contents['norm1'] );
+	$re->restore_removed_gift( 'norm1', $cart );
+	check( 'non-gift removal not restored', ! isset( $cart->cart_contents['norm1'] ) );
+	unset( $cart->removed_cart_contents['norm1'] );
+
+	// restore_removed_gift: a gift whose goal no longer exists is not
+	// restored (repository lookup fails before any cart mutation).
+	$cart->removed_cart_contents['gift1'] = $cart->cart_contents['gift1'];
+	unset( $cart->cart_contents['gift1'] );
+	$cart->removed_cart_contents['gift1']['goalcart_gift_goal'] = 99999999;
+	$re->restore_removed_gift( 'gift1', $cart );
+	check( 'orphaned goal gift not restored', ! isset( $cart->cart_contents['gift1'] ) );
+
+	// Engine-initiated removal (stale reward) is not restored: the
+	// removing_gift flag suppresses the restore handler. remove_cart_item is
+	// session-free, so no WC session/customer is required.
+	$cart->cart_contents['gift1'] = $cart->removed_cart_contents['gift1'];
+	unset( $cart->removed_cart_contents['gift1'] );
+
+	$remove = new \ReflectionMethod( $re, 'remove_gift_line' );
+	$remove->invoke( $re, $cart, 99999999 );
+	check( 'engine removal drops the gift line', ! isset( $cart->cart_contents['gift1'] ) );
+	check( 'engine removal not restored', ! isset( $cart->cart_contents['gift1'] ) && isset( $cart->removed_cart_contents['gift1'] ) );
+} else {
+	echo "SKIP free gift cart protection (WC_Cart/WC_Product_Simple unavailable)\n";
+}
+
+// ---------------------------------------------------------------------------
+// 12. Free gift removal restore (positive path, transactional)
+//
+// A shopper removing an earned gift line triggers
+// 'woocommerce_cart_item_removed', and restore_removed_gift re-adds it
+// while the goal still grants an automatic free-gift reward. Runs against
+// a real goal row + purchasable product inside a rolled-back transaction;
+// the cart session is swapped for an in-memory mock so no session row can
+// be written to the database.
+// ---------------------------------------------------------------------------
+echo "\n== 12. Free gift removal restore (positive path) ==\n";
+
+if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_exists( 'WC_Session' ) ) {
+	$container  = \GoalCart\Plugin::instance()->container();
+	$goal_repo  = $container->get( \GoalCart\Goals\GoalRepository::class );
+	$wpdb       = $GLOBALS['wpdb'];
+	$goals_table = \GoalCart\Database\Schema::table( 'goals' );
+
+	$real_session = WC()->session;
+	// In-memory session so WC_Cart_Session::set_session() writes to memory
+	// instead of the real session handler (no DB residue).
+	WC()->session = new class extends \WC_Session {};
+
+	$wpdb->query( 'START TRANSACTION' );
+	try {
+		// A purchasable, in-stock simple product (direct insert like the
+		// analytics suite — wp_insert_post fires hooks we do not need).
+		$now = current_time( 'mysql' );
+		$wpdb->insert( $wpdb->posts, array(
+			'ID'                => 900020 + wp_rand( 1, 9999 ),
+			'post_author'       => 0,
+			'post_date'         => $now,
+			'post_date_gmt'     => gmdate( 'Y-m-d H:i:s' ),
+			'post_content'      => '',
+			'post_title'        => 'Gift product (test)',
+			'post_excerpt'      => '',
+			'post_status'       => 'publish',
+			'comment_status'    => 'open',
+			'ping_status'       => 'open',
+			'post_name'         => 'goalcart-gift-test-' . wp_rand( 1000, 9999 ),
+			'post_modified'     => $now,
+			'post_modified_gmt' => gmdate( 'Y-m-d H:i:s' ),
+			'post_type'         => 'product',
+		) );
+		$product_id = (int) $wpdb->insert_id;
+		update_post_meta( $product_id, '_price', '50' );
+		update_post_meta( $product_id, '_regular_price', '50' );
+		update_post_meta( $product_id, '_stock_status', 'instock' );
+		update_post_meta( $product_id, '_manage_stock', 'no' );
+		update_post_meta( $product_id, '_virtual', 'no' );
+		update_post_meta( $product_id, '_downloadable', 'no' );
+
+		$wpdb->insert( $goals_table, array(
+			'name'             => 'Gift Goal (test)',
+			'status'           => 'active',
+			'type'             => 'amount',
+			'target'           => 100,
+			'calculation_mode' => 'subtotal',
+			'reward_type'      => 'free_gift',
+			'reward_meta'      => wp_json_encode( array(
+				'gift_product_id' => $product_id,
+				'gift_add_mode'   => 'automatic',
+			) ),
+			'created_at' => current_time( 'mysql' ),
+			'updated_at' => current_time( 'mysql' ),
+		) );
+		$goal_id = (int) $wpdb->insert_id;
+
+		check( 'gift restore goal seeded', $goal_id > 0 && $product_id > 0 );
+		check( 'gift restore product available', RewardSafety::gift_product_available( $product_id ) );
+
+		$cart = new \WC_Cart();
+		// A qualifying line (goal target is 100; cart subtotal 200).
+		$qual = new \WC_Product_Simple();
+		$qual->set_name( 'Qualifier' );
+		$qual->set_price( 200 );
+		$qual->set_regular_price( 200 );
+		$cart->cart_contents['q1'] = array(
+			'key'           => 'q1',
+			'product_id'    => 5,
+			'variation_id'  => 0,
+			'quantity'      => 1,
+			'data'          => $qual,
+			'line_subtotal' => 200.0,
+			'line_total'    => 200.0,
+		);
+		// The earned gift line, marked by the engine.
+		$cart->cart_contents['giftX'] = array(
+			'key'                   => 'giftX',
+			'product_id'            => $product_id,
+			'variation_id'          => 0,
+			'quantity'              => 1,
+			'data'                  => wc_get_product( $product_id ),
+			'goalcart_gift'         => true,
+			'goalcart_gift_goal'    => $goal_id,
+			'goalcart_gift_product' => $product_id,
+			'line_subtotal'         => 50.0,
+			'line_total'            => 50.0,
+		);
+
+		// The shopper removes the gift: remove_cart_item fires
+		// 'woocommerce_cart_item_removed', and the engine's handler must
+		// re-add it (the goal is active and still grants the reward). The
+		// restored line lives under a fresh generated cart key, so it is
+		// located by its goal marker.
+		$cart->remove_cart_item( 'giftX' );
+		$restored_key = null;
+		foreach ( $cart->get_cart() as $key => $item ) {
+			if ( ! empty( $item['goalcart_gift_goal'] ) && $goal_id === (int) $item['goalcart_gift_goal'] ) {
+				$restored_key = $key;
+				break;
+			}
+		}
+		check( 'removed gift restored by the engine', null !== $restored_key );
+		check( 'restored gift keeps the goal marker', null !== $restored_key && $goal_id === (int) $cart->cart_contents[ $restored_key ]['goalcart_gift_goal'] );
+		check( 'restored gift is zero-priced', null !== $restored_key && isset( $cart->cart_contents[ $restored_key ]['data'] ) && $cart->cart_contents[ $restored_key ]['data'] instanceof \WC_Product && near( 0, $cart->cart_contents[ $restored_key ]['data']->get_price() ) );
+
+		// The qualifying line survived untouched.
+		check( 'qualifying line survives', isset( $cart->cart_contents['q1'] ) );
+
+		// Deactivating the goal turns the next removal into a permanent one.
+		// This check simulates the admin's separate request: sync_cart was
+		// never called in this test, so the repository's per-request
+		// active-goal cache is unpopulated and the priority-20
+		// calculate_totals listener reads a fresh query. Do NOT add a
+		// sync_cart call before this — the stale cache would re-add the
+		// gift mid-request and break the assertion (that only happens with
+		// same-request DB mutations, which production never does).
+		$wpdb->update( $goals_table, array( 'status' => 'inactive' ), array( 'id' => $goal_id ) );
+		$cart->remove_cart_item( $restored_key );
+		check( 'removed gift not restored once the goal is inactive', null !== $restored_key && ! isset( $cart->cart_contents[ $restored_key ] ) );
+	} finally {
+		$wpdb->query( 'ROLLBACK' );
+		WC()->session = $real_session;
+	}
+} else {
+	echo "SKIP free gift removal restore (WC classes unavailable)\n";
+}
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 echo "\n==========================================\n";

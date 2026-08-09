@@ -63,6 +63,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Free-gift rewards are now shopper-proof — and actually get added.**
+  Two gaps fixed. (1) When the reward type is free gift, the gift is now
+  added to the cart **with a zero price** as soon as the goal is complete:
+  `FreeGiftApplicator::apply()` stamps the gift line with the
+  `goalcart_gift_product` marker and `RewardEngine::zero_gift_prices()`
+  zeroes gift lines during totals calculation (priority-10 hook before
+  sync, plus a re-zero after the adding pass). (2) Shoppers can no longer
+  remove an earned gift from the cart: the remove link is hidden
+  (`woocommerce_cart_item_remove_link`), the quantity is locked to 1 with
+  a hidden input (`woocommerce_cart_item_quantity`), and a gift line a
+  shopper removes while its goal still grants an automatic free gift is
+  **restored immediately** (`woocommerce_cart_item_removed` →
+  `RewardEngine::restore_removed_gift()`, which re-checks the goal's
+  current state via a cache-free `find()` so deactivated goals are never
+  re-granted — the engine's own revocations are suppressed via the
+  removing-gift flag). Restored lines are re-zeroed on the spot. The goal
+  builder now warns when a free-gift reward has no gift product selected
+  (goal #1484 on this store was configured as free gift with an empty
+  `reward_meta`, so the engine correctly refused to add anything).
+  `tests/reward-test.php` gained the full protection matrix (94 checks):
+  remove-link/quantity/restore wiring, zero-pricing, quantity lock,
+  remove-link hiding, non-gift and orphaned-goal removals not restored,
+  engine revocation not restored, and the transactional positive restore
+  path (gift re-added with marker + zero price, permanent removal once
+  the goal is inactive). Note: the remove-link/quantity filters are
+  classic cart-table hooks, so on WooCommerce Blocks carts the shopper
+  still sees the UI affordances — but the engine-level
+  `woocommerce_cart_item_removed` restore blocks the removal there too,
+  because Blocks mutations funnel through `WC_Cart`.
 - **The analytics dashboard showed "No analytics yet" even with recorded
   events.** The date filter built `created_at <= 'YYYY-MM-DD'` with the
   raw date-only `to` bound; MySQL casts a bare date to midnight, so every

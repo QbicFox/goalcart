@@ -35,6 +35,13 @@ defined( 'ABSPATH' ) || exit;
  *  - 'woocommerce_before_calculate_totals'  zero automatic-gift prices
  *  - 'woocommerce_cart_calculate_fees'      apply percentage/fixed fees
  *  - 'woocommerce_package_rates'            apply free shipping
+ *  - 'woocommerce_cart_item_remove_link'    hide the remove link of gift
+ *                                           lines (shoppers cannot remove
+ *                                           an earned gift)
+ *  - 'woocommerce_cart_item_quantity'       lock gift lines to quantity 1
+ *  - 'woocommerce_cart_item_removed'        re-add a gift line a shopper
+ *                                           removed while its goal still
+ *                                           grants it
  *
  * Reward safety (P05-T03) is enforced here and in RewardSafety:
  *  - duplicates / stacking   -> first reward of each type wins unless the
@@ -128,6 +135,15 @@ final class RewardEngine {
 	protected $syncing = false;
 
 	/**
+	 * True while the engine itself removes a gift line (stale reward,
+	 * empty cart, disabled plugin). 'woocommerce_cart_item_removed' must
+	 * not re-add a gift the engine deliberately revoked.
+	 *
+	 * @var bool
+	 */
+	protected $removing_gift = false;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param GoalEngine|null        $engine           Goal engine.
@@ -156,6 +172,13 @@ final class RewardEngine {
 		$hooks->add_action( 'woocommerce_before_calculate_totals', array( $this, 'zero_gift_prices' ), 10 );
 		$hooks->add_action( 'woocommerce_cart_calculate_fees', array( $this, 'apply_discount_fees' ), 20 );
 		$hooks->add_filter( 'woocommerce_package_rates', array( $this, 'apply_free_shipping' ), 100, 2 );
+
+		// Automatic gifts are shopper-proof: the remove link is hidden, the
+		// quantity is locked to 1, and a removed gift line is restored on
+		// the spot while its goal still grants it.
+		$hooks->add_filter( 'woocommerce_cart_item_remove_link', array( $this, 'hide_gift_remove_link' ), 10, 2 );
+		$hooks->add_filter( 'woocommerce_cart_item_quantity', array( $this, 'lock_gift_quantity' ), 10, 3 );
+		$hooks->add_action( 'woocommerce_cart_item_removed', array( $this, 'restore_removed_gift' ), 10, 2 );
 	}
 
 	/**
@@ -374,6 +397,12 @@ final class RewardEngine {
 			$this->reconcile_coupons( $cart, $results );
 			$this->reconcile_gifts( $cart, $results );
 
+			// A gift added by reconcile_gifts in THIS pass must already be
+			// free — the priority-10 zeroing hook ran before the gift
+			// existed. Re-zeroing here (idempotent) covers the adding pass;
+			// the earlier hook covers every later pass.
+			$this->zero_gift_prices( $cart );
+
 			return $results;
 		} finally {
 			$this->syncing = false;
@@ -588,16 +617,142 @@ final class RewardEngine {
 	/**
 	 * Remove the automatic gift line for a goal from the cart.
 	 *
+	 * The engine-removal flag is set around the mutation so the
+	 * 'woocommerce_cart_item_removed' handler (restore_removed_gift) never
+	 * re-adds a gift the engine deliberately revoked.
+	 *
 	 * @param \WC_Cart $cart    Live cart.
 	 * @param int      $goal_id Goal id.
 	 * @return void
 	 */
 	protected function remove_gift_line( \WC_Cart $cart, $goal_id ) {
-		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
-				$cart->remove_cart_item( $key );
+		$this->removing_gift = true;
+
+		try {
+			foreach ( $cart->get_cart() as $key => $item ) {
+				if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
+					$cart->remove_cart_item( $key );
+				}
 			}
+		} finally {
+			$this->removing_gift = false;
 		}
+	}
+
+	/**
+	 * Hide the remove link of automatic gift lines.
+	 *
+	 * Hooked to 'woocommerce_cart_item_remove_link'. Returning '' removes
+	 * the “Remove” affordance from the cart table for gift lines.
+	 *
+	 * @param string $link          Remove-link HTML.
+	 * @param string $cart_item_key Cart item key.
+	 * @return string
+	 */
+	public function hide_gift_remove_link( $link, $cart_item_key ) {
+		return $this->is_gift_cart_item( $cart_item_key ) ? '' : $link;
+	}
+
+	/**
+	 * Lock automatic gift lines to quantity 1.
+	 *
+	 * Hooked to 'woocommerce_cart_item_quantity'. Gift lines get a hidden
+	 * qty input (so the “Update cart” button keeps them at 1) instead of an
+	 * editable stepper — the shopper can neither change the gift quantity
+	 * nor remove it by zeroing it. Non-gift lines pass through untouched.
+	 *
+	 * @param mixed  $quantity      Quantity field HTML.
+	 * @param string $cart_item_key Cart item key.
+	 * @param array<string, mixed> $cart_item    Cart item array.
+	 * @return mixed
+	 */
+	public function lock_gift_quantity( $quantity, $cart_item_key, $cart_item ) {
+		if ( is_array( $cart_item ) && ! empty( $cart_item['goalcart_gift'] ) ) {
+			return sprintf(
+				'<div class="quantity goalcart-gift-quantity"><input type="hidden" name="cart[%1$s][qty]" value="1" />1</div>',
+				esc_attr( (string) $cart_item_key )
+			);
+		}
+
+		return $quantity;
+	}
+
+	/**
+	 * Re-add an automatic gift line a shopper removed.
+	 *
+	 * Hooked to 'woocommerce_cart_item_removed'. Shoppers cannot keep an
+	 * earned gift out of the cart: when a gift line is removed while its
+	 * goal is still active and still grants an automatic free-gift reward
+	 * with an available product, the line is restored immediately. apply()
+	 * is idempotent (the goal marker is re-checked on the line), and the
+	 * next totals pass reconciles if the goal stops qualifying. The engine's
+	 * own revocations (stale rewards, empty cart, disabled plugin) are
+	 * skipped via the removing_gift flag.
+	 *
+	 * @param string   $cart_item_key Removed cart item key.
+	 * @param \WC_Cart $cart          Live cart (removal already applied).
+	 * @return void
+	 */
+	public function restore_removed_gift( $cart_item_key, $cart ) {
+		if ( $this->removing_gift || ! $cart instanceof \WC_Cart ) {
+			return;
+		}
+
+		$removed = isset( $cart->removed_cart_contents[ $cart_item_key ] )
+			? $cart->removed_cart_contents[ $cart_item_key ]
+			: null;
+
+		if ( ! is_array( $removed ) || empty( $removed['goalcart_gift'] ) || empty( $removed['goalcart_gift_goal'] ) ) {
+			return;
+		}
+
+		if ( null === $this->repository ) {
+			return;
+		}
+
+		$goal_id = (int) $removed['goalcart_gift_goal'];
+		$goal    = $this->repository->find( $goal_id );
+
+		if ( ! $goal || ! $goal->is_active() ) {
+			return;
+		}
+
+		$reward = Reward::from_goal( $goal );
+
+		if ( Reward::TYPE_FREE_GIFT !== $reward->type()
+			|| ! $reward->is_gift_automatic()
+			|| $reward->gift_product_id() <= 0
+			|| ! RewardSafety::gift_product_available( $reward->gift_product_id() ) ) {
+			return;
+		}
+
+		$this->registry->applicator( Reward::TYPE_FREE_GIFT )->apply(
+			$reward,
+			RewardResult::available( $reward, $goal_id ),
+			$cart,
+			$goal_id
+		);
+
+		// The restored line is re-added at the product price; zero it right
+		// away (idempotent) so the gift is free even before the next totals
+		// pass runs the priority-10 zeroing hook.
+		$this->zero_gift_prices( $cart );
+	}
+
+	/**
+	 * Whether a cart item key refers to an engine-added gift line.
+	 *
+	 * @param mixed $cart_item_key Cart item key.
+	 * @return bool
+	 */
+	protected function is_gift_cart_item( $cart_item_key ) {
+		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			return false;
+		}
+
+		$item = WC()->cart->get_cart_item( (string) $cart_item_key );
+
+		return is_array( $item ) && ! empty( $item['goalcart_gift'] );
 	}
 
 	/**

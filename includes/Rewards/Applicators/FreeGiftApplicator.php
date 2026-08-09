@@ -83,8 +83,9 @@ final class FreeGiftApplicator implements RewardApplicator {
 			'',
 			array(),
 			array(
-				'goalcart_gift'      => true,
-				'goalcart_gift_goal' => (int) $goal_id,
+				'goalcart_gift'         => true,
+				'goalcart_gift_goal'    => (int) $goal_id,
+				'goalcart_gift_product' => (int) $gift_id,
 			)
 		);
 
