@@ -1,22 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import Accordion from '@mui/material/Accordion';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import AccordionSummary from '@mui/material/AccordionSummary';
+import PaletteIcon from '@mui/icons-material/Palette';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch';
+import StorefrontIcon from '@mui/icons-material/Storefront';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardActionArea from '@mui/material/CardActionArea';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import Chip from '@mui/material/Chip';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Grid from '@mui/material/Grid';
-import PaletteIcon from '@mui/icons-material/Palette';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import Select from '@mui/material/Select';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -28,9 +26,8 @@ import PreviewWidget from '../components/preview/PreviewWidget';
 import { tokensFromSettings } from '../components/preview/types';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import SchemaForm from '../templates/SchemaForm';
-import { campaignRenderer, goalRenderer } from '../templates/registry';
 import { templateById, useTemplates } from '../templates/useTemplates';
-import { bool, num, str } from '../templates/utils';
+import { bool } from '../templates/utils';
 import type {
   ProgressCampaign,
   ProgressGoal,
@@ -41,23 +38,7 @@ import type {
 
 const SCOPES: TemplateScope[] = ['goal', 'campaign'];
 
-/**
- * The card surface shared by every preview thumbnail and live preview —
- * mirrors the storefront `.goalcart` container driven by the resolved
- * template settings (accent/bg/border/text/radius).
- */
-function cardSurface(settings: TemplateSettingsValue) {
-  return {
-    background: str(settings, 'bg', '#ffffff'),
-    border: `1px solid ${str(settings, 'border', '#dcdcde')}`,
-    borderRadius: num(settings, 'radius', 10),
-    color: str(settings, 'text', '#1d2327'),
-    padding: '0.875rem 1rem',
-    fontSize: 13,
-  };
-}
-
-/** A sample in-progress goal for the thumbnails and live previews. */
+/** A sample in-progress goal for the live previews. */
 function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
   return {
     goal_id: 1,
@@ -85,7 +66,7 @@ function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
   };
 }
 
-/** Three sample milestones for the campaign thumbnails / previews. */
+/** Three sample milestones for the campaign previews. */
 function sampleMilestones(): ProgressGoal[] {
   return [
     sampleGoal({
@@ -118,275 +99,26 @@ function sampleMilestones(): ProgressGoal[] {
   ];
 }
 
-/** A goal-template thumbnail rendered by its real registry renderer. */
-function GoalThumb({
-  definition,
-  settings,
-  currency,
-}: {
-  definition: TemplateDefinition;
-  settings: TemplateSettingsValue;
-  currency: string;
-}) {
-  const Renderer = goalRenderer(definition.id);
-
-  return (
-    <Box sx={cardSurface(settings)}>
-      <Renderer
-        goal={sampleGoal({ template: definition.id })}
-        currency={currency}
-        settings={settings}
-        animation={false}
-      />
-    </Box>
-  );
-}
-
-/** A campaign-template thumbnail rendered by its real registry renderer. */
-function CampaignThumb({
-  definition,
-  settings,
-  currency,
-}: {
-  definition: TemplateDefinition;
-  settings: TemplateSettingsValue;
-  currency: string;
-}) {
-  const Renderer = campaignRenderer(definition.id);
-
-  if (!Renderer) {
-    return null;
-  }
-
-  const campaign: ProgressCampaign = {
-    campaign_id: 999,
-    name: __('Campaign', 'goalcart'),
-    template: definition.id,
-    settings,
-  };
-
-  return (
-    <Box sx={cardSurface(settings)}>
-      <Renderer
-        campaign={campaign}
-        goals={sampleMilestones().map((goal) => ({ ...goal, campaign_id: 999 }))}
-        currency={currency}
-        settings={settings}
-        animation={false}
-      />
-    </Box>
-  );
-}
-
-/** The "no campaign template" card thumbnail — plain per-goal cards. */
-function NoCampaignThumb() {
-  return (
-    <Stack spacing={0.75} sx={{ width: '100%' }}>
-      {[62, 40, 28].map((width) => (
-        <Box
-          key={width}
-          sx={{
-            height: 8,
-            borderRadius: 999,
-            background: '#dcdcde',
-            width: `${width}%`,
-            opacity: 0.8,
-          }}
-        />
-      ))}
-    </Stack>
-  );
-}
-
 /**
- * The scope default picker — one card per registered template (thumbnails
- * rendered through the template registry), plus the "no campaign
- * template" option for the campaign scope.
- */
-function ScopeTemplatePicker({
-  scope,
-  templates,
-  defaults,
-  drafts,
-  currency,
-  onSelect,
-}: {
-  scope: TemplateScope;
-  templates: TemplateDefinition[];
-  defaults: Record<TemplateScope, string>;
-  drafts: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
-  currency: string;
-  onSelect: (id: string) => void;
-}) {
-  const selected = defaults[scope];
-
-  const cardStyles = (isSelected: boolean) => ({
-    height: '100%',
-    border: isSelected ? '2px solid' : '1px solid',
-    borderColor: isSelected ? 'primary.main' : 'divider',
-    boxShadow: isSelected ? 3 : 0,
-    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-    '&:hover': { transform: 'translateY(-2px)', boxShadow: 2 },
-  });
-
-  const renderSelect = (id: string, thumb: React.ReactNode, label: string, caption: string) => {
-    const isSelected = selected === id;
-
-    return (
-      <Grid item xs={12} sm={6} md={4} key={id}>
-        <Card variant={isSelected ? 'elevation' : 'outlined'} sx={cardStyles(isSelected)}>
-          <CardActionArea
-            onClick={() => onSelect(id)}
-            aria-pressed={isSelected}
-            sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}
-          >
-            <Box sx={{ width: '100%', flex: '1 1 auto', mb: 1.5 }}>{thumb}</Box>
-            <Stack direction="row" alignItems="center" spacing={0.75} sx={{ width: '100%' }}>
-              {isSelected ? (
-                <CheckCircleIcon color="primary" fontSize="small" />
-              ) : (
-                <RadioButtonUncheckedIcon fontSize="small" color="disabled" />
-              )}
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                {label}
-              </Typography>
-            </Stack>
-            <Typography variant="caption" color="text.secondary">
-              {caption}
-            </Typography>
-          </CardActionArea>
-        </Card>
-      </Grid>
-    );
-  };
-
-  return (
-    <Grid container spacing={1.5}>
-      {scope === 'campaign' &&
-        renderSelect(
-          '',
-          <NoCampaignThumb />,
-          __('No campaign template', 'goalcart'),
-          __('Each milestone renders as its own goal card.', 'goalcart')
-        )}
-      {templates.map((definition) => {
-        const settings = drafts[scope][definition.id] ?? definition.settings;
-
-        return renderSelect(
-          definition.id,
-          scope === 'goal' ? (
-            <GoalThumb definition={definition} settings={settings} currency={currency} />
-          ) : (
-            <CampaignThumb definition={definition} settings={settings} currency={currency} />
-          ),
-          definition.label,
-          definition.description
-        );
-      })}
-    </Grid>
-  );
-}
-
-/**
- * The per-template appearance editors — one accordion per registered
- * template with the schema-driven form (the same SchemaForm the Goal and
- * Campaign builders use), plus a "reset to template defaults" action that
- * restores the factory schema defaults.
- */
-function TemplateSettingsAccordions({
-  scope,
-  templates,
-  defaults,
-  drafts,
-  onChange,
-  onReset,
-}: {
-  scope: TemplateScope;
-  templates: TemplateDefinition[];
-  defaults: Record<TemplateScope, string>;
-  drafts: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
-  onChange: (id: string, next: TemplateSettingsValue) => void;
-  onReset: (id: string) => void;
-}) {
-  const [expanded, setExpanded] = useState<string | null>(null);
-
-  return (
-    <Stack spacing={1}>
-      {templates.map((definition) => {
-        const isDefault = defaults[scope] === definition.id;
-
-        return (
-          <Accordion
-            key={definition.id}
-            expanded={expanded === definition.id}
-            onChange={(_event, isOpen) => setExpanded(isOpen ? definition.id : null)}
-            variant="outlined"
-            disableGutters
-            sx={{ '&:before': { display: 'none' } }}
-          >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1 } }}
-            >
-              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                {definition.label}
-              </Typography>
-              {isDefault && (
-                <Chip size="small" color="primary" variant="outlined" label={__('Default', 'goalcart')} />
-              )}
-              <Box sx={{ flex: 1 }} />
-              <Typography variant="caption" color="text.secondary">
-                {`v${definition.version}`}
-              </Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Stack spacing={2}>
-                <SchemaForm
-                  schema={definition.schema}
-                  value={drafts[scope][definition.id] ?? definition.settings}
-                  onChange={(next) => onChange(definition.id, next)}
-                />
-                <Box>
-                  <Button
-                    size="small"
-                    startIcon={<RestartAltIcon />}
-                    onClick={() => onReset(definition.id)}
-                  >
-                    {__('Reset to template defaults', 'goalcart')}
-                  </Button>
-                </Box>
-              </Stack>
-            </AccordionDetails>
-          </Accordion>
-        );
-      })}
-    </Stack>
-  );
-}
-
-/**
- * The live preview of the scope's default template with its current draft
- * appearance — rendered through PreviewWidget (the same component the
- * Phase 15 preview dialogs use), so what the merchant sees here matches
- * the storefront.
+ * The live preview of one template with its current draft appearance —
+ * rendered through PreviewWidget (the same component the Phase 15 preview
+ * dialogs use), so what the merchant sees here matches the storefront.
  */
 function ScopeLivePreview({
   scope,
-  defaults,
+  id,
   drafts,
   templates,
   tokens,
   currency,
 }: {
   scope: TemplateScope;
-  defaults: Record<TemplateScope, string>;
+  id: string;
   drafts: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
   templates: TemplateDefinition[];
   tokens: ReturnType<typeof tokensFromSettings>;
   currency: string;
 }) {
-  const id = defaults[scope];
-
   if (scope === 'campaign' && id === '') {
     return (
       <Alert severity="info" variant="outlined">
@@ -430,7 +162,7 @@ function ScopeLivePreview({
 
   return (
     <PreviewWidget
-      goals={sampleMilestones().map((goal) => ({ ...goal, campaign_id: 999 }))}
+      goals={sampleMilestones()}
       campaigns={[campaign]}
       currency={currency}
       tokens={tokens}
@@ -441,20 +173,83 @@ function ScopeLivePreview({
 }
 
 /**
+ * The single active template panel: the schema-driven appearance form (the
+ * same SchemaForm the Goal and Campaign builders use) plus a "reset to
+ * template defaults" action that restores the factory schema defaults.
+ * Only ever mounted for the template currently selected in the dropdown.
+ */
+function TemplateSettingsPanel({
+  scope,
+  definition,
+  drafts,
+  onChange,
+  onReset,
+}: {
+  scope: TemplateScope;
+  definition: TemplateDefinition;
+  drafts: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
+  onChange: (id: string, next: TemplateSettingsValue) => void;
+  onReset: (id: string) => void;
+}) {
+  return (
+    <Paper variant="outlined" sx={{ p: { xs: 2, md: 2.5 } }}>
+      <Stack spacing={2}>
+        <Box>
+          <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+            {__('Template appearance', 'goalcart')}
+          </Typography>
+          <Stack
+            direction="row"
+            alignItems="baseline"
+            justifyContent="space-between"
+            gap={1}
+            flexWrap="wrap"
+          >
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                {definition.label}
+              </Typography>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                {definition.description}
+              </Typography>
+            </Box>
+            <Typography variant="caption" color="text.secondary">
+              {`v${definition.version}`}
+            </Typography>
+          </Stack>
+        </Box>
+        <SchemaForm
+          schema={definition.schema}
+          value={drafts[scope][definition.id] ?? definition.settings}
+          onChange={(next) => onChange(definition.id, next)}
+        />
+        <Box>
+          <Button size="small" startIcon={<RestartAltIcon />} onClick={() => onReset(definition.id)}>
+            {__('Reset to template defaults', 'goalcart')}
+          </Button>
+        </Box>
+      </Stack>
+    </Paper>
+  );
+}
+
+/**
  * Appearance (pluggable template engine): the storefront progress UI is
- * now template-driven, independently for Goals and Campaigns.
+ * template-driven, independently for Goals and Campaigns.
  *
- *  - pick the scope default template (goals always render one; campaigns
- *    may render per-goal cards instead),
- *  - edit every registered template's default appearance through the
- *    generic schema-driven form — a new template registered on the
- *    backend automatically gets a working form here,
- *  - watch a live preview that resolves templates identically to the
- *    storefront (item override → scope default → legacy → fallback).
+ *  - Tabs switch between the Goal and Campaign scopes (only one is visible
+ *    at a time),
+ *  - a dropdown lists every registered template for the active scope,
+ *    defaulting to that scope's current default template,
+ *  - selecting a template shows only that template's live preview + the
+ *    schema-driven appearance form — mounted lazily, so no inactive
+ *    template's form ever sits in the DOM,
+ *  - the save action persists the scope default + every edited template's
+ *    appearance through `POST /goalcart/v1/settings` as `template_defaults`
+ *    + `template_settings` (identical semantics to the previous layout).
  *
- * Persisted through `POST /goalcart/v1/settings` as `template_defaults`
- * + `template_settings`; the legacy `frontend_*` surface stays honored by
- * the engine as the fallback for templates that were never configured.
+ * The legacy `frontend_*` surface stays honored by the engine as the
+ * fallback for templates that were never configured.
  */
 export default function Appearance() {
   const queryClient = useQueryClient();
@@ -472,6 +267,10 @@ export default function Appearance() {
       return 'USD';
     }
   }, []);
+
+  // Active tab: 0 = Goal, 1 = Campaign.
+  const [tab, setTab] = useState(0);
+  const scope = SCOPES[tab];
 
   // Working copy: scope defaults + per-template default appearance.
   // Seeded once from the registry payload, whose `settings` field already
@@ -503,9 +302,9 @@ export default function Appearance() {
       campaign: {},
     };
 
-    for (const scope of SCOPES) {
-      for (const definition of templates[scope]) {
-        next[scope][definition.id] = definition.settings;
+    for (const scopeItem of SCOPES) {
+      for (const definition of templates[scopeItem]) {
+        next[scopeItem][definition.id] = definition.settings;
       }
     }
 
@@ -552,12 +351,12 @@ export default function Appearance() {
     };
     let changed = false;
 
-    for (const scope of SCOPES) {
-      for (const definition of templates[scope]) {
-        const draft = drafts[scope][definition.id];
+    for (const scopeItem of SCOPES) {
+      for (const definition of templates[scopeItem]) {
+        const draft = drafts[scopeItem][definition.id];
 
         if (draft && JSON.stringify(draft) !== JSON.stringify(definition.settings)) {
-          merged[scope][definition.id] = draft;
+          merged[scopeItem][definition.id] = draft;
           changed = true;
         }
       }
@@ -590,16 +389,16 @@ export default function Appearance() {
       campaign: {},
     };
 
-    for (const scope of SCOPES) {
-      for (const definition of templates[scope]) {
-        next[scope][definition.id] = definition.settings;
+    for (const scopeItem of SCOPES) {
+      for (const definition of templates[scopeItem]) {
+        next[scopeItem][definition.id] = definition.settings;
       }
     }
 
     setDrafts(next);
   };
 
-  const resetTemplate = (scope: TemplateScope, id: string) => {
+  const resetTemplate = (id: string) => {
     const definition = templateById(templates, scope, id);
 
     if (!definition) {
@@ -622,6 +421,7 @@ export default function Appearance() {
         description={__('Customize how the cart progress UI looks on your storefront.', 'goalcart')}
       >
         <Stack spacing={2}>
+          <Skeleton variant="rounded" height={52} />
           <Skeleton variant="rounded" height={140} />
           <Skeleton variant="rounded" height={200} />
         </Stack>
@@ -644,6 +444,14 @@ export default function Appearance() {
     );
   }
 
+  const scopeTemplates = templates[scope];
+  const isCampaign = scope === 'campaign';
+
+  // The currently configured template for the active scope ('' = no
+  // campaign template). The dropdown is empty-able only for campaigns.
+  const selectedId = defaults[scope];
+  const definition = templateById(templates, scope, selectedId);
+
   return (
     <PageContainer
       title={__('Appearance', 'goalcart')}
@@ -653,76 +461,135 @@ export default function Appearance() {
       )}
     >
       <Stack spacing={3}>
-        {SCOPES.map((scope) => {
-          const scopeTemplates = templates[scope];
-          const isCampaign = scope === 'campaign';
+        <Tabs
+          value={tab}
+          onChange={(_event, next) => setTab(next)}
+          variant="fullWidth"
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+          aria-label={__('Template scope', 'goalcart')}
+        >
+          <Tab
+            id="appearance-tab-goal"
+            aria-controls="appearance-panel-goal"
+            icon={<RocketLaunchIcon />}
+            iconPosition="start"
+            label={__('Goal', 'goalcart')}
+          />
+          <Tab
+            id="appearance-tab-campaign"
+            aria-controls="appearance-panel-campaign"
+            icon={<StorefrontIcon />}
+            iconPosition="start"
+            label={__('Campaign', 'goalcart')}
+          />
+        </Tabs>
 
-          return (
-            <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }} key={scope}>
-              <Stack spacing={2.5}>
-                <Box>
-                  <Typography variant="h6" component="h3" gutterBottom>
-                    {isCampaign ? __('Campaigns', 'goalcart') : __('Goals', 'goalcart')}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {isCampaign
-                      ? __(
-                          'The default template that renders a whole campaign on the storefront (e.g. the milestone chain).',
-                          'goalcart'
-                        )
-                      : __(
-                          'The default template for every goal that does not pin its own on the Goal Builder.',
-                          'goalcart'
-                        )}
-                  </Typography>
-                </Box>
+        <Paper
+          variant="outlined"
+          role="tabpanel"
+          id={`appearance-panel-${scope}`}
+          aria-labelledby={`appearance-tab-${scope}`}
+          sx={{ p: { xs: 2.5, md: 3 } }}
+        >
+          <Stack spacing={2.5}>
+            <Box>
+              <Typography variant="h6" component="h3" gutterBottom>
+                {isCampaign ? __('Campaign template', 'goalcart') : __('Goal template', 'goalcart')}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {isCampaign
+                  ? __(
+                      'The default template that renders a whole campaign on the storefront (e.g. the milestone chain).',
+                      'goalcart'
+                    )
+                  : __(
+                      'The default template for every goal that does not pin its own on the Goal Builder.',
+                      'goalcart'
+                    )}
+              </Typography>
+            </Box>
 
-                <ScopeTemplatePicker
-                  scope={scope}
-                  templates={scopeTemplates}
-                  defaults={defaults}
-                  drafts={drafts}
-                  currency={currency}
-                  onSelect={(id) => setDefaults((prev) => ({ ...prev, [scope]: id }))}
-                />
+            {/* Template dropdown — list the active scope's registered templates. */}
+            <FormControl size="small" fullWidth>
+              <InputLabel id="appearance-template-label">
+                {isCampaign ? __('Campaign template', 'goalcart') : __('Goal template', 'goalcart')}
+              </InputLabel>
+              <Select
+                labelId="appearance-template-label"
+                label={isCampaign ? __('Campaign template', 'goalcart') : __('Goal template', 'goalcart')}
+                value={selectedId}
+                onChange={(event) =>
+                  setDefaults((prev) => ({ ...prev, [scope]: String(event.target.value) }))
+                }
+              >
+                {isCampaign && (
+                  <MenuItem value="">
+                    <em>{__('No campaign template', 'goalcart')}</em>
+                  </MenuItem>
+                )}
+                {scopeTemplates.map((template) => (
+                  <MenuItem key={template.id} value={template.id}>
+                    {template.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-                {/* Live preview of the scope default + its draft appearance. */}
-                <Box>
-                  <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                    {__('Live preview', 'goalcart')}
-                  </Typography>
-                  <Box sx={{ maxWidth: 440 }}>
-                    <ScopeLivePreview
-                      scope={scope}
-                      defaults={defaults}
-                      drafts={drafts}
-                      templates={scopeTemplates}
-                      tokens={tokens}
-                      currency={currency}
-                    />
-                  </Box>
-                </Box>
+            {scopeTemplates.length === 0 && (
+              <Alert severity="info" variant="outlined">
+                {__(
+                  'No templates are registered for this scope yet. Add one on the backend template registry.',
+                  'goalcart'
+                )}
+              </Alert>
+            )}
 
-                {/* Per-template default appearance (schema-driven). */}
-                <Box>
-                  <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-                    {__('Template appearances', 'goalcart')}
-                  </Typography>
-                  <TemplateSettingsAccordions
+            {!definition && !isCampaign && scopeTemplates.length > 0 && (
+              <Alert severity="warning" variant="outlined">
+                {__(
+                  'The stored default template is no longer registered. The storefront falls back to the Basic template until you pick another one here.',
+                  'goalcart'
+                )}
+              </Alert>
+            )}
+
+            {/* Live preview — always shown when a template is selected, or
+                for the campaign scope (where '' = no template is a valid choice). */}
+            {(definition || isCampaign) && (
+              <Box>
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{ display: 'block', mb: 1 }}
+                >
+                  {__('Live preview', 'goalcart')}
+                </Typography>
+                <Box sx={{ maxWidth: 440 }}>
+                  <ScopeLivePreview
                     scope={scope}
-                    templates={scopeTemplates}
-                    defaults={defaults}
+                    id={selectedId}
                     drafts={drafts}
-                    onChange={(id, next) =>
-                      setDrafts((prev) => ({ ...prev, [scope]: { ...prev[scope], [id]: next } }))
-                    }
-                    onReset={(id) => resetTemplate(scope, id)}
+                    templates={scopeTemplates}
+                    tokens={tokens}
+                    currency={currency}
                   />
                 </Box>
-              </Stack>
-            </Paper>
-          );
-        })}
+              </Box>
+            )}
+
+            {definition && (
+              <TemplateSettingsPanel
+                scope={scope}
+                definition={definition}
+                drafts={drafts}
+                onChange={(id, next) =>
+                  setDrafts((prev) => ({ ...prev, [scope]: { ...prev[scope], [id]: next } }))
+                }
+                onReset={resetTemplate}
+              />
+            )}
+          </Stack>
+        </Paper>
 
         <Stack direction="row" spacing={1.5}>
           <Button

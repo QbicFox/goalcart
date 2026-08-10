@@ -1052,6 +1052,20 @@ server-side. DB `0.4.0` migrates legacy `display_settings.template`
 onto `template_id` (+ empty `template_settings`) safely and
 idempotently, so existing goals upgrade with no visual change.
 
+### Template settings presentation (UI refinement of P12/P18)
+
+Purely presentational: the Appearance screen's two-card layout (image-radio
+picker + one accordion per template) was replaced by a Goal/Campaign tab
+bar with a single per-tab template dropdown. Each tab lists only that
+scope's registered templates by name (sourced from the same
+`GET /goalcart/v1/templates` payload), defaults to the scope's current
+default template, and mounts only the selected template's live preview +
+schema-driven appearance panel (the Goal/Campaign Builder override
+screens already used the equivalent dropdown + panel pattern). No change
+to the template contract, registry, storage shape, REST payloads or
+validation; save semantics (`template_defaults` + `template_settings`,
+divergence-only persistence) are byte-identical to before.
+
 ---
 
 # Phase 13 — Dynamic Messaging
