@@ -252,7 +252,7 @@ class SettingsController extends BaseController {
 			// Frontend (P18-T02).
 			'frontend_template'     => array(
 				'type' => 'string',
-				'enum' => array( 'basic', 'percentage', 'milestone', 'card' ),
+				'enum' => Settings::LEGACY_GOAL_TEMPLATES,
 			),
 			'frontend_animation'    => $bool,
 			'frontend_locations'    => array(
@@ -505,9 +505,7 @@ class SettingsController extends BaseController {
 				return array_values( array_unique( $cleaned ) );
 
 			case 'frontend_template':
-				$templates = array( 'basic', 'percentage', 'milestone', 'card' );
-
-				return in_array( $value, $templates, true ) ? $value : $defaults['frontend_template'];
+				return in_array( $value, Settings::LEGACY_GOAL_TEMPLATES, true ) ? $value : $defaults['frontend_template'];
 
 			case 'frontend_bar_height':
 				return min( 48, max( 4, (int) $value ) );

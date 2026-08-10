@@ -283,6 +283,43 @@ try {
 // mutated it) so the remaining sections run against the defaults.
 $settings->set_many( $all_before );
 
+// Self-heal (regression): a corrupted legacy frontend_template — a
+// pluggable template id like 'ring' back-synced by an older version
+// before the sync was removed — is normalized to the default on read.
+// Without this the Settings page echoes the out-of-enum value back and
+// the REST schema rejects the save with a 400. Wrapped in a transaction
+// so the option row always reverts, exactly like the section above.
+$wpdb->query( 'START TRANSACTION' );
+
+try {
+	$stored                      = get_option( Settings::OPTION_NAME, array() );
+	$stored                      = is_array( $stored ) ? $stored : array();
+	$stored['frontend_template'] = 'ring';
+	update_option( Settings::OPTION_NAME, $stored, false );
+	wp_cache_delete( Settings::OPTION_NAME, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+
+	$fresh = new Settings();
+	check( 'invalid frontend_template self-heals on read', 'basic' === $fresh->all()['frontend_template'] );
+
+	$stored['frontend_template'] = 'card';
+	update_option( Settings::OPTION_NAME, $stored, false );
+	wp_cache_delete( Settings::OPTION_NAME, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+
+	$fresh = new Settings();
+	check( 'valid frontend_template passes through', 'card' === $fresh->all()['frontend_template'] );
+} finally {
+	$wpdb->query( 'ROLLBACK' );
+
+	// ROLLBACK reverts the option row; drop the caches so later sections
+	// read the reverted (pre-block) value.
+	wp_cache_delete( Settings::OPTION_NAME, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+}
+
+$settings->set_many( $all_before );
+
 // ---------------------------------------------------------------------------
 // 3. Goal calculation toggles (P18-T03)
 // ---------------------------------------------------------------------------

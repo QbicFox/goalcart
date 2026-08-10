@@ -128,6 +128,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Saving the Settings page still failed with `Invalid parameter(s): frontend_template` (400) — the earlier sync fix left the already-corrupted stored value untouched.** The old back-sync wrote pluggable template ids (e.g. `ring`) into the legacy `frontend_template` option; removing the sync stopped *new* corruption, but a store whose option was already poisoned kept serving the out-of-enum value to the Settings page, which echoed it back and hit the REST enum schema. `Settings::all()` now self-heals on read: a stored `frontend_template` outside the four legacy enum values (`basic` | `percentage` | `milestone` | `card`) falls back to the default, so every consumer (Settings page, storefront, previews) stays schema-safe. The `TemplateEngine` already resolves `template_defaults.goal` before `frontend_template`, so the Appearance page's template selection (e.g. `ring`) is unaffected. `tests/settings-test.php` gained self-heal regression checks (128 checks).
 - **Saving the Settings page failed with `Invalid parameter(s): frontend_template` (400).**
   The `handle_save` method in `SettingsController` back-synced
   `template_defaults.goal` into the legacy `frontend_template` field, writing

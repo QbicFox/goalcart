@@ -36,6 +36,17 @@ class Settings {
 	const OPTION_NAME = 'goalcart_settings';
 
 	/**
+	 * The legacy storefront template variants the frontend_template
+	 * setting accepts (pre-pluggable-engine enum). Single source of truth
+	 * shared by the REST schema (SettingsController::save_args), the
+	 * sanitizer and the read-time self-heal, so the three can never drift
+	 * apart.
+	 *
+	 * @var array<int, string>
+	 */
+	const LEGACY_GOAL_TEMPLATES = array( 'basic', 'percentage', 'milestone', 'card' );
+
+	/**
 	 * Default settings, merged with stored values on load.
 	 * * The frontend_* keys are the Phase 12 progress-template surface
  * (template variant + appearance tokens consumed by the storefront
@@ -189,6 +200,20 @@ class Settings {
 		if ( null === $this->settings ) {
 			$stored = get_option( self::OPTION_NAME, array() );
 			$this->settings = wp_parse_args( is_array( $stored ) ? $stored : array(), $this->defaults );
+
+			// Self-heal a corrupted legacy frontend_template. The setting
+			// only accepts the four pre-engine enum values (basic | percentage
+			// | milestone | card) via the REST schema; a stored value outside
+			// that enum (e.g. a pluggable template id such as 'ring'
+			// back-synced by an older version before the sync was removed) is
+			// served to the Settings page and rejected on the next save with a
+			// 400. Falling back to the default keeps every consumer
+			// schema-safe — the TemplateEngine already resolves
+			// template_defaults.goal before frontend_template, so the
+			// storefront template selection is unaffected.
+			if ( ! in_array( (string) $this->settings['frontend_template'], self::LEGACY_GOAL_TEMPLATES, true ) ) {
+				$this->settings['frontend_template'] = $this->defaults['frontend_template'];
+			}
 		}
 
 		return $this->settings;
