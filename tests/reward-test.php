@@ -1099,6 +1099,22 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 }
 
 // ---------------------------------------------------------------------------
+// 14. Gift REST controller wiring (REST cart initialization fix)
+//
+// The storefront gift endpoint acquires the shopper's cart through
+// CartIntegration::live_cart() (which restores the session-backed cart on
+// custom REST routes instead of seeing a null WC()->cart). This guards
+// the container wiring — GiftController must receive CartIntegration — so
+// a future constructor change cannot silently reintroduce the
+// "goalcart_gift_empty_cart" 400 on every gift claim.
+// ---------------------------------------------------------------------------
+echo "\n== 14. Gift REST controller wiring ==\n";
+
+$gift_controller = \GoalCart\Plugin::instance()->container()->get( \GoalCart\REST\GiftController::class );
+check( 'gift controller resolves from the container', $gift_controller instanceof \GoalCart\REST\GiftController );
+check( 'gift controller uses CartIntegration::live_cart (not a bare WC()->cart check)', false !== strpos( (string) file_get_contents( dirname( __DIR__ ) . '/includes/REST/GiftController.php' ), 'cart_integration->live_cart()' ) );
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 echo "\n==========================================\n";

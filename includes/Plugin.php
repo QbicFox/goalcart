@@ -373,7 +373,10 @@ final class Plugin {
 		// rate limited — the storefront gift picker claims a chosen free
 		// gift through the reward engine.
 		$this->container->singleton( GiftController::class, function ( Container $container ) {
-			return new GiftController( $container->get( RewardEngine::class ) );
+			return new GiftController(
+				$container->get( RewardEngine::class ),
+				$container->get( CartIntegration::class )
+			);
 		} );
 
 		// Analytics dashboard endpoint (Phase 17): admin-only read of the

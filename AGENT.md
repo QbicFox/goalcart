@@ -1949,6 +1949,21 @@ claims the chosen gift through the new public `POST
 `TrackController`); `RewardEngine` reconciles the chosen gift like the
 automatic one. Builder: RewardFields multi-product picker for choose mode.
 
+**Gift picker 400 bug fix (Phase 32/Phase 6)** — claiming a chosen gift
+returned `goalcart_gift_empty_cart` ("Your cart is empty.") for every
+shopper. Root cause: WooCommerce does not initialize the cart for custom
+REST routes, and `GiftController::handle()` checked a bare `WC()->cart`
+(always null on REST), so the endpoint rejected every claim before the
+reward engine even ran. `GiftController` now acquires the cart through
+`CartIntegration::live_cart()` (made public) — the same Phase 6 single
+source of truth the progress endpoint uses, which restores the
+session-backed cart via idempotent `wc_load_cart()` guarded to REST
+requests after `woocommerce_init`. A genuinely empty cart still 400s
+correctly. Verified by `tests/cart-rest-initialization-test.php` (24
+checks — new `live_cart()` public-access checks for the guest, logged-in
+and pre-init states) plus container-wiring guards in
+`tests/reward-test.php` (124 checks).
+
 **Countdown** — goals and campaign groups ship a `countdown_end` ISO
 timestamp; the storefront runs a single global ticker that rewrites
 `[data-goalcart-end]` readouts every second (locale-aware digits). Gated

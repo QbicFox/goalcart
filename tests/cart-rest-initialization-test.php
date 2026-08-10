@@ -232,6 +232,13 @@ namespace {
 	check( 'session-backed guest cart restores one item', 1 === count( $context->items() ) );
 	check( 'restored CartContext subtotal is non-zero', 40.0 === $context->subtotal() );
 
+	// The storefront gift endpoint acquires the cart through the same
+	// live_cart() accessor (not a bare WC()->cart check, which would be
+	// null on custom REST routes and reject every claim as an empty cart).
+	$live = $integration->live_cart();
+	check( 'live_cart exposes the REST-initialized WC cart', $live instanceof WC_Cart );
+	check( 'gift-endpoint cart acquisition sees the session-backed item', null !== $live && 1 === count( $live->get_cart() ) );
+
 	$goal = new \GoalCart\Goals\Goal(
 		array(
 			'type'   => \GoalCart\Goals\Goal::TYPE_AMOUNT,
@@ -285,6 +292,9 @@ namespace {
 	$member_integration = new \GoalCart\Cart\CartIntegration();
 	$member_context     = $member_integration->context();
 	check( 'logged-in session-backed cart restores its item', 1 === count( $member_context->items() ) );
+
+	$member_live = $member_integration->live_cart();
+	check( 'live_cart returns the logged-in session-backed cart', $member_live instanceof WC_Cart && 1 === count( $member_live->get_cart() ) );
 	check( 'logged-in CartContext records the customer', 77 === $member_context->user_id() && ! $member_context->is_guest() );
 	check( 'logged-in cart produces non-zero progress input', 55.0 === $member_context->subtotal() );
 
@@ -294,6 +304,9 @@ namespace {
 	$early_context               = ( new \GoalCart\Cart\CartIntegration() )->context();
 	check( 'REST access before WooCommerce initialization stays safe', $early_context->is_empty() );
 	check( 'REST access before WooCommerce initialization does not load the cart', $load_count === $woocommerce->load_count );
+
+	$early_live = ( new \GoalCart\Cart\CartIntegration() )->live_cart();
+	check( 'live_cart stays null before WooCommerce init (gift endpoint degrades safely)', null === $early_live );
 
 	echo "\nChecks: {$checks}  Failures: {$failures}\n";
 	exit( $failures > 0 ? 1 : 0 );

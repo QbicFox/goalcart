@@ -194,6 +194,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   `tests/reward-test.php` grew to 122 checks (0 failures) with
   transactional coverage of stale removal, customer-line survival and
   choose-mode re-selection.
+- **Choosing a gift in the storefront picker no longer fails with
+  "Your cart is empty" (Phase 32/Phase 6).** `POST /goalcart/v1/gift`
+  rejected every claim with `goalcart_gift_empty_cart` because
+  WooCommerce does not initialize the cart for custom REST routes and
+  `GiftController::handle()` read a bare `WC()->cart` — always null on
+  REST — so the shopper's session-backed cart was invisible to the
+  endpoint. `GiftController` now acquires the cart through
+  `CartIntegration::live_cart()` (promoted from protected), the same
+  Phase 6 single source of truth the progress endpoint uses: it restores
+  the session-backed cart via idempotent `wc_load_cart()` guarded to REST
+  requests after `woocommerce_init`. Genuinely empty carts still return
+  the 400. Covered by new `live_cart()` public-access checks in
+  `tests/cart-rest-initialization-test.php` (24 checks) and container
+  wiring guards in `tests/reward-test.php` (124 checks).
 - **The analytics dashboard showed "No analytics yet" even with recorded
   events.** The date filter built `created_at <= 'YYYY-MM-DD'` with the
   raw date-only `to` bound; MySQL casts a bare date to midnight, so every

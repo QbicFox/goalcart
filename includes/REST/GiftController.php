@@ -7,6 +7,7 @@
 
 namespace GoalCart\REST;
 
+use GoalCart\Cart\CartIntegration;
 use GoalCart\Hooks\HookManager;
 use GoalCart\Rewards\RewardEngine;
 
@@ -26,6 +27,14 @@ defined( 'ABSPATH' ) || exit;
  * is guarded by the plugin's own gift nonce (minted into the frontend
  * config, adopted from every progress poll) plus per-IP rate limiting —
  * the same trust boundary as the track endpoint.
+ *
+ * The shopper's cart is acquired through CartIntegration::live_cart(), the
+ * same Phase 6 single source of truth the progress endpoint uses:
+ * WooCommerce does not initialize the cart for custom REST routes, so a
+ * bare `WC()->cart` check here would see a null cart and reject every
+ * claim with "Your cart is empty" even when the session holds a valid
+ * cart. live_cart() restores the session-backed cart for REST requests
+ * (idempotent wc_load_cart(), guarded to REST + initialized WooCommerce).
  */
 class GiftController extends BaseController {
 
@@ -44,12 +53,22 @@ class GiftController extends BaseController {
 	protected $rewards;
 
 	/**
+	 * Cart integration (single source of the cart snapshot; REST-safe
+	 * live-cart access).
+	 *
+	 * @var CartIntegration
+	 */
+	protected $cart_integration;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param RewardEngine $rewards Reward engine.
+	 * @param RewardEngine     $rewards          Reward engine.
+	 * @param CartIntegration  $cart_integration Cart snapshot service.
 	 */
-	public function __construct( RewardEngine $rewards ) {
-		$this->rewards = $rewards;
+	public function __construct( RewardEngine $rewards, CartIntegration $cart_integration ) {
+		$this->rewards          = $rewards;
+		$this->cart_integration = $cart_integration;
 	}
 
 	/**
@@ -128,11 +147,11 @@ class GiftController extends BaseController {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function handle( $request ) {
-		$cart = null;
-
-		if ( function_exists( 'WC' ) && WC() && WC()->cart instanceof \WC_Cart ) {
-			$cart = WC()->cart;
-		}
+		// WooCommerce skips cart initialization for custom REST routes;
+		// live_cart() restores the session-backed cart (wc_load_cart()) so
+		// the shopper's items are visible here, mirroring the progress
+		// endpoint.
+		$cart = $this->cart_integration->live_cart();
 
 		if ( null === $cart || empty( $cart->get_cart() ) ) {
 			return $this->error(

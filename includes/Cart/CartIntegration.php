@@ -164,10 +164,11 @@ final class CartIntegration {
 	 *
 	 * WooCommerce initializes carts automatically for frontend and AJAX
 	 * requests, but deliberately skips that work for custom REST routes. The
-	 * public progress endpoint is therefore allowed to reach this method with
-	 * a valid customer cart stored in the WooCommerce session while
-	 * `WC()->cart` is still null. Treating that state as an empty cart turns
-	 * real progress into zero.
+	 * public progress endpoint and the storefront gift endpoint are
+	 * therefore allowed to reach this method with a valid customer cart
+	 * stored in the WooCommerce session while `WC()->cart` is still null.
+	 * Treating that state as an empty cart turns real progress into zero
+	 * and breaks gift claiming with a false "cart is empty" error.
 	 *
 	 * `wc_load_cart()` is idempotent and is only called after WooCommerce has
 	 * initialized, only during REST requests, and only when the cart is
@@ -177,7 +178,7 @@ final class CartIntegration {
 	 *
 	 * @return \WC_Cart|null
 	 */
-	protected function live_cart() {
+	public function live_cart() {
 		if ( ! function_exists( 'WC' ) || ! WC() ) {
 			return null;
 		}
