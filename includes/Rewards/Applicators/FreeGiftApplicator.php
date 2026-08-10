@@ -96,10 +96,19 @@ final class FreeGiftApplicator implements RewardApplicator {
 			return false;
 		}
 
-		// Idempotent: the gift for this goal is already in the cart.
+		// Idempotent — but product-aware: the gift for this goal is already
+		// in the cart ONLY when it carries the requested product. A line
+		// for the same goal with a different product is stale (a
+		// re-configured reward, or a re-chosen selectable candidate) and
+		// must be swapped by the caller (RewardEngine::add_chosen_gift for
+		// the shopper flow, reconcile_gifts for admin re-configuration), so
+		// returning false here lets the reconcile pass revoke it instead of
+		// treating it as already applied.
 		foreach ( $cart->get_cart() as $item ) {
 			if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
-				return true;
+				$current = isset( $item['goalcart_gift_product'] ) ? (int) $item['goalcart_gift_product'] : 0;
+
+				return $current === $gift_id;
 			}
 		}
 
@@ -112,6 +121,7 @@ final class FreeGiftApplicator implements RewardApplicator {
 				'goalcart_gift'         => true,
 				'goalcart_gift_goal'    => (int) $goal_id,
 				'goalcart_gift_product' => (int) $gift_id,
+				'goalcart_gift_mode'    => $reward->gift_add_mode(),
 			)
 		);
 

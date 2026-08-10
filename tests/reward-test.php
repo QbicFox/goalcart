@@ -597,6 +597,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'goalcart_gift'       => true,
 		'goalcart_gift_goal'  => 1,
 		'goalcart_gift_product' => 42,
+		'goalcart_gift_mode'  => Reward::GIFT_AUTOMATIC,
 		'line_subtotal'       => 50.0,
 		'line_total'          => 50.0,
 	);
@@ -608,6 +609,36 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'data'          => $normal_product,
 		'line_subtotal' => 25.0,
 		'line_total'    => 25.0,
+	);
+	// Optional-mode gift: removable by the shopper (removal permission is
+	// per mode — mandatory gifts hide the remove control, optional and
+	// selectable gifts keep it).
+	$cart->cart_contents['gift2'] = array(
+		'key'                 => 'gift2',
+		'product_id'          => 42,
+		'variation_id'        => 0,
+		'quantity'            => 1,
+		'data'                => $gift_product,
+		'goalcart_gift'       => true,
+		'goalcart_gift_goal'  => 2,
+		'goalcart_gift_product' => 42,
+		'goalcart_gift_mode'  => Reward::GIFT_OPTIONAL,
+		'line_subtotal'       => 50.0,
+		'line_total'          => 50.0,
+	);
+	// Legacy gift line: no mode stamp and an unresolvable granting goal —
+	// the conservative default keeps it mandatory until re-added.
+	$cart->cart_contents['gift3'] = array(
+		'key'                 => 'gift3',
+		'product_id'          => 42,
+		'variation_id'        => 0,
+		'quantity'            => 1,
+		'data'                => $gift_product,
+		'goalcart_gift'       => true,
+		'goalcart_gift_goal'  => 99999999,
+		'goalcart_gift_product' => 42,
+		'line_subtotal'       => 50.0,
+		'line_total'          => 50.0,
 	);
 
 	// zero_gift_prices zeroes only gift lines.
@@ -629,9 +660,29 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		check( 'gift remove link hidden', '' === $re->hide_gift_remove_link( '<a>x</a>', 'gift1' ) );
 		check( 'normal remove link kept', '<a>x</a>' === $re->hide_gift_remove_link( '<a>x</a>', 'norm1' ) );
 		check( 'unknown key remove link kept', '<a>x</a>' === $re->hide_gift_remove_link( '<a>x</a>', 'nope' ) );
+		// Removal permission per mode: optional gifts keep their remove
+		// control; legacy unstamped gift lines stay mandatory.
+		check( 'optional gift remove link kept', '<a>x</a>' === $re->hide_gift_remove_link( '<a>x</a>', 'gift2' ) );
+		check( 'legacy unstamped gift remove link hidden', '' === $re->hide_gift_remove_link( '<a>x</a>', 'gift3' ) );
 	} finally {
 		WC()->cart = $previous_cart;
 	}
+
+	// Server-authoritative quantity clamp (Bug A): a quantity change aimed
+	// directly at a gift line (classic form bypass, crafted AJAX) is forced
+	// back to 1 on the next totals pass; normal lines are untouched.
+	$cart->cart_contents['gift1']['quantity'] = 3;
+	$re->clamp_gift_quantities( $cart );
+	check( 'clamp forces gift quantity back to 1', 1 === (int) $cart->cart_contents['gift1']['quantity'] );
+	check( 'clamp leaves normal quantity alone', 1 === (int) $cart->cart_contents['norm1']['quantity'] );
+	check( 'clamp wired before sync at priority 5', 5 === has_action( 'woocommerce_before_calculate_totals', array( $re, 'clamp_gift_quantities' ) ) );
+
+	// Store API / Blocks quantity lock (Bug A): gift lines are marked
+	// quantity-fixed so the Blocks cart renders a fixed “1” (no stepper)
+	// and the Store API rejects update attempts on them.
+	check( 'store-api editable filter wired', false !== has_filter( 'woocommerce_store_api_product_quantity_editable', array( $re, 'store_api_gift_quantity_editable' ) ) );
+	check( 'store-api gift quantity not editable', false === $re->store_api_gift_quantity_editable( true, $gift_product, $cart->cart_contents['gift1'] ) );
+	check( 'store-api normal quantity stays editable', true === $re->store_api_gift_quantity_editable( true, $normal_product, $cart->cart_contents['norm1'] ) );
 
 	// restore_removed_gift: non-gift removals are never restored.
 	$cart->removed_cart_contents['norm1'] = $cart->cart_contents['norm1'];
@@ -799,6 +850,252 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 	}
 } else {
 	echo "SKIP free gift removal restore (WC classes unavailable)\n";
+}
+
+// ---------------------------------------------------------------------------
+// 13. Gift reconciliation (stale removal + selectable re-selection)
+//
+// End-to-end coverage of the free-gift bug fixes against real goal rows
+// and purchasable products (rolled-back transaction, in-memory session):
+//   (a) a gift line whose granting goal stops qualifying is revoked by
+//       scanning the live cart (Bug B), while a customer-added line of
+//       the same product — which carries no goal marker — survives;
+//   (b) selectable (choose) mode adds exactly one gift per goal, and
+//       re-selecting a candidate replaces the previous selection instead
+//       of stacking a second line (Bug C); the chosen gift stays while
+//       the goal grants it and is revoked the moment it stops qualifying;
+//   (c) the quantity clamp and the goal markers (goalcart_gift_mode)
+//       hold on lines added through the real add_to_cart path.
+// ---------------------------------------------------------------------------
+echo "\n== 13. Gift reconciliation (stale removal + selectable re-selection) ==\n";
+
+if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_exists( 'WC_Session' ) ) {
+	$wpdb        = $GLOBALS['wpdb'];
+	$goals_table = \GoalCart\Database\Schema::table( 'goals' );
+
+	$real_session = WC()->session;
+	// In-memory session so WC_Cart_Session writes to memory, not the DB.
+	WC()->session = new class extends \WC_Session {};
+
+	// Force the plugin enabled + cumulative conflict mode for this block,
+	// whatever the dev database holds, and restore afterwards.
+	$previous_option = get_option( 'goalcart_settings', null );
+	$forced_settings = is_array( $previous_option ) ? $previous_option : array();
+	$forced_settings['enabled']             = true;
+	$forced_settings['conflict_resolution'] = 'cumulative';
+	update_option( 'goalcart_settings', $forced_settings );
+
+	// This block drives sync_cart through a dedicated engine instance (so
+	// the seeded goals are the active ones) while the WooCommerce hooks
+	// stay registered on the plugin's engine. When the dedicated engine
+	// removes a gift line, the plugin's hooked restore_removed_gift would
+	// re-add it (its own removing_gift flag is untouched) — a two-instance
+	// artifact that cannot happen in production, where the removing engine
+	// is the hooked one. Detach the restore handler for this block only.
+	$plugin_engine    = \GoalCart\Plugin::instance()->reward_engine();
+	$restore_hooked   = has_action( 'woocommerce_cart_item_removed', array( $plugin_engine, 'restore_removed_gift' ) );
+
+	if ( $restore_hooked ) {
+		remove_action( 'woocommerce_cart_item_removed', array( $plugin_engine, 'restore_removed_gift' ), 10 );
+	}
+
+	$wpdb->query( 'START TRANSACTION' );
+	try {
+		// Two purchasable, in-stock simple products (direct insert like the
+		// analytics suite).
+		$now         = current_time( 'mysql' );
+		$product_ids = array();
+
+		foreach ( array( 'Gift A (test)', 'Gift B (test)' ) as $title ) {
+			$wpdb->insert( $wpdb->posts, array(
+				'ID'                => 900030 + wp_rand( 1, 9999 ),
+				'post_author'       => 0,
+				'post_date'         => $now,
+				'post_date_gmt'     => gmdate( 'Y-m-d H:i:s' ),
+				'post_content'      => '',
+				'post_title'        => $title,
+				'post_excerpt'      => '',
+				'post_status'       => 'publish',
+				'comment_status'    => 'open',
+				'ping_status'       => 'open',
+				'post_name'         => 'goalcart-gift-test-' . wp_rand( 1000, 9999 ),
+				'post_modified'     => $now,
+				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s' ),
+				'post_type'         => 'product',
+			) );
+			$pid = (int) $wpdb->insert_id;
+			update_post_meta( $pid, '_price', '50' );
+			update_post_meta( $pid, '_regular_price', '50' );
+			update_post_meta( $pid, '_stock_status', 'instock' );
+			update_post_meta( $pid, '_manage_stock', 'no' );
+			update_post_meta( $pid, '_virtual', 'no' );
+			update_post_meta( $pid, '_downloadable', 'no' );
+			$product_ids[] = $pid;
+		}
+
+		$gift_a = $product_ids[0];
+		$gift_b = $product_ids[1];
+
+		// Automatic-mode goal (mandatory gift: product A at 100 subtotal).
+		$wpdb->insert( $goals_table, array(
+			'name'             => 'Auto Gift Goal (test)',
+			'status'           => 'active',
+			'type'             => 'amount',
+			'target'           => 100,
+			'calculation_mode' => 'subtotal',
+			'reward_type'      => 'free_gift',
+			'reward_meta'      => wp_json_encode( array(
+				'gift_product_id' => $gift_a,
+				'gift_add_mode'   => 'automatic',
+				'stacking'        => Reward::STACK_STACK,
+			) ),
+			'created_at' => current_time( 'mysql' ),
+			'updated_at' => current_time( 'mysql' ),
+		) );
+		$auto_goal = (int) $wpdb->insert_id;
+
+		// Selectable-mode goal (choose A or B at the same threshold).
+		$wpdb->insert( $goals_table, array(
+			'name'             => 'Choose Gift Goal (test)',
+			'status'           => 'active',
+			'type'             => 'amount',
+			'target'           => 100,
+			'calculation_mode' => 'subtotal',
+			'reward_type'      => 'free_gift',
+			'reward_meta'      => wp_json_encode( array(
+				'gift_products'   => array( $gift_a, $gift_b ),
+				'gift_add_mode'   => 'choose',
+				'stacking'        => Reward::STACK_STACK,
+			) ),
+			'created_at' => current_time( 'mysql' ),
+			'updated_at' => current_time( 'mysql' ),
+		) );
+		$choose_goal = (int) $wpdb->insert_id;
+
+		check( 'reconciliation goals seeded', $auto_goal > 0 && $choose_goal > 0 );
+		check( 'reconciliation products available', RewardSafety::gift_product_available( $gift_a ) && RewardSafety::gift_product_available( $gift_b ) );
+
+		// A dedicated engine + repository (fresh caches) so the seeded
+		// goals are the active ones and the forced settings are read.
+		$repo   = new \GoalCart\Goals\GoalRepository();
+		$engine = new RewardEngine( null, $repo, new \GoalCart\Settings\Settings(), null, null );
+
+		$cart = new \WC_Cart();
+		$qual = new \WC_Product_Simple();
+		$qual->set_name( 'Qualifier' );
+		$qual->set_price( 200 );
+		$qual->set_regular_price( 200 );
+		$cart->cart_contents['q1'] = array(
+			'key'           => 'q1',
+			'product_id'    => 5,
+			'variation_id'  => 0,
+			'quantity'      => 1,
+			'data'          => $qual,
+			'line_subtotal' => 200.0,
+			'line_total'    => 200.0,
+		);
+
+		$gift_lines = function ( $goal_id ) use ( $cart ) {
+			$lines = array();
+
+			foreach ( $cart->get_cart() as $key => $item ) {
+				if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
+					$lines[ $key ] = $item;
+				}
+			}
+
+			return $lines;
+		};
+
+		// First pass: the automatic goal grants its gift on a qualifying
+		// cart.
+		$engine->sync_cart( $cart );
+		$auto_lines = $gift_lines( $auto_goal );
+		check( 'auto gift granted on qualifying cart', 1 === count( $auto_lines ) );
+		$auto_line = reset( $auto_lines );
+		check( 'auto gift line carries the mode marker', is_array( $auto_line ) && isset( $auto_line['goalcart_gift_mode'] ) && Reward::GIFT_AUTOMATIC === $auto_line['goalcart_gift_mode'] );
+		check( 'auto gift line added at quantity 1', is_array( $auto_line ) && 1 === (int) $auto_line['quantity'] );
+
+		// Bug B: the qualifying product is removed — the auto gift must go
+		// with it, on the same recalculation.
+		unset( $cart->cart_contents['q1'] );
+		$engine->sync_cart( $cart );
+		check( 'stale auto gift removed when the goal stops qualifying', 0 === count( $gift_lines( $auto_goal ) ) );
+
+		// A customer-added line of the SAME product (no goal marker) must
+		// never be touched by gift reconciliation — and the goal re-adding
+		// its own marked gift line does not remove or merge the shopper's.
+		$cart->cart_contents['own_a'] = array(
+			'key'           => 'own_a',
+			'product_id'    => $gift_a,
+			'variation_id'  => 0,
+			'quantity'      => 1,
+			'data'          => wc_get_product( $gift_a ),
+			'line_subtotal' => 50.0,
+			'line_total'    => 50.0,
+		);
+		$cart->cart_contents['q1'] = array(
+			'key'           => 'q1',
+			'product_id'    => 5,
+			'variation_id'  => 0,
+			'quantity'      => 1,
+			'data'          => $qual,
+			'line_subtotal' => 200.0,
+			'line_total'    => 200.0,
+		);
+		$engine->sync_cart( $cart );
+		check( 'customer line of the same product survives reconciliation', isset( $cart->cart_contents['own_a'] ) );
+		check( 'customer line never marked as a gift', empty( $cart->cart_contents['own_a']['goalcart_gift'] ) );
+		check( 'auto gift re-added for the still-qualifying goal', 1 === count( $gift_lines( $auto_goal ) ) );
+
+		// Bug C: selectable mode — choosing a candidate adds exactly one
+		// gift line for the goal.
+		check( 'choose-mode gift A added', $engine->add_chosen_gift( $choose_goal, $gift_a, $cart ) );
+		$choose_lines = $gift_lines( $choose_goal );
+		check( 'exactly one choose-mode gift line after choosing A', 1 === count( $choose_lines ) );
+		$choose_line = reset( $choose_lines );
+		check( 'chosen product A is the one added', is_array( $choose_line ) && (int) $choose_line['goalcart_gift_product'] === $gift_a );
+		check( 'choose-mode gift carries the mode marker', is_array( $choose_line ) && isset( $choose_line['goalcart_gift_mode'] ) && Reward::GIFT_CHOOSE === $choose_line['goalcart_gift_mode'] );
+
+		// Re-selecting a different candidate replaces, never duplicates.
+		check( 'choose-mode gift B selected', $engine->add_chosen_gift( $choose_goal, $gift_b, $cart ) );
+		$choose_lines = $gift_lines( $choose_goal );
+		check( 're-selection replaces the old gift', 1 === count( $choose_lines ) );
+		$choose_line = reset( $choose_lines );
+		check( 're-selected product B is the one added', is_array( $choose_line ) && (int) $choose_line['goalcart_gift_product'] === $gift_b );
+
+		// Re-selecting the SAME candidate stays idempotent.
+		$engine->add_chosen_gift( $choose_goal, $gift_b, $cart );
+		check( 'same-candidate re-selection is idempotent', 1 === count( $gift_lines( $choose_goal ) ) );
+
+		// While the goal still grants it, the chosen gift survives a
+		// reconciliation pass (the picker must not re-add — no auto-add in
+		// choose mode — and must not remove a valid choice).
+		$engine->sync_cart( $cart );
+		check( 'chosen gift kept while the goal still grants it', 1 === count( $gift_lines( $choose_goal ) ) );
+
+		// Bug B for choose mode: losing eligibility revokes the chosen gift
+		// live (and the auto goal's gift at the same time).
+		unset( $cart->cart_contents['q1'], $cart->cart_contents['own_a'] );
+		$engine->sync_cart( $cart );
+		check( 'chosen gift revoked when the goal stops qualifying', 0 === count( $gift_lines( $choose_goal ) ) );
+		check( 'auto gift revoked with the goal', 0 === count( $gift_lines( $auto_goal ) ) );
+	} finally {
+		$wpdb->query( 'ROLLBACK' );
+		WC()->session = $real_session;
+
+		if ( $restore_hooked ) {
+			add_action( 'woocommerce_cart_item_removed', array( $plugin_engine, 'restore_removed_gift' ), 10, 2 );
+		}
+
+		if ( null === $previous_option ) {
+			delete_option( 'goalcart_settings' );
+		} else {
+			update_option( 'goalcart_settings', $previous_option );
+		}
+	}
+} else {
+	echo "SKIP gift reconciliation (WC classes unavailable)\n";
 }
 
 // ---------------------------------------------------------------------------

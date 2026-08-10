@@ -162,6 +162,38 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   still sees the UI affordances — but the engine-level
   `woocommerce_cart_item_removed` restore blocks the removal there too,
   because Blocks mutations funnel through `WC_Cart`.
+- **Free-gift rewards: quantity lock, stale removal and selectable mode
+  now actually work (Phase 5).** Three bugs fixed in the reward engine,
+  no calculation semantics changed. (1) **Quantity can no longer be
+  changed by the shopper on any path:** `RewardEngine::clamp_gift_quantities()`
+  (priority 5 on `woocommerce_before_calculate_totals`) resets gift
+  lines to 1 before every totals pass — classic cart updates, AJAX and
+  the Store API all funnel through it — and a
+  `woocommerce_store_api_product_quantity_editable` filter renders the
+  Blocks-cart quantity fixed (no editable stepper). Previously only the
+  classic cart page display was locked, so a direct Store API request
+  could raise the quantity. (2) **A gift whose granting goal stops
+  qualifying is now removed live (stale-reward guarantee restored):**
+  `reconcile_gifts()` sweeps goal-marked cart lines (scoped to the goals
+  evaluated in the pass) in addition to the session-tracked removal, so
+  session/cart divergence (expiry, restored persistent cart) can no
+  longer leave a stale gift in the cart; customer-added lines of the
+  same product are never touched, and optional/selectable choices are
+  recovered from the cart when the session record is lost. (3)
+  **Selectable (choose) mode works end-to-end:** choosing a candidate
+  adds exactly one gift line, re-selecting replaces it instead of
+  silently keeping the old product, and losing eligibility revokes the
+  choice (the picker re-prompts on the next completion) —
+  `FreeGiftApplicator::apply()` is now product-aware and
+  `add_chosen_gift()` swaps the previous selection. (4) **Removal
+  permission is enforced per mode:** the add-mode is stamped on every
+  gift line (`goalcart_gift_mode`, self-healed on kept legacy lines);
+  mandatory gifts keep the hidden remove control and server-side
+  rejection (re-add while granted), while optional and selectable gifts
+  remain removable with their quantity still locked.
+  `tests/reward-test.php` grew to 122 checks (0 failures) with
+  transactional coverage of stale removal, customer-line survival and
+  choose-mode re-selection.
 - **The analytics dashboard showed "No analytics yet" even with recorded
   events.** The date filter built `created_at <= 'YYYY-MM-DD'` with the
   raw date-only `to` bound; MySQL casts a bare date to midnight, so every

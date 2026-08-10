@@ -30,18 +30,27 @@ defined( 'ABSPATH' ) || exit;
  * the live cart.
  *
  * WooCommerce integration points (all public hooks):
+ *  - 'woocommerce_before_calculate_totals'  clamp gift lines to qty 1
+ *                                           (authoritative server-side)
  *  - 'woocommerce_before_calculate_totals'  evaluate goals + reconcile
  *                                           coupons/automatic gifts
  *  - 'woocommerce_before_calculate_totals'  zero automatic-gift prices
  *  - 'woocommerce_cart_calculate_fees'      apply percentage/fixed fees
- *  - 'woocommerce_package_rates'            apply free shipping
- *  - 'woocommerce_cart_item_remove_link'    hide the remove link of gift
- *                                           lines (shoppers cannot remove
- *                                           an earned gift)
- *  - 'woocommerce_cart_item_quantity'       lock gift lines to quantity 1
- *  - 'woocommerce_cart_item_removed'        re-add a gift line a shopper
- *                                           removed while its goal still
- *                                           grants it
+ *  - 'woocommerce_package_rates'            apply free shipping	 *  - 'woocommerce_cart_item_remove_link'    hide the remove link only of
+	 *                                           mandatory (automatic-mode)
+	 *                                           gift lines; optional/selectable
+	 *                                           gifts keep their remove control
+	 *  - 'woocommerce_cart_item_quantity'       lock gift lines to quantity 1
+	 *                                           (classic cart page display;
+	 *                                           enforcement is server-side via
+	 *                                           clamp_gift_quantities)
+	 *  - 'woocommerce_cart_item_removed'        re-add a mandatory gift line a
+	 *                                           shopper removed while its goal
+	 *                                           still grants it (Blocks carts
+	 *                                           always render a remove control;
+	 *                                           the re-add there is the
+	 *                                           server-side rejection, which
+	 *                                           snaps the line back in place)
  *
  * Reward safety (P05-T03) is enforced here and in RewardSafety:
  *  - duplicates / stacking   -> first reward of each type wins unless the
@@ -54,7 +63,10 @@ defined( 'ABSPATH' ) || exit;
  *                               this engine are removed the moment a goal
  *                               becomes incomplete, even without a cart
  *                               change (schedule expiry, admin
- *                               deactivation)
+ *                               deactivation). Gift removal scans the
+ *                               live cart (goal-marked lines), not just
+ *                               the session record, so a stale gift can
+ *                               never outlive its granting goal.
  *  - invalid coupons         -> validated before application
  *  - excluded products       -> discount bases exclude them (applicators)
  *
@@ -168,14 +180,29 @@ final class RewardEngine {
 	 * @return void
 	 */
 	public function register( HookManager $hooks ) {
+		// The quantity clamp runs first (priority 5) so every totals pass
+		// sees gift lines at quantity 1 — classic cart updates, AJAX and
+		// the Store API (Blocks cart) all funnel through here.
+		$hooks->add_action( 'woocommerce_before_calculate_totals', array( $this, 'clamp_gift_quantities' ), 5 );
 		$hooks->add_action( 'woocommerce_before_calculate_totals', array( $this, 'sync_cart' ), 100 );
 		$hooks->add_action( 'woocommerce_before_calculate_totals', array( $this, 'zero_gift_prices' ), 10 );
 		$hooks->add_action( 'woocommerce_cart_calculate_fees', array( $this, 'apply_discount_fees' ), 20 );
 		$hooks->add_filter( 'woocommerce_package_rates', array( $this, 'apply_free_shipping' ), 100, 2 );
 
-		// Automatic gifts are shopper-proof: the remove link is hidden, the
-		// quantity is locked to 1, and a removed gift line is restored on
-		// the spot while its goal still grants it.
+		// Blocks/Store API quantity lock: gift lines are quantity-fixed
+		// (no editable stepper in the Blocks cart, and the Store API
+		// rejects quantity updates on them). Classic cart page display is
+		// covered by lock_gift_quantity(); clamp_gift_quantities() is the
+		// authoritative backstop for every path.
+		$hooks->add_filter( 'woocommerce_store_api_product_quantity_editable', array( $this, 'store_api_gift_quantity_editable' ), 10, 3 );
+
+		// Mandatory (automatic-mode) gifts are shopper-proof: the remove
+		// link is hidden, the quantity is locked to 1, and a removed gift
+		// line is restored on the spot while its goal still grants it.
+		// Optional and selectable gifts keep their remove control (their
+		// removal is respected server-side) but still cannot change
+		// quantity. The quantity lock is display-only on the classic cart
+		// page — enforcement is authoritative via clamp_gift_quantities().
 		$hooks->add_filter( 'woocommerce_cart_item_remove_link', array( $this, 'hide_gift_remove_link' ), 10, 2 );
 		$hooks->add_filter( 'woocommerce_cart_item_quantity', array( $this, 'lock_gift_quantity' ), 10, 3 );
 		$hooks->add_action( 'woocommerce_cart_item_removed', array( $this, 'restore_removed_gift' ), 10, 2 );
@@ -395,7 +422,7 @@ final class RewardEngine {
 			// mutate when they differ — so the stale-reward guarantee holds
 			// even for goals that stop qualifying without a cart mutation.
 			$this->reconcile_coupons( $cart, $results );
-			$this->reconcile_gifts( $cart, $results );
+			$this->reconcile_gifts( $cart, $results, $goals );
 
 			// A gift added by reconcile_gifts in THIS pass must already be
 			// free — the priority-10 zeroing hook ran before the gift
@@ -406,6 +433,60 @@ final class RewardEngine {
 			return $results;
 		} finally {
 			$this->syncing = false;
+		}
+	}
+
+	/**
+	 * Lock gift-line quantities in the Store API / Blocks cart.
+	 *
+	 * Hooked to 'woocommerce_store_api_product_quantity_editable' (WC 7.9+;
+	 * on older WooCommerce versions the filter never fires and the hook is
+	 * inert). Returning false marks engine-added gift lines as
+	 * quantity-fixed: the Blocks cart renders a fixed “1” instead of an
+	 * editable stepper. The Store API validation only errors outright when
+	 * a quantity exceeds the product maximum (default ~9999); a direct
+	 * update-item with a normal quantity passes validation and is then
+	 * reset to 1 by clamp_gift_quantities() on the ensuing totals pass, so
+	 * the Store API response reflects the locked quantity either way. The
+	 * classic cart page is covered by lock_gift_quantity();
+	 * clamp_gift_quantities() remains the authoritative backstop for every
+	 * path.
+	 *
+	 * @param bool                   $editable  Whether the quantity is editable.
+	 * @param \WC_Product            $product   Line product.
+	 * @param array<string, mixed>   $cart_item Cart item array.
+	 * @return bool
+	 */
+	public function store_api_gift_quantity_editable( $editable, $product, $cart_item ) {
+		return ( is_array( $cart_item ) && ! empty( $cart_item['goalcart_gift'] ) ) ? false : $editable;
+	}
+
+	/**
+	 * Clamp engine-added gift lines to quantity 1 (authoritative).
+	 *
+	 * Hooked to 'woocommerce_before_calculate_totals' at priority 5 (before
+	 * zero_gift_prices and sync_cart). Every cart-mutating path — the
+	 * classic cart update form, AJAX add/remove, and the Store API behind
+	 * the Blocks cart — ends in a totals pass, so clamping here makes the
+	 * quantity lock hold even when a direct request bypasses the
+	 * display-layer filter ('woocommerce_cart_item_quantity' only affects
+	 * the classic cart page). set_quantity() with $check_qty=false skips
+	 * validation/stock checks so a locked gift can never raise a cart
+	 * error; the change is reflected in the Store API response because the
+	 * response is built after calculate_totals().
+	 *
+	 * @param \WC_Cart $cart Live cart.
+	 * @return void
+	 */
+	public function clamp_gift_quantities( \WC_Cart $cart ) {
+		foreach ( $cart->get_cart() as $key => $item ) {
+			if ( empty( $item['goalcart_gift'] ) ) {
+				continue;
+			}
+
+			if ( 1 !== (int) $item['quantity'] ) {
+				$cart->set_quantity( (string) $key, 1, false );
+			}
 		}
 	}
 
@@ -552,15 +633,29 @@ final class RewardEngine {
 	 * as the goal still grants it AND the chosen product is still in the
 	 * gift list; a re-configured reward revokes the stale line.
 	 *
+	 * Stale gift lines are removed by scanning the live cart for
+	 * goal-marked lines, not just the session record: a gift whose
+	 * granting goal is no longer in the desired set (or whose product is
+	 * no longer the desired one) is revoked even when the session and the
+	 * persisted cart diverge (session expiry, restored persistent cart,
+	 * direct Store API tampering). Only engine-marked lines are ever
+	 * touched, so a customer-added line of the same product — which
+	 * carries no goal marker — always survives, and each line is keyed to
+	 * exactly one goal so a gift still granted by a different, still-met
+	 * goal is left alone.
+	 *
 	 * The session payload is a map goal_id => product_id (older installs
 	 * stored a plain goal-id list; those entries are treated as
 	 * goal_id => null and reconciled normally).
 	 *
 	 * @param \WC_Cart                 $cart    Live cart.
 	 * @param array<int, RewardResult> $results Reward results.
+	 * @param Goal[]                   $goals   Goals evaluated this pass
+	 *                                          (the authoritative set the
+	 *                                          cart-scan is scoped to).
 	 * @return void
 	 */
-	protected function reconcile_gifts( \WC_Cart $cart, array $results ) {
+	protected function reconcile_gifts( \WC_Cart $cart, array $results, array $goals ) {
 		$applied = $this->session_get( self::SESSION_GIFTS );
 		$applied = is_array( $applied ) ? $applied : array();
 
@@ -596,20 +691,90 @@ final class RewardEngine {
 			}
 
 			// Optional/choose: keep a previously chosen gift while it is
-			// still allowed by the current reward configuration.
+			// still allowed by the current reward configuration. If the
+			// session record was lost (session expiry, restored persistent
+			// cart) the choice is recovered from the goal-marked line
+			// already in the cart, so a validly chosen gift is never swept
+			// just because the session is empty.
 			$chosen = isset( $applied_map[ (int) $goal_id ] ) ? (int) $applied_map[ (int) $goal_id ] : 0;
+
+			if ( $chosen <= 0 ) {
+				foreach ( $cart->get_cart() as $item ) {
+					if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
+						$chosen = isset( $item['goalcart_gift_product'] ) ? (int) $item['goalcart_gift_product'] : 0;
+						break;
+					}
+				}
+			}
 
 			if ( $chosen > 0 && $reward->is_gift_allowed( $chosen ) && RewardSafety::gift_product_available( $chosen ) ) {
 				$desired[ (int) $goal_id ] = $chosen;
 			}
 		}
 
+		// Self-heal legacy lines: a kept gift line that predates the mode
+		// marker (added before this fix) has its add-mode stamped now, so
+		// the per-mode remove-link policy applies without a repository
+		// lookup and the line no longer looks mandatory by default.
+		foreach ( $desired as $goal_id => $product_id ) {
+			foreach ( $cart->get_cart() as $key => $item ) {
+				if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id && ! isset( $item['goalcart_gift_mode'] ) ) {
+					$mode = Reward::GIFT_AUTOMATIC;
+
+					if ( isset( $results[ (int) $goal_id ] ) && $results[ (int) $goal_id ]->reward() instanceof Reward ) {
+						$mode = $results[ (int) $goal_id ]->reward()->gift_add_mode();
+					}
+
+					$cart->cart_contents[ $key ]['goalcart_gift_mode'] = $mode;
+					break;
+				}
+			}
+		}
+
+		// Path 1 — session-driven removal: revoke gifts this engine
+		// previously granted whose goals are no longer desired. Covers
+		// goals that vanished from active_goals() entirely (admin
+		// deactivation, schedule expiry) where no evaluation happened
+		// this pass.
 		foreach ( $applied_map as $goal_id => $product_id ) {
-			if ( isset( $desired[ $goal_id ] ) && ( null === $product_id || $desired[ $goal_id ] === $product_id ) ) {
+			if ( isset( $desired[ (int) $goal_id ] ) && ( null === $product_id || (int) $desired[ (int) $goal_id ] === (int) $product_id ) ) {
 				continue;
 			}
 
-			$this->remove_gift_line( $cart, $goal_id );
+			$this->remove_gift_line( $cart, (int) $goal_id );
+		}
+
+		// Path 2 — cart-scan, scoped to the goals evaluated this pass: a
+		// goal-marked line is revoked only when the engine actually saw
+		// its granting goal this pass and no longer wants it (the goal
+		// stopped qualifying, or the reward was re-configured to a
+		// different product). Lines whose goal was not evaluated this
+		// pass are out of scope — the engine never removes a gift it
+		// cannot vouch for (stale caches and nested totals passes
+		// triggered by add_to_cart mid-reconcile are harmless).
+		$desired_by_goal = array();
+
+		foreach ( $desired as $goal_id => $product_id ) {
+			$desired_by_goal[ (int) $goal_id ] = (int) $product_id;
+		}
+
+		$considered = array();
+
+		foreach ( $goals as $goal ) {
+			$considered[ (int) $goal->id() ] = true;
+		}
+
+		foreach ( $cart->get_cart() as $key => $item ) {
+			if ( empty( $item['goalcart_gift_goal'] ) || ! isset( $considered[ (int) $item['goalcart_gift_goal'] ] ) ) {
+				continue;
+			}
+
+			$gift_goal    = (int) $item['goalcart_gift_goal'];
+			$gift_product = isset( $item['goalcart_gift_product'] ) ? (int) $item['goalcart_gift_product'] : 0;
+
+			if ( ! isset( $desired_by_goal[ $gift_goal ] ) || $desired_by_goal[ $gift_goal ] !== $gift_product ) {
+				$this->remove_gift_line( $cart, $gift_goal );
+			}
 		}
 
 		$this->session_set( self::SESSION_GIFTS, $desired );
@@ -659,6 +824,24 @@ final class RewardEngine {
 			|| ! $reward->is_gift_allowed( $product_id )
 			|| ! RewardSafety::gift_product_available( $product_id ) ) {
 			return false;
+		}
+
+		// Replace a previous selection: a goal may only ever carry ONE
+		// gift line, so re-choosing a different candidate swaps it instead
+		// of stacking a second gift. The engine-removal flag suppresses the
+		// restore handler so the stale line stays gone.
+		foreach ( $cart->get_cart() as $key => $item ) {
+			if ( empty( $item['goalcart_gift_goal'] ) || (int) $item['goalcart_gift_goal'] !== $goal_id ) {
+				continue;
+			}
+
+			$current = isset( $item['goalcart_gift_product'] ) ? (int) $item['goalcart_gift_product'] : 0;
+
+			if ( $current !== $product_id ) {
+				$this->remove_gift_line( $cart, $goal_id );
+			}
+
+			break;
 		}
 
 		/** @var FreeGiftApplicator $applicator */
@@ -746,17 +929,59 @@ final class RewardEngine {
 	}
 
 	/**
-	 * Hide the remove link of automatic gift lines.
+	 * Hide the remove link of MANDATORY gift lines only.
 	 *
 	 * Hooked to 'woocommerce_cart_item_remove_link'. Returning '' removes
-	 * the “Remove” affordance from the cart table for gift lines.
+	 * the “Remove” affordance from the cart table. Mandatory
+	 * (automatic-mode) gifts cannot be removed by the shopper; optional
+	 * and selectable gifts keep their remove control, and the removal is
+	 * respected server-side (restore_removed_gift only re-adds mandatory
+	 * gifts).
 	 *
 	 * @param string $link          Remove-link HTML.
 	 * @param string $cart_item_key Cart item key.
 	 * @return string
 	 */
 	public function hide_gift_remove_link( $link, $cart_item_key ) {
-		return $this->is_gift_cart_item( $cart_item_key ) ? '' : $link;
+		return $this->gift_line_is_mandatory( $cart_item_key ) ? '' : $link;
+	}
+
+	/**
+	 * Whether a gift line is mandatory (automatic gift-add mode).
+	 *
+	 * The add mode is stamped on the line at add time
+	 * ('goalcart_gift_mode'); legacy lines without the stamp fall back to
+	 * a repository lookup of the granting goal, then to the conservative
+	 * automatic default (an unrecognised gift line stays shopper-proof
+	 * until the engine re-adds it with a stamped mode).
+	 *
+	 * @param mixed $cart_item_key Cart item key.
+	 * @return bool
+	 */
+	protected function gift_line_is_mandatory( $cart_item_key ) {
+		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
+			return false;
+		}
+
+		$item = WC()->cart->get_cart_item( (string) $cart_item_key );
+
+		if ( ! is_array( $item ) || empty( $item['goalcart_gift'] ) ) {
+			return false;
+		}
+
+		if ( isset( $item['goalcart_gift_mode'] ) && '' !== $item['goalcart_gift_mode'] ) {
+			return Reward::GIFT_AUTOMATIC === $item['goalcart_gift_mode'];
+		}
+
+		if ( ! empty( $item['goalcart_gift_goal'] ) && null !== $this->repository ) {
+			$goal = $this->repository->find( (int) $item['goalcart_gift_goal'] );
+
+			if ( $goal ) {
+				return Reward::from_goal( $goal )->is_gift_automatic();
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -843,22 +1068,6 @@ final class RewardEngine {
 		// away (idempotent) so the gift is free even before the next totals
 		// pass runs the priority-10 zeroing hook.
 		$this->zero_gift_prices( $cart );
-	}
-
-	/**
-	 * Whether a cart item key refers to an engine-added gift line.
-	 *
-	 * @param mixed $cart_item_key Cart item key.
-	 * @return bool
-	 */
-	protected function is_gift_cart_item( $cart_item_key ) {
-		if ( ! function_exists( 'WC' ) || ! WC()->cart ) {
-			return false;
-		}
-
-		$item = WC()->cart->get_cart_item( (string) $cart_item_key );
-
-		return is_array( $item ) && ! empty( $item['goalcart_gift'] );
 	}
 
 	/**

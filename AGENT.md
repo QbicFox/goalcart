@@ -620,6 +620,57 @@ Prevent:
 - unintended stacking
 - reward application to excluded products
 
+### Free gift reward bugs (Phase 5 bug fix)
+
+Three free-gift defects were fixed in the reward engine (`RewardEngine`,
+`FreeGiftApplicator`) — no goal/reward calculation semantics changed:
+
+- **Gift quantity is now locked to 1 on every path (Bug A).** Root cause:
+  the classic cart-page display lock (`woocommerce_cart_item_quantity`)
+  was the only enforcement, so a direct Store API update-item (Blocks
+  cart, or a crafted request) could change the quantity. New
+  authoritative `clamp_gift_quantities()` (priority 5 on
+  `woocommerce_before_calculate_totals`) resets gift lines to 1 before
+  every totals pass — classic cart updates, AJAX and the Store API all
+  funnel through it — and a `woocommerce_store_api_product_quantity_editable`
+  filter marks gift lines quantity-fixed so the Blocks cart renders a
+  fixed “1” instead of an editable stepper.
+- **Gifts are now removed when the granting goal stops qualifying (Bug
+  B).** Root cause: `reconcile_gifts()` only revoked session-tracked
+  gifts, so any divergence between the session and the cart (session
+  expiry, restored persistent cart) left a stale gift forever. Removal is
+  now a two-path sweep: the pre-existing session-driven loop (covers
+  goals that vanish from `active_goals()` — deactivation/expiry) plus a
+  cart-scan that revokes goal-marked lines whose goal was evaluated this
+  pass but is no longer desired (or carries a different product). The
+  scan is scoped to evaluated goals so nested totals passes (WC fires
+  `calculate_totals` from `woocommerce_add_to_cart` mid-reconcile) and
+  stale caches can never sweep a valid gift; customer-added lines of the
+  same product (no goal marker) always survive. Optional/selectable
+  choices are recovered from the cart when the session record is lost.
+- **Selectable (choose) mode works (Bug C).** Root cause:
+  `FreeGiftApplicator::apply()` treated any line for the goal as
+  idempotent regardless of product, so re-selecting a candidate reported
+  success without replacing the old gift. `apply()` is now product-aware
+  and `add_chosen_gift()` swaps the previous selection before adding —
+  exactly one gift line per goal, re-selection replaces rather than
+  duplicates, and losing eligibility revokes the chosen gift (the picker
+  re-prompts on the next completion).
+- **Removal permission is now per mode.** The gift add-mode is stamped on
+  every gift line (`goalcart_gift_mode`, self-healed on kept legacy
+  lines); the remove link is hidden only for mandatory (automatic) gifts
+  — optional and selectable gifts keep theirs (their removal is respected
+  server-side; mandatory removal is rejected by re-adding while the goal
+  still grants, which is also the Blocks-cart enforcement). Legacy
+  unstamped lines fall back to a repository lookup, then conservative
+  mandatory.
+
+Verified: `tests/reward-test.php` grew to 122 checks (0 failures),
+including transactional end-to-end coverage of stale removal,
+customer-line survival and choose-mode re-selection; all PHP lints
+clean; `tests/frontend-test.php` (98) and `tests/engine-test.php` (75)
+still pass.
+
 ---
 
 # Phase 6 — Cart Context & WooCommerce Integration
