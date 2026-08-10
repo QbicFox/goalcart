@@ -1933,17 +1933,6 @@ Implement:
 Phase 33: ░░░░░░░░░░░░░░░░░░░░ 0%
 ```
 
-## A/B Testing
-
-Compare:
-
-- copy
-- design
-- threshold
-- reward
-- CTA
-- recommendation strategy
-
 ## Revenue Attribution
 
 Measure:
