@@ -166,22 +166,20 @@ class SettingsController extends BaseController {
 			$clean[ $key ] = $this->sanitize_setting( $key, $values[ $key ] );
 		}
 
-		// Template-engine bookkeeping: saving the per-scope goal default
-		// syncs the legacy frontend_template picker (and vice versa) so the
-		// Settings page and the Appearance page can never drift, and saving
-		// per-template settings records the current schema versions for
-		// future migrations.
-		if ( isset( $clean['frontend_template'] ) && ! isset( $clean['template_defaults'] ) ) {
-			$defaults = $this->settings->get( 'template_defaults', array() );
-			$defaults = is_array( $defaults ) ? $defaults : array();
-			$defaults['goal'] = $clean['frontend_template'];
-			$clean['template_defaults'] = $defaults;
-		}
-
-		if ( isset( $clean['template_defaults'] ) && is_array( $clean['template_defaults'] ) ) {
-			$goal = isset( $clean['template_defaults']['goal'] ) ? (string) $clean['template_defaults']['goal'] : '';
-			$clean['frontend_template'] = '' !== $goal ? $goal : $this->settings->get( 'frontend_template', 'basic' );
-		}
+		// Template-engine bookkeeping: saving per-template settings records
+		// the current schema versions for future migrations.
+		//
+		// Note: the template_defaults.goal and frontend_template values are
+		// deliberately NOT synced here — they are independent settings with
+		// different validation scopes. frontend_template only accepts the
+		// four legacy enum values (basic, percentage, milestone, card) via
+		// the REST schema, while template_defaults.goal can hold any valid
+		// pluggable-template id (e.g. milestone_chain). Back-syncing them
+		// would either corrupt frontend_template with an out-of-enum value
+		// (causing a 400 error on the next Settings-page save) or silently
+		// overwrite the Appearance page's template selection. The
+		// TemplateEngine already handles the correct fallback chain:
+		// template_defaults.goal → frontend_template → basic.
 
 		if ( isset( $clean['template_settings'] ) ) {
 			// Defense in depth: the REST arg schema runs the same sanitizer

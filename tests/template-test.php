@@ -565,16 +565,28 @@ try {
 	$data = $resp->get_data()['data'];
 
 	check( 'template_defaults persisted', 'milestone' === $data['template_defaults']['goal'] && 'milestone_chain' === $data['template_defaults']['campaign'] );
-	check( 'frontend_template synced to the goal default', 'milestone' === $data['frontend_template'] );
+	// frontend_template and template_defaults are deliberately NOT synced:
+	// frontend_template only accepts the four legacy enum values (via REST
+	// schema) while template_defaults.goal can hold any pluggable-template
+	// id, and back-syncing would either corrupt frontend_template or
+	// silently overwrite the Appearance page's selection — the
+	// TemplateEngine already handles the correct fallback chain.
+	// frontend_template must NOT have been overwritten with the
+	// template_defaults.goal value (it stays at whatever the DB held
+	// before this save — definitely not 'milestone', which is a
+	// pluggable-template id outside the legacy enum).
+	check( 'frontend_template not synced from template_defaults', 'milestone' !== $data['frontend_template'] );
 	check( 'template_versions recorded', isset( $data['template_versions']['goal']['milestone'] ) && 1 === $data['template_versions']['goal']['milestone'] );
 
-	// The reverse direction: the legacy picker drives the scope default.
+	// The legacy picker no longer drives the scope default — the two are
+	// independent settings (see the sync comment above).
 	$req2 = new \WP_REST_Request( 'POST', '/goalcart/v1/settings' );
 	$req2->set_param( 'frontend_template', 'card' );
 	$resp2 = $settings_ctrl->handle_save( $req2 );
 	$data2 = $resp2->get_data()['data'];
 
-	check( 'legacy picker syncs the goal default', 'card' === $data2['template_defaults']['goal'] );
+	check( 'legacy picker persists on its own key', 'card' === $data2['frontend_template'] );
+	check( 'template_defaults.goal not overwritten by legacy picker', 'milestone' === $data2['template_defaults']['goal'] );
 
 	// template_settings are sanitized through the full save path.
 	$req3 = new \WP_REST_Request( 'POST', '/goalcart/v1/settings' );

@@ -128,6 +128,20 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Saving the Settings page failed with `Invalid parameter(s): frontend_template` (400).**
+  The `handle_save` method in `SettingsController` back-synced
+  `template_defaults.goal` into the legacy `frontend_template` field, writing
+  pluggable template ids (`milestone_chain`, `campaign_progress`) into a
+  setting whose REST schema only accepts the four legacy enum values (`basic`
+  | `percentage` | `milestone` | `card`). The next Settings-page save sent the
+  out-of-enum value back, and the REST layer rejected it with a 400 before any
+  option was written. The reverse sync (`frontend_template →
+  template_defaults.goal`) would silently overwrite the Appearance page's
+  template selection when the Settings page saved. Both sync directions were
+  removed — the `TemplateEngine` already handles the correct fallback chain
+  (`template_defaults.goal` → `frontend_template` → `basic`), so no syncing is
+  needed. `tests/template-test.php` updated (133 checks).
+
 - **Free-gift auto-add/remove was inverted on the cart page (regression).**
   Two root causes fixed. (1) **CartContext read stale `line_subtotal`**
   during `woocommerce_before_calculate_totals`: `WC_Cart::set_quantity()`
