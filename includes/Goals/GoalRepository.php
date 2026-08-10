@@ -73,7 +73,7 @@ final class GoalRepository {
 		// one regardless of the individual goals' priorities.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT g.*, c.name AS campaign_name, c.status AS campaign_status, c.starts_at AS campaign_starts_at, c.ends_at AS campaign_ends_at
+				"SELECT g.*, c.name AS campaign_name, c.status AS campaign_status, c.starts_at AS campaign_starts_at, c.ends_at AS campaign_ends_at, c.display_rules AS campaign_display_rules
 				 FROM {$goals} g
 				 LEFT JOIN {$campaigns} c ON c.id = g.campaign_id
 				 WHERE g.status = %s
@@ -113,7 +113,7 @@ final class GoalRepository {
 
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT g.*, c.name AS campaign_name, c.status AS campaign_status, c.starts_at AS campaign_starts_at, c.ends_at AS campaign_ends_at
+				"SELECT g.*, c.name AS campaign_name, c.status AS campaign_status, c.starts_at AS campaign_starts_at, c.ends_at AS campaign_ends_at, c.display_rules AS campaign_display_rules
 				 FROM {$goals} g
 				 LEFT JOIN {$campaigns} c ON c.id = g.campaign_id
 				 WHERE g.id = %d",

@@ -10,12 +10,13 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 
-import type { Campaign, CampaignGoal, FrontendTemplate } from '../types';
+import type { Campaign, CampaignGoal } from '../types';
 import PreviewControls from './preview/PreviewControls';
 import PreviewWidget from './preview/PreviewWidget';
 import { usePreviewDialog } from './preview/usePreviewDialog';
 import { DEVICE_WIDTHS, tokensFromSettings } from './preview/types';
 import type { PreviewDevice } from './preview/types';
+import { templateById } from '../templates/useTemplates';
 
 interface CampaignPreviewDialogProps {
   campaign: Campaign | null;
@@ -70,22 +71,33 @@ const DEVICE_LABELS: Record<PreviewDevice, string> = {
  * scheduled campaigns can be seen before they go live.
  */
 export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPreviewDialogProps) {
-  const { controls, patch, applyPreset, previewQuery, settingsQuery } = usePreviewDialog({
-    target: campaign,
-    derive: (current: Campaign) => ({
-      templateDefault: '',
-      targetsFor: (fraction) => presetTargets(current, fraction),
-      paramsFor: () => ({ campaignId: current.id }),
-    }),
-  });
+  const { controls, patch, applyPreset, previewQuery, settingsQuery, templatesQuery } =
+    usePreviewDialog({
+      target: campaign,
+      derive: (current: Campaign) => ({
+        // '' = auto: the payload's campaign group carries the campaign's
+        // resolved template + settings (the backend resolves them from the
+        // campaign display_rules, identically to the live frontend).
+        templateDefault: '',
+        targetsFor: (fraction) => presetTargets(current, fraction),
+        paramsFor: () => ({ campaignId: current.id }),
+      }),
+    });
 
   const settings = settingsQuery.data?.data;
-  const resolvedTemplate: FrontendTemplate =
-    controls.template || settings?.frontend_template || 'basic';
+  const templates = templatesQuery.data;
   const tokens = tokensFromSettings(settings);
   const frameWidth = DEVICE_WIDTHS[controls.deviceWidth];
   const goals = previewQuery.data?.goals ?? [];
-  const completedCount = goals.filter((goal) => goal.completed).length;
+  const completedCount = goals.filter((goal) => goal.completed).length;	  const forcedTemplate = controls.template
+    ? templateById(templates, 'campaign', controls.template)
+    : undefined;
+  const resolvedTemplate =
+    controls.template || previewQuery.data?.campaigns?.[0]?.template || '';
+  const resolvedTemplateLabel =
+    forcedTemplate?.label ??
+    templateById(templates, 'campaign', resolvedTemplate)?.label ??
+    (resolvedTemplate || __('Auto', 'goalcart'));
 
   return (
     <Dialog open={campaign !== null} onClose={onClose} maxWidth="lg" fullWidth>
@@ -99,9 +111,10 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
           <Grid item xs={12} md={4} lg={3}>
             <Paper variant="outlined" sx={{ p: 2.5 }}>
               <PreviewControls
-                value={{ ...controls, template: resolvedTemplate }}
+                value={controls}
                 onPatch={patch}
                 onApplyPreset={applyPreset}
+                templates={templates?.campaign ?? []}
               />
             </Paper>
           </Grid>
@@ -119,8 +132,7 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
               >
                 <Typography variant="subtitle2" color="text.secondary">
                   {DEVICE_LABELS[controls.deviceWidth]} · {frameWidth}px
-                </Typography>
-                <Chip
+                </Typography>	                <Chip
                   size="small"
                   variant="outlined"
                   label={sprintf(
@@ -130,6 +142,7 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
                     goals.length
                   )}
                 />
+                <Chip size="small" variant="outlined" label={resolvedTemplateLabel} />
               </Box>
 
               <Box sx={{ maxWidth: frameWidth, margin: '0 auto' }}>
@@ -145,12 +158,13 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
                       {__('No milestones in this campaign yet.', 'goalcart')}
                     </Alert>
                   ) : (
-                    <>
-                      <PreviewWidget
+                    <>	                    <PreviewWidget
                         goals={goals}
+                        campaigns={previewQuery.data.campaigns}
                         currency={previewQuery.data.currency}
                         tokens={tokens}
-                        template={resolvedTemplate}
+                        templateOverride={controls.template || undefined}
+                        settingsOverride={forcedTemplate?.settings}
                         rewardState={controls.rewardState}
                         animation={settings?.frontend_animation ?? true}
                       />

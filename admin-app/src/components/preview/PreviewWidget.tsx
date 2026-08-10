@@ -2,34 +2,39 @@ import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
+import type { ComponentType } from 'react';
 
-import { formatCurrency, formatNumber } from '../../lib/format';
-import type { FrontendTemplate, ProgressGoal, ProgressReward } from '../../types';
+import { formatCurrency } from '../../lib/format';
+import { campaignRenderer, goalRenderer } from '../../templates/registry';
+import type { CampaignTemplateProps } from '../../templates/registry';
+import { rewardLabel } from '../../templates/rewardLabel';
+import { bool, num, str } from '../../templates/utils';
+import type { ProgressCampaign, ProgressGoal, TemplateSettingsValue } from '../../types';
 import type { PreviewRewardState, PreviewTokens } from './types';
 
 interface PreviewWidgetProps {
   /** Evaluated goals (single goal or a campaign's milestones in order). */
   goals: ProgressGoal[];
+  /** Campaign template groups (pluggable engine) from the payload. */
+  campaigns?: ProgressCampaign[];
   /** ISO currency code from the payload (or the boot data). */
   currency: string;
-  /** Storefront appearance tokens (from the Phase 12 settings). */
+  /** Storefront appearance tokens (legacy fallback base). */
   tokens: PreviewTokens;
-  /** The template variant to render. */
-  template: FrontendTemplate;
+  /**
+   * Forced template override ('' = per-goal): renders every card through
+   * the given template so admins can preview any variant. Requires
+   * `settingsOverride` to supply that template's default appearance.
+   */
+  templateOverride?: string;
+  /** The global default settings of the forced override template. */
+  settingsOverride?: TemplateSettingsValue | null;
   /** Reward chip state: auto (from completion) or forced. */
   rewardState: PreviewRewardState;
   /** Whether the bar fill animates (Phase 12 `frontend_animation`). */
   animation: boolean;
 }
-
-const REWARD_LABELS: Record<string, string> = {
-  free_shipping: __('Free shipping', 'goalcart'),
-  percent_discount: __('% discount', 'goalcart'),
-  fixed_discount: __('Fixed discount', 'goalcart'),
-  free_gift: __('Free gift', 'goalcart'),
-  coupon: __('Coupon', 'goalcart'),
-};
 
 /** Human-readable reason a goal was suppressed by a conflict (Phase 26). */
 function conflictReasonLabel(reason: string): string {
@@ -47,79 +52,34 @@ function conflictReasonLabel(reason: string): string {
   }
 }
 
-/**
- * The eligible goals, in payload order.
- *
- * The storefront renders every eligible goal as its own card (no
- * featured-only behavior), so the preview mirrors that 1:1 — ineligible
- * goals are skipped, not shown.
- */
+/** The eligible goals, in payload order. */
 function eligibleGoals(goals: ProgressGoal[]): ProgressGoal[] {
   return goals.filter((goal) => goal.eligible !== false);
 }
 
-/** Value-aware reward label (mirrors MessageEngine::reward_label). */
-function rewardLabel(reward: ProgressReward): string {
-  const base = REWARD_LABELS[reward.type ?? ''] ?? reward.type ?? '';
+/**
+ * The effective settings for one card: legacy appearance tokens as the
+ * base, then the goal's own resolved template settings (or the forced
+ * override's global defaults when previewing a different template).
+ */
+function effectiveSettings(
+  goal: ProgressGoal,
+  tokens: PreviewTokens,
+  templateOverride: string | undefined,
+  settingsOverride: TemplateSettingsValue | null | undefined
+): TemplateSettingsValue {
+  const base: TemplateSettingsValue = {
+    accent: tokens.accent,
+    bg: tokens.bg,
+    border: tokens.border,
+    text: tokens.text,
+    radius: tokens.radius,
+    barHeight: tokens.barHeight,
+  };
 
-  if (reward.type === 'percent_discount' && reward.value !== null) {
-    return sprintf(
-      /* translators: %d: discount percentage. */
-      __('%d%% discount', 'goalcart'),
-      Math.round(reward.value)
-    );
-  }
+  const own = templateOverride ? (settingsOverride ?? {}) : (goal.template_settings ?? {});
 
-  if (reward.type === 'fixed_discount' && reward.value !== null) {
-    return sprintf(
-      /* translators: %s: formatted discount amount. */
-      __('Fixed %s off', 'goalcart'),
-      formatCurrency(reward.value)
-    );
-  }
-
-  return base;
-}
-
-/** The percentage fill bar (mirrors .goalcart-progress markup). */
-function PreviewBar({
-  tokens,
-  percent,
-  completed,
-  animate,
-}: {
-  tokens: PreviewTokens;
-  percent: number;
-  completed: boolean;
-  animate: boolean;
-}) {
-  const clamped = Math.max(0, Math.min(100, percent));
-
-  return (
-    <Box
-      sx={{
-        position: 'relative',
-        height: tokens.barHeight,
-        background: '#f0f0f1',
-        borderRadius: 999,
-        overflow: 'hidden',
-        flex: '1 1 auto',
-      }}
-    >
-      <Box
-        sx={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetBlockStart: 0,
-          height: '100%',
-          width: `${clamped}%`,
-          background: completed ? '#00a32a' : tokens.accent,
-          borderRadius: 'inherit',
-          transition: animate ? 'width 0.45s ease' : 'none',
-        }}
-      />
-    </Box>
-  );
+  return { ...base, ...own };
 }
 
 /** The reward chip — locked or unlocked (mirrors .goalcart-reward). */
@@ -146,65 +106,6 @@ function RewardChip({ label, state }: { label: string; state: 'locked' | 'unlock
         {unlocked ? '✓' : '🔒'}
       </Box>
       <Box component="span">{label}</Box>
-    </Box>
-  );
-}
-
-/**
- * The goal's own threshold as a single milestone rung (dot + target).
- *
- * Every goal renders as its own card now, so there is no cross-goal
- * ladder — the milestone template shows the one threshold this card is
- * tracking (mirrors milestonePanel() in assets/js/frontend.js).
- */
-function MilestoneRung({
-  goal,
-  currency,
-  tokens,
-}: {
-  goal: ProgressGoal;
-  currency: string;
-  tokens: PreviewTokens;
-}) {
-  return (
-    <Box
-      component="ol"
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: 0.375,
-        margin: '0 0 0.875rem',
-        padding: 0,
-        listStyle: 'none',
-        flexWrap: 'wrap',
-      }}
-    >
-      <Box
-        component="li"
-        sx={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 0.3,
-          color: goal.completed ? tokens.text : '#646970',
-          fontSize: 12,
-          fontWeight: 500,
-        }}
-      >
-        <Box
-          sx={{
-            width: 12,
-            height: 12,
-            borderRadius: '50%',
-            border: `2px solid ${tokens.bg}`,
-            boxShadow: `0 0 0 1px ${goal.completed ? tokens.accent : tokens.border}`,
-            background: goal.completed ? tokens.accent : tokens.border,
-            transition: 'background 0.3s ease',
-          }}
-        />
-        <Box component="span">
-          {goal.is_money ? formatCurrency(goal.target, currency) : formatNumber(goal.target)}
-        </Box>
-      </Box>
     </Box>
   );
 }
@@ -260,127 +161,78 @@ function SuggestionList({
 
 /**
  * One goal's card — mirrors goalContainer() in assets/js/frontend.js:
- * reward chip + template body + message + suggestions. Every eligible
- * goal renders as its own card, so there is no cross-goal ladder.
+ * reward chip + template body (via the React template registry) + message
+ * + suggestions. The card surface comes from the goal's effective
+ * settings (accent/bg/border/text/radius), exactly like the storefront's
+ * per-card CSS custom properties.
  */
 function GoalCard({
   goal,
   currency,
   tokens,
   template,
+  settings,
   rewardState,
   animation,
 }: {
   goal: ProgressGoal;
   currency: string;
   tokens: PreviewTokens;
-  template: FrontendTemplate;
+  template: string;
+  settings: TemplateSettingsValue;
   rewardState: PreviewRewardState;
   animation: boolean;
 }) {
-  const percent = Math.max(0, Math.min(100, goal.percentage));
+  const Renderer = goalRenderer(template);
   const chipState: 'locked' | 'unlocked' =
     rewardState === 'auto' ? (goal.completed ? 'unlocked' : 'locked') : rewardState;
   const nearlyComplete = goal.state === 'nearly_complete';
+  const showReward = template !== 'card' || bool(settings, 'showReward', true);
+  const showMessage = bool(settings, 'showMessage', true);
+  const cssClass = str(settings, 'cssClass', '');
 
   return (
     <Box
+      className={cssClass || undefined}
       sx={{
-        background: tokens.bg,
-        border: `1px solid ${tokens.border}`,
-        borderRadius: tokens.radius,
+        background: str(settings, 'bg', tokens.bg),
+        border: `1px solid ${str(settings, 'border', tokens.border)}`,
+        borderRadius: num(settings, 'radius', tokens.radius),
         boxShadow: '0 6px 24px rgba(0,0,0,0.08)',
-        color: tokens.text,
+        color: str(settings, 'text', tokens.text),
         padding: '1rem 1.125rem',
         fontSize: 14,
       }}
     >
       {/* GoalContainer head: the reward chip, right-aligned. */}
-      {goal.reward?.type && (
+      {goal.reward?.type && showReward && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.5 }}>
           <RewardChip label={rewardLabel(goal.reward)} state={chipState} />
         </Box>
       )}
 
-      {/* Template body (Phase 12). */}
-      {template === 'percentage' && (
-        <Stack direction="row" alignItems="center" spacing={1.5}>
-          <Typography
-            sx={{
-              fontSize: 28,
-              fontWeight: 800,
-              lineHeight: 1,
-              letterSpacing: '-0.02em',
-              fontVariantNumeric: 'tabular-nums',
-              color: tokens.accent,
-              minWidth: '3.2em',
-            }}
-          >
-            {Math.round(percent)}%
-          </Typography>
-          <PreviewBar
-            tokens={tokens}
-            percent={percent}
-            completed={goal.completed}
-            animate={animation}
-          />
-        </Stack>
-      )}
-
-      {template === 'milestone' && (
-        <Box sx={{ mb: 1 }}>
-          <MilestoneRung goal={goal} currency={currency} tokens={tokens} />
-          <PreviewBar
-            tokens={tokens}
-            percent={percent}
-            completed={goal.completed}
-            animate={animation}
-          />
-        </Box>
-      )}
-
-      {template === 'card' && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexWrap: 'wrap' }}>
-          <Typography sx={{ fontSize: 24, lineHeight: 1 }} aria-hidden>
-            {goal.icon || '🎯'}
-          </Typography>
-          <Typography sx={{ fontWeight: 700, flex: '1 1 auto', minWidth: 0 }}>
-            {goal.goal_name}
-          </Typography>
-          <Box sx={{ flex: '0 0 100%' }}>
-            <PreviewBar
-              tokens={tokens}
-              percent={percent}
-              completed={goal.completed}
-              animate={animation}
-            />
-          </Box>
-        </Box>
-      )}
-
-      {template === 'basic' && (
-        <PreviewBar
-          tokens={tokens}
-          percent={percent}
-          completed={goal.completed}
-          animate={animation}
-        />
-      )}
+      {/* Template body (pluggable template engine). */}
+      <Renderer
+        goal={goal}
+        currency={currency}
+        settings={settings}
+        animation={animation}
+      />
 
       {/* GoalMessage (Phase 13 state styling). */}
-      <Typography
-        sx={{
-          mt: 1,
-          fontWeight: nearlyComplete ? 600 : 500,
-          color: nearlyComplete ? tokens.accent : tokens.text,
-        }}
-      >
-        {goal.message}
-      </Typography>
+      {showMessage && (
+        <Typography
+          sx={{
+            mt: 1,
+            fontWeight: nearlyComplete ? 600 : 500,
+            color: nearlyComplete ? str(settings, 'accent', tokens.accent) : undefined,
+          }}
+        >
+          {goal.message}
+        </Typography>
+      )}
 
-      {/* Conflict resolution note (Phase 26): the admin preview shows when
-          a completed goal's reward is suppressed and why, so the behavior
-          is communicated before publishing. */}
+      {/* Conflict resolution note (Phase 26). */}
       {goal.conflict && goal.conflict.resolved === false && (
         <Box sx={{ mt: 1 }}>
           <Chip
@@ -401,15 +253,18 @@ function GoalCard({
 /**
  * The storefront progress widget, rendered in React for the Phase 15
  * admin preview. Mirrors the component flow of assets/js/frontend.js —
- * one GoalContainer card per eligible goal, stacked — with the
- * appearance tokens from the Phase 12 settings, so the admin sees
+ * campaign groups render through their campaign template (e.g. the
+ * milestone chain), everything else as one GoalContainer card per
+ * eligible goal — with the resolved template settings, so the admin sees
  * exactly what customers see.
  */
 export default function PreviewWidget({
   goals,
+  campaigns = [],
   currency,
   tokens,
-  template,
+  templateOverride,
+  settingsOverride,
   rewardState,
   animation,
 }: PreviewWidgetProps) {
@@ -419,15 +274,74 @@ export default function PreviewWidget({
     return null;
   }
 
-  return (
+  // Group eligible goals by campaign so a campaign template (e.g. the
+  // milestone chain) renders the whole group as one unit — the same
+  // grouping renderWidget() performs on the storefront.
+  const campaignById = new Map(campaigns.map((campaign) => [campaign.campaign_id, campaign]));
+  const groupOrder: number[] = [];
+  const groups = new Map<number, ProgressGoal[]>();
+  const standalone: ProgressGoal[] = [];
+
+  for (const goal of cards) {
+    const campaign = goal.campaign_id ? campaignById.get(goal.campaign_id) : undefined;
+
+    if (campaign && campaign.template && campaignRenderer(campaign.template)) {
+      const list = groups.get(goal.campaign_id as number) ?? [];
+      list.push(goal);
+      groups.set(goal.campaign_id as number, list);
+      if (list.length === 1) {
+        groupOrder.push(goal.campaign_id as number);
+      }
+    } else {
+      standalone.push(goal);
+    }
+  }	  return (
     <Stack spacing={1} sx={{ width: '100%' }}>
-      {cards.map((goal) => (
+      {groupOrder.map((campaignId) => {
+        const campaign = campaignById.get(campaignId) as ProgressCampaign;
+        const Renderer = campaignRenderer(campaign.template) as ComponentType<CampaignTemplateProps>;
+        const groupSettings: TemplateSettingsValue = {
+          accent: tokens.accent,
+          bg: tokens.bg,
+          border: tokens.border,
+          text: tokens.text,
+          radius: tokens.radius,
+          barHeight: tokens.barHeight,
+          ...(campaign.settings ?? {}),
+        };
+
+        return (
+          <Box
+            key={campaignId}
+            sx={{
+              background: str(groupSettings, 'bg', tokens.bg),
+              border: `1px solid ${str(groupSettings, 'border', tokens.border)}`,
+              borderRadius: num(groupSettings, 'radius', tokens.radius),
+              boxShadow: '0 6px 24px rgba(0,0,0,0.08)',
+              color: str(groupSettings, 'text', tokens.text),
+              padding: '1rem 1.125rem',
+              fontSize: 14,
+            }}
+          >
+            <Renderer
+              campaign={campaign}
+              goals={groups.get(campaignId) as ProgressGoal[]}
+              currency={currency}
+              settings={groupSettings}
+              animation={animation}
+            />
+          </Box>
+        );
+      })}
+
+      {standalone.map((goal) => (
         <GoalCard
           key={goal.goal_id}
           goal={goal}
           currency={currency}
           tokens={tokens}
-          template={template}
+          template={templateOverride || goal.template || 'basic'}
+          settings={effectiveSettings(goal, tokens, templateOverride, settingsOverride)}
           rewardState={rewardState}
           animation={animation}
         />

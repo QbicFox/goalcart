@@ -901,6 +901,9 @@ Campaign: Summer Sale
 - customer conditions
 - preview
 - duplicate campaign
+- campaign template (Phase 12 engine) — how the whole campaign renders
+  (e.g. the milestone chain), configured per campaign in the builder
+  Display section with a schema-driven appearance form
 
 ---
 
@@ -933,7 +936,11 @@ GoalCart
 └── StickyGoalBar
 ```
 
-Names must follow the reference project's conventions.
+Each card body renders through the Phase 12 template engine: the
+progress payload carries every goal's resolved template + settings, so
+the JS renders exactly what the engine resolved. Campaigns with a
+campaign template render their milestone group as one connected chain
+instead of per-goal cards.
 
 ## Display Locations
 
@@ -959,7 +966,32 @@ Do not inject into locations that could cause duplicate rendering.
 Phase 12: ████████████████████ 100%
 ```
 
-## Templates
+## Pluggable Template Engine
+
+The fixed Phase 12 template list was replaced by a **pluggable template
+engine** — a registration, not a rewrite, for future templates. Every
+template implements the `Template` contract
+(`includes/Templates/Template.php`): a stable `id` (persisted, never
+renamed), translated `label` + `description`, a `scope` (goal | campaign
+| both), a settings `schema` (field type, default, validation rules,
+label, group) and a `version`. Templates register through
+`TemplateRegistry` (lazy, filterable via the
+`goalcart_template_classes` class map — the same convention as
+`GoalEvaluatorRegistry` / `RewardApplicatorRegistry`), so adding a fifth
+Goal template or a second Campaign template is one class + one filter
+entry — no changes to the Settings UI, the builders, the REST layer or
+the preview system.
+
+Templates are scoped **independently for Goals and Campaigns**: the four
+originals below are the built-in Goal templates; `milestone_chain` is
+the first Campaign template (the campaign renders as a connected
+milestone ladder instead of per-goal cards). The backend is the source
+of truth for which templates exist and their schemas (`GET
+/goalcart/v1/templates`); the React app only supplies the rendering
+components, keyed by the same ids
+(`admin-app/src/templates/registry.tsx`).
+
+## Templates (built-in Goal templates)
 
 ### Basic
 
@@ -993,20 +1025,32 @@ A configurable card containing:
 - reward
 - CTA
 
-## Customization
+## Resolution & settings
 
-Support:
+`TemplateEngine` resolves the effective template + settings for every
+goal and campaign — identically for the live storefront and the Phase 15
+preview:
 
-- colors
-- typography
-- border
-- radius
-- spacing
-- height
-- icons
-- animation
-- CSS class
-- custom CSS
+1. **item override** — `display_settings.template_id` +
+   `template_settings` (campaigns: `display_rules`), with the
+   pre-engine `template` key kept as the legacy alias,
+2. **scope default** — `template_defaults[scope]` + the stored
+   per-template default appearance `template_settings[scope][template_id]`,
+3. **legacy fallback** (goals only) — `frontend_template` + the
+   `frontend_*` appearance tokens,
+4. **hardcoded fallback** — `basic` for goals; a campaign without a
+   template renders per-goal cards (the pre-engine behavior).
+
+A stored `template_id` that is no longer registered falls back to the
+scope default instead of failing. Every settings value is sanitized
+server-side against the template's schema (colors, ranges, enums,
+tag-free CSS, unknown keys dropped); the settings form is generated
+generically from the schema (`admin-app/src/templates/SchemaForm.tsx`),
+so a new template automatically gets a working settings UI. Goals and
+Campaigns save endpoints validate `template_id` + `template_settings`
+server-side. DB `0.4.0` migrates legacy `display_settings.template`
+onto `template_id` (+ empty `template_settings`) safely and
+idempotently, so existing goals upgrade with no visual change.
 
 ---
 

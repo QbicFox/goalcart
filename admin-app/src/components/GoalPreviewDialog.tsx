@@ -10,34 +10,24 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 
-import type { FrontendTemplate, Goal } from '../types';
+import type { Goal } from '../types';
 import PreviewControls from './preview/PreviewControls';
 import PreviewWidget from './preview/PreviewWidget';
 import { usePreviewDialog } from './preview/usePreviewDialog';
 import { DEVICE_WIDTHS, tokensFromSettings } from './preview/types';
 import type { PreviewDevice } from './preview/types';
+import { templateById } from '../templates/useTemplates';
 
 interface GoalPreviewDialogProps {
   goal: Goal | null;
   onClose: () => void;
 }
 
-const TEMPLATE_VARIANTS: FrontendTemplate[] = ['basic', 'percentage', 'milestone', 'card'];
-
 /** Whether a goal's progress is measured in money (mirrors Goal::is_money_goal). */
 function isMoneyGoal(goal: Goal): boolean {
   const countTypes = ['quantity', 'distinct_quantity', 'weight'];
 
   return !countTypes.includes(goal.type) && goal.calculation_mode !== 'quantity';
-}
-
-/** The goal's own Display template, sanitized to the enum ('' = auto). */
-function goalTemplate(goal: Goal): FrontendTemplate | '' {
-  const template = goal.display_settings?.template;
-
-  return template && (TEMPLATE_VARIANTS as string[]).includes(template)
-    ? (template as FrontendTemplate)
-    : '';
 }
 
 /** Amount/quantity implied by a state preset for a goal. */
@@ -68,22 +58,35 @@ const DEVICE_LABELS: Record<PreviewDevice, string> = {
  * cart, and publish gating is ignored so drafts can be seen first.
  */
 export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogProps) {
-  const { controls, patch, applyPreset, previewQuery, settingsQuery } = usePreviewDialog({
-    target: goal,
-    derive: (current: Goal) => ({
-      templateDefault: goalTemplate(current),
-      targetsFor: (fraction) => presetTargets(current, fraction),
-      paramsFor: () => ({ goalId: current.id }),
-    }),
-  });
+  const { controls, patch, applyPreset, previewQuery, settingsQuery, templatesQuery } =
+    usePreviewDialog({
+      target: goal,
+      derive: (current: Goal) => ({
+        // '' = auto: the backend resolves the goal's own template + settings
+        // (item override → scope default → legacy → fallback) into the
+        // payload, exactly like the live frontend.
+        templateDefault: '',
+        targetsFor: (fraction) => presetTargets(current, fraction),
+        paramsFor: () => ({ goalId: current.id }),
+      }),
+    });
 
   const settings = settingsQuery.data?.data;
-  const resolvedTemplate: FrontendTemplate =
-    controls.template || settings?.frontend_template || 'basic';
+  const templates = templatesQuery.data;
   const tokens = tokensFromSettings(settings);
   const frameWidth = DEVICE_WIDTHS[controls.deviceWidth];
   const featured = previewQuery.data?.goals[0];
   const percent = featured ? Math.round(featured.percentage) : 0;
+
+  // A forced template override renders with that template's global default
+  // appearance (from the registry); '' renders each goal with its own
+  // resolved template + settings from the payload.
+  const forcedTemplate = controls.template
+    ? templateById(templates, 'goal', controls.template)
+    : undefined;
+  const resolvedTemplate = controls.template || featured?.template || settings?.frontend_template || 'basic';
+  const resolvedTemplateLabel =
+    forcedTemplate?.label ?? templateById(templates, 'goal', resolvedTemplate)?.label ?? resolvedTemplate;
 
   return (
     <Dialog open={goal !== null} onClose={onClose} maxWidth="lg" fullWidth>
@@ -95,9 +98,10 @@ export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogPr
           <Grid item xs={12} md={4} lg={3}>
             <Paper variant="outlined" sx={{ p: 2.5 }}>
               <PreviewControls
-                value={{ ...controls, template: resolvedTemplate }}
+                value={controls}
                 onPatch={patch}
                 onApplyPreset={applyPreset}
+                templates={templates?.goal ?? []}
               />
             </Paper>
           </Grid>
@@ -115,12 +119,12 @@ export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogPr
               >
                 <Typography variant="subtitle2" color="text.secondary">
                   {DEVICE_LABELS[controls.deviceWidth]} · {frameWidth}px
-                </Typography>
-                <Chip
+                </Typography>	                <Chip
                   size="small"
                   variant="outlined"
                   label={sprintf(__('%d%% progress', 'goalcart'), percent)}
                 />
+                <Chip size="small" variant="outlined" label={resolvedTemplateLabel} />
               </Box>
 
               <Box sx={{ maxWidth: frameWidth, margin: '0 auto' }}>
@@ -131,12 +135,13 @@ export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogPr
                       : __('Could not load the preview.', 'goalcart')}
                   </Alert>
                 ) : previewQuery.data ? (
-                  <>
-                    <PreviewWidget
+                  <>	                    <PreviewWidget
                       goals={previewQuery.data.goals}
+                      campaigns={previewQuery.data.campaigns}
                       currency={previewQuery.data.currency}
                       tokens={tokens}
-                      template={resolvedTemplate}
+                      templateOverride={controls.template || undefined}
+                      settingsOverride={forcedTemplate?.settings}
                       rewardState={controls.rewardState}
                       animation={settings?.frontend_animation ?? true}
                     />

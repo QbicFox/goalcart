@@ -19,6 +19,7 @@ use GoalCart\Hooks\HookManager;
 use GoalCart\Rewards\RewardEngine;
 use GoalCart\Rewards\RewardResult;
 use GoalCart\Settings\Settings;
+use GoalCart\Templates\TemplateEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -114,6 +115,15 @@ class PreviewController extends BaseController {
 	protected $reward_engine;
 
 	/**
+	 * Template engine (pluggable templates): resolves the previewed
+	 * campaign's group template. Null when not injected — resolved lazily
+	 * from the plugin container.
+	 *
+	 * @var TemplateEngine|null
+	 */
+	protected $templates;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param GoalEngine         $engine       Goal engine.
@@ -123,14 +133,29 @@ class PreviewController extends BaseController {
 	 * @param Settings           $settings     Settings service.
 	 * @param RewardEngine|null  $reward_engine Reward engine (Phase 26
 	 *                                          display/grant parity).
+	 * @param TemplateEngine|null $templates   Template engine (optional).
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CampaignRepository $campaigns, FrontendController $frontend, Settings $settings, ?RewardEngine $reward_engine = null ) {
+	public function __construct( GoalEngine $engine, GoalRepository $goals, CampaignRepository $campaigns, FrontendController $frontend, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null ) {
 		$this->engine        = $engine;
 		$this->goals         = $goals;
 		$this->campaigns     = $campaigns;
 		$this->frontend      = $frontend;
 		$this->settings      = $settings;
 		$this->reward_engine = $reward_engine;
+		$this->templates     = $templates;
+	}
+
+	/**
+	 * The template engine, resolved lazily when not injected.
+	 *
+	 * @return TemplateEngine
+	 */
+	protected function templates() {
+		if ( null === $this->templates ) {
+			$this->templates = \GoalCart\Plugin::instance()->container()->get( TemplateEngine::class );
+		}
+
+		return $this->templates;
 	}
 
 	/**
@@ -299,6 +324,11 @@ class PreviewController extends BaseController {
 		return $this->success(
 			array(
 				'goals'    => $items,
+				// Campaign template group (pluggable engine) — mirrors the
+				// live /progress payload so the preview renders a configured
+				// campaign template (e.g. the milestone chain) exactly like
+				// the storefront.
+				'campaigns' => $this->campaign_groups( $goal_id, $campaign_id ),
 				'currency' => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
 				'simulated' => array(
 					'amount'   => $amount,
@@ -389,6 +419,46 @@ class PreviewController extends BaseController {
 		return array(
 			'resolved' => ConflictResolver::REASON_NONE === $reason,
 			'reason'   => $reason,
+		);
+	}
+
+	/**
+	 * The campaign template group for the preview payload.
+	 *
+	 * Mirrors FrontendController::campaign_groups(): a single-entry list
+	 * for campaign previews (resolved from the stored display_rules), and
+	 * empty for goal previews — so the preview resolves the campaign
+	 * template + settings identically to the live frontend.
+	 *
+	 * @param int $goal_id     Goal id (0 when previewing a campaign).
+	 * @param int $campaign_id Campaign id (0 when previewing a goal).
+	 * @return array<int, array<string, mixed>>
+	 */
+	protected function campaign_groups( $goal_id, $campaign_id ) {
+		if ( $campaign_id <= 0 ) {
+			return array();
+		}
+
+		$campaign = $this->campaigns->get( (int) $campaign_id );
+
+		if ( null === $campaign ) {
+			return array();
+		}
+
+		$rules    = isset( $campaign['display_rules'] ) && is_array( $campaign['display_rules'] ) ? $campaign['display_rules'] : array();
+		$resolved = $this->templates()->resolve_campaign( $rules );
+
+		if ( '' === $resolved['template_id'] ) {
+			return array();
+		}
+
+		return array(
+			array(
+				'campaign_id' => (int) $campaign_id,
+				'name'        => (string) $campaign['name'],
+				'template'    => $resolved['template_id'],
+				'settings'    => $resolved['settings'],
+			),
 		);
 	}
 

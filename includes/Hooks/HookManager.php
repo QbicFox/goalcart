@@ -103,6 +103,7 @@ class HookManager {
 			array( 'type' => 'filter', 'hook' => 'goalcart_suggestions_enabled', 'description' => 'Whether product suggestions render on the storefront.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_default_calculation_mode', 'description' => 'Store-wide default money calculation basis.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_suggestions', 'description' => 'The shaped suggestion items for a goal.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_template_classes', 'description' => 'The progress template class map (id => Template class). Register a new Goal or Campaign template here.' ),
 		);
 	}
 

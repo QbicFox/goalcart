@@ -83,6 +83,24 @@ class Settings {
 		'analytics_enabled'       => true,
 		'performance_suggestions' => true,
 
+		// Template engine (pluggable progress templates): the per-scope
+		// default template ids, the per-template default appearance and the
+		// per-template schema versions. Empty defaults fall back to the
+		// legacy frontend_* surface above, so existing stores see no change
+		// until they configure a template explicitly.
+		'template_defaults' => array(
+			'goal'     => '', // '' = legacy frontend_template.
+			'campaign' => '', // '' = no campaign template (per-goal cards).
+		),
+		'template_settings' => array(
+			'goal'     => array(),
+			'campaign' => array(),
+		),
+		'template_versions' => array(
+			'goal'     => array(),
+			'campaign' => array(),
+		),
+
 		// Advanced (P18-T05).
 		'debug_mode'      => false,
 		'logging_enabled' => false,

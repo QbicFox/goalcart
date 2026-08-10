@@ -9,6 +9,7 @@ namespace GoalCart\REST;
 
 use GoalCart\Hooks\HookManager;
 use GoalCart\Settings\Settings;
+use GoalCart\Templates\TemplateEngine;
 use GoalCart\Utils\Logger;
 
 defined( 'ABSPATH' ) || exit;
@@ -43,12 +44,37 @@ class SettingsController extends BaseController {
 	protected $settings;
 
 	/**
+	 * Template engine (pluggable templates): validates the per-scope
+	 * template defaults and per-template settings on save. Null when not
+	 * injected — resolved lazily from the plugin container so bare
+	 * constructions (tests) keep working.
+	 *
+	 * @var TemplateEngine|null
+	 */
+	protected $templates;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param Settings $settings Settings instance.
+	 * @param Settings         $settings Settings instance.
+	 * @param TemplateEngine|null $templates Template engine (optional).
 	 */
-	public function __construct( Settings $settings ) {
+	public function __construct( Settings $settings, ?TemplateEngine $templates = null ) {
 		$this->settings = $settings;
+		$this->templates = $templates;
+	}
+
+	/**
+	 * The template engine, resolved lazily when not injected.
+	 *
+	 * @return TemplateEngine
+	 */
+	protected function templates() {
+		if ( null === $this->templates ) {
+			$this->templates = \GoalCart\Plugin::instance()->container()->get( TemplateEngine::class );
+		}
+
+		return $this->templates;
 	}
 
 	/**
@@ -135,6 +161,32 @@ class SettingsController extends BaseController {
 			}
 
 			$clean[ $key ] = $this->sanitize_setting( $key, $values[ $key ] );
+		}
+
+		// Template-engine bookkeeping: saving the per-scope goal default
+		// syncs the legacy frontend_template picker (and vice versa) so the
+		// Settings page and the Appearance page can never drift, and saving
+		// per-template settings records the current schema versions for
+		// future migrations.
+		if ( isset( $clean['frontend_template'] ) && ! isset( $clean['template_defaults'] ) ) {
+			$defaults = $this->settings->get( 'template_defaults', array() );
+			$defaults = is_array( $defaults ) ? $defaults : array();
+			$defaults['goal'] = $clean['frontend_template'];
+			$clean['template_defaults'] = $defaults;
+		}
+
+		if ( isset( $clean['template_defaults'] ) && is_array( $clean['template_defaults'] ) ) {
+			$goal = isset( $clean['template_defaults']['goal'] ) ? (string) $clean['template_defaults']['goal'] : '';
+			$clean['frontend_template'] = '' !== $goal ? $goal : $this->settings->get( 'frontend_template', 'basic' );
+		}
+
+		if ( isset( $clean['template_settings'] ) ) {
+			// Defense in depth: the REST arg schema runs the same sanitizer
+			// on real dispatches; sanitizing here too keeps direct saves
+			// schema-safe, so a bad template_settings payload can never be
+			// persisted.
+			$clean['template_settings'] = $this->sanitize_template_settings( $clean['template_settings'] );
+			$clean['template_versions'] = $this->templates()->versions();
 		}
 
 		if ( empty( $clean ) ) {
@@ -235,7 +287,111 @@ class SettingsController extends BaseController {
 			'debug_mode'      => $bool,
 			'logging_enabled' => $bool,
 			'developer_hooks' => $bool,
+
+			// Template engine (pluggable progress templates).
+			'template_defaults' => array(
+				'type'                 => 'object',
+				'default'              => array(),
+				'properties'           => array(
+					'goal'     => array( 'type' => 'string' ),
+					'campaign' => array( 'type' => 'string' ),
+				),
+				'additionalProperties' => false,
+				'validate_callback'    => array( $this, 'validate_template_defaults' ),
+			),
+			'template_settings' => array(
+				'type'                 => 'object',
+				'default'              => array(),
+				'additionalProperties' => true,
+				'validate_callback'    => array( $this, 'validate_template_settings' ),
+				'sanitize_callback'    => array( $this, 'sanitize_template_settings' ),
+			),
 		);
+	}
+
+	/**
+	 * Validate the per-scope template defaults against the registries.
+	 *
+	 * @param mixed $value Raw template_defaults value.
+	 * @return bool
+	 */
+	public function validate_template_defaults( $value ) {
+		if ( ! is_array( $value ) ) {
+			return false;
+		}
+
+		foreach ( array( 'goal', 'campaign' ) as $scope ) {
+			if ( ! array_key_exists( $scope, $value ) ) {
+				continue;
+			}
+
+			$id = (string) $value[ $scope ];
+
+			if ( '' !== $id && ! $this->templates()->is_registered( $scope, $id ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validate the per-template settings payload (scopes must be known).
+	 *
+	 * @param mixed $value Raw template_settings value.
+	 * @return bool
+	 */
+	public function validate_template_settings( $value ) {
+		if ( ! is_array( $value ) ) {
+			return false;
+		}
+
+		foreach ( array_keys( $value ) as $scope ) {
+			if ( ! in_array( $scope, array( 'goal', 'campaign' ), true ) ) {
+				return false;
+			}
+
+			$per_template = $value[ $scope ];
+
+			if ( ! is_array( $per_template ) ) {
+				return false;
+			}
+
+			foreach ( array_keys( $per_template ) as $template_id ) {
+				if ( ! $this->templates()->is_registered( $scope, $template_id ) ) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Sanitize the per-template settings against each template's schema.
+	 *
+	 * @param mixed $value Raw template_settings value.
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function sanitize_template_settings( $value ) {
+		$clean = array(
+			'goal'     => array(),
+			'campaign' => array(),
+		);
+
+		if ( ! is_array( $value ) ) {
+			return $clean;
+		}
+
+		foreach ( array( 'goal', 'campaign' ) as $scope ) {
+			if ( ! isset( $value[ $scope ] ) || ! is_array( $value[ $scope ] ) ) {
+				continue;
+			}
+
+			$clean[ $scope ] = $this->templates()->sanitize_scope_settings( $scope, $value[ $scope ] );
+		}
+
+		return $clean;
 	}
 
 	/**

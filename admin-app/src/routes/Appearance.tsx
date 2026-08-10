@@ -1,418 +1,621 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActionArea from '@mui/material/CardActionArea';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import Chip from '@mui/material/Chip';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import Grid from '@mui/material/Grid';
-import InputAdornment from '@mui/material/InputAdornment';
 import PaletteIcon from '@mui/icons-material/Palette';
 import Paper from '@mui/material/Paper';
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import Skeleton from '@mui/material/Skeleton';
-import Slider from '@mui/material/Slider';
 import Stack from '@mui/material/Stack';
-import Switch from '@mui/material/Switch';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { getBootData } from '../boot';
 import { fetchSettingsEnvelope, saveSettings } from '../api/settings';
-import type { FrontendTemplate, GoalCartSettings } from '../types';
 import PageContainer from '../components/PageContainer';
+import PreviewWidget from '../components/preview/PreviewWidget';
+import { tokensFromSettings } from '../components/preview/types';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
+import SchemaForm from '../templates/SchemaForm';
+import { campaignRenderer, goalRenderer } from '../templates/registry';
+import { templateById, useTemplates } from '../templates/useTemplates';
+import { bool, num, str } from '../templates/utils';
+import type {
+  ProgressCampaign,
+  ProgressGoal,
+  TemplateDefinition,
+  TemplateScope,
+  TemplateSettingsValue,
+} from '../types';
 
-/** Mirrors the PHP Settings::defaults() (keep them in sync). */
-const DEFAULT_SETTINGS: GoalCartSettings = {
-  enabled: true,
-  fullscreen_dashboard: true,
-  currency_display: 'symbol',
-  default_goal_behavior: 'all',
-  conflict_resolution: 'cumulative',
-  calculation_mode: 'subtotal',
-  frontend_template: 'basic',
-  frontend_animation: true,
-  frontend_locations: ['cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky'],
-  frontend_mobile: 'show',
-  frontend_bar_height: 10,
-  frontend_accent: '#2271b1',
-  frontend_bg: '#ffffff',
-  frontend_border: '#dcdcde',
-  frontend_text: '#1d2327',
-  frontend_radius: 10,
-  frontend_css_class: '',
-  frontend_custom_css: '',
-  calculation_include_tax: false,
-  calculation_include_discount: true,
-  calculation_include_shipping: true,
-  calculation_include_sale: true,
-  calculation_include_virtual: true,
-  performance_caching: false,
-  analytics_enabled: true,
-  performance_suggestions: true,
-  debug_mode: false,
-  logging_enabled: false,
-  developer_hooks: true,
-};
+const SCOPES: TemplateScope[] = ['goal', 'campaign'];
 
-const TEMPLATES: Array<{ value: FrontendTemplate; label: string; description: string }> = [
-  {
-    value: 'basic',
-    label: __('Basic', 'goalcart'),
-    description: __('Progress bar + message — the classic goal strip.', 'goalcart'),
-  },
-  {
-    value: 'percentage',
-    label: __('Percentage', 'goalcart'),
-    description: __('A big percent readout above the bar.', 'goalcart'),
-  },
-  {
-    value: 'milestone',
-    label: __('Milestone', 'goalcart'),
-    description: __('A goal ladder of dots and targets, bar underneath.', 'goalcart'),
-  },
-  {
-    value: 'card',
-    label: __('Card', 'goalcart'),
-    description: __('Icon, title and reward bundled in a card.', 'goalcart'),
-  },
-];
-
-/** Resolved appearance tokens for the live preview (storefront equivalents). */
-interface Tokens {
-  accent: string;
-  bg: string;
-  border: string;
-  text: string;
-  radius: number;
-  barHeight: number;
-}
-
-function tokensOf(form: Partial<GoalCartSettings>): Tokens {
+/**
+ * The card surface shared by every preview thumbnail and live preview —
+ * mirrors the storefront `.goalcart` container driven by the resolved
+ * template settings (accent/bg/border/text/radius).
+ */
+function cardSurface(settings: TemplateSettingsValue) {
   return {
-    accent: form.frontend_accent || DEFAULT_SETTINGS.frontend_accent,
-    bg: form.frontend_bg || DEFAULT_SETTINGS.frontend_bg,
-    border: form.frontend_border || DEFAULT_SETTINGS.frontend_border,
-    text: form.frontend_text || DEFAULT_SETTINGS.frontend_text,
-    radius: form.frontend_radius ?? DEFAULT_SETTINGS.frontend_radius,
-    barHeight: form.frontend_bar_height ?? DEFAULT_SETTINGS.frontend_bar_height,
+    background: str(settings, 'bg', '#ffffff'),
+    border: `1px solid ${str(settings, 'border', '#dcdcde')}`,
+    borderRadius: num(settings, 'radius', 10),
+    color: str(settings, 'text', '#1d2327'),
+    padding: '0.875rem 1rem',
+    fontSize: 13,
   };
 }
 
-/** The progress-bar visual (mirrors .goalcart-progress markup). */
-function PreviewBar({ tokens, percent }: { tokens: Tokens; percent: number }) {
-  const clamped = Math.max(0, Math.min(100, percent));
+/** A sample in-progress goal for the thumbnails and live previews. */
+function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
+  return {
+    goal_id: 1,
+    campaign_id: 0,
+    goal_name: __('Free shipping', 'goalcart'),
+    goal_type: 'amount',
+    is_money: true,
+    icon: '🎯',
+    template: 'basic',
+    template_settings: {},
+    current: 93,
+    target: 150,
+    remaining: 57,
+    percentage: 62,
+    completed: false,
+    state: 'progressing',
+    message: __('Only $57.00 left to reach your goal', 'goalcart'),
+    reward: { type: 'free_shipping', value: null, max_value: null, meta: {} },
+    suggestions: [],
+    reward_state: 'locked',
+    eligible: true,
+    reason: '',
+    conflict: { resolved: true, reason: '' },
+    ...overrides,
+  };
+}
+
+/** Three sample milestones for the campaign thumbnails / previews. */
+function sampleMilestones(): ProgressGoal[] {
+  return [
+    sampleGoal({
+      goal_id: 1,
+      goal_name: __('Free shipping', 'goalcart'),
+      target: 100,
+      current: 93,
+      remaining: 7,
+      percentage: 93,
+      reward: { type: 'free_shipping', value: null, max_value: null, meta: {} },
+    }),
+    sampleGoal({
+      goal_id: 2,
+      goal_name: __('Free gift', 'goalcart'),
+      target: 200,
+      current: 93,
+      remaining: 107,
+      percentage: 46,
+      reward: { type: 'free_gift', value: null, max_value: null, meta: {} },
+    }),
+    sampleGoal({
+      goal_id: 3,
+      goal_name: __('10% off', 'goalcart'),
+      target: 300,
+      current: 93,
+      remaining: 207,
+      percentage: 31,
+      reward: { type: 'percent_discount', value: 10, max_value: null, meta: {} },
+    }),
+  ];
+}
+
+/** A goal-template thumbnail rendered by its real registry renderer. */
+function GoalThumb({
+  definition,
+  settings,
+  currency,
+}: {
+  definition: TemplateDefinition;
+  settings: TemplateSettingsValue;
+  currency: string;
+}) {
+  const Renderer = goalRenderer(definition.id);
+
   return (
-    <Box
-      sx={{
-        position: 'relative',
-        height: tokens.barHeight,
-        background: '#f0f0f1',
-        borderRadius: 999,
-        overflow: 'hidden',
-        flex: '1 1 auto',
-      }}
-    >
-      <Box
-        sx={{
-          position: 'absolute',
-          insetInlineStart: 0,
-          insetBlockStart: 0,
-          height: '100%',
-          width: `${clamped}%`,
-          background: tokens.accent,
-          borderRadius: 'inherit',
-        }}
+    <Box sx={cardSurface(settings)}>
+      <Renderer
+        goal={sampleGoal({ template: definition.id })}
+        currency={currency}
+        settings={settings}
+        animation={false}
       />
     </Box>
   );
 }
 
-/** The locked reward chip (mirrors .goalcart-reward markup). */
-function PreviewReward() {
+/** A campaign-template thumbnail rendered by its real registry renderer. */
+function CampaignThumb({
+  definition,
+  settings,
+  currency,
+}: {
+  definition: TemplateDefinition;
+  settings: TemplateSettingsValue;
+  currency: string;
+}) {
+  const Renderer = campaignRenderer(definition.id);
+
+  if (!Renderer) {
+    return null;
+  }
+
+  const campaign: ProgressCampaign = {
+    campaign_id: 999,
+    name: __('Campaign', 'goalcart'),
+    template: definition.id,
+    settings,
+  };
+
   return (
-    <Box
-      component="span"
-      sx={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: '0.4rem',
-        padding: '0.25rem 0.625rem',
-        borderRadius: 999,
-        fontSize: 12,
-        fontWeight: 600,
-        background: '#f0f0f1',
-        color: '#646970',
-      }}
-    >
-      <span aria-hidden>🔒</span>
-      <span>{__('Free shipping', 'goalcart')}</span>
+    <Box sx={cardSurface(settings)}>
+      <Renderer
+        campaign={campaign}
+        goals={sampleMilestones().map((goal) => ({ ...goal, campaign_id: 999 }))}
+        currency={currency}
+        settings={settings}
+        animation={false}
+      />
     </Box>
   );
 }
 
-/** A small, inline thumbnail of one template variant (template cards). */
-function TemplateThumb({ template, tokens }: { template: FrontendTemplate; tokens: Tokens }) {
-  if (template === 'percentage') {
-    return (
-      <Stack direction="row" alignItems="center" spacing={1} sx={{ width: '100%' }}>
-        <Typography sx={{ fontSize: 20, fontWeight: 800, color: tokens.accent, lineHeight: 1 }}>
-          62%
-        </Typography>
-        <PreviewBar tokens={tokens} percent={62} />
-      </Stack>
-    );
-  }
-
-  if (template === 'milestone') {
-    return (
-      <Stack spacing={1} sx={{ width: '100%' }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between">
-          {[
-            { target: '50$', done: true },
-            { target: '100$', done: true },
-            { target: '150$', done: false },
-          ].map((step) => (
-            <Stack key={step.target} direction="row" alignItems="center" spacing={0.5}>
-              <Box
-                sx={{
-                  width: 10,
-                  height: 10,
-                  borderRadius: '50%',
-                  background: step.done ? tokens.accent : tokens.border,
-                }}
-              />
-              <Typography sx={{ fontSize: 10, color: step.done ? tokens.text : '#646970' }}>
-                {step.target}
-              </Typography>
-            </Stack>
-          ))}
-        </Stack>
-        <PreviewBar tokens={tokens} percent={62} />
-      </Stack>
-    );
-  }
-
-  if (template === 'card') {
-    return (
-      <Stack spacing={0.75} sx={{ width: '100%' }}>
-        <Stack direction="row" alignItems="center" spacing={0.75}>
-          <Typography sx={{ fontSize: 18, lineHeight: 1 }} aria-hidden>
-            🎯
-          </Typography>
-          <Typography sx={{ fontSize: 13, fontWeight: 700, flex: 1 }}>
-            {__('Free shipping', 'goalcart')}
-          </Typography>
-          <PreviewReward />
-        </Stack>
-        <PreviewBar tokens={tokens} percent={62} />
-      </Stack>
-    );
-  }
-
+/** The "no campaign template" card thumbnail — plain per-goal cards. */
+function NoCampaignThumb() {
   return (
     <Stack spacing={0.75} sx={{ width: '100%' }}>
-      <PreviewBar tokens={tokens} percent={62} />
-      <Typography sx={{ fontSize: 11, fontWeight: 500 }}>
-        {__('Only $38.00 left to reach your goal', 'goalcart')}
-      </Typography>
+      {[62, 40, 28].map((width) => (
+        <Box
+          key={width}
+          sx={{
+            height: 8,
+            borderRadius: 999,
+            background: '#dcdcde',
+            width: `${width}%`,
+            opacity: 0.8,
+          }}
+        />
+      ))}
     </Stack>
   );
 }
 
-/** The full-size live preview driven by the current form values. */
-function LivePreview({ form }: { form: Partial<GoalCartSettings> }) {
-  const tokens = tokensOf(form);
-  const template = TEMPLATES.find((t) => t.value === form.frontend_template) || TEMPLATES[0];
+/**
+ * The scope default picker — one card per registered template (thumbnails
+ * rendered through the template registry), plus the "no campaign
+ * template" option for the campaign scope.
+ */
+function ScopeTemplatePicker({
+  scope,
+  templates,
+  defaults,
+  drafts,
+  currency,
+  onSelect,
+}: {
+  scope: TemplateScope;
+  templates: TemplateDefinition[];
+  defaults: Record<TemplateScope, string>;
+  drafts: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
+  currency: string;
+  onSelect: (id: string) => void;
+}) {
+  const selected = defaults[scope];
+
+  const cardStyles = (isSelected: boolean) => ({
+    height: '100%',
+    border: isSelected ? '2px solid' : '1px solid',
+    borderColor: isSelected ? 'primary.main' : 'divider',
+    boxShadow: isSelected ? 3 : 0,
+    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
+    '&:hover': { transform: 'translateY(-2px)', boxShadow: 2 },
+  });
+
+  const renderSelect = (id: string, thumb: React.ReactNode, label: string, caption: string) => {
+    const isSelected = selected === id;
+
+    return (
+      <Grid item xs={12} sm={6} md={4} key={id}>
+        <Card variant={isSelected ? 'elevation' : 'outlined'} sx={cardStyles(isSelected)}>
+          <CardActionArea
+            onClick={() => onSelect(id)}
+            aria-pressed={isSelected}
+            sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}
+          >
+            <Box sx={{ width: '100%', flex: '1 1 auto', mb: 1.5 }}>{thumb}</Box>
+            <Stack direction="row" alignItems="center" spacing={0.75} sx={{ width: '100%' }}>
+              {isSelected ? (
+                <CheckCircleIcon color="primary" fontSize="small" />
+              ) : (
+                <RadioButtonUncheckedIcon fontSize="small" color="disabled" />
+              )}
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                {label}
+              </Typography>
+            </Stack>
+            <Typography variant="caption" color="text.secondary">
+              {caption}
+            </Typography>
+          </CardActionArea>
+        </Card>
+      </Grid>
+    );
+  };
 
   return (
-    <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, bgcolor: '#f6f7f7' }}>
-      <Typography variant="subtitle2" gutterBottom color="text.secondary">
-        {__('Live preview', 'goalcart')}
-      </Typography>
-      <Box
-        sx={{
-          maxWidth: 440,
-          margin: '0 auto',
-          background: tokens.bg,
-          border: `1px solid ${tokens.border}`,
-          borderRadius: tokens.radius,
-          boxShadow: '0 6px 24px rgba(0,0,0,0.08)',
-          color: tokens.text,
-          padding: '1rem 1.125rem',
-          fontSize: 14,
-        }}
-      >
-        <Stack direction="row" justifyContent="flex-end" sx={{ mb: 0.75 }}>
-          <PreviewReward />
-        </Stack>
-
-        {form.frontend_template === 'percentage' && (
-          <Stack direction="row" alignItems="center" spacing={1.5}>
-            <Typography sx={{ fontSize: 28, fontWeight: 800, color: tokens.accent, lineHeight: 1 }}>
-              62%
-            </Typography>
-            <PreviewBar tokens={tokens} percent={62} />
-          </Stack>
+    <Grid container spacing={1.5}>
+      {scope === 'campaign' &&
+        renderSelect(
+          '',
+          <NoCampaignThumb />,
+          __('No campaign template', 'goalcart'),
+          __('Each milestone renders as its own goal card.', 'goalcart')
         )}
+      {templates.map((definition) => {
+        const settings = drafts[scope][definition.id] ?? definition.settings;
 
-        {form.frontend_template === 'milestone' && (
-          <Stack spacing={1} sx={{ mb: 1 }}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between">
-              {[
-                { target: '50$', done: true },
-                { target: '100$', done: true },
-                { target: '150$', done: false },
-              ].map((step) => (
-                <Stack key={step.target} direction="row" alignItems="center" spacing={0.5}>
-                  <Box
-                    sx={{
-                      width: 12,
-                      height: 12,
-                      borderRadius: '50%',
-                      background: step.done ? tokens.accent : tokens.border,
-                    }}
-                  />
-                  <Typography
-                    sx={{
-                      fontSize: 12,
-                      fontWeight: 500,
-                      color: step.done ? tokens.text : '#646970',
-                    }}
-                  >
-                    {step.target}
-                  </Typography>
-                </Stack>
-              ))}
-            </Stack>
-            <PreviewBar tokens={tokens} percent={62} />
-          </Stack>
-        )}
-
-        {form.frontend_template === 'card' && (
-          <Stack spacing={0.75} sx={{ mb: 1 }}>
-            <Stack direction="row" alignItems="center" spacing={0.75}>
-              <Typography sx={{ fontSize: 24, lineHeight: 1 }} aria-hidden>
-                🎯
-              </Typography>
-              <Typography sx={{ fontWeight: 700, flex: 1 }}>
-                {__('Free shipping', 'goalcart')}
-              </Typography>
-            </Stack>
-            <PreviewBar tokens={tokens} percent={62} />
-          </Stack>
-        )}
-
-        {form.frontend_template === 'basic' && <PreviewBar tokens={tokens} percent={62} />}
-
-        <Typography sx={{ mt: 1, fontWeight: 500 }}>
-          {__('Only $38.00 left to reach your goal', 'goalcart')}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-          {template.label} — {template.description}
-        </Typography>
-      </Box>
-    </Paper>
+        return renderSelect(
+          definition.id,
+          scope === 'goal' ? (
+            <GoalThumb definition={definition} settings={settings} currency={currency} />
+          ) : (
+            <CampaignThumb definition={definition} settings={settings} currency={currency} />
+          ),
+          definition.label,
+          definition.description
+        );
+      })}
+    </Grid>
   );
 }
 
-/** A hex-color field with a native color picker in the adornment. */
-function ColorField({
-  label,
-  value,
+/**
+ * The per-template appearance editors — one accordion per registered
+ * template with the schema-driven form (the same SchemaForm the Goal and
+ * Campaign builders use), plus a "reset to template defaults" action that
+ * restores the factory schema defaults.
+ */
+function TemplateSettingsAccordions({
+  scope,
+  templates,
+  defaults,
+  drafts,
   onChange,
+  onReset,
 }: {
-  label: string;
-  value: string;
-  onChange: (next: string) => void;
+  scope: TemplateScope;
+  templates: TemplateDefinition[];
+  defaults: Record<TemplateScope, string>;
+  drafts: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
+  onChange: (id: string, next: TemplateSettingsValue) => void;
+  onReset: (id: string) => void;
 }) {
-  const safe = /^#[0-9a-fA-F]{6}$/.test(value) ? value : '#2271b1';
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   return (
-    <TextField
-      label={label}
-      value={value}
-      size="small"
-      onChange={(event) => onChange(event.target.value)}
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <input
-                type="color"
-                value={safe}
-                onChange={(event) => onChange(event.target.value)}
-                aria-label={label}
-                style={{
-                  width: 28,
-                  height: 28,
-                  padding: 0,
-                  border: 'none',
-                  background: 'transparent',
-                  cursor: 'pointer',
-                }}
-              />
-            </InputAdornment>
-          ),
-        },
-      }}
+    <Stack spacing={1}>
+      {templates.map((definition) => {
+        const isDefault = defaults[scope] === definition.id;
+
+        return (
+          <Accordion
+            key={definition.id}
+            expanded={expanded === definition.id}
+            onChange={(_event, isOpen) => setExpanded(isOpen ? definition.id : null)}
+            variant="outlined"
+            disableGutters
+            sx={{ '&:before': { display: 'none' } }}
+          >
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              sx={{ '& .MuiAccordionSummary-content': { alignItems: 'center', gap: 1 } }}
+            >
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                {definition.label}
+              </Typography>
+              {isDefault && (
+                <Chip size="small" color="primary" variant="outlined" label={__('Default', 'goalcart')} />
+              )}
+              <Box sx={{ flex: 1 }} />
+              <Typography variant="caption" color="text.secondary">
+                {`v${definition.version}`}
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={2}>
+                <SchemaForm
+                  schema={definition.schema}
+                  value={drafts[scope][definition.id] ?? definition.settings}
+                  onChange={(next) => onChange(definition.id, next)}
+                />
+                <Box>
+                  <Button
+                    size="small"
+                    startIcon={<RestartAltIcon />}
+                    onClick={() => onReset(definition.id)}
+                  >
+                    {__('Reset to template defaults', 'goalcart')}
+                  </Button>
+                </Box>
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+        );
+      })}
+    </Stack>
+  );
+}
+
+/**
+ * The live preview of the scope's default template with its current draft
+ * appearance — rendered through PreviewWidget (the same component the
+ * Phase 15 preview dialogs use), so what the merchant sees here matches
+ * the storefront.
+ */
+function ScopeLivePreview({
+  scope,
+  defaults,
+  drafts,
+  templates,
+  tokens,
+  currency,
+}: {
+  scope: TemplateScope;
+  defaults: Record<TemplateScope, string>;
+  drafts: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
+  templates: TemplateDefinition[];
+  tokens: ReturnType<typeof tokensFromSettings>;
+  currency: string;
+}) {
+  const id = defaults[scope];
+
+  if (scope === 'campaign' && id === '') {
+    return (
+      <Alert severity="info" variant="outlined">
+        {__(
+          'No campaign template selected — each milestone renders as its own goal card on the storefront.',
+          'goalcart'
+        )}
+      </Alert>
+    );
+  }
+
+  const definition = templates.find((template) => template.id === id);
+
+  if (!definition) {
+    return null;
+  }
+
+  const settings = drafts[scope][id] ?? definition.settings;
+  const animation = bool(settings, 'animation', true);
+
+  if (scope === 'goal') {
+    return (
+      <PreviewWidget
+        goals={[sampleGoal()]}
+        currency={currency}
+        tokens={tokens}
+        templateOverride={id}
+        settingsOverride={settings}
+        rewardState="locked"
+        animation={animation}
+      />
+    );
+  }
+
+  const campaign: ProgressCampaign = {
+    campaign_id: 999,
+    name: __('Sample campaign', 'goalcart'),
+    template: id,
+    settings,
+  };
+
+  return (
+    <PreviewWidget
+      goals={sampleMilestones().map((goal) => ({ ...goal, campaign_id: 999 }))}
+      campaigns={[campaign]}
+      currency={currency}
+      tokens={tokens}
+      rewardState="locked"
+      animation={animation}
     />
   );
 }
 
 /**
- * Appearance (P12-T01 / P12-T02): storefront progress templates.
+ * Appearance (pluggable template engine): the storefront progress UI is
+ * now template-driven, independently for Goals and Campaigns.
  *
- * Choose the template variant, tune the appearance tokens (colors,
- * radius, bar height, animation), add a custom class or custom CSS, and
- * watch a live preview — all persisted through `POST /goalcart/v1/settings`.
- * The storefront widgets (Phase 11) consume the same settings, so the
- * changes apply the moment they are saved.
+ *  - pick the scope default template (goals always render one; campaigns
+ *    may render per-goal cards instead),
+ *  - edit every registered template's default appearance through the
+ *    generic schema-driven form — a new template registered on the
+ *    backend automatically gets a working form here,
+ *  - watch a live preview that resolves templates identically to the
+ *    storefront (item override → scope default → legacy → fallback).
+ *
+ * Persisted through `POST /goalcart/v1/settings` as `template_defaults`
+ * + `template_settings`; the legacy `frontend_*` surface stays honored by
+ * the engine as the fallback for templates that were never configured.
  */
 export default function Appearance() {
   const queryClient = useQueryClient();
   const { notify } = useSnackbar();
+  const templatesQuery = useTemplates();
+  const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: fetchSettingsEnvelope });
 
-  // The shared `['settings']` cache is the envelope shape `{ data, meta }`
-  // (the same shape the Settings page reads and writes) — never the raw
-  // settings object. Mixing shapes under one query key made the Settings
-  // page read `data?.data` as undefined after an Appearance save and fall
-  // back to defaults, hiding the saved values.
-  const settingsQuery = useQuery({
-    queryKey: ['settings'],
-    queryFn: fetchSettingsEnvelope,
+  const templates = templatesQuery.data;
+  const settings = settingsQuery.data?.data;
+  const tokens = tokensFromSettings(settings);
+  const currency = useMemo(() => {
+    try {
+      return getBootData().currency;
+    } catch {
+      return 'USD';
+    }
+  }, []);
+
+  // Working copy: scope defaults + per-template default appearance.
+  // Seeded once from the registry payload, whose `settings` field already
+  // carries the effective defaults (stored appearance merged over the
+  // schema defaults and legacy tokens), so no draft is ever empty.
+  const [defaults, setDefaults] = useState<Record<TemplateScope, string>>({
+    goal: 'basic',
+    campaign: '',
   });
-
-  const { control, handleSubmit, reset } = useForm<GoalCartSettings>({
-    defaultValues: DEFAULT_SETTINGS,
-    values: settingsQuery.data?.data,
+  const [drafts, setDrafts] = useState<Record<TemplateScope, Record<string, TemplateSettingsValue>>>({
+    goal: {},
+    campaign: {},
   });
+  const seeded = useRef(false);
 
-  // Live form values for the preview (reacts to every keystroke/slider).
-  const watched = useWatch<GoalCartSettings>({ control });
+  useEffect(() => {
+    if (!templates || seeded.current) {
+      return;
+    }
+
+    seeded.current = true;
+    setDefaults({
+      goal: templates.defaults.goal || 'basic',
+      campaign: templates.defaults.campaign || '',
+    });
+
+    const next: Record<TemplateScope, Record<string, TemplateSettingsValue>> = {
+      goal: {},
+      campaign: {},
+    };
+
+    for (const scope of SCOPES) {
+      for (const definition of templates[scope]) {
+        next[scope][definition.id] = definition.settings;
+      }
+    }
+
+    setDrafts(next);
+  }, [templates]);
 
   const saveMutation = useMutation({
-    mutationFn: (values: GoalCartSettings) => saveSettings(values),
+    mutationFn: (values: {
+      template_defaults: Record<TemplateScope, string>;
+      template_settings?: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
+    }) => saveSettings(values),
     onSuccess: (saved) => {
       notify(__('Appearance saved.', 'goalcart'));
 
       // Keep the envelope shape in the shared cache so the Settings page
       // (and the preview dialogs) still find `data` after this save, then
-      // refetch so the meta (debug log path, hooks reference) stays fresh
-      // — the same post-save refresh the Settings page performs.
+      // refresh the registry payload (its `settings`/`defaults` now carry
+      // the persisted values).
       const meta = settingsQuery.data?.meta ?? {};
       void queryClient.setQueryData(['settings'], { data: saved, meta });
       void settingsQuery.refetch();
+      void queryClient.invalidateQueries({ queryKey: ['templates'] });
     },
     onError: (error: Error) => {
       notify(error.message, 'error');
     },
   });
 
-  if (settingsQuery.isLoading) {
+  const handleSave = () => {
+    if (!templates) {
+      return;
+    }
+
+    // Persist a template's appearance only when its draft diverges from
+    // the effective default the backend served. Unchanged templates keep
+    // their stored settings (merged from the server state) — and
+    // templates that were never configured stay unconfigured, so the
+    // legacy `frontend_*` fallback keeps applying instead of being
+    // silently frozen by an unrelated save.
+    const stored = settings?.template_settings;
+    const merged: Record<TemplateScope, Record<string, TemplateSettingsValue>> = {
+      goal: { ...(stored?.goal ?? {}) },
+      campaign: { ...(stored?.campaign ?? {}) },
+    };
+    let changed = false;
+
+    for (const scope of SCOPES) {
+      for (const definition of templates[scope]) {
+        const draft = drafts[scope][definition.id];
+
+        if (draft && JSON.stringify(draft) !== JSON.stringify(definition.settings)) {
+          merged[scope][definition.id] = draft;
+          changed = true;
+        }
+      }
+    }
+
+    const payload: {
+      template_defaults: Record<TemplateScope, string>;
+      template_settings?: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
+    } = { template_defaults: defaults };
+
+    if (changed) {
+      payload.template_settings = merged;
+    }
+
+    saveMutation.mutate(payload);
+  };
+
+  const discardChanges = () => {
+    if (!templates) {
+      return;
+    }
+
+    setDefaults({
+      goal: templates.defaults.goal || 'basic',
+      campaign: templates.defaults.campaign || '',
+    });
+
+    const next: Record<TemplateScope, Record<string, TemplateSettingsValue>> = {
+      goal: {},
+      campaign: {},
+    };
+
+    for (const scope of SCOPES) {
+      for (const definition of templates[scope]) {
+        next[scope][definition.id] = definition.settings;
+      }
+    }
+
+    setDrafts(next);
+  };
+
+  const resetTemplate = (scope: TemplateScope, id: string) => {
+    const definition = templateById(templates, scope, id);
+
+    if (!definition) {
+      return;
+    }
+
+    const factory: TemplateSettingsValue = {};
+
+    for (const field of definition.schema) {
+      factory[field.key] = field.default;
+    }
+
+    setDrafts((prev) => ({ ...prev, [scope]: { ...prev[scope], [id]: factory } }));
+  };
+
+  if (templatesQuery.isLoading) {
     return (
       <PageContainer
         title={__('Appearance', 'goalcart')}
@@ -426,16 +629,16 @@ export default function Appearance() {
     );
   }
 
-  if (settingsQuery.isError) {
+  if (templatesQuery.isError || !templates) {
     return (
       <PageContainer
         title={__('Appearance', 'goalcart')}
         description={__('Customize how the cart progress UI looks on your storefront.', 'goalcart')}
       >
         <Alert severity="error" variant="outlined">
-          {settingsQuery.error instanceof Error
-            ? settingsQuery.error.message
-            : __('Could not load the settings.', 'goalcart')}
+          {templatesQuery.error instanceof Error
+            ? templatesQuery.error.message
+            : __('Could not load the progress templates.', 'goalcart')}
         </Alert>
       </PageContainer>
     );
@@ -444,289 +647,104 @@ export default function Appearance() {
   return (
     <PageContainer
       title={__('Appearance', 'goalcart')}
-      description={__('Customize how the cart progress UI looks on your storefront.', 'goalcart')}
+      description={__(
+        'Pick the default progress template and tune its appearance — separately for Goals and Campaigns.',
+        'goalcart'
+      )}
     >
-      <form onSubmit={handleSubmit((values) => saveMutation.mutate(values as GoalCartSettings))}>
-        <Stack spacing={3}>
-          <Grid container spacing={3}>
-            <Grid item xs={12} lg={7}>
-              {/* Template picker */}
-              <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }}>
-                <Typography variant="h6" component="h3" gutterBottom>
-                  {__('Template', 'goalcart')}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {__(
-                    'The progress widget layout shown to customers on the cart, checkout and product pages.',
-                    'goalcart'
-                  )}
-                </Typography>
-                <Grid container spacing={1.5}>
-                  <Controller
-                    name="frontend_template"
-                    control={control}
-                    render={({ field }) => (
-                      <>
-                        {TEMPLATES.map((template) => {
-                          const selected = field.value === template.value;
-                          return (
-                            <Grid item xs={12} sm={6} key={template.value}>
-                              <Card
-                                variant={selected ? 'elevation' : 'outlined'}
-                                sx={{
-                                  height: '100%',
-                                  border: selected ? '2px solid' : '1px solid',
-                                  borderColor: selected ? 'primary.main' : 'divider',
-                                  boxShadow: selected ? 3 : 0,
-                                  transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                                  '&:hover': { transform: 'translateY(-2px)', boxShadow: 2 },
-                                }}
-                              >
-                                <CardActionArea
-                                  onClick={() => field.onChange(template.value)}
-                                  aria-pressed={selected}
-                                  sx={{
-                                    p: 2,
-                                    height: '100%',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                  }}
-                                >
-                                  <Box sx={{ width: '100%', flex: '1 1 auto', mb: 1.5 }}>
-                                    <TemplateThumb
-                                      template={template.value}
-                                      tokens={tokensOf(watched)}
-                                    />
-                                  </Box>
-                                  <Stack
-                                    direction="row"
-                                    alignItems="center"
-                                    spacing={0.75}
-                                    sx={{ width: '100%' }}
-                                  >
-                                    {selected && (
-                                      <CheckCircleIcon color="primary" fontSize="small" />
-                                    )}
-                                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
-                                      {template.label}
-                                    </Typography>
-                                  </Stack>
-                                  <Typography variant="caption" color="text.secondary">
-                                    {template.description}
-                                  </Typography>
-                                </CardActionArea>
-                              </Card>
-                            </Grid>
-                          );
-                        })}
-                      </>
-                    )}
-                  />
-                </Grid>
-              </Paper>
-            </Grid>
+      <Stack spacing={3}>
+        {SCOPES.map((scope) => {
+          const scopeTemplates = templates[scope];
+          const isCampaign = scope === 'campaign';
 
-            <Grid item xs={12} lg={5}>
-              <LivePreview form={watched} />
-            </Grid>
-          </Grid>
+          return (
+            <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }} key={scope}>
+              <Stack spacing={2.5}>
+                <Box>
+                  <Typography variant="h6" component="h3" gutterBottom>
+                    {isCampaign ? __('Campaigns', 'goalcart') : __('Goals', 'goalcart')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {isCampaign
+                      ? __(
+                          'The default template that renders a whole campaign on the storefront (e.g. the milestone chain).',
+                          'goalcart'
+                        )
+                      : __(
+                          'The default template for every goal that does not pin its own on the Goal Builder.',
+                          'goalcart'
+                        )}
+                  </Typography>
+                </Box>
 
-          {/* Colors */}
-          <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }}>
-            <Typography variant="h6" component="h3" gutterBottom>
-              {__('Colors', 'goalcart')}
-            </Typography>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} flexWrap="wrap">
-              <Controller
-                name="frontend_accent"
-                control={control}
-                render={({ field }) => (
-                  <ColorField
-                    label={__('Accent', 'goalcart')}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                name="frontend_bg"
-                control={control}
-                render={({ field }) => (
-                  <ColorField
-                    label={__('Background', 'goalcart')}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                name="frontend_border"
-                control={control}
-                render={({ field }) => (
-                  <ColorField
-                    label={__('Border', 'goalcart')}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-              <Controller
-                name="frontend_text"
-                control={control}
-                render={({ field }) => (
-                  <ColorField
-                    label={__('Text', 'goalcart')}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-            </Stack>
-          </Paper>
+                <ScopeTemplatePicker
+                  scope={scope}
+                  templates={scopeTemplates}
+                  defaults={defaults}
+                  drafts={drafts}
+                  currency={currency}
+                  onSelect={(id) => setDefaults((prev) => ({ ...prev, [scope]: id }))}
+                />
 
-          {/* Bar & animation */}
-          <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }}>
-            <Typography variant="h6" component="h3" gutterBottom>
-              {__('Bar & animation', 'goalcart')}
-            </Typography>
-            <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {__('Bar height (px)', 'goalcart')}
-                </Typography>
-                <Controller
-                  name="frontend_bar_height"
-                  control={control}
-                  render={({ field }) => (
-                    <Slider
-                      value={field.value}
-                      min={4}
-                      max={48}
-                      onChange={(_, next) => field.onChange(next)}
-                      valueLabelDisplay="auto"
+                {/* Live preview of the scope default + its draft appearance. */}
+                <Box>
+                  <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                    {__('Live preview', 'goalcart')}
+                  </Typography>
+                  <Box sx={{ maxWidth: 440 }}>
+                    <ScopeLivePreview
+                      scope={scope}
+                      defaults={defaults}
+                      drafts={drafts}
+                      templates={scopeTemplates}
+                      tokens={tokens}
+                      currency={currency}
                     />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {__('Corner radius (px)', 'goalcart')}
-                </Typography>
-                <Controller
-                  name="frontend_radius"
-                  control={control}
-                  render={({ field }) => (
-                    <Slider
-                      value={field.value}
-                      min={0}
-                      max={40}
-                      onChange={(_, next) => field.onChange(next)}
-                      valueLabelDisplay="auto"
-                    />
-                  )}
-                />
-              </Grid>
-            </Grid>
-            <Controller
-              name="frontend_animation"
-              control={control}
-              render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch checked={field.value} onChange={field.onChange} />}
-                  label={
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {__('Animate progress updates', 'goalcart')}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {__('Smoothly slide the bar fill when the cart changes.', 'goalcart')}
-                      </Typography>
-                    </Box>
-                  }
-                />
-              )}
-            />
-          </Paper>
+                  </Box>
+                </Box>
 
-          {/* Advanced */}
-          <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }}>
-            <Typography variant="h6" component="h3" gutterBottom>
-              {__('Advanced', 'goalcart')}
-            </Typography>
-            <Stack spacing={2}>
-              <Controller
-                name="frontend_css_class"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label={__('Extra CSS class', 'goalcart')}
-                    helperText={__(
-                      'Added to every storefront progress widget so your theme can target it.',
-                      'goalcart'
-                    )}
-                    size="small"
+                {/* Per-template default appearance (schema-driven). */}
+                <Box>
+                  <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                    {__('Template appearances', 'goalcart')}
+                  </Typography>
+                  <TemplateSettingsAccordions
+                    scope={scope}
+                    templates={scopeTemplates}
+                    defaults={defaults}
+                    drafts={drafts}
+                    onChange={(id, next) =>
+                      setDrafts((prev) => ({ ...prev, [scope]: { ...prev[scope], [id]: next } }))
+                    }
+                    onReset={(id) => resetTemplate(scope, id)}
                   />
-                )}
-              />
-              <Controller
-                name="frontend_custom_css"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label={__('Custom CSS', 'goalcart')}
-                    helperText={__(
-                      'Appended to the storefront widget styles (overrides any token).',
-                      'goalcart'
-                    )}
-                    multiline
-                    minRows={5}
-                    fullWidth
-                    sx={{ fontFamily: 'monospace' }}
-                    slotProps={{ input: { sx: { fontFamily: 'ui-monospace, monospace' } } }}
-                  />
-                )}
-              />
-            </Stack>
-          </Paper>
+                </Box>
+              </Stack>
+            </Paper>
+          );
+        })}
 
-          <Stack direction="row" spacing={1.5}>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={saveMutation.isPending}
-              startIcon={<PaletteIcon />}
-              sx={{ minWidth: 160 }}
-            >
-              {saveMutation.isPending
-                ? __('Saving…', 'goalcart')
-                : __('Save appearance', 'goalcart')}
-            </Button>
-            <Button
-              variant="outlined"
-              color="inherit"
-              startIcon={<RestartAltIcon />}
-              disabled={saveMutation.isPending}
-              onClick={() => {
-                // Reset only the appearance surface — never clobber the
-                // plugin-level toggles the merchant may have changed on the
-                // Settings page (e.g. disabling Goal Cart entirely).
-                const resetValues: GoalCartSettings = {
-                  ...DEFAULT_SETTINGS,
-                  enabled: watched.enabled ?? DEFAULT_SETTINGS.enabled,
-                  fullscreen_dashboard:
-                    watched.fullscreen_dashboard ?? DEFAULT_SETTINGS.fullscreen_dashboard,
-                };
-                reset(resetValues);
-                saveMutation.mutate(resetValues);
-              }}
-            >
-              {__('Reset to defaults', 'goalcart')}
-            </Button>
-          </Stack>
+        <Stack direction="row" spacing={1.5}>
+          <Button
+            variant="contained"
+            startIcon={<PaletteIcon />}
+            disabled={saveMutation.isPending}
+            onClick={handleSave}
+            sx={{ minWidth: 160 }}
+          >
+            {saveMutation.isPending ? __('Saving…', 'goalcart') : __('Save appearance', 'goalcart')}
+          </Button>
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<RestartAltIcon />}
+            disabled={saveMutation.isPending}
+            onClick={discardChanges}
+          >
+            {__('Discard changes', 'goalcart')}
+          </Button>
         </Stack>
-      </form>
+      </Stack>
     </PageContainer>
   );
 }

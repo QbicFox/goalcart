@@ -293,6 +293,21 @@ wooinsights/                      # Plugin root (slug = folder name)
 10. **WC integration**: `before_woocommerce_init` HPOS declaration; `wc_*` functions guarded by `function_exists`; site-timezone `current_time()` datetimes everywhere.
 11. **i18n pipeline**: PHP text domain + POT + MO; React via `wp.i18n` shim + JED JSON + extraction/build/verify scripts; RTL support end-to-end.
 12. **Utils pattern**: static helper classes (`Helpers`, `Formatting`) for shared sanitization/formatting; `number_format_i18n`, `wc_price`, `date_i18n`.
+13. **Pluggable template engine (Goal Cart pattern, extends the registry
+    convention)**: a `Template` contract — stable id, translated
+    label/description, scope (goal | campaign | both), a settings
+    `schema` (field type, default, validation, label, group) and a
+    `version` — plus a lazy, filterable `TemplateRegistry` (the same
+    class-map convention as the goal-evaluator / reward-applicator
+    registries, filterable via `goalcart_template_classes`) and a
+    resolver (`TemplateEngine`) with a documented resolution order
+    (item override → scope default → legacy → fallback) and
+    schema-driven settings sanitization. The backend is the source of
+    truth for registered templates + schemas (REST); the React app maps
+    template ids to renderer components (`templates/registry.tsx`) and
+    builds the settings form generically from the schema
+    (`templates/SchemaForm.tsx`). Adding a new template touches only the
+    registry — never the Settings UI, builders, REST layer or preview.
 
 ## 12. Patterns That MUST NOT Be Copied
 

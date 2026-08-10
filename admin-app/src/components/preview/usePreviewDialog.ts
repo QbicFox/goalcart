@@ -3,14 +3,15 @@ import { useQuery } from '@tanstack/react-query';
 
 import { fetchPreview } from '../../api/preview';
 import { fetchSettingsEnvelope } from '../../api/settings';
-import type { FrontendTemplate, PreviewSimulated } from '../../types';
+import { useTemplates } from '../../templates/useTemplates';
+import type { PreviewSimulated } from '../../types';
 import { PRESET_PERCENTS, defaultControls } from './types';
 import type { PreviewControlsValue, PreviewPreset } from './types';
 
 /** What a dialog needs to derive per target (goal or campaign). */
 export interface PreviewDerivation {
-  /** Initial template for the preview ('' = resolve the global one). */
-  templateDefault: FrontendTemplate | '';
+  /** Initial template for the preview ('' = resolve the goal/campaign one). */
+  templateDefault: string;
   /** Amount/quantity a state preset fraction should simulate. */
   targetsFor: (fraction: number) => { amount: number; quantity: number };
   /** The endpoint parameters for the current target. */
@@ -114,12 +115,15 @@ export function usePreviewDialog<T extends { id: number }>({
     },
     enabled: target !== null,
     placeholderData: (previous) => previous,
-  });
+  });	// The shared `['settings']` cache is the envelope shape `{ data, meta }`
+	// (the same shape the Settings/Appearance pages use), so the dialogs
+	// read the settings off `data` like everywhere else.
+	const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: fetchSettingsEnvelope });
 
-  // The shared `['settings']` cache is the envelope shape `{ data, meta }`
-  // (the same shape the Settings/Appearance pages use), so the dialogs
-  // read the settings off `data` like everywhere else.
-  const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: fetchSettingsEnvelope });
+	// The shared template registry (pluggable engine): the dialogs need
+	// the registered templates + their global defaults for the template
+	// override control and the forced-template preview settings.
+	const templatesQuery = useTemplates();
 
-  return { controls, patch, applyPreset, previewQuery, settingsQuery };
+	return { controls, patch, applyPreset, previewQuery, settingsQuery, templatesQuery };
 }

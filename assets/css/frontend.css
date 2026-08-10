@@ -23,6 +23,11 @@
  * transition. The Appearance settings override every token through an
  * inline style block printed by ProgressUI::appearance_css().
  *
+ * Pluggable template engine: per-goal / per-campaign template settings
+ * override the same tokens through inline CSS custom properties set by
+ * the storefront JS (applyTemplateSettings) — a goal pinned to a
+ * template with its own accent/bar height renders exactly that.
+ *
  * @package GoalCart
  */
 
@@ -36,6 +41,11 @@
 	--goalcart-radius: 10px;
 	--goalcart-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 	--goalcart-track: #f0f0f1;
+	--goalcart-percent-color: #2271b1;
+	--goalcart-percent-size: 1.75rem;
+	--goalcart-dot-color: #dcdcde;
+	--goalcart-done-color: #00a32a;
+	--goalcart-connector-color: #dcdcde;
 
 	color: var(--goalcart-text);
 	font-family: inherit;
@@ -144,12 +154,12 @@
 }
 
 .goalcart-percentage__value {
-	font-size: 1.75rem;
+	font-size: var(--goalcart-percent-size, 1.75rem);
 	font-weight: 800;
 	line-height: 1;
 	letter-spacing: -0.02em;
 	font-variant-numeric: tabular-nums;
-	color: var(--goalcart-accent);
+	color: var(--goalcart-percent-color, var(--goalcart-accent));
 	min-width: 3.2em;
 }
 
@@ -295,7 +305,7 @@
 	width: 9px;
 	height: 9px;
 	border-radius: 50%;
-	background: var(--goalcart-border);
+	background: var(--goalcart-dot-color, var(--goalcart-border));
 	transition: background 0.3s ease;
 }
 
@@ -304,7 +314,111 @@
 }
 
 .goalcart-milestone--complete .goalcart-milestone__dot {
-	background: var(--goalcart-accent);
+	background: var(--goalcart-done-color, var(--goalcart-accent));
+}
+
+/* ------------------------------------------------------------------ *
+ * Campaign milestone chain (pluggable template engine, campaign scope)
+ * ------------------------------------------------------------------ */
+
+/* One connected ladder per campaign: dots joined by a connector line,
+ * with optional labels / targets / rewards per step and an overall
+ * progress bar underneath. */
+
+.goalcart-chain {
+	background: var(--goalcart-bg);
+	border: 1px solid var(--goalcart-border);
+	border-radius: var(--goalcart-radius);
+	box-shadow: var(--goalcart-shadow);
+	padding: 1rem 1.125rem;
+}
+
+.goalcart-chain__title {
+	margin-block-end: 0.75rem;
+	font-weight: 700;
+}
+
+.goalcart-chain__steps {
+	display: flex;
+	align-items: flex-start;
+	margin: 0 0 0.875rem;
+	padding: 0;
+	list-style: none;
+}
+
+.goalcart-chain__step {
+	position: relative;
+	flex: 1 1 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	min-width: 0;
+	text-align: center;
+}
+
+/* The connector line runs behind the dots (logical inline-start → end,
+ * so it mirrors automatically in RTL). */
+
+.goalcart-chain__step:not(:first-child)::before {
+	content: '';
+	position: absolute;
+	inset-inline-start: -50%;
+	inset-inline-end: 50%;
+	inset-block-start: 5px;
+	height: 2px;
+	background: var(--goalcart-connector-color, var(--goalcart-border));
+	z-index: 0;
+}
+
+.goalcart-chain__dot {
+	position: relative;
+	z-index: 1;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: var(--goalcart-dot-color, var(--goalcart-border));
+	transition: background 0.3s ease;
+}
+
+.goalcart-chain__step--done .goalcart-chain__dot {
+	background: var(--goalcart-done-color, var(--goalcart-accent));
+}
+
+.goalcart-chain__label,
+.goalcart-chain__target {
+	font-size: 12px;
+	line-height: 1.3;
+}
+
+.goalcart-chain__label {
+	font-weight: 600;
+	color: var(--goalcart-text);
+}
+
+.goalcart-chain__target {
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-chain__reward {
+	display: inline-flex;
+	align-items: center;
+	margin-block-start: 0.125rem;
+	padding: 0.125rem 0.5rem;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 600;
+	background: var(--goalcart-track);
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-chain__step--done .goalcart-chain__reward {
+	background: rgba(0, 163, 42, 0.12);
+	color: #007017;
+}
+
+.goalcart-chain .goalcart-progress {
+	margin-block-start: 0.25rem;
 }
 
 /* ------------------------------------------------------------------ *

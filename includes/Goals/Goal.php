@@ -210,6 +210,17 @@ final class Goal {
 	protected $campaign_name;
 
 	/**
+	 * The campaign's display_rules (empty when standalone).
+	 *
+	 * Folded in by the repository's campaign join so the template engine
+	 * can resolve the campaign-scoped template (e.g. the milestone chain)
+	 * from the goal payload without a second query.
+	 *
+	 * @var array<string, mixed>
+	 */
+	protected $campaign_display_rules;
+
+	/**
 	 * Display configuration (Phase 9 builder): title, message,
 	 * completed_message, icon, template. Stored as JSON in
 	 * `display_settings`; parsed to an array here so the frontend can read
@@ -250,6 +261,7 @@ final class Goal {
 		$this->display_settings = $this->meta( isset( $data['display_settings'] ) ? $data['display_settings'] : array() );
 		$this->campaign_id      = isset( $data['campaign_id'] ) ? (int) $data['campaign_id'] : 0;
 		$this->campaign_name    = isset( $data['campaign_name'] ) ? (string) $data['campaign_name'] : '';
+		$this->campaign_display_rules = $this->meta( isset( $data['campaign_display_rules'] ) ? $data['campaign_display_rules'] : array() );
 	}
 
 	/**
@@ -488,6 +500,15 @@ final class Goal {
 	 */
 	public function campaign_name() {
 		return $this->campaign_name;
+	}
+
+	/**
+	 * The campaign's display_rules (empty when standalone).
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function campaign_display_rules() {
+		return $this->campaign_display_rules;
 	}
 
 	/**

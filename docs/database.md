@@ -23,7 +23,7 @@ A target the customer can reach (see `docs/PRODUCT_SPEC.md` §2.1). Stored in th
 | calculation mode | `calculation_mode` | `varchar(20)`, default `subtotal` (tax/discount/shipping basis, Phase 18) |
 | reward | `reward_type` / `reward_value` / `reward_max_value` / `reward_meta` | MVP embeds one reward per goal; `reward_meta` is JSON for extended config (eligible products/categories, stacking rules) |
 | conditions | `conditions` | JSON — category/product/role/cart conditions (grow in later phases) |
-| display settings | `display_settings` | JSON — title, message, completed message, icon, template |
+| display settings | `display_settings` | JSON — title, message, completed message, icon, plus the pluggable-template-engine keys `template_id` + `template_settings` (the legacy `template` key is kept as the engine's pre-engine alias) |
 | priority | `priority` | `int(10) unsigned`, default `10` — conflict resolution (Phase 26) |
 | exclusive | `exclusive` | `tinyint(1)`, default `0` — mutually exclusive goal: when reached, lower-priority goals are skipped (Phase 26) |
 | schedule | `starts_at` / `ends_at` | `datetime`, nullable — independent scheduling |
@@ -112,11 +112,20 @@ reference plugin's convention.
 
 ## 3. Database rules applied (P03-T03)
 
-1. **Reference migration strategy** — version-driven: `GOALCART_DB_VERSION` (now `0.3.0` —
-   Phase 26 added `goals.exclusive`) vs the `goalcart_db_version` option;
-   `Installer::maybe_upgrade()` runs on `plugins_loaded` + `admin_init`;
-   schema recreated idempotently via `dbDelta`; foreign keys added with `INFORMATION_SCHEMA`-guarded
-   `ALTER TABLE` (safe to re-run; failures logged, never fatal).
+1. **Reference migration strategy** — version-driven: `GOALCART_DB_VERSION` (now `0.4.0` —
+   the Phase 12 template engine migration on top of Phase 26's `goals.exclusive`) vs the
+   `goalcart_db_version` option; `Installer::maybe_upgrade()` runs on
+   `plugins_loaded` + `admin_init`; schema recreated idempotently via `dbDelta`; foreign keys
+   added with `INFORMATION_SCHEMA`-guarded `ALTER TABLE` (safe to re-run; failures logged, never
+   fatal).
+
+   **0.4.0 data migration** — `Installer::maybe_migrate_template_storage()` copies the legacy
+   `display_settings.template` value (one of `basic` / `percentage` / `milestone` / `card`) onto
+   `display_settings.template_id` and adds an empty `template_settings` object, so existing goals
+   adopt the pluggable template engine's storage shape losslessly. Rows that already carry a
+   `template_id` are skipped and unknown `template` values are left untouched, so re-running the
+   migration (activation, every upgrade) is a no-op; the engine also keeps reading the legacy
+   `template` key as an alias, so even an un-migrated row renders correctly.
 2. **Proper indexes** — every query path is covered: status/type filters, campaign grouping,
    date-range scans, event-type/session/order lookups.
 3. **No duplicated WooCommerce data** — products/orders are referenced by ID only (plain indexed

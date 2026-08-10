@@ -21,6 +21,7 @@ use GoalCart\Rewards\RewardEngine;
 use GoalCart\Rewards\RewardResult;
 use GoalCart\Settings\Settings;
 use GoalCart\Suggestions\SuggestionEngine;
+use GoalCart\Templates\TemplateEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -108,6 +109,16 @@ class FrontendController extends BaseController {
 	protected $reward_engine;
 
 	/**
+	 * Template engine (pluggable templates): resolves each goal's
+	 * effective template + settings (item override → scope default →
+	 * legacy → fallback) and each campaign's group template. Null when not
+	 * injected — resolved lazily from the plugin container.
+	 *
+	 * @var TemplateEngine|null
+	 */
+	protected $templates;
+
+	/**
 	 * Progress payload transient TTL in seconds (performance_caching).
 	 *
 	 * @var int
@@ -126,7 +137,7 @@ class FrontendController extends BaseController {
 	 * @param RewardEngine|null $reward_engine   Reward engine (Phase 26
 	 *                                           display/grant parity).
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, SuggestionEngine $suggestions, Settings $settings, ?RewardEngine $reward_engine = null ) {
+	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, SuggestionEngine $suggestions, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null ) {
 		$this->engine           = $engine;
 		$this->goals            = $goals;
 		$this->cart_integration = $cart_integration;
@@ -134,6 +145,20 @@ class FrontendController extends BaseController {
 		$this->suggestions      = $suggestions;
 		$this->settings         = $settings;
 		$this->reward_engine    = $reward_engine;
+		$this->templates        = $templates;
+	}
+
+	/**
+	 * The template engine, resolved lazily when not injected.
+	 *
+	 * @return TemplateEngine
+	 */
+	protected function templates() {
+		if ( null === $this->templates ) {
+			$this->templates = \GoalCart\Plugin::instance()->container()->get( TemplateEngine::class );
+		}
+
+		return $this->templates;
 	}
 
 	/**
@@ -231,6 +256,12 @@ class FrontendController extends BaseController {
 		$response = $this->success(
 			array(
 				'goals'    => $items,
+				// Campaign template groups (pluggable engine): only campaigns
+				// with a configured campaign-scoped template are listed — the
+				// storefront renders those milestone groups through the
+				// campaign template (e.g. the milestone chain) instead of
+				// per-goal cards.
+				'campaigns' => $this->campaign_groups( $goals ),
 				'currency' => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
 				// Self-healing tracking nonce: a freshly minted goalcart_track
 				// nonce rides on every progress response so the storefront JS
@@ -496,6 +527,8 @@ class FrontendController extends BaseController {
 			);
 		}
 
+		$resolved = $this->templates()->resolve_goal( $goal );
+
 		return array(
 			'goal_id'      => $goal->id(),
 			'campaign_id'  => $goal->campaign_id(),
@@ -503,7 +536,11 @@ class FrontendController extends BaseController {
 			'goal_type'    => $goal->type(),
 			'is_money'     => $this->is_money_goal( $goal ),
 			'icon'         => $this->goal_icon( $goal ),
-			'template'     => $this->goal_template( $goal ),
+			// The effective template + settings (item override → scope
+			// default → legacy → fallback) — the storefront renders exactly
+			// what the template engine resolved.
+			'template'         => $resolved['template_id'],
+			'template_settings' => $resolved['settings'],
 			'current'      => $result->current(),
 			'target'       => $result->target(),
 			'remaining'    => $result->remaining(),
@@ -568,23 +605,43 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * The goal's display template for the progress widget (Phase 12).
+	 * The campaign template groups for the progress payload.
 	 *
-	 * Comes from the goal builder's Display section
-	 * (`display_settings.template`) and is normalized to the template enum
-	 * so a bad stored value never reaches the widget. Empty when none was
-	 * configured — the widget falls back to the store-wide Appearance
-	 * template.
+	 * Groups the served goals by campaign and resolves each campaign's
+	 * template + settings through the engine. Only campaigns with a
+	 * configured campaign-scoped template are listed — a campaign without
+	 * one keeps the pre-engine per-goal card rendering.
 	 *
-	 * @param Goal $goal Goal.
-	 * @return string
+	 * @param Goal[] $goals Goals being served.
+	 * @return array<int, array<string, mixed>>
 	 */
-	protected function goal_template( Goal $goal ) {
-		$display   = $goal->display_settings();
-		$template  = isset( $display['template'] ) ? (string) $display['template'] : '';
-		$templates = array( 'basic', 'percentage', 'milestone', 'card' );
+	protected function campaign_groups( array $goals ) {
+		$groups = array();
 
-		return in_array( $template, $templates, true ) ? $template : '';
+		foreach ( $goals as $goal ) {
+			if ( ! $goal->campaign_id() ) {
+				continue;
+			}
+
+			if ( isset( $groups[ $goal->campaign_id() ] ) ) {
+				continue;
+			}
+
+			$resolved = $this->templates()->resolve_campaign( $goal->campaign_display_rules() );
+
+			if ( '' === $resolved['template_id'] ) {
+				continue; // No campaign template configured → per-goal cards.
+			}
+
+			$groups[ $goal->campaign_id() ] = array(
+				'campaign_id' => (int) $goal->campaign_id(),
+				'name'        => $goal->campaign_name(),
+				'template'    => $resolved['template_id'],
+				'settings'    => $resolved['settings'],
+			);
+		}
+
+		return array_values( $groups );
 	}
 
 	/**

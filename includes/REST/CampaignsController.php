@@ -10,6 +10,7 @@ namespace GoalCart\REST;
 use GoalCart\Campaigns\CampaignRepository;
 use GoalCart\Goals\Goal;
 use GoalCart\Hooks\HookManager;
+use GoalCart\Templates\TemplateEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,12 +42,36 @@ class CampaignsController extends BaseController {
 	protected $campaigns;
 
 	/**
+	 * Template engine (pluggable templates): validates the campaign's
+	 * display_rules.template_id / template_settings on save. Null when not
+	 * injected — resolved lazily from the plugin container.
+	 *
+	 * @var TemplateEngine|null
+	 */
+	protected $templates;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param CampaignRepository $campaigns Campaign repository.
+	 * @param CampaignRepository  $campaigns Campaign repository.
+	 * @param TemplateEngine|null $templates Template engine (optional).
 	 */
-	public function __construct( CampaignRepository $campaigns ) {
+	public function __construct( CampaignRepository $campaigns, ?TemplateEngine $templates = null ) {
 		$this->campaigns = $campaigns;
+		$this->templates = $templates;
+	}
+
+	/**
+	 * The template engine, resolved lazily when not injected.
+	 *
+	 * @return TemplateEngine
+	 */
+	protected function templates() {
+		if ( null === $this->templates ) {
+			$this->templates = \GoalCart\Plugin::instance()->container()->get( TemplateEngine::class );
+		}
+
+		return $this->templates;
 	}
 
 	/**
@@ -280,6 +305,66 @@ class CampaignsController extends BaseController {
 	}
 
 	/**
+	 * Validate the display_rules payload (template engine).
+	 *
+	 * A `template_id` must be registered for the campaign scope.
+	 *
+	 * @param mixed $value Raw display_rules value.
+	 * @return bool
+	 */
+	public function validate_display_rules( $value ) {
+		if ( ! is_array( $value ) ) {
+			return true;
+		}
+
+		if ( isset( $value['template_id'] ) ) {
+			return $this->templates()->is_registered( TemplateEngine::SCOPE_CAMPAIGN, $value['template_id'] );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Sanitize the display_rules payload (template engine).
+	 *
+	 * Normalizes template_id to the registry and validates template_settings
+	 * against that template's schema. All other display keys pass through.
+	 *
+	 * @param mixed $value Raw display_rules value.
+	 * @return array<string, mixed>
+	 */
+	public function sanitize_display_rules( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$clean = $value;
+
+		if ( isset( $clean['template_id'] ) ) {
+			$clean['template_id'] = $this->templates()->normalize_template_id(
+				TemplateEngine::SCOPE_CAMPAIGN,
+				$clean['template_id']
+			);
+		}
+
+		if ( isset( $clean['template_settings'] ) ) {
+			$template_id = isset( $clean['template_id'] ) && '' !== $clean['template_id']
+				? (string) $clean['template_id']
+				: '';
+
+			$template = $this->templates()->registry()->has( $template_id )
+				? $this->templates()->registry()->get( $template_id )
+				: null;
+
+			$clean['template_settings'] = $template
+				? $this->templates()->sanitize_settings( $template, $clean['template_settings'] )
+				: array();
+		}
+
+		return $clean;
+	}
+
+	/**
 	 * Arg schema for id-parameterized routes.
 	 *
 	 * @return array<string, array<string, mixed>>
@@ -336,6 +421,11 @@ class CampaignsController extends BaseController {
 				'type'                 => 'object',
 				'default'              => array(),
 				'additionalProperties' => true,
+				// Template engine: template_id must be registered for the
+				// campaign scope and template_settings must conform to that
+				// template's schema — never trust client-side validation.
+				'validate_callback'    => array( $this, 'validate_display_rules' ),
+				'sanitize_callback'    => array( $this, 'sanitize_display_rules' ),
 			),
 			'goals'         => array(
 				'type'  => 'array',

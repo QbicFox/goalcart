@@ -78,7 +78,74 @@ export interface DisplaySettingsInput {
   message?: string;
   completed_message?: string;
   icon?: string;
+  /** Legacy pre-engine template variant (kept for backward compatibility). */
   template?: string;
+  /** Pluggable template engine: the goal's own template id ('' = default). */
+  template_id?: string;
+  /** Pluggable template engine: per-goal override of the template's appearance. */
+  template_settings?: TemplateSettingsValue;
+}
+
+/** Pluggable template engine (Phase 12): one template scope. */
+export type TemplateScope = 'goal' | 'campaign';
+
+/** Pluggable template engine: the field types a template schema accepts. */
+export type TemplateFieldType =
+  | 'color'
+  | 'text'
+  | 'textarea'
+  | 'number'
+  | 'bool'
+  | 'select'
+  | 'css';
+
+/** One field of a template's settings schema (drives the dynamic form). */
+export interface TemplateField {
+  key: string;
+  type: TemplateFieldType;
+  label: string;
+  group?: string;
+  default: string | number | boolean;
+  help?: string;
+  min?: number;
+  max?: number;
+  options?: Record<string, string>;
+}
+
+/** A resolved template settings map (schema-conformant, server-validated). */
+export type TemplateSettingsValue = Record<string, string | number | boolean>;
+
+/** One registered template as served by `GET /goalcart/v1/templates`. */
+export interface TemplateDefinition {
+  id: string;
+  label: string;
+  description: string;
+  version: number;
+  scope: TemplateScope;
+  schema: TemplateField[];
+  /** The effective default appearance (legacy fallbacks already merged). */
+  settings: TemplateSettingsValue;
+}
+
+/** The `GET /goalcart/v1/templates` payload. */
+export interface TemplatesPayload {
+  scopes: TemplateScope[];
+  defaults: Record<TemplateScope, string>;
+  goal: TemplateDefinition[];
+  campaign: TemplateDefinition[];
+  versions: Record<TemplateScope, Record<string, number>>;
+}
+
+/**
+ * A campaign template group in the progress/preview payload — the
+ * resolved campaign-scoped template that renders the whole milestone
+ * group (e.g. the milestone chain) instead of per-goal cards.
+ */
+export interface ProgressCampaign {
+  campaign_id: number;
+  name: string;
+  template: string;
+  settings: TemplateSettingsValue;
 }
 
 /** A composite child config — a Goal::from_array() payload (Phase 4). */
@@ -189,7 +256,10 @@ export interface ProgressGoal {
   goal_type: GoalType;
   is_money: boolean;
   icon: string;
+  /** Resolved template id (item override → scope default → legacy → fallback). */
   template: string;
+  /** Resolved template settings (what the storefront actually renders). */
+  template_settings: TemplateSettingsValue;
   current: number;
   target: number;
   remaining: number;
@@ -223,6 +293,8 @@ export interface PreviewSimulated {
  */
 export interface PreviewPayload {
   goals: ProgressGoal[];
+  /** Campaign template groups (campaign-scoped templates, e.g. the chain). */
+  campaigns: ProgressCampaign[];
   currency: string;
   simulated: PreviewSimulated;
 }
@@ -420,6 +492,12 @@ export interface GoalCartSettings {
   frontend_radius: number;
   frontend_css_class: string;
   frontend_custom_css: string;
+
+  // Pluggable template engine (Phase 12 → engine): per-scope default
+  // template ids, per-template default appearance and schema versions.
+  template_defaults: Record<TemplateScope, string>;
+  template_settings: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
+  template_versions: Record<TemplateScope, Record<string, number>>;
 
   // Goal Calculation (P18-T03).
   calculation_include_tax: boolean;

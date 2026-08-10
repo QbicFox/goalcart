@@ -245,7 +245,9 @@ sanitizer (direct handler saves included). The full Phase 18 surface:
 | `default_goal_behavior` | enum `all` `first` `closest` | unknown → `all` |
 | `conflict_resolution` | enum `cumulative` `best` `first` | unknown → `cumulative` |
 | `calculation_mode` | enum `subtotal` `discounted_subtotal` `total` | unknown → `subtotal` |
-| `frontend_template` | enum `basic` `percentage` `milestone` `card` | unknown → `basic` |
+| `frontend_template` | enum `basic` `percentage` `milestone` `card` | unknown → `basic`; syncs `template_defaults.goal` (and vice versa) |
+| `template_defaults` | object `{ goal?, campaign? }` — ids registered for that scope ('' allowed) | unknown ids rejected; syncs `frontend_template` |
+| `template_settings` | object `{ goal?, campaign? }` → per-template appearance maps | sanitized against each template's schema (unknown scopes/templates dropped, colors/ranges/enums/CSS cleaned) |
 | `frontend_animation` | boolean | cast |
 | `frontend_locations` | array of the location enum (`cart` `mini-cart` `checkout` `shop` `product` `sticky`) | filtered + deduped |
 | `frontend_mobile` | enum `show` `hide` | unknown → `show` |
@@ -464,6 +466,49 @@ Semantics:
 
 Errors: `goalcart_forbidden` (403, anonymous).
 
+### 2.7 Templates (pluggable template engine)
+
+#### `GET /templates` — admin-only, rate limited per user
+
+The single source of truth the admin app uses to render the template
+pickers and the schema-driven settings forms (Appearance page, Goal
+Builder Display, Campaign Builder Display): every registered template
+grouped by scope, with its settings schema, the current scope defaults
+and the effective default appearance per template.
+
+```json
+{
+  "data": {
+    "scopes": ["goal", "campaign"],
+    "defaults": { "goal": "basic", "campaign": "" },
+    "goal": [
+      {
+        "id": "basic",
+        "label": "Basic",
+        "description": "Progress bar + message — the classic goal strip.",
+        "version": 1,
+        "scope": "goal",
+        "schema": [
+          { "key": "accent", "type": "color", "label": "Accent color", "group": "Colors", "default": "#2271b1" }
+        ],
+        "settings": { "accent": "#2271b1", "barHeight": 10 }
+      }
+    ],
+    "campaign": [
+      { "id": "milestone_chain", "label": "Milestone chain", "version": 1, "scope": "campaign", "schema": [], "settings": {} }
+    ],
+    "versions": { "goal": { "basic": 1 }, "campaign": { "milestone_chain": 1 } }
+  }
+}
+```
+
+`defaults.goal` always resolves (legacy `frontend_template` included);
+`defaults.campaign` may be `''` — no campaign template → per-goal cards.
+The `settings` object of each definition is the effective default
+appearance (stored per-template settings merged over the schema defaults
+and the legacy `frontend_*` tokens), so the admin forms open pre-filled
+with exactly what the storefront would render.
+
 ### `GET /progress` — public, rate limited per IP
 
 Evaluates every active goal against the current shopper's cart and
@@ -475,10 +520,10 @@ exposes only the minimum data the widgets need:
     "goals": [
       {
         "goal_id": 5,
-        "goal_name": "Free shipping",
-        "goal_type": "amount",		"is_money": true,
+        "goal_name": "Free shipping",		"goal_type": "amount",		"is_money": true,
 		"icon": "",
 		"template": "card",
+		"template_settings": { "radius": 20 },
 		"current": 250000,
         "target": 500000,
         "remaining": 250000,
@@ -541,12 +586,21 @@ Notes:
 - `icon` is the goal's Display icon (`display_settings.icon`, empty when
   none was configured) — the Phase 12 card template renders it, falling
   back to its own default icon.
-- `template` is the goal's own Display template
-  (`display_settings.template`, normalized to the `basic` `percentage`
-  `milestone` `card` enum, empty when none was configured). The widget
-  uses it for that goal (container override → goal template → global
-  Appearance template → `basic`), so the goal builder's template picker
-  takes effect on the storefront per goal.
+- `template` + `template_settings` are the goal's **resolved** template
+  id and appearance, computed server-side by the template engine
+  (pluggable template engine, Phase 12): item override
+  `display_settings.template_id` + `template_settings` → scope default
+  → legacy `frontend_template` → `basic` fallback. The pre-engine
+  `display_settings.template` key reads as the legacy alias (step 1), so
+  existing goals keep their template with no migration step needed. The
+  widget renders exactly what the engine resolved — no client-side
+  re-resolution.
+- `campaigns` lists the campaign template groups: one entry per
+  campaign with a configured campaign-scoped template
+  (`campaign_id`, `name`, `template`, `settings`). The widget renders
+  those milestone groups as one chain (e.g. the milestone_chain ladder)
+  instead of per-goal cards; a campaign without a template keeps the
+  pre-engine per-goal card rendering and never appears here.
 - `conflict` (Phase 26) is the per-goal conflict-resolution fragment:
   `{ "resolved": true|false, "reason": "" | "not_first" | "not_best" |
   "exclusive" | "stacking" | "lower_priority" }`. `resolved: false`

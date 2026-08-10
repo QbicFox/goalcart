@@ -28,10 +28,13 @@ use GoalCart\REST\GoalsController;
 use GoalCart\REST\PreviewController;
 use GoalCart\REST\SearchController;
 use GoalCart\REST\SettingsController;
+use GoalCart\REST\TemplatesController;
 use GoalCart\REST\TrackController;
 use GoalCart\Rewards\RewardEngine;
 use GoalCart\Settings\Settings;
 use GoalCart\Suggestions\SuggestionEngine;
+use GoalCart\Templates\TemplateEngine;
+use GoalCart\Templates\TemplateRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -179,6 +182,11 @@ final class Plugin {
 		$this->hooks()->register( $this->container->get( TrackController::class ) );
 		$this->hooks()->register( $this->container->get( AnalyticsController::class ) );
 
+		// Template registry (pluggable progress templates): the engine
+		// resolves which template + settings render for each goal/campaign;
+		// the REST endpoint lists the registered templates + schemas.
+		$this->hooks()->register( $this->container->get( TemplatesController::class ) );
+
 		// Apply everything to WordPress.
 		$this->hooks()->run();
 
@@ -271,14 +279,35 @@ final class Plugin {
 			return new CampaignRepository();
 		} );
 
+		// Template engine (pluggable progress templates): the registry of
+		// built-in Goal/Campaign templates plus the resolution/validation
+		// service every display layer (settings, builders, REST, preview)
+		// shares.
+		$this->container->singleton( TemplateRegistry::class, function () {
+			return new TemplateRegistry();
+		} );
+
+		$this->container->singleton( TemplateEngine::class, function ( Container $container ) {
+			return new TemplateEngine(
+				$container->get( TemplateRegistry::class ),
+				$container->get( Settings::class )
+			);
+		} );
+
 		// REST controllers (Phase 7: REST API / AJAX Layer) — admin CRUD,
 		// settings, search, campaigns and the public cart-progress endpoint.
 		$this->container->singleton( GoalsController::class, function ( Container $container ) {
-			return new GoalsController( $container->get( GoalRepository::class ) );
+			return new GoalsController(
+				$container->get( GoalRepository::class ),
+				$container->get( TemplateEngine::class )
+			);
 		} );
 
 		$this->container->singleton( SettingsController::class, function ( Container $container ) {
-			return new SettingsController( $container->get( Settings::class ) );
+			return new SettingsController(
+				$container->get( Settings::class ),
+				$container->get( TemplateEngine::class )
+			);
 		} );
 
 		$this->container->singleton( SearchController::class, function () {
@@ -286,7 +315,10 @@ final class Plugin {
 		} );
 
 		$this->container->singleton( CampaignsController::class, function ( Container $container ) {
-			return new CampaignsController( $container->get( CampaignRepository::class ) );
+			return new CampaignsController(
+				$container->get( CampaignRepository::class ),
+				$container->get( TemplateEngine::class )
+			);
 		} );
 
 		$this->container->singleton( FrontendController::class, function ( Container $container ) {
@@ -303,7 +335,8 @@ final class Plugin {
 				$container->get( MessageEngine::class ),
 				$container->get( SuggestionEngine::class ),
 				$container->get( Settings::class ),
-				$container->get( RewardEngine::class )
+				$container->get( RewardEngine::class ),
+				$container->get( TemplateEngine::class )
 			);
 		} );
 
@@ -322,7 +355,8 @@ final class Plugin {
 				$container->get( CampaignRepository::class ),
 				$container->get( FrontendController::class ),
 				$container->get( Settings::class ),
-				$container->get( RewardEngine::class )
+				$container->get( RewardEngine::class ),
+				$container->get( TemplateEngine::class )
 			);
 		} );
 
@@ -337,6 +371,12 @@ final class Plugin {
 		// campaigns / goals / suggested products lists, all filterable.
 		$this->container->singleton( AnalyticsController::class, function ( Container $container ) {
 			return new AnalyticsController( $container->get( AnalyticsRepository::class ) );
+		} );
+
+		// Template registry endpoint (pluggable engine): lists every
+		// registered template + schema, grouped by scope, for the admin UI.
+		$this->container->singleton( TemplatesController::class, function ( Container $container ) {
+			return new TemplatesController( $container->get( TemplateEngine::class ) );
 		} );
 
 		$this->container->singleton( AssetLoader::class, function ( Container $container ) {

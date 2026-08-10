@@ -604,7 +604,7 @@
 	 */
 	function widgetTemplate( container, goal ) {
 		var override = container.getAttribute( 'data-goalcart-template' );
-		var names = [ 'basic', 'percentage', 'milestone', 'card' ];
+		var names = [ 'basic', 'percentage', 'milestone', 'card', 'milestone_chain' ];
 
 		if ( override && names.indexOf( override ) !== -1 ) {
 			return override;
@@ -624,17 +624,112 @@
 	}
 
 	/**
+	 * Apply a template's resolved settings to a node as CSS custom
+	 * properties (pluggable template engine).
+	 *
+	 * The backend resolves each goal's effective template settings (item
+	 * override → scope default → legacy → fallback) and ships them in the
+	 * payload; the stylesheet reads the same --goalcart-* custom
+	 * properties the global Appearance settings override, so a per-goal
+	 * (or per-campaign) template styles exactly what its settings say.
+	 *
+	 * @param {HTMLElement} node     Element to style.
+	 * @param {Object}      settings Resolved template settings.
+	 * @return {void}
+	 */
+	function applyTemplateSettings( node, settings ) {
+		if ( ! settings || typeof settings !== 'object' ) {
+			return;
+		}
+
+		var map = {
+			accent: '--goalcart-accent',
+			bg: '--goalcart-bg',
+			border: '--goalcart-border',
+			text: '--goalcart-text',
+			radius: '--goalcart-radius',
+			barHeight: '--goalcart-bar-height',
+			percentColor: '--goalcart-percent-color',
+			percentSize: '--goalcart-percent-size',
+			dotColor: '--goalcart-dot-color',
+			doneColor: '--goalcart-done-color',
+			connectorColor: '--goalcart-connector-color'
+		};
+
+		for ( var key in map ) {
+			if ( ! Object.prototype.hasOwnProperty.call( settings, key ) ) {
+				continue;
+			}
+
+			var value = settings[ key ];
+
+			if ( value === undefined || value === null || value === '' ) {
+				continue;
+			}
+
+			var isPx = 'radius' === key || 'barHeight' === key || 'percentSize' === key;
+			node.style.setProperty( map[ key ], isPx ? Number( value ) + 'px' : String( value ) );
+		}
+	}
+
+	/**
+	 * Inject a template's custom CSS once per unique payload.
+	 *
+	 * Custom CSS is admin-authored and sanitized server-side (tag-free,
+	 * bounded); it renders into a single cached <style> element so a page
+	 * with several templates never duplicates rules.
+	 *
+	 * @param {string} css Custom CSS.
+	 * @return {void}
+	 */
+	function applyTemplateCss( css ) {
+		if ( ! css ) {
+			return;
+		}
+
+		var styleId = 'goalcart-template-css-' + hashString( css );
+
+		if ( document.getElementById( styleId ) ) {
+			return;
+		}
+
+		var style = el( 'style', '' );
+		style.id = styleId;
+		style.textContent = css;
+		document.head.appendChild( style );
+	}
+
+	/**
+	 * A tiny non-cryptographic hash (djb2) used to dedupe injected CSS.
+	 *
+	 * @param {string} value Input string.
+	 * @return {number}
+	 */
+	function hashString( value ) {
+		var hash = 5381;
+
+		for ( var i = 0; i < value.length; i++ ) {
+			hash = ( ( hash << 5 ) + hash ) + value.charCodeAt( i );
+		}
+
+		return Math.abs( hash );
+	}
+
+	/**
 	 * Percentage template — a large percent readout above the bar.
 	 *
-	 * @param {Object} goal Progress goal entry.
+	 * @param {Object}  goal    Progress goal entry.
+	 * @param {boolean} showBar Whether the bar renders under the percent.
 	 * @return {HTMLElement}
 	 */
-	function percentagePanel( goal ) {
+	function percentagePanel( goal, showBar ) {
 		var wrap = el( 'div', 'goalcart-percentage' );
 		var percent = Math.max( 0, Math.min( 100, Number( goal.percentage ) || 0 ) );
 
 		wrap.appendChild( el( 'span', 'goalcart-percentage__value', Math.round( percent ) + '%' ) );
-		wrap.appendChild( progressBar( goal ) );
+		if ( false !== showBar ) {
+			wrap.appendChild( progressBar( goal ) );
+		}
 
 		return wrap;
 	}
@@ -653,10 +748,12 @@
 	 * @param {string}  currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function milestonePanel( goal, currency ) {
+	function milestonePanel( goal, currency, showBar ) {
 		var wrap = el( 'div', 'goalcart-milestone-panel' );
 		var rung = el( 'ol', 'goalcart-milestones' );
 		var step = el( 'li', 'goalcart-milestone' );
+		var settings = goal.template_settings || {};
+		var showLabels = settings.showLabels !== false;
 		var target = goal.is_money
 			? formatMoney( goal.target, currency )
 			: formatNumber( goal.target );
@@ -666,10 +763,14 @@
 		}
 
 		step.appendChild( el( 'span', 'goalcart-milestone__dot' ) );
-		step.appendChild( el( 'span', 'goalcart-milestone__target', target ) );
+		if ( showLabels ) {
+			step.appendChild( el( 'span', 'goalcart-milestone__target', target ) );
+		}
 		rung.appendChild( step );
 		wrap.appendChild( rung );
-		wrap.appendChild( progressBar( goal ) );
+		if ( false !== showBar ) {
+			wrap.appendChild( progressBar( goal ) );
+		}
 
 		return wrap;
 	}
@@ -701,16 +802,16 @@
 	 * @param {string}  template Template variant.
 	 * @return {HTMLElement}
 	 */
-	function templateBody( goal, currency, template ) {
+	function templateBody( goal, currency, template, showBar ) {
 		switch ( template ) {
 			case 'percentage':
-				return percentagePanel( goal );
+				return percentagePanel( goal, showBar );
 			case 'milestone':
-				return milestonePanel( goal, currency );
+				return milestonePanel( goal, currency, showBar );
 			case 'card':
 				return cardPanel( goal );
 			default:
-				return progressBar( goal );
+				return false === showBar ? null : progressBar( goal );
 		}
 	}
 
@@ -734,27 +835,50 @@
 		// class so the stylesheet can highlight near-completion etc.
 		var stateClass = goal.state ? ' goalcart-state--' + goal.state : '';
 		var card = el( 'div', 'goalcart-card goalcart-template--' + template + stateClass );
+		var settings = goal.template_settings || {};
+
+		// The resolved template settings drive this card's appearance
+		// (colors, radius, bar height) through the shared CSS variables.
+		applyTemplateSettings( card, settings );
+		applyTemplateCss( settings.customCss );
+
+		if ( settings.cssClass ) {
+			card.classList.add( String( settings.cssClass ) );
+		}
 
 		var compact = 'compact' === variant;
 		var reward = rewardStatus( goal );
+		var showReward = 'card' !== template || settings.showReward !== false;
+		var showMessage = settings.showMessage !== false;
 
 		if ( compact ) {
-			card.appendChild( templateBody( goal, currency, template ) );
-			card.appendChild( goalMessage( goal ) );
-			if ( reward ) {
+			var compactBody = templateBody( goal, currency, template, settings.showBar );
+			if ( compactBody ) {
+				card.appendChild( compactBody );
+			}
+			if ( showMessage ) {
+				card.appendChild( goalMessage( goal ) );
+			}
+			if ( reward && showReward ) {
 				card.appendChild( reward );
 			}
 			return card;
 		}
 
 		var head = el( 'div', 'goalcart-card__head' );
-		if ( reward ) {
+		if ( reward && showReward ) {
 			head.appendChild( reward );
 		}
 		card.appendChild( head );
 
-		card.appendChild( templateBody( goal, currency, template ) );
-		card.appendChild( goalMessage( goal ) );
+		var body = templateBody( goal, currency, template, settings.showBar );
+		if ( body ) {
+			card.appendChild( body );
+		}
+
+		if ( showMessage ) {
+			card.appendChild( goalMessage( goal ) );
+		}
 
 		var suggestions = suggestionList( goal );
 		if ( suggestions ) {
@@ -762,6 +886,80 @@
 		}
 
 		return card;
+	}
+
+	/**
+	 * Campaign milestone chain (pluggable engine, campaign scope).
+	 *
+	 * Renders a campaign's milestones as one connected ladder — dots,
+	 * names, targets and rewards per step, with an overall progress bar
+	 * driven by the top milestone. Used when the campaign's resolved
+	 * template is 'milestone_chain'; otherwise the campaign's goals render
+	 * as individual cards.
+	 *
+	 * @param {Array}  goals    The campaign's eligible milestone goals.
+	 * @param {Object} campaign Campaign group (template + resolved settings).
+	 * @param {string} currency ISO currency code.
+	 * @return {HTMLElement}
+	 */
+	function campaignChain( goals, campaign, currency ) {
+		var settings = campaign.settings || {};
+		var panel = el( 'div', 'goalcart-chain goalcart-template--' + campaign.template );
+
+		applyTemplateSettings( panel, settings );
+		applyTemplateCss( settings.customCss );
+
+		if ( settings.cssClass ) {
+			panel.classList.add( String( settings.cssClass ) );
+		}
+
+		if ( campaign.name ) {
+			panel.appendChild( el( 'div', 'goalcart-chain__title', String( campaign.name ) ) );
+		}
+
+		var rung = el( 'ol', 'goalcart-chain__steps' );
+
+		for ( var i = 0; i < goals.length; i++ ) {
+			var goal = goals[ i ];
+			var step = el( 'li', 'goalcart-chain__step' );
+
+			step.classList.add( goal.completed ? 'goalcart-chain__step--done' : 'goalcart-chain__step--pending' );
+			step.appendChild( el( 'span', 'goalcart-chain__dot' ) );
+
+			if ( settings.showLabels !== false ) {
+				step.appendChild( el( 'span', 'goalcart-chain__label', String( goal.goal_name || '' ) ) );
+			}
+
+			if ( settings.showTargets !== false ) {
+				var target = goal.is_money
+					? formatMoney( goal.target, currency )
+					: formatNumber( goal.target );
+				step.appendChild( el( 'span', 'goalcart-chain__target', target ) );
+			}
+
+			if ( settings.showRewards !== false && goal.reward && goal.reward.type ) {
+				step.appendChild( el( 'span', 'goalcart-chain__reward', ( cfg.labels && cfg.labels[ goal.reward.type ] ) || goal.reward.type ) );
+			}
+
+			rung.appendChild( step );
+		}
+
+		panel.appendChild( rung );
+
+		// Overall progress: the top milestone drives the bar.
+		var top = null;
+
+		for ( var j = 0; j < goals.length; j++ ) {
+			if ( ! top || Number( goals[ j ].target ) > Number( top.target ) ) {
+				top = goals[ j ];
+			}
+		}
+
+		if ( top ) {
+			panel.appendChild( progressBar( top ) );
+		}
+
+		return panel;
 	}
 
 	/* ------------------------------------------------------------------ *
@@ -805,11 +1003,12 @@
 		}
 		container.classList.remove( 'goalcart-widget--mobile-hidden' );
 
-		// Stack one card per eligible goal. Ineligible goals never render
-		// a card (they are skipped, not broken), and when nothing is left
-		// the whole widget hides.
-		var rendered = 0;
-		var stack = el( 'div', 'goalcart-widget__goals' );
+		// Group the eligible goals by campaign so a campaign template
+		// (e.g. the milestone chain) can render the whole group as one
+		// unit. Campaign groups without a configured campaign template —
+		// and every standalone goal — render as individual cards.
+		var groups = {};
+		var order = [];
 
 		for ( var i = 0; i < goals.length; i++ ) {
 			var goal = goals[ i ];
@@ -818,10 +1017,47 @@
 				continue;
 			}
 
-			stack.appendChild(
-				goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) )
-			);
-			rendered++;
+			var groupId = goal.campaign_id || 0;
+
+			if ( ! groups[ groupId ] ) {
+				groups[ groupId ] = [];
+				order.push( groupId );
+			}
+
+			groups[ groupId ].push( goal );
+		}
+
+		var campaigns = ( data && data.campaigns ) || [];
+		var campaignById = {};
+
+		for ( var c = 0; c < campaigns.length; c++ ) {
+			campaignById[ campaigns[ c ].campaign_id ] = campaigns[ c ];
+		}
+
+		// Stack one card per eligible goal (or one chain per campaign
+		// group). Ineligible goals never render (they are skipped, not
+		// broken), and when nothing is left the whole widget hides.
+		var rendered = 0;
+		var stack = el( 'div', 'goalcart-widget__goals' );
+
+		for ( var g = 0; g < order.length; g++ ) {
+			var groupGoals = groups[ order[ g ] ];
+			var campaign = campaignById[ order[ g ] ];
+
+			if ( campaign && campaign.template && 'milestone_chain' === campaign.template ) {
+				stack.appendChild( campaignChain( groupGoals, campaign, data.currency || cfg.currency ) );
+				rendered++;
+				continue;
+			}
+
+			for ( var j = 0; j < groupGoals.length; j++ ) {
+				var goal = groupGoals[ j ];
+
+				stack.appendChild(
+					goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) )
+				);
+				rendered++;
+			}
 		}
 
 		if ( ! rendered ) {

@@ -11,6 +11,7 @@ use GoalCart\Goals\Goal;
 use GoalCart\Goals\GoalRepository;
 use GoalCart\Hooks\HookManager;
 use GoalCart\Rewards\Reward;
+use GoalCart\Templates\TemplateEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,12 +42,36 @@ class GoalsController extends BaseController {
 	protected $goals;
 
 	/**
+	 * Template engine (pluggable templates): validates the goal's
+	 * display_settings.template_id / template_settings on save. Null when
+	 * not injected — resolved lazily from the plugin container.
+	 *
+	 * @var TemplateEngine|null
+	 */
+	protected $templates;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param GoalRepository $goals Goal repository.
+	 * @param GoalRepository     $goals Goal repository.
+	 * @param TemplateEngine|null $templates Template engine (optional).
 	 */
-	public function __construct( GoalRepository $goals ) {
+	public function __construct( GoalRepository $goals, ?TemplateEngine $templates = null ) {
 		$this->goals = $goals;
+		$this->templates = $templates;
+	}
+
+	/**
+	 * The template engine, resolved lazily when not injected.
+	 *
+	 * @return TemplateEngine
+	 */
+	protected function templates() {
+		if ( null === $this->templates ) {
+			$this->templates = \GoalCart\Plugin::instance()->container()->get( TemplateEngine::class );
+		}
+
+		return $this->templates;
 	}
 
 	/**
@@ -476,6 +501,11 @@ class GoalsController extends BaseController {
 				'type'                 => 'object',
 				'default'              => array(),
 				'additionalProperties' => true,
+				// Template engine: template_id must be registered for the
+				// goal scope and template_settings must conform to that
+				// template's schema — never trust client-side validation.
+				'validate_callback'    => array( $this, 'validate_display_settings' ),
+				'sanitize_callback'    => array( $this, 'sanitize_display_settings' ),
 			),
 			'limits'            => array(
 				'type'                 => 'object',
@@ -520,6 +550,68 @@ class GoalsController extends BaseController {
 		$args['id'] = $this->id_args()['id'];
 
 		return $args;
+	}
+
+	/**
+	 * Validate the display_settings payload (template engine).
+	 *
+	 * The legacy `template` key stays accepted (pre-engine storage); a
+	 * `template_id` must be registered for the goal scope.
+	 *
+	 * @param mixed $value Raw display_settings value.
+	 * @return bool
+	 */
+	public function validate_display_settings( $value ) {
+		if ( ! is_array( $value ) ) {
+			return true;
+		}
+
+		if ( isset( $value['template_id'] ) ) {
+			return $this->templates()->is_registered( TemplateEngine::SCOPE_GOAL, $value['template_id'] );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Sanitize the display_settings payload (template engine).
+	 *
+	 * Normalizes template_id to the registry and validates template_settings
+	 * against that template's schema (unknown keys dropped, values cast and
+	 * clamped). All other display keys pass through untouched.
+	 *
+	 * @param mixed $value Raw display_settings value.
+	 * @return array<string, mixed>
+	 */
+	public function sanitize_display_settings( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$clean = $value;
+
+		if ( isset( $clean['template_id'] ) ) {
+			$clean['template_id'] = $this->templates()->normalize_template_id(
+				TemplateEngine::SCOPE_GOAL,
+				$clean['template_id']
+			);
+		}
+
+		if ( isset( $clean['template_settings'] ) ) {
+			$template_id = isset( $clean['template_id'] ) && '' !== $clean['template_id']
+				? (string) $clean['template_id']
+				: ( isset( $clean['template'] ) ? (string) $clean['template'] : '' );
+
+			$template = $this->templates()->registry()->has( $template_id )
+				? $this->templates()->registry()->get( $template_id )
+				: null;
+
+			$clean['template_settings'] = $template
+				? $this->templates()->sanitize_settings( $template, $clean['template_settings'] )
+				: array();
+		}
+
+		return $clean;
 	}
 
 	/**

@@ -10,7 +10,6 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
 
-import type { FrontendTemplate } from '../../types';
 import type { PreviewControlsValue, PreviewPreset } from './types';
 
 interface PreviewControlsProps {
@@ -19,6 +18,12 @@ interface PreviewControlsProps {
   onPatch: (patch: Partial<PreviewControlsValue>) => void;
   /** Apply a state preset (the parent computes amount/quantity). */
   onApplyPreset: (preset: PreviewPreset) => void;
+  /**
+   * The registered templates for the previewed scope (pluggable engine) —
+   * the template override dropdown is built from this list, so new
+   * templates automatically appear here.
+   */
+  templates: Array<{ id: string; label: string }>;
 }
 
 const PRESETS: Array<{ value: PreviewPreset; label: string }> = [
@@ -28,8 +33,6 @@ const PRESETS: Array<{ value: PreviewPreset; label: string }> = [
   { value: '75', label: '75%' },
   { value: '100', label: __('Complete', 'goalcart') },
 ];
-
-const TEMPLATES: FrontendTemplate[] = ['basic', 'percentage', 'milestone', 'card'];
 
 const DEVICES: Array<{ value: PreviewControlsValue['deviceWidth']; label: string }> = [
   { value: 'mobile', label: __('Mobile', 'goalcart') },
@@ -43,7 +46,12 @@ const DEVICES: Array<{ value: PreviewControlsValue['deviceWidth']; label: string
  * simulated reward state, device width and template variant. Shared by
  * the goal and campaign preview dialogs.
  */
-export default function PreviewControls({ value, onPatch, onApplyPreset }: PreviewControlsProps) {
+export default function PreviewControls({
+  value,
+  onPatch,
+  onApplyPreset,
+  templates,
+}: PreviewControlsProps) {
   return (
     <Stack spacing={2.5}>
       {/* Preview states */}
@@ -147,20 +155,21 @@ export default function PreviewControls({ value, onPatch, onApplyPreset }: Previ
             </ToggleButton>
           ))}
         </ToggleButtonGroup>
-      </Box>
-
-      {/* Template */}
+      </Box>	      {/* Template override (pluggable template engine) */}
       <FormControl size="small" fullWidth>
         <InputLabel id="preview-template-label">{__('Template', 'goalcart')}</InputLabel>
         <Select
           labelId="preview-template-label"
           label={__('Template', 'goalcart')}
           value={value.template}
-          onChange={(event) => onPatch({ template: event.target.value as FrontendTemplate })}
+          onChange={(event) => onPatch({ template: String(event.target.value) })}
         >
-          {TEMPLATES.map((template) => (
-            <MenuItem key={template} value={template}>
-              {template}
+          <MenuItem value="">
+            <em>{__('Auto (goal/campaign)', 'goalcart')}</em>
+          </MenuItem>
+          {templates.map((template) => (
+            <MenuItem key={template.id} value={template.id}>
+              {template.label}
             </MenuItem>
           ))}
         </Select>

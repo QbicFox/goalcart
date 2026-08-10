@@ -1,5 +1,3 @@
-import type { FrontendTemplate } from '../../types';
-
 /** Device-width presets for the preview frame (Phase 15 Preview Controls). */
 export type PreviewDevice = 'mobile' | 'tablet' | 'desktop';
 
@@ -16,9 +14,11 @@ export type PreviewPreset = 'empty' | '25' | '50' | '75' | '100' | 'custom';
  * The full preview control state shared by the goal and campaign preview
  * dialogs.
  *
- * `template` may be `''` to mean "auto": resolve the goal's own Display
- * template, then the store-wide Appearance template, then `basic` — the
- * same resolution order the storefront widget uses.
+ * `template` may be `''` to mean "auto": render each goal with its own
+ * resolved template + settings from the payload (the backend resolves
+ * item override → scope default → legacy → fallback, identically to the
+ * live frontend). Choosing a template id forces that variant with its
+ * global default appearance.
  */
 export interface PreviewControlsValue {
   preset: PreviewPreset;
@@ -26,7 +26,7 @@ export interface PreviewControlsValue {
   quantity: number;
   rewardState: PreviewRewardState;
   deviceWidth: PreviewDevice;
-  template: FrontendTemplate | '';
+  template: string;
 }
 
 /** Frame widths (px) for each device preset. */
@@ -93,7 +93,7 @@ export function tokensFromSettings(
 }
 
 /** Default (fresh-open) control state for a goal/campaign preview. */
-export function defaultControls(template: FrontendTemplate | ''): PreviewControlsValue {
+export function defaultControls(template: string): PreviewControlsValue {
   return {
     preset: '50',
     amount: 0,

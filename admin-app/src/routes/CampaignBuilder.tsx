@@ -2,6 +2,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import CloseIcon from '@mui/icons-material/Close';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -28,6 +29,8 @@ import SectionCard from '../components/goal-builder/SectionCard';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import PageContainer from '../components/PageContainer';
 import { formatCurrency, formatNumber } from '../lib/format';
+import SchemaForm from '../templates/SchemaForm';
+import { useTemplates } from '../templates/useTemplates';
 import type { Campaign, CampaignInput, Goal } from '../types';
 
 const REWARD_LABELS: Record<string, string> = {
@@ -91,6 +94,7 @@ export default function CampaignBuilder() {
   const navigate = useNavigate();
   const { notify } = useSnackbar();
   const queryClient = useQueryClient();
+  const { data: templates } = useTemplates();
 
   const [values, setValues] = useState<CampaignInput>(emptyCampaign);
 
@@ -303,9 +307,22 @@ export default function CampaignBuilder() {
               </TextField>
             </Grid>
           </Grid>
+        </SectionCard>	        {/* 3. Display (pluggable template engine) */}
+        <SectionCard
+          title={__('Display', 'goalcart')}
+          description={__(
+            'How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own goal card.',
+            'goalcart'
+          )}
+        >
+          <CampaignDisplayFields
+            display={values.display_rules as Record<string, unknown>}
+            templates={templates?.campaign ?? []}
+            onChange={(display_rules) => patch({ display_rules })}
+          />
         </SectionCard>
 
-        {/* 3. Milestones (goal ordering) */}
+        {/* 4. Milestones (goal ordering) */}
         <SectionCard
           title={__('Milestones', 'goalcart')}
           description={__(
@@ -454,6 +471,109 @@ function rewardLabel(goal: Goal): string {
   }
 
   return base;
+}
+
+/**
+ * Campaign Display section (pluggable template engine): the campaign
+ * template picker + schema-driven appearance form, stored in
+ * `display_rules.template_id` / `display_rules.template_settings` and
+ * validated server-side against the campaign-scope registry. "Default"
+ * (no template) keeps the per-goal card rendering.
+ */
+function CampaignDisplayFields({
+  display,
+  templates,
+  onChange,
+}: {
+  display: Record<string, unknown>;
+  templates: Array<{ id: string; label: string; description: string; schema: unknown[]; settings: Record<string, string | number | boolean> }>;
+  onChange: (next: Record<string, unknown>) => void;
+}) {
+  const templateId = typeof display.template_id === 'string' ? display.template_id : '';
+  const definition = templates.find((template) => template.id === templateId);
+  const rawSettings = display.template_settings;
+  const templateSettings =
+    rawSettings && typeof rawSettings === 'object'
+      ? (rawSettings as Record<string, string | number | boolean>)
+      : (definition?.settings ?? {});
+
+  const chooseTemplate = (next: string) => {
+    if (!next) {
+      const rest = { ...display };
+      delete rest.template_id;
+      delete rest.template_settings;
+      onChange(rest);
+      return;
+    }
+
+    const nextDefinition = templates.find((template) => template.id === next);
+
+    onChange({
+      ...display,
+      template_id: next,
+      template_settings: { ...(nextDefinition?.settings ?? {}) },
+    });
+  };
+
+  return (
+    <Stack spacing={2}>
+      <TextField
+        select
+        label={__('Campaign template', 'goalcart')}
+        fullWidth
+        value={templateId}
+        onChange={(event) => chooseTemplate(event.target.value)}
+      >
+        <MenuItem value="">
+          <em>{__('Default (no campaign template)', 'goalcart')}</em>
+        </MenuItem>
+        {templates.map((template) => (
+          <MenuItem key={template.id} value={template.id}>
+            {template.label}
+          </MenuItem>
+        ))}
+      </TextField>
+
+      {definition && (
+        <Box
+          sx={{
+            p: 2,
+            border: '1px dashed',
+            borderColor: 'divider',
+            borderRadius: 2,
+            bgcolor: 'background.default',
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: 1,
+              mb: 2,
+            }}
+          >
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                {definition.label}
+              </Typography>
+              <Typography variant="caption" color="text.secondary">
+                {definition.description}
+              </Typography>
+            </Box>
+            <Button size="small" startIcon={<RestartAltIcon />} onClick={() => chooseTemplate('')}>
+              {__('Use global default', 'goalcart')}
+            </Button>
+          </Box>
+          <SchemaForm
+            schema={definition.schema as import('../types').TemplateField[]}
+            value={templateSettings}
+            onChange={(next) => onChange({ ...display, template_settings: next })}
+          />
+        </Box>
+      )}
+    </Stack>
+  );
 }
 
 interface TextFieldDateProps {

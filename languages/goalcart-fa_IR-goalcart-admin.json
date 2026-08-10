@@ -1257,6 +1257,69 @@
             ],
             "“%s” will be permanently deleted. This cannot be undone.": [
                 "«%s» برای همیشه حذف می‌شود. این عمل قابل بازگشت نیست."
+            ],
+            "10% off": [
+                "۱۰٪ تخفیف"
+            ],
+            "Auto (goal\/campaign)": [
+                "خودکار (هدف\/کمپین)"
+            ],
+            "Campaign template": [
+                "قالب کمپین"
+            ],
+            "Could not load the progress templates.": [
+                "قالب‌های پیشرفت بارگذاری نشدند."
+            ],
+            "Default": [
+                "پیش‌فرض"
+            ],
+            "Default (goal templates)": [
+                "پیش‌فرض (قالب‌های هدف)"
+            ],
+            "Default (no campaign template)": [
+                "پیش‌فرض (بدون قالب کمپین)"
+            ],
+            "Discard changes": [
+                "بازگردانی تغییرات"
+            ],
+            "Each milestone renders as its own goal card.": [
+                "هر نقطه عطف به‌صورت کارت هدف جداگانه نمایش داده می‌شود."
+            ],
+            "How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own goal card.": [
+                "نحوه نمایش کمپین در فروشگاه. قالب کمپین کل کمپین را مدیریت می‌کند (مثلاً زنجیره نقاط عطف)؛ بدون آن، هر نقطه عطف به‌صورت کارت هدف جداگانه نمایش داده می‌شود."
+            ],
+            "No campaign template": [
+                "بدون قالب کمپین"
+            ],
+            "No campaign template selected — each milestone renders as its own goal card on the storefront.": [
+                "قالب کمپینی انتخاب نشده است — هر نقطه عطف در فروشگاه به‌صورت کارت هدف جداگانه نمایش داده می‌شود."
+            ],
+            "Only $57.00 left to reach your goal": [
+                "تنها ۵۷٫۰۰ دلار تا رسیدن به هدف باقی مانده است"
+            ],
+            "Pick the default progress template and tune its appearance — separately for Goals and Campaigns.": [
+                "قالب پیشرفت پیش‌فرض را انتخاب کنید و ظاهر آن را تنظیم نمایید — جداگانه برای اهداف و کمپین‌ها."
+            ],
+            "Reset to template defaults": [
+                "بازنشانی به پیش‌فرض‌های قالب"
+            ],
+            "Sample campaign": [
+                "کمپین نمونه"
+            ],
+            "Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront.": [
+                "یک محصول هدیه انتخاب کنید — بدون آن، هدیه هرگز به سبد خرید اضافه نمی‌شود و جایزه در فروشگاه در دسترس باقی نمی‌ماند."
+            ],
+            "Template appearances": [
+                "ظاهر قالب‌ها"
+            ],
+            "The default template for every goal that does not pin its own on the Goal Builder.": [
+                "قالب پیش‌فرض برای هر هدفی که در سازنده هدف، قالب خودش را مشخص نکرده باشد."
+            ],
+            "The default template that renders a whole campaign on the storefront (e.g. the milestone chain).": [
+                "قالب پیش‌فرضی که کل کمپین را در فروشگاه نمایش می‌دهد (مثلاً زنجیره نقاط عطف)."
+            ],
+            "Use global default": [
+                "استفاده از پیش‌فرض سراسری"
             ]
         }
     }

@@ -65,8 +65,11 @@ if ( ! defined( 'GOALCART_DB_VERSION' ) ) {
 	 *         tables, so Installer::maybe_add_indexes() applies them.
 	 * 0.3.0 = Phase 26: goals.exclusive (mutually exclusive goals) —
 	 *         dbDelta adds the missing column on upgrade.
+	 * 0.4.0 = Pluggable template engine: migrates stored goals' legacy
+	 *         display_settings.template onto display_settings.template_id
+	 *         (safe, repeatable — see Installer::maybe_migrate_template_storage).
 	 */
-	define( 'GOALCART_DB_VERSION', '0.3.0' );
+	define( 'GOALCART_DB_VERSION', '0.4.0' );
 }
 
 // Load the Composer autoloader (PSR-4: GoalCart\ => includes/).

@@ -210,53 +210,80 @@ can highlight near-completion (`goalcart-state--nearly_complete`) etc.
 
 # Progress Templates & Appearance (Phase 12)
 
-The widget body renders per an active **template variant**. Resolution
-order: a per-widget `data-goalcart-template` override on the shortcode
-(`[goalcart_progress template="card"]`), then the goal's own Display
-template (`display_settings.template`, served per goal in the progress
-payload as `template` — the goal builder's template picker), then the
-store-wide Appearance setting (`cfg.template`), then `basic`.
+The widget body is rendered by a **pluggable template engine**: each
+template is a registered, self-describing unit (stable id, scope,
+settings schema, version) with its own layout, and templates are scoped
+independently for Goals and Campaigns. See `includes/Templates/`
+(`Template` contract, `TemplateRegistry`, `TemplateEngine`) and
+`docs/REFERENCE_ARCHITECTURE.md` §11.13.
 
-## Templates
+## Built-in templates
 
-| Variant | Layout |
-|---|---|
-| `basic` | Progress bar + message (the Phase 11 layout) |
-| `percentage` | Large percent readout (`goalcart-percentage__value`) above the bar |
-| `milestone` | The goal's own threshold as a single rung (`goalcart-milestones`: dot + target label), bar underneath. Every goal is its own card now, so there is no cross-goal ladder to climb — the rung keeps the template visually distinct from basic without duplicating the other goals' cards |
-| `card` | Icon + goal-title header (`goalcart-card-panel`) above the bar |
+| Variant | Scope | Layout |
+|---|---|---|
+| `basic` | goal | Progress bar + message (the Phase 11 layout) |
+| `percentage` | goal | Large percent readout (`goalcart-percentage__value`) above the bar |
+| `milestone` | goal | The goal's own threshold as a single rung (`goalcart-milestones`: dot + target label), bar underneath. Every goal is its own card now, so there is no cross-goal ladder to climb — the rung keeps the template visually distinct from basic without duplicating the other goals' cards |
+| `card` | goal | Icon + goal-title header (`goalcart-card-panel`) above the bar |
+| `milestone_chain` | campaign | The campaign's milestones as one connected ladder — dots, names, targets and rewards — with an overall progress bar (`campaignChain()`); the campaign renders as a unit instead of per-goal cards |
 
 In JS terms the shared flow (message, reward chip, suggestions, sticky
 bar) stays identical — only `templateBody()` swaps the core visual per
 variant (`progressBar`, `percentagePanel`, `milestonePanel`,
-`cardPanel`). The card icon comes from the goal's Display settings
-(`display_settings.icon`, served in the progress payload as `icon`); the
-widget falls back to 🎯 when a goal has no icon. Compact widgets keep
-their slim footprint — every eligible goal still gets its own compact
-card, stacked with a tighter gap.
+`cardPanel`), and a campaign group with a configured campaign template
+renders through `campaignChain()` instead of per-goal cards. The card
+icon comes from the goal's Display settings (`display_settings.icon`,
+served in the progress payload as `icon`); the widget falls back to 🎯
+when a goal has no icon. Compact widgets keep their slim footprint —
+every eligible goal still gets its own compact card, stacked with a
+tighter gap.
 
-Typography and spacing have no dedicated settings: they are tuned through
-the shared tokens (bar height, radius) and the custom-CSS field, keeping
-the settings surface small (Phase 18 grows the general/frontend
-sections).
+## Resolution
+
+The engine resolves each goal's effective template + appearance
+**server-side** and ships it in the progress payload (`template` +
+`template_settings`); campaign groups ship under `campaigns` (only for
+campaigns with a configured campaign template). The JS never
+re-resolves — it renders exactly what the engine resolved:
+
+1. **item override** — `display_settings.template_id` +
+   `template_settings` (the Goal Builder's Display section; a campaign's
+   `display_rules` analogously),
+2. **scope default** — the Appearance page's per-scope default template
+   and its stored default appearance (`template_defaults` /
+   `template_settings` in the settings option),
+3. **legacy fallback** — the pre-engine `frontend_template` +
+   `frontend_*` appearance tokens (goals only),
+4. **hardcoded fallback** — `basic` for goals; a campaign without a
+   template renders per-goal cards (the pre-engine behavior).
+
+The pre-engine `display_settings.template` key still reads as the legacy
+alias (step 1) and the DB migration (0.4.0) copies it onto
+`template_id`, so existing goals upgrade with no visual change. A stored
+template id that is no longer registered falls back to the scope default
+instead of failing. The Phase 15 admin preview resolves through the same
+engine, so what the merchant previews is what customers see. The
+per-widget shortcode `template` attribute and the
+`goalcart_frontend_template` filter still override the store-wide
+variant (`ProgressUI::template()`).
 
 ## Customization
 
-All keys live under the `frontend_*` settings (see `docs/api.md` §2.2),
-edited in the Appearance page and applied two ways:
-
-- **Tokens** — `ProgressUI::appearance_css()` prints an inline style block
-  (via `wp_add_inline_style`) overriding the `--goalcart-*` custom
-  properties on `.goalcart-widget, #goalcart-sticky`: colors (accent /
-  bg / border / text), corner radius and bar height
-  (`--goalcart-bar-height`).
-- **Custom CSS** — the `frontend_custom_css` setting is appended verbatim
-  to the same inline block; `frontend_css_class` is added to every widget
-  container so themes can target the widgets.
-- **Animation** — when `frontend_animation` is off, the JS adds
-  `goalcart-widget--no-anim` / `goalcart-no-anim` classes that disable the
-  fill transition (`transition: none`), complementing the
-  `prefers-reduced-motion` CSS.
+Every template exposes its own **settings schema** (colors, radius, bar
+height, animation, content toggles, CSS class, custom CSS — genuinely
+different per template). The Appearance page (per-scope defaults),
+Goal Builder and Campaign Builder all render the settings form
+**generically from the schema** (`admin-app/src/templates/SchemaForm.tsx`),
+so a new template automatically gets a working settings UI. The
+storefront applies each goal's resolved settings as per-card CSS custom
+properties (`--goalcart-accent`, `--goalcart-bg`, `--goalcart-border`,
+`--goalcart-text`, `--goalcart-radius`, `--goalcart-bar-height`, …) via
+`style.setProperty()` and appends any custom CSS per card. Every value
+is validated server-side against the schema (colors, ranges, tag-free
+CSS, unknown keys dropped). The legacy `frontend_*` surface remains the
+fallback for templates never configured, and the store-wide custom-CSS /
+CSS-class / animation settings still apply through
+`ProgressUI::appearance_css()`.
 
 ## Styling
 
@@ -435,9 +462,10 @@ goals.
 state.
 - **Device width** — mobile (375px) / tablet (768px) / desktop (1280px)
 preview frame.
-- **Template** — basic / percentage / milestone / card (defaults to the
-goal's Display template, then the store-wide Appearance template — the
-widget's own resolution order).
+- **Template** — any registered Goal template (goal preview) or
+  Campaign template (campaign preview); empty = the payload's resolved
+template + settings (the engine's resolution order, identical to the
+storefront).
 
 The dialog debounces the simulated values (300ms), keeps the previous
 frame while refetching (`placeholderData`), and applies the Phase 12
@@ -513,7 +541,8 @@ admin-app/src/
     │                            milestone ordering (Phase 10)
     ├── Analytics.tsx            full analytics dashboard: KPI cards,
     │                            trend chart, top lists + filters (Phase 17)
-    ├── Appearance.tsx           container (Phase 12)
+    ├── Appearance.tsx           per-scope template manager (Phase 12
+    │                            template engine)
     ├── Settings.tsx             functional react-hook-form settings page
     └── NotFound.tsx             404
 ```
@@ -584,7 +613,7 @@ it.
 | Campaigns | full campaign CRUD list (milestones, status, priority, schedule, edit, duplicate, enable/disable, delete, preview) | 10 (Campaign Builder) |
 | CampaignBuilder | — | 10 (Campaign Builder, `/campaigns/new` + `/campaigns/:id/edit`) |
 | Analytics | full dashboard: date-range + campaign/goal/reward/product filters, 7 KPI cards, daily trend chart, top campaigns / top goals / top suggested products | 17 (Analytics Dashboard) |
-| Appearance | full: template picker (live thumbnails), colors, bar height/radius sliders, animation switch, custom class + custom CSS, live preview, reset-to-defaults | 12 (Progress Templates) |
+| Appearance | full (pluggable template engine): per-scope default picker (Goals / Campaigns) with live thumbnails, per-template schema-driven appearance forms, live preview, reset to defaults | 12 (Progress Templates) |
 | Settings | full: General / Frontend / Goal Calculation / Performance / Advanced five-tab form (react-hook-form) | 18 (Settings) |
 
 ## Settings Page (Phase 18)
