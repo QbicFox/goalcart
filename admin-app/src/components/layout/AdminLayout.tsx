@@ -25,7 +25,7 @@ import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import type { Theme } from '@mui/material/styles';
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Outlet, Link as RouterLink, useLocation } from 'react-router-dom';
 
 import { getBootData } from '../../boot';
@@ -101,7 +101,13 @@ export default function AdminLayout() {
 
   // Keep the group holding the current page open when navigating — the
   // user can still collapse it afterwards (their choice is persisted).
-  useEffect(() => {
+  // The state is adjusted during render (guarded by the previously seen
+  // path) rather than in an effect, per react-hooks/set-state-in-effect.
+  const [activePath, setActivePath] = useState(location.pathname);
+
+  if (location.pathname !== activePath) {
+    setActivePath(location.pathname);
+
     const activeSection = NAV_SECTIONS.find((section) =>
       section.items.some((item) => item.path === location.pathname)
     );
@@ -111,7 +117,7 @@ export default function AdminLayout() {
         prev[activeSection.title] ? prev : { ...prev, [activeSection.title]: true }
       );
     }
-  }, [location.pathname]);
+  }
 
   const toggleSection = (title: string) => {
     setExpanded((prev) => {
@@ -224,7 +230,7 @@ export default function AdminLayout() {
                       </ListItemIcon>
                       <ListItemText
                         primary={item.label}
-                        primaryTypographyProps={{ variant: 'body2' }}
+                        slotProps={{ primary: { variant: 'body2' } }}
                       />
                     </ListItemButton>
                   );

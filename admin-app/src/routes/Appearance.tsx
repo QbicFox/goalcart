@@ -208,10 +208,12 @@ function TemplateSettingsPanel({
           </Typography>
           <Stack
             direction="row"
-            alignItems="baseline"
-            justifyContent="space-between"
-            gap={1}
-            flexWrap="wrap"
+            sx={{
+              alignItems: 'baseline',
+              justifyContent: 'space-between',
+              gap: 1,
+              flexWrap: 'wrap',
+            }}
           >
             <Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
@@ -232,7 +234,11 @@ function TemplateSettingsPanel({
           onChange={(next) => onChange(definition.id, next)}
         />
         <Box>
-          <Button size="small" startIcon={<RestartAltIcon />} onClick={() => onReset(definition.id)}>
+          <Button
+            size="small"
+            startIcon={<RestartAltIcon />}
+            onClick={() => onReset(definition.id)}
+          >
             {__('Reset to template defaults', 'goalcart')}
           </Button>
         </Box>
@@ -288,7 +294,9 @@ export default function Appearance() {
     goal: 'basic',
     campaign: '',
   });
-  const [drafts, setDrafts] = useState<Record<TemplateScope, Record<string, TemplateSettingsValue>>>({
+  const [drafts, setDrafts] = useState<
+    Record<TemplateScope, Record<string, TemplateSettingsValue>>
+  >({
     goal: {},
     campaign: {},
   });
@@ -524,7 +532,9 @@ export default function Appearance() {
               </InputLabel>
               <Select
                 labelId="appearance-template-label"
-                label={isCampaign ? __('Campaign template', 'goalcart') : __('Goal template', 'goalcart')}
+                label={
+                  isCampaign ? __('Campaign template', 'goalcart') : __('Goal template', 'goalcart')
+                }
                 value={selectedId}
                 onChange={(event) =>
                   setDefaults((prev) => ({ ...prev, [scope]: String(event.target.value) }))

@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
 import type { ComponentType } from 'react';
 
 import { formatCurrency } from '../../lib/format';
-import { campaignRenderer, goalRenderer } from '../../templates/registry';
+import { CAMPAIGN_RENDERERS, GOAL_RENDERERS } from '../../templates/registry';
 import type { CampaignTemplateProps } from '../../templates/registry';
 import { rewardLabel } from '../../templates/rewardLabel';
 import { bool, num, str } from '../../templates/utils';
@@ -183,7 +183,9 @@ function GoalCard({
   rewardState: PreviewRewardState;
   animation: boolean;
 }) {
-  const Renderer = goalRenderer(template);
+  // Property lookup (not a call result) keeps the component reference
+  // static across renders — react-hooks/static-components.
+  const Renderer = GOAL_RENDERERS[template] ?? GOAL_RENDERERS.basic;
   const chipState: 'locked' | 'unlocked' =
     rewardState === 'auto' ? (goal.completed ? 'unlocked' : 'locked') : rewardState;
   const nearlyComplete = goal.state === 'nearly_complete';
@@ -212,12 +214,7 @@ function GoalCard({
       )}
 
       {/* Template body (pluggable template engine). */}
-      <Renderer
-        goal={goal}
-        currency={currency}
-        settings={settings}
-        animation={animation}
-      />
+      <Renderer goal={goal} currency={currency} settings={settings} animation={animation} />
 
       {/* GoalMessage (Phase 13 state styling). */}
       {showMessage && (
@@ -285,7 +282,7 @@ export default function PreviewWidget({
   for (const goal of cards) {
     const campaign = goal.campaign_id ? campaignById.get(goal.campaign_id) : undefined;
 
-    if (campaign && campaign.template && campaignRenderer(campaign.template)) {
+    if (campaign && campaign.template && CAMPAIGN_RENDERERS[campaign.template]) {
       const list = groups.get(goal.campaign_id as number) ?? [];
       list.push(goal);
       groups.set(goal.campaign_id as number, list);
@@ -295,11 +292,14 @@ export default function PreviewWidget({
     } else {
       standalone.push(goal);
     }
-  }	  return (
+  }
+  return (
     <Stack spacing={1} sx={{ width: '100%' }}>
       {groupOrder.map((campaignId) => {
         const campaign = campaignById.get(campaignId) as ProgressCampaign;
-        const Renderer = campaignRenderer(campaign.template) as ComponentType<CampaignTemplateProps>;
+        const Renderer = CAMPAIGN_RENDERERS[
+          campaign.template
+        ] as ComponentType<CampaignTemplateProps>;
         const groupSettings: TemplateSettingsValue = {
           accent: tokens.accent,
           bg: tokens.bg,

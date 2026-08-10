@@ -12,7 +12,7 @@ import Switch from '@mui/material/Switch';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { createGoal, fetchGoal, updateGoal } from '../api/goals';
@@ -141,11 +141,16 @@ export default function GoalBuilder() {
     enabled: editId !== null,
   });
 
-  useEffect(() => {
-    if (goalQuery.data) {
-      setValues(goalToInput(goalQuery.data));
-    }
-  }, [goalQuery.data]);
+  // Seed the form once the goal loads. This is a guarded state
+  // adjustment during render (tracking the already-seeded id) rather
+  // than an effect, per react-hooks/set-state-in-effect.
+  const goal = goalQuery.data;
+  const [loadedGoalId, setLoadedGoalId] = useState<number | null>(null);
+
+  if (goal && goal.id !== loadedGoalId) {
+    setLoadedGoalId(goal.id);
+    setValues(goalToInput(goal));
+  }
   const saveMutation = useMutation({
     mutationFn: (input: GoalInput) => (editId ? updateGoal(editId, input) : createGoal(input)),
     onSuccess: () => {

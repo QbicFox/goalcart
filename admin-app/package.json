@@ -5,7 +5,7 @@
   "description": "Goal Cart admin panel — React SPA (Vite + TypeScript + MUI) mounted inside WP admin.",
   "type": "module",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.19.0"
   },
   "scripts": {
     "dev": "vite",
@@ -25,36 +25,36 @@
   "dependencies": {
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.4.0",
-    "@mui/material": "^6.4.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/icons-material": "^9.3.1",
+    "@mui/material": "^9.3.1",
     "@mui/stylis-plugin-rtl": "^9.3.0",
-    "@mui/x-data-grid": "^7.29.13",
-    "@mui/x-date-pickers": "^7.29.4",
-    "@tanstack/react-query": "^5.62.0",
+    "@mui/x-data-grid": "^9.11.0",
+    "@mui/x-date-pickers": "^9.11.0",
+    "@tanstack/react-query": "^5.101.4",
     "dayjs": "^1.11.21",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-hook-form": "^7.84.0",
-    "react-router-dom": "^6.28.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-hook-form": "^7.85.0",
+    "react-router-dom": "^7.18.2",
     "recharts": "^3.10.1",
     "stylis": "^4.4.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.17.0",
-    "@types/node": "^22.10.0",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "@types/stylis": "^4.2.7",
-    "@vitejs/plugin-react": "^4.3.4",
-    "eslint": "^9.17.0",
+    "@vitejs/plugin-react": "^6.0.5",
+    "eslint": "^9.39.5",
     "eslint-plugin-jsx-a11y": "^6.10.2",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.16",
-    "globals": "^15.14.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.7.2",
-    "typescript-eslint": "^8.18.0",
-    "vite": "^5.4.11"
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.4",
+    "globals": "^17.9.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.66.0",
+    "vite": "^8.2.1"
   }
 }

@@ -149,9 +149,12 @@ function LocationField({
             </Typography>
             <Stack
               direction="row"
-              flexWrap="wrap"
               useFlexGap
-              sx={{ gap: 0, '& .MuiFormControlLabel-root': { mr: 0, minWidth: 190 } }}
+              sx={{
+                flexWrap: 'wrap',
+                gap: 0,
+                '& .MuiFormControlLabel-root': { mr: 0, minWidth: 190 },
+              }}
             >
               {LOCATION_OPTIONS.map((option) => {
                 const checked = selected.includes(option.value);
@@ -545,7 +548,10 @@ export default function Settings() {
                     control={control}
                     name="sticky_display"
                     label={__('Layout', 'goalcart')}
-                    description={__('Compact shows only the progress; full adds the message and reward.', 'goalcart')}
+                    description={__(
+                      'Compact shows only the progress; full adds the message and reward.',
+                      'goalcart'
+                    )}
                     options={[
                       { value: 'compact', label: __('Compact', 'goalcart') },
                       { value: 'full', label: __('Full', 'goalcart') },
@@ -561,7 +567,10 @@ export default function Settings() {
                         size="small"
                         fullWidth
                         label={__('Appear delay (seconds)', 'goalcart')}
-                        helperText={__('How long after page load before the bar appears.', 'goalcart')}
+                        helperText={__(
+                          'How long after page load before the bar appears.',
+                          'goalcart'
+                        )}
                         value={Number(field.value)}
                         onChange={(event) => field.onChange(Number(event.target.value) || 0)}
                         sx={{ maxWidth: 360 }}
@@ -572,13 +581,19 @@ export default function Settings() {
                     control={control}
                     name="sticky_countdown"
                     label={__('Countdown in sticky bar', 'goalcart')}
-                    description={__('Show the deadline countdown inside the sticky bar.', 'goalcart')}
+                    description={__(
+                      'Show the deadline countdown inside the sticky bar.',
+                      'goalcart'
+                    )}
                   />
                   <BooleanField
                     control={control}
                     name="sticky_suggestions"
                     label={__('Suggestions in sticky bar', 'goalcart')}
-                    description={__('List the gap-closing product suggestions in the bar.', 'goalcart')}
+                    description={__(
+                      'List the gap-closing product suggestions in the bar.',
+                      'goalcart'
+                    )}
                   />
                 </Stack>
               </SectionCard>

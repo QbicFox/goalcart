@@ -94,7 +94,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
     <Stack spacing={3}>
       {/* Excluded products (existing) */}
       <Grid container spacing={2}>
-        <Grid item xs={12}>
+        <Grid size={12}>
           <EntityAutocomplete
             label={__('Excluded products', 'goalcart')}
             value={values.excluded_products}
@@ -115,7 +115,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
         </Typography>
         <Stack spacing={2}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Autocomplete<{ slug: string; name: string }, true, false, false>
                 multiple
                 options={roles}
@@ -137,7 +137,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
                 )}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <Box>
                 <FormControlLabel
                   control={
@@ -171,7 +171,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
                   }
                   label={__('Logged-in customers', 'goalcart')}
                 />
-                <Typography variant="caption" color="text.secondary" display="block">
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
                   {__('Leave both unchecked to allow everyone.', 'goalcart')}
                 </Typography>
               </Box>
@@ -202,7 +202,10 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
 
           <FormControlLabel
             control={
-              <Switch checked={Boolean(values.vip)} onChange={(event) => patch({ vip: event.target.checked })} />
+              <Switch
+                checked={Boolean(values.vip)}
+                onChange={(event) => patch({ vip: event.target.checked })}
+              />
             }
             label={
               <Box>
@@ -221,7 +224,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
 
           {values.vip && (
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} lg={4}>
+              <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                 <TextField
                   label={__('Minimum lifetime spend', 'goalcart')}
                   type="number"
@@ -232,7 +235,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
                   onChange={(event) => patch({ vip_min_spend: Number(event.target.value) || 0 })}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} lg={4}>
+              <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                 <TextField
                   label={__('Minimum completed orders', 'goalcart')}
                   type="number"
@@ -311,14 +314,14 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
           {__('Schedule', 'goalcart')}
         </Typography>
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextFieldDate
               label={__('Starts at', 'goalcart')}
               value={values.starts_at}
               onChange={(starts_at) => patch({ starts_at })}
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <TextFieldDate
               label={__('Ends at', 'goalcart')}
               value={values.ends_at}
@@ -326,8 +329,11 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
             />
           </Grid>
         </Grid>
-        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-          {__('Leave both empty to run the goal at all times. Local site time is used.', 'goalcart')}
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+          {__(
+            'Leave both empty to run the goal at all times. Local site time is used.',
+            'goalcart'
+          )}
         </Typography>
 
         {/* Phase 32: recurring day/time window */}
@@ -336,7 +342,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
             <Typography variant="caption" color="text.secondary" component="div" gutterBottom>
               {__('Repeat on days (optional)', 'goalcart')}
             </Typography>
-            <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+            <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
               {WEEKDAYS.map((day) => {
                 const selected = (values.schedule_days ?? []).includes(day.value);
                 return (
@@ -353,7 +359,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
             </Stack>
           </Box>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 label={__('Day window starts', 'goalcart')}
                 type="time"
@@ -363,7 +369,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
                 slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 label={__('Day window ends', 'goalcart')}
                 type="time"

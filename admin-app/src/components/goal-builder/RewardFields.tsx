@@ -97,8 +97,8 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
   };
 
   return (
-    <Grid container spacing={2} alignItems="flex-start">
-      <Grid item xs={12} sm={6} lg={4}>
+    <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
+      <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
         <TextField
           select
           label={__('Reward type', 'goalcart')}
@@ -118,7 +118,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
         <>
           {(type === 'percent_discount' || type === 'fixed_discount') && (
             <>
-              <Grid item xs={12} sm={6} lg={4}>
+              <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                 <TextField
                   label={
                     type === 'percent_discount'
@@ -139,7 +139,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
               </Grid>
 
               {type === 'percent_discount' && (
-                <Grid item xs={12} sm={6} lg={4}>
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                   <TextField
                     label={__('Maximum discount', 'goalcart')}
                     type="number"
@@ -154,7 +154,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                 </Grid>
               )}
 
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <Box
                   sx={{ display: 'grid', gap: 2, gridTemplateColumns: { sm: 'repeat(2, 1fr)' } }}
                 >
@@ -175,7 +175,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                 </Box>
               </Grid>
 
-              <Grid item xs={12}>
+              <Grid size={12}>
                 <EntityAutocomplete
                   label={__('Excluded products (optional)', 'goalcart')}
                   value={meta.excluded_products ?? []}
@@ -188,7 +188,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
           )}
 
           {type === 'free_shipping' && (
-            <Grid item xs={12}>
+            <Grid size={12}>
               <Typography variant="body2" color="text.secondary">
                 {__(
                   'Makes every shipping rate free once the goal is reached. Zone/method-specific rules are configured in a later phase.',
@@ -200,18 +200,19 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
 
           {type === 'free_gift' && (
             <>
-              {!meta.gift_product_id && (!meta.gift_products || meta.gift_products.length === 0) && (
-                <Grid item xs={12}>
-                  <Alert severity="warning" variant="outlined">
-                    {__(
-                      'Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront.',
-                      'goalcart'
-                    )}
-                  </Alert>
-                </Grid>
-              )}
+              {!meta.gift_product_id &&
+                (!meta.gift_products || meta.gift_products.length === 0) && (
+                  <Grid size={12}>
+                    <Alert severity="warning" variant="outlined">
+                      {__(
+                        'Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront.',
+                        'goalcart'
+                      )}
+                    </Alert>
+                  </Grid>
+                )}
               {meta.gift_add_mode === 'choose' ? (
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <EntityAutocomplete
                     label={__('Gift products (customer picks one)', 'goalcart')}
                     value={meta.gift_products ?? []}
@@ -228,7 +229,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                   />
                 </Grid>
               ) : (
-                <Grid item xs={12} sm={6} lg={4}>
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                   <EntityAutocomplete
                     label={__('Gift product', 'goalcart')}
                     value={meta.gift_product_id ? [meta.gift_product_id] : []}
@@ -239,7 +240,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                   />
                 </Grid>
               )}
-              <Grid item xs={12} sm={6} lg={4}>
+              <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                 <TextField
                   select
                   label={__('Gift mode', 'goalcart')}
@@ -274,7 +275,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
             <CouponFields values={values} meta={meta} patchMeta={patchMeta} patch={patch} />
           )}
 
-          <Grid item xs={12} sm={6} lg={4}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TextField
               label={__('Reward label', 'goalcart')}
               fullWidth
@@ -285,7 +286,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
             />
           </Grid>
 
-          <Grid item xs={12} sm={6} lg={4}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TextField
               select
               label={__('Stack with other rewards?', 'goalcart')}
@@ -342,7 +343,7 @@ function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
 
   return (
     <>
-      <Grid item xs={12}>
+      <Grid size={12}>
         <FormControlLabel
           control={
             <Switch
@@ -365,7 +366,7 @@ function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
 
       {generate ? (
         <>
-          <Grid item xs={12} sm={6} lg={4}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TextField
               select
               label={__('Coupon discount type', 'goalcart')}
@@ -382,7 +383,7 @@ function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
               ))}
             </TextField>
           </Grid>
-          <Grid item xs={12} sm={6} lg={4}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TextField
               label={__('Coupon value', 'goalcart')}
               type="number"
@@ -392,7 +393,7 @@ function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
               onChange={(event) => patch({ reward_value: Number(event.target.value) || null })}
             />
           </Grid>
-          <Grid item xs={12} sm={6} lg={4}>
+          <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TextField
               label={__('Coupon cap (optional)', 'goalcart')}
               type="number"
@@ -404,7 +405,7 @@ function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
           </Grid>
         </>
       ) : (
-        <Grid item xs={12} sm={6} lg={6}>
+        <Grid size={{ xs: 12, sm: 6, lg: 6 }}>
           <Autocomplete<CouponPick, false, false, true>
             freeSolo
             options={options}

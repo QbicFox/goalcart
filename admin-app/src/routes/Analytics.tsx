@@ -1,5 +1,5 @@
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import InsightsIcon from '@mui/icons-material/Insights';
 import MouseIcon from '@mui/icons-material/Mouse';
 import PaymentsIcon from '@mui/icons-material/Payments';
@@ -153,7 +153,10 @@ export default function Analytics() {
   const [productId, setProductId] = useState<number>(0);
 
   const analyticsQuery = useQuery({
-    queryKey: ['analytics', { from: range.from, to: range.to, campaignId, goalId, reward, productId }],
+    queryKey: [
+      'analytics',
+      { from: range.from, to: range.to, campaignId, goalId, reward, productId },
+    ],
     queryFn: () =>
       fetchAnalytics({
         from: range.from,
@@ -202,9 +205,8 @@ export default function Analytics() {
       <Stack
         direction={{ xs: 'column', lg: 'row' }}
         spacing={1.5}
-        alignItems={{ xs: 'stretch', lg: 'center' }}
-        flexWrap="wrap"
         useFlexGap
+        sx={{ alignItems: { xs: 'stretch', lg: 'center' }, flexWrap: 'wrap' }}
       >
         <DateRangeFilter />
 
@@ -280,7 +282,11 @@ export default function Analytics() {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)', xl: 'repeat(7, 1fr)' },
+              gridTemplateColumns: {
+                xs: 'repeat(2, 1fr)',
+                md: 'repeat(4, 1fr)',
+                xl: 'repeat(7, 1fr)',
+              },
               gap: 2,
             }}
           >
@@ -306,7 +312,11 @@ export default function Analytics() {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)', xl: 'repeat(7, 1fr)' },
+              gridTemplateColumns: {
+                xs: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+                xl: 'repeat(7, 1fr)',
+              },
               gap: 2,
             }}
           >
@@ -318,7 +328,7 @@ export default function Analytics() {
             <KpiCard
               label={__('Completions', 'goalcart')}
               value={formatNumber(summary.completions)}
-              icon={<CheckCircleOutlineIcon fontSize="small" />}
+              icon={<CheckCircleOutlineOutlinedIcon fontSize="small" />}
             />
             <KpiCard
               label={__('Completion rate', 'goalcart')}
@@ -455,7 +465,11 @@ export default function Analytics() {
                       layout="vertical"
                       margin={{ top: 0, right: 12, bottom: 0, left: 0 }}
                     >
-                      <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} horizontal={false} />
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke={COLORS.grid}
+                        horizontal={false}
+                      />
                       <XAxis
                         type="number"
                         tick={{ fontSize: 11, fill: COLORS.tick }}
@@ -514,7 +528,11 @@ export default function Analytics() {
                         <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
                           {index + 1}. {goal.name}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ whiteSpace: 'nowrap' }}
+                        >
                           {sprintf(
                             /* translators: 1: completions, 2: impressions. */
                             __('%1$s of %2$s', 'goalcart'),
@@ -574,7 +592,9 @@ export default function Analytics() {
                           />
                         </TableCell>
                         <TableCell align="right">{formatPercent(product.ctr)}</TableCell>
-                        <TableCell align="right">{formatPercent(product.add_to_cart_rate)}</TableCell>
+                        <TableCell align="right">
+                          {formatPercent(product.add_to_cart_rate)}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

@@ -18,10 +18,10 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "types": ["vite/client", "node"],
-    "baseUrl": ".",
+    // TS 6 deprecated baseUrl; paths entries now resolve relative to this file.
     "paths": {
-      "@/*": ["src/*"],
-      "@wordpress/i18n": ["src/lib/wp-i18n.ts"]
+      "@/*": ["./src/*"],
+      "@wordpress/i18n": ["./src/lib/wp-i18n.ts"]
     }
   },
   "include": ["src", "vite.config.ts"]

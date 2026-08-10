@@ -21,7 +21,7 @@ export default function PercentageTemplateRenderer({
   const showBar = bool(settings, 'showBar', true);
 
   return (
-    <Stack direction="row" alignItems="center" spacing={1.5}>
+    <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
       <Typography
         sx={{
           fontSize: percentSize,

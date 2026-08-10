@@ -59,8 +59,8 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
   };
 
   return (
-    <Grid container spacing={2} alignItems="flex-start">
-      <Grid item xs={12} sm={6}>
+    <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <TextField
           label={__('Title', 'goalcart')}
           fullWidth
@@ -70,7 +70,7 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
         />
       </Grid>
 
-      <Grid item xs={12} sm={6}>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <TextField
           select
           label={__('Template', 'goalcart')}
@@ -90,7 +90,7 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
       </Grid>
 
       {definition && (
-        <Grid item xs={12}>
+        <Grid size={12}>
           <Box
             sx={{
               p: 2,
@@ -134,7 +134,7 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
         </Grid>
       )}
 
-      <Grid item xs={12}>
+      <Grid size={12}>
         <TextField
           label={__('Message (in progress)', 'goalcart')}
           fullWidth
@@ -150,7 +150,7 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
         />
       </Grid>
 
-      <Grid item xs={12}>
+      <Grid size={12}>
         <TextField
           label={__('Completed message', 'goalcart')}
           fullWidth
@@ -162,7 +162,7 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
         />
       </Grid>
 
-      <Grid item xs={12} sm={6}>
+      <Grid size={{ xs: 12, sm: 6 }}>
         <TextField
           label={__('Icon', 'goalcart')}
           fullWidth

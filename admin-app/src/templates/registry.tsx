@@ -47,7 +47,14 @@ export type CampaignTemplateRenderer = ComponentType<CampaignTemplateProps>;
  * template that is no longer registered falls back to the basic renderer
  * rather than failing.
  */
-const GOAL_RENDERERS: Record<string, GoalTemplateRenderer> = {
+/**
+ * The registered Goal template renderers, keyed by the same stable ids
+ * the backend serves. Consumers look components up by property access
+ * (never by call result) so the component references stay static across
+ * renders. A template that is no longer registered falls back to the
+ * basic renderer (`GOAL_RENDERERS.basic`) rather than failing.
+ */
+export const GOAL_RENDERERS: Record<string, GoalTemplateRenderer> = {
   basic: BasicTemplateRenderer,
   percentage: PercentageTemplateRenderer,
   milestone: MilestoneTemplateRenderer,
@@ -55,17 +62,12 @@ const GOAL_RENDERERS: Record<string, GoalTemplateRenderer> = {
   ring: RingTemplateRenderer,
 };
 
-const CAMPAIGN_RENDERERS: Record<string, CampaignTemplateRenderer> = {
+/**
+ * The registered Campaign template renderers. A campaign whose template
+ * id is missing here renders as per-goal cards instead (the storefront
+ * grouping check looks the id up in this map).
+ */
+export const CAMPAIGN_RENDERERS: Record<string, CampaignTemplateRenderer> = {
   milestone_chain: MilestoneChainTemplateRenderer,
   campaign_progress: CampaignProgressTemplateRenderer,
 };
-
-/** Resolve a Goal template renderer (falls back to Basic). */
-export function goalRenderer(id: string): GoalTemplateRenderer {
-  return GOAL_RENDERERS[id] ?? BasicTemplateRenderer;
-}
-
-/** Resolve a Campaign template renderer (null = not registered → per-goal cards). */
-export function campaignRenderer(id: string): CampaignTemplateRenderer | null {
-  return CAMPAIGN_RENDERERS[id] ?? null;
-}

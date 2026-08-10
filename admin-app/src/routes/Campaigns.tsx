@@ -189,7 +189,7 @@ export default function Campaigns() {
                     <Typography variant="body2">{campaign.goal_count}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Stack direction="row" spacing={1} alignItems="center">
+                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                       {statusChip(campaign)}
                       <Tooltip
                         title={
@@ -207,12 +207,14 @@ export default function Campaigns() {
                               status: checked ? 'active' : 'inactive',
                             })
                           }
-                          inputProps={{
-                            'aria-label': sprintf(
-                              /* translators: %s: campaign name. */
-                              __('Toggle %s', 'goalcart'),
-                              campaign.name
-                            ),
+                          slotProps={{
+                            input: {
+                              'aria-label': sprintf(
+                                /* translators: %s: campaign name. */
+                                __('Toggle %s', 'goalcart'),
+                                campaign.name
+                              ),
+                            },
                           }}
                         />
                       </Tooltip>
@@ -227,7 +229,7 @@ export default function Campaigns() {
                     </Typography>
                   </TableCell>
                   <TableCell align="right">
-                    <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                    <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
                       <Tooltip title={__('Preview', 'goalcart')}>
                         <IconButton
                           size="small"

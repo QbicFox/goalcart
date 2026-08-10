@@ -137,7 +137,7 @@ export default function CustomRangePicker({ from, to, onApply }: CustomRangePick
   return (
     <Box sx={{ width: 288, maxWidth: '100%' }}>
       {/* Month navigation */}
-      <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
+      <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
         <IconButton
           size="small"
           onClick={() => goMonth(-1)}

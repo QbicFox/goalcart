@@ -105,7 +105,9 @@ function SchemaField({
     case 'bool':
       return (
         <FormControlLabel
-          control={<Switch checked={Boolean(value)} onChange={(event) => onChange(event.target.checked)} />}
+          control={
+            <Switch checked={Boolean(value)} onChange={(event) => onChange(event.target.checked)} />
+          }
           label={
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
@@ -151,7 +153,7 @@ function SchemaField({
           fullWidth
           value={Number(value)}
           helperText={help}
-          inputProps={{ min, max }}
+          slotProps={{ htmlInput: { min, max } }}
           onChange={(event) => onChange(Number(event.target.value) || 0)}
         />
       );

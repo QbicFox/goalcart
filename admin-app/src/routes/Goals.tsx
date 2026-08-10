@@ -274,7 +274,7 @@ export default function Goals() {
                   <TableRow key={goal.id} hover>
                     <TableCell>
                       <Box>
-                        <Stack direction="row" spacing={0.75} alignItems="center">
+                        <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
                             {goal.name}
                           </Typography>
@@ -311,7 +311,7 @@ export default function Goals() {
                       <Typography variant="body2">{rewardLabel(goal)}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Stack direction="row" spacing={1} alignItems="center">
+                      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                         {statusChip(goal)}
                         <Tooltip
                           title={
@@ -329,12 +329,14 @@ export default function Goals() {
                                 status: checked ? 'active' : 'inactive',
                               })
                             }
-                            inputProps={{
-                              'aria-label': sprintf(
-                                /* translators: %s: goal name. */
-                                __('Toggle %s', 'goalcart'),
-                                goal.name
-                              ),
+                            slotProps={{
+                              input: {
+                                'aria-label': sprintf(
+                                  /* translators: %s: goal name. */
+                                  __('Toggle %s', 'goalcart'),
+                                  goal.name
+                                ),
+                              },
                             }}
                           />
                         </Tooltip>
@@ -356,7 +358,7 @@ export default function Goals() {
                       </Tooltip>
                     </TableCell>
                     <TableCell align="right">
-                      <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                      <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
                         <Tooltip title={__('Preview', 'goalcart')}>
                           <IconButton
                             size="small"

@@ -100,8 +100,14 @@ export default function EntityAutocomplete({
     const requestId = ++requested.current;
     window.clearTimeout(timer.current);
 
-    setLoading(true);
+    // Loading is toggled inside the debounce callback (not synchronously
+    // in the effect body) per react-hooks/set-state-in-effect.
     timer.current = window.setTimeout(() => {
+      if (requestId !== requested.current) {
+        return;
+      }
+
+      setLoading(true);
       search({ q: input, per_page: 20 })
         .then((items) => {
           if (requestId !== requested.current) {
@@ -156,12 +162,13 @@ export default function EntityAutocomplete({
           }
           helperText={helperText}
           slotProps={{
+            ...params.slotProps,
             input: {
-              ...params.InputProps,
+              ...params.slotProps.input,
               endAdornment: (
                 <>
                   {loading ? <CircularProgress size={18} /> : null}
-                  {params.InputProps.endAdornment}
+                  {params.slotProps.input.endAdornment}
                 </>
               ),
             },

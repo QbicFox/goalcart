@@ -91,8 +91,8 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
   const mode = values.calculation_mode;
 
   return (
-    <Grid container spacing={2} alignItems="flex-start">
-      <Grid item xs={12} sm={6} lg={4}>
+    <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
+      <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
         <TextField
           label={__('Target', 'goalcart')}
           type="number"
@@ -105,7 +105,7 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       </Grid>
 
       {modeOptions.length > 0 && (
-        <Grid item xs={12} sm={6} lg={4}>
+        <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <TextField
             select
             label={__('Calculate against', 'goalcart')}
@@ -124,7 +124,7 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       )}
 
       {type === 'category' && (
-        <Grid item xs={12}>
+        <Grid size={12}>
           <EntityAutocomplete
             label={__('Categories', 'goalcart')}
             value={values.categories}
@@ -139,7 +139,7 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       )}
 
       {type === 'product' && (
-        <Grid item xs={12}>
+        <Grid size={12}>
           <EntityAutocomplete
             label={__('Products', 'goalcart')}
             value={values.products}
@@ -154,7 +154,7 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       )}
 
       {type === 'tag' && (
-        <Grid item xs={12}>
+        <Grid size={12}>
           <EntityAutocomplete
             label={__('Tags', 'goalcart')}
             value={values.tags}
@@ -169,7 +169,7 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       )}
 
       {type === 'attribute' && (
-        <Grid item xs={12}>
+        <Grid size={12}>
           <TaxonomyAutocomplete
             label={__('Attributes', 'goalcart')}
             value={values.attributes}
@@ -184,7 +184,7 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       )}
 
       {type === 'brand' && (
-        <Grid item xs={12} sm={8} lg={6}>
+        <Grid size={{ xs: 12, sm: 8, lg: 6 }}>
           <TaxonomyAutocomplete
             label={__('Brand attribute', 'goalcart')}
             value={values.attributes.length > 0 ? [values.attributes[0]] : []}
@@ -231,9 +231,12 @@ function TaxonomyAutocomplete({
     }
 
     let alive = true;
-    setLoading(true);
 
+    // Loading is toggled inside the debounce callback (not synchronously
+    // in the effect body) per react-hooks/set-state-in-effect.
     const timer = window.setTimeout(() => {
+      setLoading(true);
+
       searchAttributes({ q: input, per_page: 50 })
         .then((items) => {
           if (alive) {
@@ -291,12 +294,13 @@ function TaxonomyAutocomplete({
           placeholder={__('Search attributes…', 'goalcart')}
           helperText={helperText}
           slotProps={{
+            ...params.slotProps,
             input: {
-              ...params.InputProps,
+              ...params.slotProps.input,
               endAdornment: (
                 <>
                   {loading ? <CircularProgress size={18} /> : null}
-                  {params.InputProps.endAdornment}
+                  {params.slotProps.input.endAdornment}
                 </>
               ),
             },

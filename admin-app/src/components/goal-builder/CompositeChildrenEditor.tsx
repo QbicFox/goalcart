@@ -74,8 +74,8 @@ export default function CompositeChildrenEditor({
 
         return (
           <Paper key={index} variant="outlined" sx={{ p: 2, mb: 1.5, bgcolor: 'action.hover' }}>
-            <Grid container spacing={2} alignItems="flex-start">
-              <Grid item xs={12} sm={6} md={3}>
+            <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
                   select
                   label={__('Child type', 'goalcart')}
@@ -97,7 +97,7 @@ export default function CompositeChildrenEditor({
                 </TextField>
               </Grid>
 
-              <Grid item xs={12} sm={6} md={3}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
                   label={__('Target', 'goalcart')}
                   type="number"
@@ -112,7 +112,7 @@ export default function CompositeChildrenEditor({
               </Grid>
 
               {(childType === 'amount' || childType === 'category' || childType === 'product') && (
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
                     select
                     label={__('Calculate against', 'goalcart')}
@@ -132,7 +132,7 @@ export default function CompositeChildrenEditor({
                 </Grid>
               )}
 
-              <Grid item xs={12} sm="auto">
+              <Grid size={{ xs: 12, sm: 'auto' }}>
                 <Tooltip title={__('Remove condition', 'goalcart')}>
                   <span>
                     <IconButton
@@ -148,7 +148,7 @@ export default function CompositeChildrenEditor({
               </Grid>
 
               {childType === 'category' && (
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <EntityAutocomplete
                     label={__('Categories', 'goalcart')}
                     value={child.categories}
@@ -159,7 +159,7 @@ export default function CompositeChildrenEditor({
               )}
 
               {childType === 'product' && (
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <EntityAutocomplete
                     label={__('Products', 'goalcart')}
                     value={child.products}

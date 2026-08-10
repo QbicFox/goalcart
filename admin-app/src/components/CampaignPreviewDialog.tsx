@@ -89,11 +89,11 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
   const tokens = tokensFromSettings(settings);
   const frameWidth = DEVICE_WIDTHS[controls.deviceWidth];
   const goals = previewQuery.data?.goals ?? [];
-  const completedCount = goals.filter((goal) => goal.completed).length;	  const forcedTemplate = controls.template
+  const completedCount = goals.filter((goal) => goal.completed).length;
+  const forcedTemplate = controls.template
     ? templateById(templates, 'campaign', controls.template)
     : undefined;
-  const resolvedTemplate =
-    controls.template || previewQuery.data?.campaigns?.[0]?.template || '';
+  const resolvedTemplate = controls.template || previewQuery.data?.campaigns?.[0]?.template || '';
   const resolvedTemplateLabel =
     forcedTemplate?.label ??
     templateById(templates, 'campaign', resolvedTemplate)?.label ??
@@ -108,7 +108,7 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
       </DialogTitle>
       <DialogContent>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={4} lg={3}>
+          <Grid size={{ xs: 12, md: 4, lg: 3 }}>
             <Paper variant="outlined" sx={{ p: 2.5 }}>
               <PreviewControls
                 value={controls}
@@ -119,7 +119,7 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={8} lg={9}>
+          <Grid size={{ xs: 12, md: 8, lg: 9 }}>
             <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, bgcolor: '#f6f7f7' }}>
               <Box
                 sx={{
@@ -132,7 +132,8 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
               >
                 <Typography variant="subtitle2" color="text.secondary">
                   {DEVICE_LABELS[controls.deviceWidth]} · {frameWidth}px
-                </Typography>	                <Chip
+                </Typography>{' '}
+                <Chip
                   size="small"
                   variant="outlined"
                   label={sprintf(
@@ -158,7 +159,9 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
                       {__('No milestones in this campaign yet.', 'goalcart')}
                     </Alert>
                   ) : (
-                    <>	                    <PreviewWidget
+                    <>
+                      {' '}
+                      <PreviewWidget
                         goals={goals}
                         campaigns={previewQuery.data.campaigns}
                         currency={previewQuery.data.currency}

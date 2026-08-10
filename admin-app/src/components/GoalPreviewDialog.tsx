@@ -84,9 +84,12 @@ export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogPr
   const forcedTemplate = controls.template
     ? templateById(templates, 'goal', controls.template)
     : undefined;
-  const resolvedTemplate = controls.template || featured?.template || settings?.frontend_template || 'basic';
+  const resolvedTemplate =
+    controls.template || featured?.template || settings?.frontend_template || 'basic';
   const resolvedTemplateLabel =
-    forcedTemplate?.label ?? templateById(templates, 'goal', resolvedTemplate)?.label ?? resolvedTemplate;
+    forcedTemplate?.label ??
+    templateById(templates, 'goal', resolvedTemplate)?.label ??
+    resolvedTemplate;
 
   return (
     <Dialog open={goal !== null} onClose={onClose} maxWidth="lg" fullWidth>
@@ -95,7 +98,7 @@ export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogPr
       </DialogTitle>
       <DialogContent>
         <Grid container spacing={3}>
-          <Grid item xs={12} md={4} lg={3}>
+          <Grid size={{ xs: 12, md: 4, lg: 3 }}>
             <Paper variant="outlined" sx={{ p: 2.5 }}>
               <PreviewControls
                 value={controls}
@@ -106,7 +109,7 @@ export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogPr
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={8} lg={9}>
+          <Grid size={{ xs: 12, md: 8, lg: 9 }}>
             <Paper variant="outlined" sx={{ p: { xs: 2, md: 3 }, bgcolor: '#f6f7f7' }}>
               <Box
                 sx={{
@@ -119,7 +122,8 @@ export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogPr
               >
                 <Typography variant="subtitle2" color="text.secondary">
                   {DEVICE_LABELS[controls.deviceWidth]} · {frameWidth}px
-                </Typography>	                <Chip
+                </Typography>{' '}
+                <Chip
                   size="small"
                   variant="outlined"
                   label={sprintf(__('%d%% progress', 'goalcart'), percent)}
@@ -135,7 +139,9 @@ export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogPr
                       : __('Could not load the preview.', 'goalcart')}
                   </Alert>
                 ) : previewQuery.data ? (
-                  <>	                    <PreviewWidget
+                  <>
+                    {' '}
+                    <PreviewWidget
                       goals={previewQuery.data.goals}
                       campaigns={previewQuery.data.campaigns}
                       currency={previewQuery.data.currency}

@@ -31,8 +31,7 @@ export default function PageContainer({
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={2}
-          alignItems={{ md: 'center' }}
-          justifyContent="space-between"
+          sx={{ alignItems: { md: 'center' }, justifyContent: 'space-between' }}
         >
           <Box>
             <Typography variant="h5" component="h2" gutterBottom>
@@ -45,7 +44,7 @@ export default function PageContainer({
             )}
           </Box>
           {actions && (
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
               {actions}
             </Stack>
           )}

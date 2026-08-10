@@ -21,7 +21,7 @@ import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { createCampaign, fetchCampaign, updateCampaign } from '../api/campaigns';
@@ -142,11 +142,16 @@ export default function CampaignBuilder() {
     queryFn: () => fetchGoals({ per_page: 100 }),
   });
 
-  useEffect(() => {
-    if (campaignQuery.data) {
-      setValues(campaignToInput(campaignQuery.data));
-    }
-  }, [campaignQuery.data]);
+  // Seed the form once the campaign loads. This is a guarded state
+  // adjustment during render (tracking the already-seeded id) rather
+  // than an effect, per react-hooks/set-state-in-effect.
+  const campaign = campaignQuery.data;
+  const [loadedCampaignId, setLoadedCampaignId] = useState<number | null>(null);
+
+  if (campaign && campaign.id !== loadedCampaignId) {
+    setLoadedCampaignId(campaign.id);
+    setValues(campaignToInput(campaign));
+  }
 
   const saveMutation = useMutation({
     mutationFn: (input: CampaignInput) =>
@@ -298,7 +303,6 @@ export default function CampaignBuilder() {
             />
           </Stack>
         </SectionCard>
-
         {/* 2. Schedule + priority */}
         <SectionCard
           title={__('Schedule & priority', 'goalcart')}
@@ -307,22 +311,22 @@ export default function CampaignBuilder() {
             'goalcart'
           )}
         >
-          <Grid container spacing={2} alignItems="flex-start">
-            <Grid item xs={12} sm={6} lg={4}>
+          <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
               <TextFieldDate
                 label={__('Starts at', 'goalcart')}
                 value={values.starts_at}
                 onChange={(starts_at) => patch({ starts_at })}
               />
             </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
               <TextFieldDate
                 label={__('Ends at', 'goalcart')}
                 value={values.ends_at}
                 onChange={(ends_at) => patch({ ends_at })}
               />
             </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
               <TextField
                 select
                 label={__('Priority', 'goalcart')}
@@ -339,7 +343,8 @@ export default function CampaignBuilder() {
               </TextField>
             </Grid>
           </Grid>
-        </SectionCard>	        {/* 3. Advanced schedule (Phase 32) */}
+        </SectionCard>{' '}
+        {/* 3. Advanced schedule (Phase 32) */}
         <SectionCard
           title={__('Recurring schedule', 'goalcart')}
           description={__(
@@ -347,13 +352,13 @@ export default function CampaignBuilder() {
             'goalcart'
           )}
         >
-          <Grid container spacing={2} alignItems="flex-start">
-            <Grid item xs={12}>
+          <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
+            <Grid size={12}>
               <Box>
                 <Typography variant="caption" color="text.secondary" component="div" gutterBottom>
                   {__('Repeat on days (optional)', 'goalcart')}
                 </Typography>
-                <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+                <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
                   {WEEKDAYS.map((day) => {
                     const selected = scheduleDays.includes(day.value);
                     return (
@@ -370,7 +375,7 @@ export default function CampaignBuilder() {
                 </Stack>
               </Box>
             </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
               <TextField
                 label={__('Daily from', 'goalcart')}
                 type="time"
@@ -381,7 +386,7 @@ export default function CampaignBuilder() {
                 slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
-            <Grid item xs={12} sm={6} lg={4}>
+            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
               <TextField
                 label={__('Daily until', 'goalcart')}
                 type="time"
@@ -397,7 +402,6 @@ export default function CampaignBuilder() {
             </Grid>
           </Grid>
         </SectionCard>
-
         {/* 4. Display (pluggable template engine) */}
         <SectionCard
           title={__('Display', 'goalcart')}
@@ -412,7 +416,6 @@ export default function CampaignBuilder() {
             onChange={(display_rules) => patch({ display_rules })}
           />
         </SectionCard>
-
         {/* 5. Milestones (goal ordering) */}
         <SectionCard
           title={__('Milestones', 'goalcart')}
@@ -503,7 +506,7 @@ export default function CampaignBuilder() {
                   <Typography variant="subtitle2" gutterBottom>
                     {__('Add a milestone', 'goalcart')}
                   </Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                  <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
                     {availableGoals.map((goal) => (
                       <Chip
                         key={goal.id}
@@ -524,7 +527,6 @@ export default function CampaignBuilder() {
             </Stack>
           )}
         </SectionCard>
-
         <Paper variant="outlined" sx={{ p: 2.5, display: 'flex', gap: 1.5 }}>
           <Button
             variant="contained"
@@ -577,7 +579,13 @@ function CampaignDisplayFields({
   onChange,
 }: {
   display: Record<string, unknown>;
-  templates: Array<{ id: string; label: string; description: string; schema: unknown[]; settings: Record<string, string | number | boolean> }>;
+  templates: Array<{
+    id: string;
+    label: string;
+    description: string;
+    schema: unknown[];
+    settings: Record<string, string | number | boolean>;
+  }>;
   onChange: (next: Record<string, unknown>) => void;
 }) {
   const templateId = typeof display.template_id === 'string' ? display.template_id : '';
