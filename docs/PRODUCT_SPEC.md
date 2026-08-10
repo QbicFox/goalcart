@@ -212,7 +212,7 @@ These are the acceptance-level expectations the implementation phases must satis
   conventions. Every eligible goal renders as its own stacked card; the
   cross-goal `GoalMilestones` ladder was removed when that landed.
 - Display locations: cart, mini-cart, checkout, shop, product page, configurable widget/shortcode, sticky bar (later). **Never** inject into locations that could double-render.
-- Templates: basic, percentage, milestone, card (Phase 12); customizable colors, typography, border, radius, spacing, height, icons, animation, CSS class, custom CSS.
+- Templates: the pluggable engine ships basic, percentage, milestone, card and ring (Phase 12) — each with its own structure and schema-driven settings (colors, typography, border, radius, spacing, height, icons, animation, CSS class, custom CSS); third parties register more via `goalcart_template_classes` (see `docs/api.md` §3).
 - Message variables: `{current} {target} {remaining} {percentage} {quantity} {remaining_quantity} {reward} {goal_name} {campaign_name}` (Phase 13).
 
 ### 5.4 Admin

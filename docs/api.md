@@ -690,6 +690,135 @@ bad event type or field), `goalcart_track_failed` (500).
 
 ---
 
+## 3. Developer API — registering a third-party template
+
+The template engine (pluggable template engine, Phase 12) is the one
+Goal Cart surface a third party extends with a **class-map filter**,
+using the same convention as the goal evaluators and reward
+applicators:
+
+```php
+add_filter( 'goalcart_template_classes', function ( $classes ) {
+    $classes['countdown'] = My_Countdown_Template::class;
+    return $classes;
+} );
+```
+
+The filter is applied once, when the `TemplateRegistry` singleton is
+first resolved (i.e. on the first admin/REST request that touches
+templates), so hook it from your plugin's main file or a
+`plugins_loaded` callback — well before any request runs.
+
+### The contract
+
+A template is any class implementing
+`GoalCart\Templates\Template` — extending
+`GoalCart\Templates\AbstractTemplate` gives you `default_settings()`
+for free. Minimum surface:
+
+| Method | Returns |
+|---|---|
+| `id()` | Stable string id — persisted in goal/campaign config and settings; never rename or reuse |
+| `label()` / `description()` | Translated, shown in the template pickers |
+| `scope()` | `'goal'`, `'campaign'` or `'both'` |
+| `version()` | Int — bump when the settings shape changes (safe future migrations) |
+| `schema()` | The settings fields this template accepts — drives the admin form *and* the server-side validation |
+
+### Example
+
+```php
+<?php
+// my-countdown-template.php — namespace + autoload per your plugin.
+use GoalCart\Templates\AbstractTemplate;
+
+class My_Countdown_Template extends AbstractTemplate {
+
+    public function id() { return 'countdown'; }
+
+    public function label() {
+        return __( 'Countdown', 'my-plugin' );
+    }
+
+    public function description() {
+        return __( 'A big countdown to the target.', 'my-plugin' );
+    }
+
+    public function scope() { return 'both'; }
+
+    public function version() { return 1; }
+
+    public function schema() {
+        return array(
+            'accent'      => array(
+                'type'    => 'color',
+                'label'   => __( 'Accent color', 'my-plugin' ),
+                'group'   => __( 'Colors', 'my-plugin' ),
+                'default' => '#2271b1',
+            ),
+            'layout'      => array(
+                'type'    => 'select',
+                'label'   => __( 'Layout', 'my-plugin' ),
+                'default' => 'ring',
+                'options' => array(
+                    'ring' => __( 'Ring', 'my-plugin' ),
+                    'bar'  => __( 'Bar', 'my-plugin' ),
+                ),
+            ),
+            'showSeconds' => array(
+                'type'    => 'bool',
+                'label'   => __( 'Show seconds', 'my-plugin' ),
+                'default' => true,
+            ),
+        );
+    }
+}
+```
+
+Schema field types: `color` (hex), `text`, `textarea`, `number`
+(clamped to `min`/`max`), `bool`, `select` (`options` = value →
+translated label), `css` (tag-stripped, capped at 16 KB).
+
+### What you get automatically
+
+The moment the class is registered, the backend handles everything
+else — no changes to the Settings UI, the builders, the REST layer or
+the preview system:
+
+- `GET /templates` lists it with its schema, so the Appearance page,
+  the Goal Builder and the Campaign Builder pickers render it as-is,
+  including a generated settings form and per-goal/campaign overrides
+  with reset-to-default.
+- Goal/Campaign/Settings saves validate `template_id` against the
+  template's scope and sanitize `template_settings` field-by-field
+  against `schema()` server-side (colors, ranges, enums, tag-free CSS
+  — client values are never trusted).
+- `TemplateEngine` resolves it with the same order as the built-ins
+  (item override → scope default → legacy → fallback), so the
+  storefront and the admin preview render it identically.
+- If the template is later de-registered, stored goals/campaigns fall
+  back to the scope default — a removed template can never break
+  rendering.
+
+### What you must provide yourself — the renderers
+
+The PHP class makes the template *selectable and configurable*; it
+does not paint pixels. A genuinely new layout also needs its renderer
+on the two rendering surfaces (both already fall back safely):
+
+| Surface | File | Unknown id falls back to |
+|---|---|---|
+| Storefront | `assets/js/frontend.js` — add a case to `templateBody()` | the basic progress bar |
+| Admin preview | `admin-app/src/templates/registry.tsx` — add your component to `GOAL_RENDERERS` / `CAMPAIGN_RENDERERS` | `BasicTemplateRenderer` (goal) / per-goal cards (campaign) |
+
+Each renderer receives the goal (or campaign group + goals), the
+currency and the **resolved** settings object. A template that reuses
+a built-in visual and only adds settings fields needs no new renderer
+at all — the resolved settings reach the storefront as card-level CSS
+custom properties, and the admin falls back to the basic renderer with
+those settings applied.
+
+---
+
 ## 4. Security checklist (P07-T04)
 
 - [x] Authentication where required — WP core cookie auth + `X-WP-Nonce`

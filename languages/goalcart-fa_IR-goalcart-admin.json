@@ -1320,6 +1320,27 @@
             ],
             "Use global default": [
                 "استفاده از پیش‌فرض سراسری"
+            ],
+            "Circular gauge — the target as a filled ring with the percentage centered.": [
+                "نمودار حلقه‌ای — هدف به‌صورت حلقه پر شده با درصد در مرکز."
+            ],
+            "Ring": [
+                "حلقه"
+            ],
+            "Ring color": [
+                "رنگ حلقه"
+            ],
+            "Ring size (px)": [
+                "اندازه حلقه (پیکسل)"
+            ],
+            "Show the percentage in the center": [
+                "نمایش درصد در مرکز"
+            ],
+            "Stroke width (px)": [
+                "ضخامت خط (پیکسل)"
+            ],
+            "Track color": [
+                "رنگ پس‌زمینه حلقه"
             ]
         }
     }

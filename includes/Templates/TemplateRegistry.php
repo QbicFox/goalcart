@@ -12,6 +12,7 @@ use GoalCart\Templates\Goal\BasicTemplate;
 use GoalCart\Templates\Goal\CardTemplate;
 use GoalCart\Templates\Goal\MilestoneTemplate;
 use GoalCart\Templates\Goal\PercentageTemplate;
+use GoalCart\Templates\Goal\RingTemplate;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,7 +39,11 @@ class TemplateRegistry {
 	 *
 	 * The four original Phase 12 Goal templates (basic, percentage,
 	 * milestone, card) plus the first Campaign template (milestone_chain)
-	 * are re-implemented here as the built-ins of the pluggable engine.
+	 * are re-implemented here as the built-ins of the pluggable engine,
+	 * alongside the Ring gauge (a genuinely different structure — an SVG
+	 * circle instead of a fill bar) added through the same registration
+	 * path, demonstrating how a fifth template ships with zero changes to
+	 * the registry core, Settings UI, builders, REST layer or preview.
 	 *
 	 * @return array<string, string>
 	 */
@@ -48,6 +53,7 @@ class TemplateRegistry {
 			'percentage'      => PercentageTemplate::class,
 			'milestone'       => MilestoneTemplate::class,
 			'card'            => CardTemplate::class,
+			'ring'            => RingTemplate::class,
 			'milestone_chain' => MilestoneChainTemplate::class,
 		);
 	}

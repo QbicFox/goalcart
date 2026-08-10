@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-10T06:08:18Z\n"
+"POT-Creation-Date: 2026-08-10T06:36:04Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -162,6 +162,8 @@ msgstr ""
 #: includes/Templates/Goal/MilestoneTemplate.php:114
 #: includes/Templates/Goal/PercentageTemplate.php:110
 #: includes/Templates/Goal/PercentageTemplate.php:116
+#: includes/Templates/Goal/RingTemplate.php:133
+#: includes/Templates/Goal/RingTemplate.php:139
 msgid "Advanced"
 msgstr ""
 
@@ -224,13 +226,14 @@ msgstr ""
 #: includes/Templates/Goal/CardTemplate.php:118
 #: includes/Templates/Goal/MilestoneTemplate.php:101
 #: includes/Templates/Goal/PercentageTemplate.php:103
+#: includes/Templates/Goal/RingTemplate.php:126
 msgid "Animate progress updates"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:45
-#: admin-app/src/routes/Appearance.tsx:584
-#: admin-app/src/routes/Appearance.tsx:598
-#: admin-app/src/routes/Appearance.tsx:612
+#: admin-app/src/routes/Appearance.tsx:621
+#: admin-app/src/routes/Appearance.tsx:635
+#: admin-app/src/routes/Appearance.tsx:649
 msgid "Appearance"
 msgstr ""
 
@@ -247,6 +250,7 @@ msgstr ""
 #: includes/Templates/Goal/CardTemplate.php:133
 #: includes/Templates/Goal/MilestoneTemplate.php:116
 #: includes/Templates/Goal/PercentageTemplate.php:118
+#: includes/Templates/Goal/RingTemplate.php:141
 msgid "Appended to the widget styles. Applied only while this template renders."
 msgstr ""
 
@@ -286,6 +290,7 @@ msgstr ""
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:114
 #: includes/Templates/Goal/BasicTemplate.php:75
 #: includes/Templates/Goal/CardTemplate.php:92
+#: includes/Templates/Goal/RingTemplate.php:80
 msgid "Background"
 msgstr ""
 
@@ -311,6 +316,7 @@ msgstr ""
 #: includes/Templates/Goal/CardTemplate.php:119
 #: includes/Templates/Goal/MilestoneTemplate.php:102
 #: includes/Templates/Goal/PercentageTemplate.php:104
+#: includes/Templates/Goal/RingTemplate.php:127
 msgid "Behavior"
 msgstr ""
 
@@ -325,6 +331,7 @@ msgstr ""
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:120
 #: includes/Templates/Goal/BasicTemplate.php:81
 #: includes/Templates/Goal/CardTemplate.php:98
+#: includes/Templates/Goal/RingTemplate.php:86
 msgid "Border"
 msgstr ""
 
@@ -371,7 +378,7 @@ msgid "Campaign template"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:38
-#: admin-app/src/routes/Appearance.tsx:628
+#: admin-app/src/routes/Appearance.tsx:665
 #: admin-app/src/routes/Campaigns.tsx:114
 msgid "Campaigns"
 msgstr ""
@@ -437,6 +444,10 @@ msgstr ""
 msgid "Choose a start and end date."
 msgstr ""
 
+#: includes/Templates/Goal/RingTemplate.php:47
+msgid "Circular gauge — the target as a filled ring with the percentage centered."
+msgstr ""
+
 #: admin-app/src/routes/Analytics.tsx:556
 msgid "Clicks"
 msgstr ""
@@ -471,6 +482,10 @@ msgstr ""
 #: includes/Templates/Goal/MilestoneTemplate.php:74
 #: includes/Templates/Goal/MilestoneTemplate.php:80
 #: includes/Templates/Goal/PercentageTemplate.php:68
+#: includes/Templates/Goal/RingTemplate.php:75
+#: includes/Templates/Goal/RingTemplate.php:81
+#: includes/Templates/Goal/RingTemplate.php:87
+#: includes/Templates/Goal/RingTemplate.php:93
 msgid "Colors"
 msgstr ""
 
@@ -533,6 +548,7 @@ msgstr ""
 #: includes/Templates/Goal/CardTemplate.php:68
 #: includes/Templates/Goal/CardTemplate.php:75
 #: includes/Templates/Goal/CardTemplate.php:81
+#: includes/Templates/Goal/RingTemplate.php:121
 msgid "Content"
 msgstr ""
 
@@ -573,7 +589,7 @@ msgstr ""
 msgid "Could not load the preview."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:604
+#: admin-app/src/routes/Appearance.tsx:641
 msgid "Could not load the progress templates."
 msgstr ""
 
@@ -641,6 +657,7 @@ msgstr ""
 #: includes/Templates/Goal/CardTemplate.php:130
 #: includes/Templates/Goal/MilestoneTemplate.php:113
 #: includes/Templates/Goal/PercentageTemplate.php:115
+#: includes/Templates/Goal/RingTemplate.php:138
 msgid "Custom CSS"
 msgstr ""
 
@@ -652,8 +669,8 @@ msgstr ""
 msgid "Customer-facing copy and template for the progress widget."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:585
-#: admin-app/src/routes/Appearance.tsx:599
+#: admin-app/src/routes/Appearance.tsx:622
+#: admin-app/src/routes/Appearance.tsx:636
 msgid "Customize how the cart progress UI looks on your storefront."
 msgstr ""
 
@@ -751,7 +768,7 @@ msgstr ""
 msgid "Disable"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:707
+#: admin-app/src/routes/Appearance.tsx:744
 msgid "Discard changes"
 msgstr ""
 
@@ -901,6 +918,7 @@ msgstr ""
 #: includes/Templates/Goal/CardTemplate.php:124
 #: includes/Templates/Goal/MilestoneTemplate.php:107
 #: includes/Templates/Goal/PercentageTemplate.php:109
+#: includes/Templates/Goal/RingTemplate.php:132
 msgid "Extra CSS class"
 msgstr ""
 
@@ -1041,7 +1059,7 @@ msgid "Goal type"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:37
-#: admin-app/src/routes/Appearance.tsx:628
+#: admin-app/src/routes/Appearance.tsx:665
 #: admin-app/src/routes/Goals.tsx:178
 msgid "Goals"
 msgstr ""
@@ -1177,7 +1195,7 @@ msgstr ""
 msgid "Leave empty to apply to the whole cart."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:655
+#: admin-app/src/routes/Appearance.tsx:692
 msgid "Live preview"
 msgstr ""
 
@@ -1441,7 +1459,7 @@ msgstr ""
 msgid "Performance"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:613
+#: admin-app/src/routes/Appearance.tsx:650
 msgid "Pick the default progress template and tune its appearance — separately for Goals and Campaigns."
 msgstr ""
 
@@ -1606,11 +1624,26 @@ msgstr ""
 msgid "Reward unlocked: {reward}"
 msgstr ""
 
+#: includes/Templates/Goal/RingTemplate.php:40
+#: includes/Templates/Goal/RingTemplate.php:99
+#: includes/Templates/Goal/RingTemplate.php:105
+#: includes/Templates/Goal/RingTemplate.php:113
+msgid "Ring"
+msgstr ""
+
+#: includes/Templates/Goal/RingTemplate.php:74
+msgid "Ring color"
+msgstr ""
+
+#: includes/Templates/Goal/RingTemplate.php:104
+msgid "Ring size (px)"
+msgstr ""
+
 #: admin-app/src/routes/Appearance.tsx:426
 msgid "Sample campaign"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:698
+#: admin-app/src/routes/Appearance.tsx:735
 msgid "Save appearance"
 msgstr ""
 
@@ -1623,7 +1656,7 @@ msgstr ""
 msgid "Save settings"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:698
+#: admin-app/src/routes/Appearance.tsx:735
 #: admin-app/src/routes/CampaignBuilder.tsx:444
 #: admin-app/src/routes/GoalBuilder.tsx:374
 #: admin-app/src/routes/Settings.tsx:687
@@ -1723,6 +1756,10 @@ msgstr ""
 msgid "Show the first goal only"
 msgstr ""
 
+#: includes/Templates/Goal/RingTemplate.php:120
+msgid "Show the percentage in the center"
+msgstr ""
+
 #: includes/Templates/Goal/PercentageTemplate.php:81
 msgid "Show the progress bar"
 msgstr ""
@@ -1812,6 +1849,10 @@ msgstr ""
 msgid "Store-wide progress widget variant."
 msgstr ""
 
+#: includes/Templates/Goal/RingTemplate.php:112
+msgid "Stroke width (px)"
+msgstr ""
+
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:26
 #: admin-app/src/components/goal-builder/TargetFields.tsx:18
 #: admin-app/src/components/goal-builder/TargetFields.tsx:24
@@ -1851,13 +1892,14 @@ msgstr ""
 msgid "Template"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:672
+#: admin-app/src/routes/Appearance.tsx:709
 msgid "Template appearances"
 msgstr ""
 
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:126
 #: includes/Templates/Goal/BasicTemplate.php:87
 #: includes/Templates/Goal/CardTemplate.php:104
+#: includes/Templates/Goal/RingTemplate.php:92
 msgid "Text"
 msgstr ""
 
@@ -1904,11 +1946,11 @@ msgstr ""
 msgid "The campaign was updated."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:636
+#: admin-app/src/routes/Appearance.tsx:673
 msgid "The default template for every goal that does not pin its own on the Goal Builder."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:632
+#: admin-app/src/routes/Appearance.tsx:669
 msgid "The default template that renders a whole campaign on the storefront (e.g. the milestone chain)."
 msgstr ""
 
@@ -2039,6 +2081,10 @@ msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:111
 msgid "Total goals"
+msgstr ""
+
+#: includes/Templates/Goal/RingTemplate.php:98
+msgid "Track color"
 msgstr ""
 
 #: includes/REST/TrackController.php:198

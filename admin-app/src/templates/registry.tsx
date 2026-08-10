@@ -6,6 +6,7 @@ import CardTemplateRenderer from './renderers/CardTemplateRenderer';
 import MilestoneChainTemplateRenderer from './renderers/MilestoneChainTemplateRenderer';
 import MilestoneTemplateRenderer from './renderers/MilestoneTemplateRenderer';
 import PercentageTemplateRenderer from './renderers/PercentageTemplateRenderer';
+import RingTemplateRenderer from './renderers/RingTemplateRenderer';
 
 /**
  * The props every Goal template renderer receives. Renderers draw only
@@ -50,6 +51,7 @@ const GOAL_RENDERERS: Record<string, GoalTemplateRenderer> = {
   percentage: PercentageTemplateRenderer,
   milestone: MilestoneTemplateRenderer,
   card: CardTemplateRenderer,
+  ring: RingTemplateRenderer,
 };
 
 const CAMPAIGN_RENDERERS: Record<string, CampaignTemplateRenderer> = {

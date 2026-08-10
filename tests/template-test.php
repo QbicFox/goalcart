@@ -5,10 +5,11 @@
  * Boots WordPress and exercises the template engine end to end:
  *
  *  - the registry contract: every built-in template implements Template,
- *    the four Goal templates (basic / percentage / milestone / card) plus
- *    the first Campaign template (milestone_chain) are registered, each
- *    with a stable id, label, description, scope, version and a settings
- *    schema whose defaults drive `default_settings()`
+ *    the five Goal templates (basic / percentage / milestone / card /
+ *    ring) plus the first Campaign template (milestone_chain) are
+ *    registered, each with a stable id, label, description, scope,
+ *    version and a settings schema whose defaults drive
+ *    `default_settings()`
  *  - schema validation: sanitize_settings() clamps numbers, validates
  *    colors/enums/booleans, strips tags from CSS, drops unknown keys, and
  *    scope checks reject the wrong template in the wrong scope
@@ -134,7 +135,7 @@ $goal_ids = array_map(
 );
 sort( $goal_ids );
 
-check( 'goal scope has the four built-ins', array( 'basic', 'card', 'milestone', 'percentage' ) === $goal_ids );
+check( 'goal scope has the five built-ins', array( 'basic', 'card', 'milestone', 'percentage', 'ring' ) === $goal_ids );
 
 $campaign_ids = array_map(
 	function ( $template ) {
@@ -144,7 +145,7 @@ $campaign_ids = array_map(
 );
 
 check( 'campaign scope has the milestone chain', array( 'milestone_chain' ) === $campaign_ids );
-check( 'all() exposes five templates', 5 === count( $registry->all() ) );
+check( 'all() exposes six templates', 6 === count( $registry->all() ) );
 
 foreach ( $registry->all() as $template ) {
 	check( 'template implements the contract', $template instanceof Template );
@@ -175,6 +176,12 @@ check( 'default_settings derives from the schema', $schema_ok );
 
 $chain = $registry->get( 'milestone_chain' );
 check( 'chain schema has campaign-specific fields', array_key_exists( 'showLabels', $chain->schema() ) && array_key_exists( 'dotColor', $chain->schema() ) && array_key_exists( 'showRewards', $chain->schema() ) );
+
+// The ring template's schema is genuinely its own — ring-only fields
+// that no other built-in exposes, alongside the shared legacy surface.
+$ring = $registry->get( 'ring' );
+check( 'ring schema has ring-specific fields', array_key_exists( 'ringSize', $ring->schema() ) && array_key_exists( 'strokeWidth', $ring->schema() ) && array_key_exists( 'trackColor', $ring->schema() ) && array_key_exists( 'showPercent', $ring->schema() ) );
+check( 'ring shares the legacy accent key', array_key_exists( 'accent', $ring->schema() ) );
 
 // ---------------------------------------------------------------------------
 // 2. Schema validation (engine-level)
@@ -225,6 +232,22 @@ $cleaned_chain = $engine->sanitize_settings(
 );
 check( 'chain booleans normalized', false === $cleaned_chain['showLabels'] );
 check( 'chain colors validated', '#123456' === $cleaned_chain['dotColor'] );
+
+// The ring template's number/color/bool fields.
+$cleaned_ring = $engine->sanitize_settings(
+	$registry->get( 'ring' ),
+	array(
+		'ringSize'    => 999,
+		'strokeWidth' => 0,
+		'trackColor'  => 'not-a-color',
+		'showPercent' => 0,
+	)
+);
+check( 'ring size clamped to max', 240 === $cleaned_ring['ringSize'] );
+check( 'ring stroke clamped to min', 4 === $cleaned_ring['strokeWidth'] );
+check( 'ring track color falls back on invalid', '#f0f0f1' === $cleaned_ring['trackColor'] );
+check( 'ring bool normalized', false === $cleaned_ring['showPercent'] );
+check( 'ring rejected for the campaign scope', ! $engine->is_registered( TemplateEngine::SCOPE_CAMPAIGN, 'ring' ) );
 
 // ---------------------------------------------------------------------------
 // 3. Goal resolution (override → scope default → legacy → fallback)
@@ -586,7 +609,22 @@ $data = $resp->get_data()['data'];
 check( 'payload lists the two scopes', array( 'goal', 'campaign' ) === $data['scopes'] );
 check( 'goal default resolves', isset( $data['defaults']['goal'] ) && '' !== $data['defaults']['goal'] );
 check( 'campaign default is empty by default', '' === $data['defaults']['campaign'] );
-check( 'payload carries four goal definitions', 4 === count( $data['goal'] ) );
+check( 'payload carries five goal definitions', 5 === count( $data['goal'] ) );
+
+$ring_definition = null;
+foreach ( $data['goal'] as $definition ) {
+	if ( 'ring' === $definition['id'] ) {
+		$ring_definition = $definition;
+		break;
+	}
+}
+$ring_keys = $ring_definition ? array_map(
+	function ( $field ) {
+		return $field['key'];
+	},
+	$ring_definition['schema']
+) : array();
+check( 'payload carries the ring definition with its schema', null !== $ring_definition && in_array( 'ringSize', $ring_keys, true ) && in_array( 'strokeWidth', $ring_keys, true ) );
 check( 'payload carries the chain definition', 1 === count( $data['campaign'] ) && 'milestone_chain' === $data['campaign'][0]['id'] );
 
 $definition_shape_ok = true;

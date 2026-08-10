@@ -1360,3 +1360,38 @@ msgstr "قالب پیش‌فرضی که کل کمپین را در فروشگاه
 msgid "Use global default"
 msgstr "استفاده از پیش‌فرض سراسری"
 
+
+
+#: includes/Templates/Goal/RingTemplate.php
+msgid "Circular gauge — the target as a filled ring with the percentage centered."
+msgstr "نمودار حلقه‌ای — هدف به‌صورت حلقه پر شده با درصد در مرکز."
+
+
+#: includes/Templates/Goal/RingTemplate.php
+msgid "Ring"
+msgstr "حلقه"
+
+
+#: includes/Templates/Goal/RingTemplate.php
+msgid "Ring color"
+msgstr "رنگ حلقه"
+
+
+#: includes/Templates/Goal/RingTemplate.php
+msgid "Ring size (px)"
+msgstr "اندازه حلقه (پیکسل)"
+
+
+#: includes/Templates/Goal/RingTemplate.php
+msgid "Show the percentage in the center"
+msgstr "نمایش درصد در مرکز"
+
+
+#: includes/Templates/Goal/RingTemplate.php
+msgid "Stroke width (px)"
+msgstr "ضخامت خط (پیکسل)"
+
+
+#: includes/Templates/Goal/RingTemplate.php
+msgid "Track color"
+msgstr "رنگ پس‌زمینه حلقه"

@@ -214,6 +214,45 @@
 	flex-wrap: wrap;
 }
 
+/* Ring template: circular gauge (SVG). Logical properties keep the
+   centered readout direction-agnostic under RTL. */
+
+.goalcart-ring {
+	position: relative;
+	inline-size: fit-content;
+	max-inline-size: 100%;
+	margin-inline: auto;
+}
+
+.goalcart-ring__svg {
+	display: block;
+	max-inline-size: 100%;
+	height: auto;
+}
+
+.goalcart-ring__fill {
+	transition: stroke-dashoffset 0.6s ease;
+}
+
+.goalcart-widget--no-anim .goalcart-ring__fill,
+.goalcart-no-anim .goalcart-ring__fill {
+	transition: none;
+}
+
+.goalcart-ring__percent {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 800;
+	line-height: 1;
+	letter-spacing: -0.02em;
+	font-variant-numeric: tabular-nums;
+	color: var(--goalcart-text);
+	pointer-events: none;
+}
+
 /* Message states (Phase 13): the payload `state` lands as a card class.
    The completed fill color is already handled by
    .goalcart-progress--complete, so the state classes only refine copy. */
@@ -531,6 +570,7 @@
 
 @media ( prefers-reduced-motion: reduce ) {
 	.goalcart-progress__fill,
+	.goalcart-ring__fill,
 	.goalcart-sticky {
 		transition: none;
 	}

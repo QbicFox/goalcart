@@ -23,10 +23,10 @@
  *
  * Templates (P12): the goal body renders per the active variant — basic
  * (bar), percentage (big % + bar), milestone (single threshold rung +
- * bar) or card (icon + title + bar) — driven by `cfg.template` or a
- * per-container `data-goalcart-template` override. Appearance tokens
- * (colors, radius, bar height) come from the same config; the animation
- * toggle adds a no-transition class when disabled.
+ * bar), card (icon + title + bar) or ring (circular gauge) — driven by
+ * `cfg.template` or a per-container `data-goalcart-template` override.
+ * Appearance tokens (colors, radius, bar height) come from the same
+ * config; the animation toggle adds a no-transition class when disabled.
  *
  * Contracts:
  *   - config comes from `window.goalcartFrontend` (printed early in
@@ -604,7 +604,7 @@
 	 */
 	function widgetTemplate( container, goal ) {
 		var override = container.getAttribute( 'data-goalcart-template' );
-		var names = [ 'basic', 'percentage', 'milestone', 'card', 'milestone_chain' ];
+		var names = [ 'basic', 'percentage', 'milestone', 'card', 'ring', 'milestone_chain' ];
 
 		if ( override && names.indexOf( override ) !== -1 ) {
 			return override;
@@ -794,6 +794,78 @@
 	}
 
 	/**
+	 * Ring template — a circular gauge (SVG circle instead of a fill bar).
+	 *
+	 * The target renders as a ring whose stroke-dashoffset draws exactly
+	 * `percentage` of the circumference; the percent readout sits centered
+	 * inside (locale-aware digits via formatNumber, so Persian stores see
+	 * Persian digits). The ring-specific settings (size, stroke width,
+	 * track color) come from the resolved template settings; the shared
+	 * accent drives the progress stroke.
+	 *
+	 * @param {Object} goal Progress goal entry.
+	 * @return {HTMLElement}
+	 */
+	function ringPanel( goal ) {
+		var settings = goal.template_settings || {};
+		var percent = Math.max( 0, Math.min( 100, Number( goal.percentage ) || 0 ) );
+		var size = Number( settings.ringSize ) || 120;
+		var stroke = Number( settings.strokeWidth ) || 12;
+		var accent = settings.accent || '#2271b1';
+		var trackColor = settings.trackColor || '#f0f0f1';
+		var showPercent = settings.showPercent !== false;
+		var radius = ( size - stroke ) / 2;
+		var circumference = 2 * Math.PI * radius;
+		var NS = 'http://www.w3.org/2000/svg';
+
+		var wrap = el( 'div', 'goalcart-ring' );
+		var svg = document.createElementNS( NS, 'svg' );
+		var track = document.createElementNS( NS, 'circle' );
+		var fill = document.createElementNS( NS, 'circle' );
+
+		svg.setAttribute( 'viewBox', '0 0 ' + size + ' ' + size );
+		svg.setAttribute( 'width', String( size ) );
+		svg.setAttribute( 'height', String( size ) );
+		svg.setAttribute( 'role', 'img' );
+		svg.setAttribute( 'class', 'goalcart-ring__svg' );
+
+		// Track: the full circle behind the progress stroke.
+		track.setAttribute( 'class', 'goalcart-ring__track' );
+		track.setAttribute( 'cx', String( size / 2 ) );
+		track.setAttribute( 'cy', String( size / 2 ) );
+		track.setAttribute( 'r', String( radius ) );
+		track.setAttribute( 'fill', 'none' );
+		track.setAttribute( 'stroke', trackColor );
+		track.setAttribute( 'stroke-width', String( stroke ) );
+
+		// Progress: same circle, dashed so only `percent` of the ring is
+		// drawn, rotated to start at 12 o'clock.
+		fill.setAttribute( 'class', 'goalcart-ring__fill' );
+		fill.setAttribute( 'cx', String( size / 2 ) );
+		fill.setAttribute( 'cy', String( size / 2 ) );
+		fill.setAttribute( 'r', String( radius ) );
+		fill.setAttribute( 'fill', 'none' );
+		fill.setAttribute( 'stroke', accent );
+		fill.setAttribute( 'stroke-width', String( stroke ) );
+		// Round caps can render a residual dot at the start point when the
+		// dash is empty (0%), so fall back to butt caps at zero progress.
+		fill.setAttribute( 'stroke-linecap', 0 === percent ? 'butt' : 'round' );
+		fill.setAttribute( 'stroke-dasharray', String( circumference ) );
+		fill.setAttribute( 'stroke-dashoffset', String( circumference * ( 1 - percent / 100 ) ) );
+		fill.setAttribute( 'transform', 'rotate(-90 ' + size / 2 + ' ' + size / 2 + ')' );
+
+		svg.appendChild( track );
+		svg.appendChild( fill );
+		wrap.appendChild( svg );
+
+		if ( showPercent ) {
+			wrap.appendChild( el( 'span', 'goalcart-ring__percent', formatNumber( Math.round( percent ) ) + '%' ) );
+		}
+
+		return wrap;
+	}
+
+	/**
 	 * The template's core visual (everything except the shared message /
 	 * reward chip / suggestion flow).
 	 *
@@ -810,6 +882,8 @@
 				return milestonePanel( goal, currency, showBar );
 			case 'card':
 				return cardPanel( goal );
+			case 'ring':
+				return ringPanel( goal );
 			default:
 				return false === showBar ? null : progressBar( goal );
 		}
