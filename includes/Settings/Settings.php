@@ -54,7 +54,8 @@ class Settings {
 		'conflict_resolution'   => 'cumulative',       // cumulative | best | first (Phase 26)
 		'calculation_mode'      => 'subtotal',         // subtotal | discounted_subtotal | total
 
-		// Frontend (P18-T02).
+		// Frontend (P18-T02). Phase 32 adds the countdown + celebration
+		// toggles and the advanced sticky-bar surface.
 		'frontend_template'     => 'basic',
 		'frontend_animation'    => true,
 		'frontend_locations'    => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ),
@@ -67,6 +68,16 @@ class Settings {
 		'frontend_radius'       => 10,
 		'frontend_css_class'    => '',
 		'frontend_custom_css'   => '',
+		'frontend_countdown'    => true,               // Phase 32: live countdown chips on goals with an end time.
+		'frontend_celebrate'    => true,               // Phase 32: completion celebration animation.
+
+		// Phase 32 (advanced sticky bar).
+		'sticky_position'       => 'bottom',           // bottom | top
+		'sticky_behavior'       => 'dismissible',      // dismissible | auto_hide
+		'sticky_delay'          => 0,                  // seconds before the bar appears (0 = immediately)
+		'sticky_countdown'      => false,              // show the countdown chip in the bar
+		'sticky_suggestions'    => false,              // show the top suggestion in the bar
+		'sticky_display'        => 'compact',          // compact | full
 
 		// Goal Calculation (P18-T03). Each default preserves the
 		// pre-Phase-18 engine behavior: taxes stay out of the subtotal
@@ -82,6 +93,10 @@ class Settings {
 		'performance_caching'     => false,
 		'analytics_enabled'       => true,
 		'performance_suggestions' => true,
+
+		// Phase 32 (advanced upsell ranking): how the suggestion engine
+		// ranks candidates — balanced | price | popularity.
+		'suggestions_ranking'     => 'balanced',
 
 		// Template engine (pluggable progress templates): the per-scope
 		// default template ids, the per-template default appearance and the

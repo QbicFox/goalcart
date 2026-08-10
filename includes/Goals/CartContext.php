@@ -97,6 +97,22 @@ final class CartContext {
 	protected $is_guest;
 
 	/**
+	 * Coupon codes currently applied to the cart (Phase 32 cart-state
+	 * conditions).
+	 *
+	 * @var string[]
+	 */
+	protected $coupons;
+
+	/**
+	 * The shipping zone id matching the cart destination (Phase 32
+	 * shipping-zone goals). 0 when unknown / not calculated.
+	 *
+	 * @var int
+	 */
+	protected $shipping_zone_id;
+
+	/**
 	 * Phase 18 (Goal Calculation): whether line taxes are folded into the
 	 * money bases.
 	 *
@@ -127,6 +143,8 @@ final class CartContext {
 		$this->currency       = isset( $data['currency'] ) ? (string) $data['currency'] : '';
 		$this->user_id        = isset( $data['user_id'] ) ? (int) $data['user_id'] : 0;
 		$this->is_guest       = isset( $data['is_guest'] ) ? (bool) $data['is_guest'] : ( 0 === $this->user_id );
+		$this->coupons        = isset( $data['coupons'] ) && is_array( $data['coupons'] ) ? array_map( array( __CLASS__, 'clean_text' ), array_map( 'strval', $data['coupons'] ) ) : array();
+		$this->shipping_zone_id = isset( $data['shipping_zone_id'] ) ? (int) $data['shipping_zone_id'] : 0;
 		$this->include_tax    = ! empty( $data['include_tax'] );
 		$this->include_discount = ! isset( $data['include_discount'] ) || (bool) $data['include_discount'];
 
@@ -200,6 +218,8 @@ final class CartContext {
 	public static function from_cart( \WC_Cart $cart, array $args = array() ) {
 		$items           = array();
 		$category_map    = isset( $args['categories'] ) && is_array( $args['categories'] ) ? $args['categories'] : array();
+		$tags_map        = isset( $args['tags'] ) && is_array( $args['tags'] ) ? $args['tags'] : array();
+		$attributes_map  = isset( $args['attributes'] ) && is_array( $args['attributes'] ) ? $args['attributes'] : array();
 		$include_tax     = ! empty( $args['include_tax'] );
 		$include_discount = ! isset( $args['include_discount'] ) || (bool) $args['include_discount'];
 		$include_shipping = ! isset( $args['include_shipping'] ) || (bool) $args['include_shipping'];
@@ -228,11 +248,21 @@ final class CartContext {
 			// (the parent for variations, where WC stores the categories).
 			$category_product_id = isset( $cart_item['product_id'] ) && (int) $cart_item['product_id'] > 0
 				? (int) $cart_item['product_id']
-				: (int) $product->get_id();
-
-			$categories = isset( $category_map[ $category_product_id ] )
+				: (int) $product->get_id();			$categories = isset( $category_map[ $category_product_id ] )
 				? array_map( 'intval', (array) $category_map[ $category_product_id ] )
 				: ( function_exists( 'wp_get_post_terms' ) ? wp_get_post_terms( $category_product_id, 'product_cat', array( 'fields' => 'ids' ) ) : array() );
+
+			// Phase 32 (brand/tag/attribute goals): tags and attribute
+			// taxonomies are preloaded in the same batched way as categories
+			// (CartIntegration builds one object-terms query + one product
+			// attribute pass), so no per-item queries run on the storefront.
+			$tags = isset( $tags_map[ $category_product_id ] )
+				? array_map( 'intval', (array) $tags_map[ $category_product_id ] )
+				: ( method_exists( $product, 'get_tag_ids' ) ? $product->get_tag_ids() : array() );
+
+			$attributes = isset( $attributes_map[ $category_product_id ] )
+				? array_map( array( __CLASS__, 'clean_text' ), array_map( 'strval', (array) $attributes_map[ $category_product_id ] ) )
+				: self::product_attributes( $product );
 
 			$items[] = new CartItem(
 				array(
@@ -240,12 +270,14 @@ final class CartContext {
 					'variation_id'  => ! empty( $cart_item['variation_id'] ) ? (int) $cart_item['variation_id'] : 0,
 					'name'          => $product->get_name(),
 					'quantity'      => isset( $cart_item['quantity'] ) ? (float) $cart_item['quantity'] : 1.0,
-				'line_subtotal' => isset( $cart_item['line_subtotal'] ) ? (float) $cart_item['line_subtotal'] : 0.0,
-				'line_total'    => isset( $cart_item['line_total'] ) ? (float) $cart_item['line_total'] : 0.0,
-				'line_tax'      => isset( $cart_item['line_tax'] ) ? (float) $cart_item['line_tax'] : 0.0,
-				'price'         => (float) $product->get_price(),
+					'line_subtotal' => isset( $cart_item['line_subtotal'] ) ? (float) $cart_item['line_subtotal'] : 0.0,
+					'line_total'    => isset( $cart_item['line_total'] ) ? (float) $cart_item['line_total'] : 0.0,
+					'line_tax'      => isset( $cart_item['line_tax'] ) ? (float) $cart_item['line_tax'] : 0.0,
+					'price'         => (float) $product->get_price(),
 					'weight'        => (float) $product->get_weight(),
 					'categories'    => $categories,
+					'tags'          => $tags,
+					'attributes'    => $attributes,
 					'virtual'       => $product->is_virtual(),
 					'downloadable'  => $product->is_downloadable(),
 				)
@@ -315,11 +347,119 @@ final class CartContext {
 				'currency'         => isset( $args['currency'] ) ? (string) $args['currency'] : ( function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '' ),
 				'user_id'          => isset( $args['user_id'] ) ? (int) $args['user_id'] : ( function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0 ),
 				'is_guest'         => isset( $args['is_guest'] ) ? (bool) $args['is_guest'] : ( function_exists( 'is_user_logged_in' ) ? ! is_user_logged_in() : true ),
+				// Phase 32 (advanced conditions): applied coupon codes and the
+				// shipping zone matching the destination are part of the
+				// snapshot so customer/order/cart/shipping conditions can be
+				// evaluated without touching the request state.
+				'coupons'          => isset( $args['coupons'] ) && is_array( $args['coupons'] )
+					? $args['coupons']
+					: ( method_exists( $cart, 'get_applied_coupons' ) ? $cart->get_applied_coupons() : array() ),
+				'shipping_zone_id' => isset( $args['shipping_zone_id'] ) ? (int) $args['shipping_zone_id'] : self::resolve_shipping_zone_id(),
 				'items'            => $items,
 				'include_tax'      => $include_tax,
 				'include_discount' => $include_discount,
 			)
 		);
+	}
+
+	/**
+	 * The attribute taxonomy slugs present on a product (variations fall
+	 * back to their parent's attributes via the canonical id passed in).
+	 *
+	 * @param \WC_Product $product Product.
+	 * @return string[]
+	 */
+	protected static function product_attributes( \WC_Product $product ) {
+		$taxonomies = array();
+
+		if ( ! method_exists( $product, 'get_attributes' ) ) {
+			return $taxonomies;
+		}
+
+		foreach ( $product->get_attributes() as $attribute ) {
+			if ( $attribute instanceof \WC_Product_Attribute && $attribute->get_name() ) {
+				$taxonomies[] = self::clean_text( (string) $attribute->get_name() );
+			}
+		}
+
+		return $taxonomies;
+	}
+
+	/**
+	 * Sanitize a plain string without hard-depending on WP being loaded.
+	 *
+	 * The engine value objects run inside WordPress (where
+	 * sanitize_text_field exists), but the standalone regression tests
+	 * stub a minimal WP surface, so a guarded fallback keeps them
+	 * runnable — same output in both paths.
+	 *
+	 * @param string $value Raw value.
+	 * @return string
+	 */
+	protected static function clean_text( $value ) {
+		$value = (string) $value;
+
+		if ( function_exists( 'sanitize_text_field' ) ) {
+			return sanitize_text_field( $value );
+		}
+
+		// Minimal WP-free fallback for the standalone tests.
+		return trim( function_exists( 'wp_strip_all_tags' ) ? wp_strip_all_tags( $value ) : $value );
+	}
+
+	/**
+	 * The shipping zone id matching the customer's cart destination.
+	 *
+	 * Uses the WooCommerce public shipping-zone API against the customer's
+	 * shipping destination; returns 0 when unavailable (no WC, zone 0,
+	 * destination unknown).
+	 *
+	 * @return int
+	 */
+	protected static function resolve_shipping_zone_id() {
+		if ( ! function_exists( 'WC' ) || ! WC() || ! WC()->customer ) {
+			return 0;
+		}
+
+		$customer = WC()->customer;
+
+		// The standalone regression tests stub the customer as a plain
+		// object; without the WC getters there is no destination to match.
+		if ( ! method_exists( $customer, 'get_shipping_country' ) ) {
+			return 0;
+		}
+
+		$country  = method_exists( $customer, 'get_shipping_country' ) && $customer->get_shipping_country() ? $customer->get_shipping_country() : ( method_exists( $customer, 'get_billing_country' ) ? $customer->get_billing_country() : '' );
+		$state    = method_exists( $customer, 'get_shipping_state' ) && $customer->get_shipping_state() ? $customer->get_shipping_state() : ( method_exists( $customer, 'get_billing_state' ) ? $customer->get_billing_state() : '' );
+		$postcode = method_exists( $customer, 'get_shipping_postcode' ) && $customer->get_shipping_postcode() ? $customer->get_shipping_postcode() : ( method_exists( $customer, 'get_billing_postcode' ) ? $customer->get_billing_postcode() : '' );
+		$city     = method_exists( $customer, 'get_shipping_city' ) && $customer->get_shipping_city() ? $customer->get_shipping_city() : ( method_exists( $customer, 'get_billing_city' ) ? $customer->get_billing_city() : '' );
+		$address  = method_exists( $customer, 'get_shipping_address' ) && $customer->get_shipping_address() ? $customer->get_shipping_address() : ( method_exists( $customer, 'get_billing_address' ) ? $customer->get_billing_address() : '' );
+		$address2 = method_exists( $customer, 'get_shipping_address_2' ) && $customer->get_shipping_address_2() ? $customer->get_shipping_address_2() : ( method_exists( $customer, 'get_billing_address_2' ) ? $customer->get_billing_address_2() : '' );
+
+		$package = array(
+			'destination' => array(
+				'country'   => $country,
+				'state'     => $state,
+				'postcode'  => $postcode,
+				'city'      => $city,
+				'address'   => $address,
+				'address_2' => $address2,
+			),
+		);
+
+		if ( class_exists( '\WC_Shipping_Zones' ) && method_exists( '\WC_Shipping_Zones', 'get_zone_matching_package' ) ) {
+			$zone = \WC_Shipping_Zones::get_zone_matching_package( $package );
+
+			return $zone ? (int) $zone->get_id() : 0;
+		}
+
+		if ( function_exists( 'wc_get_shipping_zone' ) ) {
+			$zone = wc_get_shipping_zone();
+
+			return $zone ? (int) $zone->get_id() : 0;
+		}
+
+		return 0;
 	}
 
 	/**
@@ -579,6 +719,107 @@ final class CartContext {
 	}
 
 	/**
+	 * Tag-restricted value: quantity or amount (Phase 32).
+	 *
+	 * @param int[]  $tag_ids Product tag term ids.
+	 * @param string $mode    quantity | subtotal | total | discounted_subtotal.
+	 * @param int[]  $exclude Product ids to drop.
+	 * @return float
+	 */
+	public function tag_value( array $tag_ids, $mode = Goal::MODE_QUANTITY, array $exclude = array() ) {
+		$tag_ids = array_flip( array_map( 'intval', $tag_ids ) );
+
+		$sum = 0.0;
+		foreach ( $this->items( $exclude ) as $item ) {
+			if ( ! $this->item_has_tags( $item, $tag_ids ) ) {
+				continue;
+			}
+
+			$sum += $this->line_value( $item, $mode );
+		}
+
+		return $sum;
+	}
+
+	/**
+	 * Attribute-restricted value: quantity or amount (Phase 32). Matches
+	 * products carrying ANY of the configured attribute taxonomies (brand
+	 * goals configure their brand taxonomy here).
+	 *
+	 * @param string[] $taxonomies Global attribute taxonomy slugs.
+	 * @param string   $mode       quantity | subtotal | total | discounted_subtotal.
+	 * @param int[]    $exclude    Product ids to drop.
+	 * @return float
+	 */
+	public function attribute_value( array $taxonomies, $mode = Goal::MODE_QUANTITY, array $exclude = array() ) {
+		$taxonomies = array_flip( array_map( 'sanitize_text_field', array_map( 'strval', $taxonomies ) ) );
+
+		$sum = 0.0;
+		foreach ( $this->items( $exclude ) as $item ) {
+			if ( ! $this->item_has_attributes( $item, $taxonomies ) ) {
+				continue;
+			}
+
+			$sum += $this->line_value( $item, $mode );
+		}
+
+		return $sum;
+	}
+
+	/**
+	 * The per-line value for a money/quantity mode.
+	 *
+	 * @param CartItem $item Item.
+	 * @param string   $mode Goal::MODE_*.
+	 * @return float
+	 */
+	protected function line_value( CartItem $item, $mode ) {
+		if ( Goal::MODE_QUANTITY === $mode ) {
+			return $item->quantity();
+		}
+
+		if ( Goal::MODE_TOTAL === $mode || Goal::MODE_DISCOUNTED_SUBTOTAL === $mode ) {
+			return $item->line_total();
+		}
+
+		return $item->line_subtotal();
+	}
+
+	/**
+	 * Whether an item carries any of the given tag ids.
+	 *
+	 * @param CartItem $item    Item.
+	 * @param int[]    $tag_ids Flipped tag id set.
+	 * @return bool
+	 */
+	protected function item_has_tags( CartItem $item, array $tag_ids ) {
+		foreach ( $item->tags() as $id ) {
+			if ( isset( $tag_ids[ $id ] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Whether an item carries any of the given attribute taxonomies.
+	 *
+	 * @param CartItem $item        Item.
+	 * @param string[] $taxonomies  Flipped taxonomy set.
+	 * @return bool
+	 */
+	protected function item_has_attributes( CartItem $item, array $taxonomies ) {
+		foreach ( $item->attributes() as $taxonomy ) {
+			if ( isset( $taxonomies[ $taxonomy ] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Whether an item belongs to any of the given category ids.
 	 *
 	 * @param CartItem  $item         Item.
@@ -593,6 +834,20 @@ final class CartContext {
 		}
 
 		return false;
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public function coupons() {
+		return $this->coupons;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function shipping_zone_id() {
+		return $this->shipping_zone_id;
 	}
 
 	/**

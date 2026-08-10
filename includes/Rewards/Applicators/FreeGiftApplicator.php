@@ -43,8 +43,28 @@ final class FreeGiftApplicator implements RewardApplicator {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * Choose mode (Phase 32, free gift selection) surfaces the full gift
+	 * candidate list so the storefront can render the picker; the chosen
+	 * product is added by the public gift endpoint (never automatically).
 	 */
 	public function evaluate( Reward $reward, GoalResult $result, ?CartContext $context = null ) {
+		if ( $reward->is_gift_choose() ) {
+			if ( empty( $reward->gift_products() ) ) {
+				return RewardResult::blocked( $reward, $result->goal()->id(), RewardResult::REASON_GIFT_UNAVAILABLE );
+			}
+
+			return RewardResult::available(
+				$reward,
+				$result->goal()->id(),
+				0.0,
+				array(
+					'gift_add_mode' => $reward->gift_add_mode(),
+					'gift_products' => array_map( 'intval', $reward->gift_products() ),
+				)
+			);
+		}
+
 		if ( $reward->gift_product_id() <= 0 ) {
 			return RewardResult::blocked( $reward, $result->goal()->id(), RewardResult::REASON_GIFT_UNAVAILABLE );
 		}
@@ -62,11 +82,17 @@ final class FreeGiftApplicator implements RewardApplicator {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param int|null $chosen_product_id Optional override: the shopper's
+	 *                                    chosen gift product (Phase 32
+	 *                                    choose mode; ignored otherwise).
 	 */
-	public function apply( Reward $reward, RewardResult $evaluation, \WC_Cart $cart, $goal_id ) {
-		$gift_id = $reward->gift_product_id();
+	public function apply( Reward $reward, RewardResult $evaluation, \WC_Cart $cart, $goal_id, $chosen_product_id = null ) {
+		$gift_id = $reward->is_gift_choose()
+			? (int) $chosen_product_id
+			: $reward->gift_product_id();
 
-		if ( ! RewardSafety::gift_product_available( $gift_id ) ) {
+		if ( ! $reward->is_gift_allowed( $gift_id ) || ! RewardSafety::gift_product_available( $gift_id ) ) {
 			return false;
 		}
 

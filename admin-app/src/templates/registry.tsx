@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 
 import type { ProgressCampaign, ProgressGoal, TemplateSettingsValue } from '../types';
 import BasicTemplateRenderer from './renderers/BasicTemplateRenderer';
+import CampaignProgressTemplateRenderer from './renderers/CampaignProgressTemplateRenderer';
 import CardTemplateRenderer from './renderers/CardTemplateRenderer';
 import MilestoneChainTemplateRenderer from './renderers/MilestoneChainTemplateRenderer';
 import MilestoneTemplateRenderer from './renderers/MilestoneTemplateRenderer';
@@ -56,6 +57,7 @@ const GOAL_RENDERERS: Record<string, GoalTemplateRenderer> = {
 
 const CAMPAIGN_RENDERERS: Record<string, CampaignTemplateRenderer> = {
   milestone_chain: MilestoneChainTemplateRenderer,
+  campaign_progress: CampaignProgressTemplateRenderer,
 };
 
 /** Resolve a Goal template renderer (falls back to Basic). */

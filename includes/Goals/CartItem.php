@@ -85,6 +85,21 @@ final class CartItem {
 	protected $categories;
 
 	/**
+	 * Product tag term IDs (Phase 32: tag / brand / attribute goals).
+	 *
+	 * @var int[]
+	 */
+	protected $tags;
+
+	/**
+	 * Global attribute taxonomy slugs present on the product, e.g.
+	 * array( 'pa_color', 'pa_brand' ) (Phase 32).
+	 *
+	 * @var string[]
+	 */
+	protected $attributes;
+
+	/**
 	 * @var bool
 	 */
 	protected $virtual;
@@ -110,6 +125,8 @@ final class CartItem {
 		$this->price         = isset( $data['price'] ) ? (float) $data['price'] : 0.0;
 		$this->weight        = isset( $data['weight'] ) ? (float) $data['weight'] : 0.0;
 		$this->categories    = isset( $data['categories'] ) && is_array( $data['categories'] ) ? array_map( 'intval', $data['categories'] ) : array();
+		$this->tags          = isset( $data['tags'] ) && is_array( $data['tags'] ) ? array_map( 'intval', $data['tags'] ) : array();
+		$this->attributes    = isset( $data['attributes'] ) && is_array( $data['attributes'] ) ? array_map( array( $this, 'clean_text' ), array_map( 'strval', $data['attributes'] ) ) : array();
 		$this->virtual       = ! empty( $data['virtual'] );
 		$this->downloadable  = ! empty( $data['downloadable'] );
 	}
@@ -192,6 +209,35 @@ final class CartItem {
 	 */
 	public function categories() {
 		return $this->categories;
+	}
+
+	/**
+	 * @return int[]
+	 */
+	public function tags() {
+		return $this->tags;
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public function attributes() {
+		return $this->attributes;
+	}
+
+	/**
+	 * Sanitize a plain string without hard-depending on WP being loaded
+	 * (the standalone regression tests stub a minimal WP surface).
+	 *
+	 * @param string $value Raw value.
+	 * @return string
+	 */
+	protected function clean_text( $value ) {
+		$value = (string) $value;
+
+		return function_exists( 'sanitize_text_field' )
+			? sanitize_text_field( $value )
+			: trim( $value );
 	}
 
 	/**

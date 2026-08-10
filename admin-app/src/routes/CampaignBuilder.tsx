@@ -9,6 +9,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import FormControlLabel from '@mui/material/FormControlLabel';
+
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import MenuItem from '@mui/material/MenuItem';
@@ -40,6 +41,16 @@ const REWARD_LABELS: Record<string, string> = {
   free_gift: __('Free gift', 'goalcart'),
   coupon: __('Coupon', 'goalcart'),
 };
+
+const WEEKDAYS = [
+  { value: 1, label: __('Monday', 'goalcart') },
+  { value: 2, label: __('Tuesday', 'goalcart') },
+  { value: 3, label: __('Wednesday', 'goalcart') },
+  { value: 4, label: __('Thursday', 'goalcart') },
+  { value: 5, label: __('Friday', 'goalcart') },
+  { value: 6, label: __('Saturday', 'goalcart') },
+  { value: 7, label: __('Sunday', 'goalcart') },
+];
 
 /** Fresh-campaign defaults (mirror the backend save-arg defaults). */
 function emptyCampaign(): CampaignInput {
@@ -97,6 +108,27 @@ export default function CampaignBuilder() {
   const { data: templates } = useTemplates();
 
   const [values, setValues] = useState<CampaignInput>(emptyCampaign);
+
+  const displayRules = values.display_rules ?? {};
+  const scheduleDays = Array.isArray(displayRules.schedule_days)
+    ? (displayRules.schedule_days as number[])
+    : [];
+  const scheduleStart =
+    typeof displayRules.schedule_start_time === 'string' ? displayRules.schedule_start_time : '';
+  const scheduleEnd =
+    typeof displayRules.schedule_end_time === 'string' ? displayRules.schedule_end_time : '';
+
+  /** Patch display_rules. */
+  const patchDisplay = (rules: Record<string, unknown>) =>
+    patch({ display_rules: { ...displayRules, ...rules } });
+
+  /** Toggle one weekday in the recurring set (empty clears the restriction). */
+  const toggleScheduleDay = (day: number) =>
+    patchDisplay({
+      schedule_days: scheduleDays.includes(day)
+        ? scheduleDays.filter((d) => d !== day)
+        : [...scheduleDays, day],
+    });
 
   const campaignQuery = useQuery({
     queryKey: ['campaign', editId],
@@ -307,7 +339,66 @@ export default function CampaignBuilder() {
               </TextField>
             </Grid>
           </Grid>
-        </SectionCard>	        {/* 3. Display (pluggable template engine) */}
+        </SectionCard>	        {/* 3. Advanced schedule (Phase 32) */}
+        <SectionCard
+          title={__('Recurring schedule', 'goalcart')}
+          description={__(
+            'Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Goals inherit these rules unless they pin their own.',
+            'goalcart'
+          )}
+        >
+          <Grid container spacing={2} alignItems="flex-start">
+            <Grid item xs={12}>
+              <Box>
+                <Typography variant="caption" color="text.secondary" component="div" gutterBottom>
+                  {__('Repeat on days (optional)', 'goalcart')}
+                </Typography>
+                <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
+                  {WEEKDAYS.map((day) => {
+                    const selected = scheduleDays.includes(day.value);
+                    return (
+                      <Chip
+                        key={day.value}
+                        label={day.label}
+                        size="small"
+                        color={selected ? 'primary' : 'default'}
+                        variant={selected ? 'filled' : 'outlined'}
+                        onClick={() => toggleScheduleDay(day.value)}
+                      />
+                    );
+                  })}
+                </Stack>
+              </Box>
+            </Grid>
+            <Grid item xs={12} sm={6} lg={4}>
+              <TextField
+                label={__('Daily from', 'goalcart')}
+                type="time"
+                fullWidth
+                value={scheduleStart}
+                onChange={(event) => patchDisplay({ schedule_start_time: event.target.value })}
+                helperText={__('Optional start of the daily window.', 'goalcart')}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} lg={4}>
+              <TextField
+                label={__('Daily until', 'goalcart')}
+                type="time"
+                fullWidth
+                value={scheduleEnd}
+                onChange={(event) => patchDisplay({ schedule_end_time: event.target.value })}
+                helperText={__(
+                  'A start later than the end means “after start OR before end” (crosses midnight).',
+                  'goalcart'
+                )}
+                slotProps={{ inputLabel: { shrink: true } }}
+              />
+            </Grid>
+          </Grid>
+        </SectionCard>
+
+        {/* 4. Display (pluggable template engine) */}
         <SectionCard
           title={__('Display', 'goalcart')}
           description={__(
@@ -322,7 +413,7 @@ export default function CampaignBuilder() {
           />
         </SectionCard>
 
-        {/* 4. Milestones (goal ordering) */}
+        {/* 5. Milestones (goal ordering) */}
         <SectionCard
           title={__('Milestones', 'goalcart')}
           description={__(

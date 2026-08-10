@@ -489,6 +489,97 @@ export default function Settings() {
                       { value: 'hide', label: __('Hide on mobile', 'goalcart') },
                     ]}
                   />
+                  <BooleanField
+                    control={control}
+                    name="frontend_countdown"
+                    label={__('Countdown timer', 'goalcart')}
+                    description={__(
+                      'Show a live countdown to the goal/campaign deadline (Phase 32).',
+                      'goalcart'
+                    )}
+                  />
+                  <BooleanField
+                    control={control}
+                    name="frontend_celebrate"
+                    label={__('Celebration animation', 'goalcart')}
+                    description={__(
+                      'Play a confetti burst when a goal is reached (Phase 32).',
+                      'goalcart'
+                    )}
+                  />
+                </Stack>
+              </SectionCard>
+
+              <SectionCard
+                title={__('Sticky bar', 'goalcart')}
+                description={__(
+                  'The advanced sticky bottom/top bar (Phase 32): position, behavior, countdown and suggestions.',
+                  'goalcart'
+                )}
+              >
+                <Stack spacing={2}>
+                  <SelectField
+                    control={control}
+                    name="sticky_position"
+                    label={__('Position', 'goalcart')}
+                    description={__('Where the sticky bar docks.', 'goalcart')}
+                    options={[
+                      { value: 'bottom', label: __('Bottom', 'goalcart') },
+                      { value: 'top', label: __('Top', 'goalcart') },
+                    ]}
+                  />
+                  <SelectField
+                    control={control}
+                    name="sticky_behavior"
+                    label={__('Behavior', 'goalcart')}
+                    description={__(
+                      'Dismissible bars hide via the close button; auto-hide bars collapse after a few seconds and reappear on scroll.',
+                      'goalcart'
+                    )}
+                    options={[
+                      { value: 'dismissible', label: __('Dismissible', 'goalcart') },
+                      { value: 'auto_hide', label: __('Auto-hide', 'goalcart') },
+                    ]}
+                  />
+                  <SelectField
+                    control={control}
+                    name="sticky_display"
+                    label={__('Layout', 'goalcart')}
+                    description={__('Compact shows only the progress; full adds the message and reward.', 'goalcart')}
+                    options={[
+                      { value: 'compact', label: __('Compact', 'goalcart') },
+                      { value: 'full', label: __('Full', 'goalcart') },
+                    ]}
+                  />
+                  <Controller
+                    control={control}
+                    name="sticky_delay"
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        type="number"
+                        size="small"
+                        fullWidth
+                        label={__('Appear delay (seconds)', 'goalcart')}
+                        helperText={__('How long after page load before the bar appears.', 'goalcart')}
+                        value={Number(field.value)}
+                        onChange={(event) => field.onChange(Number(event.target.value) || 0)}
+                        sx={{ maxWidth: 360 }}
+                      />
+                    )}
+                  />
+                  <BooleanField
+                    control={control}
+                    name="sticky_countdown"
+                    label={__('Countdown in sticky bar', 'goalcart')}
+                    description={__('Show the deadline countdown inside the sticky bar.', 'goalcart')}
+                  />
+                  <BooleanField
+                    control={control}
+                    name="sticky_suggestions"
+                    label={__('Suggestions in sticky bar', 'goalcart')}
+                    description={__('List the gap-closing product suggestions in the bar.', 'goalcart')}
+                  />
                 </Stack>
               </SectionCard>
             </Stack>
@@ -587,6 +678,20 @@ export default function Settings() {
                       'Show recommended products that help reach the goal.',
                       'goalcart'
                     )}
+                  />
+                  <SelectField
+                    control={control}
+                    name="suggestions_ranking"
+                    label={__('Suggestion ranking', 'goalcart')}
+                    description={__(
+                      'How suggested products are ordered (Phase 32 advanced upsell ranking).',
+                      'goalcart'
+                    )}
+                    options={[
+                      { value: 'balanced', label: __('Balanced', 'goalcart') },
+                      { value: 'price', label: __('Cheapest first', 'goalcart') },
+                      { value: 'popularity', label: __('Most popular first', 'goalcart') },
+                    ]}
                   />
                 </Stack>
               </SectionCard>

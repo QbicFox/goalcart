@@ -6,10 +6,10 @@
  *
  *  - the registry contract: every built-in template implements Template,
  *    the five Goal templates (basic / percentage / milestone / card /
- *    ring) plus the first Campaign template (milestone_chain) are
- *    registered, each with a stable id, label, description, scope,
- *    version and a settings schema whose defaults drive
- *    `default_settings()`
+ *    ring) plus the two Campaign templates (milestone_chain and
+ *    campaign_progress) are registered, each with a stable id, label,
+ *    description, scope, version and a settings schema whose defaults
+ *    drive `default_settings()`
  *  - schema validation: sanitize_settings() clamps numbers, validates
  *    colors/enums/booleans, strips tags from CSS, drops unknown keys, and
  *    scope checks reject the wrong template in the wrong scope
@@ -143,9 +143,10 @@ $campaign_ids = array_map(
 	},
 	$registry->for_scope( TemplateEngine::SCOPE_CAMPAIGN )
 );
+sort( $campaign_ids );
 
-check( 'campaign scope has the milestone chain', array( 'milestone_chain' ) === $campaign_ids );
-check( 'all() exposes six templates', 6 === count( $registry->all() ) );
+check( 'campaign scope has both campaign templates', array( 'campaign_progress', 'milestone_chain' ) === $campaign_ids );
+check( 'all() exposes seven templates', 7 === count( $registry->all() ) );
 
 foreach ( $registry->all() as $template ) {
 	check( 'template implements the contract', $template instanceof Template );
@@ -625,7 +626,7 @@ $ring_keys = $ring_definition ? array_map(
 	$ring_definition['schema']
 ) : array();
 check( 'payload carries the ring definition with its schema', null !== $ring_definition && in_array( 'ringSize', $ring_keys, true ) && in_array( 'strokeWidth', $ring_keys, true ) );
-check( 'payload carries the chain definition', 1 === count( $data['campaign'] ) && 'milestone_chain' === $data['campaign'][0]['id'] );
+check( 'payload carries both campaign definitions', 2 === count( $data['campaign'] ) && in_array( 'milestone_chain', array_column( $data['campaign'], 'id' ), true ) && in_array( 'campaign_progress', array_column( $data['campaign'], 'id' ), true ) );
 
 $definition_shape_ok = true;
 foreach ( array_merge( $data['goal'], $data['campaign'] ) as $definition ) {

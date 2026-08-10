@@ -36,6 +36,7 @@ const STACKING_OPTIONS = [
 const GIFT_MODE_OPTIONS = [
   { value: 'automatic', label: __('Add automatically', 'goalcart') },
   { value: 'optional', label: __('Offer as optional', 'goalcart') },
+  { value: 'choose', label: __('Customer picks from a list', 'goalcart') },
 ];
 
 const COUPON_TYPE_OPTIONS = [
@@ -82,6 +83,14 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
         stacking: 'none',
         coupon_generate: false,
         coupon_discount_type: 'percent',
+      };
+    }
+
+    if (next === 'free_gift') {
+      patchData.reward_meta = {
+        label: '',
+        stacking: 'none',
+        gift_add_mode: 'automatic',
       };
     }
 
@@ -192,7 +201,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
 
           {type === 'free_gift' && (
             <>
-              {!meta.gift_product_id && (
+              {!meta.gift_product_id && (!meta.gift_products || meta.gift_products.length === 0) && (
                 <Grid item xs={12}>
                   <Alert severity="warning" variant="outlined">
                     {__(
@@ -202,16 +211,35 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                   </Alert>
                 </Grid>
               )}
-              <Grid item xs={12} sm={6} lg={4}>
-                <EntityAutocomplete
-                  label={__('Gift product', 'goalcart')}
-                  value={meta.gift_product_id ? [meta.gift_product_id] : []}
-                  onChange={(ids) => patchMeta({ gift_product_id: ids[0] ?? 0 })}
-                  search={searchProducts}
-                  multiple={false}
-                  helperText={__('The product added to the cart as a gift.', 'goalcart')}
-                />
-              </Grid>
+              {meta.gift_add_mode === 'choose' ? (
+                <Grid item xs={12}>
+                  <EntityAutocomplete
+                    label={__('Gift products (customer picks one)', 'goalcart')}
+                    value={meta.gift_products ?? []}
+                    onChange={(gift_products) => {
+                      const first = gift_products[0] ?? 0;
+                      patchMeta({ gift_products, gift_product_id: first });
+                    }}
+                    search={searchProducts}
+                    multiple
+                    helperText={__(
+                      'The customer chooses one free gift from this list once the goal is reached. The first product is the storefront default.',
+                      'goalcart'
+                    )}
+                  />
+                </Grid>
+              ) : (
+                <Grid item xs={12} sm={6} lg={4}>
+                  <EntityAutocomplete
+                    label={__('Gift product', 'goalcart')}
+                    value={meta.gift_product_id ? [meta.gift_product_id] : []}
+                    onChange={(ids) => patchMeta({ gift_product_id: ids[0] ?? 0 })}
+                    search={searchProducts}
+                    multiple={false}
+                    helperText={__('The product added to the cart as a gift.', 'goalcart')}
+                  />
+                </Grid>
+              )}
               <Grid item xs={12} sm={6} lg={4}>
                 <TextField
                   select
@@ -219,7 +247,9 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                   fullWidth
                   value={meta.gift_add_mode ?? 'automatic'}
                   onChange={(event) =>
-                    patchMeta({ gift_add_mode: event.target.value as 'automatic' | 'optional' })
+                    patchMeta({
+                      gift_add_mode: event.target.value as 'automatic' | 'optional' | 'choose',
+                    })
                   }
                 >
                   {GIFT_MODE_OPTIONS.map((option) => (

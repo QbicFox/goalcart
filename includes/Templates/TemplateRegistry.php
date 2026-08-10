@@ -7,6 +7,7 @@
 
 namespace GoalCart\Templates;
 
+use GoalCart\Templates\Campaign\CampaignProgressTemplate;
 use GoalCart\Templates\Campaign\MilestoneChainTemplate;
 use GoalCart\Templates\Goal\BasicTemplate;
 use GoalCart\Templates\Goal\CardTemplate;
@@ -44,17 +45,20 @@ class TemplateRegistry {
 	 * circle instead of a fill bar) added through the same registration
 	 * path, demonstrating how a fifth template ships with zero changes to
 	 * the registry core, Settings UI, builders, REST layer or preview.
+	 * Phase 32 adds the second Campaign template (campaign_progress) the
+	 * same way.
 	 *
 	 * @return array<string, string>
 	 */
 	protected function default_classes() {
 		return array(
-			'basic'           => BasicTemplate::class,
-			'percentage'      => PercentageTemplate::class,
-			'milestone'       => MilestoneTemplate::class,
-			'card'            => CardTemplate::class,
-			'ring'            => RingTemplate::class,
-			'milestone_chain' => MilestoneChainTemplate::class,
+			'basic'              => BasicTemplate::class,
+			'percentage'         => PercentageTemplate::class,
+			'milestone'          => MilestoneTemplate::class,
+			'card'               => CardTemplate::class,
+			'ring'               => RingTemplate::class,
+			'milestone_chain'    => MilestoneChainTemplate::class,
+			'campaign_progress'  => CampaignProgressTemplate::class,
 		);
 	}
 

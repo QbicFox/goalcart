@@ -543,10 +543,18 @@ final class RewardEngine {
 	}
 
 	/**
-	 * Add automatic gifts of completed goals; remove stale gift lines.
+	 * Add automatic gifts of completed goals; remove stale gift lines;
+	 * keep shopper-chosen gifts while their goal still grants them.
 	 *
-	 * Optional-mode gifts are left to the shopper (and a later-phase
-	 * frontend action); they are never added automatically.
+	 * Automatic gifts are added for the goal's configured product.
+	 * Optional/choose-mode gifts are left to the shopper — but a gift the
+	 * shopper already chose (via the public gift endpoint) is kept as long
+	 * as the goal still grants it AND the chosen product is still in the
+	 * gift list; a re-configured reward revokes the stale line.
+	 *
+	 * The session payload is a map goal_id => product_id (older installs
+	 * stored a plain goal-id list; those entries are treated as
+	 * goal_id => null and reconciled normally).
 	 *
 	 * @param \WC_Cart                 $cart    Live cart.
 	 * @param array<int, RewardResult> $results Reward results.
@@ -556,6 +564,17 @@ final class RewardEngine {
 		$applied = $this->session_get( self::SESSION_GIFTS );
 		$applied = is_array( $applied ) ? $applied : array();
 
+		// Normalize the legacy list form to the map form.
+		$applied_map = array();
+
+		foreach ( $applied as $key => $value ) {
+			if ( is_numeric( $key ) ) {
+				$applied_map[ (int) $value ] = null;
+			} else {
+				$applied_map[ (int) $key ] = (int) $value;
+			}
+		}
+
 		$desired = array();
 
 		foreach ( $results as $goal_id => $reward_result ) {
@@ -563,25 +582,111 @@ final class RewardEngine {
 				continue;
 			}
 
-			if ( ! $reward_result->reward()->is_gift_automatic() ) {
-				continue;
-			}
+			$reward = $reward_result->reward();
 
 			/** @var FreeGiftApplicator $applicator */
 			$applicator = $this->registry->applicator( Reward::TYPE_FREE_GIFT );
 
-			if ( $applicator->apply( $reward_result->reward(), $reward_result, $cart, $goal_id ) ) {
-				$desired[] = (int) $goal_id;
+			if ( $reward->is_gift_automatic() ) {
+				if ( $applicator->apply( $reward, $reward_result, $cart, $goal_id ) ) {
+					$desired[ (int) $goal_id ] = (int) $reward->gift_product_id();
+				}
+
+				continue;
+			}
+
+			// Optional/choose: keep a previously chosen gift while it is
+			// still allowed by the current reward configuration.
+			$chosen = isset( $applied_map[ (int) $goal_id ] ) ? (int) $applied_map[ (int) $goal_id ] : 0;
+
+			if ( $chosen > 0 && $reward->is_gift_allowed( $chosen ) && RewardSafety::gift_product_available( $chosen ) ) {
+				$desired[ (int) $goal_id ] = $chosen;
 			}
 		}
 
-		foreach ( $applied as $goal_id ) {
-			if ( ! in_array( (int) $goal_id, $desired, true ) ) {
-				$this->remove_gift_line( $cart, $goal_id );
+		foreach ( $applied_map as $goal_id => $product_id ) {
+			if ( isset( $desired[ $goal_id ] ) && ( null === $product_id || $desired[ $goal_id ] === $product_id ) ) {
+				continue;
 			}
+
+			$this->remove_gift_line( $cart, $goal_id );
 		}
 
 		$this->session_set( self::SESSION_GIFTS, $desired );
+	}
+
+	/**
+	 * Add the shopper's chosen gift for a completed goal (Phase 32).
+	 *
+	 * Called by the public gift endpoint. The goal must currently be
+	 * completed AND grant a free-gift reward whose gift list allows the
+	 * chosen product; the gift is added free (goalcart markers) and
+	 * session-tracked so a goal that stops qualifying revokes it.
+	 *
+	 * @param int       $goal_id    Goal id.
+	 * @param int       $product_id Chosen gift product id.
+	 * @param \WC_Cart  $cart       Live cart.
+	 * @return bool
+	 */
+	public function add_chosen_gift( $goal_id, $product_id, \WC_Cart $cart ) {
+		$goal_id    = (int) $goal_id;
+		$product_id = (int) $product_id;
+
+		if ( null === $this->repository ) {
+			return false;
+		}
+
+		$goal = $this->repository->find( $goal_id );
+
+		if ( ! $goal ) {
+			return false;
+		}
+
+		$context = null !== $this->cart_integration
+			? $this->cart_integration->context( $cart )
+			: CartContext::from_cart( $cart );
+
+		$result = $this->engine->evaluate( $goal, $context );
+
+		if ( ! $result->eligible() || GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+			return false;
+		}
+
+		$reward = Reward::from_goal( $goal );
+
+		if ( Reward::TYPE_FREE_GIFT !== $reward->type()
+			|| $reward->is_gift_automatic()
+			|| ! $reward->is_gift_allowed( $product_id )
+			|| ! RewardSafety::gift_product_available( $product_id ) ) {
+			return false;
+		}
+
+		/** @var FreeGiftApplicator $applicator */
+		$applicator = $this->registry->applicator( Reward::TYPE_FREE_GIFT );
+
+		if ( ! $applicator->apply( $reward, RewardResult::available( $reward, $goal_id ), $cart, $goal_id, $product_id ) ) {
+			return false;
+		}
+
+		$applied = $this->session_get( self::SESSION_GIFTS );
+		$applied = is_array( $applied ) ? $applied : array();
+
+		// Normalize the legacy list form before writing the map form.
+		$applied_map = array();
+
+		foreach ( $applied as $key => $value ) {
+			if ( is_numeric( $key ) ) {
+				$applied_map[ (int) $value ] = null;
+			} else {
+				$applied_map[ (int) $key ] = (int) $value;
+			}
+		}
+
+		$applied_map[ $goal_id ] = $product_id;
+
+		$this->session_set( self::SESSION_GIFTS, $applied_map );
+
+		return true;
 	}
 
 	/**
@@ -605,8 +710,9 @@ final class RewardEngine {
 		$gifts = $this->session_get( self::SESSION_GIFTS );
 
 		if ( is_array( $gifts ) ) {
-			foreach ( $gifts as $goal_id ) {
-				$this->remove_gift_line( $cart, $goal_id );
+			foreach ( $gifts as $key => $value ) {
+				// Legacy list form: values are goal ids; map form: keys are.
+				$this->remove_gift_line( $cart, is_numeric( $key ) ? $value : $key );
 			}
 		}
 

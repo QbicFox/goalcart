@@ -1,10 +1,13 @@
+import { useEffect, useState } from 'react';
+import Autocomplete from '@mui/material/Autocomplete';
+import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import { __ } from '@wordpress/i18n';
 
-import type { GoalInput, GoalType } from '../../types';
-import { searchCategories, searchProducts } from '../../api/search';
+import { searchAttributes, searchCategories, searchProducts, searchTags } from '../../api/search';
+import type { GoalInput, GoalType, SearchAttribute } from '../../types';
 import EntityAutocomplete from './EntityAutocomplete';
 
 interface TargetFieldsProps {
@@ -31,6 +34,25 @@ const MODE_OPTIONS: Record<string, Array<{ value: string; label: string }>> = {
     { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
     { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
   ],
+  // Phase 32 (brand/tag/attribute conditions): the category family.
+  tag: [
+    { value: 'quantity', label: __('Quantity', 'goalcart') },
+    { value: 'subtotal', label: __('Subtotal (before discounts)', 'goalcart') },
+    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
+    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+  ],
+  attribute: [
+    { value: 'quantity', label: __('Quantity', 'goalcart') },
+    { value: 'subtotal', label: __('Subtotal (before discounts)', 'goalcart') },
+    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
+    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+  ],
+  brand: [
+    { value: 'quantity', label: __('Quantity', 'goalcart') },
+    { value: 'subtotal', label: __('Subtotal (before discounts)', 'goalcart') },
+    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
+    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+  ],
 };
 
 /** The units a goal type measures, for the target field suffix. */
@@ -50,8 +72,9 @@ function targetSuffix(type: GoalType, mode: string): string {
  * sees irrelevant controls:
  *
  * - amount / quantity / distinct_quantity / weight: a single target
- * - category / product: target + calculation basis + a picker for the
- *   scoped categories/products
+ * - category / product / tag / attribute / brand: target + calculation
+ *   basis + a picker for the scoped entities (Phase 32 adds tags,
+ *   attribute taxonomies and brands)
  * - composite: operator + children are edited in their own section
  */
 export default function TargetFields({ values, onValueChange }: TargetFieldsProps) {
@@ -129,6 +152,157 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
           />
         </Grid>
       )}
+
+      {type === 'tag' && (
+        <Grid item xs={12}>
+          <EntityAutocomplete
+            label={__('Tags', 'goalcart')}
+            value={values.tags}
+            onChange={(tags) => patch({ tags })}
+            search={searchTags}
+            helperText={__(
+              'Only products carrying any of these tags count toward the target.',
+              'goalcart'
+            )}
+          />
+        </Grid>
+      )}
+
+      {type === 'attribute' && (
+        <Grid item xs={12}>
+          <TaxonomyAutocomplete
+            label={__('Attributes', 'goalcart')}
+            value={values.attributes}
+            multiple
+            onChange={(attributes) => patch({ attributes })}
+            helperText={__(
+              'Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target.',
+              'goalcart'
+            )}
+          />
+        </Grid>
+      )}
+
+      {type === 'brand' && (
+        <Grid item xs={12} sm={8} lg={6}>
+          <TaxonomyAutocomplete
+            label={__('Brand attribute', 'goalcart')}
+            value={values.attributes.length > 0 ? [values.attributes[0]] : []}
+            multiple={false}
+            onChange={(attributes) => patch({ attributes })}
+            helperText={__(
+              'The product attribute that identifies the brand (typically pa_brand).',
+              'goalcart'
+            )}
+          />
+        </Grid>
+      )}
     </Grid>
+  );
+}
+
+interface TaxonomyAutocompleteProps {
+  label: string;
+  value: string[];
+  multiple?: boolean;
+  onChange: (value: string[]) => void;
+  helperText?: string;
+}
+
+/**
+ * A debounced picker for global attribute taxonomies (Phase 32). Works on
+ * taxonomy slugs (strings), backed by `/search/attributes`.
+ */
+function TaxonomyAutocomplete({
+  label,
+  value,
+  multiple = true,
+  onChange,
+  helperText,
+}: TaxonomyAutocompleteProps) {
+  const [input, setInput] = useState('');
+  const [options, setOptions] = useState<SearchAttribute[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    let alive = true;
+    setLoading(true);
+
+    const timer = window.setTimeout(() => {
+      searchAttributes({ q: input, per_page: 50 })
+        .then((items) => {
+          if (alive) {
+            setOptions(items);
+          }
+        })
+        .catch(() => undefined)
+        .finally(() => {
+          if (alive) {
+            setLoading(false);
+          }
+        });
+    }, 300);
+
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
+  }, [input, open]);
+
+  // Keep saved taxonomies visible as chips even when the attribute was
+  // deleted (label falls back to the raw slug).
+  const selected = value.map((slug) => ({
+    taxonomy: slug,
+    name: options.find((option) => option.taxonomy === slug)?.name ?? slug,
+  }));
+
+  return (
+    <Autocomplete<{ taxonomy: string; name: string }, boolean, false, false>
+      multiple={multiple}
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => {
+        setOpen(false);
+        setInput('');
+      }}
+      value={multiple ? selected : (selected[0] ?? null)}
+      options={options}
+      loading={loading}
+      filterOptions={(options) => options}
+      isOptionEqualToValue={(option, value) => option.taxonomy === value.taxonomy}
+      getOptionLabel={(option) => option.name}
+      onInputChange={(_event, value) => setInput(value)}
+      onChange={(_event, value) => {
+        if (multiple) {
+          onChange((value as Array<{ taxonomy: string }>).map((option) => option.taxonomy));
+        } else {
+          onChange(value ? [(value as { taxonomy: string }).taxonomy] : []);
+        }
+      }}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          placeholder={__('Search attributes…', 'goalcart')}
+          helperText={helperText}
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? <CircularProgress size={18} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            },
+          }}
+        />
+      )}
+    />
   );
 }

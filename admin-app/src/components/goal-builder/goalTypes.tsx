@@ -1,10 +1,13 @@
 import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import CategoryIcon from '@mui/icons-material/Category';
 import Inventory2Icon from '@mui/icons-material/Inventory2';
+import LabelIcon from '@mui/icons-material/Label';
 import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import ScaleIcon from '@mui/icons-material/Scale';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import StyleIcon from '@mui/icons-material/Style';
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { __ } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
 
@@ -60,5 +63,23 @@ export const GOAL_TYPES: GoalTypeDefinition[] = [
     label: __('Composite', 'goalcart'),
     description: __('Combine child goals with AND/OR logic.', 'goalcart'),
     icon: <AccountTreeIcon />,
+  },
+  {
+    value: 'tag',
+    label: __('Tag', 'goalcart'),
+    description: __('Reach an amount or quantity across products with chosen tags.', 'goalcart'),
+    icon: <LabelIcon />,
+  },
+  {
+    value: 'attribute',
+    label: __('Attribute', 'goalcart'),
+    description: __('Reach an amount or quantity across products with chosen attributes.', 'goalcart'),
+    icon: <StyleIcon />,
+  },
+  {
+    value: 'brand',
+    label: __('Brand', 'goalcart'),
+    description: __('Reach an amount or quantity of one brand (a product attribute).', 'goalcart'),
+    icon: <WorkspacePremiumIcon />,
   },
 ];

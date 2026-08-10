@@ -8,11 +8,14 @@
 namespace GoalCart\Goals;
 
 use GoalCart\Goals\Evaluators\AmountEvaluator;
+use GoalCart\Goals\Evaluators\AttributeEvaluator;
+use GoalCart\Goals\Evaluators\BrandEvaluator;
 use GoalCart\Goals\Evaluators\CategoryEvaluator;
 use GoalCart\Goals\Evaluators\CompositeEvaluator;
 use GoalCart\Goals\Evaluators\DistinctQuantityEvaluator;
 use GoalCart\Goals\Evaluators\ProductEvaluator;
 use GoalCart\Goals\Evaluators\QuantityEvaluator;
+use GoalCart\Goals\Evaluators\TagEvaluator;
 use GoalCart\Goals\Evaluators\WeightEvaluator;
 
 defined( 'ABSPATH' ) || exit;
@@ -40,6 +43,11 @@ class GoalEvaluatorRegistry {
 			Goal::TYPE_PRODUCT           => ProductEvaluator::class,
 			Goal::TYPE_WEIGHT            => WeightEvaluator::class,
 			Goal::TYPE_COMPOSITE         => CompositeEvaluator::class,
+			// Phase 32 (brand/tag/attribute conditions) — the category
+			// family extended to tags, attribute taxonomies and brands.
+			Goal::TYPE_TAG               => TagEvaluator::class,
+			Goal::TYPE_ATTRIBUTE         => AttributeEvaluator::class,
+			Goal::TYPE_BRAND             => BrandEvaluator::class,
 		);
 	}
 

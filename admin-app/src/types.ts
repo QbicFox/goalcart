@@ -51,7 +51,16 @@ export interface ApiEnvelope<T> {
 export type GoalStatus = 'active' | 'inactive';
 
 export type GoalType =
-  'amount' | 'quantity' | 'distinct_quantity' | 'category' | 'product' | 'weight' | 'composite';
+  'amount'
+  | 'quantity'
+  | 'distinct_quantity'
+  | 'category'
+  | 'product'
+  | 'weight'
+  | 'composite'
+  | 'tag'
+  | 'attribute'
+  | 'brand';
 
 export type RewardType =
   'free_shipping' | 'percent_discount' | 'fixed_discount' | 'free_gift' | 'coupon' | null;
@@ -66,7 +75,9 @@ export interface RewardMetaInput {
   shipping_zone_ids?: number[];
   shipping_method_ids?: string[];
   gift_product_id?: number;
-  gift_add_mode?: 'automatic' | 'optional';
+  /** Phase 32 (free gift selection): candidate gifts for 'choose' mode. */
+  gift_products?: number[];
+  gift_add_mode?: 'automatic' | 'optional' | 'choose';
   coupon_code?: string;
   coupon_generate?: boolean;
   coupon_discount_type?: 'percent' | 'fixed_cart';
@@ -146,6 +157,8 @@ export interface ProgressCampaign {
   name: string;
   template: string;
   settings: TemplateSettingsValue;
+  /** Phase 32 (countdown): the latest milestone deadline (ISO local). */
+  countdown_end?: string;
 }
 
 /** A composite child config — a Goal::from_array() payload (Phase 4). */
@@ -155,12 +168,16 @@ export interface GoalChildInput {
   calculation_mode: string;
   categories: number[];
   products: number[];
+  /** Phase 32: tag / attribute / brand child scopes. */
+  tags?: number[];
+  attributes?: string[];
 }
 
 /**
  * The payload accepted by `POST /goals` and `PUT /goals/{id}` (Phase 9
  * builder form model — mirrors the Goal REST payload without the
- * server-managed id/timestamps).
+ * server-managed id/timestamps). Phase 32 adds the tag/attribute/brand
+ * scopes and the customer/order/cart/shipping condition keys.
  */
 export interface GoalInput {
   name: string;
@@ -172,6 +189,20 @@ export interface GoalInput {
   categories: number[];
   products: number[];
   excluded_products: number[];
+  tags: number[];
+  attributes: string[];
+  customer_roles: string[];
+  customer_state: Array<'guest' | 'logged_in'>;
+  first_order: boolean;
+  vip: boolean;
+  vip_min_spend: number;
+  vip_min_orders: number;
+  shipping_zones: number[];
+  cart_coupons: string[];
+  cart_min_items: number;
+  schedule_days: number[];
+  schedule_start_time: string;
+  schedule_end_time: string;
   operator: 'and' | 'or';
   children: GoalChildInput[];
   reward_type: RewardType;
@@ -188,7 +219,8 @@ export interface GoalInput {
 
 /**
  * A goal as served by the Phase 7 REST API (`GET /goalcart/v1/goals`).
- * Mirrors the Goal model's payload shape 1:1.
+ * Mirrors the Goal model's payload shape 1:1 (Phase 32 condition keys
+ * included).
  */
 export interface Goal {
   id: number;
@@ -201,6 +233,20 @@ export interface Goal {
   categories: number[];
   products: number[];
   excluded_products: number[];
+  tags: number[];
+  attributes: string[];
+  customer_roles: string[];
+  customer_state: Array<'guest' | 'logged_in'>;
+  first_order: boolean;
+  vip: boolean;
+  vip_min_spend: number;
+  vip_min_orders: number;
+  shipping_zones: number[];
+  cart_coupons: string[];
+  cart_min_items: number;
+  schedule_days: number[];
+  schedule_start_time: string;
+  schedule_end_time: string;
   operator: 'and' | 'or';
   children: Array<Record<string, unknown>>;
   reward_type: RewardType;
@@ -230,6 +276,9 @@ export interface ProgressReward {
   value: number | null;
   max_value: number | null;
   meta: RewardMetaInput;
+  /** Phase 32 (free gift selection): catalog-safe gift list + chosen flag. */
+  gift?: Array<{ id: number; name: string; image: string; price_html: string }>;
+  gift_chosen?: boolean;
 }
 
 /** A suggested product in the progress payload (Phase 14). */
@@ -272,6 +321,8 @@ export interface ProgressGoal {
   reward_state: 'not_applicable' | 'locked' | 'unlocked';
   eligible: boolean;
   reason: string;
+  /** Phase 32 (countdown): the goal's deadline (ISO local, '' = none). */
+  countdown_end?: string;
   /**
    * Phase 26 conflict resolution: whether this goal won its conflict and
    * may grant its reward, plus the machine-readable reason when suppressed
@@ -325,6 +376,27 @@ export interface SearchCoupon {
   code: string;
   discount_type: string;
   amount: number | null;
+}
+
+/** Search endpoint result item (`GET /search/tags`). */
+export interface SearchTag {
+  id: number;
+  name: string;
+  slug: string;
+  count: number;
+}
+
+/** Search endpoint result item (`GET /search/attributes`). */
+export interface SearchAttribute {
+  taxonomy: string;
+  name: string;
+  label: string;
+}
+
+/** Search endpoint result item (`GET /search/zones`). */
+export interface SearchZone {
+  id: number;
+  name: string;
 }
 
 /** A milestone inside a campaign (Phase 10 payload shape). */
@@ -479,7 +551,8 @@ export interface GoalCartSettings {
   conflict_resolution: ConflictResolution;
   calculation_mode: CalculationMode;
 
-  // Frontend (P18-T02).
+  // Frontend (P18-T02). Phase 32 adds the countdown/celebration toggles
+  // and the advanced sticky-bar surface.
   frontend_template: FrontendTemplate;
   frontend_animation: boolean;
   frontend_locations: FrontendLocation[];
@@ -492,6 +565,16 @@ export interface GoalCartSettings {
   frontend_radius: number;
   frontend_css_class: string;
   frontend_custom_css: string;
+  frontend_countdown: boolean;
+  frontend_celebrate: boolean;
+
+  // Phase 32 (advanced sticky bar).
+  sticky_position: 'bottom' | 'top';
+  sticky_behavior: 'dismissible' | 'auto_hide';
+  sticky_delay: number;
+  sticky_countdown: boolean;
+  sticky_suggestions: boolean;
+  sticky_display: 'compact' | 'full';
 
   // Pluggable template engine (Phase 12 → engine): per-scope default
   // template ids, per-template default appearance and schema versions.
@@ -510,6 +593,8 @@ export interface GoalCartSettings {
   performance_caching: boolean;
   analytics_enabled: boolean;
   performance_suggestions: boolean;
+  /** Phase 32 (advanced upsell ranking): balanced | price | popularity. */
+  suggestions_ranking: 'balanced' | 'price' | 'popularity';
 
   // Advanced (P18-T05).
   debug_mode: boolean;
@@ -530,4 +615,6 @@ export interface SettingsMeta {
   hooks?: DeveloperHook[];
   /** Absolute path of the debug log file (present when logging is on). */
   log_path?: string;
+  /** Site roles (slug → display name) for the Phase 32 role conditions. */
+  roles?: Record<string, string>;
 }

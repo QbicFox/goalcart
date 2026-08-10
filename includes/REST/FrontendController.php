@@ -9,6 +9,7 @@ namespace GoalCart\REST;
 
 use GoalCart\Analytics\Tracker;
 use GoalCart\Cart\CartIntegration;
+use GoalCart\REST\GiftController;
 use GoalCart\Goals\CartContext;
 use GoalCart\Goals\ConflictResolver;
 use GoalCart\Goals\Goal;
@@ -17,6 +18,7 @@ use GoalCart\Goals\GoalRepository;
 use GoalCart\Goals\GoalResult;
 use GoalCart\Goals\MessageEngine;
 use GoalCart\Hooks\HookManager;
+use GoalCart\Rewards\Reward;
 use GoalCart\Rewards\RewardEngine;
 use GoalCart\Rewards\RewardResult;
 use GoalCart\Settings\Settings;
@@ -218,12 +220,13 @@ class FrontendController extends BaseController {
 			$cached = get_transient( $cache_key );
 
 			if ( is_array( $cached ) ) {
-				// The cached payload never stores the tracking nonce (the
-				// write path below strips it), so re-inject a fresh one here
-				// — a cached payload can never serve a stale or another
-				// user's nonce.
+				// The cached payload never stores the session-bound nonces
+				// (the write path below strips them), so re-inject fresh
+				// ones here — a cached payload can never serve a stale or
+				// another user's nonce.
 				if ( isset( $cached['data'] ) && is_array( $cached['data'] ) ) {
 					$cached['data']['tracking_nonce'] = $this->tracking_nonce();
+					$cached['data']['gift_nonce']     = $this->gift_nonce();
 				}
 
 				$cached_response = rest_ensure_response( $cached );
@@ -270,6 +273,11 @@ class FrontendController extends BaseController {
 				// poll instead of producing a stream of 403s. See
 				// tracking_nonce().
 				'tracking_nonce' => $this->tracking_nonce(),
+				// Phase 32 (free gift selection): a freshly minted gift nonce
+				// rides on every progress response so the storefront JS can
+				// adopt it before claiming a gift — a long-lived cart page
+				// never outlives its gift nonce window.
+				'gift_nonce'     => $this->gift_nonce(),
 			),
 			array(
 				'total_goals' => count( $items ),
@@ -277,12 +285,12 @@ class FrontendController extends BaseController {
 		);
 
 		if ( $caching ) {
-			// Cache the envelope WITHOUT the tracking nonce: the nonce is
-			// regenerated fresh on every read (see the cache-hit branch
-			// above), so a cached payload can never serve a stale or
-			// another user's nonce.
+			// Cache the envelope WITHOUT the session-bound nonces (tracking
+			// + gift): they are regenerated fresh on every read (see the
+			// cache-hit branch above), so a cached payload can never serve a
+			// stale or another user's nonce.
 			$cache_payload = $response->get_data();
-			unset( $cache_payload['data']['tracking_nonce'] );
+			unset( $cache_payload['data']['tracking_nonce'], $cache_payload['data']['gift_nonce'] );
 			set_transient( $cache_key, $cache_payload, self::PROGRESS_CACHE_TTL );
 		}
 
@@ -320,6 +328,29 @@ class FrontendController extends BaseController {
 		}
 
 		return wp_create_nonce( Tracker::TRACK_NONCE_ACTION );
+	}
+
+	/**
+	 * A fresh gift nonce for the storefront gift endpoint.
+	 *
+	 * Mirrors the tracking-nonce self-healing pattern: the gift nonce
+	 * baked into a cached page expires after its 12-hour tick, so every
+	 * progress poll mints a fresh one and frontend.js adopts it before
+	 * the shopper claims a gift. Gated on the master `enabled` toggle
+	 * (matching ProgressUI::frontend_config()).
+	 *
+	 * @return string
+	 */
+	protected function gift_nonce() {
+		if ( ! $this->settings->get( 'enabled', true ) ) {
+			return '';
+		}
+
+		if ( ! class_exists( GiftController::class ) ) {
+			return '';
+		}
+
+		return wp_create_nonce( GiftController::GIFT_NONCE_ACTION );
 	}
 
 	/**
@@ -554,7 +585,36 @@ class FrontendController extends BaseController {
 			'eligible'     => $result->eligible(),
 			'reason'       => $result->reason(),
 			'conflict'     => $conflict,
+			// Phase 32 (countdown): the goal's deadline as a local-time ISO
+			// string ('' when the goal has no end time). The storefront JS
+			// renders a live countdown chip from it.
+			'countdown_end' => $this->countdown_end( $goal ),
 		);
+	}
+
+	/**
+	 * The goal's deadline for the storefront countdown (Phase 32).
+	 *
+	 * Only an end time in the future is worth counting down to; past and
+	 * empty values render no chip. The stored site-local datetime is
+	 * emitted as a local-time ISO string ('2026-08-07T14:30:00') so the
+	 * JS Date parsing matches the site clock.
+	 *
+	 * @param Goal $goal Goal.
+	 * @return string
+	 */
+	protected function countdown_end( Goal $goal ) {
+		$ends_at = $goal->ends_at();
+
+		if ( empty( $ends_at ) || ! (bool) $this->settings->get( 'frontend_countdown', true ) ) {
+			return '';
+		}
+
+		if ( $ends_at < current_time( 'mysql' ) ) {
+			return '';
+		}
+
+		return str_replace( ' ', 'T', (string) $ends_at );
 	}
 
 	/**
@@ -641,6 +701,27 @@ class FrontendController extends BaseController {
 			);
 		}
 
+		// Phase 32 (countdown): a campaign group exposes the latest of its
+		// milestones' end times so the storefront can render one countdown
+		// per campaign.
+		foreach ( $goals as $goal ) {
+			if ( ! $goal->campaign_id() || ! isset( $groups[ $goal->campaign_id() ] ) ) {
+				continue;
+			}
+
+			$ends = $this->countdown_end( $goal );
+
+			if ( '' !== $ends ) {
+				$current = isset( $groups[ $goal->campaign_id() ]['countdown_end'] )
+					? (string) $groups[ $goal->campaign_id() ]['countdown_end']
+					: '';
+
+				if ( '' === $current || $ends > $current ) {
+					$groups[ $goal->campaign_id() ]['countdown_end'] = $ends;
+				}
+			}
+		}
+
 		return array_values( $groups );
 	}
 
@@ -676,10 +757,85 @@ class FrontendController extends BaseController {
 			'max_value' => $goal->reward_max_value(),
 		);
 
+		// Phase 32 (free gift selection): a choose-mode gift goal exposes
+		// the candidate gifts as catalog data (id/name/image/price — store
+		// products, no secrets) so the storefront picker can render; the
+		// gift_chosen flag reflects the live cart. Only rendered for the
+		// public payload — the admin preview gets the full meta anyway.
+		if ( $redact_meta && Reward::TYPE_FREE_GIFT === $goal->reward_type() ) {
+			$meta = $goal->reward_meta();
+
+			if ( isset( $meta['gift_add_mode'] ) && 'choose' === $meta['gift_add_mode'] ) {
+				$reward['gift']        = $this->gift_catalog( $meta );
+				$reward['gift_chosen'] = $this->gift_chosen_in_cart( $goal->id() );
+			}
+		}
+
 		if ( ! $redact_meta ) {
 			$reward['meta'] = $goal->reward_meta();
 		}
 
 		return $reward;
+	}
+
+	/**
+	 * The catalog-safe gift list for the storefront picker.
+	 *
+	 * @param array<string, mixed> $meta Reward meta.
+	 * @return array<int, array<string, mixed>>
+	 */
+	protected function gift_catalog( array $meta ) {
+		$ids = isset( $meta['gift_products'] ) && is_array( $meta['gift_products'] ) ? $meta['gift_products'] : array();
+		$ids = array_values( array_filter( array_map( 'intval', $ids ), function ( $id ) {
+			return $id > 0;
+		} ) );
+
+		$items = array();
+
+		if ( empty( $ids ) || ! function_exists( 'wc_get_product' ) ) {
+			return $items;
+		}
+
+		foreach ( $ids as $id ) {
+			$product = wc_get_product( $id );
+
+			if ( ! $product || 'publish' !== $product->get_status() ) {
+				continue;
+			}
+
+			$image_id = $product->get_image_id();
+			$price    = $product->get_price();
+
+			$items[] = array(
+				'id'         => (int) $product->get_id(),
+				'name'       => $product->get_name(),
+				'image'      => $image_id ? (string) wp_get_attachment_image_url( $image_id, 'woocommerce_thumbnail' ) : '',
+				'price_html' => '' !== $price && function_exists( 'wc_price' )
+					? html_entity_decode( wp_strip_all_tags( wc_price( (float) $price ) ), ENT_QUOTES, 'UTF-8' )
+					: '',
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Whether the live cart already carries a chosen gift for the goal.
+	 *
+	 * @param int $goal_id Goal id.
+	 * @return bool
+	 */
+	protected function gift_chosen_in_cart( $goal_id ) {
+		if ( ! function_exists( 'WC' ) || ! WC() || ! WC()->cart ) {
+			return false;
+		}
+
+		foreach ( WC()->cart->get_cart() as $item ) {
+			if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

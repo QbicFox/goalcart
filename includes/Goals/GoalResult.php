@@ -33,6 +33,11 @@ final class GoalResult {
 
 	/**
 	 * Eligibility reasons.
+	 *
+	 * Phase 32 (Advanced V2) adds the customer/order/cart/shipping
+	 * condition reasons: customer_conditions (roles / customer state),
+	 * first_order_only, vip_only, shipping_zone and cart_conditions
+	 * (required coupons / minimum items).
 	 */
 	const REASON_NONE              = '';
 	const REASON_GOAL_INACTIVE     = 'goal_inactive';
@@ -40,6 +45,11 @@ final class GoalResult {
 	const REASON_INVALID_TARGET    = 'invalid_target';
 	const REASON_NO_MATCHING_ITEMS = 'no_matching_items';
 	const REASON_UNKNOWN_TYPE      = 'unknown_type';
+	const REASON_CUSTOMER_CONDITIONS = 'customer_conditions';
+	const REASON_FIRST_ORDER_ONLY    = 'first_order_only';
+	const REASON_VIP_ONLY            = 'vip_only';
+	const REASON_SHIPPING_ZONE       = 'shipping_zone';
+	const REASON_CART_CONDITIONS     = 'cart_conditions';
 
 	/**
 	 * The goal that was evaluated.

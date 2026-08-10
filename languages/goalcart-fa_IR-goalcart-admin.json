@@ -1341,6 +1341,306 @@
             ],
             "Track color": [
                 "رنگ پس‌زمینه حلقه"
+            ],
+            "A start later than the end means “after start OR before end” (crosses midnight).": [
+                "شروع بعد از پایان یعنی «بعد از شروع یا قبل از پایان» (گذر از نیمهشب)."
+            ],
+            "A window that crosses midnight (e.g. 22:00–06:00) counts the hours after start and before end.": [
+                "بازهٔ عبورکننده از نیمهشب (مثلاً ۲۲:۰۰ تا ۰۶:۰۰) ساعات بعد از شروع و قبل از پایان را شامل میشود."
+            ],
+            "Allowed customer roles": [
+                "نقشهای مجاز مشتری"
+            ],
+            "Allowed shipping zones": [
+                "مناطق ارسال مجاز"
+            ],
+            "Appear delay (seconds)": [
+                "تأخیر نمایش (ثانیه)"
+            ],
+            "At least one of these coupon codes must be applied for the goal to count.": [
+                "برای محاسبهٔ هدف باید حداقل یکی از این کدهای تخفیف اعمال شده باشد."
+            ],
+            "Attribute": [
+                "ویژگی"
+            ],
+            "Attributes": [
+                "ویژگیها"
+            ],
+            "Auto-hide": [
+                "پنهانشدن خودکار"
+            ],
+            "Balanced": [
+                "متوازن"
+            ],
+            "Behavior": [
+                "رفتار"
+            ],
+            "Bottom": [
+                "پایین"
+            ],
+            "Brand": [
+                "برند"
+            ],
+            "Brand attribute": [
+                "ویژگی برند"
+            ],
+            "Cart state": [
+                "وضعیت سبد"
+            ],
+            "Celebration animation": [
+                "انیمیشن جشن"
+            ],
+            "Cheapest first": [
+                "ارزانترین اول"
+            ],
+            "Compact": [
+                "فشرده"
+            ],
+            "Compact shows only the progress; full adds the message and reward.": [
+                "حالت فشرده فقط پیشرفت را نشان میدهد؛ حالت کامل پیام و پاداش را نیز اضافه میکند."
+            ],
+            "Countdown in sticky bar": [
+                "شمارش معکوس در نوار چسبان"
+            ],
+            "Countdown timer": [
+                "تایمر شمارش معکوس"
+            ],
+            "Customer picks from a list": [
+                "مشتری از یک فهرست انتخاب میکند"
+            ],
+            "Customers": [
+                "مشتریان"
+            ],
+            "Daily from": [
+                "روزانه از"
+            ],
+            "Daily until": [
+                "روزانه تا"
+            ],
+            "Day window ends": [
+                "پایان بازهٔ روزانه"
+            ],
+            "Day window starts": [
+                "شروع بازهٔ روزانه"
+            ],
+            "Dismissible": [
+                "قابل بستن"
+            ],
+            "Dismissible bars hide via the close button; auto-hide bars collapse after a few seconds and reappear on scroll.": [
+                "نوارهای قابل بستن با دکمهٔ بستن پنهان میشوند؛ نوارهای پنهانشوندهٔ خودکار پس از چند ثانیه جمع میشوند و با اسکرول دوباره ظاهر میشوند."
+            ],
+            "Every day": [
+                "هر روز"
+            ],
+            "First order only": [
+                "فقط اولین سفارش"
+            ],
+            "Fri": [
+                "جمعه"
+            ],
+            "Friday": [
+                "جمعه"
+            ],
+            "Full": [
+                "کامل"
+            ],
+            "Gift products (customer picks one)": [
+                "محصولات هدیه (مشتری یکی را انتخاب میکند)"
+            ],
+            "Guests (not logged in)": [
+                "مهمانها (وارد نشدهاند)"
+            ],
+            "How long after page load before the bar appears.": [
+                "چند ثانیه پس از بارگذاری صفحه نوار ظاهر شود."
+            ],
+            "How suggested products are ordered (Phase 32 advanced upsell ranking).": [
+                "نحوهٔ مرتبسازی محصولات پیشنهادی (رتبهبندی فروش پیشرفتهٔ فاز ۳۲)."
+            ],
+            "Layout": [
+                "چیدمان"
+            ],
+            "Leave both unchecked to allow everyone.": [
+                "برای اجازه به همه، هر دو را خالی بگذارید."
+            ],
+            "Leave empty to allow every role. Guests never match a role restriction.": [
+                "برای اجازه به همهٔ نقشها خالی بگذارید. مهمانها هرگز با محدودیت نقش مطابقت ندارند."
+            ],
+            "List the gap-closing product suggestions in the bar.": [
+                "محصولات پیشنهادیِ پرکنندهٔ فاصله را در نوار فهرست کنید."
+            ],
+            "Logged-in customers": [
+                "مشتریان واردشده"
+            ],
+            "Logged-in customers whose lifetime spend and order count meet the thresholds below.": [
+                "مشتریان واردشده که مجموع خرید و تعداد سفارش آنها آستانههای زیر را برآورده میکند."
+            ],
+            "Minimum completed orders": [
+                "حداقل سفارشهای تکمیلشده"
+            ],
+            "Minimum items in cart": [
+                "حداقل اقلام در سبد"
+            ],
+            "Minimum lifetime spend": [
+                "حداقل مجموع خرید"
+            ],
+            "Mon": [
+                "دوشنبه"
+            ],
+            "Monday": [
+                "دوشنبه"
+            ],
+            "Most popular first": [
+                "محبوبترین اول"
+            ],
+            "Only products carrying any of these tags count toward the goal. Leave empty to count every product.": [
+                "فقط محصولاتی که هر یک از این برچسبها را دارند در هدف محاسبه میشوند. برای شمارش همهٔ محصولات خالی بگذارید."
+            ],
+            "Only products carrying any of these tags count toward the target.": [
+                "فقط محصولاتی که هر یک از این برچسبها را دارند در هدف محاسبه میشوند."
+            ],
+            "Only shoppers with no completed orders see this goal. Guests always qualify.": [
+                "فقط خریدارانی که سفارش تکمیلشده ندارند این هدف را میبینند. مهمانها همیشه واجد شرایط هستند."
+            ],
+            "Optional Phase 32 rules: run the campaign only on selected weekdays and\/or inside a daily time window. Goals inherit these rules unless they pin their own.": [
+                "قوانین اختیاری فاز ۳۲: کمپین را فقط در روزهای انتخابشده و\/یا در یک بازهٔ زمانی روزانه اجرا کنید. اهداف این قوانین را به ارث میبرند مگر اینکه قوانین خودشان را داشته باشند."
+            ],
+            "Optional start of the daily window.": [
+                "شروع اختیاری بازهٔ روزانه."
+            ],
+            "Pick one day to restrict; empty runs every day.": [
+                "یک روز برای محدودیت انتخاب کنید؛ خالی یعنی هر روز."
+            ],
+            "Play a confetti burst when a goal is reached (Phase 32).": [
+                "هنگام رسیدن به هدف، کاغذرنگی بپاشید (فاز ۳۲)."
+            ],
+            "Position": [
+                "موقعیت"
+            ],
+            "Processing + completed orders.": [
+                "سفارشهای در حال پردازش + تکمیلشده."
+            ],
+            "Product tags": [
+                "برچسبهای محصول"
+            ],
+            "Recurring schedule": [
+                "زمانبندی تکراری"
+            ],
+            "Repeat on days (optional)": [
+                "تکرار در روزها (اختیاری)"
+            ],
+            "Required coupons in cart": [
+                "کدهای تخفیف الزامی در سبد"
+            ],
+            "Required product tags": [
+                "برچسبهای محصول الزامی"
+            ],
+            "Sat": [
+                "شنبه"
+            ],
+            "Saturday": [
+                "شنبه"
+            ],
+            "Shipping destination": [
+                "مقصد ارسال"
+            ],
+            "Show the countdown to the goal\/campaign deadline (Phase 32).": [
+                "شمارش معکوس تا مهلت هدف\/کمپین را نشان بده (فاز ۳۲)."
+            ],
+            "Show the deadline countdown inside the sticky bar.": [
+                "شمارش معکوس مهلت را داخل نوار چسبان نشان بده."
+            ],
+            "Sticky bar": [
+                "نوار چسبان"
+            ],
+            "Suggestion ranking": [
+                "رتبهبندی پیشنهادها"
+            ],
+            "Sun": [
+                "یکشنبه"
+            ],
+            "Sunday": [
+                "یکشنبه"
+            ],
+            "Tag": [
+                "برچسب"
+            ],
+            "Tags": [
+                "برچسبها"
+            ],
+            "The advanced sticky bottom\/top bar (Phase 32): position, behavior, countdown and suggestions.": [
+                "نوار چسبان پیشرفتهٔ پایین\/بالا (فاز ۳۲): موقعیت، رفتار، شمارش معکوس و پیشنهادها."
+            ],
+            "The cart must contain at least this many items.": [
+                "سبد باید حداقل این تعداد اقلام داشته باشد."
+            ],
+            "The customer chooses one free gift from this list once the goal is reached. The first product is the storefront default.": [
+                "مشتری پس از رسیدن به هدف، یک هدیهٔ رایگان از این فهرست انتخاب میکند. اولین محصول، پیشفرض فروشگاه است."
+            ],
+            "The goal only applies when the cart ships to one of these zones. Leave empty for every zone.": [
+                "هدف فقط زمانی اعمال میشود که سبد به یکی از این مناطق ارسال شود. برای همهٔ مناطق خالی بگذارید."
+            ],
+            "The goal only applies to shoppers with one of the selected roles.": [
+                "هدف فقط برای خریدارانی اعمال میشود که یکی از نقشهای انتخابشده را دارند."
+            ],
+            "The product attribute that identifies the brand (typically pa_brand).": [
+                "ویژگی محصولی که برند را مشخص میکند (معمولاً pa_brand)."
+            ],
+            "Total paid across all orders.": [
+                "مجموع پرداختی در همهٔ سفارشها."
+            ],
+            "Where the sticky bar docks.": [
+                "جایی که نوار چسبان قرار میگیرد."
+            ],
+            "The goal only applies when the cart ships to one of these zones.": [
+                "هدف فقط زمانی اعمال میشود که سبد به یکی از این مناطق ارسال شود."
+            ],
+            "Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target.": [
+                "محصولاتی که هر یک از این ویژگیها (مثلاً pa_color) را دارند در هدف محاسبه میشوند."
+            ],
+            "Reach an amount or quantity across products with chosen attributes.": [
+                "رسیدن به یک مبلغ یا تعداد در میان محصولاتی با ویژگیهای انتخابشده."
+            ],
+            "Reach an amount or quantity across products with chosen tags.": [
+                "رسیدن به یک مبلغ یا تعداد در میان محصولاتی با برچسبهای انتخابشده."
+            ],
+            "Reach an amount or quantity of one brand (a product attribute).": [
+                "رسیدن به یک مبلغ یا تعداد از یک برند (یک ویژگی محصول)."
+            ],
+            "Search attributes…": [
+                "جستجوی ویژگیها…"
+            ],
+            "Show a live countdown to the goal\/campaign deadline (Phase 32).": [
+                "نمایش شمارش معکوس زنده تا مهلت هدف\/کمپین (فاز ۳۲)."
+            ],
+            "Suggestions in sticky bar": [
+                "پیشنهادها در نوار چسبان"
+            ],
+            "Thu": [
+                "پنجشنبه"
+            ],
+            "Thursday": [
+                "پنجشنبه"
+            ],
+            "Top": [
+                "بالا"
+            ],
+            "Tue": [
+                "سهشنبه"
+            ],
+            "Tuesday": [
+                "سهشنبه"
+            ],
+            "VIP customers only": [
+                "فقط مشتریان ویژه (VIP)"
+            ],
+            "Wed": [
+                "چهارشنبه"
+            ],
+            "Wednesday": [
+                "چهارشنبه"
+            ],
+            "Weekdays": [
+                "روزهای هفته"
             ]
         }
     }

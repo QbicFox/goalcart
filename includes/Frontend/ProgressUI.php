@@ -388,6 +388,8 @@ final class ProgressUI {
 	 * and mirror the Appearance settings without another round-trip.
 	 * Phase 18 adds the currency display style and the mobile behavior so
 	 * the JS formats money and hides widgets per the Settings page.
+	 * Phase 32 adds the countdown + celebration toggles, the advanced
+	 * sticky-bar surface and the gift-selection endpoint/nonce.
 	 * Kept as its own method so tests can assert the shape without
 	 * capturing output.
 	 *
@@ -395,6 +397,7 @@ final class ProgressUI {
 	 */
 	public function frontend_config() {
 		$appearance = $this->appearance();
+		$position   = $this->settings->get( 'sticky_position', 'bottom' );
 
 		return array(
 			'endpoint'  => esc_url_raw( rest_url( 'goalcart/v1/progress' ) ),
@@ -412,6 +415,25 @@ final class ProgressUI {
 			'mobile'    => $this->mobile_behavior(),
 			'appearance' => $appearance,
 			'labels'    => $this->reward_labels(),
+			// Phase 32 (countdown + celebration).
+			'countdown' => (bool) apply_filters( 'goalcart_frontend_countdown', $this->settings->get( 'frontend_countdown', true ) ),
+			'celebrate' => (bool) apply_filters( 'goalcart_frontend_celebrate', $this->settings->get( 'frontend_celebrate', true ) ),
+			// Phase 32 (free gift selection): the storefront gift picker
+			// posts to this endpoint with this nonce; empty nonce = the
+			// plugin is disabled (picker hidden).
+			'giftEndpoint' => esc_url_raw( rest_url( 'goalcart/v1/gift' ) ),
+			'giftNonce'   => $this->settings->get( 'enabled', true )
+				? wp_create_nonce( \GoalCart\REST\GiftController::GIFT_NONCE_ACTION )
+				: '',
+			// Phase 32 (advanced sticky bar).
+			'sticky'    => array(
+				'position'    => 'top' === $position ? 'top' : 'bottom',
+				'behavior'    => 'auto_hide' === $this->settings->get( 'sticky_behavior', 'dismissible' ) ? 'auto_hide' : 'dismissible',
+				'delay'       => min( 120, max( 0, (int) $this->settings->get( 'sticky_delay', 0 ) ) ),
+				'countdown'   => (bool) $this->settings->get( 'sticky_countdown', false ),
+				'suggestions' => (bool) $this->settings->get( 'sticky_suggestions', false ),
+				'display'     => 'full' === $this->settings->get( 'sticky_display', 'compact' ) ? 'full' : 'compact',
+			),
 		);
 	}
 
@@ -618,8 +640,12 @@ final class ProgressUI {
 			return;
 		}
 
+		// Phase 32 (advanced sticky bar): the configured position renders as
+		// a class so the stylesheet can anchor the bar to the top edge.
+		$position = 'top' === $this->settings->get( 'sticky_position', 'bottom' ) ? ' goalcart-sticky--top' : '';
+
 		// phpcs:ignore WordPress.Security.EscapeOutput -- static markup.
-		echo '<div id="goalcart-sticky" class="goalcart-sticky" aria-hidden="true"></div>';
+		echo '<div id="goalcart-sticky" class="goalcart-sticky' . esc_attr( $position ) . '" aria-hidden="true"></div>';
 	}
 
 	/**
@@ -782,6 +808,8 @@ final class ProgressUI {
 	/**
 	 * Localized reward type labels for the JS reward status component.
 	 *
+	 * Phase 32 adds the countdown, gift-picker and sticky-bar strings.
+	 *
 	 * @return array<string, string>
 	 */
 	protected function reward_labels() {
@@ -791,6 +819,11 @@ final class ProgressUI {
 			'fixed_discount'   => __( 'Fixed discount', 'goalcart' ),
 			'free_gift'        => __( 'Free gift', 'goalcart' ),
 			'coupon'           => __( 'Coupon', 'goalcart' ),
+			'countdown'        => __( 'Ends in', 'goalcart' ),
+			'countdown_ended'  => __( 'Ended', 'goalcart' ),
+			'gift_picker'      => __( 'Pick your free gift', 'goalcart' ),
+			'gift_chosen'      => __( 'Gift added to your cart', 'goalcart' ),
+			'dismiss'          => __( 'Dismiss', 'goalcart' ),
 		);
 	}
 }

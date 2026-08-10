@@ -87,6 +87,41 @@ class SearchController extends BaseController {
 				'args'                => $this->search_args(),
 			)
 		);
+
+		// Phase 32 (brand/tag/attribute conditions): tag terms, global
+		// attribute taxonomies and shipping zones for the goal builder.
+		register_rest_route(
+			self::NAMESPACE,
+			'/search/tags',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'handle_tags' ),
+				'permission_callback' => $this->get_permission_callback(),
+				'args'                => $this->search_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/search/attributes',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'handle_attributes' ),
+				'permission_callback' => $this->get_permission_callback(),
+				'args'                => $this->search_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/search/zones',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'handle_zones' ),
+				'permission_callback' => $this->get_permission_callback(),
+				'args'                => $this->search_args(),
+			)
+		);
 	}
 
 	/**
@@ -272,6 +307,131 @@ class SearchController extends BaseController {
 		}
 
 		return $this->success( array( 'items' => $items ) );
+	}
+
+	/**
+	 * Search product tags (product_tag terms).
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function handle_tags( $request ) {
+		$q        = (string) $request->get_param( 'q' );
+		$per_page = min( self::MAX_RESULTS, max( 1, (int) $request->get_param( 'per_page' ) ) );
+		$ids      = $this->positive_ints( $request->get_param( 'ids' ) );
+
+		$args = array(
+			'taxonomy'   => 'product_tag',
+			'hide_empty' => false,
+			'number'     => $per_page,
+			'orderby'    => 'name',
+			'search'     => '' !== $q ? $q : '',
+		);
+
+		if ( ! empty( $ids ) ) {
+			$args['include'] = $ids;
+		}
+
+		$terms = get_terms( $args );
+
+		if ( is_wp_error( $terms ) ) {
+			$terms = array();
+		}
+
+		$items = array();
+
+		foreach ( (array) $terms as $term ) {
+			$items[] = array(
+				'id'    => (int) $term->term_id,
+				'name'  => $term->name,
+				'slug'  => $term->slug,
+				'count' => (int) $term->count,
+			);
+		}
+
+		return $this->success( array( 'items' => $items ) );
+	}
+
+	/**
+	 * List global product attribute taxonomies (e.g. pa_color, pa_brand).
+	 *
+	 * The goal builder stores the selected taxonomy slugs; brand goals
+	 * store their brand taxonomy the same way.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function handle_attributes( $request ) {
+		$q = strtolower( (string) $request->get_param( 'q' ) );
+
+		$taxonomies = function_exists( 'wc_get_attribute_taxonomies' )
+			? wc_get_attribute_taxonomies()
+			: array();
+
+		$items = array();
+
+		foreach ( (array) $taxonomies as $attribute ) {
+			$taxonomy = 'pa_' . $attribute->attribute_name;
+			$name     = $attribute->attribute_label ? $attribute->attribute_label : $attribute->attribute_name;
+
+			if ( '' !== $q && false === strpos( strtolower( $name ), $q ) && false === strpos( $taxonomy, $q ) ) {
+				continue;
+			}
+
+			$items[] = array(
+				'taxonomy' => $taxonomy,
+				'name'     => $name,
+				'label'    => $name,
+			);
+
+			if ( count( $items ) >= self::MAX_RESULTS ) {
+				break;
+			}
+		}
+
+		return $this->success( array( 'items' => $items ) );
+	}
+
+	/**
+	 * List shipping zones (phase 32 shipping-zone goals).
+	 *
+	 * Zone 0 ("locations not covered by your other zones") is listed with
+	 * its conventional id 0.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function handle_zones( $request ) {
+		$items = array();
+
+		$zone_0 = array(
+			'id'   => 0,
+			'name' => __( 'Locations not covered by your other zones', 'goalcart' ),
+		);
+
+		if ( class_exists( '\WC_Shipping_Zones' ) && method_exists( '\WC_Shipping_Zones', 'get_zones' ) ) {
+			foreach ( \WC_Shipping_Zones::get_zones() as $zone ) {
+				$items[] = array(
+					'id'   => (int) $zone['id'],
+					'name' => (string) $zone['zone_name'],
+				);
+			}
+		}
+
+		// Zone 0 sorts first (it is the fallback).
+		array_unshift( $items, $zone_0 );
+
+		$q = strtolower( (string) $request->get_param( 'q' ) );
+
+		if ( '' !== $q ) {
+			$items = array_values(
+				array_filter( $items, function ( $zone ) use ( $q ) {
+					return false !== strpos( strtolower( (string) $zone['name'] ), $q );
+				} )
+			);
+		}
+
+		return $this->success( array( 'items' => array_slice( $items, 0, self::MAX_RESULTS ) ) );
 	}
 
 	/**

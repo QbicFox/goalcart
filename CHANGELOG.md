@@ -9,6 +9,54 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
+- **Phase 32 — Advanced V2 features** — the full V2 surface:
+  - **Goal types** — `tag`, `attribute` and `brand` goals (amount or
+    quantity restricted to products carrying the configured product tags,
+    global attribute taxonomies or the brand attribute), evaluated by new
+    `TagEvaluator` / `AttributeEvaluator` / `BrandEvaluator` against
+    per-item tags and attribute taxonomies preloaded by `CartIntegration`
+    in the same batched way as categories; the admin Goal Builder gained
+    the three types with taxonomy/tag pickers.
+  - **Advanced conditions** — `customer_roles`, `customer_state`
+    (guest / logged-in), `first_order`, `vip` (+ `vip_min_spend` /
+    `vip_min_orders`), `shipping_zones`, `cart_coupons` and
+    `cart_min_items` gate goals through
+    `GoalEngine::conditions_reason()`, with new GoalResult reasons
+    (`customer_conditions`, `first_order_only`, `vip_only`,
+    `shipping_zone`, `cart_conditions`). The CartContext snapshot now
+    carries applied coupons and the matching shipping zone; first-order
+    and VIP use public WC customer-history helpers.
+  - **Advanced scheduling** — recurring weekdays + a daily time window
+    (midnight-crossing supported) on goals, and campaign-level rules in
+    `display_rules` that milestones inherit; the Campaign Builder gained
+    a Recurring schedule section.
+  - **Free gift selection** — free-gift rewards support `choose` mode
+    with a `gift_products` list; the storefront renders a gift picker
+    that claims the chosen product via the new public
+    `POST /goalcart/v1/gift` endpoint (`GiftController`);
+    `RewardEngine` reconciles the chosen gift. The RewardFields UI gains
+    the multi-product picker.
+  - **Countdown** — goals and campaign groups ship `countdown_end`;
+    the storefront runs one global ticker for live, locale-aware
+    countdown chips, gated by `frontend_countdown` / `sticky_countdown`.
+  - **Campaign templates** — the second campaign-scoped template
+    `campaign_progress` (`CampaignProgressTemplate`, React renderer,
+    storefront `campaignProgress()`) renders the whole campaign as one
+    progress readout with a milestone counter.
+  - **Celebration animations** — a one-per-goal-per-session confetti
+    burst + card pulse on completion, gated by `frontend_celebrate`.
+  - **Advanced sticky bar** — position (bottom/top), behavior
+    (dismissible / auto-hide with scroll-direction tracking), appear
+    delay, countdown chip and top-suggestion link, driven by the new
+    `sticky_*` settings.
+  - **Advanced upsell ranking** — `suggestions_ranking`
+    (balanced | price | popularity) re-orders suggestions by price
+    proximity vs. sales/rating popularity.
+  - **Search endpoints** — `/search/tags`, `/search/attributes` and
+    `/search/zones` for the new pickers.
+  - **Tests & i18n** — new `tests/phase32-test.php` (54 checks) plus
+    extended fa_IR translations for every new admin string and a
+    regenerated POT/JED.
 - **Persian (fa_IR) translation of the admin dashboard** —
   `languages/goalcart-fa_IR.po` now translates all 408 strings
   referenced from `admin-app/src` (navigation, analytics KPIs, goal &

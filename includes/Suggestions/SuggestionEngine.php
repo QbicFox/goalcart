@@ -10,6 +10,7 @@ namespace GoalCart\Suggestions;
 use GoalCart\Goals\CartContext;
 use GoalCart\Goals\Goal;
 use GoalCart\Goals\GoalResult;
+use GoalCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -90,11 +91,36 @@ final class SuggestionEngine {
 	const SOURCE_BEST_SELLER     = 'best_seller';
 
 	/**
+	 * Ranking modes.
+	 */
+	const RANKING_BALANCED   = 'balanced';
+	const RANKING_PRICE      = 'price';
+	const RANKING_POPULARITY = 'popularity';
+
+	/**
 	 * Request-level product cache (id => WC_Product).
 	 *
 	 * @var array<int, \WC_Product>
 	 */
 	protected $loaded = array();
+
+	/**
+	 * Settings instance (Phase 32: the suggestions_ranking mode). Optional
+	 * so bare constructions (tests, headless contexts) keep the default
+	 * balanced scoring.
+	 *
+	 * @var Settings|null
+	 */
+	protected $settings;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param Settings|null $settings Settings instance.
+	 */
+	public function __construct( ?Settings $settings = null ) {
+		$this->settings = $settings;
+	}
 
 	/**
 	 * Suggest products that help reach the goal.
@@ -252,23 +278,61 @@ final class SuggestionEngine {
 			$score += 0.5;
 		}
 
-		// Price proximity to the remaining amount (money goals only — a
-		// quantity goal has no sensible price target).
+		// Phase 32 (advanced upsell ranking): the configured mode shapes how
+		// price proximity, popularity (total sales) and rating weight the
+		// final score. All three modes keep the manual/relevance/trust
+		// signals above; only the tail differs.
+		$ranking = $this->ranking_mode();
+
+		// Sales popularity + average rating (bounded, so one huge seller
+		// cannot dominate).
+		$sales  = min( 1.0, (float) $product->get_total_sales() / 50.0 );
+		$rating = method_exists( $product, 'get_average_rating' ) ? (float) $product->get_average_rating() / 5.0 : 0.0;
+
 		if ( $is_money && $remaining > 0 ) {
 			$price = (float) $product->get_price();
 
 			if ( $price > 0 ) {
 				$ratio = $price / $remaining;
+				$band  = $ratio >= self::PRICE_MIN_RATIO && $ratio <= self::PRICE_MAX_RATIO;
 
-				if ( $ratio >= self::PRICE_MIN_RATIO && $ratio <= self::PRICE_MAX_RATIO ) {
-					$score += 2.0;
-				} elseif ( $ratio < self::PRICE_MIN_RATIO ) {
-					$score += 0.75; // cheaper than ideal but still helps.
+				if ( self::RANKING_PRICE === $ranking ) {
+					// Pure price proximity: the gap-closer band dominates.
+					$score += $band ? 3.0 : ( $ratio < self::PRICE_MIN_RATIO ? 0.75 : 0.25 );
+				} elseif ( self::RANKING_POPULARITY === $ranking ) {
+					// Popularity first; a cheap filler still helps.
+					$score += $ratio < self::PRICE_MIN_RATIO ? 0.75 : 0.0;
+				} else {
+					// Balanced (default): the original band scoring.
+					$score += $band ? 2.0 : ( $ratio < self::PRICE_MIN_RATIO ? 0.75 : 0.0 );
 				}
 			}
 		}
 
-		return $score;
+		if ( self::RANKING_PRICE === $ranking ) {
+			return $score;
+		}
+
+		if ( self::RANKING_POPULARITY === $ranking ) {
+			return $score + ( $sales * 2.0 ) + ( $rating * 0.5 );
+		}
+
+		return $score + ( $sales * 0.75 ) + ( $rating * 0.25 );
+	}
+
+	/**
+	 * The active ranking mode from the settings (normalized).
+	 *
+	 * @return string
+	 */
+	protected function ranking_mode() {
+		$mode = null !== $this->settings
+			? (string) $this->settings->get( 'suggestions_ranking', self::RANKING_BALANCED )
+			: self::RANKING_BALANCED;
+
+		return in_array( $mode, array( self::RANKING_BALANCED, self::RANKING_PRICE, self::RANKING_POPULARITY ), true )
+			? $mode
+			: self::RANKING_BALANCED;
 	}
 
 	/**

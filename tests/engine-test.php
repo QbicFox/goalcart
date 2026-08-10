@@ -537,8 +537,8 @@ check( 'unknown type reason', GoalResult::REASON_UNKNOWN_TYPE === $r->reason() )
 $types = $engine->registry()->types();
 sort( $types );
 check(
-    'registry exposes all 7 types',
-    array( 'amount', 'category', 'composite', 'distinct_quantity', 'product', 'quantity', 'weight' ) === $types
+    'registry exposes all 10 types',
+    array( 'amount', 'attribute', 'brand', 'category', 'composite', 'distinct_quantity', 'product', 'quantity', 'tag', 'weight' ) === $types
 );
 
 // ---------------------------------------------------------------------------

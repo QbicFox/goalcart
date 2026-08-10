@@ -131,6 +131,9 @@ class SettingsController extends BaseController {
 			// Phase 18 (Advanced → developer hooks): the reference list of
 			// public goalcart_* hooks, rendered by the Settings page.
 			'hooks' => HookManager::documented_hooks(),
+			// Phase 32 (customer-role conditions): the editable role list
+			// for the goal builder's role picker.
+			'roles' => $this->role_options(),
 		);
 
 		if ( $this->settings->get( 'logging_enabled', false ) ) {
@@ -270,6 +273,15 @@ class SettingsController extends BaseController {
 			'frontend_radius'       => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 40 ),
 			'frontend_css_class'    => array( 'type' => 'string' ),
 			'frontend_custom_css'   => array( 'type' => 'string' ),
+			// Phase 32 (countdown + celebration + advanced sticky bar).
+			'frontend_countdown'    => $bool,
+			'frontend_celebrate'    => $bool,
+			'sticky_position'       => array( 'type' => 'string', 'enum' => array( 'bottom', 'top' ) ),
+			'sticky_behavior'       => array( 'type' => 'string', 'enum' => array( 'dismissible', 'auto_hide' ) ),
+			'sticky_delay'          => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 120 ),
+			'sticky_countdown'      => $bool,
+			'sticky_suggestions'    => $bool,
+			'sticky_display'        => array( 'type' => 'string', 'enum' => array( 'compact', 'full' ) ),
 
 			// Goal Calculation (P18-T03).
 			'calculation_include_tax'      => $bool,
@@ -282,6 +294,11 @@ class SettingsController extends BaseController {
 			'performance_caching'     => $bool,
 			'analytics_enabled'       => $bool,
 			'performance_suggestions' => $bool,
+			// Phase 32 (advanced upsell ranking).
+			'suggestions_ranking'     => array(
+				'type' => 'string',
+				'enum' => array( 'balanced', 'price', 'popularity' ),
+			),
 
 			// Advanced (P18-T05).
 			'debug_mode'      => $bool,
@@ -395,6 +412,26 @@ class SettingsController extends BaseController {
 	}
 
 	/**
+	 * The editable role options (slug => translated name) for the builder.
+	 *
+	 * @return array<string, string>
+	 */
+	protected function role_options() {
+		if ( ! function_exists( 'wp_roles' ) ) {
+			return array();
+		}
+
+		$roles = wp_roles()->get_names();
+		$names = array();
+
+		foreach ( (array) $roles as $slug => $name ) {
+			$names[ (string) $slug ] = translate_user_role( $name );
+		}
+
+		return $names;
+	}
+
+	/**
 	 * Sanitize a single setting value by key.
 	 *
 	 * Runs after the REST schema validation; normalizes the value before it
@@ -414,6 +451,10 @@ class SettingsController extends BaseController {
 			case 'fullscreen_dashboard':
 			case 'enabled':
 			case 'frontend_animation':
+			case 'frontend_countdown':
+			case 'frontend_celebrate':
+			case 'sticky_countdown':
+			case 'sticky_suggestions':
 			case 'calculation_include_tax':
 			case 'calculation_include_discount':
 			case 'calculation_include_shipping':
@@ -441,6 +482,21 @@ class SettingsController extends BaseController {
 
 			case 'frontend_mobile':
 				return in_array( $value, array( 'show', 'hide' ), true ) ? $value : $defaults['frontend_mobile'];
+
+			case 'sticky_position':
+				return in_array( $value, array( 'bottom', 'top' ), true ) ? $value : $defaults['sticky_position'];
+
+			case 'sticky_behavior':
+				return in_array( $value, array( 'dismissible', 'auto_hide' ), true ) ? $value : $defaults['sticky_behavior'];
+
+			case 'sticky_delay':
+				return min( 120, max( 0, (int) $value ) );
+
+			case 'sticky_display':
+				return in_array( $value, array( 'compact', 'full' ), true ) ? $value : $defaults['sticky_display'];
+
+			case 'suggestions_ranking':
+				return in_array( $value, array( 'balanced', 'price', 'popularity' ), true ) ? $value : $defaults['suggestions_ranking'];
 
 			case 'frontend_locations':
 				$allowed  = array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' );

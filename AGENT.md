@@ -1822,21 +1822,102 @@ Confirm:
 
 # Phase 32 — Advanced V2 Features
 
+**Phase Weight:** 3%  
+**Phase Progress:** 100%  
+**Project Contribution:** 3.00%  
+
+```text
+Phase 32: ████████████████████ 100%
+```
+
 After MVP stability, implement:
 
-- free gift selection
-- countdown
-- campaign templates
-- advanced conditional rules
-- customer roles
-- first-order goals
-- VIP goals
-- shipping-zone goals
-- brand/tag/attribute conditions
-- scheduled campaigns
-- celebration animations
-- advanced sticky bar
-- advanced upsell ranking
+- free gift selection ✅
+- countdown ✅
+- campaign templates ✅
+- advanced conditional rules ✅
+- customer roles ✅
+- first-order goals ✅
+- VIP goals ✅
+- shipping-zone goals ✅
+- brand/tag/attribute conditions ✅
+- scheduled campaigns ✅
+- celebration animations ✅
+- advanced sticky bar ✅
+- advanced upsell ranking ✅
+
+## Objective
+
+Turn the MVP into a competitive V2: customer- and context-aware goals,
+shopper-chosen gifts, deadline urgency (countdowns), celebration
+moments, richer campaign presentation and smarter suggestions.
+
+## Implementation Notes
+
+**Free gift selection** — `Reward::gift_products()` + `GIFT_CHOOSE` mode;
+the storefront widget renders a gift picker (`goalcart-gift-picker`) that
+claims the chosen gift through the new public `POST
+/goalcart/v1/gift` endpoint (`GiftController`, nonce-guarded like
+`TrackController`); `RewardEngine` reconciles the chosen gift like the
+automatic one. Builder: RewardFields multi-product picker for choose mode.
+
+**Countdown** — goals and campaign groups ship a `countdown_end` ISO
+timestamp; the storefront runs a single global ticker that rewrites
+`[data-goalcart-end]` readouts every second (locale-aware digits). Gated
+by the `frontend_countdown` setting; the sticky bar has its own
+`sticky_countdown` toggle.
+
+**Campaign templates** — the second Campaign-scoped template
+`campaign_progress` (`CampaignProgressTemplate.php` + the React renderer
++ the storefront `campaignProgress()`), rendering the whole campaign as
+one progress readout with a milestone counter. Registered in
+`TemplateRegistry` alongside `milestone_chain`.
+
+**Advanced conditional rules / customer roles / customer state** — the
+Goal model now carries `customer_roles`, `customer_state`, `first_order`,
+`vip` (+ `vip_min_spend` / `vip_min_orders`), `shipping_zones`,
+`cart_coupons`, `cart_min_items`, and recurring `schedule_days` /
+`schedule_start_time` / `schedule_end_time`. `GoalEngine::conditions_reason()`
+checks them against the CartContext snapshot (user id, guest flag, applied
+coupons, shipping zone id, item count) with first-order/VIP customer
+history via public WC helpers. New GoalResult reasons:
+`customer_conditions`, `first_order_only`, `vip_only`, `shipping_zone`,
+`cart_conditions`.
+
+**Brand/tag/attribute conditions** — three new goal types
+(`tag` / `attribute` / `brand`) evaluated by `TagEvaluator`,
+`AttributeEvaluator` and `BrandEvaluator` against per-item tags and
+attribute taxonomies preloaded by `CartIntegration` in the same batched
+way as categories. Search endpoints: `/search/tags`, `/search/attributes`,
+`/search/zones`.
+
+**Scheduled campaigns** — campaigns fold recurring day/time rules from
+`display_rules.schedule_days / schedule_start_time / schedule_end_time`
+onto milestones that lack their own (`GoalRepository::fold_campaign()`),
+so one window schedules every milestone. The Campaign Builder gained a
+Recurring schedule section.
+
+**Celebration animations** — a one-per-goal-per-session confetti burst +
+card pulse (`celebrate()`), gated by the `frontend_celebrate` setting.
+
+**Advanced sticky bar** — position (bottom/top), behavior
+(dismissible/auto-hide with a scroll-direction tracker), appear delay,
+countdown chip and a top-suggestion link in the full layout — all driven
+by the `sticky_*` settings.
+
+**Advanced upsell ranking** — `SuggestionEngine` honors the
+`suggestions_ranking` setting (`balanced` | `price` | `popularity`),
+weighting price proximity vs. popularity (sales/rating) data.
+
+## Definition of Done
+
+- New goal types evaluate correctly with the Phase 32 conditions
+  (`tests/phase32-test.php`: 54 checks).
+- Free-gift choose mode is configured, persisted and reconciled.
+- Countdown / celebration / sticky / ranking surfaces are settings-driven.
+- Admin builder + settings UI expose every new control.
+- `php -l`, the full PHP test suite, `tsc`, ESLint and the production
+  build all pass; the fa_IR translation is extended and in sync.
 
 ---
 
@@ -2128,6 +2209,19 @@ This is the authoritative task-level progress register. Each task is represented
 | P31-T01 | 31 | Static Checks | 33.33% | [ ] | 0% | 0.00% |
 | P31-T02 | 31 | Runtime Checks | 33.33% | [ ] | 0% | 0.00% |
 | P31-T03 | 31 | Regression | 33.33% | [ ] | 0% | 0.00% |
+| P32-T01 | 32 | Free gift selection | 7.69% | [x] | 100% | 0.2308% |
+| P32-T02 | 32 | Countdown | 7.69% | [x] | 100% | 0.2308% |
+| P32-T03 | 32 | Campaign templates | 7.69% | [x] | 100% | 0.2308% |
+| P32-T04 | 32 | Advanced conditional rules | 7.69% | [x] | 100% | 0.2308% |
+| P32-T05 | 32 | Customer roles | 7.69% | [x] | 100% | 0.2308% |
+| P32-T06 | 32 | First-order goals | 7.69% | [x] | 100% | 0.2308% |
+| P32-T07 | 32 | VIP goals | 7.69% | [x] | 100% | 0.2308% |
+| P32-T08 | 32 | Shipping-zone goals | 7.69% | [x] | 100% | 0.2308% |
+| P32-T09 | 32 | Brand/tag/attribute conditions | 7.69% | [x] | 100% | 0.2308% |
+| P32-T10 | 32 | Scheduled campaigns | 7.69% | [x] | 100% | 0.2308% |
+| P32-T11 | 32 | Celebration animations | 7.69% | [x] | 100% | 0.2308% |
+| P32-T12 | 32 | Advanced sticky bar | 7.69% | [x] | 100% | 0.2308% |
+| P32-T13 | 32 | Advanced upsell ranking | 7.69% | [x] | 100% | 0.2308% |
 | P33-T01 | 33 | A/B Testing | 25.00% | [ ] | 0% | 0.00% |
 | P33-T02 | 33 | Revenue Attribution | 25.00% | [ ] | 0% | 0.00% |
 | P33-T03 | 33 | Smart Goal Recommendation | 25.00% | [ ] | 0% | 0.00% |
@@ -2195,11 +2289,11 @@ Use this compact dashboard during development:
 | 29 | 1% | 0% | 0.00% |
 | 30 | 2% | 0% | 0.00% |
 | 31 | 2% | 0% | 0.00% |
-| 32 | 3% | 0% | 0.00% |
+| 32 | 3% | 100% | 3.00% |
 | 33 | 3% | 0% | 0.00% |
 | 34 | 2% | 0% | 0.00% |
 | 35 | 1% | 0% | 0.00% |
-| **TOTAL** | **100%** | **79%** | **79.00%** |
+| **TOTAL** | **100%** | **82%** | **82.00%** |
 
 
 # Phase Completion Rule

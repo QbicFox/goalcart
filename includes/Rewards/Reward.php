@@ -44,9 +44,15 @@ final class Reward {
 
 	/**
 	 * Gift add modes.
+	 *
+	 * Phase 32 (free gift selection) adds 'choose': the shopper picks one
+	 * gift from the configured `gift_products` list through the storefront
+	 * widget picker (automatic and optional keep the single-gift
+	 * behavior).
 	 */
 	const GIFT_AUTOMATIC = 'automatic';
 	const GIFT_OPTIONAL  = 'optional';
+	const GIFT_CHOOSE    = 'choose';
 
 	/**
 	 * Coupon discount types (generated coupons).
@@ -143,14 +149,21 @@ final class Reward {
 	protected $shipping_method_ids;
 
 	/**
-	 * Gift product id for free-gift rewards.
+	 * Gift product id for free-gift rewards (automatic/optional modes).
 	 *
 	 * @var int
 	 */
 	protected $gift_product_id;
 
 	/**
-	 * automatic|optional — how the gift is added.
+	 * Candidate gift product ids for the choose mode (Phase 32).
+	 *
+	 * @var int[]
+	 */
+	protected $gift_products;
+
+	/**
+	 * automatic|optional|choose — how the gift is added.
 	 *
 	 * @var string
 	 */
@@ -194,6 +207,7 @@ final class Reward {
 		$this->shipping_zone_ids   = $this->ints( isset( $data['shipping_zone_ids'] ) ? $data['shipping_zone_ids'] : array() );
 		$this->shipping_method_ids = $this->strings( isset( $data['shipping_method_ids'] ) ? $data['shipping_method_ids'] : array() );
 		$this->gift_product_id     = isset( $data['gift_product_id'] ) ? (int) $data['gift_product_id'] : 0;
+		$this->gift_products       = $this->ints( isset( $data['gift_products'] ) ? $data['gift_products'] : array() );
 		$this->gift_add_mode       = isset( $data['gift_add_mode'] ) ? (string) $data['gift_add_mode'] : self::GIFT_AUTOMATIC;
 		$this->coupon_code         = isset( $data['coupon_code'] ) ? (string) $data['coupon_code'] : '';
 		$this->coupon_generate     = ! empty( $data['coupon_generate'] );
@@ -222,6 +236,7 @@ final class Reward {
 				'shipping_zone_ids'   => isset( $meta['shipping_zone_ids'] ) ? $meta['shipping_zone_ids'] : array(),
 				'shipping_method_ids' => isset( $meta['shipping_method_ids'] ) ? $meta['shipping_method_ids'] : array(),
 				'gift_product_id'     => isset( $meta['gift_product_id'] ) ? (int) $meta['gift_product_id'] : 0,
+				'gift_products'       => isset( $meta['gift_products'] ) ? $meta['gift_products'] : array(),
 				'gift_add_mode'       => isset( $meta['gift_add_mode'] ) ? (string) $meta['gift_add_mode'] : self::GIFT_AUTOMATIC,
 				'coupon_code'         => isset( $meta['coupon_code'] ) ? (string) $meta['coupon_code'] : '',
 				'coupon_generate'     => ! empty( $meta['coupon_generate'] ),
@@ -356,6 +371,34 @@ final class Reward {
 	}
 
 	/**
+	 * Candidate gift product ids (choose mode).
+	 *
+	 * @return int[]
+	 */
+	public function gift_products() {
+		return $this->gift_products;
+	}
+
+	/**
+	 * Whether a product id is a valid gift for this reward.
+	 *
+	 * Choose mode accepts any id in the gift list; automatic/optional mode
+	 * accepts the single configured gift product.
+	 *
+	 * @param int $product_id Product id.
+	 * @return bool
+	 */
+	public function is_gift_allowed( $product_id ) {
+		$product_id = (int) $product_id;
+
+		if ( $this->is_gift_choose() ) {
+			return in_array( $product_id, array_map( 'intval', $this->gift_products ), true );
+		}
+
+		return $product_id === (int) $this->gift_product_id && $product_id > 0;
+	}
+
+	/**
 	 * @return string
 	 */
 	public function gift_add_mode() {
@@ -367,6 +410,13 @@ final class Reward {
 	 */
 	public function is_gift_automatic() {
 		return self::GIFT_AUTOMATIC === $this->gift_add_mode;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function is_gift_choose() {
+		return self::GIFT_CHOOSE === $this->gift_add_mode;
 	}
 
 	/**
@@ -408,6 +458,7 @@ final class Reward {
 			'shipping_zone_ids'    => $this->shipping_zone_ids,
 			'shipping_method_ids'  => $this->shipping_method_ids,
 			'gift_product_id'      => $this->gift_product_id,
+			'gift_products'        => $this->gift_products,
 			'gift_add_mode'        => $this->gift_add_mode,
 			'coupon_code'          => $this->coupon_code,
 			'coupon_generate'      => $this->coupon_generate,

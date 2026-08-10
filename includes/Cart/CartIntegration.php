@@ -142,11 +142,14 @@ final class CartIntegration {
 		}
 
 		// Preload categories once per build (one batched query) and hand
-		// them to from_cart so no per-item term queries run. Phase 18: the
-		// Goal Calculation settings refine the snapshot (tax / discount /
-		// shipping / sale / virtual inclusion), unless the caller passed
-		// explicit overrides.
+		// them to from_cart so no per-item term queries run. Phase 32
+		// (brand/tag/attribute goals) preloads tags and attribute
+		// taxonomies the same way. Phase 18: the Goal Calculation settings
+		// refine the snapshot (tax / discount / shipping / sale / virtual
+		// inclusion), unless the caller passed explicit overrides.
 		$args['categories'] = $this->load_categories( $cart );
+		$args['tags']       = $this->load_tags( $cart );
+		$args['attributes'] = $this->load_attributes( $cart );
 		$args               = $this->calculation_args( $args );
 
 		$context = CartContext::from_cart( $cart, $args );
@@ -235,8 +238,8 @@ final class CartIntegration {
 	 *
 	 * The line totals are part of the key so a totals pass that updates line
 	 * values (coupon discounts) naturally changes the key and forces a
-	 * rebuild. The preloaded category map is excluded — it is derived from
-	 * the same line data.
+	 * rebuild. The preloaded category/tag/attribute maps are excluded — they
+	 * are derived from the same line data.
 	 *
 	 * @param \WC_Cart             $cart Live cart.
 	 * @param array<string, mixed> $args Context args.
@@ -256,7 +259,7 @@ final class CartIntegration {
 			);
 		}
 
-		unset( $args['categories'] );
+		unset( $args['categories'], $args['tags'], $args['attributes'] );
 
 		return md5( wp_json_encode( $lines ) . '|' . wp_json_encode( $args ) );
 	}
@@ -307,6 +310,118 @@ final class CartIntegration {
 			}
 
 			$map[ $object_id ][] = (int) $term->term_id;
+		}
+
+		return $map;
+	}
+
+	/**
+	 * Load product tag ids for every line in one batched query (Phase 32).
+	 *
+	 * Keyed by the canonical product id exactly like load_categories().
+	 *
+	 * @param \WC_Cart $cart Live cart.
+	 * @return array<int, int[]> product id => tag term ids.
+	 */
+	protected function load_tags( \WC_Cart $cart ) {
+		return $this->load_object_terms( $cart, 'product_tag', 'term_id' );
+	}
+
+	/**
+	 * Load the attribute taxonomies present on every line (Phase 32).
+	 *
+	 * Reads each product's attributes in one batched product load (no
+	 * per-item DB queries). Keyed by the canonical product id (the cart
+	 * item's product_id — the parent for variations, where WooCommerce
+	 * stores the attributes).
+	 *
+	 * @param \WC_Cart $cart Live cart.
+	 * @return array<int, string[]> product id => attribute taxonomy slugs.
+	 */
+	protected function load_attributes( \WC_Cart $cart ) {
+		$product_ids = array();
+
+		foreach ( $cart->get_cart() as $item ) {
+			$product_id = isset( $item['product_id'] ) ? (int) $item['product_id'] : 0;
+			$product_id = $product_id > 0 ? $product_id : ( isset( $item['variation_id'] ) ? (int) $item['variation_id'] : 0 );
+
+			if ( $product_id > 0 ) {
+				$product_ids[ $product_id ] = true;
+			}
+		}
+
+		$map = array();
+
+		if ( empty( $product_ids ) || ! function_exists( 'wc_get_product' ) ) {
+			return $map;
+		}
+
+		foreach ( array_keys( $product_ids ) as $product_id ) {
+			$product = wc_get_product( $product_id );
+
+			if ( ! $product ) {
+				continue;
+			}
+
+			$taxonomies = array();
+
+			foreach ( $product->get_attributes() as $attribute ) {
+				if ( $attribute instanceof \WC_Product_Attribute && $attribute->get_name() ) {
+					$taxonomies[] = sanitize_text_field( (string) $attribute->get_name() );
+				}
+			}
+
+			if ( ! empty( $taxonomies ) ) {
+				$map[ $product_id ] = $taxonomies;
+			}
+		}
+
+		return $map;
+	}
+
+	/**
+	 * Load object-term relations for a taxonomy in one batched query.
+	 *
+	 * @param \WC_Cart $cart     Live cart.
+	 * @param string   $taxonomy Taxonomy name.
+	 * @param string   $field    Term field to collect ('term_id' | 'slug').
+	 * @return array<int, array<int|string>> product id => term values.
+	 */
+	protected function load_object_terms( \WC_Cart $cart, $taxonomy, $field ) {
+		$product_ids = array();
+
+		foreach ( $cart->get_cart() as $item ) {
+			$product_id = isset( $item['product_id'] ) ? (int) $item['product_id'] : 0;
+			$product_id = $product_id > 0 ? $product_id : ( isset( $item['variation_id'] ) ? (int) $item['variation_id'] : 0 );
+
+			if ( $product_id > 0 ) {
+				$product_ids[ $product_id ] = true;
+			}
+		}
+
+		$map = array();
+
+		if ( empty( $product_ids ) ) {
+			return $map;
+		}
+
+		$terms = function_exists( 'wp_get_object_terms' )
+			? wp_get_object_terms( array_keys( $product_ids ), $taxonomy, array( 'fields' => 'all_with_object_id' ) )
+			: array();
+
+		if ( is_wp_error( $terms ) ) {
+			return $map;
+		}
+
+		foreach ( (array) $terms as $term ) {
+			$object_id = (int) $term->object_id;
+			$value     = 'slug' === $field ? $term->slug : $term->term_id;
+
+			if ( ! isset( $map[ $object_id ] ) ) {
+				$map[ $object_id ] = array();
+			}
+
+			$map[ $object_id ][] = $value;
 		}
 
 		return $map;

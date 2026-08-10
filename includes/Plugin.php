@@ -24,6 +24,7 @@ use GoalCart\Hooks\HookManager;
 use GoalCart\REST\AnalyticsController;
 use GoalCart\REST\CampaignsController;
 use GoalCart\REST\FrontendController;
+use GoalCart\REST\GiftController;
 use GoalCart\REST\GoalsController;
 use GoalCart\REST\PreviewController;
 use GoalCart\REST\SearchController;
@@ -175,6 +176,7 @@ final class Plugin {
 		// rest_api_init through the same HookManager.
 		$this->hooks()->register( $this->container->get( GoalsController::class ) );
 		$this->hooks()->register( $this->container->get( SettingsController::class ) );
+		$this->hooks()->register( $this->container->get( GiftController::class ) );
 		$this->hooks()->register( $this->container->get( SearchController::class ) );
 		$this->hooks()->register( $this->container->get( CampaignsController::class ) );
 		$this->hooks()->register( $this->container->get( FrontendController::class ) );
@@ -229,9 +231,10 @@ final class Plugin {
 
 		// Suggestion engine (Phase 14): product recommendations that close
 		// the goal gap — six sources, stock filter, relevance + price
-		// proximity ranking — consumed by the frontend REST layer.
-		$this->container->singleton( SuggestionEngine::class, function () {
-			return new SuggestionEngine();
+		// proximity ranking — consumed by the frontend REST layer. Phase 32
+		// (advanced upsell ranking) reads the suggestions_ranking mode.
+		$this->container->singleton( SuggestionEngine::class, function ( Container $container ) {
+			return new SuggestionEngine( $container->get( Settings::class ) );
 		} );
 
 		// Analytics (Phase 16): anonymous session, event recorder, and the
@@ -364,6 +367,13 @@ final class Plugin {
 		// limited — the storefront JS reports events through it.
 		$this->container->singleton( TrackController::class, function ( Container $container ) {
 			return new TrackController( $container->get( Tracker::class ) );
+		} );
+
+		// Public gift-selection endpoint (Phase 32): nonce-guarded, per-IP
+		// rate limited — the storefront gift picker claims a chosen free
+		// gift through the reward engine.
+		$this->container->singleton( GiftController::class, function ( Container $container ) {
+			return new GiftController( $container->get( RewardEngine::class ) );
 		} );
 
 		// Analytics dashboard endpoint (Phase 17): admin-only read of the

@@ -1,5 +1,12 @@
 import { apiFetch } from './client';
-import type { SearchCategory, SearchCoupon, SearchProduct } from '../types';
+import type {
+  SearchAttribute,
+  SearchCategory,
+  SearchCoupon,
+  SearchProduct,
+  SearchTag,
+  SearchZone,
+} from '../types';
 
 export interface SearchParams {
   q?: string;
@@ -46,5 +53,35 @@ export async function searchCategories(params: SearchParams = {}): Promise<Searc
 /** Search coupons via `GET /goalcart/v1/search/coupons`. */
 export async function searchCoupons(params: SearchParams = {}): Promise<SearchCoupon[]> {
   const data = await apiFetch<SearchList<SearchCoupon>>(`/search/coupons${buildQuery(params)}`);
+  return data.items;
+}
+
+/** Search product tags via `GET /goalcart/v1/search/tags` (Phase 32). */
+export async function searchTags(params: SearchParams = {}): Promise<SearchTag[]> {
+  const data = await apiFetch<SearchList<SearchTag>>(`/search/tags${buildQuery(params)}`);
+  return data.items;
+}
+
+/**
+ * List global attribute taxonomies via `GET /goalcart/v1/search/attributes`
+ * (Phase 32). `ids` is not applicable — the query uses `q` only.
+ */
+export async function searchAttributes(params: SearchParams = {}): Promise<SearchAttribute[]> {
+  const query = new URLSearchParams();
+
+  if (params.q) {
+    query.set('q', params.q);
+  }
+
+  const qs = query.toString();
+  const data = await apiFetch<SearchList<SearchAttribute>>(
+    `/search/attributes${qs ? `?${qs}` : ''}`
+  );
+  return data.items;
+}
+
+/** List shipping zones via `GET /goalcart/v1/search/zones` (Phase 32). */
+export async function searchZones(params: SearchParams = {}): Promise<SearchZone[]> {
+  const data = await apiFetch<SearchList<SearchZone>>(`/search/zones${buildQuery(params)}`);
   return data.items;
 }

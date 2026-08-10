@@ -1395,3 +1395,303 @@ msgstr "ضخامت خط (پیکسل)"
 #: includes/Templates/Goal/RingTemplate.php
 msgid "Track color"
 msgstr "رنگ پس‌زمینه حلقه"
+
+msgid "A start later than the end means “after start OR before end” (crosses midnight)."
+msgstr "شروع بعد از پایان یعنی «بعد از شروع یا قبل از پایان» (گذر از نیمهشب)."
+
+msgid "A window that crosses midnight (e.g. 22:00–06:00) counts the hours after start and before end."
+msgstr "بازهٔ عبورکننده از نیمهشب (مثلاً ۲۲:۰۰ تا ۰۶:۰۰) ساعات بعد از شروع و قبل از پایان را شامل میشود."
+
+msgid "Allowed customer roles"
+msgstr "نقشهای مجاز مشتری"
+
+msgid "Allowed shipping zones"
+msgstr "مناطق ارسال مجاز"
+
+msgid "Appear delay (seconds)"
+msgstr "تأخیر نمایش (ثانیه)"
+
+msgid "At least one of these coupon codes must be applied for the goal to count."
+msgstr "برای محاسبهٔ هدف باید حداقل یکی از این کدهای تخفیف اعمال شده باشد."
+
+msgid "Attribute"
+msgstr "ویژگی"
+
+msgid "Attributes"
+msgstr "ویژگیها"
+
+msgid "Auto-hide"
+msgstr "پنهانشدن خودکار"
+
+msgid "Balanced"
+msgstr "متوازن"
+
+msgid "Behavior"
+msgstr "رفتار"
+
+msgid "Bottom"
+msgstr "پایین"
+
+msgid "Brand"
+msgstr "برند"
+
+msgid "Brand attribute"
+msgstr "ویژگی برند"
+
+msgid "Cart state"
+msgstr "وضعیت سبد"
+
+msgid "Celebration animation"
+msgstr "انیمیشن جشن"
+
+msgid "Cheapest first"
+msgstr "ارزانترین اول"
+
+msgid "Compact"
+msgstr "فشرده"
+
+msgid "Compact shows only the progress; full adds the message and reward."
+msgstr "حالت فشرده فقط پیشرفت را نشان میدهد؛ حالت کامل پیام و پاداش را نیز اضافه میکند."
+
+msgid "Countdown in sticky bar"
+msgstr "شمارش معکوس در نوار چسبان"
+
+msgid "Countdown timer"
+msgstr "تایمر شمارش معکوس"
+
+msgid "Customer picks from a list"
+msgstr "مشتری از یک فهرست انتخاب میکند"
+
+msgid "Customers"
+msgstr "مشتریان"
+
+msgid "Daily from"
+msgstr "روزانه از"
+
+msgid "Daily until"
+msgstr "روزانه تا"
+
+msgid "Day window ends"
+msgstr "پایان بازهٔ روزانه"
+
+msgid "Day window starts"
+msgstr "شروع بازهٔ روزانه"
+
+msgid "Dismissible"
+msgstr "قابل بستن"
+
+msgid "Dismissible bars hide via the close button; auto-hide bars collapse after a few seconds and reappear on scroll."
+msgstr "نوارهای قابل بستن با دکمهٔ بستن پنهان میشوند؛ نوارهای پنهانشوندهٔ خودکار پس از چند ثانیه جمع میشوند و با اسکرول دوباره ظاهر میشوند."
+
+msgid "Every day"
+msgstr "هر روز"
+
+msgid "First order only"
+msgstr "فقط اولین سفارش"
+
+msgid "Fri"
+msgstr "جمعه"
+
+msgid "Friday"
+msgstr "جمعه"
+
+msgid "Full"
+msgstr "کامل"
+
+msgid "Gift products (customer picks one)"
+msgstr "محصولات هدیه (مشتری یکی را انتخاب میکند)"
+
+msgid "Guests (not logged in)"
+msgstr "مهمانها (وارد نشدهاند)"
+
+msgid "How long after page load before the bar appears."
+msgstr "چند ثانیه پس از بارگذاری صفحه نوار ظاهر شود."
+
+msgid "How suggested products are ordered (Phase 32 advanced upsell ranking)."
+msgstr "نحوهٔ مرتبسازی محصولات پیشنهادی (رتبهبندی فروش پیشرفتهٔ فاز ۳۲)."
+
+msgid "Layout"
+msgstr "چیدمان"
+
+msgid "Leave both unchecked to allow everyone."
+msgstr "برای اجازه به همه، هر دو را خالی بگذارید."
+
+msgid "Leave empty to allow every role. Guests never match a role restriction."
+msgstr "برای اجازه به همهٔ نقشها خالی بگذارید. مهمانها هرگز با محدودیت نقش مطابقت ندارند."
+
+msgid "List the gap-closing product suggestions in the bar."
+msgstr "محصولات پیشنهادیِ پرکنندهٔ فاصله را در نوار فهرست کنید."
+
+msgid "Logged-in customers"
+msgstr "مشتریان واردشده"
+
+msgid "Logged-in customers whose lifetime spend and order count meet the thresholds below."
+msgstr "مشتریان واردشده که مجموع خرید و تعداد سفارش آنها آستانههای زیر را برآورده میکند."
+
+msgid "Minimum completed orders"
+msgstr "حداقل سفارشهای تکمیلشده"
+
+msgid "Minimum items in cart"
+msgstr "حداقل اقلام در سبد"
+
+msgid "Minimum lifetime spend"
+msgstr "حداقل مجموع خرید"
+
+msgid "Mon"
+msgstr "دوشنبه"
+
+msgid "Monday"
+msgstr "دوشنبه"
+
+msgid "Most popular first"
+msgstr "محبوبترین اول"
+
+msgid "Only products carrying any of these tags count toward the goal. Leave empty to count every product."
+msgstr "فقط محصولاتی که هر یک از این برچسبها را دارند در هدف محاسبه میشوند. برای شمارش همهٔ محصولات خالی بگذارید."
+
+msgid "Only products carrying any of these tags count toward the target."
+msgstr "فقط محصولاتی که هر یک از این برچسبها را دارند در هدف محاسبه میشوند."
+
+msgid "Only shoppers with no completed orders see this goal. Guests always qualify."
+msgstr "فقط خریدارانی که سفارش تکمیلشده ندارند این هدف را میبینند. مهمانها همیشه واجد شرایط هستند."
+
+msgid "Optional Phase 32 rules: run the campaign only on selected weekdays and\/or inside a daily time window. Goals inherit these rules unless they pin their own."
+msgstr "قوانین اختیاری فاز ۳۲: کمپین را فقط در روزهای انتخابشده و\/یا در یک بازهٔ زمانی روزانه اجرا کنید. اهداف این قوانین را به ارث میبرند مگر اینکه قوانین خودشان را داشته باشند."
+
+msgid "Optional start of the daily window."
+msgstr "شروع اختیاری بازهٔ روزانه."
+
+msgid "Pick one day to restrict; empty runs every day."
+msgstr "یک روز برای محدودیت انتخاب کنید؛ خالی یعنی هر روز."
+
+msgid "Play a confetti burst when a goal is reached (Phase 32)."
+msgstr "هنگام رسیدن به هدف، کاغذرنگی بپاشید (فاز ۳۲)."
+
+msgid "Position"
+msgstr "موقعیت"
+
+msgid "Processing + completed orders."
+msgstr "سفارشهای در حال پردازش + تکمیلشده."
+
+msgid "Product tags"
+msgstr "برچسبهای محصول"
+
+msgid "Recurring schedule"
+msgstr "زمانبندی تکراری"
+
+msgid "Repeat on days (optional)"
+msgstr "تکرار در روزها (اختیاری)"
+
+msgid "Required coupons in cart"
+msgstr "کدهای تخفیف الزامی در سبد"
+
+msgid "Required product tags"
+msgstr "برچسبهای محصول الزامی"
+
+msgid "Sat"
+msgstr "شنبه"
+
+msgid "Saturday"
+msgstr "شنبه"
+
+msgid "Shipping destination"
+msgstr "مقصد ارسال"
+
+msgid "Show the countdown to the goal\/campaign deadline (Phase 32)."
+msgstr "شمارش معکوس تا مهلت هدف\/کمپین را نشان بده (فاز ۳۲)."
+
+msgid "Show the deadline countdown inside the sticky bar."
+msgstr "شمارش معکوس مهلت را داخل نوار چسبان نشان بده."
+
+msgid "Sticky bar"
+msgstr "نوار چسبان"
+
+msgid "Suggestion ranking"
+msgstr "رتبهبندی پیشنهادها"
+
+msgid "Sun"
+msgstr "یکشنبه"
+
+msgid "Sunday"
+msgstr "یکشنبه"
+
+msgid "Tag"
+msgstr "برچسب"
+
+msgid "Tags"
+msgstr "برچسبها"
+
+msgid "The advanced sticky bottom\/top bar (Phase 32): position, behavior, countdown and suggestions."
+msgstr "نوار چسبان پیشرفتهٔ پایین\/بالا (فاز ۳۲): موقعیت، رفتار، شمارش معکوس و پیشنهادها."
+
+msgid "The cart must contain at least this many items."
+msgstr "سبد باید حداقل این تعداد اقلام داشته باشد."
+
+msgid "The customer chooses one free gift from this list once the goal is reached. The first product is the storefront default."
+msgstr "مشتری پس از رسیدن به هدف، یک هدیهٔ رایگان از این فهرست انتخاب میکند. اولین محصول، پیشفرض فروشگاه است."
+
+msgid "The goal only applies when the cart ships to one of these zones. Leave empty for every zone."
+msgstr "هدف فقط زمانی اعمال میشود که سبد به یکی از این مناطق ارسال شود. برای همهٔ مناطق خالی بگذارید."
+
+msgid "The goal only applies to shoppers with one of the selected roles."
+msgstr "هدف فقط برای خریدارانی اعمال میشود که یکی از نقشهای انتخابشده را دارند."
+
+msgid "The product attribute that identifies the brand (typically pa_brand)."
+msgstr "ویژگی محصولی که برند را مشخص میکند (معمولاً pa_brand)."
+
+msgid "Total paid across all orders."
+msgstr "مجموع پرداختی در همهٔ سفارشها."
+
+msgid "Where the sticky bar docks."
+msgstr "جایی که نوار چسبان قرار میگیرد."
+
+msgid "The goal only applies when the cart ships to one of these zones."
+msgstr "هدف فقط زمانی اعمال میشود که سبد به یکی از این مناطق ارسال شود."
+
+msgid "Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target."
+msgstr "محصولاتی که هر یک از این ویژگیها (مثلاً pa_color) را دارند در هدف محاسبه میشوند."
+
+msgid "Reach an amount or quantity across products with chosen attributes."
+msgstr "رسیدن به یک مبلغ یا تعداد در میان محصولاتی با ویژگیهای انتخابشده."
+
+msgid "Reach an amount or quantity across products with chosen tags."
+msgstr "رسیدن به یک مبلغ یا تعداد در میان محصولاتی با برچسبهای انتخابشده."
+
+msgid "Reach an amount or quantity of one brand (a product attribute)."
+msgstr "رسیدن به یک مبلغ یا تعداد از یک برند (یک ویژگی محصول)."
+
+msgid "Search attributes…"
+msgstr "جستجوی ویژگیها…"
+
+msgid "Show a live countdown to the goal\/campaign deadline (Phase 32)."
+msgstr "نمایش شمارش معکوس زنده تا مهلت هدف\/کمپین (فاز ۳۲)."
+
+msgid "Suggestions in sticky bar"
+msgstr "پیشنهادها در نوار چسبان"
+
+msgid "Thu"
+msgstr "پنجشنبه"
+
+msgid "Thursday"
+msgstr "پنجشنبه"
+
+msgid "Top"
+msgstr "بالا"
+
+msgid "Tue"
+msgstr "سهشنبه"
+
+msgid "Tuesday"
+msgstr "سهشنبه"
+
+msgid "VIP customers only"
+msgstr "فقط مشتریان ویژه (VIP)"
+
+msgid "Wed"
+msgstr "چهارشنبه"
+
+msgid "Wednesday"
+msgstr "چهارشنبه"
+
+msgid "Weekdays"
+msgstr "روزهای هفته"

@@ -442,45 +442,64 @@ protected function sanitize_column( $type, $value ) {
 	}
 
 	return wp_json_encode( $value );
-}
+}	/**
+	 * Pack the condition/composite keys into the conditions JSON.
+	 *
+	 * The Goal model reads categories, products, excluded_products, operator,
+	 * children and the Phase 32 condition keys as first-class properties;
+	 * they are persisted inside the conditions column. Returns null when
+	 * none of those keys is present in the payload (nothing to write).
+	 *
+	 * @param array<string, mixed> $data Goal payload.
+	 * @return string|null
+	 */
+	protected function pack_conditions( array $data ) {
+		$keys = array(
+			'categories',
+			'products',
+			'excluded_products',
+			'operator',
+			'children',
+			// Phase 32 (Advanced V2 conditions).
+			'tags',
+			'attributes',
+			'customer_roles',
+			'customer_state',
+			'first_order',
+			'vip',
+			'vip_min_spend',
+			'vip_min_orders',
+			'shipping_zones',
+			'cart_coupons',
+			'cart_min_items',
+			'schedule_days',
+			'schedule_start_time',
+			'schedule_end_time',
+		);
+		$packed = array();
+		$found  = false;
 
-/**
- * Pack the condition/composite keys into the conditions JSON.
- *
- * The Goal model reads categories, products, excluded_products, operator
- * and children as first-class properties; they are persisted inside the
- * conditions column. Returns null when none of those keys is present in
- * the payload (nothing to write).
- *
- * @param array<string, mixed> $data Goal payload.
- * @return string|null
- */
-protected function pack_conditions( array $data ) {
-	$keys = array( 'categories', 'products', 'excluded_products', 'operator', 'children' );
-	$packed = array();
-	$found  = false;
+		foreach ( $keys as $key ) {
+			if ( ! array_key_exists( $key, $data ) ) {
+				continue;
+			}
 
-	foreach ( $keys as $key ) {
-		if ( ! array_key_exists( $key, $data ) ) {
-			continue;
+			$found = true;
+
+			if ( 'children' === $key ) {
+				$packed[ $key ] = is_array( $data[ $key ] ) ? $data[ $key ] : array();
+				continue;
+			}
+
+			$packed[ $key ] = $data[ $key ];
 		}
 
-		$found = true;
-
-		if ( 'children' === $key ) {
-			$packed[ $key ] = is_array( $data[ $key ] ) ? $data[ $key ] : array();
-			continue;
+		if ( ! $found ) {
+			return null;
 		}
 
-		$packed[ $key ] = $data[ $key ];
+		return wp_json_encode( $packed );
 	}
-
-	if ( ! $found ) {
-		return null;
-	}
-
-	return wp_json_encode( $packed );
-}
 
 	/**
 	 * Decode a raw database row: JSON columns + condition-key spread.
@@ -501,9 +520,30 @@ protected function pack_conditions( array $data ) {
 
 		// The conditions JSON stores the condition/composite keys the Goal
 		// model reads as first-class properties; spread them onto the row so
-		// persisted category/product/composite goals evaluate correctly.
+		// persisted category/product/composite/tag/attribute/brand goals and
+		// the Phase 32 customer/cart/shipping conditions evaluate correctly.
 		if ( isset( $row['conditions'] ) && is_array( $row['conditions'] ) ) {
-			foreach ( array( 'categories', 'products', 'excluded_products', 'operator', 'children' ) as $key ) {
+			foreach ( array(
+				'categories',
+				'products',
+				'excluded_products',
+				'operator',
+				'children',
+				'tags',
+				'attributes',
+				'customer_roles',
+				'customer_state',
+				'first_order',
+				'vip',
+				'vip_min_spend',
+				'vip_min_orders',
+				'shipping_zones',
+				'cart_coupons',
+				'cart_min_items',
+				'schedule_days',
+				'schedule_start_time',
+				'schedule_end_time',
+			) as $key ) {
 				if ( array_key_exists( $key, $row['conditions'] ) ) {
 					$row[ $key ] = $row['conditions'][ $key ];
 				}
@@ -519,6 +559,10 @@ protected function pack_conditions( array $data ) {
 	 * Engine path: a goal's own dates take precedence; otherwise the
 	 * campaign window applies, and an inactive/out-of-window campaign makes
 	 * the goal inactive.
+	 *
+	 * Phase 32 (advanced scheduled campaigns): a campaign may carry its own
+	 * recurring day/time rules inside display_rules; a goal without its own
+	 * rules inherits them, so one campaign window schedules every milestone.
 	 *
 	 * @param array<string, mixed> $row Decoded goal row.
 	 * @return array<string, mixed>
@@ -539,11 +583,42 @@ protected function pack_conditions( array $data ) {
 			if ( $campaign_ends ) {
 				$row['ends_at'] = ( ! empty( $row['ends_at'] ) && $row['ends_at'] < $campaign_ends ) ? $row['ends_at'] : $campaign_ends;
 			}
+
+			// Phase 32 recurring rules: inherit the campaign's day/time
+			// window unless the goal pins its own.
+			$rules = $this->decode_campaign_display_rules( $row );
+
+			foreach ( array( 'schedule_days', 'schedule_start_time', 'schedule_end_time' ) as $key ) {
+				if ( empty( $row[ $key ] ) && isset( $rules[ $key ] ) && ! empty( $rules[ $key ] ) ) {
+					$row[ $key ] = $rules[ $key ];
+				}
+			}
 		}
 
 		unset( $row['campaign_status'], $row['campaign_starts_at'], $row['campaign_ends_at'] );
 
 		return $row;
+	}
+
+	/**
+	 * Decode a campaign's display_rules for schedule folding.
+	 *
+	 * @param array<string, mixed> $row Raw row (campaign_display_rules may
+	 *                                  be a JSON string or an array).
+	 * @return array<string, mixed>
+	 */
+	protected function decode_campaign_display_rules( array $row ) {
+		if ( ! isset( $row['campaign_display_rules'] ) ) {
+			return array();
+		}
+
+		if ( is_array( $row['campaign_display_rules'] ) ) {
+			return $row['campaign_display_rules'];
+		}
+
+		$decoded = json_decode( (string) $row['campaign_display_rules'], true );
+
+		return is_array( $decoded ) ? $decoded : array();
 	}
 
 	/**

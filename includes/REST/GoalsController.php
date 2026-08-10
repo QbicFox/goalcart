@@ -397,6 +397,10 @@ class GoalsController extends BaseController {
 					Goal::TYPE_PRODUCT,
 					Goal::TYPE_WEIGHT,
 					Goal::TYPE_COMPOSITE,
+					// Phase 32 (brand/tag/attribute conditions).
+					Goal::TYPE_TAG,
+					Goal::TYPE_ATTRIBUTE,
+					Goal::TYPE_BRAND,
 				),
 			),
 			'target'            => array(
@@ -444,6 +448,54 @@ class GoalsController extends BaseController {
 				// whitelists the keys recursively and casts every value to
 				// its safe scalar type before the payload reaches the DB.
 				'sanitize_callback' => array( $this, 'sanitize_children' ),
+			),
+			// Phase 32 (Advanced V2): brand/tag/attribute goal types plus
+			// the customer/order/cart/shipping condition keys — validated
+			// and cast here so a bad value can never reach the conditions
+			// JSON.
+			'tags'              => array(
+				'type'  => 'array',
+				'items' => array( 'type' => 'integer' ),
+			),
+			'attributes'        => array(
+				'type'  => 'array',
+				'items' => array( 'type' => 'string' ),
+			),
+			'customer_roles'    => array(
+				'type'  => 'array',
+				'items' => array( 'type' => 'string' ),
+			),
+			'customer_state'    => array(
+				'type'  => 'array',
+				'items' => array(
+					'type' => 'string',
+					'enum' => array( 'guest', 'logged_in' ),
+				),
+			),
+			'first_order'       => array( 'type' => 'boolean', 'default' => false ),
+			'vip'               => array( 'type' => 'boolean', 'default' => false ),
+			'vip_min_spend'     => array( 'type' => 'number', 'minimum' => 0 ),
+			'vip_min_orders'    => array( 'type' => 'integer', 'minimum' => 0 ),
+			'shipping_zones'    => array(
+				'type'  => 'array',
+				'items' => array( 'type' => 'integer' ),
+			),
+			'cart_coupons'      => array(
+				'type'  => 'array',
+				'items' => array( 'type' => 'string' ),
+			),
+			'cart_min_items'    => array( 'type' => 'integer', 'minimum' => 0 ),
+			'schedule_days'     => array(
+				'type'  => 'array',
+				'items' => array( 'type' => 'integer', 'minimum' => 1, 'maximum' => 7 ),
+			),
+			'schedule_start_time' => array(
+				'type'              => array( 'string', 'null' ),
+				'validate_callback' => array( $this, 'validate_time_param' ),
+			),
+			'schedule_end_time' => array(
+				'type'              => array( 'string', 'null' ),
+				'validate_callback' => array( $this, 'validate_time_param' ),
 			),
 			'priority'          => array(
 				'type'    => 'integer',
@@ -662,10 +714,14 @@ class GoalsController extends BaseController {
 			'type'             => 'sanitize_key',
 			'calculation_mode' => 'sanitize_key',
 			'operator'         => 'sanitize_key',
+			'schedule_start_time' => 'sanitize_text_field',
+			'schedule_end_time'   => 'sanitize_text_field',
 		);
 
-		$float = array( 'target', 'reward_value', 'reward_max_value' );
-		$ints  = array( 'categories', 'products', 'excluded_products' );
+		$float = array( 'target', 'reward_value', 'reward_max_value', 'vip_min_spend' );
+		$ints  = array( 'categories', 'products', 'excluded_products', 'tags', 'shipping_zones', 'schedule_days', 'cart_min_items', 'vip_min_orders' );
+		$str_list = array( 'attributes', 'customer_roles', 'customer_state', 'cart_coupons' );
+		$flags    = array( 'first_order', 'vip', 'exclusive' );
 
 		$clean = array();
 
@@ -695,6 +751,22 @@ class GoalsController extends BaseController {
 							return $id > 0;
 						} )
 					);
+				}
+			}
+
+			foreach ( $str_list as $key ) {
+				if ( isset( $child[ $key ] ) && is_array( $child[ $key ] ) ) {
+					$node[ $key ] = array_values(
+						array_filter( array_map( 'sanitize_text_field', array_map( 'strval', $child[ $key ] ) ), function ( $v ) {
+							return '' !== $v;
+						} )
+					);
+				}
+			}
+
+			foreach ( $flags as $key ) {
+				if ( array_key_exists( $key, $child ) ) {
+					$node[ $key ] = (bool) $child[ $key ];
 				}
 			}
 
@@ -728,6 +800,21 @@ class GoalsController extends BaseController {
 			'excluded_products' => $this->ints( isset( $row['excluded_products'] ) ? $row['excluded_products'] : array() ),
 			'operator'          => isset( $row['operator'] ) ? (string) $row['operator'] : Goal::OP_AND,
 			'children'          => isset( $row['children'] ) && is_array( $row['children'] ) ? $row['children'] : array(),
+			// Phase 32 condition surface (mirrors the Goal model accessors).
+			'tags'              => $this->ints( isset( $row['tags'] ) ? $row['tags'] : array() ),
+			'attributes'        => $this->strings( isset( $row['attributes'] ) ? $row['attributes'] : array() ),
+			'customer_roles'    => $this->strings( isset( $row['customer_roles'] ) ? $row['customer_roles'] : array() ),
+			'customer_state'    => $this->strings( isset( $row['customer_state'] ) ? $row['customer_state'] : array() ),
+			'first_order'       => ! empty( $row['first_order'] ),
+			'vip'               => ! empty( $row['vip'] ),
+			'vip_min_spend'     => isset( $row['vip_min_spend'] ) ? (float) $row['vip_min_spend'] : 0.0,
+			'vip_min_orders'    => isset( $row['vip_min_orders'] ) ? (int) $row['vip_min_orders'] : 0,
+			'shipping_zones'    => $this->ints( isset( $row['shipping_zones'] ) ? $row['shipping_zones'] : array() ),
+			'cart_coupons'      => $this->strings( isset( $row['cart_coupons'] ) ? $row['cart_coupons'] : array() ),
+			'cart_min_items'    => isset( $row['cart_min_items'] ) ? (int) $row['cart_min_items'] : 0,
+			'schedule_days'     => $this->ints( isset( $row['schedule_days'] ) ? $row['schedule_days'] : array() ),
+			'schedule_start_time' => isset( $row['schedule_start_time'] ) ? (string) $row['schedule_start_time'] : '',
+			'schedule_end_time' => isset( $row['schedule_end_time'] ) ? (string) $row['schedule_end_time'] : '',
 			'reward_type'       => ! empty( $row['reward_type'] ) ? (string) $row['reward_type'] : null,
 			'reward_value'      => null !== $row['reward_value'] && '' !== $row['reward_value'] ? (float) $row['reward_value'] : null,
 			'reward_max_value'  => null !== $row['reward_max_value'] && '' !== $row['reward_max_value'] ? (float) $row['reward_max_value'] : null,
@@ -759,5 +846,35 @@ class GoalsController extends BaseController {
 		return array_values( array_filter( array_map( 'intval', $value ), function ( $id ) {
 			return $id > 0;
 		} ) );
+	}
+
+	/**
+	 * Cast a mixed value to a list of non-empty sanitized strings.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return string[]
+	 */
+	protected function strings( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		return array_values( array_filter( array_map( 'sanitize_text_field', array_map( 'strval', $value ) ), function ( $v ) {
+			return '' !== $v;
+		} ) );
+	}
+
+	/**
+	 * Validate a recurring schedule time ('H:i').
+	 *
+	 * @param mixed $value Value to validate.
+	 * @return bool
+	 */
+	public function validate_time_param( $value ) {
+		if ( null === $value || '' === $value ) {
+			return true;
+		}
+
+		return (bool) preg_match( '/^([01]\d|2[0-3]):[0-5]\d$/', (string) $value );
 	}
 }

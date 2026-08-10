@@ -25,6 +25,11 @@ final class Goal {
 
 	/**
 	 * Goal types.
+	 *
+	 * Phase 32 (Advanced V2): tag, attribute and brand goals extend the
+	 * category/product family — the amount or quantity restricted to
+	 * products carrying the configured tags / attribute taxonomies /
+	 * brand attribute.
 	 */
 	const TYPE_AMOUNT            = 'amount';
 	const TYPE_QUANTITY          = 'quantity';
@@ -33,6 +38,9 @@ final class Goal {
 	const TYPE_PRODUCT           = 'product';
 	const TYPE_WEIGHT            = 'weight';
 	const TYPE_COMPOSITE         = 'composite';
+	const TYPE_TAG               = 'tag';
+	const TYPE_ATTRIBUTE         = 'attribute';
+	const TYPE_BRAND             = 'brand';
 
 	/**
 	 * Calculation bases for amount-style goals.
@@ -130,6 +138,113 @@ final class Goal {
 	 * @var array[] Each entry is a Goal::from_array() payload.
 	 */
 	protected $children;
+
+	/**
+	 * Product tag term IDs for tag goals (Phase 32).
+	 *
+	 * @var int[]
+	 */
+	protected $tags;
+
+	/**
+	 * Global attribute taxonomy slugs for attribute/brand goals (Phase 32),
+	 * e.g. array( 'pa_color' ) or array( 'pa_brand' ).
+	 *
+	 * @var string[]
+	 */
+	protected $attributes;
+
+	/**
+	 * Customer roles allowed to see/complete the goal (Phase 32). Empty =
+	 * everyone.
+	 *
+	 * @var string[]
+	 */
+	protected $customer_roles;
+
+	/**
+	 * Required customer state (Phase 32): subset of 'guest' | 'logged_in'.
+	 * Empty = everyone.
+	 *
+	 * @var string[]
+	 */
+	protected $customer_state;
+
+	/**
+	 * First-order-only goal (Phase 32): applies only to shoppers with zero
+	 * completed orders.
+	 *
+	 * @var bool
+	 */
+	protected $first_order;
+
+	/**
+	 * VIP-only goal (Phase 32): applies only to logged-in customers meeting
+	 * the spend/order thresholds.
+	 *
+	 * @var bool
+	 */
+	protected $vip;
+
+	/**
+	 * Minimum lifetime spend for VIP goals.
+	 *
+	 * @var float
+	 */
+	protected $vip_min_spend;
+
+	/**
+	 * Minimum completed-order count for VIP goals.
+	 *
+	 * @var int
+	 */
+	protected $vip_min_orders;
+
+	/**
+	 * Shipping zone ids the goal applies to (Phase 32). Empty = every zone.
+	 *
+	 * @var int[]
+	 */
+	protected $shipping_zones;
+
+	/**
+	 * Coupon codes the cart must have applied for the goal to apply
+	 * (Phase 32 cart-state condition). Empty = no coupon requirement.
+	 *
+	 * @var string[]
+	 */
+	protected $cart_coupons;
+
+	/**
+	 * Minimum cart item count for the goal to apply (Phase 32 cart-state
+	 * condition). 0 = no minimum.
+	 *
+	 * @var int
+	 */
+	protected $cart_min_items;
+
+	/**
+	 * Recurring schedule days (Phase 32, advanced scheduling): 1 (Mon) to
+	 * 7 (Sun), matching PHP date('N'). Empty = every day.
+	 *
+	 * @var int[]
+	 */
+	protected $schedule_days;
+
+	/**
+	 * Recurring schedule day window start 'H:i' (Phase 32). Empty = no
+	 * time window.
+	 *
+	 * @var string
+	 */
+	protected $schedule_start_time;
+
+	/**
+	 * Recurring schedule day window end 'H:i' (Phase 32).
+	 *
+	 * @var string
+	 */
+	protected $schedule_end_time;
 
 	/**
 	 * Schedule window (site timezone, 'Y-m-d H:i:s' or 'Y-m-d'). Null = open.
@@ -250,6 +365,20 @@ final class Goal {
 		$this->excluded_products = $this->ints( isset( $data['excluded_products'] ) ? $data['excluded_products'] : array() );
 		$this->operator          = isset( $data['operator'] ) ? (string) $data['operator'] : self::OP_AND;
 		$this->children          = isset( $data['children'] ) && is_array( $data['children'] ) ? $data['children'] : array();
+		$this->tags              = $this->ints( isset( $data['tags'] ) ? $data['tags'] : array() );
+		$this->attributes        = $this->strings( isset( $data['attributes'] ) ? $data['attributes'] : array() );
+		$this->customer_roles    = $this->strings( isset( $data['customer_roles'] ) ? $data['customer_roles'] : array() );
+		$this->customer_state    = $this->strings( isset( $data['customer_state'] ) ? $data['customer_state'] : array() );
+		$this->first_order       = ! empty( $data['first_order'] );
+		$this->vip               = ! empty( $data['vip'] );
+		$this->vip_min_spend     = isset( $data['vip_min_spend'] ) ? (float) $data['vip_min_spend'] : 0.0;
+		$this->vip_min_orders    = isset( $data['vip_min_orders'] ) ? (int) $data['vip_min_orders'] : 0;
+		$this->shipping_zones    = $this->ints( isset( $data['shipping_zones'] ) ? $data['shipping_zones'] : array() );
+		$this->cart_coupons      = $this->strings( isset( $data['cart_coupons'] ) ? $data['cart_coupons'] : array() );
+		$this->cart_min_items    = isset( $data['cart_min_items'] ) ? (int) $data['cart_min_items'] : 0;
+		$this->schedule_days     = $this->ints( isset( $data['schedule_days'] ) ? $data['schedule_days'] : array() );
+		$this->schedule_start_time = isset( $data['schedule_start_time'] ) ? (string) $data['schedule_start_time'] : '';
+		$this->schedule_end_time   = isset( $data['schedule_end_time'] ) ? (string) $data['schedule_end_time'] : '';
 		$this->starts_at         = isset( $data['starts_at'] ) ? (string) $data['starts_at'] : null;
 		$this->ends_at           = isset( $data['ends_at'] ) ? (string) $data['ends_at'] : null;
 		$this->priority          = isset( $data['priority'] ) ? (int) $data['priority'] : 10;
@@ -323,6 +452,26 @@ final class Goal {
 	}
 
 	/**
+	 * Cast a mixed value to a list of non-empty sanitized strings.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return string[]
+	 */
+	protected function strings( $value ) {
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$clean = function ( $v ) {
+			return function_exists( 'sanitize_text_field' ) ? sanitize_text_field( $v ) : trim( (string) $v );
+		};
+
+		return array_values( array_filter( array_map( $clean, array_map( 'strval', $value ) ), function ( $v ) {
+			return '' !== $v;
+		} ) );
+	}
+
+	/**
 	 * @return int
 	 */
 	public function id() {
@@ -390,6 +539,150 @@ final class Goal {
 	 */
 	public function excluded_products() {
 		return $this->excluded_products;
+	}
+
+	/**
+	 * Product tag term IDs (tag goals / tag conditions).
+	 *
+	 * @return int[]
+	 */
+	public function tags() {
+		return $this->tags;
+	}
+
+	/**
+	 * Global attribute taxonomy slugs (attribute / brand goals).
+	 *
+	 * @return string[]
+	 */
+	public function attributes() {
+		return $this->attributes;
+	}
+
+	/**
+	 * The brand taxonomy for brand goals (first configured attribute, else
+	 * the conventional pa_brand).
+	 *
+	 * @return string
+	 */
+	public function brand_taxonomy() {
+		if ( ! empty( $this->attributes ) ) {
+			return (string) $this->attributes[0];
+		}
+
+		return (string) apply_filters( 'goalcart_brand_taxonomy', 'pa_brand' );
+	}
+
+	/**
+	 * Customer roles allowed to complete the goal (empty = everyone).
+	 *
+	 * @return string[]
+	 */
+	public function customer_roles() {
+		return $this->customer_roles;
+	}
+
+	/**
+	 * Required customer state: subset of 'guest' | 'logged_in' (empty =
+	 * everyone).
+	 *
+	 * @return string[]
+	 */
+	public function customer_state() {
+		return $this->customer_state;
+	}
+
+	/**
+	 * Whether the goal applies to first orders only.
+	 *
+	 * @return bool
+	 */
+	public function is_first_order() {
+		return $this->first_order;
+	}
+
+	/**
+	 * Whether the goal is restricted to VIP customers.
+	 *
+	 * @return bool
+	 */
+	public function is_vip() {
+		return $this->vip;
+	}
+
+	/**
+	 * @return float
+	 */
+	public function vip_min_spend() {
+		return $this->vip_min_spend;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function vip_min_orders() {
+		return $this->vip_min_orders;
+	}
+
+	/**
+	 * Shipping zone ids the goal applies to (empty = every zone).
+	 *
+	 * @return int[]
+	 */
+	public function shipping_zones() {
+		return $this->shipping_zones;
+	}
+
+	/**
+	 * Coupon codes the cart must carry (empty = no coupon requirement).
+	 *
+	 * @return string[]
+	 */
+	public function cart_coupons() {
+		return $this->cart_coupons;
+	}
+
+	/**
+	 * Minimum cart item count (0 = no minimum).
+	 *
+	 * @return int
+	 */
+	public function cart_min_items() {
+		return $this->cart_min_items;
+	}
+
+	/**
+	 * Recurring schedule days (1=Mon .. 7=Sun, empty = every day).
+	 *
+	 * @return int[]
+	 */
+	public function schedule_days() {
+		return $this->schedule_days;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function schedule_start_time() {
+		return $this->schedule_start_time;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function schedule_end_time() {
+		return $this->schedule_end_time;
+	}
+
+	/**
+	 * Whether any recurring schedule rule (days / time window) is set.
+	 *
+	 * @return bool
+	 */
+	public function has_schedule_rules() {
+		return ! empty( $this->schedule_days )
+			|| '' !== $this->schedule_start_time
+			|| '' !== $this->schedule_end_time;
 	}
 
 	/**

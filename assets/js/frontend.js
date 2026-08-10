@@ -82,6 +82,18 @@
 	var renderedFingerprints = {};
 	var stickyFingerprint = null;
 
+	// Phase 32: per-session state for the celebration animation (one burst
+	// per goal), the sticky bar's delay gating and the auto-hide scroll
+	// direction tracker.
+	var celebrated = {};
+	var stickyShown = false;
+	var stickyDelayTimer = null;
+	var stickyLastScrollY = 0;
+	var stickyAutoHidden = false;
+
+	// Confetti palette (Phase 32 celebration).
+	var CONFETTI_COLORS = [ '#2271b1', '#00a32a', '#d63638', '#f0b849', '#7e5af5', '#2c7a7b' ];
+
 	/**
 	 * Guard every entry point: a thrown error must never reach the page.
 	 *
@@ -141,22 +153,29 @@
 		request.onload = function () {
 			if ( request.status < 200 || request.status >= 300 ) {
 				return;
-			}
+			}				safe( function () {
+					var payload = JSON.parse( request.responseText );
+					if ( payload && payload.data ) {
+						// Self-healing tracking nonce: every /progress response
+						// carries a freshly minted goalcart_track nonce. Adopt it
+						// before the next event report so a cached page's expired
+						// or foreign nonce can never block analytics for the rest
+						// of the session.
+						if ( tracking && payload.data.tracking_nonce ) {
+							tracking.nonce = payload.data.tracking_nonce;
+						}
 
-			safe( function () {
-				var payload = JSON.parse( request.responseText );
-				if ( payload && payload.data ) {
-					// Self-healing tracking nonce: every /progress response
-					// carries a freshly minted goalcart_track nonce. Adopt it
-					// before the next event report so a cached page's expired
-					// or foreign nonce can never block analytics for the rest
-					// of the session.
-					if ( tracking && payload.data.tracking_nonce ) {
-						tracking.nonce = payload.data.tracking_nonce;
+						// Phase 32 (free gift selection): the payload also
+						// mints a fresh gift nonce every poll, so a long-lived
+						// cart page never outlives its gift-claim nonce window
+						// (adopt it before the shopper claims a gift).
+						if ( payload.data.gift_nonce ) {
+							cfg.giftNonce = payload.data.gift_nonce;
+						}
+
+						done( payload.data );
 					}
-					done( payload.data );
-				}
-			} );
+				} );
 		};
 
 		request.onerror = function () {};
@@ -405,6 +424,8 @@
 					String( goal.message || '' ),
 					String( ( goal.reward && goal.reward.type ) || '' ),
 					String( ( goal.reward && goal.reward.value ) || '' ),
+					String( goal.countdown_end || '' ),
+					( goal.reward && goal.reward.gift_chosen ) ? '1' : '0',
 					suggestionIds,
 				].join( '|' )
 			);
@@ -425,6 +446,76 @@
 		} catch ( error ) {
 			return String( value );
 		}
+	}
+
+	/**
+	 * A localized text label with a sensible fallback.
+	 *
+	 * @param {string} key      Label key in cfg.labels.
+	 * @param {string} fallback Fallback text.
+	 * @return {string}
+	 */
+	function uiLabel( key, fallback ) {
+		return ( cfg.labels && cfg.labels[ key ] ) ? String( cfg.labels[ key ] ) : String( fallback );
+	}
+
+	/**
+	 * The live countdown text for an ISO end timestamp (Phase 32).
+	 *
+	 * @param {string} end ISO local-time timestamp.
+	 * @return {string}
+	 */
+	function countdownText( end ) {
+		var ms = Date.parse( String( end || '' ) ) - Date.now();
+
+		if ( isNaN( ms ) ) {
+			return '';
+		}
+
+		if ( ms <= 0 ) {
+			return uiLabel( 'countdown_ended', 'Ended' );
+		}
+
+		var total = Math.floor( ms / 1000 );
+		var days = Math.floor( total / 86400 );
+		var hours = Math.floor( ( total % 86400 ) / 3600 );
+		var minutes = Math.floor( ( total % 3600 ) / 60 );
+		var seconds = total % 60;
+
+		function pad2( n ) {
+			return n < 10 ? '0' + n : '' + n;
+		}
+
+		var time = formatNumber( pad2( hours ) ) + ':' + formatNumber( pad2( minutes ) ) + ':' + formatNumber( pad2( seconds ) );
+
+		return days > 0 ? formatNumber( days ) + 'd ' + time : time;
+	}
+
+	/**
+	 * Countdown chip for a goal/campaign with an end time (Phase 32).
+	 *
+	 * The chip carries the end timestamp on a data attribute; a single
+	 * global ticker (started in init) rewrites the readout every second
+	 * without re-rendering the widget.
+	 *
+	 * @param {Object} entry Goal or campaign group with countdown_end.
+	 * @return {HTMLElement|null}
+	 */
+	function countdownPanel( entry ) {
+		if ( ! entry || ! entry.countdown_end || cfg.countdown === false ) {
+			return null;
+		}
+
+		var wrap = el( 'div', 'goalcart-countdown' );
+
+		wrap.appendChild( el( 'span', 'goalcart-countdown__label', uiLabel( 'countdown', 'Ends in' ) ) );
+
+		var time = el( 'span', 'goalcart-countdown__time' );
+		time.setAttribute( 'data-goalcart-end', String( entry.countdown_end ) );
+		time.textContent = countdownText( entry.countdown_end );
+		wrap.appendChild( time );
+
+		return wrap;
 	}
 
 	/**
@@ -592,6 +683,130 @@
 		}
 
 		return list;
+	}
+
+	/**
+	 * GiftPicker — the shopper's free-gift selection (Phase 32).
+	 *
+	 * Renders for completed goals whose free-gift reward is in "choose"
+	 * mode: one button per candidate gift. Clicking claims the gift through
+	 * the public gift endpoint (nonce-guarded), then the widgets refresh
+	 * and the picker flips to its "added" state.
+	 *
+	 * @param {Object} goal Progress goal entry.
+	 * @return {HTMLElement|null}
+	 */
+	function giftPicker( goal ) {
+		var reward = goal.reward || null;
+
+		if ( ! reward || reward.type !== 'free_gift' || ! reward.gift || ! reward.gift.length ) {
+			return null;
+		}
+
+		if ( ! cfg.giftEndpoint || ! cfg.giftNonce ) {
+			return null;
+		}
+
+		var picker = el( 'div', 'goalcart-gift-picker' );
+
+		if ( reward.gift_chosen ) {
+			picker.classList.add( 'goalcart-gift-picker--done' );
+			picker.appendChild( el( 'p', 'goalcart-gift-picker__done', uiLabel( 'gift_chosen', 'Gift added to your cart' ) ) );
+			return picker;
+		}
+
+		picker.appendChild( el( 'div', 'goalcart-gift-picker__title', uiLabel( 'gift_picker', 'Pick your free gift' ) ) );
+
+		var list = el( 'ul', 'goalcart-gift-picker__list' );
+
+		for ( var i = 0; i < reward.gift.length; i++ ) {
+			var item = reward.gift[ i ];
+			var li = el( 'li', 'goalcart-gift-picker__item' );
+			var button = el( 'button', 'goalcart-gift-picker__button' );
+
+			button.type = 'button';
+			button.setAttribute( 'data-goalcart-gift-product', String( item.id || 0 ) );
+			button.setAttribute( 'data-goalcart-gift-goal', String( goal.goal_id || 0 ) );
+
+			if ( item.image ) {
+				var img = el( 'img', 'goalcart-gift-picker__image' );
+				img.src = String( item.image );
+				img.alt = '';
+				button.appendChild( img );
+			}
+
+			button.appendChild( el( 'span', 'goalcart-gift-picker__name', String( item.name || '' ) ) );
+
+			if ( item.price_html ) {
+				button.appendChild( el( 'span', 'goalcart-gift-picker__price', String( item.price_html ) ) );
+			}
+
+			li.appendChild( button );
+			list.appendChild( li );
+		}
+
+		picker.appendChild( list );
+
+		return picker;
+	}
+
+	/**
+	 * Claim a chosen gift through the public gift endpoint.
+	 *
+	 * @param {HTMLElement} button The gift button clicked.
+	 * @return {void}
+	 */
+	function claimGift( button ) {
+		var goalId = button.getAttribute( 'data-goalcart-gift-goal' ) || '0';
+		var productId = button.getAttribute( 'data-goalcart-gift-product' ) || '0';
+
+		if ( ! goalId || ! productId || button.disabled ) {
+			return;
+		}
+
+		button.disabled = true;
+		button.classList.add( 'goalcart-gift-picker__button--pending' );
+
+		var body;
+		try {
+			body = JSON.stringify( {
+				goal_id: Number( goalId ) || 0,
+				product_id: Number( productId ) || 0,
+				nonce: cfg.giftNonce || '',
+			} );
+		} catch ( error ) {
+			button.disabled = false;
+			button.classList.remove( 'goalcart-gift-picker__button--pending' );
+			return;
+		}
+
+		var request = new XMLHttpRequest();
+
+		request.open( 'POST', cfg.giftEndpoint, true );
+		request.setRequestHeader( 'Content-Type', 'application/json' );
+		request.timeout = 10000;
+
+		request.onload = function () {
+			if ( request.status >= 200 && request.status < 300 ) {
+				refreshAfterCartChange();
+				return;
+			}
+
+			// A failed claim (nonce, stock) re-enables the button so the
+			// shopper can retry after the next poll adopts a fresh nonce.
+			button.disabled = false;
+			button.classList.remove( 'goalcart-gift-picker__button--pending' );
+		};
+
+		request.onerror = function () {
+			button.disabled = false;
+			button.classList.remove( 'goalcart-gift-picker__button--pending' );
+		};
+		request.ontimeout = function () {
+			button.disabled = false;
+			button.classList.remove( 'goalcart-gift-picker__button--pending' );
+		};
+		request.send( body );
 	}
 
 	/**
@@ -954,12 +1169,62 @@
 			card.appendChild( goalMessage( goal ) );
 		}
 
+		// Phase 32 (countdown + free gift selection): the deadline chip and
+		// the gift picker render at the bottom of the full card.
+		var countdown = countdownPanel( goal );
+		if ( countdown ) {
+			card.appendChild( countdown );
+		}
+
 		var suggestions = suggestionList( goal );
 		if ( suggestions ) {
 			card.appendChild( suggestions );
 		}
 
+		var gift = giftPicker( goal );
+		if ( gift ) {
+			card.appendChild( gift );
+		}
+
 		return card;
+	}
+
+	/**
+	 * Celebration — a confetti burst + pulse when a goal completes
+	 * (Phase 32).
+	 *
+	 * Runs once per goal per session (the `celebrated` map). The pieces are
+	 * plain CSS-animated spans removed after the animation, so nothing
+	 * lingers on the page.
+	 *
+	 * @param {HTMLElement} card The goal card.
+	 * @param {Object}      goal Progress goal entry.
+	 * @return {void}
+	 */
+	function celebrate( card, goal ) {
+		celebrated[ String( goal.goal_id || 0 ) ] = true;
+
+		card.classList.add( 'goalcart-card--celebrate' );
+
+		var confetti = el( 'div', 'goalcart-confetti' );
+		confetti.setAttribute( 'aria-hidden', 'true' );
+
+		for ( var i = 0; i < 18; i++ ) {
+			var piece = el( 'span', 'goalcart-confetti__piece' );
+			piece.style.left = ( Math.random() * 100 ) + '%';
+			piece.style.background = CONFETTI_COLORS[ i % CONFETTI_COLORS.length ];
+			piece.style.animationDelay = ( Math.random() * 0.35 ) + 's';
+			piece.style.setProperty( '--goalcart-confetti-x', ( ( Math.random() * 160 ) - 80 ) + 'px' );
+			confetti.appendChild( piece );
+		}
+
+		card.appendChild( confetti );
+
+		window.setTimeout( function () {
+			try {
+				confetti.remove();
+			} catch ( error ) {}
+		}, 2000 );
 	}
 
 	/**
@@ -1031,6 +1296,86 @@
 
 		if ( top ) {
 			panel.appendChild( progressBar( top ) );
+		}
+
+		return panel;
+	}
+
+	/**
+	 * Campaign progress (pluggable engine, campaign scope — Phase 32).
+	 *
+	 * Renders the whole campaign as one readout: title, a "n / m"
+	 * milestone counter, one bar driven by the top milestone, the reward
+	 * chips and an optional countdown. Used when the campaign's resolved
+	 * template is 'campaign_progress'; the milestone_chain stays the
+	 * connected-ladder variant.
+	 *
+	 * @param {Array}  goals    The campaign's eligible milestone goals.
+	 * @param {Object} campaign Campaign group (template + resolved settings).
+	 * @param {string} currency ISO currency code.
+	 * @return {HTMLElement}
+	 */
+	function campaignProgress( goals, campaign, currency ) {
+		var settings = campaign.settings || {};
+		var panel = el( 'div', 'goalcart-campaign goalcart-template--' + campaign.template );
+
+		applyTemplateSettings( panel, settings );
+		applyTemplateCss( settings.customCss );
+
+		if ( settings.cssClass ) {
+			panel.classList.add( String( settings.cssClass ) );
+		}
+
+		if ( settings.showTitle !== false && campaign.name ) {
+			panel.appendChild( el( 'div', 'goalcart-campaign__title', String( campaign.name ) ) );
+		}
+
+		if ( settings.showCounter !== false ) {
+			var done = 0;
+
+			for ( var i = 0; i < goals.length; i++ ) {
+				if ( goals[ i ].completed ) {
+					done++;
+				}
+			}
+
+			panel.appendChild(
+				el( 'div', 'goalcart-campaign__counter', formatNumber( done ) + ' / ' + formatNumber( goals.length ) )
+			);
+		}
+
+		// Overall progress: the top milestone drives the bar.
+		var top = null;
+
+		for ( var j = 0; j < goals.length; j++ ) {
+			if ( ! top || Number( goals[ j ].target ) > Number( top.target ) ) {
+				top = goals[ j ];
+			}
+		}
+
+		if ( top ) {
+			panel.appendChild( progressBar( top ) );
+		}
+
+		if ( settings.showRewards !== false ) {
+			var chips = el( 'div', 'goalcart-campaign__rewards' );
+
+			for ( var k = 0; k < goals.length; k++ ) {
+				if ( goals[ k ].reward && goals[ k ].reward.type ) {
+					chips.appendChild(
+						el( 'span', 'goalcart-campaign__reward', ( cfg.labels && cfg.labels[ goals[ k ].reward.type ] ) || goals[ k ].reward.type )
+					);
+				}
+			}
+
+			if ( chips.firstChild ) {
+				panel.appendChild( chips );
+			}
+		}
+
+		var countdown = countdownPanel( campaign );
+		if ( countdown ) {
+			panel.appendChild( countdown );
 		}
 
 		return panel;
@@ -1118,18 +1463,32 @@
 			var groupGoals = groups[ order[ g ] ];
 			var campaign = campaignById[ order[ g ] ];
 
-			if ( campaign && campaign.template && 'milestone_chain' === campaign.template ) {
-				stack.appendChild( campaignChain( groupGoals, campaign, data.currency || cfg.currency ) );
-				rendered++;
-				continue;
+			if ( campaign && campaign.template ) {
+				if ( 'milestone_chain' === campaign.template ) {
+					stack.appendChild( campaignChain( groupGoals, campaign, data.currency || cfg.currency ) );
+					rendered++;
+					continue;
+				}
+
+				// Phase 32: the second campaign template — one overall bar.
+				if ( 'campaign_progress' === campaign.template ) {
+					stack.appendChild( campaignProgress( groupGoals, campaign, data.currency || cfg.currency ) );
+					rendered++;
+					continue;
+				}
 			}
 
 			for ( var j = 0; j < groupGoals.length; j++ ) {
 				var goal = groupGoals[ j ];
+				var card = goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) );
 
-				stack.appendChild(
-					goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) )
-				);
+				// Phase 32 (celebration): one confetti burst + pulse per
+				// completed goal per session.
+				if ( goal.completed && cfg.celebrate && ! celebrated[ String( goal.goal_id || 0 ) ] ) {
+					celebrate( card, goal );
+				}
+
+				stack.appendChild( card );
 				rendered++;
 			}
 		}
@@ -1144,10 +1503,15 @@
 	}
 
 	/**
-	 * StickyGoalBar — a fixed bottom bar with the featured goal's progress.
+	 * StickyGoalBar — a fixed progress bar (bottom by default, Phase 32
+	 * adds the top position, an appearance delay and an auto-hide
+	 * behavior).
 	 *
 	 * Visible only while the cart has progress to show (current > 0 or the
-	 * goal is completed); the close button dismisses it for the session.
+	 * goal is completed). dismissible mode keeps the close button
+	 * (session-persistent); auto_hide mode fades the bar out while
+	 * scrolling down and back in while scrolling up. The full display
+	 * variant adds the countdown chip and the top suggestion.
 	 *
 	 * @param {Object} data Progress payload data.
 	 * @return {void}
@@ -1162,6 +1526,7 @@
 		var goals = ( data && data.goals ) || [];
 		var goal = featuredGoal( goals );
 		var hasProgress = false;
+		var sticky = cfg.sticky || {};
 
 		for ( var i = 0; i < goals.length; i++ ) {
 			if ( Number( goals[ i ].current ) > 0 || goals[ i ].completed ) {
@@ -1170,8 +1535,26 @@
 			}
 		}
 
-		// Phase 18 (mobile behavior): the sticky bar hides too.
-		if ( ! goal || ! hasProgress || stickyDismissed || mobileHidden() ) {
+		var visible = ! ! goal && hasProgress && ! stickyDismissed && ! mobileHidden();
+
+		// Delay gate: the bar waits sticky.delay seconds after the first
+		// render before appearing (the timer in init flips stickyShown).
+		if ( visible && Number( sticky.delay ) > 0 && ! stickyShown ) {
+			visible = false;
+		}
+
+		// Auto-hide: hidden while scrolling down (past a small threshold),
+		// shown again when scrolling up or near the top.
+		if ( visible && sticky.behavior === 'auto_hide' ) {
+			var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+
+			if ( y > 120 && y > stickyLastScrollY ) {
+				visible = false;
+				stickyAutoHidden = true;
+			}
+		}
+
+		if ( ! visible ) {
 			bar.classList.remove( 'goalcart-sticky--visible' );
 			bar.setAttribute( 'aria-hidden', 'true' );
 			bar.replaceChildren();
@@ -1179,6 +1562,7 @@
 		}
 
 		bar.classList.add( 'goalcart-sticky--visible' );
+		bar.classList.toggle( 'goalcart-sticky--top', 'top' === sticky.position );
 		bar.classList.toggle( 'goalcart-no-anim', false === cfg.animation );
 		bar.setAttribute( 'aria-hidden', 'false' );
 
@@ -1186,7 +1570,6 @@
 		// track the live cart (no mount-once freeze).
 		var inner = el( 'div', 'goalcart-sticky__inner' );
 		var content = el( 'div', 'goalcart-sticky__content' );
-		var close = el( 'button', 'goalcart-sticky__close' );
 		var reward = rewardStatus( goal );
 
 		content.appendChild( progressBar( goal ) );
@@ -1195,18 +1578,67 @@
 			content.appendChild( reward );
 		}
 
-		close.type = 'button';
-		close.setAttribute( 'aria-label', 'Dismiss' );
-		close.textContent = '\u00D7';
-		close.addEventListener( 'click', function () {
-			stickyDismissed = true;
-			bar.classList.remove( 'goalcart-sticky--visible' );
-			bar.setAttribute( 'aria-hidden', 'true' );
-		} );
+		if ( sticky.countdown && goal.countdown_end ) {
+			var countdown = countdownPanel( goal );
+
+			if ( countdown ) {
+				content.appendChild( countdown );
+			}
+		}
+
+		// Full display: the top suggestion rides along as a small link.
+		if ( sticky.display === 'full' && sticky.suggestions ) {
+			var suggestion = stickySuggestion( goal );
+
+			if ( suggestion ) {
+				content.appendChild( suggestion );
+			}
+		}
 
 		inner.appendChild( content );
-		inner.appendChild( close );
+
+		if ( sticky.behavior !== 'auto_hide' ) {
+			var close = el( 'button', 'goalcart-sticky__close' );
+
+			close.type = 'button';
+			close.setAttribute( 'aria-label', uiLabel( 'dismiss', 'Dismiss' ) );
+			close.textContent = '\u00D7';
+			close.addEventListener( 'click', function () {
+				stickyDismissed = true;
+				bar.classList.remove( 'goalcart-sticky--visible' );
+				bar.setAttribute( 'aria-hidden', 'true' );
+			} );
+			inner.appendChild( close );
+		}
+
 		bar.replaceChildren( inner );
+	}
+
+	/**
+	 * The top suggestion as a single compact link (sticky bar full mode).
+	 *
+	 * @param {Object} goal Progress goal entry.
+	 * @return {HTMLElement|null}
+	 */
+	function stickySuggestion( goal ) {
+		var items = ( goal.suggestions && goal.suggestions.length ) ? goal.suggestions : [];
+
+		if ( ! items.length ) {
+			return null;
+		}
+
+		var item = items[ 0 ];
+		var link = el( 'a', 'goalcart-sticky__suggestion' );
+
+		if ( item.permalink && isSafeUrl( item.permalink ) ) {
+			link.href = String( item.permalink );
+		}
+
+		link.setAttribute( 'rel', 'noreferrer' );
+		link.appendChild( el( 'span', 'goalcart-sticky__suggestion-name', String( item.name || '' ) ) );
+		link.appendChild( el( 'span', 'goalcart-sticky__suggestion-price', String( item.price_html || item.price || '' ) ) );
+
+		return link;
 	}
 
 	/**
@@ -1347,6 +1779,77 @@
 	}
 
 	/**
+	 * Bind the delegated gift-picker click handler (Phase 32).
+	 *
+	 * One listener on document.body covers every widget's picker buttons;
+	 * the ids ride on the button's data attributes.
+	 *
+	 * @return {void}
+	 */
+	function bindGiftPicker() {
+		if ( ! cfg.giftEndpoint || ! cfg.giftNonce ) {
+			return;
+		}
+
+		document.body.addEventListener( 'click', function ( event ) {
+			var target = event.target;
+
+			while ( target && target !== document.body ) {
+				if ( target.classList && target.classList.contains( 'goalcart-gift-picker__button' ) ) {
+					claimGift( target );
+					return;
+				}
+				target = target.parentNode;
+			}
+		} );
+	}
+
+	/**
+	 * Start the countdown ticker (Phase 32).
+	 *
+	 * One interval rewrites every `.goalcart-countdown__time` readout from
+	 * its data attribute every second — no widget re-render involved.
+	 *
+	 * @return {void}
+	 */
+	function bindCountdownTicker() {
+		window.setInterval( function () {
+			safe( function () {
+				var nodes = document.querySelectorAll( '.goalcart-countdown__time' );
+
+				for ( var i = 0; i < nodes.length; i++ ) {
+					var end = nodes[ i ].getAttribute( 'data-goalcart-end' );
+
+				if ( end ) {
+					nodes[ i ].textContent = countdownText( end );
+				}
+			}
+		} );
+		}, 1000 );
+	}
+
+	/**
+	 * Track the scroll direction for the sticky bar's auto-hide behavior
+	 * (Phase 32).
+	 *
+	 * @return {void}
+	 */
+	function bindStickyScroll() {
+		var sticky = cfg.sticky || {};
+
+		if ( sticky.behavior !== 'auto_hide' ) {
+			return;
+		}
+
+		window.addEventListener( 'scroll', function () {
+			var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+			stickyLastScrollY = y;
+			stickyAutoHidden = false;
+			safe( refresh );
+		}, { passive: true } );
+	}
+
+	/**
 	 * Boot the widgets.
 	 *
 	 * @return {void}
@@ -1354,11 +1857,25 @@
 	function init() {
 		bindCartEvents();
 		bindSuggestionTracking();
+		bindGiftPicker();
+		bindCountdownTicker();
+		bindStickyScroll();
 
 		// Phase 18 (mobile behavior): re-render when the viewport crosses
 		// the mobile breakpoint so hidden widgets appear/disappear live.
 		if ( cfg.mobile === 'hide' ) {
 			window.addEventListener( 'resize', refresh );
+		}
+
+		// Phase 32 (sticky bar delay): after sticky.delay seconds the bar
+		// becomes eligible to show.
+		var sticky = cfg.sticky || {};
+
+		if ( Number( sticky.delay ) > 0 ) {
+			stickyDelayTimer = window.setTimeout( function () {
+				stickyShown = true;
+				safe( refresh );
+			}, Number( sticky.delay ) * 1000 );
 		}
 
 		refresh();
