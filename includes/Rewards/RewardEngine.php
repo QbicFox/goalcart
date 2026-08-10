@@ -1049,6 +1049,19 @@ final class RewardEngine {
 			return;
 		}
 
+		// The goal must be currently met — a removed gift line for a
+		// still-active goal whose cart no longer qualifies must NOT be
+		// re-added. Re-evaluate the goal against the live cart (the same
+		// path sync_cart uses) to confirm the shopper still qualifies.
+		$context = null !== $this->cart_integration
+			? $this->cart_integration->context( $cart )
+			: \GoalCart\Goals\CartContext::from_cart( $cart );
+		$result  = $this->engine->evaluate( $goal, $context );
+
+		if ( ! $result->eligible() || \GoalCart\Goals\GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+			return;
+		}
+
 		$reward = Reward::from_goal( $goal );
 
 		if ( Reward::TYPE_FREE_GIFT !== $reward->type()

@@ -849,6 +849,58 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$wpdb->update( $goals_table, array( 'status' => 'inactive' ), array( 'id' => $goal_id ) );
 		$cart->remove_cart_item( $restored_key );
 		check( 'removed gift not restored once the goal is inactive', null !== $restored_key && ! isset( $cart->cart_contents[ $restored_key ] ) );
+
+		// ---- Sub-scenario: goal active but unmet (cart below target) ----
+		// Re-activate the goal (the transaction will roll back, so this is
+		// safe). The restoring handler must check the goal is CURRENTLY MET,
+		// not just active.
+		$wpdb->update( $goals_table, array( 'status' => 'active' ), array( 'id' => $goal_id ) );
+
+		// Add a fresh gift line manually (the previous one was removed and
+		// not restored).
+		$cart->cart_contents['giftY'] = array(
+			'key'                   => 'giftY',
+			'product_id'            => $product_id,
+			'variation_id'          => 0,
+			'quantity'              => 1,
+			'data'                  => wc_get_product( $product_id ),
+			'goalcart_gift'         => true,
+			'goalcart_gift_goal'    => $goal_id,
+			'goalcart_gift_product' => $product_id,
+			'line_subtotal'         => 50.0,
+			'line_total'            => 50.0,
+		);
+
+		// Reduce the qualifier below the 100 target (price 30 × qty 1 = 30,
+		// plus the gift line at price 50 = 80 total, below 100). The stored
+		// line_subtotal (200) is intentionally STALE — this simulates the
+		// cart page state after set_quantity() changed the quantity but
+		// before the totals pass refreshed line values.
+		$qual->set_price( 30 );
+		$qual->set_regular_price( 30 );
+		$cart->cart_contents['q1']['quantity'] = 1;
+
+		// CartContext must use the current price × quantity, not the stale
+		// line_subtotal (the Fix 1 stale-context guard). With the qualifier
+		// at 30 × 1 = 30 and the gift line at 50 × 1 = 50, the subtotal
+		// should be 80, not the stale 200 + 50 = 250.
+		$ctx = \GoalCart\Goals\CartContext::from_cart( $cart );
+		check( 'CartContext subtotal uses current price × quantity', near( 80.0, $ctx->subtotal() ) );
+
+		// Remove the gift line — restore_removed_gift must NOT re-add it
+		// because the cart no longer qualifies (goal target 100, subtotal
+		// 30 after the gift is removed). This is the Fix 2 hardening.
+		$cart->remove_cart_item( 'giftY' );
+		$still_restored = false;
+
+		foreach ( $cart->get_cart() as $key => $item ) {
+			if ( ! empty( $item['goalcart_gift_goal'] ) && $goal_id === (int) $item['goalcart_gift_goal'] ) {
+				$still_restored = true;
+				break;
+			}
+		}
+
+		check( 'gift not restored when the goal is unmet', ! $still_restored );
 	} finally {
 		$wpdb->query( 'ROLLBACK' );
 		WC()->session = $real_session;
@@ -1085,6 +1137,47 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$engine->sync_cart( $cart );
 		check( 'chosen gift revoked when the goal stops qualifying', 0 === count( $gift_lines( $choose_goal ) ) );
 		check( 'auto gift revoked with the goal', 0 === count( $gift_lines( $auto_goal ) ) );
+
+		// ---- Sub-scenario: stale line_subtotal after set_quantity ----
+		// Simulates the cart-page flow: WC_Cart::set_quantity() updates the
+		// `quantity` field but leaves `line_subtotal`/`line_total` at their
+		// previous values. CartContext::from_cart() must recompute the line
+		// value from price × quantity so the goal evaluation uses the
+		// CURRENT cart, not the stale line_subtotal. The auto goal has a
+		// target of 100; the qualifier price is 60 and quantity is 1 (stale
+		// line_subtotal = 60, below target). After raising quantity to 2
+		// without refreshing line_subtotal (still 60), the correct subtotal
+		// is 120 — the goal is now met and the gift must be granted.
+		$cart->cart_contents['q1'] = array(
+			'key'           => 'q1',
+			'product_id'    => 5,
+			'variation_id'  => 0,
+			'quantity'      => 1,
+			'data'          => $qual,
+			'line_subtotal' => 60.0,
+			'line_total'    => 60.0,
+		);
+		$qual->set_price( 60 );
+		$qual->set_regular_price( 60 );
+
+		// The qualifier at qty 1 is below the target (60 < 100).
+		$engine->sync_cart( $cart );
+		check( 'no gift below goal with stale context', 0 === count( $gift_lines( $auto_goal ) ) );
+
+		// Now simulate set_quantity(2): update quantity but NOT line_subtotal
+		// (the stale-context condition). The engine must see the CORRECT
+		// subtotal (120) and grant the gift.
+		$cart->cart_contents['q1']['quantity'] = 2;
+		// line_subtotal is deliberately left at 60.0 (stale)
+		$engine->sync_cart( $cart );
+		$stale_lines = $gift_lines( $auto_goal );
+		check( 'gift granted despite stale line_subtotal (price×quantity used)', 1 === count( $stale_lines ) );
+
+		// Crossing back down: decrease quantity to 1 (qualified subtotal
+		// back to 60, below goal). The gift must be revoked.
+		$cart->cart_contents['q1']['quantity'] = 1;
+		$engine->sync_cart( $cart );
+		check( 'gift revoked when stale context would keep it', 0 === count( $gift_lines( $auto_goal ) ) );
 	} finally {
 		$wpdb->query( 'ROLLBACK' );
 		WC()->session = $real_session;

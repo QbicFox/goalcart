@@ -264,16 +264,42 @@ final class CartContext {
 				? array_map( array( __CLASS__, 'clean_text' ), array_map( 'strval', (array) $attributes_map[ $category_product_id ] ) )
 				: self::product_attributes( $product );
 
+			// The money bases must reflect the line's CURRENT quantity even
+			// while WooCommerce is mid-calculation: WC_Cart::set_quantity()
+			// updates the line's `quantity` immediately but leaves
+			// `line_subtotal`/`line_total` at their previous values until the
+			// post-before_calculate_totals totals pass refreshes them. The
+			// goal engine evaluates on 'woocommerce_before_calculate_totals'
+			// (see the timing note above), so relying on the stored line
+			// totals would read the OLD quantity — a cart that just crossed
+			// the goal threshold upward would still evaluate below it (gift
+			// not granted) and a cart that crossed downward would still
+			// evaluate above it (gift not revoked). When the product is
+			// available, the line value is therefore recomputed as
+			// price × quantity — the same math the totals pass will run —
+			// and the stored (possibly stale) value is only trusted when no
+			// product price can be read.
+			$quantity = isset( $cart_item['quantity'] ) ? (float) $cart_item['quantity'] : 1.0;
+			$price    = method_exists( $product, 'get_price' ) ? (float) $product->get_price( 'edit' ) : 0.0;
+
+			if ( $price > 0 ) {
+				$line_subtotal = $price * $quantity;
+				$line_total    = $line_subtotal;
+			} else {
+				$line_subtotal = isset( $cart_item['line_subtotal'] ) ? (float) $cart_item['line_subtotal'] : 0.0;
+				$line_total    = isset( $cart_item['line_total'] ) ? (float) $cart_item['line_total'] : 0.0;
+			}
+
 			$items[] = new CartItem(
 				array(
 					'product_id'    => $product->get_id(),
 					'variation_id'  => ! empty( $cart_item['variation_id'] ) ? (int) $cart_item['variation_id'] : 0,
 					'name'          => $product->get_name(),
-					'quantity'      => isset( $cart_item['quantity'] ) ? (float) $cart_item['quantity'] : 1.0,
-					'line_subtotal' => isset( $cart_item['line_subtotal'] ) ? (float) $cart_item['line_subtotal'] : 0.0,
-					'line_total'    => isset( $cart_item['line_total'] ) ? (float) $cart_item['line_total'] : 0.0,
+					'quantity'      => $quantity,
+					'line_subtotal' => $line_subtotal,
+					'line_total'    => $line_total,
 					'line_tax'      => isset( $cart_item['line_tax'] ) ? (float) $cart_item['line_tax'] : 0.0,
-					'price'         => (float) $product->get_price(),
+					'price'         => $price,
 					'weight'        => (float) $product->get_weight(),
 					'categories'    => $categories,
 					'tags'          => $tags,

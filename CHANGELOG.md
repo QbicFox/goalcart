@@ -128,6 +128,26 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **Free-gift auto-add/remove was inverted on the cart page (regression).**
+  Two root causes fixed. (1) **CartContext read stale `line_subtotal`**
+  during `woocommerce_before_calculate_totals`: `WC_Cart::set_quantity()`
+  updates the `quantity` field immediately but leaves `line_subtotal` at
+  its previous value until the totals pass recomputes it. The goal engine
+  evaluates on `before_calculate_totals`, so a cart that just crossed the
+  threshold upward would still read the old, lower subtotal (gift not
+  granted), and a cart that crossed downward would still read the old,
+  higher subtotal (gift not revoked). `CartContext::from_cart()` now
+  recomputes every line's value as `price × quantity` when the product
+  price is available — the same math the totals pass will run — so the
+  goal evaluation always sees the current cart, not the stale snapshot.
+  (2) **`restore_removed_gift` never checked the goal is currently met:**
+  when a gift line was removed via `woocommerce_cart_item_removed`, the
+  engine re-added it as long as the goal was merely *active* (status =
+  'active'), even if the cart no longer qualified. It now re-evaluates
+  the goal against the live cart and only restores the gift when the goal
+  is still met (`REWARD_UNLOCKED`). `tests/reward-test.php` grew to 130
+  checks (0 failures) with transactional coverage of the stale-context
+  crossing (up and down) and the unmet-goal restore hardening.
 - **The campaign template preview on the Appearance page showed three
   plain goal cards instead of the campaign readout (milestone chain /
   campaign progress).** The page's live preview builds its own sample
