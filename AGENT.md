@@ -954,6 +954,29 @@ instead of per-goal cards.
 
 Do not inject into locations that could cause duplicate rendering.
 
+### Live updates on AJAX cart changes (Phase 11 bug fix)
+
+The widgets now refresh in place on every cart-mutating AJAX interaction —
+no reload, no polling. Root cause found: the classic jQuery events
+(`added_to_cart` … `wc_fragments_refreshed`) were bound, but coupon
+apply/remove and cart-emptied were not, and WooCommerce Blocks cart
+mutations (Store API) never fired a classic jQuery event at all, so the
+widget froze until a reload on block-driven pages. `assets/js/frontend.js`
+now funnels every mechanism into one `goalcart:cart-changed` bridge on
+`document.body`: the classic events (incl. `applied_coupon` /
+`removed_coupon` / `wc_cart_emptied`), the Blocks `wc-blocks_*` DOM
+events, and a `wp.data.subscribe` subscription to the `wc/store/cart`
+store (fingerprint = cartHash + totals, so coupon/shipping-driven total
+changes are caught too). Refreshes are trailing-debounced (150 ms) with
+one 700 ms follow-up after the session write lands; a supersede guard
+(epoch + abort of the in-flight XHR) stops a stale response from
+overwriting fresher progress; a subtle `goalcart-widget--updating` dim
+(never a blank/flash) shows while a cart-change refresh is in flight.
+Purely presentational wiring — no change to goal/reward calculation,
+REST, or caching (`performance_caching` was already keyed by the cart
+snapshot). Verified: `node --check`, `php -l` and
+`tests/frontend-test.php` (98 checks) all pass.
+
 ---
 
 # Phase 12 — Progress Templates

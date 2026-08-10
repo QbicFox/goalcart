@@ -102,6 +102,16 @@
 	display: none;
 }
 
+/* Live cart-change refresh: while the widgets re-fetch the progress
+ * payload after an AJAX cart mutation they dim subtly (never blank or
+ * flash). The sticky bar uses the same class on its container. */
+
+.goalcart-widget--updating .goalcart-widget__goals,
+#goalcart-sticky.goalcart-widget--updating .goalcart-sticky__inner {
+	opacity: 0.7;
+	transition: opacity 0.15s ease;
+}
+
 /* Phase 18 (Settings → Frontend → mobile behavior = hide). */
 
 .goalcart-widget--mobile-hidden {
@@ -807,7 +817,9 @@
 	.goalcart-ring__fill,
 	.goalcart-sticky,
 	.goalcart-card--celebrate,
-	.goalcart-confetti__piece {
+	.goalcart-confetti__piece,
+	.goalcart-widget--updating .goalcart-widget__goals,
+	#goalcart-sticky.goalcart-widget--updating .goalcart-sticky__inner {
 		transition: none;
 		animation: none;
 	}

@@ -202,6 +202,21 @@ check( 'frontend JS skips ineligible goals when rendering', false !== strpos( $f
 check( 'frontend JS renders each goal card with its own template', false !== strpos( $frontend_js, 'goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) )' ) );
 check( 'frontend JS keeps the sticky bar featured-only', false !== strpos( $frontend_js, 'var goal = featuredGoal( goals );' ) );
 
+// Live cart-change refresh (Phase 11): every WooCommerce cart-mutation
+// signal must reach the widgets through ONE centralized bridge — the
+// classic jQuery events (incl. coupon / emptied), the Blocks wc-blocks_*
+// DOM events and the wc/store/cart data store — with a supersede guard
+// so a stale in-flight response can never overwrite fresher progress.
+check( 'frontend JS binds the coupon/emptied classic cart events', false !== strpos( $frontend_js, "'applied_coupon'" ) && false !== strpos( $frontend_js, "'removed_coupon'" ) && false !== strpos( $frontend_js, "'wc_cart_emptied'" ) );
+check( 'frontend JS normalizes every signal through one cart-changed bridge', false !== strpos( $frontend_js, 'goalcart:cart-changed' ) && false !== strpos( $frontend_js, 'emitCartChanged' ) );
+check( 'frontend JS subscribes to the Blocks cart data store', false !== strpos( $frontend_js, 'wc/store/cart' ) && false !== strpos( $frontend_js, 'wpData.subscribe' ) );
+check( 'frontend JS folds cart totals into the Blocks store fingerprint', false !== strpos( $frontend_js, "totals.total_price" ) );
+check( 'frontend JS clears the updating state on any request end', false !== strpos( $frontend_js, 'request.onloadend' ) );
+check( 'frontend JS binds the Blocks add/remove DOM events', false !== strpos( $frontend_js, 'wc-blocks_added_to_cart' ) && false !== strpos( $frontend_js, 'wc-blocks_removed_from_cart' ) );
+check( 'frontend JS supersedes stale refresh responses', false !== strpos( $frontend_js, 'fetchEpoch' ) && false !== strpos( $frontend_js, 'activeFetch' ) );
+check( 'frontend JS debounces cart-change refreshes', false !== strpos( $frontend_js, 'cartFollowUpTimer' ) && false !== strpos( $frontend_js, 'refresh( { updating: true } )' ) );
+check( 'frontend JS shows a subtle updating state while refreshing', false !== strpos( $frontend_js, 'goalcart-widget--updating' ) );
+
 // Self-healing tracking nonce (Phase 28): every /progress response mints
 // a fresh goalcart_track nonce so frontend.js can adopt it after a
 // cached page served an expired or foreign one. The toggles are pinned

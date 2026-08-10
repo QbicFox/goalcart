@@ -111,6 +111,28 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **The storefront progress widgets now update live on every AJAX cart
+  change (Phase 11).** Previously the widgets only refreshed on the
+  classic jQuery cart events (`added_to_cart` … `wc_fragments_refreshed`)
+  — coupon apply/remove and cart-emptied were not bound, and WooCommerce
+  Blocks cart mutations (Store API) never fired a classic jQuery event,
+  so on block-driven pages (or after coupon actions) the progress froze
+  until a full page reload. `assets/js/frontend.js` now funnels every
+  cart-change mechanism into one `goalcart:cart-changed` bridge on
+  `document.body`: the classic events (now incl. `applied_coupon` /
+  `removed_coupon` / `wc_cart_emptied`), the Blocks `wc-blocks_*` DOM
+  events, and a `wp.data.subscribe` subscription to the `wc/store/cart`
+  store whose fingerprint folds in the totals (so coupon/shipping-driven
+  total changes are caught). Refreshes are trailing-debounced (150 ms,
+  no request storm from quantity steppers) with one 700 ms follow-up
+  after the session write lands; a supersede guard (epoch counter +
+  abort of the in-flight XHR) ensures a stale response can never
+  overwrite fresher progress; and a subtle `goalcart-widget--updating`
+  dim (never a blank or flash, disabled under
+  `prefers-reduced-motion`) signals an in-flight refresh. Purely
+  presentational — no change to goal/reward calculation, REST payloads
+  or caching. `tests/frontend-test.php` gained 10 source-scan checks
+  (98 total).
 - **Free-gift rewards are now shopper-proof — and actually get added.**
   Two gaps fixed. (1) When the reward type is free gift, the gift is now
   added to the cart **with a zero price** as soon as the goal is complete:

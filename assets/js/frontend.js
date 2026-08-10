@@ -130,6 +130,14 @@
 		return node;
 	}
 
+	// Race guard (live cart updates): every fetch gets a monotonically
+	// increasing epoch. When a newer refresh starts while an older one is
+	// still in flight, the older request is aborted and its response is
+	// ignored — a stale response can never overwrite fresher progress
+	// (e.g. two rapid cart changes, or a poll racing a cart event).
+	var fetchEpoch = 0;
+	var activeFetch = null;
+
 	/**
 	 * Fetch the progress payload.
 	 *
@@ -140,46 +148,85 @@
 	 * cart's progress after the shopper adds or removes items. A unique
 	 * timestamp query parameter forces a fresh evaluation every poll.
 	 *
-	 * @param {Function} done Callback receiving the parsed `data` object.
+	 * @param {Function} done  Callback receiving the parsed `data` object.
+	 * @param {Function} [ended] Called when the request finishes (success,
+	 *                          failure or superseded) — used to clear the
+	 *                          transient "updating" state.
 	 * @return {void}
 	 */
-	function fetchProgress( done ) {
+	function fetchProgress( done, ended ) {
 		var request = new XMLHttpRequest();
 		var separator = cfg.endpoint.indexOf( '?' ) >= 0 ? '&' : '?';
+		var myEpoch = ++fetchEpoch;
+
+		// A newer refresh supersedes this one: abort the in-flight request
+		// so its response can never reach the widgets, then take its place.
+		if ( activeFetch ) {
+			try {
+				activeFetch.abort();
+			} catch ( error ) {}
+		}
+		activeFetch = request;
+
+		function finish() {
+			// Only the CURRENT request may release the "updating" state; a
+			// superseded request's late callback is a no-op.
+			if ( activeFetch === request ) {
+				activeFetch = null;
+				if ( ended ) {
+					ended();
+				}
+			}
+		}
 
 		request.open( 'GET', cfg.endpoint + separator + '_=' + Date.now(), true );
 		request.timeout = 10000;
 
 		request.onload = function () {
-			if ( request.status < 200 || request.status >= 300 ) {
+			if ( myEpoch !== fetchEpoch ) {
+				finish();
 				return;
-			}				safe( function () {
-					var payload = JSON.parse( request.responseText );
-					if ( payload && payload.data ) {
-						// Self-healing tracking nonce: every /progress response
-						// carries a freshly minted goalcart_track nonce. Adopt it
-						// before the next event report so a cached page's expired
-						// or foreign nonce can never block analytics for the rest
-						// of the session.
-						if ( tracking && payload.data.tracking_nonce ) {
-							tracking.nonce = payload.data.tracking_nonce;
-						}
+			}
 
-						// Phase 32 (free gift selection): the payload also
-						// mints a fresh gift nonce every poll, so a long-lived
-						// cart page never outlives its gift-claim nonce window
-						// (adopt it before the shopper claims a gift).
-						if ( payload.data.gift_nonce ) {
-							cfg.giftNonce = payload.data.gift_nonce;
-						}
+			if ( request.status < 200 || request.status >= 300 ) {
+				finish();
+				return;
+			}
 
-						done( payload.data );
+			safe( function () {
+				var payload = JSON.parse( request.responseText );
+				if ( payload && payload.data ) {
+					// Self-healing tracking nonce: every /progress response
+					// carries a freshly minted goalcart_track nonce. Adopt it
+					// before the next event report so a cached page's expired
+					// or foreign nonce can never block analytics for the rest
+					// of the session.
+					if ( tracking && payload.data.tracking_nonce ) {
+						tracking.nonce = payload.data.tracking_nonce;
 					}
-				} );
+
+					// Phase 32 (free gift selection): the payload also
+					// mints a fresh gift nonce every poll, so a long-lived
+					// cart page never outlives its gift-claim nonce window
+					// (adopt it before the shopper claims a gift).
+					if ( payload.data.gift_nonce ) {
+						cfg.giftNonce = payload.data.gift_nonce;
+					}
+
+					done( payload.data );
+				}
+			} );
+
+			finish();
 		};
 
-		request.onerror = function () {};
-		request.ontimeout = function () {};
+		request.onerror = function () { finish(); };
+		request.ontimeout = function () { finish(); };
+		// Safety net: fires on success, error, timeout AND abort, so the
+		// "updating" state can never linger behind a request that ends in
+		// any way (finish() is idempotent — the activeFetch guard makes
+		// superseded requests no-ops).
+		request.onloadend = function () { finish(); };
 		request.send();
 	}
 
@@ -788,7 +835,7 @@
 
 		request.onload = function () {
 			if ( request.status >= 200 && request.status < 300 ) {
-				refreshAfterCartChange();
+				emitCartChanged();
 				return;
 			}
 
@@ -1656,8 +1703,44 @@
 	 *
 	 * @return {void}
 	 */
-	function refresh() {
+	/**
+	 * Toggle the subtle "updating" feedback across every mounted widget
+	 * (cart-change refreshes only — never a blank/unmount or a flash).
+	 *
+	 * @param {boolean} on Whether the widgets are refreshing.
+	 * @return {void}
+	 */
+	function setUpdating( on ) {
+		var containers = document.querySelectorAll( WIDGET_SELECTOR );
+
+		for ( var i = 0; i < containers.length; i++ ) {
+			containers[ i ].classList.toggle( 'goalcart-widget--updating', !! on );
+		}
+
+		var bar = document.getElementById( STICKY_ID );
+
+		if ( bar ) {
+			bar.classList.toggle( 'goalcart-widget--updating', !! on );
+		}
+	}
+
+	/**
+	 * Refresh every mounted widget from the progress endpoint.
+	 *
+	 * @param {Object} [options] Options.
+	 * @param {boolean} [options.updating] Show the subtle updating state
+	 *                                     while this refresh is in flight
+	 *                                     (cart-change refreshes).
+	 * @return {void}
+	 */
+	function refresh( options ) {
 		safe( function () {
+			options = options || {};
+
+			if ( options.updating ) {
+				setUpdating( true );
+			}
+
 			fetchProgress( function ( data ) {
 				safe( function () {
 					var containers = document.querySelectorAll( WIDGET_SELECTOR );
@@ -1682,41 +1765,85 @@
 
 					trackGoals( data );
 				} );
+			}, function () {
+				safe( function () {
+					setUpdating( false );
+				} );
 			} );
 		} );
 	}
 
-	// Coalesces the 600 ms follow-up poll: WooCommerce fires several cart
-	// events per mutation (added_to_cart, then wc_fragments_refreshed,
-	// then updated_cart_totals …), so only one trailing re-poll should
-	// survive each burst.
+	// Cart-change refresh timers. WooCommerce fires several events per
+	// mutation (added_to_cart, then wc_fragments_refreshed, then
+	// updated_cart_totals …) and the Blocks data store can notify several
+	// times per change too, so both timers are reset on every signal and
+	// only the trailing refresh of a burst survives.
 	var cartRefreshTimer = null;
+	var cartFollowUpTimer = null;
 
 	/**
-	 * Refresh after a WooCommerce cart mutation.
+	 * Refresh after a WooCommerce cart mutation (the single handler every
+	 * cart-change signal funnels into).
 	 *
-	 * The AJAX request that triggered the cart event only persists the
-	 * session on PHP shutdown — after its response has been flushed to
-	 * the browser. A poll fired straight from the event can therefore
-	 * race that write and read the previous cart, leaving the widgets
-	 * frozen on stale progress until the next cart event. Refresh
-	 * immediately AND once more once the write has had time to land, so
-	 * the widgets settle on the persisted cart. The extra poll is cheap:
-	 * unchanged payloads are skipped by the fingerprint check, and rapid
-	 * successive events collapse into a single follow-up.
+	 * Debounce: the immediate refresh is trailing-debounced (150 ms) so a
+	 * quantity stepper clicked repeatedly or a burst of fragment events
+	 * fires ONE request, not a storm. Follow-up: the AJAX request that
+	 * triggered the cart event only persists the session on PHP shutdown
+	 * — after its response has been flushed to the browser. A poll fired
+	 * straight from the event can therefore race that write and read the
+	 * previous cart, leaving the widgets frozen on stale progress until
+	 * the next cart event. One extra poll 700 ms after the burst settles
+	 * lets the widgets land on the persisted cart; it is cheap because
+	 * unchanged payloads are skipped by the fingerprint check.
 	 *
 	 * @return {void}
 	 */
 	function refreshAfterCartChange() {
-		refresh();
-
 		if ( cartRefreshTimer ) {
 			window.clearTimeout( cartRefreshTimer );
 		}
 		cartRefreshTimer = window.setTimeout( function () {
 			cartRefreshTimer = null;
+			refresh( { updating: true } );
+		}, 150 );
+
+		if ( cartFollowUpTimer ) {
+			window.clearTimeout( cartFollowUpTimer );
+		}
+		cartFollowUpTimer = window.setTimeout( function () {
+			cartFollowUpTimer = null;
 			refresh();
-		}, 600 );
+		}, 700 );
+	}
+
+	/**
+	 * The centralized cart-changed bridge.
+	 *
+	 * Every WooCommerce cart-change mechanism — the classic jQuery events,
+	 * the Blocks wc-blocks_* DOM events, the Blocks wc/store/cart data
+	 * store and the gift-claim flow — is normalized into ONE custom
+	 * `goalcart:cart-changed` event on document.body. A single listener
+	 * runs the debounced refresh, so every widget instance reacts to
+	 * every entry point consistently and a future entry point only has to
+	 * dispatch the event.
+	 *
+	 * @return {void}
+	 */
+	function emitCartChanged() {
+		try {
+			document.body.dispatchEvent( new CustomEvent( 'goalcart:cart-changed', { bubbles: true } ) );
+		} catch ( error ) {
+			refreshAfterCartChange();
+		}
+	}
+
+	/**
+	 * Bind the centralized cart-changed bridge listener.
+	 *
+	 * @return {void}
+	 */
+	function bindCartChangedBridge() {
+		document.body.addEventListener( 'goalcart:cart-changed', refreshAfterCartChange );
 	}
 
 	/**
@@ -1737,17 +1864,108 @@
 			'updated_wc_div',
 			'wc_fragments_refreshed',
 			'wc_fragments_loaded',
+			// Coupon apply/remove and cart emptied change the totals (and
+			// therefore goal eligibility) without an item mutation — the
+			// widget must refresh for them too.
+			'applied_coupon',
+			'removed_coupon',
+			'wc_cart_emptied',
 		];
 
 		if ( window.jQuery ) {
 			safe( function () {
-				window.jQuery( document.body ).on( events.join( ' ' ), refreshAfterCartChange );
+				window.jQuery( document.body ).on( events.join( ' ' ), emitCartChanged );
 			} );
 		} else {
 			for ( var i = 0; i < events.length; i++ ) {
-				document.body.addEventListener( events[ i ], refreshAfterCartChange );
+				document.body.addEventListener( events[ i ], emitCartChanged );
 			}
 		}
+	}
+
+	/**
+	 * Subscribe to the WooCommerce Blocks cart data store.
+	 *
+	 * Classic cart mutations fire the jQuery events bound above, but the
+	 * Cart/Checkout blocks mutate the cart through the Store API and only
+	 * the `wc/store/cart` data store (window.wp.data, loaded by the blocks
+	 * on the frontend) reflects every change — quantity steppers, item
+	 * removals, coupons and shipping inside the blocks never fire a
+	 * classic jQuery event. This subscribes to the store and normalizes
+	 * any cart-data change into the same `goalcart:cart-changed` bridge.
+	 * The `wc-blocks_*` DOM events the blocks package translates from the
+	 * classic jQuery events (add/remove only) are bound too, so block
+	 * add-to-cart from archive/product grids is covered even before the
+	 * data store updates.
+	 *
+	 * @return {void}
+	 */
+	function bindBlockStore() {
+		// The blocks package dispatches these native DOM events on
+		// document.body for block-driven add/remove actions.
+		document.body.addEventListener( 'wc-blocks_added_to_cart', emitCartChanged );
+		document.body.addEventListener( 'wc-blocks_removed_from_cart', emitCartChanged );
+
+		var wpData = window.wp && window.wp.data;
+
+		if ( ! wpData || ! wpData.select || ! wpData.subscribe ) {
+			return;
+		}
+
+		// A compact fingerprint of the cart store state: the server-computed
+		// cartHash when available, otherwise item keys + quantities.
+		function cartFingerprint() {
+			try {
+				var store = wpData.select( 'wc/store/cart' );
+
+				if ( ! store || ! store.getCartData ) {
+					return null;
+				}
+
+				var cart = store.getCartData() || {};
+
+				// The totals fold in coupon discounts and the shipping rate,
+				// neither of which the item-based cartHash covers — a coupon
+				// applied inside the Cart block changes the totals but not the
+				// items, so without this the widget would not refresh.
+				var totals = cart.totals || {};
+				var totalsPart = String( totals.total_price || '' ) + ':' + String( totals.currency_code || '' );
+
+				if ( cart.cartHash ) {
+					return String( cart.cartHash ) + '|' + totalsPart;
+				}
+
+				var parts = [];
+				var items = cart.items || [];
+
+				for ( var i = 0; i < items.length; i++ ) {
+					parts.push( String( items[ i ].key || '' ) + ':' + String( items[ i ].quantity || 0 ) );
+				}
+
+				return String( cart.itemsCount || 0 ) + '|' + parts.join( ',' ) + '|' + totalsPart;
+			} catch ( error ) {
+				return null;
+			}
+		}
+
+		var lastCartFingerprint = null;
+
+		// The plain subscribe(listener) form works on every @wordpress/data
+		// version; the fingerprint guard keeps unrelated store changes
+		// silent. (Newer versions accept a store-name second argument, but
+		// the global form degrades safely everywhere.)
+		wpData.subscribe( function () {
+			safe( function () {
+				var fingerprint = cartFingerprint();
+
+				if ( fingerprint === null || fingerprint === lastCartFingerprint ) {
+					return;
+				}
+
+				lastCartFingerprint = fingerprint;
+				emitCartChanged();
+			} );
+		} );
 	}
 
 	/**
@@ -1855,7 +2073,9 @@
 	 * @return {void}
 	 */
 	function init() {
+		bindCartChangedBridge();
 		bindCartEvents();
+		bindBlockStore();
 		bindSuggestionTracking();
 		bindGiftPicker();
 		bindCountdownTicker();
