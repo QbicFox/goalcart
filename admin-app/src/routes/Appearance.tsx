@@ -160,9 +160,17 @@ function ScopeLivePreview({
     settings,
   };
 
+  // The sample milestones must carry the campaign's id so PreviewWidget's
+  // grouping (goal.campaign_id → campaign) actually joins them into the
+  // campaign and renders it through the selected campaign template —
+  // otherwise they fall through as standalone goal cards and the campaign
+  // preview always shows the wrong (basic) rendering.
   return (
     <PreviewWidget
-      goals={sampleMilestones()}
+      goals={sampleMilestones().map((goal) => ({
+        ...goal,
+        campaign_id: campaign.campaign_id,
+      }))}
       campaigns={[campaign]}
       currency={currency}
       tokens={tokens}

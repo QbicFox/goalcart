@@ -390,6 +390,16 @@ if ( isset( $post_id ) && ! is_wp_error( $post_id ) ) {
 // ---------------------------------------------------------------------------
 echo "\n== 8. Templates & appearance ==\n";
 
+// The Appearance admin screen's campaign live-preview stamps the sample
+// campaign id onto its sample milestones — without it PreviewWidget's
+// grouping (goal.campaign_id -> campaign) never joins them and the
+// campaign template (milestone chain / campaign progress) never
+// renders: the merchant would see three plain basic goal cards instead
+// of the campaign readout. Source-scanned so that regression cannot
+// slip through silently.
+$appearance_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/Appearance.tsx' );
+check( 'Appearance campaign preview stamps the sample campaign id on milestones', false !== strpos( $appearance_tsx, 'campaign_id: campaign.campaign_id' ) );
+
 $config = $ui->frontend_config();
 check( 'config carries the template', isset( $config['template'] ) && 'basic' === $config['template'] );
 check( 'config carries the animation flag', array_key_exists( 'animation', $config ) && true === $config['animation'] );

@@ -1159,6 +1159,19 @@ to the template contract, registry, storage shape, REST payloads or
 validation; save semantics (`template_defaults` + `template_settings`,
 divergence-only persistence) are byte-identical to before.
 
+### Campaign preview fix (Appearance page)
+
+Bug fix in the same presentational layer: the Appearance page's campaign
+live-preview showed three plain goal cards instead of the selected
+campaign template (milestone chain / campaign progress). The sample
+milestones were built with `campaign_id: 0` while the sample campaign
+carries `campaign_id: 999`, so `PreviewWidget`'s grouping never joined
+them into the campaign and the campaign renderer was never mounted.
+The page now stamps the sample campaign's id onto its sample milestones
+(`campaign_id: campaign.campaign_id`); the preview dialogs were already
+correct (server-side payload). `tests/frontend-test.php` gained a
+source-scan guard.
+
 ---
 
 # Phase 13 — Dynamic Messaging

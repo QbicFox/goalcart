@@ -128,6 +128,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **The campaign template preview on the Appearance page showed three
+  plain goal cards instead of the campaign readout (milestone chain /
+  campaign progress).** The page's live preview builds its own sample
+  data — a sample campaign (`campaign_id: 999`) plus sample milestone
+  goals — but `sampleGoal()` hardcoded `campaign_id: 0` on every
+  milestone. `PreviewWidget` groups a goal into a campaign only when
+  `goal.campaign_id` matches, so the milestones never joined the sample
+  campaign and the selected campaign template was never rendered — the
+  merchant saw the fallback `basic` cards instead. The Appearance page
+  now stamps the sample campaign's id onto its sample milestones before
+  rendering (`campaign_id: campaign.campaign_id`), so the preview shows
+  exactly what the storefront renders. The campaign/Goal preview
+  dialogs were already correct (they use the server-side preview
+  payload). `tests/frontend-test.php` gained a source-scan guard for
+  the stamping.
 - **The storefront progress widgets now update live on every AJAX cart
   change (Phase 11).** Previously the widgets only refreshed on the
   classic jQuery cart events (`added_to_cart` … `wc_fragments_refreshed`)
