@@ -34,6 +34,12 @@
             "Goal reward": [
                 "پاداش هدف"
             ],
+            "Goal template": [
+                "قالب هدف"
+            ],
+            "No templates are registered for this scope yet. Add one on the backend template registry.": [
+                "هنوز قالبی برای این محدوده ثبت نشده است. یکی را در فهرست قالب‌های بک‌اند اضافه کنید."
+            ],
             "Only {remaining} left to reach your goal": [
                 "تنها {remaining} تا رسیدن به هدف شما باقی مانده است"
             ],
@@ -45,6 +51,15 @@
             ],
             "Show cart goals, progress and rewards (Goal Cart).": [
                 "اهداف سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (Goal Cart)."
+            ],
+            "Template appearance": [
+                "ظاهر قالب"
+            ],
+            "Template scope": [
+                "محدودهٔ قالب"
+            ],
+            "The stored default template is no longer registered. The storefront falls back to the Basic template until you pick another one here.": [
+                "قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا انتخاب قالب دیگری در اینجا، از قالب پایه استفاده می‌کند."
             ],
             "This offer is not active right now.": [
                 "این پیشنهاد در حال حاضر فعال نیست."
@@ -822,9 +837,6 @@
             ],
             "OR (any child completes)": [
                 "یا (هر زیرشرطی تکمیل شود)"
-            ],
-            "Offer as optional": [
-                "ارائه به‌صورت اختیاری"
             ],
             "Only $38.00 left to reach your goal": [
                 "فقط $38.00 تا رسیدن به هدف شما باقی مانده است"

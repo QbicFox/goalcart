@@ -35,7 +35,6 @@ const STACKING_OPTIONS = [
 
 const GIFT_MODE_OPTIONS = [
   { value: 'automatic', label: __('Add automatically', 'goalcart') },
-  { value: 'optional', label: __('Offer as optional', 'goalcart') },
   { value: 'choose', label: __('Customer picks from a list', 'goalcart') },
 ];
 
@@ -245,10 +244,19 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                   select
                   label={__('Gift mode', 'goalcart')}
                   fullWidth
-                  value={meta.gift_add_mode ?? 'automatic'}
+                  // A goal saved before the 'optional' mode was removed may
+                  // still store it — render it as 'automatic' so the select
+                  // never shows a blank value; saving overwrites the legacy
+                  // mode with whatever the merchant picks. (The widening cast
+                  // is deliberate: the DB can still hold the removed value.)
+                  value={
+                    (meta.gift_add_mode as string | undefined) === 'optional'
+                      ? 'automatic'
+                      : (meta.gift_add_mode ?? 'automatic')
+                  }
                   onChange={(event) =>
                     patchMeta({
-                      gift_add_mode: event.target.value as 'automatic' | 'optional' | 'choose',
+                      gift_add_mode: event.target.value as 'automatic' | 'choose',
                     })
                   }
                 >

@@ -7,6 +7,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+### Removed
+
+- **The `optional` gift add mode is gone.** `gift_add_mode` now accepts
+  only `automatic` (silently add the configured gift — mandatory,
+  non-removable) and `choose` (shopper picks one gift from the
+  `gift_products` list). The Goal Builder's gift-mode select drops
+  "Offer as optional", `Reward::GIFT_OPTIONAL` and the `'optional'`
+  union member were deleted, and `docs/rewards.md` updated. Legacy goals
+  still storing `gift_add_mode = 'optional'` read as `automatic` (mode
+  normalization in the `Reward` model), so the removed value can never
+  reach the UI, REST payloads, or the engine again. Cart lines already
+  stamped `goalcart_gift_mode = 'optional'` keep their remove link until
+  the engine re-adds them. `tests/reward-test.php` (125 checks) covers
+  the legacy normalization; the POT/JED were regenerated and the five
+  template-UI strings the committed POT was missing now carry Persian
+  translations (`tests/i18n-test.php` 53/53).
+
 ### Added
 
 - **Phase 32 — Advanced V2 features** — the full V2 surface:

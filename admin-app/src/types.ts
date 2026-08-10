@@ -77,7 +77,7 @@ export interface RewardMetaInput {
   gift_product_id?: number;
   /** Phase 32 (free gift selection): candidate gifts for 'choose' mode. */
   gift_products?: number[];
-  gift_add_mode?: 'automatic' | 'optional' | 'choose';
+  gift_add_mode?: 'automatic' | 'choose';
   coupon_code?: string;
   coupon_generate?: boolean;
   coupon_discount_type?: 'percent' | 'fixed_cart';

@@ -38,8 +38,9 @@ defined( 'ABSPATH' ) || exit;
  *  - 'woocommerce_cart_calculate_fees'      apply percentage/fixed fees
  *  - 'woocommerce_package_rates'            apply free shipping	 *  - 'woocommerce_cart_item_remove_link'    hide the remove link only of
 	 *                                           mandatory (automatic-mode)
-	 *                                           gift lines; optional/selectable
-	 *                                           gifts keep their remove control
+	 *                                           gift lines; selectable
+	 *                                           (choose-mode) gifts keep their
+	 *                                           remove control
 	 *  - 'woocommerce_cart_item_quantity'       lock gift lines to quantity 1
 	 *                                           (classic cart page display;
 	 *                                           enforcement is server-side via
@@ -199,7 +200,7 @@ final class RewardEngine {
 		// Mandatory (automatic-mode) gifts are shopper-proof: the remove
 		// link is hidden, the quantity is locked to 1, and a removed gift
 		// line is restored on the spot while its goal still grants it.
-		// Optional and selectable gifts keep their remove control (their
+		// Selectable (choose-mode) gifts keep their remove control (their
 		// removal is respected server-side) but still cannot change
 		// quantity. The quantity lock is display-only on the classic cart
 		// page — enforcement is authoritative via clamp_gift_quantities().
@@ -628,10 +629,10 @@ final class RewardEngine {
 	 * keep shopper-chosen gifts while their goal still grants them.
 	 *
 	 * Automatic gifts are added for the goal's configured product.
-	 * Optional/choose-mode gifts are left to the shopper — but a gift the
-	 * shopper already chose (via the public gift endpoint) is kept as long
-	 * as the goal still grants it AND the chosen product is still in the
-	 * gift list; a re-configured reward revokes the stale line.
+	 * Choose-mode gifts are left to the shopper — but a gift the shopper
+	 * already chose (via the public gift endpoint) is kept as long as the
+	 * goal still grants it AND the chosen product is still in the gift
+	 * list; a re-configured reward revokes the stale line.
 	 *
 	 * Stale gift lines are removed by scanning the live cart for
 	 * goal-marked lines, not just the session record: a gift whose
@@ -690,12 +691,12 @@ final class RewardEngine {
 				continue;
 			}
 
-			// Optional/choose: keep a previously chosen gift while it is
-			// still allowed by the current reward configuration. If the
-			// session record was lost (session expiry, restored persistent
-			// cart) the choice is recovered from the goal-marked line
-			// already in the cart, so a validly chosen gift is never swept
-			// just because the session is empty.
+			// Choose mode: keep a previously chosen gift while it is still
+			// allowed by the current reward configuration. If the session
+			// record was lost (session expiry, restored persistent cart)
+			// the choice is recovered from the goal-marked line already in
+			// the cart, so a validly chosen gift is never swept just
+			// because the session is empty.
 			$chosen = isset( $applied_map[ (int) $goal_id ] ) ? (int) $applied_map[ (int) $goal_id ] : 0;
 
 			if ( $chosen <= 0 ) {
@@ -933,8 +934,8 @@ final class RewardEngine {
 	 *
 	 * Hooked to 'woocommerce_cart_item_remove_link'. Returning '' removes
 	 * the “Remove” affordance from the cart table. Mandatory
-	 * (automatic-mode) gifts cannot be removed by the shopper; optional
-	 * and selectable gifts keep their remove control, and the removal is
+	 * (automatic-mode) gifts cannot be removed by the shopper; selectable
+	 * (choose-mode) gifts keep their remove control, and the removal is
 	 * respected server-side (restore_removed_gift only re-adds mandatory
 	 * gifts).
 	 *

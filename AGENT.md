@@ -646,7 +646,7 @@ Three free-gift defects were fixed in the reward engine (`RewardEngine`,
   scan is scoped to evaluated goals so nested totals passes (WC fires
   `calculate_totals` from `woocommerce_add_to_cart` mid-reconcile) and
   stale caches can never sweep a valid gift; customer-added lines of the
-  same product (no goal marker) always survive. Optional/selectable
+  same product (no goal marker) always survive. Selectable (choose-mode)
   choices are recovered from the cart when the session record is lost.
 - **Selectable (choose) mode works (Bug C).** Root cause:
   `FreeGiftApplicator::apply()` treated any line for the goal as
@@ -659,17 +659,36 @@ Three free-gift defects were fixed in the reward engine (`RewardEngine`,
 - **Removal permission is now per mode.** The gift add-mode is stamped on
   every gift line (`goalcart_gift_mode`, self-healed on kept legacy
   lines); the remove link is hidden only for mandatory (automatic) gifts
-  — optional and selectable gifts keep theirs (their removal is respected
-  server-side; mandatory removal is rejected by re-adding while the goal
-  still grants, which is also the Blocks-cart enforcement). Legacy
-  unstamped lines fall back to a repository lookup, then conservative
-  mandatory.
+  — selectable (choose-mode) gifts keep theirs (their removal is
+  respected server-side; mandatory removal is rejected by re-adding
+  while the goal still grants, which is also the Blocks-cart
+  enforcement). Legacy unstamped lines fall back to a repository lookup,
+  then conservative mandatory.
 
 Verified: `tests/reward-test.php` grew to 122 checks (0 failures),
 including transactional end-to-end coverage of stale removal,
 customer-line survival and choose-mode re-selection; all PHP lints
 clean; `tests/frontend-test.php` (98) and `tests/engine-test.php` (75)
 still pass.
+
+### Gift add-mode surface (Phase 5 / Phase 32 change)
+
+The `optional` gift add mode was removed from `gift_add_mode`. The Goal
+Builder's gift-mode select now offers only `automatic` (silently add the
+single configured gift — mandatory, non-removable) and `choose` (shopper
+picks one gift from the `gift_products` list); `Reward::GIFT_OPTIONAL`
+and the `'optional'` union member were deleted and `docs/rewards.md`
+updated. Legacy goals that still store `gift_add_mode = 'optional'`
+normalize to `automatic` at the `Reward` model boundary
+(`Reward::__construct`), so the value can never surface in the UI, the
+REST payloads, or the engine again and their gifts behave as mandatory
+until re-configured. Cart lines already stamped
+`goalcart_gift_mode = 'optional'` keep their per-mode remove-link policy
+(removable) until the engine re-adds them. No engine behavior changed
+for `automatic` / `choose`. The POT/JED were regenerated and the five
+template-UI strings the committed POT was missing now carry Persian
+translations (`tests/i18n-test.php` back to 53/53;
+`tests/reward-test.php` at 125 checks).
 
 ---
 

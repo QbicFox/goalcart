@@ -45,13 +45,15 @@ final class Reward {
 	/**
 	 * Gift add modes.
 	 *
+	 * 'automatic' silently adds the single configured gift product once
+	 * the goal is reached (mandatory — the shopper cannot remove it).
 	 * Phase 32 (free gift selection) adds 'choose': the shopper picks one
 	 * gift from the configured `gift_products` list through the storefront
-	 * widget picker (automatic and optional keep the single-gift
-	 * behavior).
+	 * widget picker. The former 'optional' mode was removed (its auto-add
+	 * but shopper-removable behavior blurred the mandatory/selectable
+	 * model); legacy goals still storing it read as 'automatic'.
 	 */
 	const GIFT_AUTOMATIC = 'automatic';
-	const GIFT_OPTIONAL  = 'optional';
 	const GIFT_CHOOSE    = 'choose';
 
 	/**
@@ -149,7 +151,7 @@ final class Reward {
 	protected $shipping_method_ids;
 
 	/**
-	 * Gift product id for free-gift rewards (automatic/optional modes).
+	 * Gift product id for free-gift rewards (automatic mode).
 	 *
 	 * @var int
 	 */
@@ -163,7 +165,7 @@ final class Reward {
 	protected $gift_products;
 
 	/**
-	 * automatic|optional|choose — how the gift is added.
+	 * automatic|choose — how the gift is added.
 	 *
 	 * @var string
 	 */
@@ -209,6 +211,13 @@ final class Reward {
 		$this->gift_product_id     = isset( $data['gift_product_id'] ) ? (int) $data['gift_product_id'] : 0;
 		$this->gift_products       = $this->ints( isset( $data['gift_products'] ) ? $data['gift_products'] : array() );
 		$this->gift_add_mode       = isset( $data['gift_add_mode'] ) ? (string) $data['gift_add_mode'] : self::GIFT_AUTOMATIC;
+
+		// The 'optional' gift add mode was removed; a legacy goal still
+		// storing it reads as 'automatic' (mandatory, auto-added) so the
+		// value can never surface in the UI or the engine again.
+		if ( 'optional' === $this->gift_add_mode ) {
+			$this->gift_add_mode = self::GIFT_AUTOMATIC;
+		}
 		$this->coupon_code         = isset( $data['coupon_code'] ) ? (string) $data['coupon_code'] : '';
 		$this->coupon_generate     = ! empty( $data['coupon_generate'] );
 		$this->coupon_discount_type = isset( $data['coupon_discount_type'] ) ? (string) $data['coupon_discount_type'] : self::COUPON_PERCENT;
@@ -382,8 +391,8 @@ final class Reward {
 	/**
 	 * Whether a product id is a valid gift for this reward.
 	 *
-	 * Choose mode accepts any id in the gift list; automatic/optional mode
-	 * accepts the single configured gift product.
+	 * Choose mode accepts any id in the gift list; automatic mode accepts
+	 * the single configured gift product.
 	 *
 	 * @param int $product_id Product id.
 	 * @return bool

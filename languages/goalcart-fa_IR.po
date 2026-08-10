@@ -62,6 +62,12 @@ msgstr "پیشرفت Goal Cart"
 msgid "Goal reward"
 msgstr "پاداش هدف"
 
+msgid "Goal template"
+msgstr "قالب هدف"
+
+msgid "No templates are registered for this scope yet. Add one on the backend template registry."
+msgstr "هنوز قالبی برای این محدوده ثبت نشده است. یکی را در فهرست قالب‌های بک‌اند اضافه کنید."
+
 #: includes/Goals/MessageEngine.php:171
 msgid "Only {remaining} left to reach your goal"
 msgstr "تنها {remaining} تا رسیدن به هدف شما باقی مانده است"
@@ -77,6 +83,15 @@ msgstr "پاداش فعال شد: {reward}"
 #: includes/Frontend/ProgressUI.php:192
 msgid "Show cart goals, progress and rewards (Goal Cart)."
 msgstr "اهداف سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (Goal Cart)."
+
+msgid "Template appearance"
+msgstr "ظاهر قالب"
+
+msgid "Template scope"
+msgstr "محدودهٔ قالب"
+
+msgid "The stored default template is no longer registered. The storefront falls back to the Basic template until you pick another one here."
+msgstr "قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا انتخاب قالب دیگری در اینجا، از قالب پایه استفاده می‌کند."
 
 #: includes/Goals/MessageEngine.php:145
 msgid "This offer is not active right now."
@@ -862,9 +877,6 @@ msgstr "هیچ‌کدام"
 msgid "OR (any child completes)"
 msgstr "یا (هر زیرشرطی تکمیل شود)"
 
-msgid "Offer as optional"
-msgstr "ارائه به‌صورت اختیاری"
-
 msgid "Only $38.00 left to reach your goal"
 msgstr "فقط $38.00 تا رسیدن به هدف شما باقی مانده است"
 
@@ -1360,37 +1372,29 @@ msgstr "قالب پیش‌فرضی که کل کمپین را در فروشگاه
 msgid "Use global default"
 msgstr "استفاده از پیش‌فرض سراسری"
 
-
-
 #: includes/Templates/Goal/RingTemplate.php
 msgid "Circular gauge — the target as a filled ring with the percentage centered."
 msgstr "نمودار حلقه‌ای — هدف به‌صورت حلقه پر شده با درصد در مرکز."
-
 
 #: includes/Templates/Goal/RingTemplate.php
 msgid "Ring"
 msgstr "حلقه"
 
-
 #: includes/Templates/Goal/RingTemplate.php
 msgid "Ring color"
 msgstr "رنگ حلقه"
-
 
 #: includes/Templates/Goal/RingTemplate.php
 msgid "Ring size (px)"
 msgstr "اندازه حلقه (پیکسل)"
 
-
 #: includes/Templates/Goal/RingTemplate.php
 msgid "Show the percentage in the center"
 msgstr "نمایش درصد در مرکز"
 
-
 #: includes/Templates/Goal/RingTemplate.php
 msgid "Stroke width (px)"
 msgstr "ضخامت خط (پیکسل)"
-
 
 #: includes/Templates/Goal/RingTemplate.php
 msgid "Track color"

@@ -116,11 +116,15 @@ $json = Reward::from_goal(
     goal(
         array(
             'reward_type'  => Reward::TYPE_FREE_GIFT,
-            'reward_meta'  => json_encode( array( 'gift_product_id' => 42, 'gift_add_mode' => Reward::GIFT_OPTIONAL ) ),
+            // A legacy goal that still stores the removed 'optional' add
+            // mode (pre-Phase-33 data) must read as automatic so the mode
+            // can never surface in the UI or the engine again.
+            'reward_meta'  => json_encode( array( 'gift_product_id' => 42, 'gift_add_mode' => 'optional' ) ),
         )
     )
 );
-check( 'reward_meta accepts a JSON string', 42 === $json->gift_product_id() && ! $json->is_gift_automatic() );
+check( 'reward_meta accepts a JSON string', 42 === $json->gift_product_id() && $json->is_gift_automatic() );
+check( 'legacy optional gift mode normalized to automatic', Reward::GIFT_AUTOMATIC === $json->gift_add_mode() );
 
 $empty = Reward::from_goal( goal( array() ) );
 check( 'no reward configured -> has_config false', ! $empty->has_config() );
@@ -401,14 +405,14 @@ $r = $reward_engine->evaluate(
             array(
                 'target'      => 100,
                 'reward_type' => Reward::TYPE_FREE_GIFT,
-                'reward_meta' => array( 'gift_product_id' => 42, 'gift_add_mode' => Reward::GIFT_OPTIONAL ),
+                'reward_meta' => array( 'gift_product_id' => 42, 'gift_add_mode' => Reward::GIFT_AUTOMATIC ),
             )
         ),
         $full_cart
     )
 );
 check( 'configured gift available', RewardResult::STATE_AVAILABLE === $r->state() );
-check( 'gift meta carries product + mode', 42 === $r->meta()['gift_product_id'] && Reward::GIFT_OPTIONAL === $r->meta()['gift_add_mode'] );
+check( 'gift meta carries product + mode', 42 === $r->meta()['gift_product_id'] && Reward::GIFT_AUTOMATIC === $r->meta()['gift_add_mode'] );
 
 // 5o. Zero-target goal with reward -> unlocked -> available
 $r = $reward_engine->evaluate(
@@ -610,9 +614,9 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'line_subtotal' => 25.0,
 		'line_total'    => 25.0,
 	);
-	// Optional-mode gift: removable by the shopper (removal permission is
-	// per mode — mandatory gifts hide the remove control, optional and
-	// selectable gifts keep it).
+	// Choose-mode gift: removable by the shopper (removal permission is
+	// per mode — mandatory gifts hide the remove control, selectable
+	// (choose-mode) gifts keep it).
 	$cart->cart_contents['gift2'] = array(
 		'key'                 => 'gift2',
 		'product_id'          => 42,
@@ -622,7 +626,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'goalcart_gift'       => true,
 		'goalcart_gift_goal'  => 2,
 		'goalcart_gift_product' => 42,
-		'goalcart_gift_mode'  => Reward::GIFT_OPTIONAL,
+		'goalcart_gift_mode'  => Reward::GIFT_CHOOSE,
 		'line_subtotal'       => 50.0,
 		'line_total'          => 50.0,
 	);
@@ -660,9 +664,10 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		check( 'gift remove link hidden', '' === $re->hide_gift_remove_link( '<a>x</a>', 'gift1' ) );
 		check( 'normal remove link kept', '<a>x</a>' === $re->hide_gift_remove_link( '<a>x</a>', 'norm1' ) );
 		check( 'unknown key remove link kept', '<a>x</a>' === $re->hide_gift_remove_link( '<a>x</a>', 'nope' ) );
-		// Removal permission per mode: optional gifts keep their remove
-		// control; legacy unstamped gift lines stay mandatory.
-		check( 'optional gift remove link kept', '<a>x</a>' === $re->hide_gift_remove_link( '<a>x</a>', 'gift2' ) );
+		// Removal permission per mode: selectable (choose-mode) gifts keep
+		// their remove control; legacy unstamped gift lines stay
+		// mandatory.
+		check( 'choose gift remove link kept', '<a>x</a>' === $re->hide_gift_remove_link( '<a>x</a>', 'gift2' ) );
 		check( 'legacy unstamped gift remove link hidden', '' === $re->hide_gift_remove_link( '<a>x</a>', 'gift3' ) );
 	} finally {
 		WC()->cart = $previous_cart;
