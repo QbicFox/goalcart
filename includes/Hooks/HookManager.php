@@ -106,6 +106,10 @@ class HookManager {
 			array( 'type' => 'filter', 'hook' => 'goalcart_template_classes', 'description' => 'The progress template class map (id => Template class). Register a new Goal or Campaign template here.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_tracking_enabled', 'description' => 'Whether the Phase 33 revenue event pipeline records events.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_retention_days', 'description' => 'Retention window (days) for the revenue/upsell event logs before the weekly cleanup purges them.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_enabled', 'description' => 'Whether Phase 33.2 revenue attribution (order association) is on.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_product_cost', 'description' => 'Product cost used by the Phase 33.2 reward-cost / profit estimation (null = no cost data).' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_metric_rows', 'description' => 'Row cap for the bounded Phase 33.2 metric reads.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_order_scan_pages', 'description' => 'Page cap for the Phase 33.2 store-wide order scans (AOV, shipping).' ),
 		);
 	}
 

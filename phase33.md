@@ -15,11 +15,11 @@ Phase: 33
 Name: Advanced V3 Revenue Optimization
 
 Phase Weight: 3%
-Phase Progress: 12.5%
-Project Contribution: 0.375%
+Phase Progress: 25%
+Project Contribution: 0.75%
 
 Phase:
-██░░░░░░░░░░░░░░░░░░ 12.5%
+█████░░░░░░░░░░░░░░░ 25%
 ```
 
 The purpose of this phase is to transform Goal Cart from a simple goal/progress-bar plugin into a **data-driven revenue optimization engine for WooCommerce**.
@@ -1994,8 +1994,56 @@ Tasks:
 Progress:
 
 ```text
-0%
+100% — COMPLETED
 ```
+
+Implementation notes (see `tests/attribution-test.php`, 71 checks):
+
+- **Order association** — `AttributionEngine` hooks
+  `woocommerce_payment_complete` plus `woocommerce_order_status_completed`
+  (backstop for manual transitions; both idempotent) and attributes each
+  revenue-producing order (statuses `processing`/`completed` only —
+  refunded/cancelled/failed orders are skipped) to the goals that
+  influenced its session within a 30-day lookback
+  (`ATTRIBUTION_WINDOW`). The order_paid event is recorded through the
+  Phase 33.1 tracker; rows land in `goal_attribution` guarded by the
+  `order_goal_model` unique key, so double processing is a no-op.
+- **Direct vs assisted models** — a goal the session progressed or
+  completed before ordering is `direct` (the order's incremental value —
+  order total above the cart value at first exposure — is split equally
+  across the direct goals, never double counted); a goal the session only
+  viewed is `assisted` (order total recorded, zero incremental value).
+  The session resolves from the recorded order_paid event, the live
+  cookie, or the logged-in user's recent goal session.
+- **Metrics (SQL-aggregated, bounded)** — `funnel()` (views → progressed
+  → completed → converted + completion/conversion rates),
+  `incremental_cart_value()` (cart value after exposure − value at first
+  exposure, per session), `attribution_summary()` (goal-driven =
+  SUM(direct incremental), goal-assisted = pure-assisted order totals,
+  goal-influenced = distinct order totals), `goal_metrics()`, `aov_analysis()`
+  (store-wide vs goal-exposed, labeled *observed* impact, never
+  causality) and `shipping_stats()` (average shipping, per-method, free
+  share — feeds the Phase 33.4 shipping-aware recommendations). Reads are
+  capped by `goalcart_attribution_metric_rows` /
+  `goalcart_attribution_order_scan_pages`.
+- **Reward cost** — `RewardCostEstimator` maps every reward type to a
+  deterministic cost model: percent (order total × % capped at max),
+  fixed (amount), coupon (percent/fixed per coupon settings), free
+  shipping (order shipping total) and free gift (gift product cost).
+  Models needing data the store lacks (shipping total, gift cost) return
+  `available: false` with the reason — never a guessed number.
+- **Margin & profit impact** — product cost is read from the store's
+  `_cost` / `_wc_cog_cost` fields through the `goalcart_product_cost`
+  filter (never modified); `estimated_profit = incremental_revenue ×
+  margin% − reward_cost − shipping_cost`. Without margin data the profit
+  is reported unavailable with a reason (revenue-only analytics).
+- **Feature flags** — attribution gates on the master + analytics toggles
+  through the tracker's consent chain plus the
+  `goalcart_attribution_enabled` filter (documented in the hooks list).
+- **Graceful degradation** — no margin data → profit unavailable but all
+  revenue metrics still compute; no WooCommerce order data → AOV/shipping
+  comparisons mark `comparison_available: false`; refunded/zero-total
+  orders are never attributed.
 
 ---
 

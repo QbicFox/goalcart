@@ -10,7 +10,9 @@ namespace GoalCart;
 use GoalCart\Admin\Admin;
 use GoalCart\Admin\AssetLoader;
 use GoalCart\Analytics\AnalyticsRepository;
+use GoalCart\Analytics\AttributionEngine;
 use GoalCart\Analytics\RevenueTracker;
+use GoalCart\Analytics\RewardCostEstimator;
 use GoalCart\Analytics\Session;
 use GoalCart\Analytics\Tracker;
 use GoalCart\Campaigns\CampaignRepository;
@@ -175,6 +177,12 @@ final class Plugin {
 		// with idempotent dedup and the weekly retention cleanup cron.
 		$this->hooks()->register( $this->container->get( RevenueTracker::class ) );
 
+		// Revenue attribution (Phase 33.2): associates paid orders with the
+		// goals that influenced their session (direct/assisted models) and
+		// exposes the revenue metrics — incremental cart value, goal-driven
+		// / assisted revenue, AOV, reward cost and profit impact.
+		$this->hooks()->register( $this->container->get( AttributionEngine::class ) );
+
 		// Storefront progress UI (Phase 11): shortcode, display-location
 		// injection, sticky bar and frontend assets.
 		$this->hooks()->register( $this->container->get( ProgressUI::class ) );
@@ -270,6 +278,28 @@ final class Plugin {
 			return new RevenueTracker(
 				$container->get( Settings::class ),
 				$container->get( Session::class )
+			);
+		} );
+
+		// Reward cost / profit impact estimator (Phase 33.2): deterministic
+		// reward-cost models per type, product margin detection (only when
+		// the store provides cost data) and profit impact with graceful
+		// degradation to revenue-only analytics.
+		$this->container->singleton( RewardCostEstimator::class, function () {
+			return new RewardCostEstimator();
+		} );
+
+		// Revenue attribution engine (Phase 33.2): order association on
+		// payment, direct/assisted attribution into goal_attribution, and
+		// the SQL-aggregated metric reads (funnel, incremental cart value,
+		// goal-driven/assisted revenue, AOV, shipping stats).
+		$this->container->singleton( AttributionEngine::class, function ( Container $container ) {
+			return new AttributionEngine(
+				$container->get( RevenueTracker::class ),
+				$container->get( Session::class ),
+				$container->get( Settings::class ),
+				$container->get( RewardCostEstimator::class ),
+				$container->get( GoalRepository::class )
 			);
 		} );
 

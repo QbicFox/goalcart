@@ -47,6 +47,50 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   - **Tests** — new `tests/revenue-foundation-test.php` (66 checks)
     covering wiring, schema/index presence, whitelists, recording,
     dedup windows, privacy and cleanup; all rolled back, zero residue.
+- **Phase 33.2 — Revenue Attribution** — the attribution engine on top of
+  the 33.1 event funnel (P33-T02):
+  - **Order association** — new `AttributionEngine`
+    (`includes/Analytics/`) hooks `woocommerce_payment_complete` plus
+    `woocommerce_order_status_completed` (both idempotent) and
+    attributes every revenue-producing order (statuses `processing` /
+    `completed` only) to the goals that influenced its session within a
+    30-day lookback. Rows land in `goal_attribution` under the
+    `order_goal_model` unique key; the order_paid event is recorded
+    through the 33.1 tracker.
+  - **Direct vs assisted attribution** — a goal the session progressed
+    or completed before ordering is `direct` (the order's incremental
+    value — order total above the cart value at first exposure — is
+    split equally across the direct goals, never double counted); a
+    viewed-only goal is `assisted` (order total recorded, zero
+    incremental). The session resolves from the recorded order_paid
+    event, the live cookie, or the logged-in user's recent goal session.
+  - **Metrics** — SQL-aggregated, bounded reads: funnel counts with
+    completion/conversion rates, incremental cart value (peak − baseline
+    per session), goal-driven (direct incremental) revenue, goal-assisted
+    revenue (pure-assisted orders), goal-influenced revenue (distinct
+    order totals), per-goal performance metrics, AOV analysis
+    (store-wide vs goal-exposed — labeled *observed* impact, never
+    causality) and shipping stats (average, per-method, free share).
+  - **Reward cost** — new `RewardCostEstimator` maps every reward type
+    to a deterministic cost model (percent capped at max, fixed,
+    coupon, free shipping via the order shipping total, free gift via
+    the gift product cost); models needing missing store data return
+    `available: false` with the reason — never a guessed number.
+  - **Margin & profit impact** — product cost is read from the store's
+    `_cost` / `_wc_cog_cost` fields through the new
+    `goalcart_product_cost` filter (never modified);
+    `estimated_profit = incremental_revenue × margin% − reward_cost −
+    shipping_cost`, degrading gracefully to revenue-only analytics when
+    the store has no margin data.
+  - **Feature flags** — attribution gates on the master + analytics
+    toggles plus the new `goalcart_attribution_enabled` filter; reads
+    are capped by `goalcart_attribution_metric_rows` /
+    `goalcart_attribution_order_scan_pages`.
+  - **Tests** — new `tests/attribution-test.php` (71 checks) covering
+    reward-cost models, margin/profit degradation, order association,
+    model selection, idempotency, funnel/conversion metrics,
+    incremental cart value, summaries, AOV and shipping stats — all in
+    a rolled-back transaction with baseline-aware store-wide assertions.
 
 ### Removed
 
