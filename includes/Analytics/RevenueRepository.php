@@ -31,6 +31,12 @@ defined( 'ABSPATH' ) || exit;
  *                          the engine until the next aggregation tick.
  *  - product_stats()     — per-product upsell aggregates read from
  *                          upsell_stats (rebuilt by DailyAggregator).
+ *  - upsell_ranking()    — the Phase 33.5 Smart Upsell ranked products for
+ *                          a cart + goal context (cached, deterministic).
+ *  - upsell_analytics()  — the top-products upsell analytics table
+ *                          (impressions/clicks/adds/orders/revenue/profit/
+ *                          score) over a window.
+ *  - upsell_product_detail() — one product's score breakdown + stats.
  *
  * Caching (P33.3): every read is memoized in a transient whose key embeds a
  * generation counter (goalcart_revenue_cache_version). invalidate() bumps the
@@ -104,16 +110,25 @@ final class RevenueRepository {
 	protected $recommendations;
 
 	/**
+	 * Smart upsell ranking engine (Phase 33.5).
+	 *
+	 * @var UpsellRanker
+	 */
+	protected $upsells;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AttributionEngine        $engine         Revenue attribution engine.
 	 * @param GoalRepository           $repository     Goal repository.
 	 * @param GoalRecommendationEngine $recommendations Goal recommendation engine.
+	 * @param UpsellRanker|null        $upsells        Upsell ranking engine (Phase 33.5).
 	 */
-	public function __construct( AttributionEngine $engine, GoalRepository $repository, GoalRecommendationEngine $recommendations ) {
+	public function __construct( AttributionEngine $engine, GoalRepository $repository, GoalRecommendationEngine $recommendations, ?UpsellRanker $upsells = null ) {
 		$this->engine         = $engine;
 		$this->repository     = $repository;
 		$this->recommendations = $recommendations;
+		$this->upsells        = $upsells;
 	}
 
 	/**
@@ -422,6 +437,201 @@ final class RevenueRepository {
 
 				return $items;
 			}
+		);
+	}
+
+	/**
+	 * Smart upsell ranking (Phase 33.5), cached.
+	 *
+	 * The UpsellRanker is deterministic and pure (no writes), so caching
+	 * only skips recomputation; the existing invalidation — order payment/
+	 * status changes (upsell funnel), goal CRUD (eligibility), product
+	 * saves (prices/stock/margin), aggregation runs (upsell_stats) —
+	 * already covers every event that could change a ranking.
+	 *
+	 * @param array<string, mixed> $args Optional: goal_id, cart_value,
+	 *                                   remaining, cart, limit, exclude.
+	 * @return array<string, mixed>
+	 */
+	public function upsell_ranking( array $args = array() ) {
+		if ( null === $this->upsells ) {
+			return $this->upsells_unavailable( 'Smart upsell ranking is not available.' );
+		}
+
+		return $this->cached(
+			'upsell_rank',
+			$args,
+			self::RECS_CACHE_TTL,
+			function () use ( $args ) {
+				return $this->upsells->rank( $args );
+			}
+		);
+	}
+
+	/**
+	 * Top-products upsell analytics table (Phase 33.5), cached.
+	 *
+	 * Unlike product_stats() (which reads the pre-aggregated upsell_stats
+	 * table), this read supports the admin analytics window (from/to) and
+	 * goal filtering by scanning the retention-bounded upsell_events log
+	 * — grouped per product, bounded by the same pagination caps as the
+	 * other revenue reads. Each row is enriched with the product's margin
+	 * (when the store provides cost data) and its upsell score computed
+	 * through the same Phase 33.5 component math.
+	 *
+	 * @param array<string, mixed> $args Optional: from, to, goal_id, limit.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function upsell_analytics( array $args = array() ) {
+		return $this->cached(
+			'upsell_analytics',
+			$args,
+			self::PRODUCTS_CACHE_TTL,
+			function () use ( $args ) {
+				return $this->build_upsell_analytics( $args );
+			}
+		);
+	}
+
+	/**
+	 * One product's upsell score breakdown + historical stats (Phase 33.5),
+	 * cached.
+	 *
+	 * @param int                  $product_id Product id.
+	 * @param array<string, mixed> $args       Optional: goal_id, cart_value,
+	 *                                         remaining, cart.
+	 * @return array<string, mixed>|null Null when the product is not found
+	 *                                   or not rankable.
+	 */
+	public function upsell_product_detail( $product_id, array $args = array() ) {
+		if ( null === $this->upsells ) {
+			return null;
+		}
+
+		return $this->cached(
+			'upsell_product',
+			array_merge( $args, array( 'product_id' => (int) $product_id ) ),
+			self::PRODUCTS_CACHE_TTL,
+			function () use ( $product_id, $args ) {
+				return $this->upsells->product_detail( (int) $product_id, $args );
+			}
+		);
+	}
+
+	/**
+	 * Build the top-products upsell analytics rows.
+	 *
+	 * @param array<string, mixed> $args Optional: from, to, goal_id, limit.
+	 * @return array<int, array<string, mixed>>
+	 */
+	protected function build_upsell_analytics( array $args ) {
+		global $wpdb;
+
+		$events = Schema::table( 'upsell_events' );
+		$posts  = $wpdb->posts;
+		$limit  = max( 1, min( 100, isset( $args['limit'] ) ? (int) $args['limit'] : 20 ) );
+
+		$where  = '1=1';
+		$params = array();
+
+		if ( ! empty( $args['goal_id'] ) ) {
+			$where .= ' AND goal_id = %d';
+			$params[] = (int) $args['goal_id'];
+		}
+
+		if ( ! empty( $args['from'] ) ) {
+			$where .= ' AND created_at >= %s';
+			$params[] = date( 'Y-m-d 00:00:00', strtotime( (string) $args['from'] ) );
+		}
+
+		if ( ! empty( $args['to'] ) ) {
+			$where .= ' AND created_at <= %s';
+			$params[] = date( 'Y-m-d 23:59:59', strtotime( (string) $args['to'] ) );
+		}
+
+		$impression = RevenueTracker::EVENT_UPSELL_IMPRESSION;
+		$clicked    = RevenueTracker::EVENT_UPSELL_CLICKED;
+		$added      = RevenueTracker::EVENT_UPSELL_ADDED;
+		$order      = RevenueTracker::EVENT_UPSELL_ORDER;
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT product_id,
+					SUM( CASE WHEN event_type = %s THEN 1 ELSE 0 END ) AS impressions,
+					SUM( CASE WHEN event_type = %s THEN 1 ELSE 0 END ) AS clicks,
+					SUM( CASE WHEN event_type = %s THEN 1 ELSE 0 END ) AS adds,
+					COUNT( DISTINCT CASE WHEN event_type = %s THEN order_id END ) AS orders,
+					SUM( CASE WHEN event_type = %s THEN COALESCE(cart_value, 0) ELSE 0 END ) AS revenue
+				 FROM {$events}
+				 WHERE product_id IS NOT NULL AND {$where}
+				 GROUP BY product_id
+				 ORDER BY orders DESC, revenue DESC, impressions DESC
+				 LIMIT %d",
+				array_merge(
+					array( $impression, $clicked, $added, $order, $order ),
+					$params,
+					array( $limit )
+				)
+			),
+			ARRAY_A
+		);
+
+		$items = array();
+
+		foreach ( (array) $rows as $row ) {
+			$product_id = (int) $row['product_id'];
+			$product    = function_exists( 'wc_get_product' ) ? wc_get_product( $product_id ) : false;
+
+			if ( ! $product ) {
+				continue;
+			}
+
+			$impressions = (int) $row['impressions'];
+			$stats       = array(
+				'impressions' => $impressions,
+				'clicks'      => (int) $row['clicks'],
+				'adds'        => (int) $row['adds'],
+				'orders'      => (int) $row['orders'],
+				'revenue'     => (float) $row['revenue'],
+			);
+
+			$items[] = array(
+				'product_id'      => $product_id,
+				'name'            => $product->get_name(),
+				'impressions'     => $impressions,
+				'clicks'          => $stats['clicks'],
+				'adds'            => $stats['adds'],
+				'orders'          => $stats['orders'],
+				'revenue'         => round( $stats['revenue'], 4 ),
+				'conversion_rate' => $impressions > 0 ? round( $stats['orders'] / $impressions, 4 ) : 0.0,
+				// Scored standalone (no cart context) through the same
+				// Phase 33.5 component math — margin/profit included when the
+				// store provides cost data, neutral otherwise.
+				'upsell_score'    => null !== $this->upsells
+					? (float) $this->upsells->score_product( $product )['score']
+					: 0.0,
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * The unavailable ranking payload shape (graceful degradation).
+	 *
+	 * @param string $reason Human-readable reason.
+	 * @return array<string, mixed>
+	 */
+	protected function upsells_unavailable( $reason ) {
+		return array(
+			'available'   => false,
+			'status'      => 'unavailable',
+			'reason'      => $reason,
+			'context'     => array(),
+			'candidates'  => 0,
+			'weights'     => array(),
+			'recommendations' => array(),
+			'generated_at' => current_time( 'mysql' ),
 		);
 	}
 

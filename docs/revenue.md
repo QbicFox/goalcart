@@ -239,3 +239,95 @@ layer — excluded without margin data.
 The public `recommend()` payload is the frontend contract. A future
 `MLGoalRecommendationEngine` can replace the deterministic class behind
 that same shape without touching the REST layer or the admin UI (P33-60).
+
+---
+
+# Goal Cart — Smart Upsell Ranking (Phase 33.5)
+
+`UpsellRanker` (`includes/Analytics/`) answers *"which products should
+this shopper add to reach the goal?"* with a fully transparent,
+deterministic weighted ranking — no LLM/AI. Every product exposes its
+component scores, raw factors, historical conversion stats and
+plain-English reasons, so the admin UI and the storefront can always
+show *why* a product was recommended.
+
+## 1. Pipeline
+
+1. **Candidates (P33-26)** — the goal's own products (`manual`),
+   products historically recommended for the goal (`historical`),
+   products in the goal's categories (`category`), the cart items'
+   WooCommerce-endorsed sources (`upsell` / `cross_sell` / `related`),
+   products sharing a category or tag with the cart (`category_match` /
+   `tag_match`) and best sellers (`popular`). Bounded to 60 candidates;
+   out-of-stock / private / draft / already-in-cart / goal-excluded
+   products never reach scoring.
+2. **Six normalized (0–100) component scores** with filterable weights
+   (`goalcart_upsell_weights`, defaults below).
+3. **Ranking (P33-34)** — composite `score` desc; ties break by lower
+   price, then product id (fully deterministic).
+
+## 2. Component scores
+
+| Component | Default weight | Signal |
+| --- | --- | --- |
+| `price_gap` | 25% | how well the price fits the remaining goal gap — sweet band `[0.75×, 1.30×]` scores 100 (small overshoots tolerated, P33-27/36), hard decay to 0 at 3×; neutral 50 without a price/gap |
+| `relevance` | 25% | goal eligibility (manual products +55, counts-toward-goal +35), category overlap with the cart (+30), tag overlap (+20), WC-endorsed source trust (+15) |
+| `popularity` | 15% | units sold (bounded at 100) + average rating |
+| `inventory` | 10% | stock >20 → 100, 5–20 → 70, 1–4 → 40, backorder → 20; unmanaged stock → neutral 70 |
+| `margin` | 15% | only when the store provides product cost data (never invented); neutral 50 otherwise |
+| `conversion` | 10% | the product's historical upsell funnel, impressions-weighted so sparse data blends toward neutral 50 |
+
+A partial `goalcart_upsell_weights` filter falls back per key (missing
+keys keep their defaults unchanged, provided keys normalize among
+themselves) — a filter returning only `price_gap`/`relevance` cannot
+zero the other components.
+
+## 3. Historical learning (P33-35)
+
+The storefront reports upsell interactions through
+`POST /goalcart/v1/upsell/track` (public, privacy-safe session ids) into
+the Phase 33.1 `upsell_events` log: `upsell_impression` (deduped per
+session+goal+product within 24h), `upsell_clicked`, `upsell_added` and
+`upsell_order`. When a paid order completes, `attribute_order()` resolves
+the ordering session (the `order_paid` event's session, then the live
+cookie, then the user's recent revenue session) and records one
+`upsell_order` event per product shown/clicked/added in that session —
+the "purchased after recommendation" signal. The Phase 33.3
+`DailyAggregator::aggregate_upsells()` rebuilds `upsell_stats` from that
+log, and the conversion scorer reads the aggregates: deterministic
+historical scoring, no black-box model.
+
+## 4. Graceful degradation (P33-51)
+
+- No goal / no remaining gap → `available: false` with a reason (never a
+  fabricated list); a closed gap is explicit.
+- Disabled via `goalcart_upsells_enabled` → unavailable with a reason.
+- No margin data → margin neutral 50, `profit_available: false`,
+  `estimated_profit: null` — the product still ranks.
+- No historical data → conversion neutral 50.
+- No candidates → unavailable with a reason.
+
+## 5. API & caching
+
+- `GET /goalcart/v1/revenue/upsells` (admin) — the ranked products for a
+  cart + goal context (`goal_id`, `cart_value`, `remaining`, `cart`,
+  `limit`), including weights, context echo and per-product breakdowns.
+- `GET /goalcart/v1/revenue/upsells/{product_id}` (admin) — one product's
+  score breakdown + historical stats (null for unknown products).
+- Both are served through `RevenueRepository::upsell_ranking()` /
+  `upsell_product_detail()` — the same generation-versioned transients
+  as every other revenue read; the existing invalidation (order
+  payment/status, goal CRUD, product saves, aggregation) keeps rankings
+  fresh. `RevenueRepository::upsell_analytics()` powers the admin
+  top-products table over a window (impressions/clicks/adds/orders/
+  revenue/profit/score).
+- `goalcart_upsell_candidates` / `goalcart_upsells` filters let callers
+  pin the candidate set and shape the payload.
+- **Safety:** the ranker never writes anything. Historical events are
+  recorded only by the public track endpoint and the order hooks.
+
+## 6. Extensibility (future AI/ML)
+
+The public `rank()` payload is the frontend contract. A future
+`MLUpsellRanker` can replace this class behind the same payload shape
+without touching the REST layer or the admin UI (P33-60).

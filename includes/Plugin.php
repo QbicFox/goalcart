@@ -16,6 +16,7 @@ use GoalCart\Analytics\GoalRecommendationEngine;
 use GoalCart\Analytics\RevenueRepository;
 use GoalCart\Analytics\RevenueTracker;
 use GoalCart\Analytics\RewardCostEstimator;
+use GoalCart\Analytics\UpsellRanker;
 use GoalCart\Analytics\Session;
 use GoalCart\Analytics\Tracker;
 use GoalCart\Campaigns\CampaignRepository;
@@ -38,6 +39,7 @@ use GoalCart\REST\SearchController;
 use GoalCart\REST\SettingsController;
 use GoalCart\REST\TemplatesController;
 use GoalCart\REST\TrackController;
+use GoalCart\REST\UpsellController;
 use GoalCart\Rewards\RewardEngine;
 use GoalCart\Settings\Settings;
 use GoalCart\Suggestions\SuggestionEngine;
@@ -202,6 +204,15 @@ final class Plugin {
 		// served read-only through the cached revenue repository.
 		$this->hooks()->register( $this->container->get( RecommendationsController::class ) );
 
+		// Smart upsell (Phase 33.5): the deterministic product-ranking
+		// engine (candidate collection, price-gap/relevance/inventory
+		// /popularity/margin/conversion scorers, composite weighted score)
+		// attributes upsell_order events server-side when a paid order
+		// completes, and the controller exposes the public upsell tracking
+		// endpoint plus the admin ranking/analytics reads.
+		$this->hooks()->register( $this->container->get( UpsellRanker::class ) );
+		$this->hooks()->register( $this->container->get( UpsellController::class ) );
+
 		// Storefront progress UI (Phase 11): shortcode, display-location
 		// injection, sticky bar and frontend assets.
 		$this->hooks()->register( $this->container->get( ProgressUI::class ) );
@@ -350,11 +361,34 @@ final class Plugin {
 		// performance / daily trend / product stats / goal recommendations
 		// with generation-versioned transients and invalidation on order,
 		// goal, product and aggregation changes.
+		// Smart upsell ranking engine (Phase 33.5): the deterministic
+		// product-ranking engine — candidate collection from the goal/cart
+		// context (manual, historical, category, WC-endorsed, taxonomy
+		// overlap, best sellers), six normalized component scorers
+		// (price gap / relevance / popularity / inventory / margin /
+		// conversion) with filterable weights, transparent score
+		// breakdowns + reasons, and the server-side upsell_order
+		// attribution on paid orders (historical learning). Pure
+		// computation: caching lives in RevenueRepository.
+		$this->container->singleton( UpsellRanker::class, function ( Container $container ) {
+			return new UpsellRanker(
+				$container->get( RevenueTracker::class ),
+				$container->get( RewardCostEstimator::class ),
+				$container->get( GoalRepository::class ),
+				$container->get( Settings::class )
+			);
+		} );
+
+		// Cached revenue summaries (Phase 33.3/33.4/33.5): overview / goal
+		// performance / daily trend / product stats / goal recommendations
+		// / upsell ranking + analytics with generation-versioned transients
+		// and invalidation on order, goal, product and aggregation changes.
 		$this->container->singleton( RevenueRepository::class, function ( Container $container ) {
 			return new RevenueRepository(
 				$container->get( AttributionEngine::class ),
 				$container->get( GoalRepository::class ),
-				$container->get( GoalRecommendationEngine::class )
+				$container->get( GoalRecommendationEngine::class ),
+				$container->get( UpsellRanker::class )
 			);
 		} );
 
@@ -500,6 +534,15 @@ final class Plugin {
 		// like the other revenue summaries).
 		$this->container->singleton( RecommendationsController::class, function ( Container $container ) {
 			return new RecommendationsController( $container->get( RevenueRepository::class ) );
+		} );
+
+		// Upsell endpoints (Phase 33.5): the public nonce-guarded
+		// upsell event tracking route (impression/clicked/added into the
+		// Phase 33.1 upsell_events log — upsell_order is attributed
+		// server-side on payment) plus the admin ranking + analytics reads
+		// served through the cached revenue repository.
+		$this->container->singleton( UpsellController::class, function ( Container $container ) {
+			return new UpsellController( $container->get( RevenueRepository::class ) );
 		} );
 
 		$this->container->singleton( AssetLoader::class, function ( Container $container ) {

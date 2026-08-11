@@ -123,6 +123,10 @@ class HookManager {
 			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_margin_products', 'description' => 'Product sample size for the Phase 33.4 margin analyzer.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_recommendations', 'description' => 'The full Phase 33.4 recommendation payload before it is served.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_cache_ttl', 'description' => 'TTL (seconds) for the Phase 33.4 recommendation cache.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_upsells_enabled', 'description' => 'Whether Phase 33.5 smart upsell ranking is on.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_upsell_candidates', 'description' => 'The candidate product ids collected for Phase 33.5 upsell scoring.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_upsell_weights', 'description' => 'The Phase 33.5 composite scoring weights (price_gap/relevance/popularity/inventory/margin/conversion).' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_upsells', 'description' => 'The full Phase 33.5 upsell ranking payload before it is served.' ),
 		);
 	}
 

@@ -189,6 +189,70 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     degradation branches, the candidate/payload filters, the cached
     read + generation invalidation, and rollback residue checks —
     zero residue.
+- **Phase 33.5 — Smart Upsell Ranking** — the deterministic product
+  ranker that answers "which products should this shopper add to reach
+  the goal?" (P33-T05):
+  - **Ranking engine** — new `UpsellRanker` (`includes/Analytics/`)
+    with a fully transparent weighted pipeline, no LLM/AI. Candidates
+    (bounded to 60) come from the goal's own products, products
+    historically recommended for the goal, the goal's categories, the
+    cart items' WooCommerce upsells / cross-sells / related products,
+    category/tag overlap with the cart, and best sellers — with
+    out-of-stock / private / draft / already-in-cart / goal-excluded
+    products excluded before scoring.
+  - **Six normalized (0–100) components** with filterable weights
+    (`goalcart_upsell_weights`, defaults 25/25/15/10/15/10): price gap
+    (sweet band [0.75×, 1.30×] → 100 with small-overshoot tolerance,
+    hard decay to 0 at 3×, neutral without a price/gap), relevance
+    (goal manual +55 / counts-toward-goal +35, category overlap +30,
+    tag overlap +20, WC-endorsed source +15), popularity (sales +
+    rating, bounded), inventory (healthy stock preferred, unmanaged
+    neutral), margin (only when the store provides product cost data —
+    never invented, neutral otherwise) and conversion (the product's
+    historical upsell funnel, impressions-weighted so sparse data
+    blends toward neutral). A partial weight filter falls back per key
+    (missing keys keep defaults, provided keys normalize among
+    themselves).
+  - **Transparent ranking output** — composite `score` desc, ties break
+    by lower price then product id; every product exposes its component
+    breakdown, raw factors, historical conversion stats and plain-English
+    reasons derived from the actual numbers (P33-34).
+  - **Historical learning** — the storefront reports upsell
+    interactions through the new public `POST /goalcart/v1/upsell/track`
+    (`UpsellController`, nonce-guarded like the Phase 16 track route)
+    into the Phase 33.1 `upsell_events` log; on a paid order
+    `UpsellRanker::attribute_order()` resolves the ordering session (the
+    order_paid event's session → live cookie → user's recent revenue
+    session) and records one `upsell_order` per product shown/clicked/
+    added — exactly once per order via the tracker dedup. The Phase 33.3
+    aggregator's `upsell_stats` rebuild feeds the conversion scorer:
+    deterministic historical scoring, no black-box model.
+  - **Graceful degradation** — no goal / no remaining gap / disabled /
+    no candidates → unavailable with a human-readable reason (never a
+    fabricated list); no margin data → margin neutral and profit
+    excluded while the product still ranks.
+  - **API + caching** — new admin-only
+    `GET /goalcart/v1/revenue/upsells` (ranked products for a cart +
+    goal context) and `GET /goalcart/v1/revenue/upsells/{product_id}`
+    (one product's score breakdown + stats), served through
+    `RevenueRepository::upsell_ranking()` /
+    `upsell_product_detail()` on the same generation-versioned
+    transients (existing order/goal/product/aggregation invalidation
+    keeps rankings fresh); `upsell_analytics()` powers the admin
+    top-products table. New documented hooks:
+    `goalcart_upsells_enabled`, `goalcart_upsell_weights`,
+    `goalcart_upsell_candidates` and `goalcart_upsells`.
+  - **Tests** — new `tests/upsell-test.php` (81 checks): container +
+    REST route wiring, reflection unit tests of every scoring component
+    and the weight normalization, a transactional fixture store with
+    exact ranking invariants (gap-fitting product beats an unrelated
+    expensive one, sold-out exclusion, goal-derived gap), margin-aware
+    profit with a costed product, the full upsell funnel
+    (impressions/clicks/adds → aggregated conversion → exactly-once
+    server-side `upsell_order` attribution on a paid order), all
+    graceful degradation branches, the candidate/payload filters, the
+    cached read + generation invalidation, and rollback residue checks
+    — deterministic across repeated runs, zero residue.
 
 ### Removed
 

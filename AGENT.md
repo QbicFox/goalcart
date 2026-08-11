@@ -2061,11 +2061,11 @@ weighting price proximity vs. popularity (sales/rating) data.
 Implement:
 
 **Phase Weight:** 3%  
-**Phase Progress:** 50%  
-**Project Contribution:** 1.5%  
+**Phase Progress:** 62.5%  
+**Project Contribution:** 1.875%  
 
 ```text
-Phase 33: ██████████░░░░░░░░░░ 50%
+Phase 33: █████████████░░░░░░░ 62.5%
 ```
 
 ## Revenue Attribution
@@ -2350,7 +2350,7 @@ This is the authoritative task-level progress register. Each task is represented
 | P33-T02 | 33 | 33.2 Revenue Attribution | 12.50% | [x] | 100% | 0.3750% |
 | P33-T03 | 33 | 33.3 Aggregation & Performance | 12.50% | [x] | 100% | 0.3750% |
 | P33-T04 | 33 | 33.4 Smart Goal Recommendation | 12.50% | [x] | 100% | 0.3750% |
-| P33-T05 | 33 | 33.5 Smart Upsell | 12.50% | [ ] | 0% | 0.00% |
+| P33-T05 | 33 | 33.5 Smart Upsell | 12.50% | [x] | 100% | 0.3750% |
 | P33-T06 | 33 | 33.6 React Admin | 12.50% | [ ] | 0% | 0.00% |
 | P33-T07 | 33 | 33.7 Frontend Upsell Integration | 12.50% | [ ] | 0% | 0.00% |
 | P33-T08 | 33 | 33.8 Testing & Optimization | 12.50% | [ ] | 0% | 0.00% |
