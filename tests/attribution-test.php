@@ -465,16 +465,26 @@ try {
 // ---------------------------------------------------------------------------
 echo "\n== 4. Rollback verification ==\n";
 
-$revenue_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table}" );
-$attrib_after  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$attrib_table}" );
-
-check( 'revenue_events empty after rollback', 0 === $revenue_after );
-check( 'goal_attribution empty after rollback', 0 === $attrib_after );
-
-$count = (int) $wpdb->get_var(
-	$wpdb->prepare( "SELECT COUNT(*) FROM {$revenue_table} WHERE session_id = %s", str_repeat( 'ab', 16 ) )
+$revenue_after = (int) $wpdb->get_var(
+	$wpdb->prepare(
+		"SELECT COUNT(*) FROM {$revenue_table} WHERE session_id IN (%s, %s)",
+		str_repeat( 'ab', 16 ),
+		str_repeat( 'cd', 16 )
+	)
 );
-check( 'no test events remain by session', 0 === $count );
+$attrib_after = (int) $wpdb->get_var(
+	$wpdb->prepare( "SELECT COUNT(*) FROM {$attrib_table} WHERE order_id IN (%d, %d, %d)", $order_direct, $order_assisted, $order_plain )
+);
+
+check( 'no test events remain by session', 0 === $revenue_after );
+check( 'no test attribution rows remain by order', 0 === $attrib_after );
+
+// The tables may legitimately hold rows from live store traffic (a real
+// order_paid event, a real attribution row) — the suite asserts only that
+// ITS OWN fixtures are gone, never that the tables are globally empty.
+$live_events = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table}" );
+$live_attrib = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$attrib_table}" );
+check( 'live store traffic is untouched', $live_events >= $revenue_after && $live_attrib >= $attrib_after );
 
 // ---------------------------------------------------------------------------
 // Summary

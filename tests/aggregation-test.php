@@ -332,7 +332,12 @@ try {
 	$upsell( 'upsell_impression', 5002, 0, null, '2026-08-05 11:00:00' );
 
 	$rebuild = $aggregator->aggregate_upsells();
-	check( 'upsell stats rebuilt for both products', 2 === $rebuild );
+	check( 'upsell stats rebuilt for the fixture products', $rebuild >= 2 );
+
+	$fixture_stats = (int) $wpdb->get_var(
+		$wpdb->prepare( "SELECT COUNT(*) FROM {$stats_table} WHERE product_id IN (%d, %d)", 5001, 5002 )
+	);
+	check( 'both fixture products have a stats row', 2 === $fixture_stats );
 
 	$stat_5001 = $wpdb->get_row(
 		$wpdb->prepare( "SELECT * FROM {$stats_table} WHERE product_id = %d", 5001 ),
@@ -370,11 +375,21 @@ try {
 	check( 'trend includes a today bucket from live data', 1 === count( $today_trend ) && $today === $today_trend[0]['date'] );
 	check( 'live today bucket has zero views (no events today)', 1 === count( $today_trend ) && 0 === (int) $today_trend[0]['views'] );
 
-	// product_stats reads the rebuilt upsell_stats table.
-	$products = $repo->product_stats( array( 'limit' => 10 ) );
-	check( 'product stats list the rebuilt products', 2 === count( $products ) );
-	check( 'product stats lead with the converting product', isset( $products[0] ) && 5001 === (int) $products[0]['product_id'] && 1 === (int) $products[0]['orders'] );
-	check( 'product stats expose conversion rate', isset( $products[0] ) && close( 0.5, $products[0]['conversion_rate'] ) );
+	// product_stats reads the rebuilt upsell_stats table. The store may
+	// hold live upsell stats rows (real storefront traffic) alongside the
+	// fixture rows, so the assertions target the fixture products by id
+	// rather than expecting the table to contain exactly two products.
+	$products = $repo->product_stats( array( 'limit' => 100 ) );
+
+	$by_id = array();
+
+	foreach ( $products as $product_row ) {
+		$by_id[ (int) $product_row['product_id'] ] = $product_row;
+	}
+
+	check( 'product stats list the fixture products', isset( $by_id[5001] ) && isset( $by_id[5002] ) );
+	check( 'product stats carry the converting product stats', isset( $by_id[5001] ) && 1 === (int) $by_id[5001]['orders'] );
+	check( 'product stats expose conversion rate', isset( $by_id[5001] ) && close( 0.5, $by_id[5001]['conversion_rate'] ) );
 
 	// overview merges the live attribution summary + AOV + shipping.
 	$overview = $repo->overview( array( 'from' => '2026-08-05', 'to' => '2026-08-05' ) );
@@ -479,15 +494,27 @@ echo "\n== 4. Rollback verification ==\n";
 // drop it so the verification reads the true post-rollback state.
 wp_cache_flush();
 
-$daily_after  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$daily_table}" );
-$stats_after  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$stats_table}" );
-$event_after  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table}" );
-$attrib_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$attrib_table}" );
+$daily_after  = (int) $wpdb->get_var(
+	$wpdb->prepare( "SELECT COUNT(*) FROM {$daily_table} WHERE report_date = %s", '2026-08-05' )
+);
+$stats_after  = (int) $wpdb->get_var(
+	$wpdb->prepare( "SELECT COUNT(*) FROM {$stats_table} WHERE product_id IN (%d, %d)", 5001, 5002 )
+);
+$event_after  = (int) $wpdb->get_var(
+	$wpdb->prepare( "SELECT COUNT(*) FROM {$revenue_table} WHERE session_id IN (%s, %s)", $session_a, $session_b )
+);
+$attrib_after = (int) $wpdb->get_var(
+	$wpdb->prepare( "SELECT COUNT(*) FROM {$attrib_table} WHERE order_id IN (%d, %d)", 9001, 9002 )
+);
 
-check( 'revenue_daily empty after rollback', 0 === $daily_after );
-check( 'upsell_stats empty after rollback', 0 === $stats_after );
-check( 'revenue_events empty after rollback', 0 === $event_after );
-check( 'goal_attribution empty after rollback', 0 === $attrib_after );
+// The tables may legitimately hold rows from live store traffic (real
+// orders, upsell impressions, aggregation ticks) — the suite asserts only
+// that ITS OWN fixture rows are gone, never that the tables are globally
+// empty.
+check( 'fixture daily rows removed by rollback', 0 === $daily_after );
+check( 'fixture upsell stats removed by rollback', 0 === $stats_after );
+check( 'fixture events removed by rollback', 0 === $event_after );
+check( 'fixture attribution rows removed by rollback', 0 === $attrib_after );
 
 $last_option = get_option( DailyAggregator::LAST_AGGREGATED_OPTION, '' );
 check( 'last-aggregated option restored after rollback', (string) $last_option === (string) $prev_last_agg );

@@ -25,6 +25,32 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   pages without actions. Loading/error states hide the bar so it never
   submits an empty form.
 
+- **Phase 33.8 — Testing & Optimization** — the closing testing pass of
+  Phase 33 (P33-T08):
+  - **New `tests/phase33-test.php` (99 checks)** — unit coverage of the
+    ranker's scorers at the price-gap band edges, the tracker's dedup
+    windows (view/impression/click per session+goal+product, progress
+    within 30 min, order events exactly once) and confidence edge cases;
+    a transactional WooCommerce integration fixture covering the full
+    order flow (payment → exactly-once `order_paid` / `upsell_order`,
+    double-payment idempotency, refunded/cancelled orders never
+    attributed, empty-cart and no-session degradation, multiple goals);
+    HPOS via the `custom_order_tables` feature declaration and the
+    order-scan caps (`ORDER_SCAN_PAGES`, `ATTRIBUTION_WINDOW`);
+    performance/query-optimization bounds on the bounded-read constants
+    and a schema-index audit against INFORMATION_SCHEMA; cache
+    serve-from-transient + generation-version invalidation + bypass; and
+    a REST security audit (permission callbacks on every admin route,
+    anonymous rejection, public `/upsell/rank` rate limiting + margin/
+    profit redaction, track-route arg clamps).
+  - **Regression hardening** — the attribution / aggregation /
+    recommendation suites now scope their rollback/rebuild assertions to
+    their own fixture markers instead of asserting globally empty tables,
+    so the full Phase 33 suite (555 checks) passes deterministically on a
+    store with live traffic (run sequentially — the suites share fixture
+    ids). Stale `goalcart_rev_*` transients left by interrupted runs are
+    purged; no source code was changed to accommodate live-store data.
+
 - **Phase 33.7 — Frontend Upsell Integration** — the storefront half of
   the Smart Upsell engine (P33-T07):
   - **Public rank endpoint** — new `GET /goalcart/v1/upsell/rank`

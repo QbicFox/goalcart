@@ -473,8 +473,8 @@ wp_cache_flush();
 // ---------------------------------------------------------------------------
 echo "\n== 4. Rollback verification ==\n";
 
-check( 'revenue_events empty after rollback', 0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table}" ) );
-check( 'goal_attribution empty after rollback', 0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$attrib_table}" ) );
+check( 'no fixture events remain after rollback', 0 === (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$revenue_table} WHERE session_id IN (" . implode( ',', array_fill( 0, count( $sessions ), '%s' ) ) . ")", $sessions ) ) );
+check( 'no fixture attribution rows remain after rollback', 0 === (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$attrib_table} WHERE order_id = %d", $order_ids[0] ) ) );
 check( 'goals back to the pre-existing count', $goals_before === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" ) );
 
 $leftover = wc_get_orders( array(
