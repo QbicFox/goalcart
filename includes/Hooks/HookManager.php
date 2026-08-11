@@ -116,6 +116,13 @@ class HookManager {
 			array( 'type' => 'filter', 'hook' => 'goalcart_aggregate_lookback_days', 'description' => 'Lookback floor for the Phase 33.3 aggregation catch-up window.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_cache_enabled', 'description' => 'Whether the Phase 33.3 revenue summary cache is on.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_cache_ttl', 'description' => 'TTL (seconds) for the Phase 33.3 revenue summary transients.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_recommendations_enabled', 'description' => 'Whether Phase 33.4 smart goal recommendations are on.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_min_orders', 'description' => 'Minimum order count before Phase 33.4 recommendations are generated.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_candidates', 'description' => 'The candidate thresholds generated for Phase 33.4 scoring.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_weights', 'description' => 'The Phase 33.4 composite scoring weights (reachability/distance/economics/history).' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_margin_products', 'description' => 'Product sample size for the Phase 33.4 margin analyzer.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_recommendations', 'description' => 'The full Phase 33.4 recommendation payload before it is served.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_cache_ttl', 'description' => 'TTL (seconds) for the Phase 33.4 recommendation cache.' ),
 		);
 	}
 

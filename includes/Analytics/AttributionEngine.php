@@ -1163,6 +1163,42 @@ final class AttributionEngine {
 	}
 
 	/**
+	 * Store-wide order totals within the window, as plain floats.
+	 *
+	 * Phase 33.4 (Smart Goal Recommendation) entry point: feeds the AOV /
+	 * median / order-distribution analyzers with the same bounded,
+	 * memoized store scan the AOV and shipping metrics already use — one
+	 * paginated pass per window, never a full-table load. Zero/negative
+	 * totals are excluded (non-revenue orders add noise to AOV/median).
+	 *
+	 * @param array<string, mixed> $args Optional: from, to.
+	 * @return array{available: bool, totals: float[], count: int}
+	 */
+	public function store_order_values( array $args = array() ) {
+		$orders = $this->store_orders( $args );
+
+		if ( ! $orders['available'] ) {
+			return array( 'available' => false, 'totals' => array(), 'count' => 0 );
+		}
+
+		$totals = array();
+
+		foreach ( $orders['orders'] as $order ) {
+			$total = (float) $order->get_total();
+
+			if ( $total > 0 ) {
+				$totals[] = $total;
+			}
+		}
+
+		return array(
+			'available' => true,
+			'totals'    => $totals,
+			'count'     => count( $totals ),
+		);
+	}
+
+	/**
 	 * Store-wide order totals within the window (bounded, paginated).
 	 *
 	 * @param array<string, mixed> $args Optional: from, to.

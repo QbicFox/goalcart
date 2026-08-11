@@ -149,3 +149,93 @@ Estimated Profit     — profit model; unavailable without margin data
   attributed exactly once (unique key + dedup).
 - Rows store only anonymous session ids, numeric aggregates and
   plugin/WC ids — no emails, IPs, addresses or payment data.
+
+---
+
+# Goal Cart — Smart Goal Recommendation (Phase 33.4)
+
+`GoalRecommendationEngine` (`includes/Analytics/`) answers *"what
+threshold should this store use?"* with a fully deterministic,
+explainable analysis of the store's own order data — no LLM/AI. The
+engine is pure computation: it never writes, never modifies a goal, and
+caching/invalidation live in the Phase 33.3 `RevenueRepository`.
+
+## 1. Inputs (analyzers)
+
+| Analyzer | Source | Availability |
+| --- | --- | --- |
+| AOV / median / CV | `AttributionEngine::store_order_values()` — the same bounded, memoized paginated store scan as AOV/shipping metrics | always (WC order data present) |
+| Order distribution | AOV-relative buckets `<0.5×` → `>1.5×` over the scanned totals | always |
+| Shipping | `AttributionEngine::shipping_stats()` (average + free share) | per-store |
+| Margin | newest catalog products sampled through `goalcart_product_cost` (average margin %) | only when the store stores product costs |
+| Current goal performance | attribution funnel (views/completed/converted + rates) when `goal_id` is given | per goal |
+
+Window: 7–180 days (default 90, the spec's preferred stability window);
+an explicit `from`/`to` range overrides `window_days`.
+
+## 2. Candidates & scoring
+
+Candidate thresholds are generated around the AOV (`0.9× … 1.5×`),
+plus shipping-aware additions (`AOV + average shipping`,
+`median + average shipping`) for free-shipping goals — all filterable
+via `goalcart_recommendation_candidates`. Each candidate is scored on
+four normalized (0–100) components with filterable weights
+(`goalcart_recommendation_weights`, defaults in `SCORE_WEIGHTS`):
+
+- **Reachability (30%)** — share of orders within 30% below the
+  threshold (the orders that can plausibly close the gap); triangular
+  peak at ~30%.
+- **Distance (25%)** — stretch above both the median and the AOV: too
+  easy adds no revenue, too far is unreachable.
+- **Economics (30%)** — reward cost vs the incremental margin at the
+  threshold; neutral 50 when margin/reward data is missing (never a
+  guessed number).
+- **History (15%)** — the store's own completion rate (neutral without
+  ≥10 goal views).
+
+Every candidate exposes `factors` (the raw sub-scores) and `reasons`
+(plain-English bullets derived from the actual numbers) so the admin UI
+can always show *why* a threshold was chosen.
+
+## 3. Confidence & expected impact
+
+Confidence = data-volume tier (`basic` 50–199 orders / `reliable`
+200–999 / `high_confidence` 1000+, minimum filterable via
+`goalcart_recommendation_min_orders`) adjusted by order-value
+consistency (CV), margin/shipping availability, goal-history depth and
+whether economics had its data — clamped 40–95 (heuristics, never
+statistical certainty). Expected impact is derived deterministically:
+`expected_aov_impact` (reachable share × gap %), `expected_completion_rate`
+(reachable share × history factor) and `expected_profit` through the
+same `RewardCostEstimator::profit_impact` model as the attribution
+layer — excluded without margin data.
+
+## 4. API & caching
+
+- `GET /goalcart/v1/revenue/goal-recommendations` (admin-only) — args:
+  `goal_id`, `reward_type` (whitelist), `reward_value` /
+  `reward_max_value` / `reward_meta` (config for recommendations
+  without an existing goal), `window_days`, `from`, `to`. Returns the
+  analysis, the ranked candidates (score, confidence, expected impact,
+  reasons, factors) and the top `recommendation`.
+- Served through `RevenueRepository::goal_recommendations()` — the same
+  generation-versioned transients; the existing invalidation (order
+  payment/status, goal CRUD, product saves, aggregation) already keeps
+  recommendations fresh. TTL: `goalcart_recommendation_cache_ttl`.
+- **Safety:** the engine never changes a goal. Applying a recommendation
+  is an explicit admin action through the existing GoalsController.
+
+## 5. Graceful degradation
+
+- Fewer than the minimum orders → `available: false` with
+  `insufficient_reason` (no fabricated recommendation).
+- No WooCommerce order data → unavailable with reason.
+- No margin data → profit excluded, economics neutral, confidence
+  reduced; revenue analytics keep working.
+- Disabled via `goalcart_recommendations_enabled` → unavailable.
+
+## 6. Extensibility (future AI/ML)
+
+The public `recommend()` payload is the frontend contract. A future
+`MLGoalRecommendationEngine` can replace the deterministic class behind
+that same shape without touching the REST layer or the admin UI (P33-60).

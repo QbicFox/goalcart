@@ -136,6 +136,59 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     bounded catch-up, upsell-stats rebuild, the cached repository
     reads, versioned invalidation, the cache bypass and the
     `goalcart_goals_changed` CRUD hook — all rolled back, zero residue.
+- **Phase 33.4 — Smart Goal Recommendation** — the deterministic
+  threshold recommender on top of the 33.2/33.3 analytics (P33-T04):
+  - **Recommendation engine** — new `GoalRecommendationEngine`
+    (`includes/Analytics/`) answers "what threshold should this store
+    use?" from the store's own data, no LLM/AI: AOV, median and the
+    order-value distribution come from the new
+    `AttributionEngine::store_order_values()` (the same bounded,
+    memoized paginated store scan the AOV/shipping metrics use),
+    shipping from `shipping_stats()` (average + free share), margins by
+    sampling the newest catalog products through the existing
+    `goalcart_product_cost` read path (unavailable when the store
+    stores no costs — never invented), and current goal performance
+    via the attribution funnel when a `goal_id` is supplied.
+  - **Candidates + scoring** — thresholds are generated around the AOV
+    ({0.9×…1.5×} plus shipping-aware additions for free-shipping goals)
+    and scored on four filterable-weight components: reachability
+    (share of orders within 30% below the threshold), distance
+    (stretch above median + AOV), economics (reward cost vs
+    incremental margin — neutral when margin/reward data is missing)
+    and history (the store's own completion rate). Every candidate
+    exposes its raw factors and a plain-English reasons list, so the
+    admin UI can always explain *why*.
+  - **Confidence & degradation** — confidence from the data-volume tier
+    (50/200/1000 orders, minimum filterable), order-value consistency
+    (CV), margin/shipping availability and history depth, clamped
+    40–95; fewer than the minimum orders returns no recommendation
+    with an `insufficient_reason`; profit estimates are excluded
+    without margin data; the engine never modifies a goal (explicit
+    admin approval required).
+  - **API + caching** — new admin-only
+    `GET /goalcart/v1/revenue/goal-recommendations`
+    (`RecommendationsController`), served through the Phase 33.3
+    generation-versioned transient layer
+    (`RevenueRepository::goal_recommendations`), so the existing
+    order/goal/product invalidation already keeps recommendations
+    fresh. New documented hooks: `goalcart_recommendations_enabled`,
+    `goalcart_recommendation_min_orders`,
+    `goalcart_recommendation_candidates`,
+    `goalcart_recommendation_weights`,
+    `goalcart_recommendation_margin_products`,
+    `goalcart_recommendations` and
+    `goalcart_recommendation_cache_ttl`.
+  - **Tests** — new `tests/recommendation-test.php` (90 checks):
+    container + REST route wiring, reflection unit tests of every
+    scoring component (reachability/distance/economics/history/
+    confidence/candidates/statistics/tiers), a transactional fixture
+    store (60 uniform orders in a clean window) with exact AOV/median/
+    distribution assertions, ranked-output invariants, shipping-aware
+    candidates, goal-history through real funnel events + attribution,
+    the margin-aware path with a costed product, all graceful
+    degradation branches, the candidate/payload filters, the cached
+    read + generation invalidation, and rollback residue checks —
+    zero residue.
 
 ### Removed
 

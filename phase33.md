@@ -15,11 +15,11 @@ Phase: 33
 Name: Advanced V3 Revenue Optimization
 
 Phase Weight: 3%
-Phase Progress: 37.5%
-Project Contribution: 1.125%
+Phase Progress: 50%
+Project Contribution: 1.5%
 
 Phase:
-███████▒░░░░░░░░░░░░ 37.5%
+██████████░░░░░░░░░░ 50%
 ```
 
 The purpose of this phase is to transform Goal Cart from a simple goal/progress-bar plugin into a **data-driven revenue optimization engine for WooCommerce**.
@@ -2128,8 +2128,65 @@ Tasks:
 Progress:
 
 ```text
-0%
+100% — COMPLETED
 ```
+
+Implementation notes (see `tests/recommendation-test.php`, 90 checks):
+
+- **Deterministic engine** — `GoalRecommendationEngine` (new) answers
+  "what threshold should this store use?" from the store's own data with
+  no LLM/AI: AOV, median, order-value distribution, shipping and margins
+  are all computed from bounded scans and averaged samples, and the
+  public `recommend()` contract is the frontend contract — a future
+  `MLGoalRecommendationEngine` can replace the class behind the same
+  payload shape without touching the REST layer (P33-60).
+- **Analyzers (all bounded)** — AOV/median/CV via the new
+  `AttributionEngine::store_order_values()` (the same memoized paginated
+  store scan the AOV/shipping metrics use — one pass per window, never a
+  full-table load); order distribution in AOV-relative buckets
+  (`<0.5×` → `>1.5×`); shipping via `shipping_stats()` (average + free
+  share); margin by sampling the newest catalog products through the
+  existing `goalcart_product_cost` read path — unavailable when the
+  store stores no costs, never invented; current goal performance via
+  the attribution funnel when a `goal_id` is supplied.
+- **Candidate generation (P33-22)** — AOV × {0.9, 1.0, 1.1, 1.2, 1.3,
+  1.4, 1.5} plus shipping-aware additions (AOV + average shipping,
+  median + average shipping) for free-shipping goals; the list is
+  filterable (`goalcart_recommendation_candidates`) before scoring.
+- **Deterministic scoring (P33-22)** — four normalized components,
+  filterable weights (`goalcart_recommendation_weights`): reachability
+  30% (share of orders within 30% below the threshold, triangular peak),
+  distance 25% (stretch above median + AOV — too easy / too far both
+  score low), economics 30% (reward cost vs incremental margin at the
+  threshold — neutral 50 when margin/reward data is missing), history
+  15% (the store's own completion rate, neutral without ≥10 views).
+  Every candidate exposes its raw `factors` breakdown and a plain-English
+  `reasons` list (P33-24/59) — the UI can always explain *why*.
+- **Confidence (P33-23/52)** — data-volume tier (50/200/1000 orders →
+  basic/reliable/high-confidence, default 50 minimum filterable via
+  `goalcart_recommendation_min_orders`) adjusted by order-value
+  consistency (CV), margin/shipping availability, goal-history depth and
+  economics data availability; clamped 40–95 so heuristics are never
+  presented as certainty.
+- **Expected impact** — `expected_aov_impact` range (reachable share ×
+  gap %), `expected_completion_rate` (reachable share × history factor)
+  and `expected_profit` through the tested `RewardCostEstimator::profit_impact`
+  model — profit excluded (never invented) without margin data.
+- **Graceful degradation (P33-51/52)** — fewer than the minimum orders →
+  no recommendation, only an `insufficient_reason`; no WooCommerce order
+  data → unavailable; disabled via `goalcart_recommendations_enabled` →
+  unavailable; the payload is filterable end-to-end
+  (`goalcart_recommendations`).
+- **Safety (P33-53)** — the engine never changes a goal; applying a
+  recommendation is an explicit admin action through the existing
+  GoalsController.
+- **API + caching** — new admin-only `GET /goalcart/v1/revenue/goal-recommendations`
+  (`RecommendationsController`, args: goal_id, reward_type whitelist,
+  reward_value/max/`reward_meta`, window_days 7–180, from/to), served
+  through the Phase 33.3 generation-versioned transient layer
+  (`RevenueRepository::goal_recommendations`, TTL filterable via
+  `goalcart_recommendation_cache_ttl`) — the existing order/goal/product
+  invalidation already covers every event that changes a recommendation.
 
 ---
 

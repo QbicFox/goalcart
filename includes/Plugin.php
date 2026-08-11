@@ -12,6 +12,7 @@ use GoalCart\Admin\AssetLoader;
 use GoalCart\Analytics\AnalyticsRepository;
 use GoalCart\Analytics\AttributionEngine;
 use GoalCart\Analytics\DailyAggregator;
+use GoalCart\Analytics\GoalRecommendationEngine;
 use GoalCart\Analytics\RevenueRepository;
 use GoalCart\Analytics\RevenueTracker;
 use GoalCart\Analytics\RewardCostEstimator;
@@ -32,6 +33,7 @@ use GoalCart\REST\FrontendController;
 use GoalCart\REST\GiftController;
 use GoalCart\REST\GoalsController;
 use GoalCart\REST\PreviewController;
+use GoalCart\REST\RecommendationsController;
 use GoalCart\REST\SearchController;
 use GoalCart\REST\SettingsController;
 use GoalCart\REST\TemplatesController;
@@ -188,10 +190,17 @@ final class Plugin {
 		// Aggregation & performance (Phase 33.3): the daily aggregator
 		// pre-computes revenue_daily + upsell_stats on a bounded cron job, and
 		// the revenue repository serves the cached summaries (overview, goal
-		// performance, daily trend, product stats) with generation-versioned
-		// invalidation wired to order/goal/product changes and aggregation runs.
+		// performance, daily trend, product stats, goal recommendations) with
+		// generation-versioned invalidation wired to order/goal/product changes
+		// and aggregation runs.
 		$this->hooks()->register( $this->container->get( DailyAggregator::class ) );
 		$this->hooks()->register( $this->container->get( RevenueRepository::class ) );
+
+		// Smart goal recommendation (Phase 33.4): the deterministic
+		// threshold recommendation engine — AOV/median/distribution/shipping
+		// /margin analyzers, candidate scoring, confidence and explanations —
+		// served read-only through the cached revenue repository.
+		$this->hooks()->register( $this->container->get( RecommendationsController::class ) );
 
 		// Storefront progress UI (Phase 11): shortcode, display-location
 		// injection, sticky bar and frontend assets.
@@ -324,13 +333,28 @@ final class Plugin {
 			);
 		} );
 
-		// Cached revenue summaries (Phase 33.3): overview / goal performance /
-		// daily trend / product stats with generation-versioned transients and
-		// invalidation on order, goal, product and aggregation changes.
+		// Smart goal recommendation engine (Phase 33.4): the deterministic
+		// threshold recommender — store-order analysis (AOV, median,
+		// distribution), shipping/margin analyzers, candidate generation +
+		// weighted scoring, confidence and plain-English explanations. Pure
+		// computation: caching and invalidation live in RevenueRepository.
+		$this->container->singleton( GoalRecommendationEngine::class, function ( Container $container ) {
+			return new GoalRecommendationEngine(
+				$container->get( AttributionEngine::class ),
+				$container->get( RewardCostEstimator::class ),
+				$container->get( GoalRepository::class )
+			);
+		} );
+
+		// Cached revenue summaries (Phase 33.3/33.4): overview / goal
+		// performance / daily trend / product stats / goal recommendations
+		// with generation-versioned transients and invalidation on order,
+		// goal, product and aggregation changes.
 		$this->container->singleton( RevenueRepository::class, function ( Container $container ) {
 			return new RevenueRepository(
 				$container->get( AttributionEngine::class ),
-				$container->get( GoalRepository::class )
+				$container->get( GoalRepository::class ),
+				$container->get( GoalRecommendationEngine::class )
 			);
 		} );
 
@@ -468,6 +492,14 @@ final class Plugin {
 		// registered template + schema, grouped by scope, for the admin UI.
 		$this->container->singleton( TemplatesController::class, function ( Container $container ) {
 			return new TemplatesController( $container->get( TemplateEngine::class ) );
+		} );
+
+		// Goal recommendation endpoint (Phase 33.4): admin-only read of the
+		// deterministic threshold recommendation, served through the cached
+		// revenue repository (recommendations are cached and invalidated
+		// like the other revenue summaries).
+		$this->container->singleton( RecommendationsController::class, function ( Container $container ) {
+			return new RecommendationsController( $container->get( RevenueRepository::class ) );
 		} );
 
 		$this->container->singleton( AssetLoader::class, function ( Container $container ) {

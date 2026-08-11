@@ -75,6 +75,14 @@ final class RevenueRepository {
 	const PRODUCTS_CACHE_TTL = HOUR_IN_SECONDS;
 
 	/**
+	 * Default TTL for goal recommendations (filterable with
+	 * goalcart_recommendation_cache_ttl).
+	 *
+	 * @var int
+	 */
+	const RECS_CACHE_TTL = HOUR_IN_SECONDS;
+
+	/**
 	 * Attribution engine (live reads behind the cache).
 	 *
 	 * @var AttributionEngine
@@ -89,14 +97,23 @@ final class RevenueRepository {
 	protected $repository;
 
 	/**
+	 * Smart goal recommendation engine (Phase 33.4).
+	 *
+	 * @var GoalRecommendationEngine
+	 */
+	protected $recommendations;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param AttributionEngine $engine     Revenue attribution engine.
-	 * @param GoalRepository    $repository Goal repository.
+	 * @param AttributionEngine        $engine         Revenue attribution engine.
+	 * @param GoalRepository           $repository     Goal repository.
+	 * @param GoalRecommendationEngine $recommendations Goal recommendation engine.
 	 */
-	public function __construct( AttributionEngine $engine, GoalRepository $repository ) {
-		$this->engine     = $engine;
-		$this->repository = $repository;
+	public function __construct( AttributionEngine $engine, GoalRepository $repository, GoalRecommendationEngine $recommendations ) {
+		$this->engine         = $engine;
+		$this->repository     = $repository;
+		$this->recommendations = $recommendations;
 	}
 
 	/**
@@ -326,6 +343,31 @@ final class RevenueRepository {
 				}
 
 				return $trend;
+			}
+		);
+	}
+
+	/**
+	 * Smart goal recommendations, cached with the same generation-versioned
+	 * transient system as the other revenue reads.
+	 *
+	 * The recommendation engine is deterministic and pure (no writes), so
+	 * caching only skips recomputation; the existing invalidation — order
+	 * payment/status changes, goal CRUD, product saves, aggregation runs —
+	 * already covers every event that could change a recommendation.
+	 *
+	 * @param array<string, mixed> $args Optional: goal_id, reward_type,
+	 *                                   reward_value, reward_max_value,
+	 *                                   reward_meta, window_days, from, to.
+	 * @return array<string, mixed>
+	 */
+	public function goal_recommendations( array $args = array() ) {
+		return $this->cached(
+			'goal_recs',
+			$args,
+			(int) apply_filters( 'goalcart_recommendation_cache_ttl', self::RECS_CACHE_TTL ),
+			function () use ( $args ) {
+				return $this->recommendations->recommend( $args );
 			}
 		);
 	}
