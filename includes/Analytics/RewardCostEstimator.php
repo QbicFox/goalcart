@@ -350,7 +350,7 @@ final class RewardCostEstimator {
 			return array(
 				'estimated_profit'  => null,
 				'available'         => false,
-				'reason'            => 'Product cost data is not available — profit impact unavailable (revenue-only analytics).',
+				'reason'            => __( 'Product cost data is not available — profit impact unavailable (revenue-only analytics).', 'goalcart' ),
 				'incremental_revenue' => $incremental,
 				'reward_cost'       => $reward_cost,
 				'shipping_cost'     => $shipping,

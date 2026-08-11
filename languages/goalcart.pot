@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-11T07:52:12Z\n"
+"POT-Creation-Date: 2026-08-11T08:12:20Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -41,6 +41,10 @@ msgstr ""
 msgid "%s (copy)"
 msgstr ""
 
+#: includes/Analytics/GoalRecommendationEngine.php:688
+msgid "%s of existing orders are within reach of this threshold (below it by up to %s%%)."
+msgstr ""
+
 #: admin-app/src/routes/Dashboard.tsx:150
 msgid "%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page; the frontend widgets are added in a later phase."
 msgstr ""
@@ -57,8 +61,28 @@ msgstr ""
 msgid "(weight units)"
 msgstr ""
 
+#: includes/Analytics/GoalRecommendationEngine.php:805
+msgid "0.5–0.75× AOV"
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:806
+msgid "0.75–1.0× AOV"
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:807
+msgid "1.0–1.5× AOV"
+msgstr ""
+
 #: admin-app/src/routes/Appearance.tsx:92
 msgid "10% off"
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:804
+msgid "< 0.5× AOV"
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:808
+msgid "> 1.5× AOV"
 msgstr ""
 
 #: includes/Templates/Goal/PercentageTemplate.php:43
@@ -75,6 +99,10 @@ msgstr ""
 
 #: includes/Templates/Goal/MilestoneTemplate.php:43
 msgid "A goal ladder of dots and targets, bar underneath."
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:286
+msgid "A goal target or an explicit remaining amount is required to rank upsells."
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:396
@@ -372,12 +400,20 @@ msgstr ""
 msgid "Average order value"
 msgstr ""
 
+#: includes/Analytics/GoalRecommendationEngine.php:695
+msgid "Average order value is %s over %d orders."
+msgstr ""
+
 #: admin-app/src/routes/RevenueOverview.tsx:306
 msgid "Average order value — observed impact"
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:369
 msgid "Average shipping"
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:703
+msgid "Average shipping cost is %s — a free-shipping goal absorbs this cost."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:344
@@ -1202,12 +1238,20 @@ msgstr ""
 msgid "Estimated"
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:1192
+msgid "Estimated margin %s%% on the product price."
+msgstr ""
+
 #: admin-app/src/routes/RevenueOverview.tsx:205
 msgid "Estimated profit"
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:216
 msgid "Estimated profit impact"
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:711
+msgid "Estimated reward cost at this threshold is %s."
 msgstr ""
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:99
@@ -1497,6 +1541,10 @@ msgstr ""
 msgid "Guests (not logged in)"
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:1184
+msgid "Healthy stock levels."
+msgstr ""
+
 #: admin-app/src/routes/Recommendations.tsx:355
 msgid "Hide details"
 msgstr ""
@@ -1513,8 +1561,20 @@ msgstr ""
 msgid "Highest margin"
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:1169
+msgid "Highly relevant to the goal and the current cart contents."
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:733
+msgid "Historical goal completion rate is %s."
+msgstr ""
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:178
 msgid "Historical performance"
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1202
+msgid "Historical upsell performance: %d impressions, %d orders (%s conversion)."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:396
@@ -1614,6 +1674,14 @@ msgstr ""
 msgid "Incremental cart value"
 msgstr ""
 
+#: includes/Analytics/GoalRecommendationEngine.php:717
+msgid "Incremental margin at this threshold covers the reward cost."
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:718
+msgid "Incremental margin at this threshold does not fully cover the reward cost."
+msgstr ""
+
 #: admin-app/src/routes/CampaignBuilder.tsx:268
 #: admin-app/src/routes/GoalBuilder.tsx:251
 msgid "Internal name shown in the admin."
@@ -1687,6 +1755,10 @@ msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:242
 msgid "Limit"
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1186
+msgid "Limited stock remaining."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:593
@@ -1881,6 +1953,18 @@ msgstr ""
 msgid "No campaigns yet"
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:307
+msgid "No candidate products could be collected for this cart and goal."
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:280
+msgid "No candidate thresholds could be generated from the order data."
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1212
+msgid "No cart contents provided — relevance scored from the goal only."
+msgstr ""
+
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:65
 msgid "No child goals yet. Add at least one condition to build the composite goal."
 msgstr ""
@@ -1916,6 +2000,10 @@ msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:523
 msgid "No goals yet — create a goal on the Goals page first."
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1208
+msgid "No historical upsell performance data yet — conversion scored neutral."
 msgstr ""
 
 #: admin-app/src/components/CampaignPreviewDialog.tsx:159
@@ -1961,6 +2049,10 @@ msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:157
 msgid "Not enough data for a reliable recommendation."
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:248
+msgid "Not enough order data for a reliable recommendation (%d orders in the window; at least %d required)."
 msgstr ""
 
 #: admin-app/src/routes/GoalBuilder.tsx:321
@@ -2126,6 +2218,10 @@ msgstr ""
 msgid "Plugin-wide configuration. Changes apply immediately."
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:1177
+msgid "Popular product (%d units sold, %s rating)."
+msgstr ""
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:49
 msgid "Popularity"
 msgstr ""
@@ -2162,6 +2258,10 @@ msgstr ""
 msgid "Previous month"
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:1155
+msgid "Price %s fits the remaining %s %s."
+msgstr ""
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:47
 msgid "Price gap"
 msgstr ""
@@ -2190,6 +2290,18 @@ msgstr ""
 msgid "Product"
 msgstr ""
 
+#: includes/Analytics/RewardCostEstimator.php:353
+msgid "Product cost data is not available — profit impact unavailable (revenue-only analytics)."
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:725
+msgid "Product margin data is not available — profit estimates are excluded."
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1196
+msgid "Product margin data is not available — profitability scored neutral."
+msgstr ""
+
 #: admin-app/src/routes/Settings.tsx:125
 msgid "Product pages"
 msgstr ""
@@ -2209,6 +2321,10 @@ msgstr ""
 
 #: admin-app/src/components/goal-builder/TargetFields.tsx:178
 msgid "Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target."
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:727
+msgid "Profit impact could not be estimated for this threshold."
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:234
@@ -2304,6 +2420,10 @@ msgstr ""
 msgid "Relevance"
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:1171
+msgid "Relevant to the goal or the current cart contents."
+msgstr ""
+
 #: admin-app/src/routes/CampaignBuilder.tsx:492
 msgid "Remove"
 msgstr ""
@@ -2376,6 +2496,10 @@ msgstr ""
 #: admin-app/src/routes/GoalPerformance.tsx:196
 #: admin-app/src/routes/RevenueOverview.tsx:195
 msgid "Reward cost"
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:721
+msgid "Reward cost cannot be estimated from the available data — economics scored neutral."
 msgstr ""
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:280
@@ -2661,12 +2785,28 @@ msgstr ""
 msgid "Smart Recommendations"
 msgstr ""
 
+#: includes/Analytics/GoalRecommendationEngine.php:220
+msgid "Smart goal recommendations are disabled."
+msgstr ""
+
+#: includes/Analytics/RevenueRepository.php:458
+msgid "Smart upsell ranking is not available."
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:276
+msgid "Smart upsells are disabled."
+msgstr ""
+
 #: admin-app/src/components/ErrorBoundary.tsx:48
 msgid "Something went wrong"
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:259
 msgid "Sort products"
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1165
+msgid "Source: %s."
 msgstr ""
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:292
@@ -2881,6 +3021,10 @@ msgstr ""
 msgid "The goal could not be updated."
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:287
+msgid "The goal gap is already closed — no upsells needed."
+msgstr ""
+
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:264
 msgid "The goal only applies when the cart ships to one of these zones. Leave empty for every zone."
 msgstr ""
@@ -2971,6 +3115,10 @@ msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:194
 msgid "This product could not be scored."
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:680
+msgid "This threshold is %s above the median order value (%s)."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:390
@@ -3224,8 +3372,20 @@ msgstr ""
 msgid "Window"
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:1230
+msgid "WooCommerce cross-sell of a cart item"
+msgstr ""
+
 #: includes/Compatibility.php:150
 msgid "WooCommerce must be installed and activated."
+msgstr ""
+
+#: includes/Analytics/GoalRecommendationEngine.php:239
+msgid "WooCommerce order data is not available — no recommendation can be computed."
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1229
+msgid "WooCommerce upsell of a cart item"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:727
@@ -3257,6 +3417,14 @@ msgstr ""
 msgid "Your cart is empty."
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:1158
+msgid "almost exactly"
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1234
+msgid "best seller"
+msgstr ""
+
 #: admin-app/src/routes/GoalBuilder.tsx:246
 msgid "e.g. Free shipping over 500K"
 msgstr ""
@@ -3273,8 +3441,36 @@ msgstr ""
 msgid "e.g. 🎁 or a dashicon name"
 msgstr ""
 
+#: includes/Analytics/UpsellRanker.php:1228
+msgid "inside the goal's categories"
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1226
+msgid "manually selected for this goal"
+msgstr ""
+
 #: admin-app/src/routes/GoalPerformance.tsx:69
 msgid "n/a"
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1158
+msgid "partially"
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1227
+msgid "previously recommended for this goal"
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1231
+msgid "related to a cart item"
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1232
+msgid "shares a category with the cart"
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:1233
+msgid "shares a tag with the cart"
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:116

@@ -56,6 +56,24 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/goalcart.php';
 
+// Deterministic English assertions regardless of the site locale: the
+// recommendation reasons / insufficient_reason are translated for the
+// site locale (fa_IR on this install), so switching to en_US and
+// unloading the domain keeps the reason regexes stable — the same
+// convention message-test.php uses.
+switch_to_locale( 'en_US' );
+unload_textdomain( 'goalcart' );
+
+add_action( 'switch_locale', function ( $locale ) {
+	echo "TRACE switch_locale -> {$locale}\n";
+} );
+add_action( 'restore_previous_locale', function () {
+	echo "TRACE restore_previous_locale\n";
+} );
+add_action( 'goalcart_settings_changed', function () {
+	echo "TRACE goalcart_settings_changed\n";
+} );
+
 use GoalCart\Analytics\AttributionEngine;
 use GoalCart\Analytics\GoalRecommendationEngine;
 use GoalCart\Analytics\RevenueRepository;
@@ -308,6 +326,11 @@ try {
 	$top = $rec['recommendation'];
 	check( 'every candidate exposes scoring factors', isset( $top['factors']['reachability_score'], $top['factors']['distance_score'], $top['factors']['economics_score'], $top['factors']['history_score'] ) );
 	check( 'every candidate exposes plain-English reasons', is_array( $top['reasons'] ) && count( $top['reasons'] ) >= 2 );
+	if ( 1 !== preg_match( '/median order value/', implode( ' ', $top['reasons'] ) ) ) {
+		echo "DEBUG locale=" . get_locale() . " l10n_loaded=" . var_export( isset( $GLOBALS['l10n']['goalcart'] ), true ) . " l10n_unloaded=" . var_export( isset( $GLOBALS['l10n_unloaded']['goalcart'] ), true ) . "\n";
+		echo "DEBUG __(Dashboard)=" . __( 'Dashboard', 'goalcart' ) . "\n";
+		echo "DEBUG reasons: " . wp_json_encode( $top['reasons'] ) . "\n";
+	}
 	check( 'reasons reference the median order value', 1 === preg_match( '/median order value/', implode( ' ', $top['reasons'] ) ) );
 	check( 'expected completion rate bounded', $top['expected_completion_rate'] >= 0.05 && $top['expected_completion_rate'] <= 0.85 );
 	check( 'profit excluded without margin data', ! $top['expected_profit_available'] && null === $top['expected_profit'] );

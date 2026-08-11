@@ -455,7 +455,7 @@ final class RevenueRepository {
 	 */
 	public function upsell_ranking( array $args = array() ) {
 		if ( null === $this->upsells ) {
-			return $this->upsells_unavailable( 'Smart upsell ranking is not available.' );
+			return $this->upsells_unavailable( __( 'Smart upsell ranking is not available.', 'goalcart' ) );
 		}
 
 		return $this->cached(

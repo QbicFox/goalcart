@@ -376,12 +376,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     extended fa_IR translations for every new admin string and a
     regenerated POT/JED.
 - **Persian (fa_IR) translation of the admin dashboard** —
-  `languages/goalcart-fa_IR.po` now translates all 408 strings
-  referenced from `admin-app/src` (navigation, analytics KPIs, goal &
-  campaign builders, settings, appearance, previews, empty states,
-  confirmations, toasts, …) plus the 16 storefront strings (417 entries).
-  Compiled by `bin/build-i18n.php` into `goalcart-fa_IR.mo` and the
-  `goalcart-fa_IR-goalcart-admin.json` JED the admin app loads via
+  `languages/goalcart-fa_IR.po` now translates **every** string in the
+  POT (727 entries): all 634 referenced from `admin-app/src` (navigation,
+  analytics KPIs, the Phase 33.6 revenue section, goal & campaign
+  builders, settings, appearance, previews, empty states, confirmations,
+  toasts, …) plus the storefront/REST PHP strings. The 196 strings added
+  in this pass cover the new revenue pages (Revenue Overview, Goal
+  Performance, Attribution, Smart Recommendations, Upsell Analytics),
+  their REST error messages and the remaining storefront strings;
+  the file is regenerated from `languages/goalcart.pot` so it can never
+  drift. Compiled by `bin/build-i18n.php` into `goalcart-fa_IR.mo` and
+  the `goalcart-fa_IR-goalcart-admin.json` JED the admin app loads via
   `wp_set_script_translations`. `tests/i18n-test.php` section 1b gained a
   coverage scan — every admin-app string in the POT must carry a non-empty
   Persian translation or the suite fails, and duplicate msgids are rejected

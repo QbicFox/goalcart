@@ -273,7 +273,7 @@ final class UpsellRanker {
 		};
 
 		if ( ! $this->enabled() ) {
-			return $unavailable( 'Smart upsells are disabled.' );
+			return $unavailable( __( 'Smart upsells are disabled.', 'goalcart' ) );
 		}
 
 		$goal     = $this->resolve_goal( $args );
@@ -283,8 +283,8 @@ final class UpsellRanker {
 		if ( null === $remaining || $remaining <= 0 ) {
 			return $unavailable(
 				null === $remaining
-					? 'A goal target or an explicit remaining amount is required to rank upsells.'
-					: 'The goal gap is already closed — no upsells needed.'
+					? __( 'A goal target or an explicit remaining amount is required to rank upsells.', 'goalcart' )
+					: __( 'The goal gap is already closed — no upsells needed.', 'goalcart' )
 			);
 		}
 
@@ -304,7 +304,7 @@ final class UpsellRanker {
 		$candidates = (array) apply_filters( 'goalcart_upsell_candidates', $candidates, $args, $this );
 
 		if ( empty( $candidates ) ) {
-			return $unavailable( 'No candidate products could be collected for this cart and goal.' );
+			return $unavailable( __( 'No candidate products could be collected for this cart and goal.', 'goalcart' ) );
 		}
 
 		// 2. Score every candidate.
@@ -1151,61 +1151,65 @@ final class UpsellRanker {
 
 		if ( null !== $price && null !== $remaining && $remaining > 0 ) {
 			$reasons[] = sprintf(
-				'Price %s fits the remaining %s %s.',
+				/* translators: 1: product price, 2: remaining gap amount, 3: how well the price fits. */
+				__( 'Price %s fits the remaining %s %s.', 'goalcart' ),
 				$this->fmt_amount( $price ),
 				$this->fmt_amount( (float) $remaining ),
-				$price_gap >= 90.0 ? 'almost exactly' : 'partially'
+				$price_gap >= 90.0 ? __( 'almost exactly', 'goalcart' ) : __( 'partially', 'goalcart' )
 			);
 		}
 
 		$source_label = $this->source_label( $source );
 
 		if ( '' !== $source_label ) {
-			$reasons[] = 'Source: ' . $source_label . '.';
+			$reasons[] = sprintf( /* translators: 1: product source description. */ __( 'Source: %s.', 'goalcart' ), $source_label );
 		}
 
 		if ( $relevance >= 80.0 ) {
-			$reasons[] = 'Highly relevant to the goal and the current cart contents.';
+			$reasons[] = __( 'Highly relevant to the goal and the current cart contents.', 'goalcart' );
 		} elseif ( $relevance >= 40.0 ) {
-			$reasons[] = 'Relevant to the goal or the current cart contents.';
+			$reasons[] = __( 'Relevant to the goal or the current cart contents.', 'goalcart' );
 		}
 
 		if ( (float) $product->get_total_sales() > 0 ) {
 			$reasons[] = sprintf(
-				'Popular product (%d units sold, %s rating).',
+				/* translators: 1: units sold, 2: average rating. */
+				__( 'Popular product (%d units sold, %s rating).', 'goalcart' ),
 				(int) $product->get_total_sales(),
 				$this->fmt_amount( method_exists( $product, 'get_average_rating' ) ? (float) $product->get_average_rating() : 0.0 )
 			);
 		}
 
 		if ( $inventory >= 70.0 ) {
-			$reasons[] = 'Healthy stock levels.';
+			$reasons[] = __( 'Healthy stock levels.', 'goalcart' );
 		} elseif ( $inventory < 50.0 ) {
-			$reasons[] = 'Limited stock remaining.';
+			$reasons[] = __( 'Limited stock remaining.', 'goalcart' );
 		}
 
 		if ( null !== $margin ) {
 			$reasons[] = sprintf(
-				'Estimated margin %s%% on the product price.',
+				/* translators: 1: estimated margin percentage. */
+				__( 'Estimated margin %s%% on the product price.', 'goalcart' ),
 				$this->fmt_pct( (float) $margin['margin_pct'] * 100.0 )
 			);
 		} else {
-			$reasons[] = 'Product margin data is not available — profitability scored neutral.';
+			$reasons[] = __( 'Product margin data is not available — profitability scored neutral.', 'goalcart' );
 		}
 
 		if ( (int) $stats['impressions'] > 0 ) {
 			$reasons[] = sprintf(
-				'Historical upsell performance: %d impressions, %d orders (%s conversion).',
+				/* translators: 1: impressions, 2: orders, 3: conversion rate. */
+				__( 'Historical upsell performance: %d impressions, %d orders (%s conversion).', 'goalcart' ),
 				(int) $stats['impressions'],
 				(int) $stats['orders'],
 				$this->fmt_pct( (float) $this->conversion_payload( $stats )['conversion_rate'] * 100.0 )
 			);
 		} else {
-			$reasons[] = 'No historical upsell performance data yet — conversion scored neutral.';
+			$reasons[] = __( 'No historical upsell performance data yet — conversion scored neutral.', 'goalcart' );
 		}
 
 		if ( empty( $cart ) ) {
-			$reasons[] = 'No cart contents provided — relevance scored from the goal only.';
+			$reasons[] = __( 'No cart contents provided — relevance scored from the goal only.', 'goalcart' );
 		}
 
 		return $reasons;
@@ -1219,15 +1223,15 @@ final class UpsellRanker {
 	 */
 	protected function source_label( $source ) {
 		$labels = array(
-			self::SOURCE_MANUAL         => 'manually selected for this goal',
-			self::SOURCE_HISTORICAL     => 'previously recommended for this goal',
-			self::SOURCE_CATEGORY       => "inside the goal's categories",
-			self::SOURCE_UPSELL         => 'WooCommerce upsell of a cart item',
-			self::SOURCE_CROSS_SELL     => 'WooCommerce cross-sell of a cart item',
-			self::SOURCE_RELATED        => 'related to a cart item',
-			self::SOURCE_CATEGORY_MATCH => 'shares a category with the cart',
-			self::SOURCE_TAG_MATCH      => 'shares a tag with the cart',
-			self::SOURCE_POPULAR        => 'best seller',
+			self::SOURCE_MANUAL         => __( 'manually selected for this goal', 'goalcart' ),
+			self::SOURCE_HISTORICAL     => __( 'previously recommended for this goal', 'goalcart' ),
+			self::SOURCE_CATEGORY       => __( "inside the goal's categories", 'goalcart' ),
+			self::SOURCE_UPSELL         => __( 'WooCommerce upsell of a cart item', 'goalcart' ),
+			self::SOURCE_CROSS_SELL     => __( 'WooCommerce cross-sell of a cart item', 'goalcart' ),
+			self::SOURCE_RELATED        => __( 'related to a cart item', 'goalcart' ),
+			self::SOURCE_CATEGORY_MATCH => __( 'shares a category with the cart', 'goalcart' ),
+			self::SOURCE_TAG_MATCH      => __( 'shares a tag with the cart', 'goalcart' ),
+			self::SOURCE_POPULAR        => __( 'best seller', 'goalcart' ),
 		);
 
 		return isset( $labels[ $source ] ) ? $labels[ $source ] : '';

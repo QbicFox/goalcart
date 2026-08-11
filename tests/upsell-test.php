@@ -54,6 +54,13 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/goalcart.php';
 
+// Deterministic English assertions regardless of the site locale: the
+// upsell reasons are translated for the site locale (fa_IR on this
+// install), so switching to en_US and unloading the domain keeps the
+// reason regexes stable — the same convention message-test.php uses.
+switch_to_locale( 'en_US' );
+unload_textdomain( 'goalcart' );
+
 use GoalCart\Analytics\DailyAggregator;
 use GoalCart\Analytics\RevenueRepository;
 use GoalCart\Analytics\RevenueTracker;

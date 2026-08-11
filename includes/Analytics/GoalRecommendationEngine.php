@@ -217,7 +217,7 @@ final class GoalRecommendationEngine {
 		};
 
 		if ( ! $this->enabled() ) {
-			return $unavailable( 'Smart goal recommendations are disabled.' );
+			return $unavailable( __( 'Smart goal recommendations are disabled.', 'goalcart' ) );
 		}
 
 		// Resolve the analysis window (explicit range wins over window_days).
@@ -236,7 +236,7 @@ final class GoalRecommendationEngine {
 		$orders = $this->engine->store_order_values( $window );
 
 		if ( ! $orders['available'] ) {
-			return $unavailable( 'WooCommerce order data is not available — no recommendation can be computed.' );
+			return $unavailable( __( 'WooCommerce order data is not available — no recommendation can be computed.', 'goalcart' ) );
 		}
 
 		$min_orders = (int) apply_filters( 'goalcart_recommendation_min_orders', self::MIN_ORDERS );
@@ -244,7 +244,8 @@ final class GoalRecommendationEngine {
 		if ( $orders['count'] < max( 1, $min_orders ) ) {
 			return $unavailable(
 				sprintf(
-					'Not enough order data for a reliable recommendation (%d orders in the window; at least %d required).',
+					/* translators: 1: order count in the window, 2: minimum orders required. */
+					__( 'Not enough order data for a reliable recommendation (%d orders in the window; at least %d required).', 'goalcart' ),
 					(int) $orders['count'],
 					(int) $min_orders
 				)
@@ -276,7 +277,7 @@ final class GoalRecommendationEngine {
 		$candidates = (array) apply_filters( 'goalcart_recommendation_candidates', $candidates, $stats, $reward_type, $shipping );
 
 		if ( empty( $candidates ) ) {
-			return $unavailable( 'No candidate thresholds could be generated from the order data.' );
+			return $unavailable( __( 'No candidate thresholds could be generated from the order data.', 'goalcart' ) );
 		}
 
 		// --- Score every candidate. ---
@@ -653,11 +654,10 @@ final class GoalRecommendationEngine {
 	/**
 	 * Plain-English explanation bullets for a candidate.
 	 *
-	 * Every bullet is derived from the actual computed factors — no
-	 * hard-coded claims. Strings are intentionally plain (like the reward
-	 * cost basis labels) because they are structured data rendered by the
-	 * admin UI.
-	 *
+ * Every bullet is derived from the actual computed factors — no
+ * hard-coded claims. The bullet strings are translatable (the goalcart
+ * text domain) because the admin UI renders them directly.
+ *
 	 * @param float                $threshold      Candidate threshold.
 	 * @param array<string, mixed> $stats          aov, median, count.
 	 * @param float                $reach_share    Share of orders in reach.
@@ -676,55 +676,61 @@ final class GoalRecommendationEngine {
 
 		if ( (float) $stats['median'] > 0 ) {
 			$reasons[] = sprintf(
-				'This threshold is %s above the median order value (%s).',
+				/* translators: 1: percentage above the median, 2: formatted median order value. */
+				__( 'This threshold is %s above the median order value (%s).', 'goalcart' ),
 				$this->fmt_pct( ( $threshold / (float) $stats['median'] ) * 100.0 - 100.0 ),
 				$this->fmt_amount( (float) $stats['median'] )
 			);
 		}
 
 		$reasons[] = sprintf(
-			'%s of existing orders are within reach of this threshold (below it by up to %s%%).',
+			/* translators: 1: percentage of orders in reach, 2: reach band percentage. */
+			__( '%s of existing orders are within reach of this threshold (below it by up to %s%%).', 'goalcart' ),
 			$this->fmt_pct( $reach_share * 100.0 ),
 			(int) round( self::REACH_BAND * 100.0 )
 		);
 
 		$reasons[] = sprintf(
-			'Average order value is %s over %d orders.',
+			/* translators: 1: formatted average order value, 2: order count. */
+			__( 'Average order value is %s over %d orders.', 'goalcart' ),
 			$this->fmt_amount( (float) $stats['aov'] ),
 			(int) $stats['count']
 		);
 
 		if ( Reward::TYPE_FREE_SHIPPING === $reward_type && $shipping['available'] ) {
 			$reasons[] = sprintf(
-				'Average shipping cost is %s — a free-shipping goal absorbs this cost.',
+				/* translators: 1: formatted average shipping cost. */
+				__( 'Average shipping cost is %s — a free-shipping goal absorbs this cost.', 'goalcart' ),
 				$this->fmt_amount( (float) $shipping['average_shipping'] )
 			);
 		}
 
 		if ( $cost_available ) {
 			$reasons[] = sprintf(
-				'Estimated reward cost at this threshold is %s.',
+				/* translators: 1: formatted estimated reward cost. */
+				__( 'Estimated reward cost at this threshold is %s.', 'goalcart' ),
 				$this->fmt_amount( $reward_cost )
 			);
 
 			if ( $margin['available'] ) {
 				$reasons[] = $economics >= 60.0
-					? 'Incremental margin at this threshold covers the reward cost.'
-					: 'Incremental margin at this threshold does not fully cover the reward cost.';
+					? __( 'Incremental margin at this threshold covers the reward cost.', 'goalcart' )
+					: __( 'Incremental margin at this threshold does not fully cover the reward cost.', 'goalcart' );
 			}
 		} elseif ( null !== $reward_type ) {
-			$reasons[] = 'Reward cost cannot be estimated from the available data — economics scored neutral.';
+			$reasons[] = __( 'Reward cost cannot be estimated from the available data — economics scored neutral.', 'goalcart' );
 		}
 
 		if ( ! $margin['available'] ) {
-			$reasons[] = 'Product margin data is not available — profit estimates are excluded.';
+			$reasons[] = __( 'Product margin data is not available — profit estimates are excluded.', 'goalcart' );
 		} elseif ( ! $profit['available'] ) {
-			$reasons[] = 'Profit impact could not be estimated for this threshold.';
+			$reasons[] = __( 'Profit impact could not be estimated for this threshold.', 'goalcart' );
 		}
 
 		if ( null !== $history && (int) $history['views'] > 0 ) {
 			$reasons[] = sprintf(
-				'Historical goal completion rate is %s.',
+				/* translators: 1: historical completion rate. */
+				__( 'Historical goal completion rate is %s.', 'goalcart' ),
 				$this->fmt_pct( (float) $history['completion_rate'] * 100.0 )
 			);
 		}
@@ -795,11 +801,11 @@ final class GoalRecommendationEngine {
 		}
 
 		$buckets = array(
-			array( 'label' => '< 0.5× AOV', 'min' => null, 'max' => 0.5, 'count' => 0 ),
-			array( 'label' => '0.5–0.75× AOV', 'min' => 0.5, 'max' => 0.75, 'count' => 0 ),
-			array( 'label' => '0.75–1.0× AOV', 'min' => 0.75, 'max' => 1.0, 'count' => 0 ),
-			array( 'label' => '1.0–1.5× AOV', 'min' => 1.0, 'max' => 1.5, 'count' => 0 ),
-			array( 'label' => '> 1.5× AOV', 'min' => 1.5, 'max' => null, 'count' => 0 ),
+			array( 'label' => __( '< 0.5× AOV', 'goalcart' ), 'min' => null, 'max' => 0.5, 'count' => 0 ),
+			array( 'label' => __( '0.5–0.75× AOV', 'goalcart' ), 'min' => 0.5, 'max' => 0.75, 'count' => 0 ),
+			array( 'label' => __( '0.75–1.0× AOV', 'goalcart' ), 'min' => 0.75, 'max' => 1.0, 'count' => 0 ),
+			array( 'label' => __( '1.0–1.5× AOV', 'goalcart' ), 'min' => 1.0, 'max' => 1.5, 'count' => 0 ),
+			array( 'label' => __( '> 1.5× AOV', 'goalcart' ), 'min' => 1.5, 'max' => null, 'count' => 0 ),
 		);
 
 		foreach ( $totals as $total ) {
