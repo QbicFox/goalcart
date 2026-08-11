@@ -419,6 +419,84 @@ Margin-aware and AI-ranked recommendations remain roadmap futures
 
 ---
 
+# Smart Upsell Panel (Phase 33.7)
+
+The Phase 33.5 Smart Upsell engine gets its **storefront half**: a
+ranked "complete your goal" product panel rendered inside full-variant
+widget cards (cart/checkout pages) for money goals with a positive
+remaining gap. Unlike the Phase 14 suggestion list (bundled into the
+`/progress` payload), the panel fetches its products on demand from a
+new **public** endpoint — the server computes the gap, so the ranking
+is always based on the live cart.
+
+## Contract
+
+```text
+includes/REST/UpsellController.php      GET /goalcart/v1/upsell/rank (public)
+                                        POST /goalcart/v1/upsell/track (nonce)
+includes/Frontend/ProgressUI.php        cfg.upsells (endpoint/track/limit/labels)
+assets/js/frontend.js                   upsellPanel component + add-to-cart
+assets/css/frontend.css                 scoped panel styles (mobile strip)
+```
+
+The storefront sends only `goal_id` + `limit`. The server resolves the
+goal (explicit id, else the featured active money goal), builds the
+same `CartContext` the progress widgets evaluate on, runs the goal
+through the shared `GoalEngine` and derives the remaining gap as
+target − current cart value — **server-side, never trusted from the
+client** (explicit `cart` / `cart_value` / `remaining` args exist for
+tests and embedded consumers only). The deterministic `UpsellRanker`
+runs directly (no per-cart transient churn), so every Phase 33.5
+degradation holds: no goal / closed gap / disabled / no candidates →
+an unavailable payload with a reason, never a fabricated list. The
+payload is catalog data only (name, price, image, score breakdowns,
+reasons) — no PII, no secrets, per-IP rate limited like `/progress`,
+`Cache-Control: no-store` (cart-dependent), and the store's
+cost-derived margin/profit fields (`estimated_profit` /
+`profit_available` / `factors.margin_pct` and the margin reason
+bullets) are redacted before serving, so an anonymous caller can never
+harvest the store's margins (P22-style; the admin analytics surface
+keeps them behind manage_options).
+
+## Panel behavior
+
+- Renders for money goals with `remaining > 0` that are not completed;
+  hidden entirely when the plugin/analytics toggles are off (the
+  `cfg.upsells.enabled` gate mirrors the ranker's
+  `goalcart_upsells_enabled` gate).
+- Results are cached client-side per `goal:remaining`, so a cart-change
+  re-render with an unchanged gap reuses the last ranking; a network
+  failure drops the panel entirely (never a broken half-render).
+- **Add to cart** uses WooCommerce's own public `?wc-ajax=add_to_cart`
+  surface (the same endpoint the theme's buttons use —
+  theme-compatible by construction), falls back to the classic
+  `?add-to-cart=` redirect without it, and sends variation-requiring
+  items to their product page. On success the panel reports
+  `upsell_added` and funnels into the centralized `goalcart:cart-changed`
+  bridge, so the widgets re-poll and the gap closes live.
+
+## Conversion tracking
+
+The panel reports through the Phase 33.5 public
+`POST /goalcart/v1/upsell/track` route (reusing the Phase 16 tracking
+nonce + session id): `upsell_impression` once per goal+product per
+session, `upsell_clicked` on the product link and the add button, and
+`upsell_added` after a successful add. These feed `upsell_events` → the
+`DailyAggregator` → `upsell_stats`, closing the historical-learning loop
+(P33-35) the conversion scorer reads.
+
+## Mobile & theming
+
+The panel is a responsive grid on desktop and a swipeable horizontal
+scroll-snap strip on small screens (`@media (max-width: 600px)`). Every
+style is scoped under `.goalcart-*` and driven by the existing CSS
+custom-property tokens (`--goalcart-accent`, `--goalcart-bg`,
+`--goalcart-border`, `--goalcart-text`, `--goalcart-radius`), so it
+inherits the store's Appearance settings and never leaks into or breaks
+a theme.
+
+---
+
 # Admin Preview System (Phase 15)
 
 Administrators can see the **exact customer experience before

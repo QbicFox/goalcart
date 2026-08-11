@@ -10,6 +10,11 @@ namespace GoalCart\REST;
 use GoalCart\Analytics\RevenueRepository;
 use GoalCart\Analytics\RevenueTracker;
 use GoalCart\Analytics\Session;
+use GoalCart\Analytics\UpsellRanker;
+use GoalCart\Cart\CartIntegration;
+use GoalCart\Goals\Goal;
+use GoalCart\Goals\GoalEngine;
+use GoalCart\Goals\GoalRepository;
 use GoalCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
@@ -26,6 +31,18 @@ defined( 'ABSPATH' ) || exit;
  *    Phase 33.1 upsell_events log. Server-side attribution of upsell_order
  *    events happens on order payment (UpsellRanker hooks), so a client
  *    can never self-report a purchase. Rate limited per IP.
+ *
+ *  - `GET /goalcart/v1/upsell/rank` — public, per-IP rate limited (Phase
+ *    33.7 Frontend Upsell Integration): ranked products that help the
+ *    shopper close the live goal gap. The server resolves the goal
+ *    (explicit goal_id, or the featured active money goal), computes the
+ *    remaining gap from the LIVE cart through the same GoalEngine the
+ *    progress widgets use (goal target − current cart value) and runs the
+ *    deterministic UpsellRanker. The storefront sends only goal_id +
+ *    limit, so the gap is always computed server-side — never trusted
+ *    from the client. The payload carries catalog data only (name, price,
+ *    image, reasons) with no PII or secrets — the same privacy posture
+ *    as the public /progress endpoint.
  *
  *  - `GET /goalcart/v1/revenue/upsells` — admin-only. Two modes:
  *      - context mode (default): ranked upsell products for a simulated
@@ -58,19 +75,60 @@ class UpsellController extends BaseController {
 	const TRACK_RATE_LIMIT_COUNT = 300;
 
 	/**
-	 * Cached revenue repository (serves rankings + analytics).
+	 * Cached revenue repository (serves admin rankings + analytics).
 	 *
 	 * @var RevenueRepository
 	 */
 	protected $repository;
 
 	/**
+	 * Deterministic ranking engine (Phase 33.5). The public storefront
+	 * rank route calls it directly (no transient churn per cart state);
+	 * admin reads go through the repository's cached layer.
+	 *
+	 * @var UpsellRanker|null
+	 */
+	protected $ranker;
+
+	/**
+	 * Live-cart snapshot service (Phase 33.7 goal gap calculation).
+	 *
+	 * @var CartIntegration|null
+	 */
+	protected $cart_integration;
+
+	/**
+	 * Goal engine (evaluates the goal on the live cart).
+	 *
+	 * @var GoalEngine|null
+	 */
+	protected $engine;
+
+	/**
+	 * Goal repository (featured active goal lookup).
+	 *
+	 * @var GoalRepository|null
+	 */
+	protected $goals;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param RevenueRepository $repository Revenue repository.
+	 * @param RevenueRepository  $repository       Revenue repository.
+	 * @param UpsellRanker|null  $ranker           Ranking engine (Phase
+	 *                                             33.7 direct storefront
+	 *                                             reads; falls back to the
+	 *                                             cached repository read).
+	 * @param CartIntegration|null $cart_integration Live-cart snapshot.
+	 * @param GoalEngine|null    $engine           Goal engine (gap calc).
+	 * @param GoalRepository|null $goals           Goal repository.
 	 */
-	public function __construct( RevenueRepository $repository ) {
-		$this->repository = $repository;
+	public function __construct( RevenueRepository $repository, ?UpsellRanker $ranker = null, ?CartIntegration $cart_integration = null, ?GoalEngine $engine = null, ?GoalRepository $goals = null ) {
+		$this->repository       = $repository;
+		$this->ranker           = $ranker;
+		$this->cart_integration = $cart_integration;
+		$this->engine           = $engine;
+		$this->goals            = $goals;
 	}
 
 	/**
@@ -97,6 +155,21 @@ class UpsellController extends BaseController {
 				'callback'            => array( $this, 'handle_track' ),
 				'permission_callback' => array( $this, 'permission_callback' ),
 				'args'                => $this->track_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/upsell/rank',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'handle_rank' ),
+				// Public by design (Phase 33.7): guests read their own
+				// goal-gap recommendations, so no capability — but the
+				// route is rate limited per IP exactly like /progress and
+				// serves catalog data only.
+				'permission_callback' => $this->get_public_permission_callback(),
+				'args'                => $this->rank_args(),
 			)
 		);
 
@@ -229,6 +302,207 @@ class UpsellController extends BaseController {
 	}
 
 	/**
+	 * Rank products that help close the live goal gap (Phase 33.7).
+	 *
+	 * The storefront's upsell panel calls this with just goal_id + limit;
+	 * the server resolves the goal (explicit id, else the featured active
+	 * money goal), computes the remaining gap from the live cart via the
+	 * same GoalEngine the progress widgets use, and returns the
+	 * deterministic ranker payload (available / context / recommendations
+	 * with score breakdowns + reasons). Graceful degradation is the
+	 * ranker's own: no goal, closed gap, disabled or no candidates all
+	 * return an unavailable payload with a reason — never a fabricated
+	 * list. Catalog data only, no PII.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function handle_rank( $request ) {
+		$args = array(
+			'goal_id' => (int) $request->get_param( 'goal_id' ),
+			'limit'   => (int) $request->get_param( 'limit' ),
+		);
+
+		// Explicit cart override (tests / embedded consumers) — the live
+		// storefront path leaves it null and the server reads WC()->cart.
+		$cart = $request->get_param( 'cart' );
+
+		if ( is_array( $cart ) ) {
+			$args['cart'] = array_values( array_filter( array_map( 'intval', $cart ), function ( $id ) {
+				return $id > 0;
+			} ) );
+		}
+
+		// Explicit money overrides beat the live-cart computation.
+		if ( null !== $request->get_param( 'cart_value' ) ) {
+			$args['cart_value'] = (float) $request->get_param( 'cart_value' );
+		}
+
+		if ( null !== $request->get_param( 'remaining' ) ) {
+			$args['remaining'] = (float) $request->get_param( 'remaining' );
+		}
+
+		// Resolve the goal and compute the live gap when the client did
+		// not pin the money context (the normal storefront path).
+		if ( empty( $args['goal_id'] ) && empty( $args['remaining'] ) ) {
+			$goal = $this->rank_goal();
+
+			if ( null !== $goal ) {
+				$args['goal_id'] = $goal->id();
+			}
+		}
+
+		if ( empty( $args['cart_value'] ) && ! isset( $args['remaining'] ) ) {
+			$live = $this->live_rank_context( isset( $args['goal_id'] ) ? (int) $args['goal_id'] : 0 );
+
+			if ( null !== $live ) {
+				$args['cart_value'] = $live['cart_value'];
+
+				if ( empty( $args['cart'] ) ) {
+					$args['cart'] = $live['cart'];
+				}
+			}
+		}
+
+		// The ranker itself degrades gracefully (no goal → "a goal target
+		// or an explicit remaining amount is required", closed gap →
+		// unavailable, disabled → unavailable, no candidates →
+		// unavailable), so the endpoint never invents a list.
+		$payload = null !== $this->ranker
+			? $this->ranker->rank( $args )
+			: $this->repository->upsell_ranking( $args );
+
+		$response = $this->success(
+			$this->public_rank_payload( $payload ),
+			array( 'applied' => $args )
+		);
+
+		// The ranking is cart-dependent, so it must never be served from
+		// a browser or shared cache — the same posture as /progress.
+		$response->header( 'Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0' );
+
+		return $response;
+	}
+
+	/**
+	 * Redact the store's margin/profit data from the public payload.
+	 *
+	 * P22-style hardening: the storefront panel only renders product
+	 * image/name/price/permalink — it has no use for the scoring
+	 * transparency beyond that. Per-unit estimated profit, the
+	 * profit-availability flag, the raw margin percentage and the
+	 * margin reason bullets are therefore stripped so an anonymous
+	 * caller can never harvest the store's cost-derived margin data from
+	 * this public route (the admin-only analytics surface keeps them
+	 * behind manage_options).
+	 *
+	 * @param array<string, mixed> $payload Ranker payload.
+	 * @return array<string, mixed>
+	 */
+	protected function public_rank_payload( array $payload ) {
+		if ( empty( $payload['recommendations'] ) || ! is_array( $payload['recommendations'] ) ) {
+			return $payload;
+		}
+
+		foreach ( $payload['recommendations'] as $i => $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+
+			$item['estimated_profit'] = null;
+			$item['profit_available'] = false;
+
+			if ( isset( $item['factors']['margin_pct'] ) ) {
+				$item['factors']['margin_pct'] = null;
+			}
+
+			// Drop the margin explanation bullets too — a store that
+			// stores costs would otherwise leak "Estimated margin 25%…"
+			// through the reasons list.
+			if ( ! empty( $item['reasons'] ) && is_array( $item['reasons'] ) ) {
+				$item['reasons'] = array_values(
+					array_filter( $item['reasons'], function ( $reason ) {
+						return false === stripos( (string) $reason, 'margin' );
+					} )
+				);
+			}
+
+			$payload['recommendations'][ $i ] = $item;
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * The featured active money goal for storefront ranking.
+	 *
+	 * When no explicit goal_id is sent, the first active money goal in
+	 * repository order is the upsell target — the same goal the progress
+	 * widgets feature. Non-money goals have no money gap to close, so
+	 * they are skipped.
+	 *
+	 * @return Goal|null
+	 */
+	protected function rank_goal() {
+		if ( null === $this->goals ) {
+			return null;
+		}
+
+		foreach ( $this->goals->active_goals() as $goal ) {
+			if ( $goal instanceof Goal && $goal->is_money_goal() ) {
+				return $goal;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * The live cart's money context for a goal (Phase 33.7 gap calc).
+	 *
+	 * Builds the same CartContext the progress widgets evaluate goals
+	 * on, evaluates the goal, and returns its current money value + the
+	 * cart's product ids. The ranker then derives the remaining gap as
+	 * goal target − current, matching exactly what the widget displays.
+	 *
+	 * @param int $goal_id Resolved goal id (0 = none yet).
+	 * @return array{cart_value: float, cart: int[]}|null
+	 */
+	protected function live_rank_context( $goal_id ) {
+		if ( null === $this->cart_integration ) {
+			return null;
+		}
+
+		$context = $this->cart_integration->context();
+
+		$cart = array();
+
+		foreach ( $context->items() as $item ) {
+			$id = (int) $item->product_id();
+
+			if ( $id > 0 && ! in_array( $id, $cart, true ) ) {
+				$cart[] = $id;
+			}
+		}
+
+		$cart_value = 0.0;
+
+		if ( $goal_id > 0 && null !== $this->engine ) {
+			$goal = $this->goals ? $this->goals->find( $goal_id ) : null;
+
+			if ( $goal instanceof Goal ) {
+				$result = $this->engine->evaluate( $goal, $context );
+				$cart_value = (float) $result->current();
+			}
+		}
+
+		return array(
+			'cart_value' => max( 0.0, $cart_value ),
+			'cart'       => $cart,
+		);
+	}
+
+	/**
 	 * Ranked upsells (context mode) or the top-products analytics table.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -293,6 +567,51 @@ class UpsellController extends BaseController {
 		}
 
 		return $this->success( $detail, array( 'applied' => $args ) );
+	}
+
+	/**
+	 * Arg schema for the public storefront rank route (Phase 33.7).
+	 *
+	 * goal_id + limit are all the storefront sends; cart / cart_value /
+	 * remaining exist for tests and embedded consumers. When they are
+	 * absent the server computes the gap from the live cart — the client
+	 * can never pin the gap on the public route (well, it can, but the
+	 * storefront never does; the numbers are catalog-only either way).
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function rank_args() {
+		return array(
+			'goal_id'    => array(
+				'type'              => 'integer',
+				'default'           => 0,
+				'minimum'           => 0,
+				'sanitize_callback' => 'absint',
+			),
+			'limit'      => array(
+				'type'    => 'integer',
+				'default' => 3,
+				'minimum' => 1,
+				'maximum' => 10,
+			),
+			'cart'       => array(
+				'type'  => 'array',
+				'items' => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+				),
+			),
+			'cart_value' => array(
+				'type'    => array( 'number', 'null' ),
+				'default' => null,
+				'minimum' => 0,
+			),
+			'remaining'  => array(
+				'type'    => array( 'number', 'null' ),
+				'default' => null,
+				'minimum' => 0,
+			),
+		);
 	}
 
 	/**

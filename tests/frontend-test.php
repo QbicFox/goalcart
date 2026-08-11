@@ -176,6 +176,16 @@ check( 'config has a currency key', array_key_exists( 'currency', $config ) );
 check( 'config is RTL-aware', array_key_exists( 'isRtl', $config ) );
 check( 'config labels cover reward types', isset( $config['labels']['free_shipping'], $config['labels']['percent_discount'], $config['labels']['fixed_discount'], $config['labels']['free_gift'], $config['labels']['coupon'] ) );
 
+// Phase 33.7 (Frontend Upsell Integration): the config carries the
+// smart-upsell panel contract — public rank endpoint, upsell track
+// endpoint, limit and localized panel labels.
+$upsell_config = $config['upsells'] ?? null;
+check( 'config carries the upsell block', is_array( $upsell_config ) && ! empty( $upsell_config['enabled'] ) );
+check( 'upsell endpoint points at the public rank route', false !== strpos( $upsell_config['endpoint'] ?? '', '/goalcart/v1/upsell/rank' ) );
+check( 'upsell track endpoint points at the upsell track route', false !== strpos( $upsell_config['trackEndpoint'] ?? '', '/goalcart/v1/upsell/track' ) );
+check( 'upsell limit is bounded', isset( $upsell_config['limit'] ) && (int) $upsell_config['limit'] >= 1 && (int) $upsell_config['limit'] <= 6 );
+check( 'upsell labels cover the panel strings', isset( $upsell_config['labels']['heading'], $upsell_config['labels']['add'], $upsell_config['labels']['adding'], $upsell_config['labels']['added'], $upsell_config['labels']['unavailable'] ) );
+
 // The public progress payload must never be cached: WP sends no cache
 // headers for guest REST requests, so a browser holding the first
 // response would keep showing the previous cart's progress after the

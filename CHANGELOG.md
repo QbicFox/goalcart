@@ -9,6 +9,59 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
+- **Phase 33.7 — Frontend Upsell Integration** — the storefront half of
+  the Smart Upsell engine (P33-T07):
+  - **Public rank endpoint** — new `GET /goalcart/v1/upsell/rank`
+    (`UpsellController`), public + per-IP rate limited like `/progress`,
+    serving catalog data only. The storefront sends just `goal_id` +
+    `limit`; the server resolves the goal (explicit or the featured
+    active money goal), computes the remaining gap from the **live cart**
+    through the shared `GoalEngine` (target − current, exactly what the
+    widgets display — never trusted from the client) and runs the
+    deterministic `UpsellRanker` directly, so the ranking always reflects
+    the current cart with no per-cart transient churn. All Phase 33.5
+    degradation holds: no goal / closed gap / disabled / no candidates
+    → unavailable with a reason, never a fabricated list. The response
+    is `Cache-Control: no-store` (cart-dependent, like `/progress`), and
+    the store's cost-derived margin/profit fields (`estimated_profit` /
+    `profit_available` / `factors.margin_pct` and the margin reason
+    bullets) are redacted before serving — an anonymous caller can never
+    harvest the store's margins (P22-style public-payload redaction;
+    the admin analytics surface keeps them behind manage_options).
+  - **Upsell panel component** — full-variant cards on cart/checkout now
+    render ranked gap-closers for money goals with a positive remaining
+    gap: heading + product rows (image, name, server-formatted price,
+    add-to-cart button), fetched through a new `cfg.upsells` frontend
+    config block (rank + track endpoints, limit, localized labels,
+    gated by the same `goalcart_upsells_enabled` gate as the ranker),
+    cached per goal:gap, and dropped entirely on network failure.
+  - **Add-to-cart integration** — the panel adds through WooCommerce's
+    own public `?wc-ajax=add_to_cart` surface (the same endpoint the
+    theme's buttons use — theme-compatible by construction), falls back
+    to the classic `?add-to-cart=` redirect without it, and sends
+    variation-requiring items to their product page. Success funnels
+    into the centralized `goalcart:cart-changed` bridge, so the widgets
+    re-poll and the gap closes live.
+  - **Conversion tracking** — `upsell_impression` (once per goal+product
+    per session), `upsell_clicked` (link + add) and `upsell_added`
+    (after a successful add) report through the Phase 33.5 public
+    `POST /goalcart/v1/upsell/track` route, reusing the Phase 16
+    tracking nonce/session — feeding the historical learning loop
+    (P33-35) exactly as the admin analytics expect.
+  - **Mobile + theme compatibility** — grid on desktop, swipeable
+    horizontal snap-strip on small screens; styled exclusively through
+    the scoped `goalcart-*` classes and the existing CSS custom-property
+    tokens, so it can never leak into or break a store theme.
+  - **Tests** — new `tests/upsell-frontend-test.php` (63 checks): route
+    registration, arg-schema validation, anonymous public access, the
+    live-cart gap derivation (target − evaluated cart value with the
+    in-cart product excluded from recommendations), explicit-context
+    overrides, closed-gap / disabled / unknown-goal degradation, the
+    storefront config block (incl. the analytics-off gate) and the JS/CSS
+    wiring — all inside a rolled-back transaction with residue checks.
+    `tests/frontend-test.php` gained the `cfg.upsells` config-shape
+    checks, and the fa_IR translation covers the new panel strings.
+
 - **Phase 33.1 — Revenue Analytics Foundation** — the event layer behind
   the Phase 33 revenue-optimization engine (P33-T01):
   - **Event model** — new `RevenueTracker` (`includes/Analytics/`)

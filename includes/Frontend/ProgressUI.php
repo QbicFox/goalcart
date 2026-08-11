@@ -434,6 +434,63 @@ final class ProgressUI {
 				'suggestions' => (bool) $this->settings->get( 'sticky_suggestions', false ),
 				'display'     => 'full' === $this->settings->get( 'sticky_display', 'compact' ) ? 'full' : 'compact',
 			),
+			// Phase 33.7 (Frontend Upsell Integration): the smart upsell
+			// panel's contract — the public rank endpoint (live-cart goal
+			// gap + deterministic ranking), the nonce-guarded track
+			// endpoint (impression/clicked/added into the upsell_events
+			// log) and the localized labels. Absent/disabled = the JS
+			// renders no panel.
+			'upsells'   => $this->upsell_config(),
+		);
+	}
+
+	/**
+	 * The storefront smart-upsell panel config (Phase 33.7).
+	 *
+	 * Mirrors the UpsellRanker gate (master enabled + analytics toggles +
+	 * the goalcart_upsells_enabled filter) so the panel only renders when
+	 * the ranking engine is on. The track endpoint rides on the same
+	 * tracking nonce window.goalcartTracking already carries — the JS
+	 * reuses it, so no second nonce is needed. Every string is
+	 * translatable; the JS falls back to its English literals when the
+	 * locale file misses a key.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function upsell_config() {
+		$enabled = (bool) $this->settings->get( 'enabled', true )
+			&& (bool) $this->settings->get( 'analytics_enabled', true );
+
+		/**
+		 * Filter whether smart upsell ranking is on (same gate as the
+		 * ranker — keep the two in sync).
+		 *
+		 * @param bool $enabled Whether smart upsells are enabled.
+		 */
+		$enabled = (bool) apply_filters( 'goalcart_upsells_enabled', $enabled );
+
+		if ( ! $enabled ) {
+			return array(
+				'enabled'       => false,
+				'endpoint'      => '',
+				'trackEndpoint' => '',
+				'limit'         => 0,
+				'labels'        => array(),
+			);
+		}
+
+		return array(
+			'enabled'       => true,
+			'endpoint'      => esc_url_raw( rest_url( 'goalcart/v1/upsell/rank' ) ),
+			'trackEndpoint' => esc_url_raw( rest_url( 'goalcart/v1/upsell/track' ) ),
+			'limit'         => max( 1, min( 6, (int) apply_filters( 'goalcart_frontend_upsell_limit', 3 ) ) ),
+			'labels'        => array(
+				'heading'     => __( 'Complete your goal', 'goalcart' ),
+				'add'         => __( 'Add to cart', 'goalcart' ),
+				'adding'      => __( 'Adding…', 'goalcart' ),
+				'added'       => __( 'Added', 'goalcart' ),
+				'unavailable' => __( 'No recommendations available right now.', 'goalcart' ),
+			),
 		);
 	}
 

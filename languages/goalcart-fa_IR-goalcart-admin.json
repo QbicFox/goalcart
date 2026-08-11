@@ -5,7 +5,7 @@
             "": {
                 "domain": "goalcart",
                 "lang": "fa_IR",
-                "plural-forms": "nplurals=2; plural=(n > 1);"
+                "plural-forms": "nplurals=2; plural=(n != 1);"
             },
             "% discount": [
                 "٪ تخفیف"
@@ -112,6 +112,9 @@
             "Add line taxes to the subtotal-style money bases.": [
                 "مالیات‌های ردیف را به مبناهای پولی نوع جمع فرعی اضافه کنید."
             ],
+            "Add to cart": [
+                "افزودن به سبد خرید"
+            ],
             "Add your first campaign": [
                 "اولین کمپین خود را اضافه کنید"
             ],
@@ -126,6 +129,9 @@
             ],
             "Added": [
                 "افزوده شد"
+            ],
+            "Adding…": [
+                "در حال افزودن…"
             ],
             "Adds": [
                 "افزوده‌ها"
@@ -257,7 +263,7 @@
                 "میانگین ارزش سفارش"
             ],
             "Average order value is %s over %d orders.": [
-                "میانگین ارزش سفارش بر اساس %d سفارش، %s است."
+                "میانگین ارزش سفارش %s بر اساس %d سفارش است."
             ],
             "Average order value — observed impact": [
                 "میانگین ارزش سفارش — تأثیر مشاهده‌شده"
@@ -447,6 +453,9 @@
             ],
             "Complete": [
                 "تکمیل"
+            ],
+            "Complete your goal": [
+                "هدف خود را تکمیل کنید"
             ],
             "Completed": [
                 "تکمیل‌شده"
@@ -1308,6 +1317,9 @@
             ],
             "No recommendation available": [
                 "پیشنهادی در دسترس نیست"
+            ],
+            "No recommendations available right now.": [
+                "در حال حاضر پیشنهادی موجود نیست."
             ],
             "No revenue data yet": [
                 "هنوز دادهٔ درآمدی وجود ندارد"

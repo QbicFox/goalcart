@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-11T08:12:20Z\n"
+"POT-Creation-Date: 2026-08-11T08:49:42Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -172,6 +172,10 @@ msgstr ""
 msgid "Add line taxes to the subtotal-style money bases."
 msgstr ""
 
+#: includes/Frontend/ProgressUI.php:489
+msgid "Add to cart"
+msgstr ""
+
 #: admin-app/src/routes/Campaigns.tsx:156
 msgid "Add your first campaign"
 msgstr ""
@@ -189,7 +193,12 @@ msgid "Add-to-cart rate"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:575
+#: includes/Frontend/ProgressUI.php:491
 msgid "Added"
+msgstr ""
+
+#: includes/Frontend/ProgressUI.php:490
+msgid "Adding…"
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:299
@@ -721,6 +730,10 @@ msgstr ""
 msgid "Complete"
 msgstr ""
 
+#: includes/Frontend/ProgressUI.php:488
+msgid "Complete your goal"
+msgstr ""
+
 #: admin-app/src/components/revenue/FunnelVisual.tsx:18
 #: admin-app/src/routes/GoalPerformance.tsx:191
 msgid "Completed"
@@ -896,7 +909,7 @@ msgstr ""
 #: admin-app/src/routes/Goals.tsx:48
 #: admin-app/src/routes/Recommendations.tsx:41
 #: admin-app/src/templates/rewardLabel.ts:12
-#: includes/Frontend/ProgressUI.php:821
+#: includes/Frontend/ProgressUI.php:878
 #: includes/Goals/MessageEngine.php:303
 msgid "Coupon"
 msgstr ""
@@ -1120,7 +1133,7 @@ msgid "Discounted subtotal"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:358
-#: includes/Frontend/ProgressUI.php:826
+#: includes/Frontend/ProgressUI.php:883
 msgid "Dismiss"
 msgstr ""
 
@@ -1216,7 +1229,7 @@ msgstr ""
 msgid "Enable Goal Cart"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:823
+#: includes/Frontend/ProgressUI.php:880
 msgid "Ended"
 msgstr ""
 
@@ -1225,7 +1238,7 @@ msgstr ""
 msgid "Ends at"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:822
+#: includes/Frontend/ProgressUI.php:879
 msgid "Ends in"
 msgstr ""
 
@@ -1336,7 +1349,7 @@ msgstr ""
 #: admin-app/src/routes/Goals.tsx:46
 #: admin-app/src/routes/Recommendations.tsx:39
 #: admin-app/src/templates/rewardLabel.ts:10
-#: includes/Frontend/ProgressUI.php:819
+#: includes/Frontend/ProgressUI.php:876
 #: includes/Goals/MessageEngine.php:290
 msgid "Fixed discount"
 msgstr ""
@@ -1348,7 +1361,7 @@ msgstr ""
 #: admin-app/src/routes/Goals.tsx:47
 #: admin-app/src/routes/Recommendations.tsx:40
 #: admin-app/src/templates/rewardLabel.ts:11
-#: includes/Frontend/ProgressUI.php:820
+#: includes/Frontend/ProgressUI.php:877
 #: includes/Goals/MessageEngine.php:300
 msgid "Free gift"
 msgstr ""
@@ -1361,7 +1374,7 @@ msgstr ""
 #: admin-app/src/routes/Goals.tsx:44
 #: admin-app/src/routes/Recommendations.tsx:37
 #: admin-app/src/templates/rewardLabel.ts:8
-#: includes/Frontend/ProgressUI.php:817
+#: includes/Frontend/ProgressUI.php:874
 #: includes/Goals/MessageEngine.php:277
 msgid "Free shipping"
 msgstr ""
@@ -1409,7 +1422,7 @@ msgstr ""
 msgid "Generate a coupon from these rules"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:825
+#: includes/Frontend/ProgressUI.php:882
 msgid "Gift added to your cart"
 msgstr ""
 
@@ -1699,12 +1712,12 @@ msgstr ""
 msgid "Invalid gift nonce."
 msgstr ""
 
-#: includes/REST/UpsellController.php:273
+#: includes/REST/UpsellController.php:489
 msgid "Invalid product id."
 msgstr ""
 
 #: includes/REST/TrackController.php:174
-#: includes/REST/UpsellController.php:140
+#: includes/REST/UpsellController.php:213
 msgid "Invalid tracking nonce."
 msgstr ""
 
@@ -2014,6 +2027,10 @@ msgstr ""
 msgid "No recommendation available"
 msgstr ""
 
+#: includes/Frontend/ProgressUI.php:492
+msgid "No recommendations available right now."
+msgstr ""
+
 #: admin-app/src/routes/RevenueOverview.tsx:144
 msgid "No revenue data yet"
 msgstr ""
@@ -2179,7 +2196,7 @@ msgid "Percentage"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:25
-#: includes/Frontend/ProgressUI.php:818
+#: includes/Frontend/ProgressUI.php:875
 #: includes/Goals/MessageEngine.php:281
 msgid "Percentage discount"
 msgstr ""
@@ -2197,7 +2214,7 @@ msgstr ""
 msgid "Pick the default progress template and tune its appearance — separately for Goals and Campaigns."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:824
+#: includes/Frontend/ProgressUI.php:881
 msgid "Pick your free gift"
 msgstr ""
 
@@ -3081,7 +3098,7 @@ msgstr ""
 msgid "The product breakdown could not be loaded."
 msgstr ""
 
-#: includes/REST/UpsellController.php:290
+#: includes/REST/UpsellController.php:506
 msgid "The product could not be found."
 msgstr ""
 
@@ -3200,9 +3217,9 @@ msgid "Track color"
 msgstr ""
 
 #: includes/REST/TrackController.php:198
-#: includes/REST/UpsellController.php:169
-#: includes/REST/UpsellController.php:191
-#: includes/REST/UpsellController.php:222
+#: includes/REST/UpsellController.php:242
+#: includes/REST/UpsellController.php:264
+#: includes/REST/UpsellController.php:295
 msgid "Tracking is disabled."
 msgstr ""
 
@@ -3242,7 +3259,7 @@ msgstr ""
 msgid "Unknown method"
 msgstr ""
 
-#: includes/REST/UpsellController.php:179
+#: includes/REST/UpsellController.php:252
 msgid "Unknown upsell event type."
 msgstr ""
 

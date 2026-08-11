@@ -61,6 +61,12 @@ require dirname( __DIR__ ) . '/goalcart.php';
 switch_to_locale( 'en_US' );
 unload_textdomain( 'goalcart' );
 
+// Hard-block the just-in-time loader (WP 6.5+): WooCommerce order
+// processing pops the locale stack back to the site locale mid-suite, and
+// without this flag the first goalcart __() call would reload the fa_IR
+// .mo and translate the reason strings the suite asserts in English.
+$GLOBALS['l10n_unloaded']['goalcart'] = true;
+
 use GoalCart\Analytics\DailyAggregator;
 use GoalCart\Analytics\RevenueRepository;
 use GoalCart\Analytics\RevenueTracker;

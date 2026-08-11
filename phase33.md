@@ -2379,8 +2379,61 @@ Tasks:
 Progress:
 
 ```text
-0%
+100% — COMPLETED
 ```
+
+Implementation notes (see `tests/upsell-frontend-test.php`, 63 checks):
+
+- **Public rank endpoint** — new `GET /goalcart/v1/upsell/rank`
+  (`UpsellController`), public like `/progress` (no capability, per-IP
+  rate limited, catalog data only — no PII or secrets). The storefront
+  sends only `goal_id` + `limit`.
+- **Goal gap calculation (server-side, never trusted from the client)** —
+  the endpoint resolves the goal (explicit id, else the featured active
+  money goal), builds the same `CartContext` the progress widgets
+  evaluate on, runs the goal through the shared `GoalEngine` and derives
+  the remaining gap as target − current cart value — exactly what the
+  widget displays. Explicit `cart` / `cart_value` / `remaining` args
+  exist for tests and embedded consumers only.
+- **Candidate request + product ranking** — the endpoint calls the
+  deterministic `UpsellRanker::rank()` DIRECTLY (not the cached admin
+  repository read): no transient churn per cart state, and the ranking
+  always reflects the live cart. All Phase 33.5 degradation holds (no
+  goal / closed gap / disabled / no candidates → unavailable with a
+  reason, never a fabricated list). The response is stamped
+  `Cache-Control: no-store` (cart-dependent, like /progress).
+- **Public payload redaction (P22-style)** — the ranker's raw payload
+  carries the store's cost-derived margin/profit data; the public route
+  strips `estimated_profit` / `profit_available` / `factors.margin_pct`
+  and the margin reason bullets before serving, so an anonymous caller
+  can never harvest the store's margins (the admin analytics surface
+  keeps them behind manage_options).
+- **Upsell component** — the storefront panel renders in full-variant
+  cards on cart/checkout for money goals with a positive remaining gap:
+  heading, ranked product rows (image, name, server-formatted price,
+  add-to-cart button) fetched through `ProgressUI::frontend_config()`
+  (`cfg.upsells` — rank endpoint, track endpoint, limit, localized
+  labels; gated by the same `goalcart_upsells_enabled` gate as the
+  ranker). Results are cached per goal:gap so cart-change re-renders
+  reuse them; network failures drop the panel entirely.
+- **Add-to-cart integration** — the panel adds through WooCommerce's own
+  public `?wc-ajax=add_to_cart` surface (the same endpoint the theme's
+  buttons use — theme-compatible by construction), falls back to the
+  classic `?add-to-cart=` redirect without it, and sends variation-requiring
+  products to their product page. On success it funnels into the
+  centralized `goalcart:cart-changed` bridge, so the widgets re-poll and
+  the gap closes live.
+- **Conversion tracking** — the panel reports `upsell_impression` (once
+  per goal+product per session), `upsell_clicked` (product link + add
+  button) and `upsell_added` (after a successful add) through the
+  Phase 33.5 public `POST /goalcart/v1/upsell/track` route, reusing the
+  Phase 16 tracking nonce/session — feeding the historical learning
+  loop (P33-35) exactly as the admin analytics expect.
+- **Mobile optimization + theme compatibility** — the panel is a grid on
+  desktop and a swipeable horizontal snap-strip on small screens, styled
+  exclusively through the scoped `goalcart-*` classes and the existing
+  CSS custom-property tokens (accent/bg/border/text/radius), so it can
+  never leak into or break a store theme.
 
 ---
 

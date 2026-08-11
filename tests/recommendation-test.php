@@ -64,15 +64,11 @@ require dirname( __DIR__ ) . '/goalcart.php';
 switch_to_locale( 'en_US' );
 unload_textdomain( 'goalcart' );
 
-add_action( 'switch_locale', function ( $locale ) {
-	echo "TRACE switch_locale -> {$locale}\n";
-} );
-add_action( 'restore_previous_locale', function () {
-	echo "TRACE restore_previous_locale\n";
-} );
-add_action( 'goalcart_settings_changed', function () {
-	echo "TRACE goalcart_settings_changed\n";
-} );
+// Hard-block the just-in-time loader (WP 6.5+): WooCommerce order
+// processing pops the locale stack back to the site locale mid-suite, and
+// without this flag the first goalcart __() call would reload the fa_IR
+// .mo and translate the reason strings the suite asserts in English.
+$GLOBALS['l10n_unloaded']['goalcart'] = true;
 
 use GoalCart\Analytics\AttributionEngine;
 use GoalCart\Analytics\GoalRecommendationEngine;
@@ -219,8 +215,11 @@ echo "\n== 3. Integration ==\n";
 // The fixture order creations legitimately invalidate the revenue cache
 // (order status changes fire the invalidation hook — by design), so the
 // cache version is captured before the transaction and asserted to return
-// to that exact baseline after the rollback.
+// to that exact baseline after the rollback. The goals row count is
+// captured the same way — live stores may hold any number of real goals,
+// so the suite asserts no drift rather than a hard-coded count.
 $version_start = (int) get_option( RevenueRepository::CACHE_VERSION_OPTION, 1 );
+$goals_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
 
 $wpdb->query( 'START TRANSACTION' );
 
@@ -326,11 +325,6 @@ try {
 	$top = $rec['recommendation'];
 	check( 'every candidate exposes scoring factors', isset( $top['factors']['reachability_score'], $top['factors']['distance_score'], $top['factors']['economics_score'], $top['factors']['history_score'] ) );
 	check( 'every candidate exposes plain-English reasons', is_array( $top['reasons'] ) && count( $top['reasons'] ) >= 2 );
-	if ( 1 !== preg_match( '/median order value/', implode( ' ', $top['reasons'] ) ) ) {
-		echo "DEBUG locale=" . get_locale() . " l10n_loaded=" . var_export( isset( $GLOBALS['l10n']['goalcart'] ), true ) . " l10n_unloaded=" . var_export( isset( $GLOBALS['l10n_unloaded']['goalcart'] ), true ) . "\n";
-		echo "DEBUG __(Dashboard)=" . __( 'Dashboard', 'goalcart' ) . "\n";
-		echo "DEBUG reasons: " . wp_json_encode( $top['reasons'] ) . "\n";
-	}
 	check( 'reasons reference the median order value', 1 === preg_match( '/median order value/', implode( ' ', $top['reasons'] ) ) );
 	check( 'expected completion rate bounded', $top['expected_completion_rate'] >= 0.05 && $top['expected_completion_rate'] <= 0.85 );
 	check( 'profit excluded without margin data', ! $top['expected_profit_available'] && null === $top['expected_profit'] );
@@ -481,7 +475,7 @@ echo "\n== 4. Rollback verification ==\n";
 
 check( 'revenue_events empty after rollback', 0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table}" ) );
 check( 'goal_attribution empty after rollback', 0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$attrib_table}" ) );
-check( 'goals back to the pre-existing count', 2 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" ) );
+check( 'goals back to the pre-existing count', $goals_before === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" ) );
 
 $leftover = wc_get_orders( array(
 	'status'       => AttributionEngine::REVENUE_STATUSES,

@@ -73,6 +73,19 @@
 	var reportedSuggestionImpressions = {};
 	var reportedProgress = {};
 
+	// Phase 33.7 (Frontend Upsell Integration): the smart upsell panel
+	// config (endpoint, track endpoint, limit, labels). Absent = the
+	// panel is disabled and every upsell call is a guarded no-op.
+	var upsells = cfg.upsells || null;
+
+	// Per-session dedup for upsell impressions (one per goal + product).
+	var reportedUpsellImpressions = {};
+
+	// Per-goal ranking cache keyed by "goalId:remaining": a cart change
+	// re-renders the card and reuses the last payload when the gap did
+	// not move, instead of refetching on every poll.
+	var upsellRankCache = {};
+
 	// Phase 23 (Performance → update only changed UI fragments): each
 	// widget records a fingerprint of the payload it last rendered.
 	// refresh() skips the DOM rebuild for containers whose fingerprint is
@@ -280,6 +293,104 @@
 		request.open( 'POST', tracking.endpoint, true );
 		request.setRequestHeader( 'Content-Type', 'application/json' );
 		request.send( body );
+	}
+
+	/**
+	 * Report an upsell interaction to the upsell track endpoint (Phase
+	 * 33.7).
+	 *
+	 * The smart upsell funnel (impression / clicked / added) posts to the
+	 * public `POST /goalcart/v1/upsell/track` route — NOT the Phase 16
+	 * track endpoint, which only whitelists the goal/reward events. The
+	 * route reuses the same tracking nonce + session id the Phase 16
+	 * tracker already holds, so no second nonce is needed. Fire-and-forget
+	 * and must never throw, exactly like sendTrack.
+	 *
+	 * @param {string} eventType upsell_impression | upsell_clicked |
+	 *                           upsell_added.
+	 * @param {Object} data      Optional event fields.
+	 * @return {void}
+	 */
+	function sendUpsellTrack( eventType, data ) {
+		if ( ! upsells || ! upsells.trackEndpoint || ! tracking || ! tracking.nonce ) {
+			return;
+		}
+
+		var payload = {
+			event_type: eventType,
+			nonce: tracking.nonce || '',
+			session_id: tracking.sessionId || '',
+		};
+
+		if ( data ) {
+			for ( var key in data ) {
+				if ( Object.prototype.hasOwnProperty.call( data, key ) ) {
+					payload[ key ] = data[ key ];
+				}
+			}
+		}
+
+		var body;
+		try {
+			body = JSON.stringify( payload );
+		} catch ( error ) {
+			return;
+		}
+
+		if ( navigator.sendBeacon ) {
+			try {
+				navigator.sendBeacon( upsells.trackEndpoint, new Blob( [ body ], { type: 'application/json' } ) );
+				return;
+			} catch ( error ) {
+				// Fall through to the XHR path.
+			}
+		}
+
+		var request = new XMLHttpRequest();
+		request.open( 'POST', upsells.trackEndpoint, true );
+		request.setRequestHeader( 'Content-Type', 'application/json' );
+		request.send( body );
+	}
+
+	/**
+	 * Fetch the ranked upsell products for one goal (Phase 33.7).
+	 *
+	 * GETs the public rank endpoint with just goal_id + limit — the
+	 * server computes the remaining gap from the live cart, so the client
+	 * never needs to send (or trust) the gap. Cache-busted with a
+	 * timestamp, mirroring fetchProgress.
+	 *
+	 * @param {string}   goalId Goal id.
+	 * @param {Function} done   Callback receiving the payload `data`
+	 *                          object, or null on any failure.
+	 * @return {void}
+	 */
+	function fetchUpsells( goalId, done ) {
+		var request = new XMLHttpRequest();
+		var separator = upsells.endpoint.indexOf( '?' ) >= 0 ? '&' : '?';
+		var url = upsells.endpoint + separator
+			+ 'goal_id=' + encodeURIComponent( goalId )
+			+ '&limit=' + encodeURIComponent( upsells.limit || 3 )
+			+ '&_=' + Date.now();
+
+		request.open( 'GET', url, true );
+		request.timeout = 10000;
+
+		request.onload = function () {
+			if ( request.status < 200 || request.status >= 300 ) {
+				done( null );
+				return;
+			}
+
+			safe( function () {
+				var payload = JSON.parse( request.responseText );
+				done( payload && payload.data ? payload.data : null );
+			} );
+		};
+
+		request.onerror = function () { done( null ); };
+		request.ontimeout = function () { done( null ); };
+		request.send();
 	}
 
 	/**
@@ -730,6 +841,297 @@
 		}
 
 		return list;
+	}
+
+	/**
+	 * A localized upsell label with a sensible fallback.
+	 *
+	 * The upsell labels live in cfg.upsells.labels (not cfg.labels, which
+	 * carries the reward/countdown strings).
+	 *
+	 * @param {string} key      Label key in upsells.labels.
+	 * @param {string} fallback Fallback text.
+	 * @return {string}
+	 */
+	function upsellLabel( key, fallback ) {
+		return ( upsells && upsells.labels && upsells.labels[ key ] )
+			? String( upsells.labels[ key ] )
+			: String( fallback );
+	}
+
+	/**
+	 * One upsell product row (Phase 33.7).
+	 *
+	 * Image, name (link), server-formatted price and an add-to-cart
+	 * button. The ids, the permalink and the current cart value ride on
+	 * data attributes so the single delegated click handler can act
+	 * without resolving anything.
+	 *
+	 * @param {Object} item Ranked product payload row.
+	 * @param {Object} goal The goal the ranking belongs to.
+	 * @return {HTMLElement}
+	 */
+	function upsellRow( item, goal ) {
+		var row = el( 'div', 'goalcart-upsell' );
+
+		row.setAttribute( 'data-goalcart-upsell-product', String( item.product_id || 0 ) );
+		row.setAttribute( 'data-goalcart-upsell-goal', String( goal.goal_id || 0 ) );
+		row.setAttribute( 'data-goalcart-upsell-permalink', String( item.permalink || '' ) );
+		row.setAttribute( 'data-goalcart-upsell-value', String( Number( goal.current ) || 0 ) );
+
+		if ( item.image ) {
+			var img = el( 'img', 'goalcart-upsell__image' );
+			img.setAttribute( 'src', String( item.image ) );
+			img.setAttribute( 'alt', '' );
+			img.setAttribute( 'loading', 'lazy' );
+			row.appendChild( img );
+		}
+
+		var link = el( 'a', 'goalcart-upsell__name' );
+		link.setAttribute( 'href', isSafeUrl( item.permalink ) ? String( item.permalink ) : '#' );
+		link.setAttribute( 'data-goalcart-upsell-id', String( item.product_id || 0 ) );
+		link.setAttribute( 'data-goalcart-upsell-goal', String( goal.goal_id || 0 ) );
+		link.textContent = String( item.name || '' );
+		row.appendChild( link );
+
+		// price_html is the server-formatted, entity-decoded text price
+		// (never markup) — rendered as text, so nothing injects.
+		row.appendChild( el( 'span', 'goalcart-upsell__price', String( item.price_html || item.price || '' ) ) );
+
+		var button = el( 'button', 'goalcart-upsell__add' );
+		button.type = 'button';
+		button.textContent = upsellLabel( 'add', 'Add to cart' );
+		row.appendChild( button );
+
+		return row;
+	}
+
+	/**
+	 * UpsellPanel — ranked products that close the goal's remaining gap
+	 * (Phase 33.7).
+	 *
+	 * Renders only for money goals with a positive remaining gap inside
+	 * full-variant cards. The ranking is fetched from the public rank
+	 * endpoint (the server computes the gap from the live cart); the
+	 * result is cached per goal:remaining so cart-change re-renders reuse
+	 * it. Each rendered product reports one upsell_impression per
+	 * session.
+	 *
+	 * @param {Object} goal Progress goal entry.
+	 * @return {HTMLElement|null}
+	 */
+	function upsellPanel( goal ) {
+		if ( ! upsells || ! upsells.enabled || ! upsells.endpoint ) {
+			return null;
+		}
+
+		// Only money goals have a gap to close — and a completed goal
+		// needs no recommendations.
+		if ( ! goal.is_money || goal.completed ) {
+			return null;
+		}
+
+		var remaining = Number( goal.remaining );
+
+		if ( ! ( remaining > 0 ) ) {
+			return null;
+		}
+
+		var goalId = String( goal.goal_id || 0 );
+
+		if ( ! goalId ) {
+			return null;
+		}
+
+		var panel = el( 'div', 'goalcart-upsells' );
+		panel.appendChild( el( 'div', 'goalcart-upsells__title', upsellLabel( 'heading', 'Complete your goal' ) ) );
+
+		var list = el( 'div', 'goalcart-upsells__list' );
+		panel.appendChild( list );
+
+		var cacheKey = goalId + ':' + Math.round( remaining );
+		var cached = upsellRankCache[ cacheKey ] || null;
+
+		function fill( payload ) {
+			if ( ! payload ) {
+				// Network/parse failure: drop the panel entirely — never a
+				// broken half-rendered widget.
+				try {
+					panel.remove();
+				} catch ( error ) {}
+				return;
+			}
+
+			list.replaceChildren();
+
+			var rows = ( payload.available && payload.recommendations ) ? payload.recommendations : [];
+
+			if ( ! rows.length ) {
+				list.appendChild( el( 'div', 'goalcart-upsells__empty', upsellLabel( 'unavailable', 'No recommendations available right now.' ) ) );
+				return;
+			}
+
+			for ( var i = 0; i < rows.length; i++ ) {
+				var item = rows[ i ] || {};
+
+				if ( ! item.product_id ) {
+					continue;
+				}
+
+				list.appendChild( upsellRow( item, goal ) );
+
+				// Phase 33.7 conversion tracking: one impression per goal +
+				// product per session (deduped like suggestion impressions).
+				var key = goalId + ':' + String( item.product_id );
+
+				if ( ! reportedUpsellImpressions[ key ] ) {
+					reportedUpsellImpressions[ key ] = true;
+					sendUpsellTrack( 'upsell_impression', {
+						goal_id: goalId,
+						product_id: String( item.product_id ),
+						cart_value: Number( goal.current ) || 0,
+					} );
+				}
+			}
+		}
+
+		if ( cached ) {
+			fill( cached );
+			return panel;
+		}
+
+		// Loading state: a subtle placeholder; the fetch fills the list.
+		list.appendChild( el( 'div', 'goalcart-upsells__loading', '…' ) );
+
+		fetchUpsells( goalId, function ( payload ) {
+			upsellRankCache[ cacheKey ] = payload;
+
+			safe( function () {
+				// The widget re-rendered while the fetch was in flight —
+				// this panel is detached; the fresh one will fetch itself.
+				if ( ! list.isConnected ) {
+					return;
+				}
+
+				fill( payload );
+			} );
+		} );
+
+		return panel;
+	}
+
+	/**
+	 * Add a ranked upsell product to the cart (Phase 33.7).
+	 *
+	 * Reports upsell_clicked up front, then adds through WooCommerce's own
+	 * public `?wc-ajax=add_to_cart` endpoint (no nonce needed — the same
+	 * endpoint the theme's add-to-cart buttons use, so it works in every
+	 * theme). On success it reports upsell_added and funnels into the
+	 * centralized cart-changed bridge, which re-polls the progress
+	 * endpoint and recomputes the goal gap live. Falls back to the
+	 * classic `?add-to-cart=` redirect when the AJAX surface is missing,
+	 * and to the product page when the item needs a variation choice.
+	 *
+	 * @param {HTMLElement} button The clicked add button.
+	 * @return {void}
+	 */
+	function upsellAdd( button ) {
+		var row = button.closest ? button.closest( '.goalcart-upsell' ) : null;
+
+		if ( ! row ) {
+			return;
+		}
+
+		var productId = row.getAttribute( 'data-goalcart-upsell-product' ) || '';
+		var goalId = row.getAttribute( 'data-goalcart-upsell-goal' ) || '';
+		var permalink = row.getAttribute( 'data-goalcart-upsell-permalink' ) || '';
+		var cartValue = Number( row.getAttribute( 'data-goalcart-upsell-value' ) || 0 );
+
+		if ( ! productId ) {
+			return;
+		}
+
+		sendUpsellTrack( 'upsell_clicked', {
+			goal_id: goalId,
+			product_id: productId,
+			cart_value: cartValue,
+		} );
+
+		var ajaxUrl = '';
+		var params = window.wc_add_to_cart_params || null;
+
+		if ( params && params.wc_ajax_url ) {
+			ajaxUrl = String( params.wc_ajax_url ).replace( /%%endpoint%%/g, 'add_to_cart' );
+		}
+
+		function success() {
+			button.textContent = upsellLabel( 'added', 'Added' );
+			button.disabled = true;
+
+			sendUpsellTrack( 'upsell_added', {
+				goal_id: goalId,
+				product_id: productId,
+				cart_value: cartValue,
+			} );
+
+			// Re-poll progress: the gap shrinks and the panel/bar update.
+			emitCartChanged();
+		}
+
+		function restore() {
+			button.textContent = upsellLabel( 'add', 'Add to cart' );
+			button.disabled = false;
+		}
+
+		function go( url ) {
+			if ( url && isSafeUrl( url ) ) {
+				window.location.href = url;
+			}
+		}
+
+		if ( ! ajaxUrl ) {
+			// No WooCommerce AJAX surface (unusual): the classic redirect
+			// add-to-cart. The page reloads and the widget re-boots on the
+			// new cart.
+			var separator = permalink.indexOf( '?' ) >= 0 ? '&' : '?';
+			go( permalink + separator + 'add-to-cart=' + encodeURIComponent( productId ) );
+			return;
+		}
+
+		button.textContent = upsellLabel( 'adding', 'Adding…' );
+		button.disabled = true;
+
+		var request = new XMLHttpRequest();
+		request.open( 'POST', ajaxUrl, true );
+		request.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
+
+		request.onload = function () {
+			var ok = request.status >= 200 && request.status < 300;
+			var errored = false;
+
+			if ( ok ) {
+				safe( function () {
+					var parsed = JSON.parse( request.responseText );
+
+					if ( parsed && ( parsed.error || parsed.result === 'error' ) ) {
+						errored = true;
+					}
+				} );
+			}
+
+			if ( ok && ! errored ) {
+				success();
+			} else {
+				// The item needs a choice (variation) or is not purchasable
+				// as-is: send the shopper to the product page.
+				restore();
+				go( permalink );
+			}
+		};
+
+		request.onerror = function () { restore(); go( permalink ); };
+		request.ontimeout = function () { restore(); go( permalink ); };
+		request.send( 'product_id=' + encodeURIComponent( productId ) + '&quantity=1' );
 	}
 
 	/**
@@ -1231,6 +1633,14 @@
 		var gift = giftPicker( goal );
 		if ( gift ) {
 			card.appendChild( gift );
+		}
+
+		// Phase 33.7 (Frontend Upsell Integration): the ranked
+		// gap-closers render at the bottom of the full card, after the
+		// reward, message, countdown, suggestions and gift picker.
+		var upsell = upsellPanel( goal );
+		if ( upsell ) {
+			card.appendChild( upsell );
 		}
 
 		return card;
@@ -1997,6 +2407,48 @@
 	}
 
 	/**
+	 * Bind the delegated upsell-panel click handler (Phase 33.7).
+	 *
+	 * One listener on document.body covers every widget's panel: the add
+	 * buttons run the AJAX add-to-cart flow, and the product name links
+	 * report the upsell_clicked event. The ids ride on the row's data
+	 * attributes.
+	 *
+	 * @return {void}
+	 */
+	function bindUpsellPanel() {
+		if ( ! upsells || ! upsells.enabled ) {
+			return;
+		}
+
+		document.body.addEventListener( 'click', function ( event ) {
+			var target = event.target;
+
+			while ( target && target !== document.body ) {
+				if ( target.classList ) {
+					if ( target.classList.contains( 'goalcart-upsell__add' ) ) {
+						upsellAdd( target );
+						return;
+					}
+
+					if ( target.classList.contains( 'goalcart-upsell__name' ) ) {
+						var goalId = target.getAttribute( 'data-goalcart-upsell-goal' ) || '';
+						var productId = target.getAttribute( 'data-goalcart-upsell-id' ) || '';
+
+						sendUpsellTrack( 'upsell_clicked', {
+							goal_id: goalId,
+							product_id: productId,
+						} );
+						return;
+					}
+				}
+
+				target = target.parentNode;
+			}
+		} );
+	}
+
+	/**
 	 * Bind the delegated gift-picker click handler (Phase 32).
 	 *
 	 * One listener on document.body covers every widget's picker buttons;
@@ -2077,6 +2529,7 @@
 		bindCartEvents();
 		bindBlockStore();
 		bindSuggestionTracking();
+		bindUpsellPanel();
 		bindGiftPicker();
 		bindCountdownTicker();
 		bindStickyScroll();

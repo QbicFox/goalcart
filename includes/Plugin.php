@@ -542,13 +542,22 @@ final class Plugin {
 			return new RecommendationsController( $container->get( RevenueRepository::class ) );
 		} );
 
-		// Upsell endpoints (Phase 33.5): the public nonce-guarded
+		// Upsell endpoints (Phase 33.5/33.7): the public nonce-guarded
 		// upsell event tracking route (impression/clicked/added into the
 		// Phase 33.1 upsell_events log — upsell_order is attributed
-		// server-side on payment) plus the admin ranking + analytics reads
-		// served through the cached revenue repository.
+		// server-side on payment), the Phase 33.7 public storefront rank
+		// route (live-cart goal gap + deterministic ranking — the
+		// injected ranker/cart/engine/goals serve it directly, no
+		// per-cart transient churn) plus the admin ranking + analytics
+		// reads served through the cached revenue repository.
 		$this->container->singleton( UpsellController::class, function ( Container $container ) {
-			return new UpsellController( $container->get( RevenueRepository::class ) );
+			return new UpsellController(
+				$container->get( RevenueRepository::class ),
+				$container->get( UpsellRanker::class ),
+				$container->get( CartIntegration::class ),
+				$container->get( GoalEngine::class ),
+				$container->get( GoalRepository::class )
+			);
 		} );
 
 		// Revenue optimization admin reads (Phase 33.6): the overview /

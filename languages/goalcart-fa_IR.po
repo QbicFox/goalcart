@@ -1,27 +1,3 @@
-# Persian (fa_IR) translation of Goal Cart.
-# Copyright (C) 2026 Goal Cart Contributors
-# This file is distributed under the same license as the Goal Cart plugin (GPL-2.0-or-later).
-#
-# Covers the customer-facing storefront strings (message engine states,
-# reward labels, the cart fee label and the block copy) and the full
-# WordPress admin dashboard (React admin app). Compile with:
-#   php bin/build-i18n.php   (or: cd admin-app && npm run i18n:build)
-msgid ""
-msgstr ""
-"Project-Id-Version: Goal Cart 0.1.0\n"
-"Report-Msgid-Bugs-To: https://goalcart.com/support\n"
-"POT-Creation-Date: 2026-08-11T00:00:00Z\n"
-"PO-Revision-Date: 2026-08-11T00:00:00Z\n"
-"Last-Translator: Goal Cart Contributors <translations@goalcart.com>\n"
-"Language-Team: Persian <fa@li.org>\n"
-"Language: fa_IR\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Domain: goalcart\n"
-"X-Generator: Goal Cart i18n\n"
-
 #: admin-app/src/routes/Analytics.tsx:69
 #: admin-app/src/routes/CampaignBuilder.tsx:39
 #: admin-app/src/routes/Goals.tsx:45
@@ -179,6 +155,10 @@ msgstr "افزودن هدف"
 msgid "Add line taxes to the subtotal-style money bases."
 msgstr "مالیات‌های ردیف را به مبناهای پولی نوع جمع فرعی اضافه کنید."
 
+#: includes/Frontend/ProgressUI.php:489
+msgid "Add to cart"
+msgstr "افزودن به سبد خرید"
+
 #: admin-app/src/routes/Campaigns.tsx:156
 msgid "Add your first campaign"
 msgstr "اولین کمپین خود را اضافه کنید"
@@ -196,8 +176,13 @@ msgid "Add-to-cart rate"
 msgstr "نرخ افزودن به سبد"
 
 #: admin-app/src/routes/Analytics.tsx:575
+#: includes/Frontend/ProgressUI.php:491
 msgid "Added"
 msgstr "افزوده شد"
+
+#: includes/Frontend/ProgressUI.php:490
+msgid "Adding…"
+msgstr "در حال افزودن…"
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:299
 msgid "Adds"
@@ -409,7 +394,7 @@ msgstr "میانگین ارزش سفارش"
 
 #: includes/Analytics/GoalRecommendationEngine.php:695
 msgid "Average order value is %s over %d orders."
-msgstr "میانگین ارزش سفارش بر اساس %d سفارش، %s است."
+msgstr "میانگین ارزش سفارش %s بر اساس %d سفارش است."
 
 #: admin-app/src/routes/RevenueOverview.tsx:306
 msgid "Average order value — observed impact"
@@ -728,6 +713,10 @@ msgstr "حالت فشرده فقط پیشرفت را نشان میدهد؛ حا�
 msgid "Complete"
 msgstr "تکمیل"
 
+#: includes/Frontend/ProgressUI.php:488
+msgid "Complete your goal"
+msgstr "هدف خود را تکمیل کنید"
+
 #: admin-app/src/components/revenue/FunnelVisual.tsx:18
 #: admin-app/src/routes/GoalPerformance.tsx:191
 msgid "Completed"
@@ -903,7 +892,7 @@ msgstr "تایمر شمارش معکوس"
 #: admin-app/src/routes/Goals.tsx:48
 #: admin-app/src/routes/Recommendations.tsx:41
 #: admin-app/src/templates/rewardLabel.ts:12
-#: includes/Frontend/ProgressUI.php:821
+#: includes/Frontend/ProgressUI.php:878
 #: includes/Goals/MessageEngine.php:303
 msgid "Coupon"
 msgstr "کوپن"
@@ -1127,7 +1116,7 @@ msgid "Discounted subtotal"
 msgstr "جمع فرعی پس از تخفیف"
 
 #: admin-app/src/routes/Recommendations.tsx:358
-#: includes/Frontend/ProgressUI.php:826
+#: includes/Frontend/ProgressUI.php:883
 msgid "Dismiss"
 msgstr "رد کردن"
 
@@ -1223,7 +1212,7 @@ msgstr "فعال کردن"
 msgid "Enable Goal Cart"
 msgstr "فعال کردن Goal Cart"
 
-#: includes/Frontend/ProgressUI.php:823
+#: includes/Frontend/ProgressUI.php:880
 msgid "Ended"
 msgstr "پایان‌یافته"
 
@@ -1232,7 +1221,7 @@ msgstr "پایان‌یافته"
 msgid "Ends at"
 msgstr "پایان در"
 
-#: includes/Frontend/ProgressUI.php:822
+#: includes/Frontend/ProgressUI.php:879
 msgid "Ends in"
 msgstr "پایان در"
 
@@ -1343,7 +1332,7 @@ msgstr "تخفیف مبلغ ثابت"
 #: admin-app/src/routes/Goals.tsx:46
 #: admin-app/src/routes/Recommendations.tsx:39
 #: admin-app/src/templates/rewardLabel.ts:10
-#: includes/Frontend/ProgressUI.php:819
+#: includes/Frontend/ProgressUI.php:876
 #: includes/Goals/MessageEngine.php:290
 msgid "Fixed discount"
 msgstr "تخفیف ثابت"
@@ -1355,7 +1344,7 @@ msgstr "تخفیف ثابت"
 #: admin-app/src/routes/Goals.tsx:47
 #: admin-app/src/routes/Recommendations.tsx:40
 #: admin-app/src/templates/rewardLabel.ts:11
-#: includes/Frontend/ProgressUI.php:820
+#: includes/Frontend/ProgressUI.php:877
 #: includes/Goals/MessageEngine.php:300
 msgid "Free gift"
 msgstr "هدیه رایگان"
@@ -1368,7 +1357,7 @@ msgstr "هدیه رایگان"
 #: admin-app/src/routes/Goals.tsx:44
 #: admin-app/src/routes/Recommendations.tsx:37
 #: admin-app/src/templates/rewardLabel.ts:8
-#: includes/Frontend/ProgressUI.php:817
+#: includes/Frontend/ProgressUI.php:874
 #: includes/Goals/MessageEngine.php:277
 msgid "Free shipping"
 msgstr "ارسال رایگان"
@@ -1416,7 +1405,7 @@ msgstr "عمومی"
 msgid "Generate a coupon from these rules"
 msgstr "ایجاد کوپن بر اساس این قوانین"
 
-#: includes/Frontend/ProgressUI.php:825
+#: includes/Frontend/ProgressUI.php:882
 msgid "Gift added to your cart"
 msgstr "هدیه به سبد خرید شما اضافه شد"
 
@@ -1706,12 +1695,12 @@ msgstr "یادداشت‌های داخلی دربارهٔ این هدف."
 msgid "Invalid gift nonce."
 msgstr "nonce هدیه نامعتبر است."
 
-#: includes/REST/UpsellController.php:273
+#: includes/REST/UpsellController.php:489
 msgid "Invalid product id."
 msgstr "شناسهٔ محصول نامعتبر است."
 
 #: includes/REST/TrackController.php:174
-#: includes/REST/UpsellController.php:140
+#: includes/REST/UpsellController.php:213
 msgid "Invalid tracking nonce."
 msgstr "nonce ردیابی نامعتبر است."
 
@@ -2021,6 +2010,10 @@ msgstr "هنوز نقطهٔ عطفی در این کمپین نیست."
 msgid "No recommendation available"
 msgstr "پیشنهادی در دسترس نیست"
 
+#: includes/Frontend/ProgressUI.php:492
+msgid "No recommendations available right now."
+msgstr "در حال حاضر پیشنهادی موجود نیست."
+
 #: admin-app/src/routes/RevenueOverview.tsx:144
 msgid "No revenue data yet"
 msgstr "هنوز دادهٔ درآمدی وجود ندارد"
@@ -2186,7 +2179,7 @@ msgid "Percentage"
 msgstr "درصد"
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:25
-#: includes/Frontend/ProgressUI.php:818
+#: includes/Frontend/ProgressUI.php:875
 #: includes/Goals/MessageEngine.php:281
 msgid "Percentage discount"
 msgstr "تخفیف درصدی"
@@ -2204,7 +2197,7 @@ msgstr "عملکرد"
 msgid "Pick the default progress template and tune its appearance — separately for Goals and Campaigns."
 msgstr "قالب پیشرفت پیش‌فرض را انتخاب کنید و ظاهر آن را تنظیم نمایید — جداگانه برای اهداف و کمپین‌ها."
 
-#: includes/Frontend/ProgressUI.php:824
+#: includes/Frontend/ProgressUI.php:881
 msgid "Pick your free gift"
 msgstr "هدیهٔ رایگان خود را انتخاب کنید"
 
@@ -3088,7 +3081,7 @@ msgstr "ویژگی محصولی که برند را مشخص میکند (معمو
 msgid "The product breakdown could not be loaded."
 msgstr "بارگذاری جزئیات محصول ممکن نشد."
 
-#: includes/REST/UpsellController.php:290
+#: includes/REST/UpsellController.php:506
 msgid "The product could not be found."
 msgstr "محصول یافت نشد."
 
@@ -3207,9 +3200,9 @@ msgid "Track color"
 msgstr "رنگ پس‌زمینه حلقه"
 
 #: includes/REST/TrackController.php:198
-#: includes/REST/UpsellController.php:169
-#: includes/REST/UpsellController.php:191
-#: includes/REST/UpsellController.php:222
+#: includes/REST/UpsellController.php:242
+#: includes/REST/UpsellController.php:264
+#: includes/REST/UpsellController.php:295
 msgid "Tracking is disabled."
 msgstr "ردیابی غیرفعال است."
 
@@ -3249,7 +3242,7 @@ msgstr "نوع رویداد ناشناخته است."
 msgid "Unknown method"
 msgstr "روش ناشناخته"
 
-#: includes/REST/UpsellController.php:179
+#: includes/REST/UpsellController.php:252
 msgid "Unknown upsell event type."
 msgstr "نوع رویداد فروش بیشتر ناشناخته است."
 
@@ -3495,4 +3488,3 @@ msgstr "«%s» برای همیشه حذف می‌شود. اهداف آن حفظ 
 #: admin-app/src/routes/Goals.tsx:444
 msgid "“%s” will be permanently deleted. This cannot be undone."
 msgstr "«%s» برای همیشه حذف می‌شود. این عمل قابل بازگشت نیست."
-
