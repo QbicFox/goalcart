@@ -9,6 +9,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
+- **Sticky bottom action bar** — the admin dashboard now docks every
+  save / settings / reset action in a sticky bottom bar instead of the
+  page body. A new `ActionBar` shell component (`AdminLayout`) renders
+  the bar pinned to the bottom edge of the app shell — in full-screen
+  mode it fills the viewport bottom, in embedded mode it rides the
+  document scroll and settles flush at the end of the page — while a
+  new `ActionBarProvider` context lets pages register their buttons
+  through `useStickyBarActions`, whose deps cover both the visible state
+  (pending / disabled) and the form state the handlers read — so the bar
+  always saves the latest values, never a stale snapshot. The **Settings** save button (now submits
+  via the form's `requestSubmit()`), **Appearance** Save appearance +
+  Discard changes, and the **Goal** / **Campaign** builders' Save /
+  Create + Cancel buttons all live in the bar; it renders nothing on
+  pages without actions. Loading/error states hide the bar so it never
+  submits an empty form.
+
 - **Phase 33.7 — Frontend Upsell Integration** — the storefront half of
   the Smart Upsell engine (P33-T07):
   - **Public rank endpoint** — new `GET /goalcart/v1/upsell/rank`

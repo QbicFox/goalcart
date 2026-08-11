@@ -28,6 +28,7 @@ import { createCampaign, fetchCampaign, updateCampaign } from '../api/campaigns'
 import { fetchGoals } from '../api/goals';
 import SectionCard from '../components/goal-builder/SectionCard';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
+import { useStickyBarActions } from '../providers/ActionBarProvider';
 import PageContainer from '../components/PageContainer';
 import { formatCurrency, formatNumber } from '../lib/format';
 import SchemaForm from '../templates/SchemaForm';
@@ -204,7 +205,32 @@ export default function CampaignBuilder() {
     patch({ goals: values.goals.filter((_goal, i) => i !== index) });
   };
 
-  const canSave = useMemo(() => values.name.trim().length > 0, [values.name]);
+  const canSave = useMemo(() => values.name.trim().length > 0, [values.name]); // Sticky bottom bar: Save / Create + Cancel (moved out of the page
+  // body into the dashboard's bottom action bar). Hidden while an edited
+  // campaign is still loading so it never saves the empty seed form.
+  // `values` is a dep because the button reads it — re-registering on
+  // every form change keeps the click handler from ever saving stale
+  // state.
+  useStickyBarActions([saveMutation.isPending, canSave, editId, Boolean(campaign), values], () =>
+    editId && !campaign ? null : (
+      <>
+        <Button
+          variant="contained"
+          disabled={!canSave || saveMutation.isPending}
+          onClick={() => saveMutation.mutate(values)}
+        >
+          {saveMutation.isPending
+            ? __('Saving…', 'goalcart')
+            : editId
+              ? __('Save changes', 'goalcart')
+              : __('Create campaign', 'goalcart')}
+        </Button>
+        <Button variant="outlined" onClick={() => navigate('/campaigns')}>
+          {__('Cancel', 'goalcart')}
+        </Button>
+      </>
+    )
+  );
 
   if (editId && campaignQuery.isLoading) {
     return (
@@ -527,22 +553,6 @@ export default function CampaignBuilder() {
             </Stack>
           )}
         </SectionCard>
-        <Paper variant="outlined" sx={{ p: 2.5, display: 'flex', gap: 1.5 }}>
-          <Button
-            variant="contained"
-            disabled={!canSave || saveMutation.isPending}
-            onClick={() => saveMutation.mutate(values)}
-          >
-            {saveMutation.isPending
-              ? __('Saving…', 'goalcart')
-              : editId
-                ? __('Save changes', 'goalcart')
-                : __('Create campaign', 'goalcart')}
-          </Button>
-          <Button variant="outlined" onClick={() => navigate('/campaigns')}>
-            {__('Cancel', 'goalcart')}
-          </Button>
-        </Paper>
       </Stack>
     </PageContainer>
   );

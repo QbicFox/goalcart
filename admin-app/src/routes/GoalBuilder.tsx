@@ -5,7 +5,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import MenuItem from '@mui/material/MenuItem';
-import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
@@ -24,6 +23,7 @@ import RewardFields from '../components/goal-builder/RewardFields';
 import SectionCard from '../components/goal-builder/SectionCard';
 import TargetFields from '../components/goal-builder/TargetFields';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
+import { useStickyBarActions } from '../providers/ActionBarProvider';
 import PageContainer from '../components/PageContainer';
 import type { Goal, GoalChildInput, GoalInput, GoalType } from '../types';
 
@@ -186,7 +186,31 @@ export default function GoalBuilder() {
     }));
   };
 
-  const canSave = useMemo(() => values.name.trim().length > 0, [values.name]);
+  const canSave = useMemo(() => values.name.trim().length > 0, [values.name]); // Sticky bottom bar: Save / Create + Cancel (moved out of the page
+  // body into the dashboard's bottom action bar). Hidden while an edited
+  // goal is still loading so it never saves the empty seed form. `values`
+  // is a dep because the button reads it — re-registering on every form
+  // change keeps the click handler from ever saving stale state.
+  useStickyBarActions([saveMutation.isPending, canSave, editId, Boolean(goal), values], () =>
+    editId && !goal ? null : (
+      <>
+        <Button
+          variant="contained"
+          disabled={!canSave || saveMutation.isPending}
+          onClick={() => saveMutation.mutate(values)}
+        >
+          {saveMutation.isPending
+            ? __('Saving…', 'goalcart')
+            : editId
+              ? __('Save changes', 'goalcart')
+              : __('Create goal', 'goalcart')}
+        </Button>
+        <Button variant="outlined" onClick={() => navigate('/goals')}>
+          {__('Cancel', 'goalcart')}
+        </Button>
+      </>
+    )
+  );
 
   if (editId && goalQuery.isLoading) {
     return (
@@ -396,23 +420,6 @@ export default function GoalBuilder() {
             />
           </Stack>
         </SectionCard>
-
-        <Paper variant="outlined" sx={{ p: 2.5, display: 'flex', gap: 1.5 }}>
-          <Button
-            variant="contained"
-            disabled={!canSave || saveMutation.isPending}
-            onClick={() => saveMutation.mutate(values)}
-          >
-            {saveMutation.isPending
-              ? __('Saving…', 'goalcart')
-              : editId
-                ? __('Save changes', 'goalcart')
-                : __('Create goal', 'goalcart')}
-          </Button>
-          <Button variant="outlined" onClick={() => navigate('/goals')}>
-            {__('Cancel', 'goalcart')}
-          </Button>
-        </Paper>
       </Stack>
     </PageContainer>
   );

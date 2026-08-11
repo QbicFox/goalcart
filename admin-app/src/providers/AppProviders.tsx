@@ -9,6 +9,7 @@ import { prefixer } from 'stylis';
 import { getBootData } from '../boot';
 import { createAppTheme } from '../theme';
 import { SnackbarProvider } from '../components/notifications/SnackbarProvider';
+import { ActionBarProvider } from './ActionBarProvider';
 import { FullscreenProvider } from './FullscreenProvider';
 
 interface AppProvidersProps {
@@ -24,6 +25,9 @@ interface AppProvidersProps {
  * - TanStack Query client
  * - Full-screen dashboard mode provider
  * - Shared Snackbar notifications provider
+ * - Sticky bottom action bar provider (Phase 33.7) — pages register
+ *   their save/reset buttons; AdminLayout renders them pinned to the
+ *   bottom of the dashboard.
  *
  * Routing lives in App.tsx (a `createHashRouter` data router wrapping
  * AdminLayout), so only non-router providers live here.
@@ -78,7 +82,9 @@ export default function AppProviders({ children }: AppProvidersProps) {
         <ThemeProvider theme={theme}>
           <QueryClientProvider client={queryClient}>
             <FullscreenProvider>
-              <SnackbarProvider>{children}</SnackbarProvider>
+              <SnackbarProvider>
+                <ActionBarProvider>{children}</ActionBarProvider>
+              </SnackbarProvider>
             </FullscreenProvider>
           </QueryClientProvider>
         </ThemeProvider>

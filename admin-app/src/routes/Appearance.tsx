@@ -25,6 +25,7 @@ import PageContainer from '../components/PageContainer';
 import PreviewWidget from '../components/preview/PreviewWidget';
 import { tokensFromSettings } from '../components/preview/types';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
+import { useStickyBarActions } from '../providers/ActionBarProvider';
 import SchemaForm from '../templates/SchemaForm';
 import { templateById, useTemplates } from '../templates/useTemplates';
 import { bool } from '../templates/utils';
@@ -430,6 +431,38 @@ export default function Appearance() {
     setDrafts((prev) => ({ ...prev, [scope]: { ...prev[scope], [id]: factory } }));
   };
 
+  // Sticky bottom bar: Save appearance + Discard changes (moved out of
+  // the page body into the dashboard's bottom action bar). Hidden until
+  // the template registry has loaded. The handlers read the drafts /
+  // defaults / stored settings, so those are deps too — re-registering
+  // on every edit keeps the bar's Save from ever persisting stale drafts.
+  useStickyBarActions(
+    [saveMutation.isPending, Boolean(templates), templates, settings, drafts, defaults],
+    () =>
+      templates ? (
+        <>
+          <Button
+            variant="contained"
+            startIcon={<PaletteIcon />}
+            disabled={saveMutation.isPending}
+            onClick={handleSave}
+            sx={{ minWidth: 160 }}
+          >
+            {saveMutation.isPending ? __('Saving…', 'goalcart') : __('Save appearance', 'goalcart')}
+          </Button>
+          <Button
+            variant="outlined"
+            color="inherit"
+            startIcon={<RestartAltIcon />}
+            disabled={saveMutation.isPending}
+            onClick={discardChanges}
+          >
+            {__('Discard changes', 'goalcart')}
+          </Button>
+        </>
+      ) : null
+  );
+
   if (templatesQuery.isLoading) {
     return (
       <PageContainer
@@ -608,27 +641,6 @@ export default function Appearance() {
             )}
           </Stack>
         </Paper>
-
-        <Stack direction="row" spacing={1.5}>
-          <Button
-            variant="contained"
-            startIcon={<PaletteIcon />}
-            disabled={saveMutation.isPending}
-            onClick={handleSave}
-            sx={{ minWidth: 160 }}
-          >
-            {saveMutation.isPending ? __('Saving…', 'goalcart') : __('Save appearance', 'goalcart')}
-          </Button>
-          <Button
-            variant="outlined"
-            color="inherit"
-            startIcon={<RestartAltIcon />}
-            disabled={saveMutation.isPending}
-            onClick={discardChanges}
-          >
-            {__('Discard changes', 'goalcart')}
-          </Button>
-        </Stack>
       </Stack>
     </PageContainer>
   );

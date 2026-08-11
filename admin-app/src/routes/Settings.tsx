@@ -20,12 +20,13 @@ import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { fetchSettingsEnvelope, saveSettings } from '../api/settings';
 import SectionCard from '../components/goal-builder/SectionCard';
 import PageContainer from '../components/PageContainer';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
+import { useStickyBarActions } from '../providers/ActionBarProvider';
 import { useFullscreen } from '../providers/FullscreenProvider';
 import type { FrontendLocation, GoalCartSettings } from '../types';
 
@@ -248,6 +249,11 @@ export default function Settings() {
 
   const [tab, setTab] = useState(0);
 
+  // The save button lives in the sticky bottom bar, outside the <form>;
+  // submitting through the form element keeps react-hook-form's
+  // validation + submit flow (the button calls requestSubmit()).
+  const formRef = useRef<HTMLFormElement>(null);
+
   const settingsQuery = useQuery({
     queryKey: ['settings'],
     queryFn: fetchSettingsEnvelope,
@@ -287,6 +293,23 @@ export default function Settings() {
     },
   });
 
+  // Sticky bottom bar: the Save settings button (moved out of the page
+  // body into the dashboard's bottom action bar). Hidden while the
+  // settings are still loading so it never submits an empty form.
+  useStickyBarActions([saveMutation.isPending, Boolean(data)], () =>
+    data ? (
+      <Button
+        type="button"
+        variant="contained"
+        disabled={saveMutation.isPending}
+        onClick={() => formRef.current?.requestSubmit()}
+        sx={{ minWidth: 120 }}
+      >
+        {saveMutation.isPending ? __('Saving…', 'goalcart') : __('Save settings', 'goalcart')}
+      </Button>
+    ) : null
+  );
+
   if (settingsQuery.isLoading) {
     return (
       <PageContainer
@@ -321,7 +344,7 @@ export default function Settings() {
       title={__('Settings', 'goalcart')}
       description={__('Plugin-wide configuration. Changes apply immediately.', 'goalcart')}
     >
-      <form onSubmit={handleSubmit((values) => saveMutation.mutate(values))}>
+      <form ref={formRef} onSubmit={handleSubmit((values) => saveMutation.mutate(values))}>
         <Stack spacing={3}>
           <Tabs
             value={tab}
@@ -796,17 +819,6 @@ export default function Settings() {
               )}
             </Stack>
           )}
-
-          <Box>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={saveMutation.isPending}
-              sx={{ minWidth: 120 }}
-            >
-              {saveMutation.isPending ? __('Saving…', 'goalcart') : __('Save settings', 'goalcart')}
-            </Button>
-          </Box>
         </Stack>
       </form>
     </PageContainer>
