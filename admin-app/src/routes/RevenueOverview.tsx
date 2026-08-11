@@ -14,6 +14,7 @@ import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo, useState, type ReactNode } from 'react';
 import {
@@ -40,8 +41,6 @@ const COLORS = {
   primaryLight: '#72aee6',
   success: '#00a32a',
   warning: '#996800',
-  grid: '#dcdcde',
-  tick: '#50575e',
 };
 
 function KpiCard({ label, value, icon, hint }: { label: string; value: string; icon: ReactNode; hint?: string }) {
@@ -79,6 +78,15 @@ function KpiCard({ label, value, icon, hint }: { label: string; value: string; i
 export default function RevenueOverview() {
   const { range } = useDateRange();
   const [goalId, setGoalId] = useState<number>(0);
+
+  // Chart grid + tick colors follow the dashboard theme (divider / muted
+  // text) so the charts stay legible in dark mode; the brand accents stay
+  // fixed (they read on both surfaces).
+  const theme = useTheme();
+  const chartColors = useMemo(
+    () => ({ grid: theme.palette.divider, tick: theme.palette.text.secondary }),
+    [theme]
+  );
 
   const query = useQuery({
     queryKey: ['revenue', 'overview', { from: range.from, to: range.to, goalId }],
@@ -226,16 +234,16 @@ export default function RevenueOverview() {
               <Box role="img" aria-label={__('Daily revenue and funnel trend', 'goalcart')} sx={{ width: '100%', height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={trendData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
                     <XAxis
                       dataKey="label"
-                      tick={{ fontSize: 11, fill: COLORS.tick }}
+                      tick={{ fontSize: 11, fill: chartColors.tick }}
                       tickLine={false}
                       minTickGap={28}
                     />
                     <YAxis
                       yAxisId="count"
-                      tick={{ fontSize: 11, fill: COLORS.tick }}
+                      tick={{ fontSize: 11, fill: chartColors.tick }}
                       tickLine={false}
                       axisLine={false}
                       allowDecimals={false}
@@ -244,7 +252,7 @@ export default function RevenueOverview() {
                     <YAxis
                       yAxisId="revenue"
                       orientation="right"
-                      tick={{ fontSize: 11, fill: COLORS.tick }}
+                      tick={{ fontSize: 11, fill: chartColors.tick }}
                       tickLine={false}
                       axisLine={false}
                       width={52}

@@ -241,6 +241,7 @@ class SettingsController extends BaseController {
 			// General (P18-T01).
 			'enabled'               => $bool,
 			'fullscreen_dashboard'  => $bool,
+			'admin_theme'           => array( 'type' => 'string', 'enum' => array( 'light', 'dark' ) ),
 			'currency_display'      => array( 'type' => 'string', 'enum' => array( 'symbol', 'code', 'name' ) ),
 			'default_goal_behavior' => array( 'type' => 'string', 'enum' => array( 'all', 'first', 'closest' ) ),
 			'conflict_resolution'   => array( 'type' => 'string', 'enum' => array( 'cumulative', 'best', 'first' ) ),
@@ -478,6 +479,9 @@ class SettingsController extends BaseController {
 			case 'calculation_mode':
 				return in_array( $value, array( 'subtotal', 'discounted_subtotal', 'total' ), true ) ? $value : $defaults['calculation_mode'];
 
+			case 'admin_theme':
+				return in_array( $value, array( 'light', 'dark' ), true ) ? $value : $defaults['admin_theme'];
+
 			case 'frontend_mobile':
 				return in_array( $value, array( 'show', 'hide' ), true ) ? $value : $defaults['frontend_mobile'];
 
@@ -522,12 +526,10 @@ class SettingsController extends BaseController {
 				return min( 40, max( 0, (int) $value ) );
 
 			case 'frontend_css_class':
-				return trim( sanitize_text_field( (string) $value ) );
-
-			case 'frontend_custom_css':
-				// Admin-authored CSS (manage_options gate on the route); keep
-				// it tag-free and bounded.
-				return substr( trim( wp_strip_all_tags( (string) $value ) ), 0, 16000 );
+				return trim( sanitize_text_field( (string) $value ) );		case 'frontend_custom_css':
+			// Admin-authored CSS (manage_options gate on the route); keep
+			// it tag-free and bounded.
+			return substr( trim( wp_strip_all_tags( (string) $value ) ), 0, 16000 );
 
 			default:
 				return $value;
