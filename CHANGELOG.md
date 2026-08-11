@@ -253,6 +253,60 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     graceful degradation branches, the candidate/payload filters, the
     cached read + generation invalidation, and rollback residue checks
     — deterministic across repeated runs, zero residue.
+- **Phase 33.6 — React Admin** — the Revenue Optimization admin section
+  (P33-T06):
+  - **Revenue Overview page** (`/revenue`) — attribution KPIs (goal-
+    influenced / goal-driven revenue, incremental cart value, AOV
+    impact, goal conversion rate, reward cost, estimated profit), the
+    daily revenue trend (views/completions/conversions bars + revenue /
+    incremental lines from `revenue_daily` + today's live bucket), the
+    observed AOV comparison (exposed vs store-wide, labeled, never
+    causality) and shipping stats — from `GET /revenue/overview`.
+  - **Goal Performance page** (`/revenue/goals`) — per-goal funnel
+    counts, completion/conversion rates, cart-value lift, attributed +
+    assisted revenue, reward cost and profit, with an expandable funnel
+    visual per goal — from `GET /revenue/goals`.
+  - **Attribution Dashboard page** (`/revenue/attribution`) — the
+    funnel (views → progressed → completed → converted), direct vs
+    assisted model revenue cards, incremental cart value with a data-
+    sufficiency badge and the profit-impact panel with its graceful
+    unavailability reason.
+  - **Smart Recommendations page** (`/revenue/recommendations`) — the
+    Phase 33.4 goal-threshold recommendation UI: analyzed store data
+    (AOV, median, order distribution, shipping, margin, confidence
+    tier), the top recommendation (threshold, confidence, expected AOV
+    impact / completion / profit, reasons) with **Apply (explicit admin
+    confirmation through `updateGoal` — never automatic), View details
+    and Dismiss**, plus the ranked candidate list. All from
+    `GET /revenue/goal-recommendations`.
+  - **Upsell Analytics page** (`/revenue/upsells`) — the top-products
+    table (impressions / clicks / adds / orders / conversion / revenue /
+    estimated profit / upsell score) with the four spec views (top /
+    lowest performing, best conversion, highest margin) and a per-product
+    score-breakdown dialog (components, reasons, factors, historical
+    stats). The backend `upsell_analytics()` rows now also carry
+    `estimated_profit` / `profit_available` / `margin_pct` (null when
+    the store stores no product costs — never invented).
+  - **REST** — new admin-only `RevenueController`
+    (`includes/REST/RevenueController.php`) exposing
+    `GET /revenue/overview`, `GET /revenue/attribution` and
+    `GET /revenue/goals`, all manage_options-gated, per-user rate
+    limited, arg-schema validated (dates + goal_id) and served through
+    the cached `RevenueRepository` layer.
+  - **Shared admin infrastructure** — a new `Revenue` navigation
+    section (Overview / Goal Performance / Attribution / Recommendations
+    / Upsell Analytics), five lazy-loaded route pages, a shared
+    `RevenueToolbar` (date range + goal filter) and `FunnelVisual`, new
+    `api/revenue.ts` client + revenue TypeScript payload types, and
+    shared `formatPercent` / `formatPercentValue` / `formatCompact` /
+    `formatShortDay` helpers. Loading (skeletons), empty, error and RTL
+    states follow the existing Analytics page conventions throughout.
+  - **Tests** — new `tests/revenue-admin-test.php` (47 checks): route
+    registration, window arg-schema validation, anonymous 403 on every
+    revenue route, the overview / attribution / goals payload shapes,
+    goal-scoped reads, the upsell-analytics profit/margin fields with
+    graceful degradation, and rollback residue checks — deterministic
+    across repeated runs.
 
 ### Removed
 

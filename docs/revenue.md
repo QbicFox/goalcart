@@ -331,3 +331,86 @@ historical scoring, no black-box model.
 The public `rank()` payload is the frontend contract. A future
 `MLUpsellRanker` can replace this class behind the same payload shape
 without touching the REST layer or the admin UI (P33-60).
+
+---
+
+# Goal Cart — React Admin Revenue Section (Phase 33.6)
+
+The Revenue Optimization admin section: five lazy-loaded React pages
+under a new `Revenue` navigation group, all sharing the existing admin
+conventions (date-range context + filter toolbar, skeleton loading,
+`EmptyState`, error Alerts, MUI RTL). Data flows through the cached
+Phase 33.3 `RevenueRepository` reads only — no new uncached queries.
+
+## 1. Pages & data sources
+
+| Page | Route | REST endpoint | Repository read |
+| --- | --- | --- | --- |
+| Revenue Overview | `/revenue` | `GET /revenue/overview` | `overview()` + `daily_trend()` |
+| Goal Performance | `/revenue/goals` | `GET /revenue/goals` | `goal_performance()` |
+| Attribution Dashboard | `/revenue/attribution` | `GET /revenue/attribution` | `overview()` |
+| Smart Recommendations | `/revenue/recommendations` | `GET /revenue/goal-recommendations` | `goal_recommendations()` |
+| Upsell Analytics | `/revenue/upsells` | `GET /revenue/upsells?analytics=1` + `GET /revenue/upsells/{id}` | `upsell_analytics()` / `upsell_product_detail()` |
+
+The three new routes (`/revenue/overview`, `/revenue/attribution`,
+`/revenue/goals`) live in the new admin-only `RevenueController`
+(`includes/REST/RevenueController.php`) — manage_options-gated, per-user
+rate limited, `from`/`to`/`goal_id` validated through the arg schema, and
+served through the same generation-versioned transients as every other
+revenue read.
+
+## 2. Revenue Overview
+
+KPIs (goal-influenced / goal-driven revenue, incremental cart value,
+AOV impact %, goal conversion rate, reward cost, estimated profit) plus:
+
+- **Daily revenue trend** — completions/conversions bars with revenue /
+  incremental-revenue lines, zero-filled over the window, today's live
+  bucket merged (`revenue_daily` + `AttributionEngine`).
+- **AOV impact panel** — store-wide vs goal-exposed vs non-exposed AOV
+  with absolute + percentage change, labeled *observed impact* (never
+  causality).
+- **Shipping panel** — average shipping, free-shipping share, orders
+  with shipping and per-method averages.
+
+## 3. Goal Performance
+
+One row per goal: funnel counts (views → progressed → completed →
+converted), completion/conversion rates, average + incremental cart
+value, attributed + assisted revenue, reward cost and profit impact.
+Rows expand into the funnel visual + detail panel.
+
+## 4. Attribution Dashboard
+
+The funnel visual with completion/conversion rates, direct vs assisted
+model revenue cards (plus distinct order count), incremental cart value
+(average/total/baseline/sessions + data-sufficiency badge) and the
+profit-impact panel — which shows its `profit_reason` instead of a
+number when the store provides no margin data (revenue-only analytics).
+
+## 5. Smart Recommendations (Goal Recommendation UI)
+
+The Phase 33.4 payload rendered end-to-end: analyzed store data (AOV,
+median, coefficient of variation, order-distribution bars, shipping,
+margin availability, confidence tier), the top recommendation card
+(threshold, confidence, expected AOV impact range, expected completion
+rate, expected profit, plain-English reasons) with **Apply / View
+details / Dismiss**, and the ranked candidate list (score bar, confidence,
+reachable share, reward cost, expandable reasons).
+
+Applying a recommendation is always an explicit admin action — a
+confirm dialog then `PUT /goals/{id}` updates the selected goal's
+target. The engine never modifies a goal (P33-53).
+
+## 6. Upsell Analytics
+
+The top-products table (`upsell_analytics()` over the window):
+impressions / clicks / adds / orders / conversion / revenue /
+estimated profit / upsell score, with the four spec views (top
+performing, lowest performing, best conversion, highest margin —
+client-side sorts of the same rows). Clicking a row opens the product's
+score-breakdown dialog via `upsell_product_detail()`: the six 0–100
+components, plain-English reasons, raw factors and historical funnel
+stats. Each analytics row now also carries `estimated_profit` /
+`profit_available` / `margin_pct` — null when the store stores no
+product costs (never invented).

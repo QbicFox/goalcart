@@ -35,6 +35,7 @@ use GoalCart\REST\GiftController;
 use GoalCart\REST\GoalsController;
 use GoalCart\REST\PreviewController;
 use GoalCart\REST\RecommendationsController;
+use GoalCart\REST\RevenueController;
 use GoalCart\REST\SearchController;
 use GoalCart\REST\SettingsController;
 use GoalCart\REST\TemplatesController;
@@ -212,6 +213,11 @@ final class Plugin {
 		// endpoint plus the admin ranking/analytics reads.
 		$this->hooks()->register( $this->container->get( UpsellRanker::class ) );
 		$this->hooks()->register( $this->container->get( UpsellController::class ) );
+
+		// Revenue optimization admin reads (Phase 33.6): the overview /
+		// attribution / goal-performance endpoints serving the React Admin
+		// Revenue section through the cached repository layer.
+		$this->hooks()->register( $this->container->get( RevenueController::class ) );
 
 		// Storefront progress UI (Phase 11): shortcode, display-location
 		// injection, sticky bar and frontend assets.
@@ -543,6 +549,13 @@ final class Plugin {
 		// served through the cached revenue repository.
 		$this->container->singleton( UpsellController::class, function ( Container $container ) {
 			return new UpsellController( $container->get( RevenueRepository::class ) );
+		} );
+
+		// Revenue optimization admin reads (Phase 33.6): the overview /
+		// attribution / goal-performance endpoints serving the React Admin
+		// Revenue section, all through the cached revenue repository.
+		$this->container->singleton( RevenueController::class, function ( Container $container ) {
+			return new RevenueController( $container->get( RevenueRepository::class ) );
 		} );
 
 		$this->container->singleton( AssetLoader::class, function ( Container $container ) {

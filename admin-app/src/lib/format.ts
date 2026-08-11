@@ -32,6 +32,48 @@ export function formatNumber(value: number): string {
   }
 }
 
+/** Format a 0–1 rate as a percentage string (e.g. 0.231 → "23.1%"). */
+export function formatPercent(value: number): string {
+  return `${(value * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
+}
+
+/**
+ * Format an already-percentage number (e.g. 12.5 → "12.5%").
+ * Use for backend values that are percentage points (0–100), not rates.
+ */
+export function formatPercentValue(value: number): string {
+  return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
+}
+
+/** Compact number for axis ticks / badges (e.g. 1200 → "1.2K"). */
+export function formatCompact(value: number): string {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(value);
+  } catch {
+    return String(Math.round(value));
+  }
+}
+
+/**
+ * Short day label for chart ticks (e.g. "Aug 1") in the site locale.
+ * Falls back to the month-day slice of the Y-m-d string.
+ */
+export function formatShortDay(dateStr: string): string {
+  const boot = getBootData();
+
+  try {
+    return new Intl.DateTimeFormat(boot.locale.replace('_', '-'), {
+      month: 'short',
+      day: 'numeric',
+    }).format(new Date(`${dateStr}T12:00:00`));
+  } catch {
+    return dateStr.slice(5);
+  }
+}
+
 /** Short human schedule label for a goal's starts_at/ends_at pair. */
 export function formatSchedule(startsAt: string | null, endsAt: string | null): string {
   const day = (value: string | null) => (value ? value.slice(0, 10) : '');

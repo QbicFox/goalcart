@@ -609,6 +609,277 @@ export interface DeveloperHook {
   description: string;
 }
 
+/**
+ * Phase 33 revenue optimization types (Phase 33.6 React Admin).
+ *
+ * Every payload mirrors the PHP shapes served by the Phase 33.3–33.5
+ * repository reads (RevenueRepository) through the REST layer — the
+ * overview / attribution / goal-performance endpoints (RevenueController)
+ * and the existing goal-recommendations / upsells endpoints.
+ */
+
+/** The goal funnel counts + rates (attribution funnel, Phase 33.2). */
+export interface RevenueFunnel {
+  views: number;
+  progressed: number;
+  completed: number;
+  converted: number;
+  completion_rate: number | null;
+  conversion_rate: number | null;
+}
+
+/** The attribution summary block of the revenue overview payload. */
+export interface RevenueSummary {
+  goal_driven_revenue: number;
+  goal_assisted_revenue: number;
+  goal_influenced_revenue: number;
+  orders: number;
+  reward_cost: number;
+  reward_cost_available: boolean;
+  profit_impact: number | null;
+  profit_available: boolean;
+  profit_reason: string | null;
+  funnel: RevenueFunnel;
+}
+
+/** Incremental cart value analysis (Phase 33.2). */
+export interface IncrementalCartValue {
+  average: number;
+  total: number;
+  average_baseline: number;
+  sessions: number;
+  sessions_with_gain: number;
+  data_sufficiency: 'low' | 'medium' | 'high';
+}
+
+/** AOV comparison — goal-exposed vs store-wide (labeled observed impact). */
+export interface AovAnalysis {
+  overall_aov: number;
+  exposed_aov: number;
+  non_exposed_aov: number | null;
+  absolute_change: number;
+  percentage_change: number;
+  exposed_orders: number;
+  total_orders: number;
+  label: 'observed_impact';
+  comparison_available: boolean;
+}
+
+/** One shipping method's stats (per-method averages). */
+export interface ShippingMethodStats {
+  orders: number;
+  average: number;
+}
+
+/** Shipping statistics over the store's orders in the window. */
+export interface ShippingStats {
+  available: boolean;
+  average_shipping: number;
+  orders_with_shipping: number;
+  free_shipping_orders: number;
+  orders?: number;
+  by_method: Record<string, ShippingMethodStats>;
+}
+
+/** One daily bucket of the Phase 33.3 revenue trend series. */
+export interface RevenueTrendPoint {
+  date: string; // Y-m-d
+  views: number;
+  progressions: number;
+  completions: number;
+  conversions: number;
+  revenue: number;
+  incremental_revenue: number;
+  reward_cost: number;
+  estimated_profit: number;
+}
+
+/**
+ * The `GET /goalcart/v1/revenue/overview` payload — the Revenue Overview
+ * page's data source (summary + incremental + AOV + shipping + trend).
+ */
+export interface RevenueOverviewPayload {
+  summary: RevenueSummary;
+  incremental_cart_value: IncrementalCartValue;
+  aov: AovAnalysis;
+  shipping: ShippingStats;
+  trend: RevenueTrendPoint[];
+  generated_at: string;
+}
+
+/**
+ * The `GET /goalcart/v1/revenue/attribution` payload — the Attribution
+ * Dashboard page's data source (the overview without the trend series).
+ */
+export type RevenueAttributionPayload = Omit<RevenueOverviewPayload, 'trend'>;
+
+/** One Goal Performance row (`GET /goalcart/v1/revenue/goals`). */
+export interface GoalPerformanceRow {
+  goal_id: number;
+  name: string;
+  reward_type: RewardType;
+  target: number;
+  views: number;
+  progressed: number;
+  completed: number;
+  converted: number;
+  completion_rate: number | null;
+  conversion_rate: number | null;
+  average_cart_value: number;
+  incremental_cart_value: number;
+  attributed_revenue: number;
+  assisted_revenue: number;
+  reward_cost: number;
+  reward_cost_available: boolean;
+  profit_impact: number | null;
+  profit_available: boolean;
+}
+
+/** The `GET /goalcart/v1/revenue/goals` payload. */
+export interface GoalPerformancePayload {
+  items: GoalPerformanceRow[];
+}
+
+/** One upsell analytics row (`GET /goalcart/v1/revenue/upsells?analytics=1`). */
+export interface UpsellAnalyticsRow {
+  product_id: number;
+  name: string;
+  impressions: number;
+  clicks: number;
+  adds: number;
+  orders: number;
+  revenue: number;
+  conversion_rate: number;
+  upsell_score: number;
+  /** Per-unit estimated margin — null when the store stores no costs. */
+  estimated_profit: number | null;
+  profit_available: boolean;
+  margin_pct: number | null;
+}
+
+/** The six 0–100 upsell component scores (P33-34 breakdown). */
+export interface UpsellComponentScores {
+  price_gap: number;
+  relevance: number;
+  popularity: number;
+  inventory: number;
+  margin: number;
+  conversion: number;
+}
+
+/** Historical upsell funnel stats for one product. */
+export interface UpsellConversionStats {
+  impressions: number;
+  clicks: number;
+  adds: number;
+  orders: number;
+  revenue: number;
+  conversion_rate: number;
+  available: boolean;
+}
+
+/** One ranked upsell product (`GET /goalcart/v1/revenue/upsells`). */
+export interface UpsellRecommendation {
+  product_id: number;
+  name: string;
+  permalink: string;
+  price: number | null;
+  price_html: string;
+  image: string;
+  stock_status: string;
+  source: string;
+  score: number;
+  components: UpsellComponentScores;
+  conversion: UpsellConversionStats;
+  estimated_profit: number | null;
+  profit_available: boolean;
+  reasons: string[];
+  factors: {
+    price: number | null;
+    gap_ratio: number | null;
+    gap: number | null;
+    sales: number;
+    rating: number;
+    margin_pct: number | null;
+    stock_quantity: number | null;
+    components: UpsellComponentScores;
+  };
+}
+
+/**
+ * The `GET /goalcart/v1/revenue/upsells` ranking payload (context mode).
+ */
+export interface UpsellRankingPayload {
+  available: boolean;
+  status: 'available' | 'unavailable';
+  reason: string | null;
+  context: {
+    goal_id: number;
+    cart_value: number;
+    remaining: number | null;
+    cart: number[];
+    limit: number;
+    goal_name: string;
+  };
+  candidates: number;
+  weights: Record<string, number>;
+  recommendations: UpsellRecommendation[];
+  generated_at: string;
+}
+
+/** The analyzed store data block of a goal recommendation. */
+export interface RecommendationData {
+  aov: number;
+  median: number;
+  coefficient_of_variation: number;
+  distribution: Record<string, number>;
+  shipping: {
+    available: boolean;
+    average_shipping: number | null;
+    free_share: number | null;
+  };
+  margin: {
+    available: boolean;
+    average_margin_pct: number | null;
+    reason?: string | null;
+  } | null;
+  goal_history: Record<string, unknown> | null;
+  reward_type: string | null;
+}
+
+/** One scored recommendation candidate (`candidates[]`). */
+export interface RecommendationCandidate {
+  threshold: number;
+  score: number;
+  confidence: number;
+  expected_aov_impact: { low: number; high: number };
+  expected_completion_rate: number;
+  expected_profit: number | null;
+  expected_profit_available: boolean;
+  reachable_orders_pct: number;
+  reward_cost: number | null;
+  reasons: string[];
+  factors: Record<string, unknown>;
+}
+
+/**
+ * The `GET /goalcart/v1/revenue/goal-recommendations` payload — the
+ * Smart Recommendations page's data source (Phase 33.4).
+ */
+export interface GoalRecommendationsPayload {
+  available: boolean;
+  status: string;
+  insufficient_reason: string | null;
+  window_days: number;
+  from: string;
+  to: string;
+  orders: number;
+  data: RecommendationData | null;
+  candidates: RecommendationCandidate[];
+  recommendation: RecommendationCandidate | null;
+  generated_at: string;
+}
+
 /** Extra settings-page meta served alongside the settings payload. */
 export interface SettingsMeta {
   /** Public goalcart_* hooks reference (Phase 18, developer hooks). */

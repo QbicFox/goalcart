@@ -1,10 +1,15 @@
 import type { SvgIconComponent } from '@mui/icons-material';
+import AccountTreeIcon from '@mui/icons-material/AccountTree';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import FlagIcon from '@mui/icons-material/Flag';
 import InsightsIcon from '@mui/icons-material/Insights';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import PaletteIcon from '@mui/icons-material/Palette';
 import SettingsIcon from '@mui/icons-material/Settings';
+import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { __ } from '@wordpress/i18n';
 
 export interface NavItem {
@@ -37,6 +42,16 @@ export const NAV_SECTIONS: NavSection[] = [
       { path: '/goals', label: __('Goals', 'goalcart'), icon: FlagIcon },
       { path: '/campaigns', label: __('Campaigns', 'goalcart'), icon: CampaignIcon },
       { path: '/analytics', label: __('Analytics', 'goalcart'), icon: InsightsIcon },
+    ],
+  },
+  {
+    title: __('Revenue', 'goalcart'),
+    items: [
+      { path: '/revenue', label: __('Overview', 'goalcart'), icon: BarChartIcon },
+      { path: '/revenue/goals', label: __('Goal Performance', 'goalcart'), icon: LeaderboardIcon },
+      { path: '/revenue/attribution', label: __('Attribution', 'goalcart'), icon: AccountTreeIcon },
+      { path: '/revenue/recommendations', label: __('Recommendations', 'goalcart'), icon: TipsAndUpdatesIcon },
+      { path: '/revenue/upsells', label: __('Upsell Analytics', 'goalcart'), icon: TrendingUpIcon },
     ],
   },
   {

@@ -391,7 +391,10 @@ class UpsellController extends BaseController {
 				'type'    => 'integer',
 				'default' => 4,
 				'minimum' => 1,
-				'maximum' => 10,
+				// Matches the repository clamp (1–100). In analytics mode the
+				// limit is the top-products table size; in context mode the
+				// ranker clamps to its own 10-result cap regardless.
+				'maximum' => 100,
 			),
 			'analytics'  => array(
 				'type'    => 'boolean',

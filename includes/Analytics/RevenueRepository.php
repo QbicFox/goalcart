@@ -595,6 +595,11 @@ final class RevenueRepository {
 				'revenue'     => (float) $row['revenue'],
 			);
 
+			// Scored standalone (no cart context) through the same Phase
+			// 33.5 component math — margin/profit included when the store
+			// provides cost data, neutral otherwise.
+			$score = null !== $this->upsells ? $this->upsells->score_product( $product ) : null;
+
 			$items[] = array(
 				'product_id'      => $product_id,
 				'name'            => $product->get_name(),
@@ -604,12 +609,14 @@ final class RevenueRepository {
 				'orders'          => $stats['orders'],
 				'revenue'         => round( $stats['revenue'], 4 ),
 				'conversion_rate' => $impressions > 0 ? round( $stats['orders'] / $impressions, 4 ) : 0.0,
-				// Scored standalone (no cart context) through the same
-				// Phase 33.5 component math — margin/profit included when the
-				// store provides cost data, neutral otherwise.
-				'upsell_score'    => null !== $this->upsells
-					? (float) $this->upsells->score_product( $product )['score']
-					: 0.0,
+				'upsell_score'    => $score ? (float) $score['score'] : 0.0,
+				// Per-unit estimated margin/profit — null when the store
+				// stores no product costs (never invented, P33-31).
+				'estimated_profit' => $score ? $score['estimated_profit'] : null,
+				'profit_available' => $score ? (bool) $score['profit_available'] : false,
+				'margin_pct'      => $score && isset( $score['factors']['margin_pct'] )
+					? $score['factors']['margin_pct']
+					: null,
 			);
 		}
 

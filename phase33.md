@@ -15,11 +15,11 @@ Phase: 33
 Name: Advanced V3 Revenue Optimization
 
 Phase Weight: 3%
-Phase Progress: 62.5%
-Project Contribution: 1.875%
+Phase Progress: 75%
+Project Contribution: 2.25%
 
 Phase:
-█████████████░░░░░░░ 62.5%
+███████████████░░░░░░ 75%
 ```
 
 The purpose of this phase is to transform Goal Cart from a simple goal/progress-bar plugin into a **data-driven revenue optimization engine for WooCommerce**.
@@ -2306,8 +2306,60 @@ Tasks:
 Progress:
 
 ```text
-0%
+100% — COMPLETED
 ```
+
+Implementation notes (see `tests/revenue-admin-test.php`, 47 checks):
+
+- **Revenue section** — a new `Revenue` navigation group with five
+  lazy-loaded pages: Overview (`/revenue`), Goal Performance
+  (`/revenue/goals`), Attribution (`/revenue/attribution`),
+  Recommendations (`/revenue/recommendations`) and Upsell Analytics
+  (`/revenue/upsells`). Every page reuses the shared `RevenueToolbar`
+  (date range + goal filter) and follows the existing Analytics page's
+  loading (skeleton), empty (`EmptyState`), error (Alert) and RTL
+  conventions (MUI theme rtlPlugin + logical properties).
+- **Revenue Overview** — KPI cards (goal-influenced / goal-driven
+  revenue, incremental cart value, AOV impact, goal conversion rate,
+  reward cost, estimated profit), the daily revenue trend chart
+  (completions/conversions bars + revenue/incremental lines over
+  `revenue_daily`, zero-filled with today's live bucket), the observed
+  AOV comparison (exposed vs store-wide, labeled, never causality) and
+  shipping stats — all from the new `GET /revenue/overview` endpoint.
+- **Goal Performance** — per-goal table (funnel counts, completion /
+  conversion rates, average + incremental cart value, attributed +
+  assisted revenue, reward cost, profit) with expandable rows that show
+  the funnel visual + detail — from `GET /revenue/goals`.
+- **Attribution Dashboard** — the funnel visual, direct vs assisted
+  model revenue cards, incremental cart value with a data-sufficiency
+  badge and the profit panel (graceful unavailability reason when the
+  store stores no product costs) — from `GET /revenue/attribution`.
+- **Smart Recommendations / Goal Recommendation UI** — the Phase 33.4
+  recommendation payload rendered end-to-end: analyzed store data (AOV,
+  median, CV, order distribution bars, shipping, margin, confidence
+  tier), the top recommendation card with threshold / confidence /
+  expected AOV impact / expected completion / expected profit / reasons
+  and **Apply / View details / Dismiss** actions, and the ranked
+  candidate list. Applying always requires an explicit admin
+  confirmation (ConfirmDialog) and goes through the existing
+  `GoalsController` update — the engine itself never modifies a goal
+  (P33-53).
+- **Upsell Analytics** — the top-products table (impressions / clicks /
+  adds / orders / conversion / revenue / estimated profit / upsell
+  score) with the four spec views (top performing, lowest performing,
+  best conversion, highest margin) and a per-product score-breakdown
+  dialog (components, reasons, factors, historical stats) via
+  `GET /revenue/upsells?analytics=1` + `GET /revenue/upsells/{product_id}`.
+  `RevenueRepository::build_upsell_analytics()` now also exposes
+  `estimated_profit` / `profit_available` / `margin_pct` per row (null
+  without cost data — never invented).
+- **REST** — new admin-only `RevenueController`
+  (`includes/REST/RevenueController.php`): `GET /revenue/overview`
+  (overview + daily trend), `GET /revenue/attribution` (overview minus
+  trend) and `GET /revenue/goals` (per-goal rows), all
+  manage_options-gated, per-user rate limited, arg-schema validated
+  (from/to datetimes + goal_id bounds) and served through the cached
+  `RevenueRepository` layer — no new uncached queries.
 
 ---
 
@@ -2438,14 +2490,14 @@ Phase 33 is complete only when all of the following are true:
 
 ### Admin
 
-* [ ] Revenue Overview implemented
-* [ ] Goal Performance implemented
-* [ ] Attribution dashboard implemented
-* [ ] Smart Goal Recommendations implemented
-* [ ] Upsell Analytics implemented
-* [ ] Filters implemented
-* [ ] Date ranges implemented
-* [ ] RTL supported
+* [x] Revenue Overview implemented
+* [x] Goal Performance implemented
+* [x] Attribution dashboard implemented
+* [x] Smart Goal Recommendations implemented
+* [x] Upsell Analytics implemented
+* [x] Filters implemented
+* [x] Date ranges implemented
+* [x] RTL supported
 
 ### Technical
 

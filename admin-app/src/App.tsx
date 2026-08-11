@@ -18,6 +18,12 @@ const Appearance = lazy(() => import('./routes/Appearance'));
 const Settings = lazy(() => import('./routes/Settings'));
 const GoalBuilder = lazy(() => import('./routes/GoalBuilder'));
 const CampaignBuilder = lazy(() => import('./routes/CampaignBuilder'));
+// Phase 33.6 (React Admin) — the Revenue Optimization section.
+const RevenueOverview = lazy(() => import('./routes/RevenueOverview'));
+const GoalPerformance = lazy(() => import('./routes/GoalPerformance'));
+const AttributionDashboard = lazy(() => import('./routes/AttributionDashboard'));
+const Recommendations = lazy(() => import('./routes/Recommendations'));
+const UpsellAnalytics = lazy(() => import('./routes/UpsellAnalytics'));
 
 /** Skeleton shown while a lazy route loads. */
 function RouteFallback() {
@@ -64,6 +70,11 @@ const router = createHashRouter([
       { path: '/campaigns/new', element: lazyRoute(<CampaignBuilder />) },
       { path: '/campaigns/:id/edit', element: lazyRoute(<CampaignBuilder />) },
       { path: '/analytics', element: lazyRoute(<Analytics />) },
+      { path: '/revenue', element: lazyRoute(<RevenueOverview />) },
+      { path: '/revenue/goals', element: lazyRoute(<GoalPerformance />) },
+      { path: '/revenue/attribution', element: lazyRoute(<AttributionDashboard />) },
+      { path: '/revenue/recommendations', element: lazyRoute(<Recommendations />) },
+      { path: '/revenue/upsells', element: lazyRoute(<UpsellAnalytics />) },
       { path: '/appearance', element: lazyRoute(<Appearance />) },
       { path: '/settings', element: lazyRoute(<Settings />) },
       { path: '*', element: <NotFound /> },
