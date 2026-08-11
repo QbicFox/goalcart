@@ -327,8 +327,7 @@ export default function AdminLayout() {
 				color="default"
 				elevation={0}
 				sx={{
-					// background.paper adapts to the light/dark dashboard theme.
-					bgcolor: "background.paper",
+					bgcolor: "#ffffff",
 					borderBottom: 1,
 					borderColor: "divider",
 				}}

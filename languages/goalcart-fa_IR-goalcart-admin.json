@@ -199,9 +199,6 @@
             "Appearance": [
                 "ظاهر"
             ],
-            "Appearance of the Goal Cart dashboard. Dark mode is easier on the eyes in low light.": [
-                "ظاهر داشبورد Goal Cart. حالت تیره در نور کم برای چشم راحت‌تر است."
-            ],
             "Appearance saved.": [
                 "ظاهر ذخیره شد."
             ],
@@ -631,14 +628,8 @@
             "Daily until": [
                 "روزانه تا"
             ],
-            "Dark": [
-                "تیره"
-            ],
             "Dashboard": [
                 "داشبورد"
-            ],
-            "Dashboard theme": [
-                "تم داشبورد"
             ],
             "Data sufficiency": [
                 "کفایت داده"
@@ -1137,9 +1128,6 @@
             ],
             "Leave empty to apply to the whole cart.": [
                 "برای اعمال روی کل سبد، خالی بگذارید."
-            ],
-            "Light": [
-                "روشن"
             ],
             "Limit": [
                 "محدودیت"

@@ -25,7 +25,6 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { useTheme } from '@mui/material/styles';
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo, useState, type ReactNode } from 'react';
 import {
@@ -54,12 +53,13 @@ import { useDateRange } from '../date-range/DateRangeContext';
 import { formatCurrency, formatNumber } from '../lib/format';
 import type { AnalyticsRewardFilter } from '../types';
 
-/** Chart palette — WP admin blues + semantic accents (the grid + tick
- *  colors follow the dashboard theme, see chartColors below). */
+/** Chart palette — WP admin blues + semantic accents. */
 const COLORS = {
   primary: '#2271b1',
   primaryLight: '#72aee6',
   success: '#00a32a',
+  grid: '#dcdcde',
+  tick: '#50575e',
 };
 
 /** Reward filter dropdown options (matches Reward::types() + all). */
@@ -148,15 +148,6 @@ function KpiCard({ label, value, icon }: KpiCardProps) {
 export default function Analytics() {
   const { range } = useDateRange();
   const [campaignId, setCampaignId] = useState<number>(0);
-
-  // Chart grid + tick colors follow the dashboard theme (divider / muted
-  // text) so the charts stay legible in dark mode; the brand accents stay
-  // fixed (they read on both surfaces).
-  const theme = useTheme();
-  const chartColors = useMemo(
-    () => ({ grid: theme.palette.divider, tick: theme.palette.text.secondary }),
-    [theme]
-  );
   const [goalId, setGoalId] = useState<number>(0);
   const [reward, setReward] = useState<AnalyticsRewardFilter>('');
   const [productId, setProductId] = useState<number>(0);
@@ -379,16 +370,16 @@ export default function Analytics() {
               >
                 <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart data={trendData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} vertical={false} />
+                    <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} vertical={false} />
                     <XAxis
                       dataKey="label"
-                      tick={{ fontSize: 11, fill: chartColors.tick }}
+                      tick={{ fontSize: 11, fill: COLORS.tick }}
                       tickLine={false}
                       minTickGap={28}
                     />
                     <YAxis
                       yAxisId="count"
-                      tick={{ fontSize: 11, fill: chartColors.tick }}
+                      tick={{ fontSize: 11, fill: COLORS.tick }}
                       tickLine={false}
                       axisLine={false}
                       allowDecimals={false}
@@ -397,7 +388,7 @@ export default function Analytics() {
                     <YAxis
                       yAxisId="revenue"
                       orientation="right"
-                      tick={{ fontSize: 11, fill: chartColors.tick }}
+                      tick={{ fontSize: 11, fill: COLORS.tick }}
                       tickLine={false}
                       axisLine={false}
                       width={52}
@@ -476,12 +467,12 @@ export default function Analytics() {
                     >
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke={chartColors.grid}
+                        stroke={COLORS.grid}
                         horizontal={false}
                       />
                       <XAxis
                         type="number"
-                        tick={{ fontSize: 11, fill: chartColors.tick }}
+                        tick={{ fontSize: 11, fill: COLORS.tick }}
                         tickLine={false}
                         axisLine={false}
                         allowDecimals={false}
@@ -490,7 +481,7 @@ export default function Analytics() {
                         type="category"
                         dataKey="name"
                         width={130}
-                        tick={{ fontSize: 11, fill: chartColors.tick }}
+                        tick={{ fontSize: 11, fill: COLORS.tick }}
                         tickLine={false}
                         axisLine={false}
                       />

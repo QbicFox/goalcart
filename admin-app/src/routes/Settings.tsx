@@ -1,9 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Controller, useForm, useWatch, type Control, type Path } from 'react-hook-form';
+import { Controller, useForm, type Control, type Path } from 'react-hook-form';
 import BuildIcon from '@mui/icons-material/Build';
 import CalculateIcon from '@mui/icons-material/Calculate';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
 import SpeedIcon from '@mui/icons-material/Speed';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import TuneIcon from '@mui/icons-material/Tune';
@@ -21,13 +19,10 @@ import Switch from '@mui/material/Switch';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
-import ToggleButton from '@mui/material/ToggleButton';
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { fetchSettingsEnvelope, saveSettings } from '../api/settings';
-import { useThemeMode } from '../providers/ThemeModeProvider';
 import SectionCard from '../components/goal-builder/SectionCard';
 import PageContainer from '../components/PageContainer';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
@@ -118,63 +113,6 @@ function SelectField({
           ))}
         </TextField>
       )}
-    />
-  );
-}
-
-/** The dashboard color scheme as a Light/Dark segmented control. */
-function ThemeField({
-  control,
-  name,
-  label,
-  description,
-}: {
-  control: Control<GoalCartSettings>;
-  name: Path<GoalCartSettings>;
-  label: string;
-  description?: string;
-}) {
-  return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field }) => {
-        const value = field.value === 'dark' ? 'dark' : 'light';
-
-        return (
-          <Box>
-            <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.75 }}>
-              {label}
-            </Typography>
-            <ToggleButtonGroup
-              exclusive
-              size="small"
-              value={value}
-              onChange={(_, next) => {
-                if (next === 'dark' || next === 'light') {
-                  field.onChange(next);
-                }
-              }}
-              aria-label={label}
-              sx={{ mb: 0.75 }}
-            >
-              <ToggleButton value="light" aria-label={__('Light', 'goalcart')}>
-                <LightModeIcon fontSize="small" sx={{ mr: 0.75 }} />
-                {__('Light', 'goalcart')}
-              </ToggleButton>
-              <ToggleButton value="dark" aria-label={__('Dark', 'goalcart')}>
-                <DarkModeIcon fontSize="small" sx={{ mr: 0.75 }} />
-                {__('Dark', 'goalcart')}
-              </ToggleButton>
-            </ToggleButtonGroup>
-            {description && (
-              <Typography variant="caption" color="text.secondary">
-                {description}
-              </Typography>
-            )}
-          </Box>
-        );
-      }}
     />
   );
 }
@@ -308,7 +246,6 @@ export default function Settings() {
   const queryClient = useQueryClient();
   const { notify } = useSnackbar();
   const { setFullscreen } = useFullscreen();
-  const { mode: themeMode, setMode } = useThemeMode();
 
   const [tab, setTab] = useState(0);
 
@@ -334,19 +271,6 @@ export default function Settings() {
     defaultValues: { enabled: true, fullscreen_dashboard: true },
     values: data,
   });
-
-  const adminTheme = useWatch({ control, name: 'admin_theme' });
-
-  // Apply the dashboard theme live, before save: toggling the control
-  // switches the whole dashboard immediately (the ThemeModeProvider owns
-  // the body class + MUI palette), and saving persists it. The effect
-  // also re-syncs the theme when the settings load (`values`) or after a
-  // save (setQueryData below), mirroring the full-screen toggle's flow.
-  useEffect(() => {
-    if ((adminTheme === 'dark' || adminTheme === 'light') && adminTheme !== themeMode) {
-      setMode(adminTheme);
-    }
-  }, [adminTheme, themeMode, setMode]);
 
   const saveMutation = useMutation({
     mutationFn: (values: GoalCartSettings) => saveSettings(values),
@@ -540,15 +464,6 @@ export default function Settings() {
                     label={__('Full-screen dashboard', 'goalcart')}
                     description={__(
                       'Hide the WordPress admin chrome and let the dashboard fill the whole browser window.',
-                      'goalcart'
-                    )}
-                  />
-                  <ThemeField
-                    control={control}
-                    name="admin_theme"
-                    label={__('Dashboard theme', 'goalcart')}
-                    description={__(
-                      'Appearance of the Goal Cart dashboard. Dark mode is easier on the eyes in low light.',
                       'goalcart'
                     )}
                   />

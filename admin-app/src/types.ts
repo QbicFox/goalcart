@@ -31,12 +31,7 @@ export interface GoalCartBootData {
   isPro: boolean;
   /** Whether the dashboard opens full-screen (hides the WP admin chrome). */
   fullscreen: boolean;
-  /** Persisted dashboard theme (Settings → General → Dashboard theme). */
-  adminTheme: AdminTheme;
 }
-
-/** The dashboard color scheme (Settings → General → Dashboard theme). */
-export type AdminTheme = 'light' | 'dark';
 
 /**
  * Standard REST response envelope used by the Goal Cart API
@@ -551,8 +546,6 @@ export interface GoalCartSettings {
   // General (P18-T01).
   enabled: boolean;
   fullscreen_dashboard: boolean;
-  /** Dashboard color scheme: light | dark. */
-  admin_theme: AdminTheme;
   currency_display: CurrencyDisplay;
   default_goal_behavior: GoalBehavior;
   conflict_resolution: ConflictResolution;

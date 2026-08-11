@@ -299,10 +299,6 @@ msgstr "تأخیر نمایش (ثانیه)"
 msgid "Appearance"
 msgstr "ظاهر"
 
-#: admin-app/src/routes/Settings.tsx:550
-msgid "Appearance of the Goal Cart dashboard. Dark mode is easier on the eyes in low light."
-msgstr "ظاهر داشبورد Goal Cart. حالت تیره در نور کم برای چشم راحت‌تر است."
-
 #: admin-app/src/routes/Appearance.tsx:336
 msgid "Appearance saved."
 msgstr "ظاهر ذخیره شد."
@@ -985,19 +981,10 @@ msgstr "روند روزانهٔ درآمد و قیف"
 msgid "Daily until"
 msgstr "روزانه تا"
 
-#: admin-app/src/routes/Settings.tsx:165
-#: admin-app/src/routes/Settings.tsx:167
-msgid "Dark"
-msgstr "تیره"
-
 #: admin-app/src/components/layout/navigation.ts:41
 #: admin-app/src/routes/Dashboard.tsx:75
 msgid "Dashboard"
 msgstr "داشبورد"
-
-#: admin-app/src/routes/Settings.tsx:549
-msgid "Dashboard theme"
-msgstr "تم داشبورد"
 
 #: admin-app/src/routes/AttributionDashboard.tsx:195
 msgid "Data sufficiency"
@@ -1761,11 +1748,6 @@ msgstr "برای اجازه به همهٔ نقشها خالی بگذارید. م
 #: admin-app/src/components/goal-builder/RewardFields.tsx:173
 msgid "Leave empty to apply to the whole cart."
 msgstr "برای اعمال روی کل سبد، خالی بگذارید."
-
-#: admin-app/src/routes/Settings.tsx:161
-#: admin-app/src/routes/Settings.tsx:163
-msgid "Light"
-msgstr "روشن"
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:242
 msgid "Limit"
@@ -3506,4 +3488,3 @@ msgstr "«%s» برای همیشه حذف می‌شود. اهداف آن حفظ 
 #: admin-app/src/routes/Goals.tsx:444
 msgid "“%s” will be permanently deleted. This cannot be undone."
 msgstr "«%s» برای همیشه حذف می‌شود. این عمل قابل بازگشت نیست."
-

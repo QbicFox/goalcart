@@ -259,11 +259,6 @@ class AssetLoader {
 			// the WP admin chrome). The React shell initializes from this
 			// and switches live when the Settings toggle is saved.
 			'fullscreen' => (bool) $this->settings->get( 'fullscreen_dashboard', true ),
-			// The persisted dashboard theme (light | dark). The React shell
-			// initializes the MUI theme from this so the first render matches
-			// the setting (the `goalcart-dark` body class from
-			// Admin::admin_body_class() covers the pre-mount paint).
-			'adminTheme'  => 'dark' === $this->settings->get( 'admin_theme', 'light' ) ? 'dark' : 'light',
 		);
 
 		/**

@@ -8,39 +8,14 @@
 #goalcart-admin {
   /* Full-screen dashboard: the mount point fills the viewport and the
      app shell (AdminLayout) scrolls its own content area. Embedded mode:
-     the page grows normally inside the WP admin chrome — min-height (not
-     a fixed height) lets the dark-mode background follow the content.
-     admin-fullscreen.css pins the explicit height in full-screen mode. */
-  min-height: 100vh;
-  min-height: 100dvh;
+     the page grows normally inside the WP admin chrome. */
+  height: 100vh;
+  height: 100dvh;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
     'Helvetica Neue', sans-serif;
   font-size: 14px;
   color: #1d2327;
-}
-
-/* Dark dashboard theme (Settings → General → Dashboard theme).
-
-   The `goalcart-dark` body class is added server-side
-   (Admin::admin_body_class) so the pre-mount loading placeholder paints
-   dark, and is owned live by ThemeModeProvider afterwards — the whole
-   rule set switches instantly when the Settings toggle changes. */
-body.goalcart-dark #goalcart-admin {
-  color: #f0f0f1;
-  /* Native controls (scrollbars, selects, date pickers) render dark. */
-  color-scheme: dark;
-  background-color: #1d2327;
-}
-
-body.goalcart-dark #goalcart-admin .goalcart-admin-loading {
-  color: #c3c4c7;
-}
-
-/* Full-screen dark mode: cover the viewport (incl. overscroll) so no
-   light WP-admin canvas flashes around the dashboard. */
-body.goalcart-dark.goalcart-fullscreen {
-  background-color: #1d2327;
 }
 
 #goalcart-admin *,

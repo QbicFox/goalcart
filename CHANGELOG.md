@@ -9,24 +9,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
-- **Dark dashboard theme (Settings → General → Dashboard theme)** — the
-  admin dashboard now ships a dark color scheme mirroring the WP admin
-  dark palette (base `#1d2327`, elevated cards `#2c3338`, highlight
-  `#72aee6`), toggled from a new **Light / Dark** segmented control on the
-  Settings page and persisted through the new `admin_theme` setting
-  (default `light`, REST schema-validated). The theme applies live as the
-  control changes and on save: a new `ThemeModeProvider` owns the MUI
-  palette (`createAppTheme(mode)`) and the `goalcart-dark` body class the
-  scoped CSS keys on — PHP adds the class server-side
-  (`Admin::admin_body_class`) so the first paint is already dark, the boot
-  data carries `adminTheme` so the first React render matches, and native
-  controls render dark via `color-scheme: dark`. Hard-coded light colors
-  in the shell were made theme-aware: the header AppBar uses
-  `background.paper` and the Analytics / Revenue chart grids and ticks
-  follow `theme.palette.divider` / `text.secondary`. `tests/settings-test.php`
-  covers the default, the schema enum and the sanitizer; the POT/JED were
-  regenerated and the four new strings carry Persian translations.
-
 - **Sticky bottom action bar** — the admin dashboard now docks every
   save / settings / reset action in a sticky bottom bar instead of the
   page body. A new `ActionBar` shell component (`AdminLayout`) renders
