@@ -10,6 +10,7 @@ namespace GoalCart;
 use GoalCart\Admin\Admin;
 use GoalCart\Admin\AssetLoader;
 use GoalCart\Analytics\AnalyticsRepository;
+use GoalCart\Analytics\RevenueTracker;
 use GoalCart\Analytics\Session;
 use GoalCart\Analytics\Tracker;
 use GoalCart\Campaigns\CampaignRepository;
@@ -168,6 +169,12 @@ final class Plugin {
 		// attribution all register through the Tracker.
 		$this->hooks()->register( $this->container->get( Tracker::class ) );
 
+		// Revenue optimization (Phase 33.1): the revenue event tracker
+		// records the attribution funnel (goal_view → progress → completed
+		// → order_paid) and the upsell funnel into their dedicated logs,
+		// with idempotent dedup and the weekly retention cleanup cron.
+		$this->hooks()->register( $this->container->get( RevenueTracker::class ) );
+
 		// Storefront progress UI (Phase 11): shortcode, display-location
 		// injection, sticky bar and frontend assets.
 		$this->hooks()->register( $this->container->get( ProgressUI::class ) );
@@ -254,6 +261,16 @@ final class Plugin {
 
 		$this->container->singleton( AnalyticsRepository::class, function () {
 			return new AnalyticsRepository();
+		} );
+
+		// Revenue event tracker (Phase 33.1): owns the revenue_events and
+		// upsell_events logs — whitelisted, deduped, privacy-safe recording
+		// plus the weekly retention cleanup cron.
+		$this->container->singleton( RevenueTracker::class, function ( Container $container ) {
+			return new RevenueTracker(
+				$container->get( Settings::class ),
+				$container->get( Session::class )
+			);
 		} );
 
 		// Cart integration (Phase 6): the single source of the live-cart

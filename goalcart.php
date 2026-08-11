@@ -68,8 +68,11 @@ if ( ! defined( 'GOALCART_DB_VERSION' ) ) {
 	 * 0.4.0 = Pluggable template engine: migrates stored goals' legacy
 	 *         display_settings.template onto display_settings.template_id
 	 *         (safe, repeatable — see Installer::maybe_migrate_template_storage).
+	 * 0.5.0 = Phase 33 (Revenue Optimization): revenue_events,
+	 *         revenue_daily, goal_attribution, upsell_events and
+	 *         upsell_stats tables plus the daily aggregation cron.
 	 */
-	define( 'GOALCART_DB_VERSION', '0.4.0' );
+	define( 'GOALCART_DB_VERSION', '0.5.0' );
 }
 
 // Load the Composer autoloader (PSR-4: GoalCart\ => includes/).

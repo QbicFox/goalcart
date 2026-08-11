@@ -37,7 +37,28 @@ class Installer {
 	 */
 	public static function activate() {
 		self::maybe_create_tables();
+		self::maybe_schedule_events();
 		update_option( self::DB_VERSION_OPTION, GOALCART_DB_VERSION, false );
+	}
+
+	/**
+	 * Schedule every cron event owned by the plugin, idempotently.
+	 *
+	 * Each event is scheduled with `wp_schedule_event()` only when no
+	 * pending occurrence exists (wp_next_scheduled()), so re-running
+	 * activation/upgrade never stacks duplicate schedules. The weekly
+	 * interval is registered through cron_schedules() on every request.
+	 *
+	 * @return void
+	 */
+	public static function maybe_schedule_events() {
+		foreach ( self::cron_events() as $event ) {
+			if ( wp_next_scheduled( $event ) ) {
+				continue;
+			}
+
+			wp_schedule_event( time() + HOUR_IN_SECONDS, 'goalcart_weekly', $event );
+		}
 	}
 
 	/**
@@ -58,14 +79,17 @@ class Installer {
 	/**
 	 * Scheduled event names owned by the plugin.
 	 *
-	 * Later phases (analytics, notifications, …) append their cron events
-	 * here so activation schedules and deactivation clears them through
-	 * the same list.
+	 * Phase 33.1 (Analytics Foundation) adds the weekly revenue-event
+	 * cleanup job (RevenueTracker::CLEANUP_EVENT); later 33.x sub-phases
+	 * (aggregation) append their jobs here. The schedule is registered in
+	 * activate() and cleared in deactivate() through this list.
 	 *
 	 * @return string[]
 	 */
 	public static function cron_events() {
-		return array();
+		return array(
+			\GoalCart\Analytics\RevenueTracker::CLEANUP_EVENT,
+		);
 	}
 
 	/**
@@ -81,10 +105,16 @@ class Installer {
 		$installed = get_option( self::DB_VERSION_OPTION, '0.0.0' );
 
 		if ( version_compare( $installed, GOALCART_DB_VERSION, '>=' ) ) {
+			// Even on an up-to-date install, make sure the plugin's cron
+			// events are scheduled (they may have been cleared by an
+			// interrupted deactivate, or a manual wp-cron cleanup). The
+			// call is idempotent (wp_next_scheduled guard).
+			self::maybe_schedule_events();
 			return;
 		}
 
 		self::maybe_create_tables();
+		self::maybe_schedule_events();
 		update_option( self::DB_VERSION_OPTION, GOALCART_DB_VERSION, false );
 	}
 
@@ -193,7 +223,8 @@ class Installer {
 	}
 
 	/**
-	 * Add indexes that dbDelta cannot manage on existing tables.
+	 * Add indexes (and unique keys) that dbDelta cannot manage on
+	 * existing tables.
 	 *
 	 * dbDelta() creates indexes only on NEW tables — it never adds an
 	 * index to a table that already exists (P22 hardening: the analytics
@@ -202,16 +233,35 @@ class Installer {
 	 * index is added with ALTER TABLE after an INFORMATION_SCHEMA check,
 	 * making the operation safe to re-run on every activation/upgrade.
 	 *
+	 * Unique keys (Schema::unique_keys(), e.g. the Phase 33 order_dedup
+	 * anti-double-attribution guard) flow through the same path with
+	 * ADD UNIQUE KEY, and are skipped by name once present.
+	 *
 	 * @return void
 	 */
 	protected static function maybe_add_indexes() {
+		self::apply_indexes( Schema::indexes(), false );
+		self::apply_indexes( Schema::unique_keys(), true );
+	}
+
+	/**
+	 * Apply a set of index/unique-key definitions idempotently.
+	 *
+	 * Idempotency is name-based (same as maybe_add_foreign_keys): an
+	 * index whose name already exists is assumed to be the one we want.
+	 * Index names are plugin constants, so no two schema keys share a
+	 * name with different column sets.
+	 *
+	 * @param array<string, array<string, string[]>> $indexes Table => name => columns.
+	 * @param bool                                    $unique  Whether to add as UNIQUE KEY.
+	 * @return void
+	 */
+	protected static function apply_indexes( array $indexes, $unique ) {
 		global $wpdb;
 
-		// Idempotency is name-based (same as maybe_add_foreign_keys): an
-		// index whose name already exists is assumed to be the one we want.
-		// Index names are plugin constants, so no two schema keys share a
-		// name with different column sets.
-		foreach ( Schema::indexes() as $table => $indexes ) {
+		$kind = $unique ? 'UNIQUE KEY' : 'KEY';
+
+		foreach ( $indexes as $table => $defs ) {
 			$existing = $wpdb->get_col(
 				$wpdb->prepare(
 					'SELECT DISTINCT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s',
@@ -220,7 +270,7 @@ class Installer {
 				)
 			);
 
-			foreach ( $indexes as $name => $columns ) {
+			foreach ( $defs as $name => $columns ) {
 				if ( in_array( $name, $existing, true ) ) {
 					continue;
 				}
@@ -235,7 +285,7 @@ class Installer {
 					)
 				);
 
-				$wpdb->query( "ALTER TABLE `{$table}` ADD KEY `{$name}` ({$columns_sql})" );
+				$wpdb->query( "ALTER TABLE `{$table}` ADD {$kind} `{$name}` ({$columns_sql})" );
 
 				if ( ! empty( $wpdb->last_error ) ) {
 					// Log the failure without blocking activation; missing

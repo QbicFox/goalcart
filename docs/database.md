@@ -72,6 +72,51 @@ goal/campaign was deleted between impression and report (the FK's
 `SET NULL` semantics for a deleted parent), so events are never silently
 dropped.
 
+### 1.4 Revenue Event (Phase 33.1)
+
+Raw attribution-funnel log (P33.1). Stored in `goalcart_revenue_events` and written by
+`GoalCart\Analytics\RevenueTracker` — deliberately separate from `analytics_events`: those rows
+are the lightweight Phase 16 dashboard counters, while `revenue_events` carries the attribution
+fields (`goal_target`, `incremental_value`) plus order ids and feeds Phase 33.2 attribution.
+
+| Domain field | Column | Notes |
+|---|---|---|
+| id | `id` | `bigint(20) unsigned AUTO_INCREMENT` |
+| event type | `event_type` | `varchar(40)` — `goal_view`, `goal_progress`, `goal_completed`, `order_paid`, `cart_value` |
+| goal / campaign / product | `goal_id` / `campaign_id` / `product_id` | nullable ids (no FKs into WC tables — see §2) |
+| order | `order_id` | nullable, plain indexed column (HPOS-safe) |
+| session / user | `session_id` (32-char anon id), `user_id` | privacy-first, mirrors §1.3 |
+| cart value | `cart_value` `decimal(19,4)` | cart value at event time |
+| goal target | `goal_target` `decimal(19,4)` | the goal's threshold at event time |
+| incremental value | `incremental_value` `decimal(19,4)` | e.g. the cart increase attributed to the goal |
+| extra payload | `meta` | scalar-only JSON (percentage, quantity, …) |
+| timestamp | `created_at` | `datetime`, site timezone |
+
+### 1.5 Upsell Event (Phase 33.1)
+
+Raw upsell-interaction log (P33.1), stored in `goalcart_upsell_events` — the historical-conversion
+input for the Phase 33.5 Smart Upsell ranking.
+
+| Domain field | Column | Notes |
+|---|---|---|
+| id | `id` | `bigint(20) unsigned AUTO_INCREMENT` |
+| event type | `event_type` | `varchar(40)` — `upsell_impression`, `upsell_clicked`, `upsell_added`, `upsell_order` |
+| goal / product / order | `goal_id` / `product_id` / `order_id` | nullable ids |
+| session / user | `session_id` / `user_id` | anonymous session id, logged-in user id |
+| cart value | `cart_value` `decimal(19,4)` | cart value at event time |
+| extra payload | `meta` | scalar-only JSON |
+| timestamp | `created_at` | `datetime`, site timezone |
+
+**Write path (P33.1):** `RevenueTracker::record()` / `record_upsell()` with strict whitelists and
+idempotent dedup — views/completions/impressions/clicks dedup per session+goal(+product) within a
+24 h window, `goal_progress` within 30 min, and `order_paid` / `upsell_order` exactly once per
+order. The `order_dedup` unique key on `(event_type, order_id)` backs the per-order contract at the
+database level (concurrent double-reports fail the INSERT). Events reported after their goal was
+deleted are retried once without the FK ids so they are never silently dropped (the FK's `SET NULL`
+semantics for a deleted parent). A weekly `goalcart_revenue_cleanup` cron purges rows past the
+retention window (`RevenueTracker::RETENTION_DAYS`, filterable via
+`goalcart_revenue_retention_days`) in bounded batches and sweeps orphan `upsell_stats` rows.
+
 ---
 
 ## 2. Schema summary
@@ -80,7 +125,12 @@ dropped.
 |---|---|---|
 | `{prefix}goalcart_goals` | Goal entities | `status`, `type`, `campaign_id`, `priority`, `starts_at`, `ends_at` |
 | `{prefix}goalcart_campaigns` | Campaign entities | `status`, `starts_at`, `ends_at` |
-| `{prefix}goalcart_analytics_events` | Analytics event log | `goal_id`, `campaign_id`, `event_type`, `session_id`, `product_id`, `order_id`, `created_at` |
+| `{prefix}goalcart_analytics_events` | Analytics event log (Phase 16) | `goal_id`, `campaign_id`, `event_type`, `session_id`, `product_id`, `order_id`, `created_at` |
+| `{prefix}goalcart_revenue_events` | Revenue attribution log (Phase 33.1) | `event_type`, `goal_id`, `campaign_id`, `product_id`, `order_id`, `session_id`, `user_id`, `created_at` + composite `goal_event` / `order_event` + unique `order_dedup` |
+| `{prefix}goalcart_revenue_daily` | Daily revenue aggregates (Phase 33.1, fed by Phase 33.3) | `goal_id`, `report_date` + composite `goal_date` |
+| `{prefix}goalcart_goal_attribution` | Per-order goal attribution (Phase 33.1) | `order_id`, `goal_id`, `session_id`, `model`, `created_at` + unique `order_goal_model` |
+| `{prefix}goalcart_upsell_events` | Upsell interaction log (Phase 33.1) | `event_type`, `goal_id`, `product_id`, `order_id`, `session_id`, `created_at` + composite `product_event` + unique `order_dedup` |
+| `{prefix}goalcart_upsell_stats` | Per-product upsell aggregates (Phase 33.1) | unique `product_id` |
 
 All tables: InnoDB, `$wpdb->get_charset_collate()`, `bigint(20) unsigned AUTO_INCREMENT` PKs,
 `decimal(19,4)` for money, `datetime` in the **site timezone** (`current_time()`), `longtext` for
@@ -93,6 +143,11 @@ structured JSON. This mirrors the reference plugin's conventions exactly.
 | `fk_goalcart_goals_campaign` | `goals.campaign_id` | `campaigns.id` | `SET NULL` |
 | `fk_goalcart_analytics_goal` | `analytics_events.goal_id` | `goals.id` | `SET NULL` |
 | `fk_goalcart_analytics_campaign` | `analytics_events.campaign_id` | `campaigns.id` | `SET NULL` |
+| `fk_goalcart_revenue_goal` | `revenue_events.goal_id` | `goals.id` | `SET NULL` |
+| `fk_goalcart_revenue_campaign` | `revenue_events.campaign_id` | `campaigns.id` | `SET NULL` |
+| `fk_goalcart_daily_goal` | `revenue_daily.goal_id` | `goals.id` | `SET NULL` |
+| `fk_goalcart_attribution_goal` | `goal_attribution.goal_id` | `goals.id` | `SET NULL` |
+| `fk_goalcart_upsell_goal` | `upsell_events.goal_id` | `goals.id` | `SET NULL` |
 
 `SET NULL` preserves analytics history and standalone goals when a parent is deleted.
 
@@ -112,12 +167,12 @@ reference plugin's convention.
 
 ## 3. Database rules applied (P03-T03)
 
-1. **Reference migration strategy** — version-driven: `GOALCART_DB_VERSION` (now `0.4.0` —
-   the Phase 12 template engine migration on top of Phase 26's `goals.exclusive`) vs the
-   `goalcart_db_version` option; `Installer::maybe_upgrade()` runs on
-   `plugins_loaded` + `admin_init`; schema recreated idempotently via `dbDelta`; foreign keys
-   added with `INFORMATION_SCHEMA`-guarded `ALTER TABLE` (safe to re-run; failures logged, never
-   fatal).
+1. **Reference migration strategy** — version-driven: `GOALCART_DB_VERSION` (now `0.5.0` —
+   Phase 33.1's five revenue/upsell tables on top of the Phase 12 template engine migration and
+   Phase 26's `goals.exclusive`) vs the `goalcart_db_version` option; `Installer::maybe_upgrade()`
+   runs on `plugins_loaded` + `admin_init`; schema recreated idempotently via `dbDelta`; foreign
+   keys added with `INFORMATION_SCHEMA`-guarded `ALTER TABLE` (safe to re-run; failures logged,
+   never fatal).
 
    **0.4.0 data migration** — `Installer::maybe_migrate_template_storage()` copies the legacy
    `display_settings.template` value (one of `basic` / `percentage` / `milestone` / `card`) onto

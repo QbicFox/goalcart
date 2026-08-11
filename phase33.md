@@ -15,11 +15,11 @@ Phase: 33
 Name: Advanced V3 Revenue Optimization
 
 Phase Weight: 3%
-Phase Progress: 0%
-Project Contribution: 0.00%
+Phase Progress: 12.5%
+Project Contribution: 0.375%
 
 Phase:
-░░░░░░░░░░░░░░░░░░░░ 0%
+██░░░░░░░░░░░░░░░░░░ 12.5%
 ```
 
 The purpose of this phase is to transform Goal Cart from a simple goal/progress-bar plugin into a **data-driven revenue optimization engine for WooCommerce**.
@@ -1936,8 +1936,41 @@ Tasks:
 Progress:
 
 ```text
-0%
+100% — COMPLETED
 ```
+
+Implementation notes (see `tests/revenue-foundation-test.php`, 66 checks):
+
+- **Event model** — `RevenueTracker` owns two raw logs: `revenue_events`
+  (the attribution funnel goal_view → goal_progress → goal_completed →
+  order_paid, each row carrying cart_value, goal_target and
+  incremental_value) and `upsell_events` (impression → clicked → added →
+  order per product per session). The Phase 16 `Tracker`/`analytics_events`
+  pipeline is untouched.
+- **Schema** — five new tables (revenue_events, revenue_daily,
+  goal_attribution, upsell_events, upsell_stats) in `Database\Schema`
+  with full indexes (single + composite: goal_event, order_event,
+  product_event, goal_date, unique order_goal_model / product_id); DB
+  version bumped to 0.5.0; `Installer::maybe_add_indexes()` applies them
+  idempotently to upgraded installs.
+- **Event tracker** — `RevenueTracker::record()` / `record_upsell()` with
+  strict event-type whitelists, typed field sanitization and the same
+  FK-resilient insert pattern as the Phase 16 tracker.
+- **Deduplication** — idempotent recording by design: view/completion /
+  impression/click dedup per session+goal(+product) within a 24 h window,
+  goal_progress within 30 min, order_paid / upsell_order exactly once per
+  order (the unique order_goal_model key also guards the attribution
+  layer).
+- **Privacy-safe sessions** — reuses the anonymous 32-hex `Session`
+  cookie; rows store only anonymous session ids, numeric aggregates and
+  plugin/WC ids (no emails, IPs, addresses or payment data); logged-in
+  `user_id` is an id, not personal data.
+- **Event cleanup** — weekly `goalcart_revenue_cleanup` cron (scheduled
+  through `Installer::cron_events()` + the new
+  `Installer::maybe_schedule_events()`; cleared on deactivation) purges
+  rows older than `RETENTION_DAYS` (filterable via
+  `goalcart_revenue_retention_days`) in bounded batches and sweeps orphan
+  upsell_stats rows.
 
 ---
 

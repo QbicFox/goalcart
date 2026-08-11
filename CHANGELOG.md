@@ -7,6 +7,47 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ## [Unreleased]
 
+### Added
+
+- **Phase 33.1 — Revenue Analytics Foundation** — the event layer behind
+  the Phase 33 revenue-optimization engine (P33-T01):
+  - **Event model** — new `RevenueTracker` (`includes/Analytics/`)
+    owns two raw logs: `revenue_events` (the attribution funnel
+    `goal_view` → `goal_progress` → `goal_completed` → `order_paid`,
+    each row carrying `cart_value`, `goal_target` and
+    `incremental_value`) and `upsell_events` (impression → clicked →
+    added → order per product per session). The Phase 16
+    `Tracker`/`analytics_events` pipeline is untouched.
+  - **Schema** — five new tables (`revenue_events`, `revenue_daily`,
+    `goal_attribution`, `upsell_events`, `upsell_stats`) with full
+    index coverage (single + composite `goal_event` / `order_event` /
+    `product_event` / `goal_date`, unique `order_goal_model` /
+    `product_id`); DB version bumped to `0.5.0`; new indexes are
+    applied idempotently by `Installer::maybe_add_indexes()` on
+    upgraded installs.
+  - **Deduplication** — idempotent recording by design: views,
+    completions and upsell impressions/clicks dedup per session+goal
+    (+product) within a 24 h window, `goal_progress` within 30 min,
+    and `order_paid` / `upsell_order` exactly once per order — so
+    page refreshes, poll loops and cart sync passes never
+    double-count.
+  - **Privacy-safe sessions** — reuses the anonymous 32-hex `Session`
+    cookie; rows store only anonymous session ids, numeric aggregates
+    and plugin/WC ids (no emails, IPs, addresses or payment data);
+    malformed session ids are rejected.
+  - **Event cleanup** — weekly `goalcart_revenue_cleanup` cron
+    (scheduled via the new `Installer::maybe_schedule_events()` and
+    cleared on deactivation) purges rows past the retention window
+    (`RETENTION_DAYS`, filterable via
+    `goalcart_revenue_retention_days`) in bounded batches and sweeps
+    orphan `upsell_stats` rows.
+  - **Hooks** — `goalcart_revenue_tracking_enabled` and
+    `goalcart_revenue_retention_days` added to the developer-hooks
+    reference.
+  - **Tests** — new `tests/revenue-foundation-test.php` (66 checks)
+    covering wiring, schema/index presence, whitelists, recording,
+    dedup windows, privacy and cleanup; all rolled back, zero residue.
+
 ### Removed
 
 - **The `optional` gift add mode is gone.** `gift_add_mode` now accepts

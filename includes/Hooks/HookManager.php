@@ -104,6 +104,8 @@ class HookManager {
 			array( 'type' => 'filter', 'hook' => 'goalcart_default_calculation_mode', 'description' => 'Store-wide default money calculation basis.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_suggestions', 'description' => 'The shaped suggestion items for a goal.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_template_classes', 'description' => 'The progress template class map (id => Template class). Register a new Goal or Campaign template here.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_tracking_enabled', 'description' => 'Whether the Phase 33 revenue event pipeline records events.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_retention_days', 'description' => 'Retention window (days) for the revenue/upsell event logs before the weekly cleanup purges them.' ),
 		);
 	}
 
