@@ -60,6 +60,7 @@ class Settings {
 		// General (P18-T01).
 		'enabled'               => true,
 		'fullscreen_dashboard'  => true,
+		'admin_theme'           => 'light',            // light | dark (admin dashboard theme)
 		'currency_display'      => 'symbol',           // symbol | code | name
 		'default_goal_behavior' => 'all',              // all | first | closest
 		'conflict_resolution'   => 'cumulative',       // cumulative | best | first (Phase 26)

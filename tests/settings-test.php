@@ -159,6 +159,7 @@ check( 'settings filter registered', false !== has_filter( 'goalcart_default_cal
 $d = $settings->defaults();
 
 check( 'currency_display defaults to symbol', 'symbol' === $d['currency_display'] );
+check( 'admin_theme defaults to light', 'light' === $d['admin_theme'] );
 check( 'default_goal_behavior defaults to all', 'all' === $d['default_goal_behavior'] );
 check( 'conflict_resolution defaults to cumulative', 'cumulative' === $d['conflict_resolution'] );
 check( 'calculation_mode defaults to subtotal', 'subtotal' === $d['calculation_mode'] );
@@ -198,6 +199,10 @@ check( 'currency_display schema enum', isset( $save['currency_display']['enum'] 
 check( 'invalid currency_display rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['currency_display'], 'currency_display' ) ) );
 check( 'valid currency_display accepted', true === rest_validate_value_from_schema( 'name', $save['currency_display'], 'currency_display' ) );
 
+check( 'admin_theme schema enum', isset( $save['admin_theme']['enum'] ) );
+check( 'invalid admin_theme rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['admin_theme'], 'admin_theme' ) ) );
+check( 'valid admin_theme accepted', true === rest_validate_value_from_schema( 'dark', $save['admin_theme'], 'admin_theme' ) );
+
 check( 'default_goal_behavior schema enum', isset( $save['default_goal_behavior']['enum'] ) );
 check( 'invalid behavior rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['default_goal_behavior'], 'default_goal_behavior' ) ) );
 check( 'valid behavior accepted', true === rest_validate_value_from_schema( 'closest', $save['default_goal_behavior'], 'default_goal_behavior' ) );
@@ -231,6 +236,7 @@ $wpdb->query( 'START TRANSACTION' );
 try {
 	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/settings' );
 	$req->set_param( 'currency_display', 'bogus' );
+	$req->set_param( 'admin_theme', 'bogus' );
 	$req->set_param( 'default_goal_behavior', 'bogus' );
 	$req->set_param( 'conflict_resolution', 'bogus' );
 	$req->set_param( 'calculation_mode', 'bogus' );
@@ -252,6 +258,7 @@ try {
 	$data = $resp->get_data()['data'];
 
 	check( 'invalid currency falls back to symbol', 'symbol' === $data['currency_display'] );
+	check( 'invalid theme falls back to light', 'light' === $data['admin_theme'] );
 	check( 'invalid behavior falls back to all', 'all' === $data['default_goal_behavior'] );
 	check( 'invalid conflict mode falls back to cumulative', 'cumulative' === $data['conflict_resolution'] );
 	check( 'invalid mode falls back to subtotal', 'subtotal' === $data['calculation_mode'] );
@@ -281,6 +288,8 @@ try {
 
 // The option rolled back; re-sync the in-memory service (handle_save
 // mutated it) so the remaining sections run against the defaults.
+$settings->set( 'admin_theme', 'dark' );
+check( 'dark theme accepted in memory', 'dark' === $settings->get( 'admin_theme' ) );
 $settings->set_many( $all_before );
 
 // Self-heal (regression): a corrupted legacy frontend_template — a

@@ -11,6 +11,7 @@ import { createAppTheme } from '../theme';
 import { SnackbarProvider } from '../components/notifications/SnackbarProvider';
 import { ActionBarProvider } from './ActionBarProvider';
 import { FullscreenProvider } from './FullscreenProvider';
+import { ThemeModeProvider, useThemeMode } from './ThemeModeProvider';
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -18,7 +19,8 @@ interface AppProvidersProps {
 
 /**
  * Wraps the app in every global provider:
- * - MUI theme (WP-admin palette, RTL-aware)
+ * - Dashboard theme mode provider (light/dark — Settings → General)
+ * - MUI theme (WP-admin palette light/dark, RTL-aware)
  * - A dedicated Emotion cache with a unique 'goalcart' key (so our
  *   styles never collide with other admin plugins) that is RTL-flipped
  *   when the WordPress locale is RTL, mirroring the whole dashboard
@@ -74,21 +76,39 @@ export default function AppProviders({ children }: AppProvidersProps) {
     });
   }, []);
 
-  const theme = useMemo(() => createAppTheme(), []);
+  return (
+    <ThemeModeProvider>
+      <StyledEngineProvider injectFirst>
+        <CacheProvider value={cache}>
+          {/* The MUI theme rebuilds when the dashboard theme mode changes
+            (Settings → General → Dashboard theme). */}
+          <ThemedApp queryClient={queryClient}>{children}</ThemedApp>
+        </CacheProvider>
+      </StyledEngineProvider>
+    </ThemeModeProvider>
+  );
+}
+
+/** The theme-aware half of the provider tree (below ThemeModeProvider). */
+function ThemedApp({
+  queryClient,
+  children,
+}: {
+  queryClient: QueryClient;
+  children: ReactNode;
+}) {
+  const { mode } = useThemeMode();
+  const theme = useMemo(() => createAppTheme(mode), [mode]);
 
   return (
-    <StyledEngineProvider injectFirst>
-      <CacheProvider value={cache}>
-        <ThemeProvider theme={theme}>
-          <QueryClientProvider client={queryClient}>
-            <FullscreenProvider>
-              <SnackbarProvider>
-                <ActionBarProvider>{children}</ActionBarProvider>
-              </SnackbarProvider>
-            </FullscreenProvider>
-          </QueryClientProvider>
-        </ThemeProvider>
-      </CacheProvider>
-    </StyledEngineProvider>
+    <ThemeProvider theme={theme}>
+      <QueryClientProvider client={queryClient}>
+        <FullscreenProvider>
+          <SnackbarProvider>
+            <ActionBarProvider>{children}</ActionBarProvider>
+          </SnackbarProvider>
+        </FullscreenProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

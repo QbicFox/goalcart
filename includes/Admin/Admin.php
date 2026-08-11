@@ -163,6 +163,14 @@ class Admin {
 			if ( $this->settings->get( 'fullscreen_dashboard', true ) ) {
 				$classes .= ' goalcart-fullscreen';
 			}
+
+			// Dark dashboard theme: the class is added server-side so the
+			// pre-mount loading placeholder already paints dark (no flash),
+			// and the React shell (ThemeModeProvider) owns it from then on,
+			// switching live when the Settings toggle changes.
+			if ( 'dark' === $this->settings->get( 'admin_theme', 'light' ) ) {
+				$classes .= ' goalcart-dark';
+			}
 		}
 
 		return trim( (string) $classes );
