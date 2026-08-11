@@ -117,6 +117,50 @@ semantics for a deleted parent). A weekly `goalcart_revenue_cleanup` cron purges
 retention window (`RevenueTracker::RETENTION_DAYS`, filterable via
 `goalcart_revenue_retention_days`) in bounded batches and sweeps orphan `upsell_stats` rows.
 
+### 1.6 Daily Revenue Aggregate (Phase 33.3)
+
+One row per goal per day in `goalcart_revenue_daily`, pre-computed by
+`GoalCart\Analytics\DailyAggregator` on the `daily` cron interval so the dashboard reads an
+aggregated table instead of scanning the raw event log on every admin request.
+
+| Domain field | Column | Notes |
+|---|---|---|
+| date | `report_date` | `date` — the aggregated day |
+| goal | `goal_id` | nullable FK (`SET NULL` on goal deletion) |
+| funnel | `views` / `progressions` / `completions` / `conversions` | `int unsigned` — goal_view / goal_progress / goal_completed counts and distinct attributed orders |
+| revenue | `revenue` `decimal(19,4)` | totals of the orders the goal influenced that day |
+| incremental | `incremental_revenue` `decimal(19,4)` | direct (driven) incremental value |
+| cost | `reward_cost` `decimal(19,4)` | estimated reward cost of the day's completed goals |
+| profit | `estimated_profit` `decimal(19,4)` | estimated profit impact (0 when margin data is unavailable) |
+| timestamps | `created_at` / `updated_at` | `datetime`, site timezone |
+
+**Write path (P33.3):** the aggregator computes each day through
+`AttributionEngine::daily_metrics()` — the same funnel + summary + reward-cost + profit code the
+live dashboard reads, so the aggregate and the live view can never drift. Only goals with activity
+that day get rows; rows are delete-then-inserted per date, making re-runs idempotent. Catch-up is
+bounded: the job starts the day after `goalcart_revenue_last_aggregated` (or the
+`goalcart_aggregate_lookback_days` floor, aligned with the retention window) and processes at most
+`goalcart_aggregate_max_days` per tick, so a backlog drains over several runs.
+
+### 1.7 Product Upsell Stats (Phase 33.3)
+
+One row per product in `goalcart_upsell_stats`, rebuilt wholesale by `DailyAggregator::aggregate_upsells()`
+with a single grouped INSERT...SELECT over the raw `upsell_events` log — the historical conversion
+signal the Phase 33.5 Smart Upsell ranking reads.
+
+| Domain field | Column | Notes |
+|---|---|---|
+| product | `product_id` | unique — one row per product |
+| funnel | `impressions` / `clicks` / `adds` / `orders` | `int unsigned` |
+| revenue | `revenue` `decimal(19,4)` | sum of order cart values |
+| timestamp | `updated_at` | `datetime`, site timezone |
+
+**Read path (P33.3):** `GoalCart\Analytics\RevenueRepository` serves the cached summaries
+(`overview`, `goal_performance`, `daily_trend`, `product_stats`) with generation-versioned
+transients (`goalcart_revenue_cache_version`) and invalidates them on order payment/status
+changes, goal CRUD (`goalcart_goals_changed`), product saves and the aggregation run
+(`goalcart_revenue_aggregated`).
+
 ---
 
 ## 2. Schema summary

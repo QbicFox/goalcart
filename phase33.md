@@ -15,11 +15,11 @@ Phase: 33
 Name: Advanced V3 Revenue Optimization
 
 Phase Weight: 3%
-Phase Progress: 25%
-Project Contribution: 0.75%
+Phase Progress: 37.5%
+Project Contribution: 1.125%
 
 Phase:
-█████░░░░░░░░░░░░░░░ 25%
+███████▒░░░░░░░░░░░░ 37.5%
 ```
 
 The purpose of this phase is to transform Goal Cart from a simple goal/progress-bar plugin into a **data-driven revenue optimization engine for WooCommerce**.
@@ -2062,8 +2062,51 @@ Tasks:
 Progress:
 
 ```text
-0%
+100% — COMPLETED
 ```
+
+Implementation notes (see `tests/aggregation-test.php`, 73 checks):
+
+- **Daily aggregation** — `DailyAggregator` (new, registered on the
+  `daily` cron interval through `Installer::cron_events()` +
+  `cron_intervals()`, gated on the same revenue-tracking consent chain)
+  rolls each day's `revenue_events` + `goal_attribution` rows into
+  `revenue_daily` (views → progressions → completions → conversions,
+  revenue, incremental_revenue, reward_cost, estimated_profit) through the
+  new `AttributionEngine::daily_metrics()` — the exact same funnel/summary
+  /reward-cost/profit code the live dashboard reads, so the aggregate and
+  the live view can never drift. Only goals with activity that day get
+  rows (no all-goals scan); rows are delete-then-inserted, so re-running
+  is idempotent.
+- **Upsell product statistics** — `aggregate_upsells()` rebuilds
+  `upsell_stats` wholesale with one grouped INSERT...SELECT from the raw
+  `upsell_events` log (per-product impressions/clicks/adds/orders/revenue),
+  idempotent and never stale relative to the retained event window.
+- **Scheduled jobs** — the aggregation job joins the weekly cleanup in
+  `cron_events()`; per-event intervals are mapped in the new
+  `cron_intervals()` (cleanup weekly, aggregation daily).
+- **Bounded catch-up (large datasets)** — `aggregate_revenue()` starts the
+  day after the last aggregated date (`goalcart_revenue_last_aggregated`
+  option) or the lookback floor (`goalcart_aggregate_lookback_days`, 90 =
+  aligned with retention), processes at most
+  `goalcart_aggregate_max_days` (default 7) days per tick and advances the
+  option — a backlog drains over several runs instead of one unbounded pass.
+- **Revenue summaries (cached)** — `RevenueRepository` (new) serves the
+  KPI payloads: `overview()` (attribution summary + incremental cart value
+  + AOV + shipping merged), `goal_performance()` (per-goal rows),
+  `daily_trend()` (reads the aggregated `revenue_daily` table, zero-filled
+  over the window, merging today's still-live bucket from the engine until
+  the next tick) and `product_stats()` (reads `upsell_stats`). Every read
+  is memoized in a generation-versioned transient
+  (`goalcart_revenue_cache_version`) with a filterable TTL
+  (`goalcart_revenue_cache_ttl`) and a master bypass filter
+  (`goalcart_revenue_cache_enabled`).
+- **Cache invalidation** — `invalidate()` bumps the generation counter
+  (stale keys expire through their TTL, no key enumeration); wired to the
+  events that change the data: order payment/status changes, goal CRUD
+  (new `goalcart_goals_changed` action fired by `GoalRepository`
+  create/update/delete), product saves (`save_post_product`) and the
+  aggregation run itself (`goalcart_revenue_aggregated`).
 
 ---
 

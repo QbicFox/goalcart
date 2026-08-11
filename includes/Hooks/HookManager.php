@@ -110,6 +110,12 @@ class HookManager {
 			array( 'type' => 'filter', 'hook' => 'goalcart_product_cost', 'description' => 'Product cost used by the Phase 33.2 reward-cost / profit estimation (null = no cost data).' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_metric_rows', 'description' => 'Row cap for the bounded Phase 33.2 metric reads.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_order_scan_pages', 'description' => 'Page cap for the Phase 33.2 store-wide order scans (AOV, shipping).' ),
+			array( 'type' => 'action', 'hook' => 'goalcart_goals_changed', 'description' => 'Fires after a goal is created, updated or deleted (cache invalidation).' ),
+			array( 'type' => 'action', 'hook' => 'goalcart_revenue_aggregated', 'description' => 'Fires after the Phase 33.3 daily aggregation run completes.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_aggregate_max_days', 'description' => 'Max days the Phase 33.3 aggregation job processes per run.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_aggregate_lookback_days', 'description' => 'Lookback floor for the Phase 33.3 aggregation catch-up window.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_cache_enabled', 'description' => 'Whether the Phase 33.3 revenue summary cache is on.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_cache_ttl', 'description' => 'TTL (seconds) for the Phase 33.3 revenue summary transients.' ),
 		);
 	}
 

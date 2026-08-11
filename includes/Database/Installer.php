@@ -46,18 +46,24 @@ class Installer {
 	 *
 	 * Each event is scheduled with `wp_schedule_event()` only when no
 	 * pending occurrence exists (wp_next_scheduled()), so re-running
-	 * activation/upgrade never stacks duplicate schedules. The weekly
-	 * interval is registered through cron_schedules() on every request.
+	 * activation/upgrade never stacks duplicate schedules. Every event uses
+	 * its own interval from cron_intervals() (the weekly interval is
+	 * registered through cron_schedules() on every request; the daily
+	 * aggregation uses core's 'daily').
 	 *
 	 * @return void
 	 */
 	public static function maybe_schedule_events() {
+		$intervals = self::cron_intervals();
+
 		foreach ( self::cron_events() as $event ) {
 			if ( wp_next_scheduled( $event ) ) {
 				continue;
 			}
 
-			wp_schedule_event( time() + HOUR_IN_SECONDS, 'goalcart_weekly', $event );
+			$interval = isset( $intervals[ $event ] ) ? $intervals[ $event ] : 'goalcart_weekly';
+
+			wp_schedule_event( time() + HOUR_IN_SECONDS, $interval, $event );
 		}
 	}
 
@@ -80,8 +86,9 @@ class Installer {
 	 * Scheduled event names owned by the plugin.
 	 *
 	 * Phase 33.1 (Analytics Foundation) adds the weekly revenue-event
-	 * cleanup job (RevenueTracker::CLEANUP_EVENT); later 33.x sub-phases
-	 * (aggregation) append their jobs here. The schedule is registered in
+	 * cleanup job (RevenueTracker::CLEANUP_EVENT); Phase 33.3 (Aggregation &
+	 * Performance) adds the daily aggregation job
+	 * (DailyAggregator::AGGREGATE_EVENT). The schedule is registered in
 	 * activate() and cleared in deactivate() through this list.
 	 *
 	 * @return string[]
@@ -89,6 +96,19 @@ class Installer {
 	public static function cron_events() {
 		return array(
 			\GoalCart\Analytics\RevenueTracker::CLEANUP_EVENT,
+			\GoalCart\Analytics\DailyAggregator::AGGREGATE_EVENT,
+		);
+	}
+
+	/**
+	 * Cron interval per scheduled event.
+	 *
+	 * @return array<string, string> Event name => WP cron interval key.
+	 */
+	public static function cron_intervals() {
+		return array(
+			\GoalCart\Analytics\RevenueTracker::CLEANUP_EVENT  => 'goalcart_weekly',
+			\GoalCart\Analytics\DailyAggregator::AGGREGATE_EVENT => 'daily',
 		);
 	}
 

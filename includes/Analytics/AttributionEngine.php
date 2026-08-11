@@ -803,6 +803,42 @@ final class AttributionEngine {
 	}
 
 	/**
+	 * Per-goal daily aggregate row (the revenue_daily row shape).
+	 *
+	 * Consumed by the Phase 33.3 DailyAggregator so the aggregated table is
+	 * computed with the exact same definitions as the live reads
+	 * (funnel counts + attribution summary), keeping the dashboard and the
+	 * pre-aggregated history consistent. The window (from/to) is typically
+	 * a single day.
+	 *
+	 * @param int                  $goal_id Goal id.
+	 * @param array<string, mixed> $args    Optional: from, to.
+	 * @return array{views: int, progressions: int, completions: int, conversions: int, revenue: float, incremental_revenue: float, reward_cost: float, reward_cost_available: bool, estimated_profit: float|null, profit_available: bool}
+	 */
+	public function daily_metrics( $goal_id, array $args = array() ) {
+		$summary = $this->attribution_summary(
+			array_merge( $args, array( 'goal_id' => (int) $goal_id ) )
+		);
+
+		$funnel = $summary['funnel'];
+
+		return array(
+			'views'                => $funnel['views'],
+			'progressions'         => $funnel['progressed'],
+			'completions'          => $funnel['completed'],
+			'conversions'          => $funnel['converted'],
+			// revenue = totals of the orders influenced by the goal that
+			// day; incremental_revenue = the direct (driven) increment.
+			'revenue'              => $summary['goal_influenced_revenue'],
+			'incremental_revenue'  => $summary['goal_driven_revenue'],
+			'reward_cost'          => $summary['reward_cost'],
+			'reward_cost_available'=> $summary['reward_cost_available'],
+			'estimated_profit'     => $summary['profit_impact'],
+			'profit_available'     => $summary['profit_available'],
+		);
+	}
+
+	/**
 	 * Per-goal metrics (the Goal Performance row shape).
 	 *
 	 * @param int                   $goal_id Goal id.

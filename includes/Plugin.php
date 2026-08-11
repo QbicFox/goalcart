@@ -11,6 +11,8 @@ use GoalCart\Admin\Admin;
 use GoalCart\Admin\AssetLoader;
 use GoalCart\Analytics\AnalyticsRepository;
 use GoalCart\Analytics\AttributionEngine;
+use GoalCart\Analytics\DailyAggregator;
+use GoalCart\Analytics\RevenueRepository;
 use GoalCart\Analytics\RevenueTracker;
 use GoalCart\Analytics\RewardCostEstimator;
 use GoalCart\Analytics\Session;
@@ -183,6 +185,14 @@ final class Plugin {
 		// / assisted revenue, AOV, reward cost and profit impact.
 		$this->hooks()->register( $this->container->get( AttributionEngine::class ) );
 
+		// Aggregation & performance (Phase 33.3): the daily aggregator
+		// pre-computes revenue_daily + upsell_stats on a bounded cron job, and
+		// the revenue repository serves the cached summaries (overview, goal
+		// performance, daily trend, product stats) with generation-versioned
+		// invalidation wired to order/goal/product changes and aggregation runs.
+		$this->hooks()->register( $this->container->get( DailyAggregator::class ) );
+		$this->hooks()->register( $this->container->get( RevenueRepository::class ) );
+
 		// Storefront progress UI (Phase 11): shortcode, display-location
 		// injection, sticky bar and frontend assets.
 		$this->hooks()->register( $this->container->get( ProgressUI::class ) );
@@ -299,6 +309,27 @@ final class Plugin {
 				$container->get( Session::class ),
 				$container->get( Settings::class ),
 				$container->get( RewardCostEstimator::class ),
+				$container->get( GoalRepository::class )
+			);
+		} );
+
+		// Daily revenue aggregation (Phase 33.3): the bounded cron job that
+		// pre-computes revenue_daily + upsell_stats from the raw logs through
+		// the attribution engine's daily_metrics (same definitions as the
+		// live reads, so the aggregated history never drifts).
+		$this->container->singleton( DailyAggregator::class, function ( Container $container ) {
+			return new DailyAggregator(
+				$container->get( AttributionEngine::class ),
+				$container->get( RevenueTracker::class )
+			);
+		} );
+
+		// Cached revenue summaries (Phase 33.3): overview / goal performance /
+		// daily trend / product stats with generation-versioned transients and
+		// invalidation on order, goal, product and aggregation changes.
+		$this->container->singleton( RevenueRepository::class, function ( Container $container ) {
+			return new RevenueRepository(
+				$container->get( AttributionEngine::class ),
 				$container->get( GoalRepository::class )
 			);
 		} );

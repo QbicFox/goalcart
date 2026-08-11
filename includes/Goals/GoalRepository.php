@@ -245,6 +245,15 @@ public function create( array $data ) {
 
 	$inserted = $wpdb->insert( Schema::table( 'goals' ), $row );
 
+	if ( $inserted ) {
+		/**
+		 * Fires after a goal is created.
+		 *
+		 * @param int $goal_id New goal id.
+		 */
+		do_action( 'goalcart_goals_changed', (int) $wpdb->insert_id );
+	}
+
 	return $inserted ? (int) $wpdb->insert_id : 0;
 }
 
@@ -282,6 +291,15 @@ public function update( $goal_id, array $data ) {
 		array( '%d' )
 	);
 
+	if ( false !== $updated ) {
+		/**
+		 * Fires after a goal is updated.
+		 *
+		 * @param int $goal_id Goal id.
+		 */
+		do_action( 'goalcart_goals_changed', (int) $goal_id );
+	}
+
 	return false !== $updated;
 }
 
@@ -302,6 +320,15 @@ public function delete( $goal_id ) {
 		array( 'id' => (int) $goal_id ),
 		array( '%d' )
 	);
+
+	if ( false !== $deleted ) {
+		/**
+		 * Fires after a goal is deleted.
+		 *
+		 * @param int $goal_id Goal id.
+		 */
+		do_action( 'goalcart_goals_changed', (int) $goal_id );
+	}
 
 	return false !== $deleted;
 }	/**

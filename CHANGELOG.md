@@ -91,6 +91,51 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     model selection, idempotency, funnel/conversion metrics,
     incremental cart value, summaries, AOV and shipping stats — all in
     a rolled-back transaction with baseline-aware store-wide assertions.
+- **Phase 33.3 — Aggregation & Performance** — the scheduled, cached
+  read layer over the 33.1/33.2 pipeline (P33-T03):
+  - **Daily aggregation** — new `DailyAggregator`
+    (`includes/Analytics/`) rolls each day's `revenue_events` +
+    `goal_attribution` rows into `revenue_daily` (views → progressions
+    → completions → conversions, revenue, incremental_revenue,
+    reward_cost, estimated_profit) through the new
+    `AttributionEngine::daily_metrics()` — the exact same funnel /
+    summary / reward-cost / profit code the live dashboard reads, so
+    the aggregate and the live view can never drift. Only goals with
+    activity that day get rows; delete-then-insert makes re-runs
+    idempotent.
+  - **Upsell product statistics** — `aggregate_upsells()` rebuilds
+    `upsell_stats` wholesale with one grouped INSERT...SELECT from the
+    raw `upsell_events` log (per-product impressions/clicks/adds/
+    orders/revenue), never stale relative to the retained event window.
+  - **Scheduled jobs** — the aggregation job joins the weekly cleanup
+    in `Installer::cron_events()`; per-event intervals are mapped in
+    the new `Installer::cron_intervals()` (cleanup weekly, aggregation
+    daily).
+  - **Bounded catch-up** — `aggregate_revenue()` starts the day after
+    the last aggregated date (`goalcart_revenue_last_aggregated`) or
+    the lookback floor (`goalcart_aggregate_lookback_days`, aligned
+    with retention), processes at most `goalcart_aggregate_max_days`
+    per tick and advances the option — a backlog drains over several
+    runs instead of one unbounded pass.
+  - **Cached revenue summaries** — new `RevenueRepository` serves
+    `overview()` (attribution summary + incremental cart value + AOV +
+    shipping merged), `goal_performance()`, `daily_trend()` (reads the
+    aggregated `revenue_daily`, zero-filled, merging today's live
+    bucket until the next tick) and `product_stats()` (reads
+    `upsell_stats`) — all memoized in generation-versioned transients
+    (`goalcart_revenue_cache_version`) with a filterable TTL
+    (`goalcart_revenue_cache_ttl`) and a master bypass
+    (`goalcart_revenue_cache_enabled`).
+  - **Cache invalidation** — `invalidate()` bumps the generation
+    counter (stale keys expire through their TTL); wired to order
+    payment/status changes, goal CRUD (new `goalcart_goals_changed`
+    action from `GoalRepository`), product saves and the aggregation
+    run (`goalcart_revenue_aggregated`).
+  - **Tests** — new `tests/aggregation-test.php` (73 checks) covering
+    wiring/cron, schema indexes, daily aggregation values, idempotency,
+    bounded catch-up, upsell-stats rebuild, the cached repository
+    reads, versioned invalidation, the cache bypass and the
+    `goalcart_goals_changed` CRUD hook — all rolled back, zero residue.
 
 ### Removed
 
