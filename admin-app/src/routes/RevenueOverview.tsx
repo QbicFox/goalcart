@@ -229,8 +229,14 @@ export default function RevenueOverview() {
 
   const data = query.data;
   const summary = data?.summary;
-  const isEmpty =
-    !query.isLoading && !query.isError && data !== undefined && summary?.orders === 0 && summary?.funnel.views === 0;
+  const hasData = data !== undefined && summary !== undefined;
+
+  // §44 — two distinct empty states: no interactions at all vs interactions
+  // without any attributed purchase. "No purchases yet" is a real signal
+  // (customers engage but do not buy), not the same as "no analytics data".
+  const isEmpty = !query.isLoading && !query.isError && hasData && summary.orders === 0 && summary.funnel.views === 0;
+  const hasNoPurchases =
+    !isEmpty && !query.isLoading && !query.isError && hasData && summary.funnel.views > 0 && summary.orders === 0;
 
   const trendData = useMemo(
     () =>
@@ -296,6 +302,15 @@ export default function RevenueOverview() {
           title={__('No sales data yet', 'goalcart')}
           description={__(
             'Once customers start interacting with your goals, Goal Cart will show sales, purchases and profit insights here.',
+            'goalcart'
+          )}
+        />
+      ) : hasNoPurchases ? (
+        <EmptyState
+          icon={<ShoppingCartCheckoutIcon fontSize="large" />}
+          title={__('No purchases yet', 'goalcart')}
+          description={__(
+            'Customers are interacting with your goals, but no attributed purchases have been recorded for this period.',
             'goalcart'
           )}
         />

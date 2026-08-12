@@ -24,7 +24,7 @@ The goal is:
 
 # ✅ IMPLEMENTATION PROGRESS
 
-**Overall:** Phases 1–8 complete · Phases 9–10 not started.
+**Overall:** Phases 1–9 complete · Phase 10 not started.
 
 ```text
 Phase 1 : ████████████████████ 100%   Codebase Audit (REVENUE_ANALYTICS_AUDIT.md)
@@ -35,7 +35,7 @@ Phase 5 : ████████████████████ 100%   Go
 Phase 6 : ████████████████████ 100%   Analytics Redesign
 Phase 7 : ████████████████████ 100%   Recommendations
 Phase 8 : ████████████████████ 100%   Upsell Analytics
-Phase 9 : ░░░░░░░░░░░░░░░░░░░░   0%   UX Polish
+Phase 9 : ████████████████████ 100%   UX Polish
 Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Testing & Regression
 ```
 
@@ -49,10 +49,10 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | 6 — Analytics Redesign | [x] 100% | Analytics page → Goal Conversion & Purchase Analysis: purchase KPI row + secondary views/completions, customer-journey funnel with drop-off, completion-vs-purchase analysis, sortable goal comparison table, deterministic drop-off insights, advanced attribution accordion, legacy activity metrics preserved behind an accordion; additive `goal_comparison`/`funnel`/assisted/influenced payload fields |
 | 7 — Recommendations | [x] 100% | business-first Smart Recommendations page (Confidence: High/Medium/Low label, Expected impact, §34 expected-profit state, Why? bullets, raw scoring behind an Advanced details expander); typed `RecommendationFactors`; fa_IR coverage gap closed (i18n 53/53); `tests/frontend-test.php` Phase 7 source-scan guards; docs + CHANGELOG updated |
 | 8 — Upsell Analytics | [x] 100% | commercial-first Upsell Analytics page (summary strip Products/Purchased Orders/Sales/Conversion; table leads Product/Orders/Sales/Estimated profit/Conversion; interaction funnel + score behind a Show-interaction-details toggle; CTR/add-to-cart derived from real counts, "—" without a denominator; commercial sort views — top by purchases then sales; score breakdown kept in the per-product dialog); `tests/frontend-test.php` Phase 8 source-scan guards; docs + CHANGELOG updated |
-| 9 — UX Polish | [ ] 0% | — |
+| 9 — UX Polish | [x] 100% | verified + completed the frontend-state contract (§43–§53): distinct "No sales data yet" vs "No purchases yet" empty states on Sales Performance + Goal Conversion & Purchase Analysis (§44); loading/error/unavailable/partial/zero/negative states and subtle observed-impact disclaimers confirmed on every page; responsive (2-col KPI grids, scrollable tables) + a11y (chart summaries, aria-expanded, keyboard rows) verified; new strings translated to fa_IR (POT 893, i18n 53/53); `tests/frontend-test.php` Phase 9 guards |
 | 10 — Testing & Regression | [ ] 0% | — |
 
-**Last update:** 2026-08-12 — Phase 8 (Upsell Analytics) complete; `tsc`, ESLint and `vite build` clean; POT regenerated (891 strings), all Phase 8 strings translated to fa_IR (i18n 53/53); recommendation 90/90 and the upsell/revenue suites green; `tests/frontend-test.php` Phase 8 source-scan guards pass (its 4 remaining FAILs are the documented pre-existing live-store setting drift, identical on unmodified code); the legacy `analytics-dashboard` suite stays at its documented pre-existing dev-DB drift baseline (31 failures) — every Phase 6 check in it passes.
+**Last update:** 2026-08-12 — Phase 9 (UX Polish) complete; distinct "No purchases yet" empty states added to the Sales Performance + Analytics pages (§44); `tsc`, ESLint and `vite build` clean; POT regenerated (893 strings), new strings translated to fa_IR (i18n 53/53); `tests/frontend-test.php` Phase 9 source-scan guards pass (130 checks; its 4 remaining FAILs are the documented pre-existing live-store setting drift, identical on unmodified code); the legacy `analytics-dashboard` suite stays at its documented pre-existing dev-DB drift baseline (31 failures) — every Phase 6 check in it passes.
 
 ---
 
@@ -2270,19 +2270,47 @@ metrics; the technical score breakdowns stay available as details.
 
 # Phase 9 — UX Polish
 
-Verify:
+✅ **Complete (2026-08-12).** Every item below was verified against the
+shipped UI and the gaps were fixed.
 
-* loading
-* empty
-* unavailable
-* partial
-* error
-* zero
-* negative profit
-* responsive
-* RTL
-* accessibility
-* translations
+## Verified & fixed
+
+* **loading** — skeleton states on every revenue page (KPI grid,
+  trend, tables). Verified, no change needed.
+* **empty** — two **distinct** states now exist (§44): "No sales data
+  yet" (no interactions at all) vs **"No purchases yet"** (customers
+  interact but no attributed purchase was recorded). Added to the Sales
+  Performance page and the Goal Conversion & Purchase Analysis page,
+  branched on the funnel (`views === 0 && orders === 0` vs
+  `views > 0 && orders === 0`) with the §44 copy.
+* **unavailable** — Estimated Profit card renders "Not available" /
+  "Limited data" (with cost coverage %) / "—" without inventing
+  numbers; Analytics shows an info Alert when a product filter makes
+  the purchase pipeline unavailable. Verified, no change needed.
+* **partial** — product-filter purchase pipeline notice present.
+  Verified.
+* **error** — every page surfaces query errors as Alerts instead of
+  blank cards. Verified.
+* **zero** — zero profit stays 0 (a real value). Verified.
+* **negative profit** — negative profit renders with a short
+  explanation. Verified.
+* **responsive** — KPI grids collapse to 2 columns on small screens;
+  tables scroll horizontally; no horizontal overflow. Verified.
+* **RTL / i18n** — all labels go through `__()`/`sprintf()` with the
+  `goalcart` domain; new Phase 9 strings translated to fa_IR, JED/MO
+  rebuilt (POT 893 strings, i18n 53/53).
+* **accessibility** — charts expose `role="img"` + aria-label
+  summaries, expandables carry `aria-expanded`, toolbars/buttons carry
+  aria-labels, interactive rows are keyboard-activatable, and
+  positive/negative states pair color with a text sign. Verified.
+* **translations** — `tests/i18n-test.php` fully green.
+
+## Tests added
+
+* `tests/frontend-test.php` — Phase 9 section (13 source-scan guards:
+  both empty states and their funnel conditions on both pages, §44
+  copy, skeletons, query errors, profit-unavailable state,
+  observed-impact disclaimer).
 
 ---
 

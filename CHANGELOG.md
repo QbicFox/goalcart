@@ -228,6 +228,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     no fabricated denominators, commercial sort, per-product dialog);
     `tsc --noEmit`, ESLint and `vite build` all clean.
 
+- **Phase 9 — UX Polish (Revenue & Analytics UX simplification)**
+  — verified and completed the shared frontend-state contract
+  (Improvement.md §43–§53):
+  - **Distinct empty states (§44)** — the Sales Performance page and the
+    Goal Conversion & Purchase Analysis page now distinguish "No sales
+    data yet" (no interactions at all) from **"No purchases yet"**
+    (customers interact with goals but no attributed purchase was
+    recorded): `views === 0 && orders === 0` shows the first;
+    `views > 0 && orders === 0` shows the second with the §44 copy and
+    a cart icon. Previously both situations collapsed into a single
+    "no data" message.
+  - **States audit (§43/§46)** — loading skeletons, error Alerts,
+    profit-unavailable/limited-data/negative states, the Analytics
+    product-filter partial state and the subtle observed-impact
+    disclaimers were confirmed present on every page (no blank cards,
+    no legal-style disclaimers); the existing work from Phases 4–8 was
+    reused rather than rebuilt.
+  - **Responsive/a11y/i18n (§51–§53)** — verified 2-column KPI grids on
+    small screens, horizontally scrollable tables, `role="img"` chart
+    summaries, `aria-expanded` on expandables and keyboard-activatable
+    rows; the new empty-state strings are translated to fa_IR (POT
+    regenerated, 893 strings) and the JED/MO artifacts rebuilt.
+  - **Tests/verification** — `tests/frontend-test.php` gained a Phase 9
+    section (13 source-scan guards: the two distinct empty states and
+    their funnel conditions on both pages, §44 copy, skeletons, query
+    errors, profit-unavailable state, observed-impact disclaimer);
+    `tsc --noEmit`, ESLint, `vite build` and `tests/i18n-test.php`
+    (53 checks) all green.
+
 - **Sticky bottom action bar** — the admin dashboard now docks every
   save / settings / reset action in a sticky bottom bar instead of the
   page body. A new `ActionBar` shell component (`AdminLayout`) renders

@@ -373,6 +373,16 @@ export default function Analytics() {
     !summary?.impressions &&
     !(funnel && (funnel.views > 0 || funnel.converted > 0));
 
+  // §44 — "No purchases yet" is distinct from "no analytics data": customers
+  // interacted with goals but no attributed purchase was recorded.
+  const hasNoPurchases =
+    !analyticsQuery.isLoading &&
+    !analyticsQuery.isError &&
+    !purchaseUnavailable &&
+    funnel !== null &&
+    funnel.views > 0 &&
+    funnel.converted === 0;
+
   // Pre-format the trend series with short day labels for the X axis.
   const trendData = useMemo(
     () =>
@@ -551,6 +561,15 @@ export default function Analytics() {
           title={__('No sales data yet', 'goalcart')}
           description={__(
             'Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit insights here.',
+            'goalcart'
+          )}
+        />
+      ) : hasNoPurchases ? (
+        <EmptyState
+          icon={<ShoppingCartCheckoutIcon fontSize="large" />}
+          title={__('No purchases yet', 'goalcart')}
+          description={__(
+            'Customers are interacting with your goals, but no attributed purchases have been recorded for this period.',
             'goalcart'
           )}
         />

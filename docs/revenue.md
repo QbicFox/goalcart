@@ -511,3 +511,37 @@ Clicking a row opens the product's score-breakdown dialog via
 reasons, raw factors and historical funnel stats. Each analytics row
 carries `estimated_profit` / `profit_available` / `margin_pct` — null
 when the store stores no product costs (never invented).
+
+## 7. UX states & empty states (Phase 9 polish)
+
+Every revenue page implements the full frontend-state contract
+(Improvement.md §43/§44) — loading skeletons, error Alerts, empty /
+unavailable / partial / zero / negative states, never a blank card:
+
+- **Distinct empty states (§44)** — "No sales data yet" (no Goal Cart
+  interactions at all) is different from "No purchases yet" (customers
+  interact with goals but no attributed purchase was recorded in the
+  period). The Sales Performance page and the Goal Conversion & Purchase
+  Analysis page each branch on the funnel: `views === 0 && orders === 0`
+  shows the first; `views > 0 && orders === 0` shows the second with
+  its own §44 copy and icon.
+- **Unavailable / partial** — the Estimated Profit card renders "Not
+  available", "Limited data" (with cost-coverage %) and "—" states
+  without inventing a number; the Analytics page shows an info Alert
+  when a product filter makes the purchase pipeline unavailable.
+- **Zero and negative** — zero profit stays 0 (real value); negative
+  profit renders in the card with a short explanation.
+- **Observed impact (§46)** — every AOV comparison is labeled
+  *Observed impact* with a single subtle sentence (never a legal-style
+  disclaimer).
+- **Responsive (§51)** — KPI grids collapse to 2 columns on small
+  screens, tables scroll horizontally (`overflowX: auto`), the chart
+  keeps a readable legend, and the admin stays free of horizontal
+  overflow.
+- **Accessibility (§53)** — charts expose `role="img"` + aria-label
+  summaries, expandables carry `aria-expanded`, buttons/toolbars carry
+  aria-labels, interactive table rows are keyboard-activatable, and
+  positive/negative states pair color with a text sign.
+- **i18n (§52)** — every label goes through `__()`/`sprintf()` with the
+  domain `goalcart`; new Phase 9 strings are translated to fa_IR and
+  the JED/MO artifacts rebuilt.

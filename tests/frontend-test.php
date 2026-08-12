@@ -598,6 +598,32 @@ check( 'upsell funnel rates never fabricate a denominator', false !== strpos( $u
 check( 'upsell top-performing view sorts by purchases then sales', false !== strpos( $upsell_tsx, 'b.orders - a.orders || b.revenue - a.revenue' ) );
 check( 'upsell per-product score breakdown stays available', false !== strpos( $upsell_tsx, 'ProductDetailDialog' ) && false !== strpos( $upsell_tsx, 'Score breakdown' ) );
 
+// 13. UX polish states (Improvement.md Phase 9 / §43-§46)
+// ---------------------------------------------------------------------------
+echo "\n== 13. UX polish states ==\n";
+
+// §44 — the two empty states are distinct: no interactions at all vs
+// interactions without any attributed purchase. Source-scanned so they
+// cannot silently merge back into a single "no data" message.
+$revenue_tsx  = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/RevenueOverview.tsx' );
+$analytics_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/Analytics.tsx' );
+$profit_card   = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/components/revenue/EstimatedProfitCard.tsx' );
+check( 'overview offers the no-sales-data empty state', false !== strpos( $revenue_tsx, "__('No sales data yet', 'goalcart')" ) );
+check( 'overview offers the distinct no-purchases-yet empty state', false !== strpos( $revenue_tsx, "__('No purchases yet', 'goalcart')" ) );
+check( 'overview no-purchases-yet only fires with activity but zero orders', false !== strpos( $revenue_tsx, 'summary.funnel.views > 0 && summary.orders === 0' ) );
+check( 'analytics offers the no-sales-data empty state', false !== strpos( $analytics_tsx, "__('No sales data yet', 'goalcart')" ) );
+check( 'analytics offers the distinct no-purchases-yet empty state', false !== strpos( $analytics_tsx, "__('No purchases yet', 'goalcart')" ) );
+check( 'analytics no-purchases-yet only fires with funnel views and zero purchases', false !== strpos( $analytics_tsx, 'funnel.views > 0 &&' ) && false !== strpos( $analytics_tsx, 'funnel.converted === 0' ) );
+check( 'the no-purchases-yet copy follows section 44', false !== strpos( $revenue_tsx, 'but no attributed purchases have been recorded for this period' ) && false !== strpos( $analytics_tsx, 'but no attributed purchases have been recorded for this period' ) );
+
+// §43/§46 — loading skeletons, query errors and the profit-unavailable state
+// must stay present (no blank cards), and the observed-impact disclaimer
+// stays subtle instead of legal-style.
+check( 'pages render loading skeletons', false !== strpos( $revenue_tsx, 'Skeleton' ) && false !== strpos( $analytics_tsx, 'Skeleton' ) );
+check( 'pages surface query errors instead of blank cards', false !== strpos( $revenue_tsx, 'query.isError' ) && false !== strpos( $analytics_tsx, 'analyticsQuery.isError' ) );
+check( 'profit card keeps the unavailable state', false !== strpos( $profit_card, "__('Not available', 'goalcart')" ) );
+check( 'observed-impact disclaimer stays subtle and present', false !== strpos( $revenue_tsx, "__('Observed impact', 'goalcart')" ) && false !== strpos( $revenue_tsx, 'AOV comparisons are observed impact' ) );
+
 // ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------

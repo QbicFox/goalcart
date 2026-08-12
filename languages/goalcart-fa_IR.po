@@ -4235,3 +4235,13 @@ msgstr "نمایش جزئیات تعامل"
 msgid "Hide interaction details"
 msgstr "پنهان کردن جزئیات تعامل"
 
+#: admin-app/src/routes/Analytics.tsx:570
+#: admin-app/src/routes/RevenueOverview.tsx:311
+msgid "No purchases yet"
+msgstr "هنوز خریدی ثبت نشده"
+
+#: admin-app/src/routes/Analytics.tsx:571
+#: admin-app/src/routes/RevenueOverview.tsx:312
+msgid "Customers are interacting with your goals, but no attributed purchases have been recorded for this period."
+msgstr "مشتری‌ها با اهداف شما در تعامل هستند، اما در این بازهٔ زمانی خریدی مرتبط ثبت نشده است."
+
