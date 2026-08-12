@@ -9,6 +9,50 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
+- **Phase 2 — Backend/Data Layer (Revenue & Analytics UX simplification)**
+  the purchase-analysis data layer from `Improvement.md` Phase 2, reusing
+  the existing attribution engine and cached repository (no new engine,
+  no new order scans):
+  - **`GET /goalcart/v1/analytics` summary extended** (§37) with
+    `progressed`, `purchased_orders` (distinct attributed orders),
+    `purchase_rate` (`converted / completed` — null when there is no
+    completion denominator), `attributed_sales` (direct incremental),
+    `estimated_profit`, `profit_available`, `profit_reason`,
+    `profit_reason_code`, `cost_coverage` and `profit_details` — all
+    derived from the cached `AttributionEngine` layer with the same
+    date range + goal filters. Campaign and reward filters resolve to
+    the matching goal ids (`GoalRepository::ids_by_campaign()` /
+    `ids_by_reward_type()`); `product_id` is unsupported in attribution
+    and degrades the purchase fields to null (never a fabricated
+    number). Existing fields are untouched (API compatibility).
+  - **Profit availability metadata** (§38/§39): the attribution summary
+    now carries a stable machine-readable `profit_reason_code`
+    (`available` / `missing_product_cost` /
+    `incomplete_product_cost` / `insufficient_data`),
+    `profit_details` (incremental revenue, margin %, reward cost,
+    shipping cost — the §12 profit-panel inputs) and a `cost_coverage`
+    block (attributed orders vs orders with cost data + coverage %,
+    §11). `profit_impact()` gains `reason_code` on both paths.
+  - **Profit model fix** — the summary profit now includes the
+    pre-computed reward cost exactly as the documented formula states
+    (`estimated_profit = incremental_revenue × margin% − reward_cost −
+    shipping_cost`); previously `profit_impact_for_rows()` zeroed it,
+    so dashboards understated costs. Zero and negative profit remain
+    real values (never "unavailable").
+  - **Tests** — new `tests/purchase-metrics-test.php` (≈80 checks)
+    covering funnel purchase metrics + rates, purchase states (none /
+    one / many, direct / assisted / mixed / split, duplicate order
+    events), every profit state (complete / missing / partial cost
+    data, zero, negative, reward + shipping + margin math), cost
+    coverage, reason codes, goal + date filtering and the `/analytics`
+    extension; `analytics-dashboard-test.php` and
+    `revenue-admin-test.php` extended for the new summary/goal/overview
+    fields. All rolled back, zero residue.
+  - **Types** — `admin-app/src/types.ts` carries the new payload
+    fields (`ProfitReasonCode`, `CostCoverage`, `ProfitDetails`,
+    extended `AnalyticsSummary` / `RevenueSummary` /
+    `GoalPerformanceRow`).
+
 - **Sticky bottom action bar** — the admin dashboard now docks every
   save / settings / reset action in a sticky bottom bar instead of the
   page body. A new `ActionBar` shell component (`AdminLayout`) renders

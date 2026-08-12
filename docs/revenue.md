@@ -119,6 +119,41 @@ instead of a guessed number.
   `available: false` with the reason; all revenue metrics still compute
   (revenue-only analytics).
 
+## 5.1 Purchase & profit metadata (Phase 2)
+
+The purchase-analysis data layer (`Improvement.md` Phase 2) exposes the
+commercial-outcome metrics the redesigned admin UI needs, all derived from
+the existing attribution reads — no new engine, no new order scans:
+
+- **Purchased orders** — `summary.orders` / `funnel.converted` (distinct
+  attributed orders). **Purchase rate** — `funnel.conversion_rate` =
+  `converted / completed`, `null` when there is no completion denominator
+  (the UI renders `—`, never `0%`).
+- **Profit availability metadata** on every attribution summary:
+  - `profit_reason_code` — stable machine-readable state (§39):
+    `available` / `missing_product_cost` / `incomplete_product_cost`
+    (`some orders lack cost data — profit still computed over the
+    orders that have it`) / `insufficient_data` (no attributed orders).
+  - `profit_details` — the §12 profit-panel building blocks:
+    `incremental_revenue`, `margin_pct` (average), `reward_cost`,
+    `shipping_cost`.
+  - `cost_coverage` — `{ attributed_orders, orders_with_cost_data,
+    coverage_pct, available }` over the direct (incremental) orders
+    (§11). The strict profit model is unchanged — order margin still
+    requires cost data on every line item; the counts only explain it.
+- **The legacy `GET /goalcart/v1/analytics` summary is extended** (§37)
+  with `progressed`, `purchased_orders`, `purchase_rate`,
+  `attributed_sales`, `estimated_profit`, `profit_available`,
+  `profit_reason`, `profit_reason_code`, `cost_coverage` and
+  `profit_details` — same date range, same goal filters, served through
+  the cached `RevenueRepository::purchase_summary()`. Filter mapping:
+  `goal_id` / `goal_ids` pass through; `campaign_id` and `reward_type`
+  resolve to the matching goal ids
+  (`GoalRepository::ids_by_campaign()` / `ids_by_reward_type()`);
+  `product_id` is unsupported in attribution and yields `null` purchase
+  fields (never a fabricated number). The pre-existing Phase 17 fields
+  are untouched.
+
 ## 6. Terminology
 
 Use these labels consistently (never present estimates as facts):

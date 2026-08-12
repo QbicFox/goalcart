@@ -482,7 +482,38 @@ export type AnalyticsRewardFilter =
   | 'free_gift'
   | 'coupon';
 
-/** The seven Phase 16 summary KPIs, computed over the filtered window. */
+/** Stable machine-readable profit reason codes (Improvement.md §39). */
+export type ProfitReasonCode =
+  | 'available'
+  | 'missing_product_cost'
+  | 'incomplete_product_cost'
+  | 'insufficient_data';
+
+/** Cost-data coverage over the attributed (incremental) orders (§11). */
+export interface CostCoverage {
+  /** Direct-attribution orders that carry incremental revenue. */
+  attributed_orders: number;
+  /** Of those, how many had complete product cost data. */
+  orders_with_cost_data: number;
+  /** 0–100, null when there are no attributed orders. */
+  coverage_pct: number | null;
+  available: boolean;
+}
+
+/** The profit-model building blocks behind estimated profit (§12). */
+export interface ProfitDetails {
+  incremental_revenue: number;
+  margin_pct: number | null;
+  reward_cost: number;
+  shipping_cost: number | null;
+}
+
+/**
+ * The Phase 16/17 summary KPIs computed over the filtered window, plus the
+ * Phase 2 purchase/profit metrics derived from the attribution layer
+ * (Improvement.md §37) — null when the active filter cannot be expressed
+ * in attribution (e.g. product_id) or there is no data yet.
+ */
 export interface AnalyticsSummary {
   impressions: number;
   completions: number;
@@ -491,6 +522,17 @@ export interface AnalyticsSummary {
   revenue_influenced: number;
   suggestion_ctr: number;
   suggestion_add_to_cart_rate: number;
+  // Phase 2 — purchase analysis (from the cached attribution layer).
+  progressed: number | null;
+  purchased_orders: number | null;
+  purchase_rate: number | null;
+  attributed_sales: number | null;
+  estimated_profit: number | null;
+  profit_available: boolean;
+  profit_reason: string | null;
+  profit_reason_code: ProfitReasonCode | null;
+  cost_coverage: CostCoverage;
+  profit_details: ProfitDetails | null;
 }
 
 /** One daily bucket of the Phase 17 trend series. */
@@ -639,6 +681,10 @@ export interface RevenueSummary {
   profit_impact: number | null;
   profit_available: boolean;
   profit_reason: string | null;
+  // Phase 2 — profit availability metadata (Improvement.md §38/§39/§11/§12).
+  profit_reason_code: ProfitReasonCode;
+  profit_details: ProfitDetails;
+  cost_coverage: CostCoverage;
   funnel: RevenueFunnel;
 }
 
@@ -733,6 +779,10 @@ export interface GoalPerformanceRow {
   reward_cost_available: boolean;
   profit_impact: number | null;
   profit_available: boolean;
+  profit_reason: string | null;
+  profit_reason_code: ProfitReasonCode;
+  profit_details: ProfitDetails;
+  cost_coverage: CostCoverage;
 }
 
 /** The `GET /goalcart/v1/revenue/goals` payload. */

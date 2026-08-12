@@ -334,7 +334,7 @@ final class RewardCostEstimator {
 	 * @param array<string, mixed> $inputs incremental_revenue, margin_pct
 	 *                                     (null = unavailable), reward_cost,
 	 *                                     shipping_cost (may be null).
-	 * @return array{estimated_profit: float|null, available: bool, reason: string|null, incremental_revenue: float, reward_cost: float, shipping_cost: float|null, margin_pct: float|null}
+	 * @return array{estimated_profit: float|null, available: bool, reason: string|null, reason_code: string, incremental_revenue: float, reward_cost: float, shipping_cost: float|null, margin_pct: float|null}
 	 */
 	public function profit_impact( array $inputs ) {
 		$incremental = max( 0.0, (float) ( isset( $inputs['incremental_revenue'] ) ? $inputs['incremental_revenue'] : 0.0 ) );
@@ -351,6 +351,9 @@ final class RewardCostEstimator {
 				'estimated_profit'  => null,
 				'available'         => false,
 				'reason'            => __( 'Product cost data is not available — profit impact unavailable (revenue-only analytics).', 'goalcart' ),
+				// Stable machine-readable code (Improvement.md §39): the UI
+				// translates it; the human reason stays in 'reason'.
+				'reason_code'       => 'missing_product_cost',
 				'incremental_revenue' => $incremental,
 				'reward_cost'       => $reward_cost,
 				'shipping_cost'     => $shipping,
@@ -364,6 +367,7 @@ final class RewardCostEstimator {
 			'estimated_profit'    => round( $estimated, 4 ),
 			'available'           => true,
 			'reason'              => null,
+			'reason_code'         => 'available',
 			'incremental_revenue' => $incremental,
 			'reward_cost'         => $reward_cost,
 			'shipping_cost'       => $shipping,

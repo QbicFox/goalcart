@@ -303,6 +303,15 @@ try {
 	check( 'suggestion CTR is 0.3333', near( 0.3333, $summary['suggestion_ctr'] ) );
 	check( 'suggestion add-to-cart rate is 0.5', near( 0.5, $summary['suggestion_add_to_cart_rate'] ) );
 
+	// 3.3b Phase 2 extension (Improvement.md §37/§38): the summary now also
+	// carries the purchase/profit fields derived from the attribution
+	// layer. The legacy Phase 17 fields above stay untouched.
+	foreach ( array( 'progressed', 'purchased_orders', 'purchase_rate', 'attributed_sales', 'estimated_profit', 'profit_available', 'profit_reason', 'profit_reason_code' ) as $key ) {
+		check( "summary extended with {$key}", array_key_exists( $key, $summary ) );
+	}
+	check( 'summary extended with cost_coverage', isset( $summary['cost_coverage'] ) && is_array( $summary['cost_coverage'] ) );
+	check( 'summary extended with profit_details', isset( $summary['profit_details'] ) && is_array( $summary['profit_details'] ) );
+
 	// 3.4 Trend (P17-T03): zero-filled daily series over the window.
 	$today  = current_time( 'Y-m-d' );
 	$from30 = date( 'Y-m-d', strtotime( $today ) - 29 * DAY_IN_SECONDS );
@@ -397,6 +406,22 @@ try {
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
 	check( 'product filter CTR', near( 0.5, $summary['suggestion_ctr'] ) );
+
+	// Phase 2: product_id cannot be expressed in attribution, so the
+	// purchase fields degrade to null (never a fabricated number) while
+	// the Phase 17 fields keep working.
+	check( 'product filter purchase fields null', null === $summary['purchased_orders'] && null === $summary['attributed_sales'] && null === $summary['estimated_profit'] );
+	check( 'product filter legacy impressions intact', array_key_exists( 'impressions', $summary ) );
+
+	// A goal filter that resolves to no goals yields an honest empty
+	// purchase summary — never store-wide data for the wrong filter.
+	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req->set_param( 'goal_id', 999999 );
+	$resp = $analytics_ctrl->handle_get( $req );
+	$summary = $resp->get_data()['data']['summary'];
+	check( 'unmatched goal → purchased_orders 0', 0 === (int) $summary['purchased_orders'] );
+	check( 'unmatched goal → profit_reason_code insufficient_data', 'insufficient_data' === $summary['profit_reason_code'] );
+	check( 'unmatched goal → profit unavailable', false === $summary['profit_available'] && null === $summary['estimated_profit'] );
 
 	// Today-inclusive date bound (regression): a date-only `to` must cover
 	// the whole `to` day. MySQL casts a bare 'YYYY-MM-DD' to midnight, so

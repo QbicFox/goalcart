@@ -363,6 +363,131 @@ final class RevenueRepository {
 	}
 
 	/**
+	 * Purchase-focused attribution summary for the legacy Analytics
+	 * endpoint (Phase 2 — Backend/Data Layer).
+	 *
+	 * Maps the Phase 17 analytics filters onto the attribution layer and
+	 * returns the fields the redesigned Analytics UI needs (purchased
+	 * orders, purchase rate, attributed sales, estimated profit + reason /
+	 * coverage), served through the same cached layer as every other
+	 * revenue read — never recomputed per request.
+	 *
+	 * Filter mapping (Improvement.md §36/§37 — extend, don't duplicate):
+	 *
+	 *  - from / to          → the attribution window (the same date range)
+	 *  - goal_id / goal_ids → the goal(s) directly
+	 *  - campaign_id        → resolved to the campaign's goal ids
+	 *  - reward_type        → resolved to the goals carrying that reward
+	 *  - product_id         → unsupported in attribution (goal_attribution
+	 *                         has no product dimension) → null, so the UI
+	 *                         never shows a misleading number for a
+	 *                         dimension the engine does not track
+	 *
+	 * @param array<string, mixed> $filters Optional from/to, campaign_id,
+	 *                                      goal_id, goal_ids, product_id,
+	 *                                      reward_type.
+	 * @return array<string, mixed>|null The attribution summary shape, or
+	 *                                  null when the filters cannot be
+	 *                                  expressed in attribution.
+	 */
+	public function purchase_summary( array $filters = array() ) {
+		// product_id cannot be expressed in attribution — never fabricate a
+		// number for a dimension the engine does not track.
+		if ( ! empty( $filters['product_id'] ) ) {
+			return null;
+		}
+
+		$args = array(
+			'from' => isset( $filters['from'] ) ? (string) $filters['from'] : '',
+			'to'   => isset( $filters['to'] ) ? (string) $filters['to'] : '',
+		);
+
+		$goal_ids = array();
+
+		if ( ! empty( $filters['goal_id'] ) ) {
+			$goal_ids[] = (int) $filters['goal_id'];
+		} elseif ( ! empty( $filters['goal_ids'] ) && is_array( $filters['goal_ids'] ) ) {
+			$goal_ids = array_values( array_filter( array_map( 'absint', $filters['goal_ids'] ), function ( $id ) {
+				return $id > 0;
+			} ) );
+		} elseif ( ! empty( $filters['campaign_id'] ) ) {
+			$goal_ids = $this->repository->ids_by_campaign( (int) $filters['campaign_id'] );
+		} elseif ( ! empty( $filters['reward_type'] ) ) {
+			$goal_ids = $this->repository->ids_by_reward_type( (string) $filters['reward_type'] );
+		}
+
+		// A goal/campaign/reward filter that resolves to no goals is a
+		// genuine empty window — return the zeroed summary rather than
+		// silently reporting store-wide data for the wrong filter.
+		$filter_active = ! empty( $filters['goal_id'] )
+			|| ! empty( $filters['goal_ids'] )
+			|| ! empty( $filters['campaign_id'] )
+			|| ! empty( $filters['reward_type'] );
+
+		if ( $filter_active && empty( $goal_ids ) ) {
+			return $this->empty_purchase_summary();
+		}
+
+		if ( ! empty( $goal_ids ) ) {
+			$args['goal_ids'] = $goal_ids;
+		}
+
+		return $this->cached(
+			'purchase_summary',
+			$args,
+			self::CACHE_TTL,
+			function () use ( $args ) {
+				return $this->engine->attribution_summary( $args );
+			}
+		);
+	}
+
+	/**
+	 * The zeroed attribution-summary shape for empty filter windows.
+	 *
+	 * Keeps the purchase metrics well-formed so the analytics UI can render
+	 * an honest empty state. IMPORTANT: this must stay key-for-key in sync
+	 * with AttributionEngine::attribution_summary() — when the engine adds
+	 * a summary field, mirror it here (and in the engine's zero-data path).
+	 *
+	 * @return array<string, mixed>
+	 */
+	protected function empty_purchase_summary() {
+		return array(
+			'goal_driven_revenue'    => 0.0,
+			'goal_assisted_revenue'  => 0.0,
+			'goal_influenced_revenue'=> 0.0,
+			'orders'                 => 0,
+			'reward_cost'            => 0.0,
+			'reward_cost_available'  => true,
+			'profit_impact'          => null,
+			'profit_available'       => false,
+			'profit_reason'          => null,
+			'profit_reason_code'     => 'insufficient_data',
+			'profit_details'         => array(
+				'incremental_revenue' => 0.0,
+				'margin_pct'          => null,
+				'reward_cost'         => 0.0,
+				'shipping_cost'       => null,
+			),
+			'cost_coverage'          => array(
+				'attributed_orders'     => 0,
+				'orders_with_cost_data' => 0,
+				'coverage_pct'          => null,
+				'available'             => false,
+			),
+			'funnel'                 => array(
+				'views'           => 0,
+				'progressed'      => 0,
+				'completed'       => 0,
+				'converted'       => 0,
+				'completion_rate' => null,
+				'conversion_rate' => null,
+			),
+		);
+	}
+
+	/**
 	 * Smart goal recommendations, cached with the same generation-versioned
 	 * transient system as the other revenue reads.
 	 *

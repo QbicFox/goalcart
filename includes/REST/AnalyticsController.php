@@ -8,6 +8,7 @@
 namespace GoalCart\REST;
 
 use GoalCart\Analytics\AnalyticsRepository;
+use GoalCart\Analytics\RevenueRepository;
 use GoalCart\Hooks\HookManager;
 use GoalCart\Rewards\Reward;
 
@@ -56,12 +57,22 @@ class AnalyticsController extends BaseController {
 	protected $analytics;
 
 	/**
+	 * Cached revenue repository — purchase/profit metrics for the extended
+	 * summary (Phase 2).
+	 *
+	 * @var RevenueRepository
+	 */
+	protected $revenue;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AnalyticsRepository $analytics Metrics repository.
+	 * @param RevenueRepository   $revenue   Cached revenue repository.
 	 */
-	public function __construct( AnalyticsRepository $analytics ) {
+	public function __construct( AnalyticsRepository $analytics, RevenueRepository $revenue ) {
 		$this->analytics = $analytics;
+		$this->revenue   = $revenue;
 	}
 
 	/**
@@ -124,6 +135,15 @@ class AnalyticsController extends BaseController {
 			'suggestion_add_to_cart_rate' => $this->analytics->suggestion_add_to_cart_rate( $filters ),
 		);
 
+		// Phase 2 (Backend/Data Layer — Improvement.md §37/§38): the same
+		// payload now also carries the purchase/profit metrics derived from
+		// the existing attribution layer (same date range + goal filters,
+		// cached through the revenue repository). Null when the active
+		// filter cannot be expressed in attribution (product_id) — never a
+		// fabricated number. Existing fields are untouched (API
+		// compatibility).
+		$summary = array_merge( $summary, $this->purchase_summary_fields( $this->revenue->purchase_summary( $filters ) ) );
+
 		return $this->success(
 			array(
 				'summary'              => $summary,
@@ -144,6 +164,49 @@ class AnalyticsController extends BaseController {
 					'limit'       => $limit,
 				),
 			)
+		);
+	}
+
+	/**
+	 * Map the attribution summary onto the extended analytics summary keys.
+	 *
+	 * @param array<string, mixed>|null $purchase Attribution summary (null
+	 *                                             when the filter is
+	 *                                             unsupported in attribution).
+	 * @return array<string, mixed>
+	 */
+	protected function purchase_summary_fields( $purchase ) {
+		if ( null === $purchase ) {
+			return array(
+				'progressed'         => null,
+				'purchased_orders'   => null,
+				'purchase_rate'      => null,
+				'attributed_sales'   => null,
+				'estimated_profit'   => null,
+				'profit_available'   => false,
+				'profit_reason'      => null,
+				'profit_reason_code' => null,
+				'cost_coverage'      => array(
+					'attributed_orders'     => 0,
+					'orders_with_cost_data' => 0,
+					'coverage_pct'          => null,
+					'available'             => false,
+				),
+				'profit_details'     => null,
+			);
+		}
+
+		return array(
+			'progressed'         => (int) $purchase['funnel']['progressed'],
+			'purchased_orders'   => (int) $purchase['orders'],
+			'purchase_rate'      => $purchase['funnel']['conversion_rate'],
+			'attributed_sales'   => round( (float) $purchase['goal_driven_revenue'], 4 ),
+			'estimated_profit'   => $purchase['profit_impact'],
+			'profit_available'   => (bool) $purchase['profit_available'],
+			'profit_reason'      => $purchase['profit_reason'],
+			'profit_reason_code' => $purchase['profit_reason_code'],
+			'cost_coverage'      => $purchase['cost_coverage'],
+			'profit_details'     => $purchase['profit_details'],
 		);
 	}
 

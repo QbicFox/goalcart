@@ -785,8 +785,36 @@ final class AttributionEngine {
 			)
 		);
 
-		$reward_cost = $this->reward_cost_for_rows( $args );
-		$profit      = $this->profit_impact_for_rows( $args, $reward_cost['estimated_cost'] );
+		$reward_cost   = $this->reward_cost_for_rows( $args );
+		$profit_result = $this->profit_impact_for_rows( $args, $reward_cost['estimated_cost'] );
+		$profit        = $profit_result['profit'];
+
+		// Profit availability states (Improvement.md §13 / §39): a stable
+		// machine-readable reason code the React layer translates, never
+		// shown raw. The strict profit model is unchanged — only the
+		// explanation is enriched.
+		if ( 0 === $profit_result['orders_total'] ) {
+			$reason_code = 'insufficient_data';
+			$profit      = array_merge( $profit, array(
+				'reason' => __( 'Not enough attributed order data to estimate profit yet.', 'goalcart' ),
+			) );
+		} elseif ( ! $profit['available'] ) {
+			$reason_code = 'missing_product_cost';
+		} elseif ( $profit_result['orders_with_cost'] < $profit_result['orders_total'] ) {
+			$reason_code = 'incomplete_product_cost';
+		} else {
+			$reason_code = 'available';
+		}
+
+		// Profit-model building blocks (§12 profit details panel) — all
+		// values already computed by the bounded reads above; nothing is
+		// fabricated or re-queried.
+		$profit_details = array(
+			'incremental_revenue' => round( (float) $profit['incremental_revenue'], 4 ),
+			'margin_pct'          => null !== $profit['margin_pct'] ? round( (float) $profit['margin_pct'], 6 ) : null,
+			'reward_cost'         => round( (float) $profit['reward_cost'], 4 ),
+			'shipping_cost'       => null !== $profit['shipping_cost'] ? round( (float) $profit['shipping_cost'], 4 ) : null,
+		);
 
 		return array(
 			'goal_driven_revenue'   => round( $direct_revenue, 4 ),
@@ -798,6 +826,23 @@ final class AttributionEngine {
 			'profit_impact'         => $profit['estimated_profit'],
 			'profit_available'      => $profit['available'],
 			'profit_reason'         => $profit['reason'],
+			'profit_reason_code'    => $reason_code,
+			'profit_details'        => $profit_details,
+			// Cost-data coverage over the incremental-revenue (direct)
+			// orders (§11) — informational only; the profit calculation
+			// itself keeps the strict all-lines-costed model.
+			'cost_coverage'         => array(
+				'attributed_orders'     => $profit_result['orders_total'],
+				'orders_with_cost_data' => $profit_result['orders_with_cost'],
+				'coverage_pct'          => $profit_result['orders_total'] > 0
+					? round( $profit_result['orders_with_cost'] / $profit_result['orders_total'] * 100, 1 )
+					: null,
+				// "available" means "there are attributed orders to measure
+				// coverage against" — NOT that coverage is 100%. With 0%
+				// coverage it is true and coverage_pct is 0; with no orders
+				// it is false and coverage_pct is null.
+				'available'             => $profit_result['orders_total'] > 0,
+			),
 			'funnel'                => $this->funnel( $args ),
 		);
 	}
@@ -878,6 +923,10 @@ final class AttributionEngine {
 			'reward_cost_available' => $summary['reward_cost_available'],
 			'profit_impact'       => $summary['profit_impact'],
 			'profit_available'    => $summary['profit_available'],
+			'profit_reason'       => $summary['profit_reason'],
+			'profit_reason_code'  => $summary['profit_reason_code'],
+			'profit_details'      => $summary['profit_details'],
+			'cost_coverage'       => $summary['cost_coverage'],
 		);
 	}
 
@@ -1102,12 +1151,24 @@ final class AttributionEngine {
 	 * per direct order; when no direct order has margin data the profit is
 	 * unavailable (revenue-only analytics) — never invented.
 	 *
-	 * @param array<string, mixed> $args       Optional: goal_id, from, to.
+	 * Also returns the cost-data coverage of the same direct orders
+	 * (Improvement.md §11): how many of the orders that carry incremental
+	 * revenue have usable cost data. The strict profit model is unchanged —
+	 * the order margin still requires cost data on every line item — the
+	 * counts just let the UI explain "estimated profit is calculated only
+	 * for orders with complete cost data".
+	 *
+	 * @param array<string, mixed> $args       Optional: goal_id, goal_ids,
+	 *                                         from, to.
 	 * @param float                $reward_cost Pre-computed reward cost (avoids
 	 *                                          re-running the completed-rows
 	 *                                          query — attribution_summary
-	 *                                          already computed it).
-	 * @return array{estimated_profit: float|null, available: bool, reason: string|null}
+	 *                                          already computed it). Part of
+	 *                                          the profit model (§9):
+	 *                                          estimated_profit = incremental ×
+	 *                                          margin% − reward_cost −
+	 *                                          shipping_cost.
+	 * @return array{profit: array{estimated_profit: float|null, available: bool, reason: string|null, reason_code: string, incremental_revenue: float, reward_cost: float, shipping_cost: float|null, margin_pct: float|null}, orders_total: int, orders_with_cost: int}
 	 */
 	protected function profit_impact_for_rows( array $args, $reward_cost = 0.0 ) {
 		global $wpdb;
@@ -1132,7 +1193,6 @@ final class AttributionEngine {
 
 		$incremental_revenue = 0.0;
 		$shipping_cost       = 0.0;
-		$reward_cost         = 0.0;
 		$margin_pcts         = array();
 		$with_margin         = 0;
 
@@ -1152,13 +1212,21 @@ final class AttributionEngine {
 
 		$margin_pct = $with_margin > 0 ? array_sum( $margin_pcts ) / $with_margin : null;
 
-		return $this->costs->profit_impact(
-			array(
-				'incremental_revenue' => $incremental_revenue,
-				'margin_pct'          => $margin_pct,
-				'reward_cost'         => $reward_cost,
-				'shipping_cost'       => $with_margin > 0 ? $shipping_cost : null,
-			)
+		// The documented profit model (Improvement.md §9) subtracts both the
+		// reward cost AND the order shipping cost. For free_shipping rewards
+		// the reward cost equals the shipping total, so it is counted in
+		// both lines by design — do not "fix" this into a single deduction.
+		return array(
+			'profit' => $this->costs->profit_impact(
+				array(
+					'incremental_revenue' => $incremental_revenue,
+					'margin_pct'          => $margin_pct,
+					'reward_cost'         => max( 0.0, (float) $reward_cost ),
+					'shipping_cost'       => $with_margin > 0 ? $shipping_cost : null,
+				)
+			),
+			'orders_total'     => count( $rows ),
+			'orders_with_cost' => $with_margin,
 		);
 	}
 
@@ -1330,7 +1398,7 @@ final class AttributionEngine {
 	/**
 	 * WHERE clause for revenue_events reads (goal_id + date range).
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, from, to.
+	 * @param array<string, mixed> $args Optional: goal_id, goal_ids, from, to.
 	 * @return array{0: string, 1: array<int, mixed>}
 	 */
 	protected function revenue_where( array $args ) {
@@ -1341,6 +1409,8 @@ final class AttributionEngine {
 			$where .= ' AND goal_id = %d';
 			$params[] = (int) $args['goal_id'];
 		}
+
+		list( $where, $params ) = $this->append_goal_ids( $args, $where, $params );
 
 		if ( ! empty( $args['from'] ) ) {
 			$where .= ' AND created_at >= %s';
@@ -1358,7 +1428,7 @@ final class AttributionEngine {
 	/**
 	 * WHERE clause for goal_attribution reads (goal_id + date range).
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, from, to.
+	 * @param array<string, mixed> $args Optional: goal_id, goal_ids, from, to.
 	 * @return array{0: string, 1: array<int, mixed>}
 	 */
 	protected function attribution_where( array $args ) {
@@ -1370,6 +1440,8 @@ final class AttributionEngine {
 			$params[] = (int) $args['goal_id'];
 		}
 
+		list( $where, $params ) = $this->append_goal_ids( $args, $where, $params );
+
 		if ( ! empty( $args['from'] ) ) {
 			$where .= ' AND created_at >= %s';
 			$params[] = date( 'Y-m-d 00:00:00', strtotime( (string) $args['from'] ) );
@@ -1379,6 +1451,38 @@ final class AttributionEngine {
 			$where .= ' AND created_at <= %s';
 			$params[] = date( 'Y-m-d 23:59:59', strtotime( (string) $args['to'] ) );
 		}
+
+		return array( $where, $params );
+	}
+
+	/**
+	 * Append an explicit goal_ids IN-clause to a WHERE builder.
+	 *
+	 * Lets callers filter attribution reads by a set of goals (e.g. the
+	 * campaign/reward-filtered purchase metrics on the legacy Analytics
+	 * endpoint) without changing the single-goal semantics. Bound through
+	 * $wpdb->prepare like every other value.
+	 *
+	 * @param array<string, mixed> $args   Args (may carry goal_ids).
+	 * @param string               $where  Current WHERE string.
+	 * @param array<int, mixed>    $params Current bound values.
+	 * @return array{0: string, 1: array<int, mixed>}
+	 */
+	protected function append_goal_ids( array $args, $where, array $params ) {
+		if ( empty( $args['goal_ids'] ) || ! is_array( $args['goal_ids'] ) ) {
+			return array( $where, $params );
+		}
+
+		$ids = array_values( array_filter( array_map( 'absint', $args['goal_ids'] ), function ( $id ) {
+			return $id > 0;
+		} ) );
+
+		if ( empty( $ids ) ) {
+			return array( $where, $params );
+		}
+
+		$where .= ' AND goal_id IN (' . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+		$params = array_merge( $params, $ids );
 
 		return array( $where, $params );
 	}

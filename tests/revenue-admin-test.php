@@ -136,9 +136,14 @@ check( 'overview has incremental_cart_value', isset( $overview['incremental_cart
 check( 'overview has aov', isset( $overview['aov'] ) );
 check( 'overview has shipping', isset( $overview['shipping'] ) );
 check( 'overview has trend', isset( $overview['trend'] ) );
-check( 'overview has generated_at', isset( $overview['generated_at'] ) );
-check( 'overview summary has funnel', isset( $overview['summary']['funnel'] ) );
-check( 'overview funnel has converted', array_key_exists( 'converted', $overview['summary']['funnel'] ) );
+check( 'overview has generated_at', isset( $overview['generated_at'] ) );	check( 'overview summary has funnel', isset( $overview['summary']['funnel'] ) );
+	check( 'overview funnel has converted', array_key_exists( 'converted', $overview['summary']['funnel'] ) );
+	// Phase 2: profit availability metadata on the overview summary (§38/
+	// §39/§11/§12) — machine-readable reason code, cost coverage and the
+	// profit-model building blocks.
+	check( 'overview summary has profit_reason_code', isset( $overview['summary']['profit_reason_code'] ) );
+	check( 'overview summary has cost_coverage', isset( $overview['summary']['cost_coverage'] ) && is_array( $overview['summary']['cost_coverage'] ) );
+	check( 'overview summary has profit_details', isset( $overview['summary']['profit_details'] ) && is_array( $overview['summary']['profit_details'] ) );
 check( 'overview aov labelled observed', 'observed_impact' === $overview['aov']['label'] );
 check( 'overview trend is an array', is_array( $overview['trend'] ) );
 check( 'overview trend rows have date+revenue', empty( $overview['trend'] ) || ( isset( $overview['trend'][0]['date'] ) && isset( $overview['trend'][0]['revenue'] ) ) );
@@ -166,6 +171,9 @@ if ( ! empty( $goals['items'] ) ) {
 			&& array_key_exists( 'reward_cost', $first )
 			&& array_key_exists( 'profit_impact', $first )
 	);
+	check( 'goal row has profit_reason_code', array_key_exists( 'profit_reason_code', $first ) );
+	check( 'goal row has cost_coverage', array_key_exists( 'cost_coverage', $first ) );
+	check( 'goal row has profit_details', array_key_exists( 'profit_details', $first ) );
 }
 
 // ---------------------------------------------------------------------------

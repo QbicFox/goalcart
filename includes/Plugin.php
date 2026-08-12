@@ -525,7 +525,13 @@ final class Plugin {
 		// Phase 16 metrics repository — summary, daily trend and the top
 		// campaigns / goals / suggested products lists, all filterable.
 		$this->container->singleton( AnalyticsController::class, function ( Container $container ) {
-			return new AnalyticsController( $container->get( AnalyticsRepository::class ) );
+			// RevenueRepository powers the Phase 2 purchase/profit fields of
+			// the /analytics summary (same cached attribution layer as the
+			// revenue endpoints).
+			return new AnalyticsController(
+				$container->get( AnalyticsRepository::class ),
+				$container->get( RevenueRepository::class )
+			);
 		} );
 
 		// Template registry endpoint (pluggable engine): lists every

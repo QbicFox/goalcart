@@ -197,13 +197,71 @@ public function all( array $args = array() ) {
 	);
 }
 
-/**
- * Get a single goal as a normalized array (REST detail payload).
- *
- * @param int $goal_id Goal id.
- * @return array<string, mixed>|null Null when the goal does not exist.
- */
-public function get( $goal_id ) {
+	/**
+	 * Goal ids belonging to a campaign.
+	 *
+	 * Used by the analytics purchase metrics to resolve the campaign filter
+	 * onto the attribution layer (goals are the attribution dimension).
+	 *
+	 * @param int $campaign_id Campaign id.
+	 * @return int[]
+	 */
+	public function ids_by_campaign( $campaign_id ) {
+		$campaign_id = (int) $campaign_id;
+
+		if ( $campaign_id < 1 ) {
+			return array();
+		}
+
+		return $this->ids_where( 'campaign_id = %d', array( $campaign_id ) );
+	}
+
+	/**
+	 * Goal ids carrying a reward type.
+	 *
+	 * Used by the analytics purchase metrics to resolve the reward filter
+	 * onto the attribution layer.
+	 *
+	 * @param string $reward_type Reward type (Reward::types() whitelist).
+	 * @return int[]
+	 */
+	public function ids_by_reward_type( $reward_type ) {
+		$reward_type = (string) $reward_type;
+
+		if ( '' === $reward_type ) {
+			return array();
+		}
+
+		return $this->ids_where( 'reward_type = %s', array( $reward_type ) );
+	}
+
+	/**
+	 * Query goal ids with a prepared WHERE clause.
+	 *
+	 * @param string            $where  Prepared WHERE fragment.
+	 * @param array<int, mixed> $params Bound values.
+	 * @return int[]
+	 */
+	protected function ids_where( $where, array $params ) {
+		global $wpdb;
+
+		$table = Schema::table( 'goals' );
+
+		return array_map(
+			'intval',
+			$wpdb->get_col(
+				$wpdb->prepare( "SELECT id FROM {$table} WHERE {$where} ORDER BY id ASC", $params )
+			)
+		);
+	}
+
+	/**
+	 * Get a single goal as a normalized array (REST detail payload).
+	 *
+	 * @param int $goal_id Goal id.
+	 * @return array<string, mixed>|null Null when the goal does not exist.
+	 */
+	public function get( $goal_id ) {
 	global $wpdb;
 
 	$goals = Schema::table( 'goals' );

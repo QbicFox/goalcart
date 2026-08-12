@@ -24,11 +24,11 @@ The goal is:
 
 # ✅ IMPLEMENTATION PROGRESS
 
-**Overall:** Phase 1 (Codebase Audit) complete · Phases 2–10 not started.
+**Overall:** Phases 1–2 complete · Phases 3–10 not started.
 
 ```text
 Phase 1 : ████████████████████ 100%   Codebase Audit (REVENUE_ANALYTICS_AUDIT.md)
-Phase 2 : ░░░░░░░░░░░░░░░░░░░░   0%   Backend / Data Layer
+Phase 2 : ████████████████████ 100%   Backend / Data Layer
 Phase 3 : ░░░░░░░░░░░░░░░░░░░░   0%   Profit Availability
 Phase 4 : ░░░░░░░░░░░░░░░░░░░░   0%   Revenue Overview Redesign
 Phase 5 : ░░░░░░░░░░░░░░░░░░░░   0%   Goal Performance Redesign
@@ -42,7 +42,7 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | Phase | Status | Deliverable |
 | --- | --- | --- |
 | 1 — Codebase Audit | [x] 100% | `REVENUE_ANALYTICS_AUDIT.md` (no code modified) |
-| 2 — Backend / Data Layer | [ ] 0% | — |
+| 2 — Backend / Data Layer | [x] 100% | purchase/profit metrics on the legacy `/analytics` summary, profit reason codes + cost coverage + profit details, goal filter resolution, `tests/purchase-metrics-test.php` |
 | 3 — Profit Availability | [ ] 0% | — |
 | 4 — Revenue Overview Redesign | [ ] 0% | — |
 | 5 — Goal Performance Redesign | [ ] 0% | — |
@@ -52,7 +52,7 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | 9 — UX Polish | [ ] 0% | — |
 | 10 — Testing & Regression | [ ] 0% | — |
 
-**Last update:** 2026-08-12 — Phase 1 (Codebase Audit) complete; no code modified.
+**Last update:** 2026-08-12 — Phase 2 (Backend/Data Layer) complete; all suites green (`purchase-metrics`, `attribution`, `aggregation`, `phase33`, `revenue-admin`), PHP lint + TS typecheck clean.
 
 ---
 
@@ -1862,6 +1862,8 @@ logic, no uncached order scans.
 
 # Phase 2 — Backend/Data Layer
 
+> **STATUS: ✅ COMPLETE — 2026-08-12** (see progress register at the top of this document)
+
 Implement only missing data needed by the new UI.
 
 Priorities:
@@ -1879,6 +1881,17 @@ Reuse existing services.
 Do not duplicate attribution calculations.
 
 Update API tests.
+
+**Deliverables:**
+
+* `RewardCostEstimator::profit_impact()` now returns a stable machine-readable `reason_code` (`available` / `missing_product_cost`) alongside the existing human `reason` (§39).
+* `AttributionEngine` — the summary gained `profit_reason_code`, `cost_coverage` (attributed orders vs orders with cost data + coverage %, §11) and `profit_details` (incremental revenue, margin %, reward cost, shipping cost — §12 building blocks); `goal_metrics()` passes the same metadata through; all reads accept a `goal_ids` IN-clause for campaign/reward-filtered purchase metrics; fixed the regression where the pre-computed reward cost was zeroed inside the profit model (estimated profit now matches `incremental × margin − reward − shipping`).
+* `GoalRepository` — `ids_by_campaign()` / `ids_by_reward_type()` resolve the campaign/reward filters onto the attribution dimension.
+* `RevenueRepository::purchase_summary()` — cached attribution summary mapped from the legacy `/analytics` filters (from/to, goal_id, goal_ids, campaign_id, reward_type); `product_id` is unsupported in attribution and returns `null` (never a fabricated number); an unmatched filter returns an honest zeroed summary (`insufficient_data`), never store-wide fallback.
+* `AnalyticsController` (`GET /goalcart/v1/analytics`) — the existing summary is **extended** (never modified) with `progressed`, `purchased_orders`, `purchase_rate`, `attributed_sales`, `estimated_profit`, `profit_available`, `profit_reason`, `profit_reason_code`, `cost_coverage`, `profit_details` (§37/§38). Legacy fields stay byte-for-byte intact.
+* `admin-app/src/types.ts` — `AnalyticsSummary`, revenue summary and goal-performance row types extended with the new fields (typed `ProfitReasonCode`, `CostCoverage`, `ProfitDetails`).
+* `tests/purchase-metrics-test.php` — 107 checks covering funnel/purchase states, profit states (available / missing cost / incomplete cost / zero / negative), reward cost regression, cost coverage, reason codes, date + goal/campaign/reward/product filtering, distinct-order counting and rollback residue.
+* Existing suites remain green: `attribution` (72), `aggregation` (74), `phase33` (99), `revenue-admin` (53) — the legacy `analytics-dashboard` suite's 31 failures are pre-existing dev-DB drift (32 failures reproduce on unmodified code); the Phase 2 additions to it all pass.
 
 ---
 
