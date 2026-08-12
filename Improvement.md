@@ -24,7 +24,7 @@ The goal is:
 
 # ✅ IMPLEMENTATION PROGRESS
 
-**Overall:** Phases 1–5 complete · Phases 6–10 not started.
+**Overall:** Phases 1–6 complete · Phases 7–10 not started.
 
 ```text
 Phase 1 : ████████████████████ 100%   Codebase Audit (REVENUE_ANALYTICS_AUDIT.md)
@@ -32,7 +32,7 @@ Phase 2 : ████████████████████ 100%   Ba
 Phase 3 : ████████████████████ 100%   Profit Availability
 Phase 4 : ████████████████████ 100%   Revenue Overview Redesign
 Phase 5 : ████████████████████ 100%   Goal Performance Redesign
-Phase 6 : ░░░░░░░░░░░░░░░░░░░░   0%   Analytics Redesign
+Phase 6 : ████████████████████ 100%   Analytics Redesign
 Phase 7 : ░░░░░░░░░░░░░░░░░░░░   0%   Recommendations
 Phase 8 : ░░░░░░░░░░░░░░░░░░░░   0%   Upsell Analytics
 Phase 9 : ░░░░░░░░░░░░░░░░░░░░   0%   UX Polish
@@ -46,13 +46,13 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | 3 — Profit Availability | [x] 100% | cost sources verified (`_cost` / `_wc_cog_cost` / variation fallback / `goalcart_product_cost`), `cost_sources` + `store_has_cost_data` metadata, `tests/profit-availability-test.php` |
 | 4 — Revenue Overview Redesign | [x] 100% | Sales Performance page: 4 KPI cards, profit states + details, simplified trend with toggles, insight cards, advanced attribution drawer, nav rename |
 | 5 — Goal Performance Redesign | [x] 100% | commercial-outcomes Goal table (Viewed/Progressed/Completed/Purchased/Purchase Rate/Sales/Estimated Profit, sortable), per-goal detail drawer (performance summary, funnel with drop-off, costs via the shared profit card, advanced attribution + advanced accordions), additive `goal_metrics()` fields, `tests/revenue-admin-test.php` (56 checks) |
-| 6 — Analytics Redesign | [ ] 0% | — |
+| 6 — Analytics Redesign | [x] 100% | Analytics page → Goal Conversion & Purchase Analysis: purchase KPI row + secondary views/completions, customer-journey funnel with drop-off, completion-vs-purchase analysis, sortable goal comparison table, deterministic drop-off insights, advanced attribution accordion, legacy activity metrics preserved behind an accordion; additive `goal_comparison`/`funnel`/assisted/influenced payload fields |
 | 7 — Recommendations | [ ] 0% | — |
 | 8 — Upsell Analytics | [ ] 0% | — |
 | 9 — UX Polish | [ ] 0% | — |
 | 10 — Testing & Regression | [ ] 0% | — |
 
-**Last update:** 2026-08-12 — Phase 5 (Goal Performance Redesign) complete; `tsc`, ESLint and `vite build` clean; POT regenerated (847 strings); all PHP suites green (revenue-admin 56, attribution 72, purchase-metrics 107, aggregation 74, phase33 99, profit-availability 45, revenue-foundation 69).
+**Last update:** 2026-08-12 — Phase 6 (Analytics Redesign) complete; `tsc`, ESLint and `vite build` clean; POT regenerated (868 strings); PHP suites green (purchase-metrics 107, revenue-admin 56, attribution 72, aggregation 74, phase33 99, profit-availability 45); the legacy `analytics-dashboard` suite stays at its documented pre-existing dev-DB drift baseline (31 failures) — every Phase 6 check in it passes.
 
 ---
 
@@ -2083,6 +2083,8 @@ Add advanced attribution section.
 
 # Phase 6 — Analytics Redesign
 
+> **STATUS: ✅ COMPLETE — 2026-08-12** (see progress register at the top of this document)
+
 Transform the existing Analytics page into:
 
 > Goal Conversion & Purchase Analysis
@@ -2100,6 +2102,66 @@ Add:
 * deterministic insights
 
 Do not remove existing Analytics API compatibility.
+
+**Deliverables:**
+
+* `RevenueRepository` — `resolve_goal_ids()` extracted as the shared
+  analytics→attribution filter resolver (goal_id → goal_ids → campaign →
+  reward; used by `purchase_summary()` and the new `goal_comparison()`),
+  `goal_performance()` accepts a `goal_ids` IN-clause to limit the cached
+  per-goal loop, and `goal_comparison()` serves the per-goal comparison
+  rows over the same filters (null for product_id — never a fabricated
+  list; empty for a filter that resolves to no goals).
+* `AnalyticsController` (`GET /goalcart/v1/analytics`) — the existing
+  payload is **extended** (never modified): the summary now carries the
+  full attribution `funnel` (views → progressed → completed → purchased,
+  §23/§25), `assisted_sales` and `influenced_sales` (§30) and a new
+  `goal_comparison` key (§27) with the same row shape as `/revenue/goals`.
+  All Phase 17 legacy fields stay byte-for-byte intact.
+* `admin-app/src/routes/Analytics.tsx` rewritten as **Goal Conversion &
+  Purchase Analysis**:
+  - **Primary KPI row** (§22) — Purchased Orders (with completed ≠
+    purchased tooltip), Purchase Rate, Attributed Sales and the reusable
+    Estimated Profit card (every §10–§13 state); **secondary** Goal Views
+    + Goal Completions cards.
+  - **Customer Journey** (§23) — the views → progressed → completed →
+    purchased funnel with stage-to-stage drop-off percentages
+    (`FunnelVisual showTransitions`) and the completion-vs-purchase
+    explanation (§17).
+  - **Purchase Analysis** (§24/§25) — completed vs purchased comparison:
+    goals completed, purchased after completion, purchase rate, attributed
+    sales, average purchased order (influenced order totals ÷ orders) and
+    estimated profit.
+  - **Goal Comparison** (§27) — sortable table (views / completed /
+    purchased / purchase rate / sales / estimated profit), default sort
+    attributed sales, unavailable values always last.
+  - **Key Insights** (§26) — deterministic drop-off analysis (largest
+    drop-off, weak purchase conversion, best performer, profit guidance),
+    only rendered when the data supports it.
+  - **Advanced Analytics** (§30) — direct / assisted / influenced
+    revenue, attributed orders, attribution window and cost-data coverage
+    behind an accordion.
+  - **Detailed Activity** — the legacy trend chart, top campaigns and top
+    suggested products preserved behind an accordion (nothing removed).
+  - All states: loading / empty / error / zero / product-filter
+    unavailable (info notice + honest "—" values, §43/§44); the "Analyzing:"
+    date caption (§29); every section shares the exact selected range.
+* `admin-app/src/components/revenue/StatRow.tsx` — the shared
+  label/value row extracted from the duplicated `AttributionRow` /
+  `DetailRow` copies and used by RevenueOverview, GoalPerformance and
+  Analytics.
+* `admin-app/src/types.ts` — `AnalyticsSummary` gains `funnel`,
+  `assisted_sales`, `influenced_sales`, `profit_details`;
+  `AnalyticsPayload` gains `goal_comparison`.
+* `languages/goalcart.pot` regenerated (868 strings).
+* Tests: `tests/analytics-dashboard-test.php` extended with the Phase 6
+  checks (funnel shape, assisted/influenced fields, goal_comparison
+  presence + goal/unmatched/product filter behavior — all pass); the
+  suite's remaining 31 failures are the documented pre-existing dev-DB
+  drift baseline. Regression suites stay green: `purchase-metrics` (107),
+  `revenue-admin` (56), `attribution` (72), `aggregation` (74),
+  `phase33` (99), `profit-availability` (45). PHP lint, `tsc --noEmit`,
+  ESLint and `vite build` all clean.
 
 ---
 
@@ -2184,17 +2246,17 @@ The implementation is complete only when all of the following are true:
 
 ## Analytics
 
-* [ ] Analytics shows Views.
-* [ ] Analytics shows Progressed.
-* [ ] Analytics shows Completed.
-* [ ] Analytics shows Purchased.
-* [ ] Analytics shows Purchase Rate.
-* [ ] Analytics shows Attributed Sales.
-* [ ] Analytics shows Estimated Profit.
-* [ ] Funnel ends with Purchased.
-* [ ] Completion and purchase are clearly distinguished.
-* [ ] Goal comparison includes purchased orders.
-* [ ] Drop-off insights are shown when meaningful.
+* [x] Analytics shows Views.
+* [x] Analytics shows Progressed.
+* [x] Analytics shows Completed.
+* [x] Analytics shows Purchased.
+* [x] Analytics shows Purchase Rate.
+* [x] Analytics shows Attributed Sales.
+* [x] Analytics shows Estimated Profit.
+* [x] Funnel ends with Purchased.
+* [x] Completion and purchase are clearly distinguished.
+* [x] Goal comparison includes purchased orders.
+* [x] Drop-off insights are shown when meaningful.
 
 ## Goals
 

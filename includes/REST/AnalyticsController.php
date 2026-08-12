@@ -152,6 +152,10 @@ class AnalyticsController extends BaseController {
 				'top_campaigns'        => $this->analytics->top_campaigns( $filters, $limit ),
 				'top_goals'            => $this->analytics->top_goals( $filters, $limit ),
 				'top_suggested_products' => $this->analytics->top_suggested_products( $filters, $limit ),
+				// Phase 6 — per-goal purchase comparison rows (§27), same
+				// shape as /revenue/goals, sliced by the same filters; null
+				// when the active filter cannot be expressed in attribution.
+				'goal_comparison'      => $this->revenue->goal_comparison( $filters ),
 			),
 			array(
 				'applied' => array(
@@ -199,6 +203,11 @@ class AnalyticsController extends BaseController {
 				'cost_sources'       => RewardCostEstimator::COST_SOURCES,
 				'store_has_cost_data'=> null,
 				'profit_details'     => null,
+				// Phase 6 — the attribution funnel + assisted/influenced
+				// revenue are also unexpressible for such filters: null.
+				'funnel'             => null,
+				'assisted_sales'     => null,
+				'influenced_sales'   => null,
 			);
 		}
 
@@ -215,6 +224,14 @@ class AnalyticsController extends BaseController {
 			'cost_sources'       => $purchase['cost_sources'],
 			'store_has_cost_data'=> (bool) $purchase['store_has_cost_data'],
 			'profit_details'     => $purchase['profit_details'],
+			// Phase 6 — the full attribution funnel (views → progressed →
+			// completed → purchased) plus the assisted/influenced revenue
+			// splits, so the analytics page renders the funnel (§23), the
+			// completion-vs-purchase comparison (§25) and the advanced
+			// attribution section (§30) from one self-consistent pipeline.
+			'funnel'             => $purchase['funnel'],
+			'assisted_sales'     => round( (float) $purchase['goal_assisted_revenue'], 4 ),
+			'influenced_sales'   => round( (float) $purchase['goal_influenced_revenue'], 4 ),
 		);
 	}
 

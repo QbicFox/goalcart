@@ -548,6 +548,17 @@ export interface AnalyticsSummary {
   // attribution (e.g. product_id).
   cost_sources: CostSource[];
   store_has_cost_data: boolean | null;
+  /** Profit-model building blocks (§12) — null for unsupported filters. */
+  profit_details: ProfitDetails | null;
+  // Phase 6 — the full attribution funnel (views → progressed → completed
+  // → purchased) so the analytics funnel (§23) and the purchase analysis
+  // (§24/§25) render from one self-consistent pipeline, plus the
+  // assisted/influenced revenue splits for the advanced attribution
+  // section (§30). All null when the active filter cannot be expressed in
+  // attribution (e.g. product_id).
+  funnel: RevenueFunnel | null;
+  assisted_sales: number | null;
+  influenced_sales: number | null;
 }
 
 /** One daily bucket of the Phase 17 trend series. */
@@ -589,6 +600,12 @@ export interface AnalyticsPayload {
   top_campaigns: AnalyticsTopEntry[];
   top_goals: AnalyticsTopEntry[];
   top_suggested_products: AnalyticsSuggestedProduct[];
+  /**
+   * Phase 6 — per-goal purchase comparison rows (same shape as
+   * `/revenue/goals`, §27), sliced by the same filters. Null when the
+   * active filter cannot be expressed in attribution (e.g. product_id).
+   */
+  goal_comparison: GoalPerformanceRow[] | null;
 }
 
 /**

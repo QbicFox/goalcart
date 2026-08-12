@@ -40,6 +40,7 @@ import EmptyState from '../components/EmptyState';
 import EstimatedProfitCard from '../components/revenue/EstimatedProfitCard';
 import PageContainer from '../components/PageContainer';
 import RevenueToolbar from '../components/revenue/RevenueToolbar';
+import StatRow from '../components/revenue/StatRow';
 import { useDateRange } from '../date-range/DateRangeContext';
 import { formatCompact, formatCurrency, formatNumber, formatPercent, formatShortDay } from '../lib/format';
 import type { AovAnalysis, RevenueSummary } from '../types';
@@ -538,7 +539,7 @@ export default function RevenueOverview() {
             </AccordionSummary>
             <AccordionDetails>
               <Stack spacing={1.25}>
-                <AttributionRow
+                <StatRow
                   label={__('Direct revenue', 'goalcart')}
                   value={formatCurrency(summary.goal_driven_revenue)}
                   explanation={__(
@@ -546,7 +547,7 @@ export default function RevenueOverview() {
                     'goalcart'
                   )}
                 />
-                <AttributionRow
+                <StatRow
                   label={__('Assisted revenue', 'goalcart')}
                   value={formatCurrency(summary.goal_assisted_revenue)}
                   explanation={__(
@@ -554,7 +555,7 @@ export default function RevenueOverview() {
                     'goalcart'
                   )}
                 />
-                <AttributionRow
+                <StatRow
                   label={__('Influenced revenue', 'goalcart')}
                   value={formatCurrency(summary.goal_influenced_revenue)}
                   explanation={__(
@@ -562,7 +563,7 @@ export default function RevenueOverview() {
                     'goalcart'
                   )}
                 />
-                <AttributionRow
+                <StatRow
                   label={__('Incremental cart value', 'goalcart')}
                   value={formatCurrency(data.incremental_cart_value.average)}
                   explanation={__(
@@ -615,15 +616,15 @@ function HowCalculated({ summary }: { summary: RevenueSummary }) {
       </AccordionSummary>
       <AccordionDetails sx={{ pt: 0 }}>
         <Stack spacing={0.75}>
-          <AttributionRow
+          <StatRow
             label={__('Direct revenue', 'goalcart')}
             value={formatCurrency(summary.goal_driven_revenue)}
           />
-          <AttributionRow
+          <StatRow
             label={__('Assisted revenue', 'goalcart')}
             value={formatCurrency(summary.goal_assisted_revenue)}
           />
-          <AttributionRow
+          <StatRow
             label={__('Influenced revenue', 'goalcart')}
             value={formatCurrency(summary.goal_influenced_revenue)}
           />
@@ -657,10 +658,10 @@ function BasketCompare({ aov }: { aov: AovAnalysis }) {
           </Typography>
         ) : (
           <Stack spacing={0.75}>
-            <AttributionRow label={__('Store average', 'goalcart')} value={formatCurrency(aov.overall_aov)} />
-            <AttributionRow label={__('Goal-exposed', 'goalcart')} value={formatCurrency(aov.exposed_aov)} />
-            <AttributionRow label={__('Difference', 'goalcart')} value={formatCurrency(aov.absolute_change)} />
-            <AttributionRow
+            <StatRow label={__('Store average', 'goalcart')} value={formatCurrency(aov.overall_aov)} />
+            <StatRow label={__('Goal-exposed', 'goalcart')} value={formatCurrency(aov.exposed_aov)} />
+            <StatRow label={__('Difference', 'goalcart')} value={formatCurrency(aov.absolute_change)} />
+            <StatRow
               label={__('Percentage', 'goalcart')}
               value={formatSignedPercent(aov.percentage_change)}
             />
@@ -674,30 +675,3 @@ function BasketCompare({ aov }: { aov: AovAnalysis }) {
   );
 }
 
-function AttributionRow({
-  label,
-  value,
-  explanation,
-}: {
-  label: string;
-  value: string;
-  explanation?: string;
-}) {
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          {label}
-        </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {value}
-        </Typography>
-      </Box>
-      {explanation && (
-        <Typography variant="caption" color="text.secondary" component="p">
-          {explanation}
-        </Typography>
-      )}
-    </Box>
-  );
-}

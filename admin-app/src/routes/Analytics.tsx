@@ -1,18 +1,22 @@
-import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 import InsightsIcon from '@mui/icons-material/Insights';
-import MouseIcon from '@mui/icons-material/Mouse';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import PaymentsIcon from '@mui/icons-material/Payments';
 import PercentIcon from '@mui/icons-material/Percent';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useQuery } from '@tanstack/react-query';
+import Accordion from '@mui/material/Accordion';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import AccordionSummary from '@mui/material/AccordionSummary';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
-import LinearProgress from '@mui/material/LinearProgress';
+import Divider from '@mui/material/Divider';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
@@ -23,7 +27,9 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TableSortLabel from '@mui/material/TableSortLabel';
 import TextField from '@mui/material/TextField';
+import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo, useState, type ReactNode } from 'react';
@@ -48,10 +54,13 @@ import { getBootData } from '../boot';
 import DateRangeFilter from '../components/date-range/DateRangeFilter';
 import EmptyState from '../components/EmptyState';
 import EntityAutocomplete from '../components/goal-builder/EntityAutocomplete';
+import EstimatedProfitCard from '../components/revenue/EstimatedProfitCard';
+import FunnelVisual from '../components/revenue/FunnelVisual';
+import StatRow from '../components/revenue/StatRow';
 import PageContainer from '../components/PageContainer';
 import { useDateRange } from '../date-range/DateRangeContext';
-import { formatCurrency, formatNumber } from '../lib/format';
-import type { AnalyticsRewardFilter } from '../types';
+import { formatCompact, formatCurrency, formatNumber, formatPercent, formatPercentValue } from '../lib/format';
+import type { AnalyticsRewardFilter, AnalyticsSummary, GoalPerformanceRow } from '../types';
 
 /** Chart palette — WP admin blues + semantic accents. */
 const COLORS = {
@@ -72,11 +81,6 @@ const REWARD_OPTIONS: Array<{ value: AnalyticsRewardFilter; label: string }> = [
   { value: 'coupon', label: __('Coupon', 'goalcart') },
 ];
 
-/** Format a 0–1 rate as a percentage string. */
-function formatPercent(value: number): string {
-  return `${(value * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
-}
-
 /** Short day label for chart ticks (e.g. "Aug 1"). */
 function formatShortDay(dateStr: string): string {
   const boot = getBootData();
@@ -91,15 +95,18 @@ function formatShortDay(dateStr: string): string {
   }
 }
 
-/** Compact number for axis ticks (e.g. "1.2K"). */
-function formatCompact(value: number): string {
+/** Full date label for the "Analyzing:" caption (§29). */
+function formatAnalyzingDate(dateStr: string): string {
+  const boot = getBootData();
+
   try {
-    return new Intl.NumberFormat(undefined, {
-      notation: 'compact',
-      maximumFractionDigits: 1,
-    }).format(value);
+    return new Intl.DateTimeFormat(boot.locale.replace('_', '-'), {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(new Date(`${dateStr}T12:00:00`));
   } catch {
-    return String(Math.round(value));
+    return dateStr;
   }
 }
 
@@ -107,14 +114,16 @@ interface KpiCardProps {
   label: string;
   value: string;
   icon: ReactNode;
+  hint?: string;
+  tooltip?: string;
 }
 
 /** One KPI card with the label + icon above the value. */
-function KpiCard({ label, value, icon }: KpiCardProps) {
-  return (
-    <Card variant="outlined">
-      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1, color: 'text.secondary' }}>
+function KpiCard({ label, value, icon, hint, tooltip }: KpiCardProps) {
+  const content = (
+    <Card variant="outlined" sx={{ height: '100%' }}>
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
           {icon}
           <Typography variant="body2" color="text.secondary" noWrap>
             {label}
@@ -123,27 +132,196 @@ function KpiCard({ label, value, icon }: KpiCardProps) {
         <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 600 }}>
           {value}
         </Typography>
+        {hint && (
+          <Typography variant="caption" color="text.secondary">
+            {hint}
+          </Typography>
+        )}
       </CardContent>
     </Card>
   );
+
+  return tooltip ? (
+    <Tooltip title={tooltip} arrow>
+      <Box>{content}</Box>
+    </Tooltip>
+  ) : (
+    content
+  );
+}
+
+/** Sortable comparison-table columns (§27). */
+type ComparisonSortKey =
+  | 'name'
+  | 'views'
+  | 'completed'
+  | 'converted'
+  | 'conversion_rate'
+  | 'attributed_revenue'
+  | 'profit_impact';
+
+interface ComparisonColumn {
+  key: ComparisonSortKey;
+  label: string;
+  align: 'left' | 'right';
+  tooltip?: string;
+}
+
+const COMPARISON_COLUMNS: ComparisonColumn[] = [
+  { key: 'name', label: __('Goal', 'goalcart'), align: 'left' },
+  { key: 'views', label: __('Views', 'goalcart'), align: 'right' },
+  { key: 'completed', label: __('Completed', 'goalcart'), align: 'right' },
+  {
+    key: 'converted',
+    label: __('Purchased', 'goalcart'),
+    align: 'right',
+    tooltip: __(
+      'A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion.',
+      'goalcart'
+    ),
+  },
+  {
+    key: 'conversion_rate',
+    label: __('Purchase Rate', 'goalcart'),
+    align: 'right',
+    tooltip: __('Percentage of completed goals that were followed by an attributed purchase.', 'goalcart'),
+  },
+  {
+    key: 'attributed_revenue',
+    label: __('Sales', 'goalcart'),
+    align: 'right',
+    tooltip: __('Sales attributed to Goal Cart — the incremental order value driven by this goal.', 'goalcart'),
+  },
+  {
+    key: 'profit_impact',
+    label: __('Estimated Profit', 'goalcart'),
+    align: 'right',
+    tooltip: __('Estimated, not guaranteed — based on available product cost, reward and shipping data.', 'goalcart'),
+  },
+];
+
+/** Numeric sort value — unavailable profit/rate sorts last, never first. */
+function comparisonSortValue(row: GoalPerformanceRow, key: ComparisonSortKey): number | string {
+  if (key === 'profit_impact') {
+    return row.profit_available && row.profit_impact !== null ? row.profit_impact : Number.NEGATIVE_INFINITY;
+  }
+  if (key === 'conversion_rate') {
+    return row.conversion_rate === null ? Number.NEGATIVE_INFINITY : row.conversion_rate;
+  }
+  const value = row[key];
+  return typeof value === 'number' ? value : String(value);
+}
+
+interface Insight {
+  icon: ReactNode;
+  title: string;
+  body: string;
+}
+
+/** Deterministic drop-off / outcome insights (§26) — only shown when the
+ *  data supports them, never claiming causality. */
+function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow[]): Insight[] {
+  const insights: Insight[] = [];
+  const funnel = summary.funnel;
+
+  if (!funnel) {
+    return insights;
+  }
+
+  // Largest drop-off: customers who saw a goal but never progressed.
+  if (funnel.views > 0 && funnel.progressed < funnel.views) {
+    const dropOff = (funnel.views - funnel.progressed) / funnel.views;
+    insights.push({
+      icon: <InsightsIcon fontSize="small" />,
+      title: __('Largest drop-off', 'goalcart'),
+      body: sprintf(
+        /* translators: 1: percentage. */
+        __('%1$s of customers who viewed a goal did not progress toward it.', 'goalcart'),
+        formatPercent(dropOff)
+      ),
+    });
+  }
+
+  // Completion → purchase conversion.
+  if (funnel.completed > 0 && funnel.conversion_rate !== null) {
+    if (funnel.conversion_rate < 0.3) {
+      insights.push({
+        icon: <PercentIcon fontSize="small" />,
+        title: __('Purchase conversion', 'goalcart'),
+        body: sprintf(
+          /* translators: 1: percentage. */
+          __('Completion is strong, but purchase conversion is weak — only %1$s of completed goals were followed by an attributed purchase.', 'goalcart'),
+          formatPercent(funnel.conversion_rate)
+        ),
+      });
+    } else {
+      insights.push({
+        icon: <PercentIcon fontSize="small" />,
+        title: __('Purchases', 'goalcart'),
+        body: sprintf(
+          /* translators: 1: percentage. */
+          __('%1$s of completed goals were followed by an attributed purchase.', 'goalcart'),
+          formatPercent(funnel.conversion_rate)
+        ),
+      });
+    }
+  }
+
+  // Best performer by attributed sales.
+  if (comparison.length > 0) {
+    const best = comparison.reduce((a, b) => (b.attributed_revenue > a.attributed_revenue ? b : a));
+
+    if (best.attributed_revenue > 0) {
+      insights.push({
+        icon: <LeaderboardIcon fontSize="small" />,
+        title: __('Best performer', 'goalcart'),
+        body: sprintf(
+          /* translators: 1: goal name, 2: attributed sales amount. */
+          __('%1$s generated the highest attributed sales (%2$s).', 'goalcart'),
+          best.name,
+          formatCurrency(best.attributed_revenue)
+        ),
+      });
+    }
+  }
+
+  // Profit guidance.
+  if (summary.profit_available && summary.estimated_profit !== null) {
+    insights.push({
+      icon: <PaymentsIcon fontSize="small" />,
+      title: __('Estimated profit', 'goalcart'),
+      body: sprintf(
+        /* translators: 1: estimated profit amount. */
+        __('Goal Cart generated an estimated profit of %1$s after reward and shipping costs.', 'goalcart'),
+        formatCurrency(summary.estimated_profit)
+      ),
+    });
+  } else if ((summary.purchased_orders ?? 0) > 0 && summary.profit_reason_code === 'missing_product_cost') {
+    insights.push({
+      icon: <PaymentsIcon fontSize="small" />,
+      title: __('Profit not estimated yet', 'goalcart'),
+      body: __('Add product cost data to see the estimated profit of Goal Cart.', 'goalcart'),
+    });
+  }
+
+  return insights.slice(0, 3);
 }
 
 /**
- * Analytics (Phase 17: Analytics Dashboard).
+ * Analytics — Goal Conversion & Purchase Analysis (Phase 6 redesign of
+ * the Phase 17 dashboard).
  *
- * The full measurement page behind the Phase 16 event pipeline:
+ * Answers "what happens after customers see and complete my goals?" — the
+ * purchase funnel (views → progressed → completed → purchased, §23), the
+ * completion-vs-purchase comparison (§25), per-goal purchase outcomes
+ * (§27), deterministic drop-off insights (§26) and the advanced
+ * attribution details behind an expander (§30). The legacy interaction
+ * metrics (trend chart, top campaigns, top suggested products) are
+ * preserved but moved behind a "Detailed activity" accordion — nothing is
+ * removed, the business outcomes lead.
  *
- *  - a filter toolbar (date range + campaign / goal / reward / product)
- *    driven by the shared DateRangeContext (P17-T02)
- *  - seven KPI cards (impressions, completions, completion rate, revenue
- *    influenced, average cart value, suggestion CTR, add-to-cart rate)
- *  - a daily trend ComposedChart (impressions + completions bars with a
- *    revenue line, P17-T03)
- *  - top campaigns (horizontal bar chart), top goals (ranked completion
- *    bars) and a top suggested products table
- *
- * All data comes from `GET /goalcart/v1/analytics` and every slice
- * refetches the payload in one query.
+ * All data still comes from `GET /goalcart/v1/analytics` (same endpoint,
+ * extended payload — legacy fields untouched).
  */
 export default function Analytics() {
   const { range } = useDateRange();
@@ -151,6 +329,8 @@ export default function Analytics() {
   const [goalId, setGoalId] = useState<number>(0);
   const [reward, setReward] = useState<AnalyticsRewardFilter>('');
   const [productId, setProductId] = useState<number>(0);
+  const [sortKey, setSortKey] = useState<ComparisonSortKey>('attributed_revenue');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   const analyticsQuery = useQuery({
     queryKey: [
@@ -181,7 +361,17 @@ export default function Analytics() {
 
   const data = analyticsQuery.data;
   const summary = data?.summary;
-  const isEmpty = !analyticsQuery.isLoading && !analyticsQuery.isError && !summary?.impressions;
+  const funnel = summary?.funnel ?? null;
+
+  // The purchase pipeline is unavailable when the active filter cannot be
+  // expressed in attribution (product_id) — the legacy sections still work.
+  const purchaseUnavailable = !analyticsQuery.isLoading && !analyticsQuery.isError && funnel === null;
+
+  const isEmpty =
+    !analyticsQuery.isLoading &&
+    !analyticsQuery.isError &&
+    !summary?.impressions &&
+    !(funnel && (funnel.views > 0 || funnel.converted > 0));
 
   // Pre-format the trend series with short day labels for the X axis.
   const trendData = useMemo(
@@ -193,15 +383,66 @@ export default function Analytics() {
     [data]
   );
 
+  const comparison = useMemo(() => {
+    const rows = data?.goal_comparison ?? [];
+    const copy = [...rows];
+    const direction = sortDir === 'asc' ? 1 : -1;
+
+    copy.sort((a, b) => {
+      const left = comparisonSortValue(a, sortKey);
+      const right = comparisonSortValue(b, sortKey);
+
+      // Unavailable values always sort last, in either direction.
+      const leftUnavailable = left === Number.NEGATIVE_INFINITY;
+      const rightUnavailable = right === Number.NEGATIVE_INFINITY;
+
+      if (leftUnavailable !== rightUnavailable) {
+        return leftUnavailable ? 1 : -1;
+      }
+      if (left === right) {
+        return 0;
+      }
+      if (typeof left === 'string' && typeof right === 'string') {
+        return left.localeCompare(right) * direction;
+      }
+      return ((left as number) - (right as number)) * direction;
+    });
+
+    return copy;
+  }, [data, sortKey, sortDir]);
+
+  const insights = useMemo(
+    () => (data && summary ? buildInsights(summary, data.goal_comparison ?? []) : []),
+    [data, summary]
+  );
+
+  const handleComparisonSort = (key: ComparisonSortKey) => {
+    if (key === sortKey) {
+      setSortDir((current) => (current === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir(key === 'name' ? 'asc' : 'desc');
+    }
+  };
+
+  // Derived purchase-analysis values (§24/§25). The average purchased
+  // order uses the influenced order totals (not the incremental amount) so
+  // "average order value of the attributed purchased orders" is honest.
+  const purchasedOrders = summary?.purchased_orders ?? null;
+  const averagePurchasedOrder =
+    purchasedOrders !== null && purchasedOrders > 0 && (summary?.influenced_sales ?? 0) > 0
+      ? (summary?.influenced_sales ?? 0) / purchasedOrders
+      : null;
+
   return (
     <PageContainer
-      title={__('Analytics', 'goalcart')}
+      title={__('Goal Conversion & Purchase Analysis', 'goalcart')}
       description={__(
-        'Measure whether Goal Cart actually increases your average order value.',
+        'What happens after customers see and complete your goals — purchases, sales and profit.',
         'goalcart'
       )}
     >
-      {/* Filter toolbar (P17-T02) */}
+      {/* Filter toolbar (P17-T02, preserved) */}
       <Stack
         direction={{ xs: 'column', lg: 'row' }}
         spacing={1.5}
@@ -269,6 +510,16 @@ export default function Analytics() {
         </Box>
       </Stack>
 
+      {/* The exact range every metric on this page uses (§29). */}
+      <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
+        {sprintf(
+          /* translators: 1: start date, 2: end date. */
+          __('Analyzing: %1$s – %2$s', 'goalcart'),
+          formatAnalyzingDate(range.from),
+          formatAnalyzingDate(range.to)
+        )}
+      </Typography>
+
       {analyticsQuery.isError && (
         <Alert severity="error" variant="outlined">
           {analyticsQuery.error instanceof Error
@@ -282,327 +533,564 @@ export default function Analytics() {
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: {
-                xs: 'repeat(2, 1fr)',
-                md: 'repeat(4, 1fr)',
-                xl: 'repeat(7, 1fr)',
-              },
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
               gap: 2,
             }}
           >
-            {Array.from({ length: 7 }).map((_, index) => (
-              <Skeleton key={index} variant="rounded" height={108} />
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} variant="rounded" height={148} />
             ))}
           </Box>
-          <Skeleton variant="rounded" height={300} />
+          <Skeleton variant="rounded" height={260} />
           <Skeleton variant="rounded" height={240} />
+          <Skeleton variant="rounded" height={300} />
         </Stack>
       ) : isEmpty ? (
         <EmptyState
           icon={<InsightsIcon fontSize="large" />}
-          title={__('No analytics yet', 'goalcart')}
+          title={__('No sales data yet', 'goalcart')}
           description={__(
-            'No goal impressions were recorded in this range. Widen the date range or check that event tracking is enabled on the storefront.',
+            'Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit insights here.',
             'goalcart'
           )}
         />
       ) : data && summary ? (
-        <>
-          {/* KPI cards (P17-T01) */}
+        <Stack spacing={2} sx={{ mt: 2 }}>
+          {purchaseUnavailable && (
+            <Alert severity="info" variant="outlined">
+              {__(
+                'Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and goal comparison.',
+                'goalcart'
+              )}
+            </Alert>
+          )}
+
+          {/* Primary KPI row (§22): purchases, purchase rate, sales, profit. */}
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: {
-                xs: 'repeat(2, 1fr)',
-                md: 'repeat(3, 1fr)',
-                xl: 'repeat(7, 1fr)',
-              },
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
               gap: 2,
             }}
           >
             <KpiCard
-              label={__('Impressions', 'goalcart')}
-              value={formatNumber(summary.impressions)}
-              icon={<VisibilityIcon fontSize="small" />}
+              label={__('Purchased Orders', 'goalcart')}
+              value={funnel ? formatNumber(funnel.converted) : '—'}
+              icon={<ShoppingCartCheckoutIcon fontSize="small" />}
+              hint={__('after Goal Cart interaction', 'goalcart')}
+              tooltip={__(
+                'Distinct orders associated with a goal — a purchase, not a goal completion.',
+                'goalcart'
+              )}
             />
             <KpiCard
-              label={__('Completions', 'goalcart')}
-              value={formatNumber(summary.completions)}
-              icon={<CheckCircleOutlineOutlinedIcon fontSize="small" />}
-            />
-            <KpiCard
-              label={__('Completion rate', 'goalcart')}
-              value={formatPercent(summary.completion_rate)}
+              label={__('Purchase Rate', 'goalcart')}
+              value={summary.purchase_rate === null ? '—' : formatPercent(summary.purchase_rate)}
               icon={<PercentIcon fontSize="small" />}
+              tooltip={__('Percentage of completed goals that were followed by an attributed purchase.', 'goalcart')}
             />
             <KpiCard
-              label={__('Revenue influenced', 'goalcart')}
-              value={formatCurrency(summary.revenue_influenced)}
+              label={__('Attributed Sales', 'goalcart')}
+              value={summary.attributed_sales === null ? '—' : formatCurrency(summary.attributed_sales)}
               icon={<PaymentsIcon fontSize="small" />}
+              hint={__('Sales attributed to Goal Cart', 'goalcart')}
+              tooltip={__('The incremental order value from orders where customers interacted with a goal before purchasing.', 'goalcart')}
             />
-            <KpiCard
-              label={__('Avg. cart value', 'goalcart')}
-              value={formatCurrency(summary.average_cart_value)}
-              icon={<ShoppingCartIcon fontSize="small" />}
-            />
-            <KpiCard
-              label={__('Suggestion CTR', 'goalcart')}
-              value={formatPercent(summary.suggestion_ctr)}
-              icon={<MouseIcon fontSize="small" />}
-            />
-            <KpiCard
-              label={__('Add-to-cart rate', 'goalcart')}
-              value={formatPercent(summary.suggestion_add_to_cart_rate)}
-              icon={<AddShoppingCartIcon fontSize="small" />}
+            <EstimatedProfitCard
+              profitImpact={summary.estimated_profit}
+              profitAvailable={summary.profit_available}
+              profitReason={summary.profit_reason}
+              profitReasonCode={summary.profit_reason_code ?? 'insufficient_data'}
+              profitDetails={summary.profit_details}
+              costCoverage={summary.cost_coverage}
+              costSources={summary.cost_sources}
+              storeHasCostData={summary.store_has_cost_data}
             />
           </Box>
 
-          {/* Daily trend chart (P17-T03) */}
-          <Card variant="outlined">
-            <CardContent>
-              <Typography variant="h6" component="h3" gutterBottom>
-                {__('Activity over time', 'goalcart')}
-              </Typography>
-              <Box
-                role="img"
-                aria-label={__('Daily impressions, completions and revenue trend', 'goalcart')}
-                sx={{ width: '100%', height: 300 }}
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={trendData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} vertical={false} />
-                    <XAxis
-                      dataKey="label"
-                      tick={{ fontSize: 11, fill: COLORS.tick }}
-                      tickLine={false}
-                      minTickGap={28}
-                    />
-                    <YAxis
-                      yAxisId="count"
-                      tick={{ fontSize: 11, fill: COLORS.tick }}
-                      tickLine={false}
-                      axisLine={false}
-                      allowDecimals={false}
-                      width={40}
-                    />
-                    <YAxis
-                      yAxisId="revenue"
-                      orientation="right"
-                      tick={{ fontSize: 11, fill: COLORS.tick }}
-                      tickLine={false}
-                      axisLine={false}
-                      width={52}
-                      tickFormatter={(value: number) => formatCompact(value)}
-                    />
-                    <ChartTooltip
-                      contentStyle={{ borderRadius: 4, fontSize: 13 }}
-                      formatter={(value: unknown, name: unknown) => {
-                        const label = String(name);
-                        const formatted =
-                          label === __('Revenue', 'goalcart')
-                            ? formatCurrency(Number(value))
-                            : formatNumber(Number(value));
-
-                        return [formatted, label];
-                      }}
-                    />
-                    <Legend wrapperStyle={{ fontSize: 12 }} />
-                    <Bar
-                      yAxisId="count"
-                      dataKey="impressions"
-                      name={__('Impressions', 'goalcart')}
-                      fill={COLORS.primaryLight}
-                      radius={[3, 3, 0, 0]}
-                    />
-                    <Bar
-                      yAxisId="count"
-                      dataKey="completions"
-                      name={__('Completions', 'goalcart')}
-                      fill={COLORS.primary}
-                      radius={[3, 3, 0, 0]}
-                    />
-                    <Line
-                      yAxisId="revenue"
-                      dataKey="revenue"
-                      name={__('Revenue', 'goalcart')}
-                      stroke={COLORS.success}
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 3 }}
-                    />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </Box>
-            </CardContent>
-          </Card>
-
-          {/* Top campaigns + top goals */}
+          {/* Secondary KPIs (§22): goal views + completions. */}
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { md: 'repeat(2, 1fr)' },
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, minmax(0, 260px))' },
               gap: 2,
-              alignItems: 'stretch',
             }}
           >
-            <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6" component="h3" gutterBottom>
-                {__('Top campaigns', 'goalcart')}
-              </Typography>
-              {data.top_campaigns.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  {__('No campaign activity in this range.', 'goalcart')}
-                </Typography>
-              ) : (
-                <Box
-                  role="img"
-                  aria-label={__('Top campaigns by completions', 'goalcart')}
-                  sx={{ width: '100%', height: data.top_campaigns.length * 46 + 24 }}
-                >
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={data.top_campaigns}
-                      layout="vertical"
-                      margin={{ top: 0, right: 12, bottom: 0, left: 0 }}
-                    >
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke={COLORS.grid}
-                        horizontal={false}
-                      />
-                      <XAxis
-                        type="number"
-                        tick={{ fontSize: 11, fill: COLORS.tick }}
-                        tickLine={false}
-                        axisLine={false}
-                        allowDecimals={false}
-                      />
-                      <YAxis
-                        type="category"
-                        dataKey="name"
-                        width={130}
-                        tick={{ fontSize: 11, fill: COLORS.tick }}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <ChartTooltip
-                        contentStyle={{ borderRadius: 4, fontSize: 13 }}
-                        formatter={(value: unknown, name: unknown) => [
-                          formatNumber(Number(value)),
-                          String(name),
-                        ]}
-                      />
-                      <Bar
-                        dataKey="completions"
-                        name={__('Completions', 'goalcart')}
-                        fill={COLORS.primary}
-                        radius={[0, 4, 4, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </Box>
-              )}
-            </Paper>
+            <KpiCard
+              label={__('Goal Views', 'goalcart')}
+              value={funnel ? formatNumber(funnel.views) : '—'}
+              icon={<VisibilityIcon fontSize="small" />}
+              tooltip={__('How many times goal widgets were seen.', 'goalcart')}
+            />
+            <KpiCard
+              label={__('Goal Completions', 'goalcart')}
+              value={funnel ? formatNumber(funnel.completed) : '—'}
+              icon={<CheckCircleOutlineOutlinedIcon fontSize="small" />}
+              tooltip={__('How many times customers reached a goal target. Completion is not the same as purchase.', 'goalcart')}
+            />
+          </Box>
 
-            <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6" component="h3" gutterBottom>
-                {__('Top goals', 'goalcart')}
-              </Typography>
-              {data.top_goals.length === 0 ? (
-                <Typography variant="body2" color="text.secondary">
-                  {__('No goal activity in this range.', 'goalcart')}
+          {/* Customer journey — the full purchase funnel (§23). */}
+          {funnel && (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" component="h3" gutterBottom>
+                  {__('Customer Journey', 'goalcart')}
                 </Typography>
-              ) : (
-                <Stack spacing={1.75}>
-                  {data.top_goals.map((goal, index) => (
-                    <Box key={goal.id}>
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          gap: 1,
-                          mb: 0.5,
-                          alignItems: 'baseline',
-                        }}
-                      >
-                        <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-                          {index + 1}. {goal.name}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ whiteSpace: 'nowrap' }}
-                        >
-                          {sprintf(
-                            /* translators: 1: completions, 2: impressions. */
-                            __('%1$s of %2$s', 'goalcart'),
-                            formatNumber(goal.completions),
-                            formatNumber(goal.impressions)
-                          )}
+                <FunnelVisual
+                  showTransitions
+                  funnel={{
+                    views: funnel.views,
+                    progressed: funnel.progressed,
+                    completed: funnel.completed,
+                    converted: funnel.converted,
+                    completion_rate: funnel.completion_rate,
+                    conversion_rate: funnel.conversion_rate,
+                  }}
+                />
+                <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
+                  {__(
+                    'A completion means the customer reached the goal target. A purchase means a qualifying order was actually associated with the goal.',
+                    'goalcart'
+                  )}
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Purchase analysis — completion vs purchase comparison (§24/§25). */}
+          {funnel && (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" component="h3" gutterBottom>
+                  {__('Purchase Analysis', 'goalcart')}
+                </Typography>
+                <Stack spacing={1}>
+                  <StatRow label={__('Goals Completed', 'goalcart')} value={formatNumber(funnel.completed)} />
+                  <StatRow
+                    label={__('Purchased After Completion', 'goalcart')}
+                    value={formatNumber(funnel.converted)}
+                  />
+                  <StatRow
+                    label={__('Purchase Rate', 'goalcart')}
+                    value={funnel.conversion_rate === null ? '—' : formatPercent(funnel.conversion_rate)}
+                    explanation={__('Purchased orders ÷ completed goals.', 'goalcart')}
+                  />
+                  <Divider />
+                  <StatRow
+                    label={__('Attributed Sales', 'goalcart')}
+                    value={summary.attributed_sales === null ? '—' : formatCurrency(summary.attributed_sales)}
+                    explanation={__('Sales generated after Goal Cart interaction.', 'goalcart')}
+                  />
+                  <StatRow
+                    label={__('Average Purchased Order', 'goalcart')}
+                    value={averagePurchasedOrder === null ? '—' : formatCurrency(averagePurchasedOrder)}
+                    explanation={__('Average order value of the attributed purchased orders.', 'goalcart')}
+                  />
+                  <Divider />
+                  <StatRow
+                    label={__('Estimated Profit', 'goalcart')}
+                    value={
+                      summary.profit_available && summary.estimated_profit !== null
+                        ? formatCurrency(summary.estimated_profit)
+                        : '—'
+                    }
+                    explanation={
+                      summary.profit_available
+                        ? __('Estimated, not guaranteed.', 'goalcart')
+                        : summary.profit_reason_code === 'missing_product_cost'
+                          ? __('Add product cost data to estimate profit.', 'goalcart')
+                          : undefined
+                    }
+                  />
+                </Stack>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Goal comparison (§27): sortable purchase outcomes per goal. */}
+          {data.goal_comparison !== null && (
+            <Card variant="outlined">
+              <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
+                <Box sx={{ p: 2, pb: 1 }}>
+                  <Typography variant="h6" component="h3">
+                    {__('Goal Comparison', 'goalcart')}
+                  </Typography>
+                </Box>
+                {data.goal_comparison.length === 0 ? (
+                  <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+                    {__('No goal purchase activity in this range.', 'goalcart')}
+                  </Typography>
+                ) : (
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          {COMPARISON_COLUMNS.map((column) => {
+                            const cell = (
+                              <TableCell
+                                key={column.key}
+                                align={column.align}
+                                sortDirection={sortKey === column.key ? sortDir : false}
+                              >
+                                <TableSortLabel
+                                  active={sortKey === column.key}
+                                  direction={sortKey === column.key ? sortDir : 'asc'}
+                                  onClick={() => handleComparisonSort(column.key)}
+                                >
+                                  {column.label}
+                                </TableSortLabel>
+                              </TableCell>
+                            );
+
+                            return column.tooltip ? (
+                              <Tooltip key={column.key} title={column.tooltip} arrow>
+                                {cell}
+                              </Tooltip>
+                            ) : (
+                              cell
+                            );
+                          })}
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {comparison.map((row) => (
+                          <TableRow key={row.goal_id} hover>
+                            <TableCell sx={{ fontWeight: 600 }}>{row.name}</TableCell>
+                            <TableCell align="right">{formatNumber(row.views)}</TableCell>
+                            <TableCell align="right">{formatNumber(row.completed)}</TableCell>
+                            <TableCell align="right">{formatNumber(row.converted)}</TableCell>
+                            <TableCell align="right">
+                              {row.conversion_rate === null ? '—' : formatPercent(row.conversion_rate)}
+                            </TableCell>
+                            <TableCell align="right">{formatCurrency(row.attributed_revenue)}</TableCell>
+                            <TableCell align="right">
+                              {row.profit_available && row.profit_impact !== null
+                                ? formatCurrency(row.profit_impact)
+                                : '—'}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Key insights — deterministic drop-off analysis (§26). */}
+          {insights.length > 0 && (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography variant="h6" component="h3" gutterBottom>
+                  {__('Key Insights', 'goalcart')}
+                </Typography>
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+                    gap: 2,
+                  }}
+                >
+                  {insights.map((insight) => (
+                    <Paper key={insight.title} variant="outlined" sx={{ p: 1.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary', mb: 0.5 }}>
+                        {insight.icon}
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {insight.title}
                         </Typography>
                       </Box>
-                      <LinearProgress
-                        variant="determinate"
-                        value={Math.min(100, goal.completion_rate * 100)}
-                        sx={{ height: 6, borderRadius: 3 }}
-                      />
-                    </Box>
+                      <Typography variant="body2">{insight.body}</Typography>
+                    </Paper>
                   ))}
-                </Stack>
-              )}
-            </Paper>
-          </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* Top suggested products */}
-          <Paper variant="outlined" sx={{ overflow: 'hidden' }}>
-            <Box sx={{ p: 2, pb: 1 }}>
-              <Typography variant="h6" component="h3">
-                {__('Top suggested products', 'goalcart')}
+          {/* Advanced analytics (§30) — attribution details + data quality. */}
+          {funnel && (
+            <Accordion
+              disableGutters
+              square
+              sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
+            >
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <Typography variant="h6" component="h3" sx={{ fontSize: '1rem' }}>
+                  {__('Advanced Analytics', 'goalcart')}
+                </Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Stack spacing={1.25}>
+                  <StatRow
+                    label={__('Direct revenue', 'goalcart')}
+                    value={summary.attributed_sales === null ? '—' : formatCurrency(summary.attributed_sales)}
+                    explanation={__(
+                      'Revenue from the incremental value of orders where customers progressed toward or completed a goal before ordering.',
+                      'goalcart'
+                    )}
+                  />
+                  <StatRow
+                    label={__('Assisted revenue', 'goalcart')}
+                    value={summary.assisted_sales === null ? '—' : formatCurrency(summary.assisted_sales)}
+                    explanation={__('Order totals from orders that were only exposed to a goal, never progressed.', 'goalcart')}
+                  />
+                  <StatRow
+                    label={__('Influenced revenue', 'goalcart')}
+                    value={summary.influenced_sales === null ? '—' : formatCurrency(summary.influenced_sales)}
+                    explanation={__(
+                      'Order totals of every order associated with a goal — distinct orders, never double counted.',
+                      'goalcart'
+                    )}
+                  />
+                  <StatRow
+                    label={__('Attributed orders', 'goalcart')}
+                    value={funnel ? formatNumber(funnel.converted) : '—'}
+                    explanation={__('Distinct orders associated with a goal in the selected period.', 'goalcart')}
+                  />
+                  <StatRow
+                    label={__('Attribution window', 'goalcart')}
+                    value={__('30 days before the order', 'goalcart')}
+                    explanation={__(
+                      'Only goal events within this window before an order are attributed to it.',
+                      'goalcart'
+                    )}
+                  />
+                  {summary.cost_coverage && summary.cost_coverage.available && (
+                    <StatRow
+                      label={__('Cost data coverage', 'goalcart')}
+                      value={
+                        summary.cost_coverage.coverage_pct === null
+                          ? '—'
+                          : sprintf(
+                              /* translators: 1: percentage. */
+                              __('%1$s of eligible order value', 'goalcart'),
+                              formatPercentValue(summary.cost_coverage.coverage_pct)
+                            )
+                      }
+                      explanation={__(
+                        'Estimated profit is calculated only for orders with complete cost data.',
+                        'goalcart'
+                      )}
+                    />
+                  )}
+                  <Divider />
+                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', color: 'text.secondary' }}>
+                    <LocalShippingIcon fontSize="small" />
+                    <Typography variant="caption">
+                      {__('These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting.', 'goalcart')}
+                    </Typography>
+                  </Box>
+                </Stack>
+              </AccordionDetails>
+            </Accordion>
+          )}
+
+          {/* Detailed activity — the preserved legacy interaction metrics. */}
+          <Accordion
+            disableGutters
+            square
+            sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
+          >
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography variant="h6" component="h3" sx={{ fontSize: '1rem' }}>
+                {__('Detailed Activity', 'goalcart')}
               </Typography>
-            </Box>
-            {data.top_suggested_products.length === 0 ? (
-              <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-                {__('No suggestion activity in this range.', 'goalcart')}
-              </Typography>
-            ) : (
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>{__('Product', 'goalcart')}</TableCell>
-                      <TableCell align="right">{__('Impressions', 'goalcart')}</TableCell>
-                      <TableCell align="right">{__('Clicks', 'goalcart')}</TableCell>
-                      <TableCell align="right">{__('Added', 'goalcart')}</TableCell>
-                      <TableCell align="right">{__('CTR', 'goalcart')}</TableCell>
-                      <TableCell align="right">{__('Add-to-cart', 'goalcart')}</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {data.top_suggested_products.map((product) => (
-                      <TableRow key={product.product_id} hover>
-                        <TableCell sx={{ fontWeight: 600 }}>{product.name}</TableCell>
-                        <TableCell align="right">{formatNumber(product.impressions)}</TableCell>
-                        <TableCell align="right">{formatNumber(product.clicks)}</TableCell>
-                        <TableCell align="right">
-                          <Chip
-                            size="small"
-                            variant="outlined"
-                            color={product.added > 0 ? 'success' : 'default'}
-                            label={formatNumber(product.added)}
-                          />
-                        </TableCell>
-                        <TableCell align="right">{formatPercent(product.ctr)}</TableCell>
-                        <TableCell align="right">
-                          {formatPercent(product.add_to_cart_rate)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          </Paper>
-        </>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={2}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    {__(
+                      'Raw interaction metrics from the event log — impressions, completions, revenue and suggestions.',
+                      'goalcart'
+                    )}
+                  </Typography>
+                  <Box
+                    role="img"
+                    aria-label={__('Daily impressions, completions and revenue trend', 'goalcart')}
+                    sx={{ width: '100%', height: 280 }}
+                  >
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart data={trendData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} vertical={false} />
+                        <XAxis
+                          dataKey="label"
+                          tick={{ fontSize: 11, fill: COLORS.tick }}
+                          tickLine={false}
+                          minTickGap={28}
+                        />
+                        <YAxis
+                          yAxisId="count"
+                          tick={{ fontSize: 11, fill: COLORS.tick }}
+                          tickLine={false}
+                          axisLine={false}
+                          allowDecimals={false}
+                          width={40}
+                        />
+                        <YAxis
+                          yAxisId="revenue"
+                          orientation="right"
+                          tick={{ fontSize: 11, fill: COLORS.tick }}
+                          tickLine={false}
+                          axisLine={false}
+                          width={52}
+                          tickFormatter={(value: number) => formatCompact(value)}
+                        />
+                        <ChartTooltip
+                          contentStyle={{ borderRadius: 4, fontSize: 13 }}
+                          formatter={(value: unknown, name: unknown) => {
+                            const label = String(name);
+                            const formatted =
+                              label === __('Revenue', 'goalcart')
+                                ? formatCurrency(Number(value))
+                                : formatNumber(Number(value));
+
+                            return [formatted, label];
+                          }}
+                        />
+                        <Legend wrapperStyle={{ fontSize: 12 }} />
+                        <Bar
+                          yAxisId="count"
+                          dataKey="impressions"
+                          name={__('Impressions', 'goalcart')}
+                          fill={COLORS.primaryLight}
+                          radius={[3, 3, 0, 0]}
+                        />
+                        <Bar
+                          yAxisId="count"
+                          dataKey="completions"
+                          name={__('Completions', 'goalcart')}
+                          fill={COLORS.primary}
+                          radius={[3, 3, 0, 0]}
+                        />
+                        <Line
+                          yAxisId="revenue"
+                          dataKey="revenue"
+                          name={__('Revenue', 'goalcart')}
+                          stroke={COLORS.success}
+                          strokeWidth={2}
+                          dot={false}
+                          activeDot={{ r: 3 }}
+                        />
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </Box>
+                </Box>
+
+                <Box
+                  sx={{
+                    display: 'grid',
+                    gridTemplateColumns: { md: 'repeat(2, 1fr)' },
+                    gap: 2,
+                    alignItems: 'stretch',
+                  }}
+                >
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      {__('Top campaigns', 'goalcart')}
+                    </Typography>
+                    {data.top_campaigns.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary">
+                        {__('No campaign activity in this range.', 'goalcart')}
+                      </Typography>
+                    ) : (
+                      <Box
+                        role="img"
+                        aria-label={__('Top campaigns by completions', 'goalcart')}
+                        sx={{ width: '100%', height: data.top_campaigns.length * 46 + 24 }}
+                      >
+                        <ResponsiveContainer width="100%" height="100%">
+                          <BarChart
+                            data={data.top_campaigns}
+                            layout="vertical"
+                            margin={{ top: 0, right: 12, bottom: 0, left: 0 }}
+                          >
+                            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} horizontal={false} />
+                            <XAxis
+                              type="number"
+                              tick={{ fontSize: 11, fill: COLORS.tick }}
+                              tickLine={false}
+                              axisLine={false}
+                              allowDecimals={false}
+                            />
+                            <YAxis
+                              type="category"
+                              dataKey="name"
+                              width={130}
+                              tick={{ fontSize: 11, fill: COLORS.tick }}
+                              tickLine={false}
+                              axisLine={false}
+                            />
+                            <ChartTooltip
+                              contentStyle={{ borderRadius: 4, fontSize: 13 }}
+                              formatter={(value: unknown, name: unknown) => [
+                                formatNumber(Number(value)),
+                                String(name),
+                              ]}
+                            />
+                            <Bar
+                              dataKey="completions"
+                              name={__('Completions', 'goalcart')}
+                              fill={COLORS.primary}
+                              radius={[0, 4, 4, 0]}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </Box>
+                    )}
+                  </Paper>
+
+                  <Paper variant="outlined" sx={{ p: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      {__('Top suggested products', 'goalcart')}
+                    </Typography>
+                    {data.top_suggested_products.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary">
+                        {__('No suggestion activity in this range.', 'goalcart')}
+                      </Typography>
+                    ) : (
+                      <TableContainer>
+                        <Table size="small">
+                          <TableHead>
+                            <TableRow>
+                              <TableCell>{__('Product', 'goalcart')}</TableCell>
+                              <TableCell align="right">{__('Impressions', 'goalcart')}</TableCell>
+                              <TableCell align="right">{__('Clicks', 'goalcart')}</TableCell>
+                              <TableCell align="right">{__('Added', 'goalcart')}</TableCell>
+                              <TableCell align="right">{__('CTR', 'goalcart')}</TableCell>
+                              <TableCell align="right">{__('Add-to-cart', 'goalcart')}</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {data.top_suggested_products.map((product) => (
+                              <TableRow key={product.product_id} hover>
+                                <TableCell sx={{ fontWeight: 600 }}>{product.name}</TableCell>
+                                <TableCell align="right">{formatNumber(product.impressions)}</TableCell>
+                                <TableCell align="right">{formatNumber(product.clicks)}</TableCell>
+                                <TableCell align="right">
+                                  <Chip
+                                    size="small"
+                                    variant="outlined"
+                                    color={product.added > 0 ? 'success' : 'default'}
+                                    label={formatNumber(product.added)}
+                                  />
+                                </TableCell>
+                                <TableCell align="right">{formatPercent(product.ctr)}</TableCell>
+                                <TableCell align="right">{formatPercent(product.add_to_cart_rate)}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    )}
+                  </Paper>
+                </Box>
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+        </Stack>
       ) : null}
     </PageContainer>
   );

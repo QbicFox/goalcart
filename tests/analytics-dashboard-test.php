@@ -312,6 +312,19 @@ try {
 	check( 'summary extended with cost_coverage', isset( $summary['cost_coverage'] ) && is_array( $summary['cost_coverage'] ) );
 	check( 'summary extended with profit_details', isset( $summary['profit_details'] ) && is_array( $summary['profit_details'] ) );
 
+	// Phase 6 (Analytics Redesign — Improvement.md §21–§30): the summary
+	// also exposes the attribution funnel (views → progressed → completed
+	// → purchased) and the assisted/influenced revenue splits, and the
+	// payload carries the per-goal comparison rows (§27) — all additive.
+	check( 'summary extended with funnel', isset( $summary['funnel'] ) && is_array( $summary['funnel'] ) );
+	check(
+		'summary funnel has the four stages',
+		isset( $summary['funnel']['views'], $summary['funnel']['progressed'], $summary['funnel']['completed'], $summary['funnel']['converted'] )
+	);
+	check( 'summary extended with assisted_sales', array_key_exists( 'assisted_sales', $summary ) );
+	check( 'summary extended with influenced_sales', array_key_exists( 'influenced_sales', $summary ) );
+	check( 'payload has goal_comparison', isset( $data['data']['goal_comparison'] ) && is_array( $data['data']['goal_comparison'] ) );
+
 	// 3.4 Trend (P17-T03): zero-filled daily series over the window.
 	$today  = current_time( 'Y-m-d' );
 	$from30 = date( 'Y-m-d', strtotime( $today ) - 29 * DAY_IN_SECONDS );
@@ -412,6 +425,37 @@ try {
 	// the Phase 17 fields keep working.
 	check( 'product filter purchase fields null', null === $summary['purchased_orders'] && null === $summary['attributed_sales'] && null === $summary['estimated_profit'] );
 	check( 'product filter legacy impressions intact', array_key_exists( 'impressions', $summary ) );
+
+	// Phase 6: the goal comparison rows respect the filters (§27) — a
+	// goal filter narrows them to that goal, an unmatched filter yields
+	// no rows, and a product filter cannot be expressed in attribution
+	// (null, never a fabricated list).
+	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req->set_param( 'goal_id', $goal_b );
+	$resp = $analytics_ctrl->handle_get( $req );
+	$comparison = $resp->get_data()['data']['goal_comparison'];
+	check( 'goal filter comparison → exactly the goal', 1 === count( $comparison ) && $goal_b === (int) $comparison[0]['goal_id'] );
+	// array_key_exists (not isset): conversion_rate is legitimately null
+	// without completions — the key must still be present.
+	check(
+		'goal comparison rows carry purchase fields',
+		array_key_exists( 'views', $comparison[0] )
+			&& array_key_exists( 'converted', $comparison[0] )
+			&& array_key_exists( 'attributed_revenue', $comparison[0] )
+			&& array_key_exists( 'conversion_rate', $comparison[0] )
+	);
+
+	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req->set_param( 'goal_id', 999999 );
+	$resp = $analytics_ctrl->handle_get( $req );
+	check( 'unmatched goal → empty goal_comparison', array() === $resp->get_data()['data']['goal_comparison'] );
+
+	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req->set_param( 'product_id', 900007 );
+	$resp = $analytics_ctrl->handle_get( $req );
+	$data = $resp->get_data();
+	check( 'product filter → goal_comparison null', null === $data['data']['goal_comparison'] );
+	check( 'product filter → funnel null', null === $data['data']['summary']['funnel'] );
 
 	// A goal filter that resolves to no goals yields an honest empty
 	// purchase summary — never store-wide data for the wrong filter.

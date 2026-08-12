@@ -31,6 +31,7 @@ import PageContainer from '../components/PageContainer';
 import EstimatedProfitCard from '../components/revenue/EstimatedProfitCard';
 import FunnelVisual from '../components/revenue/FunnelVisual';
 import RevenueToolbar from '../components/revenue/RevenueToolbar';
+import StatRow from '../components/revenue/StatRow';
 import { useDateRange } from '../date-range/DateRangeContext';
 import { formatCurrency, formatNumber, formatPercent } from '../lib/format';
 import { REWARD_LABELS } from '../templates/rewardLabel';
@@ -120,27 +121,6 @@ function sortValue(row: GoalPerformanceRow, key: SortKey): number | string {
 function formatSignedPercent(value: number): string {
   const formatted = formatPercent(Math.abs(value));
   return value > 0 ? `+${formatted}` : value < 0 ? `-${formatted}` : formatPercent(value);
-}
-
-/** One label/value row in the detail drawer. */
-function DetailRow({ label, value, explanation }: { label: string; value: string; explanation?: string }) {
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 }}>
-        <Typography variant="body2" color="text.secondary">
-          {label}
-        </Typography>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {value}
-        </Typography>
-      </Box>
-      {explanation && (
-        <Typography variant="caption" color="text.secondary" component="p">
-          {explanation}
-        </Typography>
-      )}
-    </Box>
-  );
 }
 
 /** One stat cell of the drawer's performance summary (§20). */
@@ -312,7 +292,7 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
             </AccordionSummary>
             <AccordionDetails sx={{ pt: 0 }}>
               <Stack spacing={1}>
-                <DetailRow
+                <StatRow
                   label={__('Direct revenue', 'goalcart')}
                   value={formatCurrency(row.attributed_revenue)}
                   explanation={__(
@@ -320,7 +300,7 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                     'goalcart'
                   )}
                 />
-                <DetailRow
+                <StatRow
                   label={__('Assisted revenue', 'goalcart')}
                   value={formatCurrency(row.assisted_revenue)}
                   explanation={__(
@@ -328,7 +308,7 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                     'goalcart'
                   )}
                 />
-                <DetailRow
+                <StatRow
                   label={__('Influenced revenue', 'goalcart')}
                   value={formatCurrency(row.influenced_revenue)}
                   explanation={__(
@@ -336,7 +316,7 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                     'goalcart'
                   )}
                 />
-                <DetailRow
+                <StatRow
                   label={__('Incremental cart value', 'goalcart')}
                   value={formatCurrency(row.incremental_cart_value)}
                   explanation={__(
@@ -365,7 +345,7 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
             </AccordionSummary>
             <AccordionDetails sx={{ pt: 0 }}>
               <Stack spacing={1}>
-                <DetailRow
+                <StatRow
                   label={__('Attribution model', 'goalcart')}
                   value={__('Direct & assisted', 'goalcart')}
                   explanation={__(
@@ -373,7 +353,7 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                     'goalcart'
                   )}
                 />
-                <DetailRow
+                <StatRow
                   label={__('Attribution window', 'goalcart')}
                   value={sprintf(
                     /* translators: %d: number of days. */
@@ -381,8 +361,8 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                     row.attribution_window_days
                   )}
                 />
-                <DetailRow label={__('Data sufficiency', 'goalcart')} value={sufficiency.label} explanation={sufficiency.hint} />
-                <DetailRow
+                <StatRow label={__('Data sufficiency', 'goalcart')} value={sufficiency.label} explanation={sufficiency.hint} />
+                <StatRow
                   label={__('Average basket increase', 'goalcart')}
                   value={aovImpact !== null ? formatSignedPercent(aovImpact) : '—'}
                   explanation={__(
@@ -390,7 +370,7 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                     'goalcart'
                   )}
                 />
-                <DetailRow
+                <StatRow
                   label={__('Attributed orders', 'goalcart')}
                   value={formatNumber(row.converted)}
                   explanation={__('Distinct orders associated with this goal in the selected period.', 'goalcart')}

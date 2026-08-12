@@ -191,9 +191,14 @@ final class RevenueRepository {
 	}
 
 	/**
-	 * Goal Performance rows — every goal (or one), cached.
+	 * Goal Performance rows — every goal (or a filtered subset), cached.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, from, to.
+	 * `goal_ids` (optional) restricts the iteration to the listed goals, so
+	 * the Analytics comparison table (Phase 6, §27) can slice the same
+	 * cached rows by campaign/reward filters. Additive — existing callers
+	 * that pass only goal_id / from / to behave exactly as before.
+	 *
+	 * @param array<string, mixed> $args Optional: goal_id, goal_ids, from, to.
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function goal_performance( array $args = array() ) {
@@ -214,6 +219,16 @@ final class RevenueRepository {
 					return $items;
 				}
 
+				// Optional IN-clause: when present, only the listed goals
+				// participate in the comparison table.
+				$goal_ids = null;
+
+				if ( ! empty( $args['goal_ids'] ) && is_array( $args['goal_ids'] ) ) {
+					$goal_ids = array_values( array_filter( array_map( 'absint', $args['goal_ids'] ), function ( $id ) {
+						return $id > 0;
+					} ) );
+				}
+
 				// All goals, paged — never silently truncated by a fixed cap.
 				$page = 1;
 
@@ -223,6 +238,10 @@ final class RevenueRepository {
 					);
 
 					foreach ( $result['items'] as $row ) {
+						if ( null !== $goal_ids && ! in_array( (int) $row['id'], $goal_ids, true ) ) {
+							continue;
+					}
+
 						$metrics = $this->engine->goal_metrics( (int) $row['id'], $args );
 
 						if ( null !== $metrics ) {
@@ -402,19 +421,7 @@ final class RevenueRepository {
 			'to'   => isset( $filters['to'] ) ? (string) $filters['to'] : '',
 		);
 
-		$goal_ids = array();
-
-		if ( ! empty( $filters['goal_id'] ) ) {
-			$goal_ids[] = (int) $filters['goal_id'];
-		} elseif ( ! empty( $filters['goal_ids'] ) && is_array( $filters['goal_ids'] ) ) {
-			$goal_ids = array_values( array_filter( array_map( 'absint', $filters['goal_ids'] ), function ( $id ) {
-				return $id > 0;
-			} ) );
-		} elseif ( ! empty( $filters['campaign_id'] ) ) {
-			$goal_ids = $this->repository->ids_by_campaign( (int) $filters['campaign_id'] );
-		} elseif ( ! empty( $filters['reward_type'] ) ) {
-			$goal_ids = $this->repository->ids_by_reward_type( (string) $filters['reward_type'] );
-		}
+		$goal_ids = $this->resolve_goal_ids( $filters );
 
 		// A goal/campaign/reward filter that resolves to no goals is a
 		// genuine empty window — return the zeroed summary rather than
@@ -440,6 +447,87 @@ final class RevenueRepository {
 				return $this->engine->attribution_summary( $args );
 			}
 		);
+	}
+
+	/**
+	 * Resolve the analytics-style filters onto the attribution goal
+	 * dimension.
+	 *
+	 * Priority mirrors the documented semantics: an explicit goal_id wins,
+	 * then a goal_ids list, then the campaign/reward resolution onto the
+	 * goals table. Shared by purchase_summary() and goal_comparison() so
+	 * both reads apply the exact same filter interpretation.
+	 *
+	 * @param array<string, mixed> $filters Optional goal_id, goal_ids,
+	 *                                      campaign_id, reward_type.
+	 * @return array<int, int>
+	 */
+	protected function resolve_goal_ids( array $filters ) {
+		if ( ! empty( $filters['goal_id'] ) ) {
+			return array( (int) $filters['goal_id'] );
+		}
+
+		if ( ! empty( $filters['goal_ids'] ) && is_array( $filters['goal_ids'] ) ) {
+			return array_values( array_filter( array_map( 'absint', $filters['goal_ids'] ), function ( $id ) {
+				return $id > 0;
+			} ) );
+		}
+
+		if ( ! empty( $filters['campaign_id'] ) ) {
+			return $this->repository->ids_by_campaign( (int) $filters['campaign_id'] );
+		}
+
+		if ( ! empty( $filters['reward_type'] ) ) {
+			return $this->repository->ids_by_reward_type( (string) $filters['reward_type'] );
+		}
+
+		return array();
+	}
+
+	/**
+	 * Per-goal comparison rows for the Analytics page (Phase 6 — Goal
+	 * Conversion & Purchase Analysis, Improvement.md §27).
+	 *
+	 * The same cached goal performance rows as `/revenue/goals`, sliced by
+	 * the analytics filter set: an explicit goal shows only itself, while
+	 * campaign / reward / goal_ids filters resolve onto the attribution
+	 * goal dimension exactly like the purchase summary. A product filter
+	 * cannot be expressed in attribution → null (the UI explains it), never
+	 * a fabricated list.
+	 *
+	 * @param array<string, mixed> $filters Optional from/to, campaign_id,
+	 *                                      goal_id, goal_ids, product_id,
+	 *                                      reward_type.
+	 * @return array<int, array<string, mixed>>|null
+	 */
+	public function goal_comparison( array $filters = array() ) {
+		if ( ! empty( $filters['product_id'] ) ) {
+			return null;
+		}
+
+		$args = array(
+			'from' => isset( $filters['from'] ) ? (string) $filters['from'] : '',
+			'to'   => isset( $filters['to'] ) ? (string) $filters['to'] : '',
+		);
+
+		$goal_ids = $this->resolve_goal_ids( $filters );
+
+		// A goal/campaign/reward filter that resolves to no goals is a
+		// genuine empty window — no rows, never the store-wide list.
+		$filter_active = ! empty( $filters['goal_id'] )
+			|| ! empty( $filters['goal_ids'] )
+			|| ! empty( $filters['campaign_id'] )
+			|| ! empty( $filters['reward_type'] );
+
+		if ( $filter_active && empty( $goal_ids ) ) {
+			return array();
+		}
+
+		if ( ! empty( $goal_ids ) ) {
+			$args['goal_ids'] = $goal_ids;
+		}
+
+		return $this->goal_performance( $args );
 	}
 
 	/**
