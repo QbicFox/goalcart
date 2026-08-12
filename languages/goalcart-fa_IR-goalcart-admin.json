@@ -2346,6 +2346,489 @@
             ],
             "“%s” will be permanently deleted. This cannot be undone.": [
                 "«%s» برای همیشه حذف می‌شود. این عمل قابل بازگشت نیست."
+            ],
+            "High": [
+                "بالا"
+            ],
+            "Medium": [
+                "متوسط"
+            ],
+            "Low": [
+                "پایین"
+            ],
+            "Expected impact": [
+                "تأثیر مورد انتظار"
+            ],
+            "average basket value": [
+                "میانگین ارزش سبد خرید"
+            ],
+            "Add product cost data to estimate profitability.": [
+                "برای برآورد سودآوری، دادهٔ هزینهٔ محصول را اضافه کنید."
+            ],
+            "Why?": [
+                "چرا؟"
+            ],
+            "Advanced details": [
+                "جزئیات پیشرفته"
+            ],
+            "Reachable orders": [
+                "سفارش‌های قابل دستیابی"
+            ],
+            "Estimated reward cost": [
+                "هزینهٔ تخمینی پاداش"
+            ],
+            "Scoring factors": [
+                "عوامل امتیازدهی"
+            ],
+            "Reachability": [
+                "دسترس‌پذیری"
+            ],
+            "Distance": [
+                "فاصله"
+            ],
+            "Economics": [
+                "اقتصاد"
+            ],
+            "History": [
+                "تاریخچه"
+            ],
+            "AOV ratio": [
+                "نسبت به میانگین ارزش سفارش"
+            ],
+            "Median ratio": [
+                "نسبت به میانهٔ ارزش سفارش"
+            ],
+            "Reach share": [
+                "سهم در دسترس"
+            ],
+            "Already at share": [
+                "سهم رسیده به آستانه"
+            ],
+            "Recommended Goal Target": [
+                "آستانهٔ هدف پیشنهادی"
+            ],
+            "Goal target updated.": [
+                "آستانهٔ هدف به‌روزرسانی شد."
+            ],
+            "This changes a production goal — the action is not reversible from here.": [
+                "این کار یک هدف فعال را تغییر می‌دهد — این عمل از اینجا قابل بازگشت نیست."
+            ],
+            "Not available": [
+                "در دسترس نیست"
+            ],
+            "Limited data": [
+                "دادهٔ محدود"
+            ],
+            "Moderate data": [
+                "دادهٔ متوسط"
+            ],
+            "Good data": [
+                "دادهٔ خوب"
+            ],
+            "%d days before the order": [
+                "%d روز قبل از سفارش"
+            ],
+            "30 days before the order": [
+                "۳۰ روز قبل از سفارش"
+            ],
+            "A completion means the customer reached the goal target. A purchase means a qualifying order was actually associated with the goal.": [
+                "تکمیل یعنی مشتری به آستانهٔ هدف رسید. خرید یعنی یک سفارش واجد شرایط واقعاً به این هدف مرتبط شده است."
+            ],
+            "A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion.": [
+                "یک سفارش واجد شرایط ووکامرس واقعاً به این هدف مرتبط شده — یک خرید، نه یک تکمیل هدف."
+            ],
+            "AOV comparisons are observed impact — they do not prove that Goal Cart caused the difference.": [
+                "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاهده‌شده است — ثابت نمی‌کند که گال کارت باعث این تفاوت شده است."
+            ],
+            "Add product cost data to estimate profit.": [
+                "برای برآورد سود، دادهٔ هزینهٔ محصول را اضافه کنید."
+            ],
+            "Add product cost data to see the estimated profit of Goal Cart.": [
+                "برای دیدن سود تخمینی گال کارت، دادهٔ هزینهٔ محصول را اضافه کنید."
+            ],
+            "Advanced Analytics": [
+                "تحلیل‌های پیشرفته"
+            ],
+            "Advanced attribution": [
+                "تخصیص پیشرفته"
+            ],
+            "Advanced attribution details": [
+                "جزئیات تخصیص پیشرفته"
+            ],
+            "Analysis is based on a healthy number of customer sessions.": [
+                "تحلیل بر پایهٔ تعداد مناسبی از نشست‌های مشتریان است."
+            ],
+            "Analysis is based on a moderate number of customer sessions.": [
+                "تحلیل بر پایهٔ تعداد متوسطی از نشست‌های مشتریان است."
+            ],
+            "Attributed Sales": [
+                "فروش تخصیص‌یافته"
+            ],
+            "Attributed orders": [
+                "سفارش‌های تخصیص‌یافته"
+            ],
+            "Attribution model": [
+                "مدل تخصیص"
+            ],
+            "Attribution window": [
+                "بازهٔ تخصیص"
+            ],
+            "Average Basket Increase": [
+                "افزایش میانگین سبد خرید"
+            ],
+            "Average Purchased Order": [
+                "میانگین سفارش خریداری‌شده"
+            ],
+            "Average basket": [
+                "میانگین سبد خرید"
+            ],
+            "Average basket increase": [
+                "افزایش میانگین سبد خرید"
+            ],
+            "Average cart value after goal exposure minus the value at first exposure, per session.": [
+                "میانگین ارزش سبد پس از دیدن هدف منهای ارزش در اولین نمایش، به ازای هر نشست."
+            ],
+            "Average order value of the attributed purchased orders.": [
+                "میانگین ارزش سفارش خریدهای تخصیص‌یافته."
+            ],
+            "Best performer": [
+                "بهترین عملکرد"
+            ],
+            "Compare": [
+                "مقایسه"
+            ],
+            "Cost data coverage": [
+                "پوشش دادهٔ هزینه"
+            ],
+            "Cost of goods field (_wc_cog_cost)": [
+                "فیلد بهای تمام‌شده (_wc_cog_cost)"
+            ],
+            "Costs": [
+                "هزینه‌ها"
+            ],
+            "Could not load the sales overview.": [
+                "بارگذاری نمای فروش ممکن نشد."
+            ],
+            "Customer Journey": [
+                "مسیر مشتری"
+            ],
+            "Customers who progressed or completed the goal before ordering are direct; exposure-only sessions are assisted.": [
+                "مشتریانی که پیش از سفارش به هدف پیشرفت کردند یا آن را تکمیل کردند، مستقیم هستند؛ نشست‌های فقط-مشاهده، کمکی هستند."
+            ],
+            "Daily attributed sales and purchased orders trend": [
+                "روند روزانهٔ فروش تخصیص‌یافته و سفارش‌های خریداری‌شده"
+            ],
+            "Detailed Activity": [
+                "فعالیت‌های تفصیلی"
+            ],
+            "Difference": [
+                "تفاوت"
+            ],
+            "Direct & assisted": [
+                "مستقیم و کمکی"
+            ],
+            "Direct revenue": [
+                "درآمد مستقیم"
+            ],
+            "Direct revenue is the incremental amount this goal moved — it is a slice of the influenced total, not an extra value on top of it.": [
+                "درآمد مستقیم، مقدار افزایشی‌ای است که این هدف ایجاد کرده — بخشی از کل تأثیرگذار است، نه ارزش اضافی روی آن."
+            ],
+            "Distinct orders associated with a goal in the selected period.": [
+                "سفارش‌های متمایز مرتبط با یک هدف در بازهٔ انتخابی."
+            ],
+            "Distinct orders associated with a goal — a purchase, not a goal completion.": [
+                "سفارش‌های متمایز مرتبط با یک هدف — یک خرید، نه یک تکمیل هدف."
+            ],
+            "Distinct orders associated with this goal in the selected period.": [
+                "سفارش‌های متمایز مرتبط با این هدف در بازهٔ انتخابی."
+            ],
+            "Estimated Profit": [
+                "سود تخمینی"
+            ],
+            "Estimated product margin": [
+                "حاشیهٔ سود تخمینی محصول"
+            ],
+            "Estimated profit is calculated only for orders with complete cost data.": [
+                "سود تخمینی فقط برای سفارش‌هایی محاسبه می‌شود که دادهٔ هزینهٔ کامل دارند."
+            ],
+            "Estimated, not guaranteed": [
+                "تخمینی، نه قطعی"
+            ],
+            "Estimated, not guaranteed — based on available product cost, reward and shipping data.": [
+                "تخمینی، نه قطعی — بر پایهٔ داده‌های موجود هزینهٔ محصول، پاداش و ارسال."
+            ],
+            "Estimated, not guaranteed.": [
+                "تخمینی، نه قطعی."
+            ],
+            "Goal Cart Sales Performance": [
+                "عملکرد فروش گال کارت"
+            ],
+            "Goal Cart does not invent product costs.": [
+                "گال کارت هزینهٔ محصول را اختراع نمی‌کند."
+            ],
+            "Goal Cart needs product cost data to estimate profit.": [
+                "گال کارت برای برآورد سود به دادهٔ هزینهٔ محصول نیاز دارد."
+            ],
+            "Goal Comparison": [
+                "مقایسهٔ اهداف"
+            ],
+            "Goal Completions": [
+                "تکمیل‌های هدف"
+            ],
+            "Goal Conversion & Purchase Analysis": [
+                "تحلیل تبدیل هدف و خرید"
+            ],
+            "Goal Views": [
+                "بازدیدهای هدف"
+            ],
+            "Goal funnel: views, progressed, completed, purchased": [
+                "قیف هدف: بازدید، پیشرفت، تکمیل، خرید"
+            ],
+            "Goal performance details": [
+                "جزئیات عملکرد هدف"
+            ],
+            "Goal-exposed": [
+                "در معرض هدف"
+            ],
+            "Goals Completed": [
+                "اهداف تکمیل‌شده"
+            ],
+            "Good performance": [
+                "عملکرد خوب"
+            ],
+            "How Estimated Profit becomes available": [
+                "چگونه سود تخمینی در دسترس می‌شود"
+            ],
+            "How did Goal Cart perform? Sales attributed, purchased orders, average basket and estimated profit.": [
+                "گال کارت چه عملکردی داشت؟ فروش تخصیص‌یافته، سفارش‌های خریداری‌شده، میانگین سبد و سود تخمینی."
+            ],
+            "How is this calculated?": [
+                "این چگونه محاسبه می‌شود؟"
+            ],
+            "How many times customers reached a goal target. Completion is not the same as purchase.": [
+                "چند بار مشتریان به آستانهٔ هدف رسیدند. تکمیل با خرید یکی نیست."
+            ],
+            "How many times goal widgets were seen.": [
+                "چند بار ویجت‌های هدف دیده شدند."
+            ],
+            "Incremental Revenue": [
+                "درآمد افزایشی"
+            ],
+            "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the Goal Cart model: progressed\/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once.": [
+                "درآمد افزایشی همان درآمد مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که اهداف ایجاد کرده‌اند. تخصیص از مدل گال کارت پیروی می‌کند: اهداف پیشرفته\/تکمیل‌شده مستقیم‌اند، اهداف فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
+            ],
+            "Influenced revenue": [
+                "درآمد تأثیرگذار"
+            ],
+            "Key Insights": [
+                "بینش‌های کلیدی"
+            ],
+            "Largest drop-off": [
+                "بیشترین ریزش"
+            ],
+            "Learn how": [
+                "یاد بگیرید چگونه"
+            ],
+            "Limited data — based on orders with complete cost information": [
+                "دادهٔ محدود — بر پایهٔ سفارش‌های دارای اطلاعات کامل هزینه"
+            ],
+            "More customer activity is needed for a more reliable analysis.": [
+                "برای تحلیل مطمئن‌تر، فعالیت بیشتری از مشتریان لازم است."
+            ],
+            "No goal performance yet": [
+                "هنوز عملکرد هدفی وجود ندارد"
+            ],
+            "No goal purchase activity in this range.": [
+                "در این بازه خرید مرتبط با هدفی وجود ندارد."
+            ],
+            "No sales data yet": [
+                "هنوز دادهٔ فروشی وجود ندارد"
+            ],
+            "Not enough attributed order data yet.": [
+                "هنوز دادهٔ کافی از سفارش‌های تخصیص‌یافته وجود ندارد."
+            ],
+            "Observed impact": [
+                "تأثیر مشاهده‌شده"
+            ],
+            "Observed impact — incremental cart value relative to the baseline. It does not prove that Goal Cart caused the difference.": [
+                "تأثیر مشاهده‌شده — ارزش افزایشی سبد نسبت به خط مبنا. ثابت نمی‌کند که گال کارت باعث این تفاوت شده است."
+            ],
+            "Observed impact — this comparison does not prove that Goal Cart caused the difference.": [
+                "تأثیر مشاهده‌شده — این مقایسه ثابت نمی‌کند که گال کارت باعث این تفاوت شده است."
+            ],
+            "Once cost data exists, Estimated Profit becomes available automatically.": [
+                "به محض وجود دادهٔ هزینه، سود تخمینی به‌طور خودکار در دسترس می‌شود."
+            ],
+            "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit insights here.": [
+                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گال کارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
+            ],
+            "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit per goal here.": [
+                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گال کارت خرید، فروش و سود هر هدف را اینجا نشان می‌دهد."
+            ],
+            "Once customers start interacting with your goals, Goal Cart will show sales, purchases and profit insights here.": [
+                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گال کارت فروش، خریدها و بینش‌های سود را اینجا نشان می‌دهد."
+            ],
+            "Only goal events within this window before an order are attributed to it.": [
+                "فقط رویدادهای هدف در این بازه قبل از سفارش به آن تخصیص می‌یابند."
+            ],
+            "Open performance details for %s": [
+                "باز کردن جزئیات عملکرد برای %s"
+            ],
+            "Open your products": [
+                "محصولات خود را باز کنید"
+            ],
+            "Optimization opportunity": [
+                "فرصت بهینه‌سازی"
+            ],
+            "Order totals from orders that were only exposed to a goal, never progressed.": [
+                "مجموع سفارش‌هایی که فقط در معرض هدف بودند و هرگز پیشرفت نکردند."
+            ],
+            "Order totals from orders that were only exposed to this goal, never progressed.": [
+                "مجموع سفارش‌هایی که فقط در معرض این هدف بودند و هرگز پیشرفت نکردند."
+            ],
+            "Order totals of every order associated with a goal — distinct orders, never double counted.": [
+                "مجموع همهٔ سفارش‌های مرتبط با یک هدف — سفارش‌های متمایز، هرگز دوبار شمارش نمی‌شوند."
+            ],
+            "Order totals of every order associated with this goal — distinct orders, never double counted.": [
+                "مجموع همهٔ سفارش‌های مرتبط با این هدف — سفارش‌های متمایز، هرگز دوبار شمارش نمی‌شوند."
+            ],
+            "Percentage of completed goals that were followed by an attributed purchase.": [
+                "درصد اهداف تکمیل‌شده‌ای که پس از آن یک خرید تخصیص‌یافته رخ داده است."
+            ],
+            "Performance Summary": [
+                "خلاصهٔ عملکرد"
+            ],
+            "Product cost must come from WooCommerce or your product-cost data. Goal Cart reads, in order:": [
+                "هزینهٔ محصول باید از ووکامرس یا داده‌های هزینهٔ محصول شما باشد. گال کارت به ترتیب می‌خواند:"
+            ],
+            "Profit not estimated yet": [
+                "سود هنوز برآورد نشده"
+            ],
+            "Purchase Analysis": [
+                "تحلیل خرید"
+            ],
+            "Purchase Rate": [
+                "نرخ خرید"
+            ],
+            "Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and goal comparison.": [
+                "تحلیل خرید برای این فیلتر محصول در دسترس نیست. برای دیدن قیف، خریدها و مقایسهٔ اهداف، فیلتر محصول را حذف کنید."
+            ],
+            "Purchase conversion": [
+                "تبدیل به خرید"
+            ],
+            "Purchase rate": [
+                "نرخ خرید"
+            ],
+            "Purchased": [
+                "خریداری‌شده"
+            ],
+            "Purchased After Completion": [
+                "خرید پس از تکمیل"
+            ],
+            "Purchased Orders": [
+                "سفارش‌های خریداری‌شده"
+            ],
+            "Purchased orders ÷ completed goals.": [
+                "سفارش‌های خریداری‌شده ÷ اهداف تکمیل‌شده."
+            ],
+            "Purchases": [
+                "خریدها"
+            ],
+            "Raw interaction metrics from the event log — impressions, completions, revenue and suggestions.": [
+                "شاخص‌های خام تعامل از گزارش رویداد — نمایش‌ها، تکمیل‌ها، درآمد و پیشنهادها."
+            ],
+            "Revenue from the incremental value of orders where customers progressed toward or completed a goal before ordering.": [
+                "درآمد حاصل از ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به سمت هدف پیشرفت کردند یا آن را تکمیل کردند."
+            ],
+            "Rewards and shipping costs were higher than the estimated incremental margin.": [
+                "هزینه‌های پاداش و ارسال بیشتر از حاشیهٔ افزایشی تخمینی بودند."
+            ],
+            "Sales": [
+                "فروش"
+            ],
+            "Sales Attributed to Goal Cart": [
+                "فروش تخصیص‌یافته به گال کارت"
+            ],
+            "Sales Performance": [
+                "عملکرد فروش"
+            ],
+            "Sales attributed": [
+                "فروش تخصیص‌یافته"
+            ],
+            "Sales attributed to Goal Cart": [
+                "فروش تخصیص‌یافته به گال کارت"
+            ],
+            "Sales attributed to Goal Cart — the incremental order value driven by this goal.": [
+                "فروش تخصیص‌یافته به گال کارت — ارزش افزایشی سفارش ناشی از این هدف."
+            ],
+            "Sales generated after Goal Cart interaction.": [
+                "فروش ایجادشده پس از تعامل با گال کارت."
+            ],
+            "Set up product costs": [
+                "راه‌اندازی هزینه‌های محصول"
+            ],
+            "Shipping cost": [
+                "هزینهٔ ارسال"
+            ],
+            "Some orders do not have complete cost information.": [
+                "برخی سفارش‌ها اطلاعات کامل هزینه ندارند."
+            ],
+            "Store average": [
+                "میانگین فروشگاه"
+            ],
+            "Store-wide comparison is not available in this window.": [
+                "مقایسهٔ سراسری فروشگاه در این بازه در دسترس نیست."
+            ],
+            "Target: %s": [
+                "آستانه: %s"
+            ],
+            "The calculation includes product cost\/margin, reward cost, shipping cost and incremental revenue.": [
+                "محاسبه شامل هزینه\/حاشیهٔ محصول، هزینهٔ پاداش، هزینهٔ ارسال و درآمد افزایشی است."
+            ],
+            "The goalcart_product_cost filter": [
+                "فیلتر goalcart_product_cost"
+            ],
+            "The incremental order value from orders where customers interacted with a goal before purchasing.": [
+                "ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید با یک هدف تعامل کردند."
+            ],
+            "The incremental order value from orders where customers progressed or completed this goal before ordering.": [
+                "ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به این هدف پیشرفت کردند یا آن را تکمیل کردند."
+            ],
+            "These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting.": [
+                "این شاخص‌ها از مدل تخصیص گال کارت استفاده می‌کنند — مستقیم در برابر کمکی، سفارش‌های متمایز، بدون شمارش دوبار."
+            ],
+            "This is an analytical estimate based on available WooCommerce cost and order data. It is not accounting profit.": [
+                "این یک برآورد تحلیلی بر پایهٔ داده‌های موجود هزینه و سفارش ووکامرس است. سود حسابداری نیست."
+            ],
+            "Trend metrics": [
+                "شاخص‌های روند"
+            ],
+            "Variation falls back to its parent product": [
+                "متغیر به محصول والد خود بازمی‌گردد"
+            ],
+            "Viewed": [
+                "بازدیدشده"
+            ],
+            "What happened?": [
+                "چه اتفاقی افتاد؟"
+            ],
+            "What happens after customers see and complete your goals — purchases, sales and profit.": [
+                "پس از دیدن و تکمیل اهداف شما توسط مشتریان چه اتفاقی می‌افتد — خریدها، فروش و سود."
+            ],
+            "Which goals generated purchases, sales and profit? Completion is not the same as purchase.": [
+                "کدام اهداف خرید، فروش و سود ایجاد کردند؟ تکمیل با خرید یکی نیست."
+            ],
+            "WooCommerce product cost field (_cost)": [
+                "فیلد هزینهٔ محصول ووکامرس (_cost)"
+            ],
+            "after Goal Cart interaction": [
+                "پس از تعامل با گال کارت"
+            ],
+            "%d days": [
+                "%d روز"
+            ],
+            "Set the goal target to %s?": [
+                "آستانهٔ هدف را روی %s تنظیم کنم؟"
             ]
         }
     }

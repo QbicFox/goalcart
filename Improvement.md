@@ -24,7 +24,7 @@ The goal is:
 
 # ✅ IMPLEMENTATION PROGRESS
 
-**Overall:** Phases 1–6 complete · Phases 7–10 not started.
+**Overall:** Phases 1–7 complete · Phases 8–10 not started.
 
 ```text
 Phase 1 : ████████████████████ 100%   Codebase Audit (REVENUE_ANALYTICS_AUDIT.md)
@@ -33,7 +33,7 @@ Phase 3 : ████████████████████ 100%   Pr
 Phase 4 : ████████████████████ 100%   Revenue Overview Redesign
 Phase 5 : ████████████████████ 100%   Goal Performance Redesign
 Phase 6 : ████████████████████ 100%   Analytics Redesign
-Phase 7 : ░░░░░░░░░░░░░░░░░░░░   0%   Recommendations
+Phase 7 : ████████████████████ 100%   Recommendations
 Phase 8 : ░░░░░░░░░░░░░░░░░░░░   0%   Upsell Analytics
 Phase 9 : ░░░░░░░░░░░░░░░░░░░░   0%   UX Polish
 Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Testing & Regression
@@ -47,12 +47,12 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | 4 — Revenue Overview Redesign | [x] 100% | Sales Performance page: 4 KPI cards, profit states + details, simplified trend with toggles, insight cards, advanced attribution drawer, nav rename |
 | 5 — Goal Performance Redesign | [x] 100% | commercial-outcomes Goal table (Viewed/Progressed/Completed/Purchased/Purchase Rate/Sales/Estimated Profit, sortable), per-goal detail drawer (performance summary, funnel with drop-off, costs via the shared profit card, advanced attribution + advanced accordions), additive `goal_metrics()` fields, `tests/revenue-admin-test.php` (56 checks) |
 | 6 — Analytics Redesign | [x] 100% | Analytics page → Goal Conversion & Purchase Analysis: purchase KPI row + secondary views/completions, customer-journey funnel with drop-off, completion-vs-purchase analysis, sortable goal comparison table, deterministic drop-off insights, advanced attribution accordion, legacy activity metrics preserved behind an accordion; additive `goal_comparison`/`funnel`/assisted/influenced payload fields |
-| 7 — Recommendations | [ ] 0% | — |
+| 7 — Recommendations | [x] 100% | business-first Smart Recommendations page (Confidence: High/Medium/Low label, Expected impact, §34 expected-profit state, Why? bullets, raw scoring behind an Advanced details expander); typed `RecommendationFactors`; fa_IR coverage gap closed (i18n 53/53); `tests/frontend-test.php` Phase 7 source-scan guards; docs + CHANGELOG updated |
 | 8 — Upsell Analytics | [ ] 0% | — |
 | 9 — UX Polish | [ ] 0% | — |
 | 10 — Testing & Regression | [ ] 0% | — |
 
-**Last update:** 2026-08-12 — Phase 6 (Analytics Redesign) complete; `tsc`, ESLint and `vite build` clean; POT regenerated (868 strings); PHP suites green (purchase-metrics 107, revenue-admin 56, attribution 72, aggregation 74, phase33 99, profit-availability 45); the legacy `analytics-dashboard` suite stays at its documented pre-existing dev-DB drift baseline (31 failures) — every Phase 6 check in it passes.
+**Last update:** 2026-08-12 — Phase 7 (Recommendations) complete; `tsc`, ESLint and `vite build` clean; POT regenerated (887 strings) and the fa_IR translation coverage gap from Phases 4–6 closed (i18n 53/53); PHP suites green (recommendation 90, purchase-metrics 107, revenue-admin 56, attribution 72, aggregation 74, phase33 99, profit-availability 45); the legacy `analytics-dashboard` suite stays at its documented pre-existing dev-DB drift baseline (31 failures) — every Phase 6 check in it passes.
 
 ---
 
@@ -2167,6 +2167,8 @@ Do not remove existing Analytics API compatibility.
 
 # Phase 7 — Recommendations
 
+> **STATUS: ✅ COMPLETE — 2026-08-12** (see progress register at the top of this document)
+
 Simplify:
 
 * recommendation presentation
@@ -2176,6 +2178,51 @@ Simplify:
 * reasons
 
 Move raw scoring details behind Advanced Details.
+
+**Deliverables** (frontend only — the Phase 33.4 engine payload already
+supplied every value; no backend change needed):
+
+* `admin-app/src/routes/Recommendations.tsx` rewritten business-first
+  (§33–§34):
+  - **Top recommendation card** — the recommended goal target up front,
+    a **"Confidence: High / Medium / Low"** label (tiered from the raw
+    score — the number is no longer the primary read), the expected
+    impact as "+X% – +Y% average basket value" (never the technical
+    "AOV impact" wording), the expected profit with the §34 unavailable
+    state ("Not available — Add product cost data to estimate
+    profitability", never a guessed number) and the plain-English
+    **"Why?"** bullets directly on the card.
+  - **Advanced details** — the raw scoring details (score, component
+    scores, expected completion, reachable orders, estimated reward
+    cost, AOV/median ratios, reach shares, margin %) behind an
+    expander, shared by the top card and every candidate row.
+  - **Simplified analyzed-store-data panel** — AOV / median / orders /
+    window / shipping / margin plus a business-language data-sufficiency
+    label (Limited / Moderate / Good data, §45) instead of the raw
+    confidence-tier chip; the order-value distribution bars stay.
+  - **Ranked candidates** — threshold + expected impact + confidence
+    label per row; the score bar, reasons and reward cost move behind
+    the row's Details expander.
+  - The explicit **Apply → confirm → `PUT /goals/{id}`** flow and the
+    Dismiss behavior are unchanged (the engine never modifies a goal).
+* `admin-app/src/types.ts` — `RecommendationCandidate.factors` is now
+  the typed `RecommendationFactors` interface (the four component
+  scores, ratios, reach shares, reward-cost availability, margin %);
+  `RecommendationData.margin` gains the sample counts (`sampled` /
+  `with_cost`).
+* i18n — the POT is regenerated (887 strings) and `goalcart-fa_IR.po`
+  gains 159 translations (the Phase 7 labels plus the Phase 4–6
+  coverage gap: profit/data-state labels, purchase terminology,
+  insight/empty-state strings, tooltips) so `tests/i18n-test.php` is
+  fully green again (53 checks).
+* Tests — `tests/frontend-test.php` gains Phase 7 source-scan guards:
+  the business confidence label, the Why? bullets, the §34 expected-
+  profit state, the Advanced-details expander and the absence of the
+  raw confidence-percent-first render; the recommendation suite stays
+  green (90 checks).
+* Docs — `docs/revenue.md` §5 rewritten for the simplified UI;
+  CHANGELOG gains the Phase 5–7 entries.
+* Verification: `tsc --noEmit`, ESLint and `vite build` all clean.
 
 ---
 
@@ -2235,14 +2282,14 @@ The implementation is complete only when all of the following are true:
 
 ## Revenue
 
-* [ ] Revenue overview is understandable without knowing attribution terminology.
-* [ ] Four primary KPIs are visible.
-* [ ] Purchased Orders is visible.
-* [ ] Estimated Profit is visible when cost data exists.
-* [ ] Profit unavailable state explains how to enable it.
-* [ ] Negative profit is supported.
-* [ ] Profit details explain the calculation.
-* [ ] Advanced attribution is available but not intrusive.
+* [x] Revenue overview is understandable without knowing attribution terminology.
+* [x] Four primary KPIs are visible.
+* [x] Purchased Orders is visible.
+* [x] Estimated Profit is visible when cost data exists.
+* [x] Profit unavailable state explains how to enable it.
+* [x] Negative profit is supported.
+* [x] Profit details explain the calculation.
+* [x] Advanced attribution is available but not intrusive.
 
 ## Analytics
 
@@ -2268,34 +2315,34 @@ The implementation is complete only when all of the following are true:
 
 ## Profit
 
-* [ ] Existing profit formula is preserved.
-* [ ] Product cost is never invented.
-* [ ] WooCommerce cost sources are supported.
-* [ ] Missing cost produces a clear unavailable state.
-* [ ] Profit reason is user-friendly.
-* [ ] Reward cost is included.
-* [ ] Shipping cost is included where supported.
-* [ ] Negative profit works.
-* [ ] Estimated profit is explicitly labeled as estimated.
+* [x] Existing profit formula is preserved.
+* [x] Product cost is never invented.
+* [x] WooCommerce cost sources are supported.
+* [x] Missing cost produces a clear unavailable state.
+* [x] Profit reason is user-friendly.
+* [x] Reward cost is included.
+* [x] Shipping cost is included where supported.
+* [x] Negative profit works.
+* [x] Estimated profit is explicitly labeled as estimated.
 
 ## Architecture
 
-* [ ] Existing AttributionEngine is reused.
-* [ ] Existing RevenueRepository is reused.
-* [ ] Existing caching is reused.
-* [ ] No duplicate attribution engine is introduced.
-* [ ] No unnecessary full WooCommerce order scans are introduced.
-* [ ] Existing API compatibility is preserved where practical.
-* [ ] Existing attribution semantics are not silently changed.
+* [x] Existing AttributionEngine is reused.
+* [x] Existing RevenueRepository is reused.
+* [x] Existing caching is reused.
+* [x] No duplicate attribution engine is introduced.
+* [x] No unnecessary full WooCommerce order scans are introduced.
+* [x] Existing API compatibility is preserved where practical.
+* [x] Existing attribution semantics are not silently changed.
 
 ## UX
 
-* [ ] First viewport is simple.
-* [ ] Technical analytics is hidden behind progressive disclosure.
-* [ ] No confusing duplicate revenue numbers appear as primary KPIs.
-* [ ] User can understand the difference between completed and purchased.
-* [ ] Every major number has a meaningful label.
-* [ ] No raw technical field names are exposed.
+* [x] First viewport is simple.
+* [x] Technical analytics is hidden behind progressive disclosure.
+* [x] No confusing duplicate revenue numbers appear as primary KPIs.
+* [x] User can understand the difference between completed and purchased.
+* [x] Every major number has a meaningful label.
+* [x] No raw technical field names are exposed.
 
 ---
 

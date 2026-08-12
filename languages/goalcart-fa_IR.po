@@ -3488,3 +3488,738 @@ msgstr "«%s» برای همیشه حذف می‌شود. اهداف آن حفظ 
 #: admin-app/src/routes/Goals.tsx:444
 msgid "“%s” will be permanently deleted. This cannot be undone."
 msgstr "«%s» برای همیشه حذف می‌شود. این عمل قابل بازگشت نیست."
+
+#: admin-app/src/routes/Settings.tsx:465
+#: admin-app/src/routes/Recommendations.tsx:55
+msgid "High"
+msgstr "بالا"
+
+#: admin-app/src/routes/Recommendations.tsx:180
+#: admin-app/src/routes/Recommendations.tsx:58
+msgid "Medium"
+msgstr "متوسط"
+
+#: admin-app/src/routes/Settings.tsx:758
+#: admin-app/src/routes/Recommendations.tsx:60
+msgid "Low"
+msgstr "پایین"
+
+#: admin-app/src/routes/Recommendations.tsx:146
+#: admin-app/src/routes/Recommendations.tsx:249
+#: admin-app/src/routes/Recommendations.tsx:460
+msgid "Expected impact"
+msgstr "تأثیر مورد انتظار"
+
+#: includes/Analytics/UpsellRanker.php:1158
+#: admin-app/src/routes/Recommendations.tsx:255
+#: admin-app/src/routes/Recommendations.tsx:466
+msgid "average basket value"
+msgstr "میانگین ارزش سبد خرید"
+
+#: admin-app/src/routes/GoalPerformance.tsx:177
+#: admin-app/src/routes/GoalPerformance.tsx:554
+#: admin-app/src/routes/Recommendations.tsx:268
+msgid "Add product cost data to estimate profitability."
+msgstr "برای برآورد سودآوری، دادهٔ هزینهٔ محصول را اضافه کنید."
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:164
+#: admin-app/src/routes/Recommendations.tsx:277
+msgid "Why?"
+msgstr "چرا؟"
+
+#: admin-app/src/routes/GoalPerformance.tsx:291
+#: admin-app/src/routes/Recommendations.tsx:129
+msgid "Advanced details"
+msgstr "جزئیات پیشرفته"
+
+#: admin-app/src/routes/Recommendations.tsx:150
+#: admin-app/src/routes/Recommendations.tsx:170
+msgid "Reachable orders"
+msgstr "سفارش‌های قابل دستیابی"
+
+#: admin-app/src/routes/Analytics.tsx:872
+#: admin-app/src/routes/Recommendations.tsx:154
+msgid "Estimated reward cost"
+msgstr "هزینهٔ تخمینی پاداش"
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:141
+#: admin-app/src/routes/Recommendations.tsx:160
+msgid "Scoring factors"
+msgstr "عوامل امتیازدهی"
+
+#: admin-app/src/routes/Recommendations.tsx:170
+#: admin-app/src/routes/Recommendations.tsx:182
+msgid "Reachability"
+msgstr "دسترس‌پذیری"
+
+#: admin-app/src/routes/Settings.tsx:485
+#: admin-app/src/routes/Recommendations.tsx:171
+msgid "Distance"
+msgstr "فاصله"
+
+#: admin-app/src/routes/Campaigns.tsx:94
+#: admin-app/src/routes/Goals.tsx:157
+#: admin-app/src/routes/Recommendations.tsx:172
+msgid "Economics"
+msgstr "اقتصاد"
+
+#: includes/Analytics/UpsellRanker.php:1202
+#: admin-app/src/routes/Recommendations.tsx:173
+msgid "History"
+msgstr "تاریخچه"
+
+#: admin-app/src/routes/RevenueOverview.tsx:594
+#: admin-app/src/routes/Recommendations.tsx:177
+msgid "AOV ratio"
+msgstr "نسبت به میانگین ارزش سفارش"
+
+#: admin-app/src/routes/Recommendations.tsx:348
+#: admin-app/src/routes/Recommendations.tsx:180
+msgid "Median ratio"
+msgstr "نسبت به میانهٔ ارزش سفارش"
+
+#: admin-app/src/components/goal-builder/goalTypes.tsx:52
+#: admin-app/src/routes/Recommendations.tsx:182
+msgid "Reach share"
+msgstr "سهم در دسترس"
+
+#: includes/Goals/MessageEngine.php:153
+#: admin-app/src/routes/Recommendations.tsx:183
+msgid "Already at share"
+msgstr "سهم رسیده به آستانه"
+
+#: admin-app/src/components/layout/navigation.ts:51
+#: admin-app/src/routes/Recommendations.tsx:225
+msgid "Recommended Goal Target"
+msgstr "آستانهٔ هدف پیشنهادی"
+
+#: includes/Rewards/Applicators/AbstractDiscountApplicator.php:183
+#: admin-app/src/routes/Recommendations.tsx:548
+msgid "Goal target updated."
+msgstr "آستانهٔ هدف به‌روزرسانی شد."
+
+#: admin-app/src/components/goal-builder/ConditionFields.tsx:103
+#: admin-app/src/routes/Recommendations.tsx:665
+msgid "This changes a production goal — the action is not reversible from here."
+msgstr "این کار یک هدف فعال را تغییر می‌دهد — این عمل از اینجا قابل بازگشت نیست."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:98
+#: admin-app/src/routes/GoalPerformance.tsx:170
+#: admin-app/src/routes/Recommendations.tsx:264
+msgid "Not available"
+msgstr "در دسترس نیست"
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:242
+#: admin-app/src/routes/GoalPerformance.tsx:95
+#: admin-app/src/routes/Recommendations.tsx:71
+msgid "Limited data"
+msgstr "دادهٔ محدود"
+
+#: admin-app/src/routes/Settings.tsx:508
+#: admin-app/src/routes/GoalPerformance.tsx:99
+#: admin-app/src/routes/Recommendations.tsx:69
+msgid "Moderate data"
+msgstr "دادهٔ متوسط"
+
+#: admin-app/src/routes/Goals.tsx:242
+#: admin-app/src/routes/GoalPerformance.tsx:103
+#: admin-app/src/routes/Recommendations.tsx:66
+msgid "Good data"
+msgstr "دادهٔ خوب"
+
+#: admin-app/src/routes/GoalPerformance.tsx:360
+msgid "%d days before the order"
+msgstr "%d روز قبل از سفارش"
+
+#: admin-app/src/routes/Analytics.tsx:854
+#: admin-app/src/routes/RevenueOverview.tsx:587
+msgid "30 days before the order"
+msgstr "۳۰ روز قبل از سفارش"
+
+#: admin-app/src/routes/Analytics.tsx:652
+#: admin-app/src/routes/GoalPerformance.tsx:255
+msgid "A completion means the customer reached the goal target. A purchase means a qualifying order was actually associated with the goal."
+msgstr "تکمیل یعنی مشتری به آستانهٔ هدف رسید. خرید یعنی یک سفارش واجد شرایط واقعاً به این هدف مرتبط شده است."
+
+#: admin-app/src/routes/Analytics.tsx:178
+#: admin-app/src/routes/GoalPerformance.tsx:67
+msgid "A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion."
+msgstr "یک سفارش واجد شرایط ووکامرس واقعاً به این هدف مرتبط شده — یک خرید، نه یک تکمیل هدف."
+
+#: admin-app/src/routes/RevenueOverview.tsx:594
+msgid "AOV comparisons are observed impact — they do not prove that Goal Cart caused the difference."
+msgstr "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاهده‌شده است — ثابت نمی‌کند که گال کارت باعث این تفاوت شده است."
+
+#: admin-app/src/routes/Analytics.tsx:702
+#: admin-app/src/routes/GoalPerformance.tsx:177
+#: admin-app/src/routes/GoalPerformance.tsx:554
+msgid "Add product cost data to estimate profit."
+msgstr "برای برآورد سود، دادهٔ هزینهٔ محصول را اضافه کنید."
+
+#: admin-app/src/routes/Analytics.tsx:303
+#: admin-app/src/routes/RevenueOverview.tsx:181
+msgid "Add product cost data to see the estimated profit of Goal Cart."
+msgstr "برای دیدن سود تخمینی گال کارت، دادهٔ هزینهٔ محصول را اضافه کنید."
+
+#: admin-app/src/routes/Analytics.tsx:821
+msgid "Advanced Analytics"
+msgstr "تحلیل‌های پیشرفته"
+
+#: admin-app/src/routes/RevenueOverview.tsx:537
+msgid "Advanced attribution"
+msgstr "تخصیص پیشرفته"
+
+#: admin-app/src/routes/GoalPerformance.tsx:291
+msgid "Advanced attribution details"
+msgstr "جزئیات تخصیص پیشرفته"
+
+#: admin-app/src/routes/GoalPerformance.tsx:104
+msgid "Analysis is based on a healthy number of customer sessions."
+msgstr "تحلیل بر پایهٔ تعداد مناسبی از نشست‌های مشتریان است."
+
+#: admin-app/src/routes/GoalPerformance.tsx:100
+msgid "Analysis is based on a moderate number of customer sessions."
+msgstr "تحلیل بر پایهٔ تعداد متوسطی از نشست‌های مشتریان است."
+
+#: admin-app/src/routes/Analytics.tsx:593
+#: admin-app/src/routes/Analytics.tsx:681
+#: admin-app/src/routes/GoalPerformance.tsx:233
+#: admin-app/src/routes/RevenueOverview.tsx:198
+#: admin-app/src/routes/RevenueOverview.tsx:478
+msgid "Attributed Sales"
+msgstr "فروش تخصیص‌یافته"
+
+#: admin-app/src/routes/Analytics.tsx:848
+#: admin-app/src/routes/GoalPerformance.tsx:374
+#: admin-app/src/routes/RevenueOverview.tsx:576
+msgid "Attributed orders"
+msgstr "سفارش‌های تخصیص‌یافته"
+
+#: admin-app/src/routes/GoalPerformance.tsx:349
+msgid "Attribution model"
+msgstr "مدل تخصیص"
+
+#: admin-app/src/routes/Analytics.tsx:853
+#: admin-app/src/routes/GoalPerformance.tsx:357
+#: admin-app/src/routes/RevenueOverview.tsx:584
+msgid "Attribution window"
+msgstr "بازهٔ تخصیص"
+
+#: admin-app/src/routes/RevenueOverview.tsx:326
+msgid "Average Basket Increase"
+msgstr "افزایش میانگین سبد خرید"
+
+#: admin-app/src/routes/Analytics.tsx:686
+msgid "Average Purchased Order"
+msgstr "میانگین سفارش خریداری‌شده"
+
+#: admin-app/src/routes/RevenueOverview.tsx:127
+msgid "Average basket"
+msgstr "میانگین سبد خرید"
+
+#: admin-app/src/routes/GoalPerformance.tsx:366
+msgid "Average basket increase"
+msgstr "افزایش میانگین سبد خرید"
+
+#: admin-app/src/routes/GoalPerformance.tsx:322
+#: admin-app/src/routes/RevenueOverview.tsx:569
+msgid "Average cart value after goal exposure minus the value at first exposure, per session."
+msgstr "میانگین ارزش سبد پس از دیدن هدف منهای ارزش در اولین نمایش، به ازای هر نشست."
+
+#: admin-app/src/routes/Analytics.tsx:688
+msgid "Average order value of the attributed purchased orders."
+msgstr "میانگین ارزش سفارش خریدهای تخصیص‌یافته."
+
+#: admin-app/src/routes/Analytics.tsx:277
+msgid "Best performer"
+msgstr "بهترین عملکرد"
+
+#: admin-app/src/routes/RevenueOverview.tsx:652
+msgid "Compare"
+msgstr "مقایسه"
+
+#: admin-app/src/routes/Analytics.tsx:862
+msgid "Cost data coverage"
+msgstr "پوشش دادهٔ هزینه"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:24
+msgid "Cost of goods field (_wc_cog_cost)"
+msgstr "فیلد بهای تمام‌شده (_wc_cog_cost)"
+
+#: admin-app/src/routes/GoalPerformance.tsx:267
+msgid "Costs"
+msgstr "هزینه‌ها"
+
+#: admin-app/src/routes/RevenueOverview.tsx:273
+msgid "Could not load the sales overview."
+msgstr "بارگذاری نمای فروش ممکن نشد."
+
+#: admin-app/src/routes/Analytics.tsx:638
+#: admin-app/src/routes/GoalPerformance.tsx:240
+msgid "Customer Journey"
+msgstr "مسیر مشتری"
+
+#: admin-app/src/routes/GoalPerformance.tsx:351
+msgid "Customers who progressed or completed the goal before ordering are direct; exposure-only sessions are assisted."
+msgstr "مشتریانی که پیش از سفارش به هدف پیشرفت کردند یا آن را تکمیل کردند، مستقیم هستند؛ نشست‌های فقط-مشاهده، کمکی هستند."
+
+#: admin-app/src/routes/RevenueOverview.tsx:417
+msgid "Daily attributed sales and purchased orders trend"
+msgstr "روند روزانهٔ فروش تخصیص‌یافته و سفارش‌های خریداری‌شده"
+
+#: admin-app/src/routes/Analytics.tsx:898
+msgid "Detailed Activity"
+msgstr "فعالیت‌های تفصیلی"
+
+#: admin-app/src/routes/RevenueOverview.tsx:663
+msgid "Difference"
+msgstr "تفاوت"
+
+#: admin-app/src/routes/GoalPerformance.tsx:350
+msgid "Direct & assisted"
+msgstr "مستقیم و کمکی"
+
+#: admin-app/src/routes/Analytics.tsx:827
+#: admin-app/src/routes/GoalPerformance.tsx:296
+#: admin-app/src/routes/RevenueOverview.tsx:543
+#: admin-app/src/routes/RevenueOverview.tsx:620
+msgid "Direct revenue"
+msgstr "درآمد مستقیم"
+
+#: admin-app/src/routes/GoalPerformance.tsx:328
+msgid "Direct revenue is the incremental amount this goal moved — it is a slice of the influenced total, not an extra value on top of it."
+msgstr "درآمد مستقیم، مقدار افزایشی‌ای است که این هدف ایجاد کرده — بخشی از کل تأثیرگذار است، نه ارزش اضافی روی آن."
+
+#: admin-app/src/routes/Analytics.tsx:850
+msgid "Distinct orders associated with a goal in the selected period."
+msgstr "سفارش‌های متمایز مرتبط با یک هدف در بازهٔ انتخابی."
+
+#: admin-app/src/routes/Analytics.tsx:581
+msgid "Distinct orders associated with a goal — a purchase, not a goal completion."
+msgstr "سفارش‌های متمایز مرتبط با یک هدف — یک خرید، نه یک تکمیل هدف."
+
+#: admin-app/src/routes/GoalPerformance.tsx:376
+msgid "Distinct orders associated with this goal in the selected period."
+msgstr "سفارش‌های متمایز مرتبط با این هدف در بازهٔ انتخابی."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:88
+#: admin-app/src/routes/Analytics.tsx:197
+#: admin-app/src/routes/Analytics.tsx:692
+#: admin-app/src/routes/GoalPerformance.tsx:86
+#: admin-app/src/routes/GoalPerformance.tsx:234
+msgid "Estimated Profit"
+msgstr "سود تخمینی"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:172
+msgid "Estimated product margin"
+msgstr "حاشیهٔ سود تخمینی محصول"
+
+#: admin-app/src/routes/Analytics.tsx:872
+msgid "Estimated profit is calculated only for orders with complete cost data."
+msgstr "سود تخمینی فقط برای سفارش‌هایی محاسبه می‌شود که دادهٔ هزینهٔ کامل دارند."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:106
+#: admin-app/src/routes/GoalPerformance.tsx:175
+msgid "Estimated, not guaranteed"
+msgstr "تخمینی، نه قطعی"
+
+#: admin-app/src/routes/Analytics.tsx:199
+#: admin-app/src/routes/GoalPerformance.tsx:88
+msgid "Estimated, not guaranteed — based on available product cost, reward and shipping data."
+msgstr "تخمینی، نه قطعی — بر پایهٔ داده‌های موجود هزینهٔ محصول، پاداش و ارسال."
+
+#: admin-app/src/routes/Analytics.tsx:700
+msgid "Estimated, not guaranteed."
+msgstr "تخمینی، نه قطعی."
+
+#: admin-app/src/routes/RevenueOverview.tsx:379
+msgid "Goal Cart Sales Performance"
+msgstr "عملکرد فروش گال کارت"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:209
+msgid "Goal Cart does not invent product costs."
+msgstr "گال کارت هزینهٔ محصول را اختراع نمی‌کند."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:109
+msgid "Goal Cart needs product cost data to estimate profit."
+msgstr "گال کارت برای برآورد سود به دادهٔ هزینهٔ محصول نیاز دارد."
+
+#: admin-app/src/routes/Analytics.tsx:717
+msgid "Goal Comparison"
+msgstr "مقایسهٔ اهداف"
+
+#: admin-app/src/routes/Analytics.tsx:626
+#: admin-app/src/routes/RevenueOverview.tsx:200
+#: admin-app/src/routes/RevenueOverview.tsx:458
+msgid "Goal Completions"
+msgstr "تکمیل‌های هدف"
+
+#: admin-app/src/routes/Analytics.tsx:439
+msgid "Goal Conversion & Purchase Analysis"
+msgstr "تحلیل تبدیل هدف و خرید"
+
+#: admin-app/src/routes/Analytics.tsx:620
+msgid "Goal Views"
+msgstr "بازدیدهای هدف"
+
+#: admin-app/src/components/revenue/FunnelVisual.tsx:63
+msgid "Goal funnel: views, progressed, completed, purchased"
+msgstr "قیف هدف: بازدید، پیشرفت، تکمیل، خرید"
+
+#: admin-app/src/routes/GoalPerformance.tsx:189
+msgid "Goal performance details"
+msgstr "جزئیات عملکرد هدف"
+
+#: admin-app/src/routes/RevenueOverview.tsx:662
+msgid "Goal-exposed"
+msgstr "در معرض هدف"
+
+#: admin-app/src/routes/Analytics.tsx:669
+msgid "Goals Completed"
+msgstr "اهداف تکمیل‌شده"
+
+#: admin-app/src/routes/RevenueOverview.tsx:112
+msgid "Good performance"
+msgstr "عملکرد خوب"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:205
+msgid "How Estimated Profit becomes available"
+msgstr "چگونه سود تخمینی در دسترس می‌شود"
+
+#: admin-app/src/routes/RevenueOverview.tsx:262
+msgid "How did Goal Cart perform? Sales attributed, purchased orders, average basket and estimated profit."
+msgstr "گال کارت چه عملکردی داشت؟ فروش تخصیص‌یافته، سفارش‌های خریداری‌شده، میانگین سبد و سود تخمینی."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:163
+#: admin-app/src/routes/RevenueOverview.tsx:615
+msgid "How is this calculated?"
+msgstr "این چگونه محاسبه می‌شود؟"
+
+#: admin-app/src/routes/Analytics.tsx:629
+msgid "How many times customers reached a goal target. Completion is not the same as purchase."
+msgstr "چند بار مشتریان به آستانهٔ هدف رسیدند. تکمیل با خرید یکی نیست."
+
+#: admin-app/src/routes/Analytics.tsx:623
+msgid "How many times goal widgets were seen."
+msgstr "چند بار ویجت‌های هدف دیده شدند."
+
+#: admin-app/src/routes/RevenueOverview.tsx:408
+#: admin-app/src/routes/RevenueOverview.tsx:489
+msgid "Incremental Revenue"
+msgstr "درآمد افزایشی"
+
+#: admin-app/src/routes/RevenueOverview.tsx:632
+msgid "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the Goal Cart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once."
+msgstr "درآمد افزایشی همان درآمد مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که اهداف ایجاد کرده‌اند. تخصیص از مدل گال کارت پیروی می‌کند: اهداف پیشرفته/تکمیل‌شده مستقیم‌اند، اهداف فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
+
+#: admin-app/src/routes/Analytics.tsx:840
+#: admin-app/src/routes/GoalPerformance.tsx:312
+#: admin-app/src/routes/RevenueOverview.tsx:559
+#: admin-app/src/routes/RevenueOverview.tsx:628
+msgid "Influenced revenue"
+msgstr "درآمد تأثیرگذار"
+
+#: admin-app/src/routes/Analytics.tsx:787
+msgid "Key Insights"
+msgstr "بینش‌های کلیدی"
+
+#: admin-app/src/routes/Analytics.tsx:236
+msgid "Largest drop-off"
+msgstr "بیشترین ریزش"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:136
+msgid "Learn how"
+msgstr "یاد بگیرید چگونه"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:105
+msgid "Limited data — based on orders with complete cost information"
+msgstr "دادهٔ محدود — بر پایهٔ سفارش‌های دارای اطلاعات کامل هزینه"
+
+#: admin-app/src/routes/GoalPerformance.tsx:96
+msgid "More customer activity is needed for a more reliable analysis."
+msgstr "برای تحلیل مطمئن‌تر، فعالیت بیشتری از مشتریان لازم است."
+
+#: admin-app/src/routes/GoalPerformance.tsx:478
+msgid "No goal performance yet"
+msgstr "هنوز عملکرد هدفی وجود ندارد"
+
+#: admin-app/src/routes/Analytics.tsx:722
+msgid "No goal purchase activity in this range."
+msgstr "در این بازه خرید مرتبط با هدفی وجود ندارد."
+
+#: admin-app/src/routes/Analytics.tsx:551
+#: admin-app/src/routes/RevenueOverview.tsx:296
+msgid "No sales data yet"
+msgstr "هنوز دادهٔ فروشی وجود ندارد"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:108
+#: admin-app/src/routes/GoalPerformance.tsx:557
+msgid "Not enough attributed order data yet."
+msgstr "هنوز دادهٔ کافی از سفارش‌های تخصیص‌یافته وجود ندارد."
+
+#: admin-app/src/routes/RevenueOverview.tsx:333
+msgid "Observed impact"
+msgstr "تأثیر مشاهده‌شده"
+
+#: admin-app/src/routes/GoalPerformance.tsx:368
+msgid "Observed impact — incremental cart value relative to the baseline. It does not prove that Goal Cart caused the difference."
+msgstr "تأثیر مشاهده‌شده — ارزش افزایشی سبد نسبت به خط مبنا. ثابت نمی‌کند که گال کارت باعث این تفاوت شده است."
+
+#: admin-app/src/routes/RevenueOverview.tsx:669
+msgid "Observed impact — this comparison does not prove that Goal Cart caused the difference."
+msgstr "تأثیر مشاهده‌شده — این مقایسه ثابت نمی‌کند که گال کارت باعث این تفاوت شده است."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:224
+msgid "Once cost data exists, Estimated Profit becomes available automatically."
+msgstr "به محض وجود دادهٔ هزینه، سود تخمینی به‌طور خودکار در دسترس می‌شود."
+
+#: admin-app/src/routes/Analytics.tsx:552
+msgid "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit insights here."
+msgstr "به محض اینکه مشتریان با اهداف شما تعامل کنند، گال کارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
+
+#: admin-app/src/routes/GoalPerformance.tsx:479
+msgid "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit per goal here."
+msgstr "به محض اینکه مشتریان با اهداف شما تعامل کنند، گال کارت خرید، فروش و سود هر هدف را اینجا نشان می‌دهد."
+
+#: admin-app/src/routes/RevenueOverview.tsx:297
+msgid "Once customers start interacting with your goals, Goal Cart will show sales, purchases and profit insights here."
+msgstr "به محض اینکه مشتریان با اهداف شما تعامل کنند، گال کارت فروش، خریدها و بینش‌های سود را اینجا نشان می‌دهد."
+
+#: admin-app/src/routes/Analytics.tsx:855
+msgid "Only goal events within this window before an order are attributed to it."
+msgstr "فقط رویدادهای هدف در این بازه قبل از سفارش به آن تخصیص می‌یابند."
+
+#: admin-app/src/routes/GoalPerformance.tsx:534
+msgid "Open performance details for %s"
+msgstr "باز کردن جزئیات عملکرد برای %s"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:230
+msgid "Open your products"
+msgstr "محصولات خود را باز کنید"
+
+#: admin-app/src/routes/RevenueOverview.tsx:147
+msgid "Optimization opportunity"
+msgstr "فرصت بهینه‌سازی"
+
+#: admin-app/src/routes/Analytics.tsx:837
+#: admin-app/src/routes/RevenueOverview.tsx:553
+msgid "Order totals from orders that were only exposed to a goal, never progressed."
+msgstr "مجموع سفارش‌هایی که فقط در معرض هدف بودند و هرگز پیشرفت نکردند."
+
+#: admin-app/src/routes/GoalPerformance.tsx:306
+msgid "Order totals from orders that were only exposed to this goal, never progressed."
+msgstr "مجموع سفارش‌هایی که فقط در معرض این هدف بودند و هرگز پیشرفت نکردند."
+
+#: admin-app/src/routes/Analytics.tsx:842
+#: admin-app/src/routes/RevenueOverview.tsx:561
+msgid "Order totals of every order associated with a goal — distinct orders, never double counted."
+msgstr "مجموع همهٔ سفارش‌های مرتبط با یک هدف — سفارش‌های متمایز، هرگز دوبار شمارش نمی‌شوند."
+
+#: admin-app/src/routes/GoalPerformance.tsx:314
+msgid "Order totals of every order associated with this goal — distinct orders, never double counted."
+msgstr "مجموع همهٔ سفارش‌های مرتبط با این هدف — سفارش‌های متمایز، هرگز دوبار شمارش نمی‌شوند."
+
+#: admin-app/src/routes/Analytics.tsx:187
+#: admin-app/src/routes/Analytics.tsx:590
+#: admin-app/src/routes/GoalPerformance.tsx:76
+msgid "Percentage of completed goals that were followed by an attributed purchase."
+msgstr "درصد اهداف تکمیل‌شده‌ای که پس از آن یک خرید تخصیص‌یافته رخ داده است."
+
+#: admin-app/src/routes/GoalPerformance.tsx:223
+msgid "Performance Summary"
+msgstr "خلاصهٔ عملکرد"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:211
+msgid "Product cost must come from WooCommerce or your product-cost data. Goal Cart reads, in order:"
+msgstr "هزینهٔ محصول باید از ووکامرس یا داده‌های هزینهٔ محصول شما باشد. گال کارت به ترتیب می‌خواند:"
+
+#: admin-app/src/routes/Analytics.tsx:302
+#: admin-app/src/routes/RevenueOverview.tsx:180
+msgid "Profit not estimated yet"
+msgstr "سود هنوز برآورد نشده"
+
+#: admin-app/src/routes/Analytics.tsx:666
+msgid "Purchase Analysis"
+msgstr "تحلیل خرید"
+
+#: admin-app/src/routes/Analytics.tsx:185
+#: admin-app/src/routes/Analytics.tsx:587
+#: admin-app/src/routes/Analytics.tsx:675
+#: admin-app/src/routes/GoalPerformance.tsx:74
+msgid "Purchase Rate"
+msgstr "نرخ خرید"
+
+#: admin-app/src/routes/Analytics.tsx:561
+msgid "Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and goal comparison."
+msgstr "تحلیل خرید برای این فیلتر محصول در دسترس نیست. برای دیدن قیف، خریدها و مقایسهٔ اهداف، فیلتر محصول را حذف کنید."
+
+#: admin-app/src/routes/Analytics.tsx:250
+msgid "Purchase conversion"
+msgstr "تبدیل به خرید"
+
+#: admin-app/src/components/revenue/FunnelVisual.tsx:130
+msgid "Purchase rate"
+msgstr "نرخ خرید"
+
+#: admin-app/src/components/revenue/FunnelVisual.tsx:26
+#: admin-app/src/routes/Analytics.tsx:176
+#: admin-app/src/routes/GoalPerformance.tsx:65
+#: admin-app/src/routes/GoalPerformance.tsx:229
+msgid "Purchased"
+msgstr "خریداری‌شده"
+
+#: admin-app/src/routes/Analytics.tsx:671
+msgid "Purchased After Completion"
+msgstr "خرید پس از تکمیل"
+
+#: admin-app/src/routes/Analytics.tsx:577
+#: admin-app/src/routes/RevenueOverview.tsx:199
+#: admin-app/src/routes/RevenueOverview.tsx:346
+#: admin-app/src/routes/RevenueOverview.tsx:467
+msgid "Purchased Orders"
+msgstr "سفارش‌های خریداری‌شده"
+
+#: admin-app/src/routes/Analytics.tsx:677
+msgid "Purchased orders ÷ completed goals."
+msgstr "سفارش‌های خریداری‌شده ÷ اهداف تکمیل‌شده."
+
+#: admin-app/src/routes/Analytics.tsx:260
+#: admin-app/src/routes/RevenueOverview.tsx:157
+msgid "Purchases"
+msgstr "خریدها"
+
+#: admin-app/src/routes/Analytics.tsx:905
+msgid "Raw interaction metrics from the event log — impressions, completions, revenue and suggestions."
+msgstr "شاخص‌های خام تعامل از گزارش رویداد — نمایش‌ها، تکمیل‌ها، درآمد و پیشنهادها."
+
+#: admin-app/src/routes/Analytics.tsx:829
+#: admin-app/src/routes/RevenueOverview.tsx:545
+msgid "Revenue from the incremental value of orders where customers progressed toward or completed a goal before ordering."
+msgstr "درآمد حاصل از ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به سمت هدف پیشرفت کردند یا آن را تکمیل کردند."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:114
+msgid "Rewards and shipping costs were higher than the estimated incremental margin."
+msgstr "هزینه‌های پاداش و ارسال بیشتر از حاشیهٔ افزایشی تخمینی بودند."
+
+#: admin-app/src/routes/Analytics.tsx:191
+#: admin-app/src/routes/GoalPerformance.tsx:80
+msgid "Sales"
+msgstr "فروش"
+
+#: admin-app/src/routes/RevenueOverview.tsx:313
+msgid "Sales Attributed to Goal Cart"
+msgstr "فروش تخصیص‌یافته به گال کارت"
+
+#: admin-app/src/components/layout/navigation.ts:47
+#: admin-app/src/routes/RevenueOverview.tsx:261
+msgid "Sales Performance"
+msgstr "عملکرد فروش"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:168
+msgid "Sales attributed"
+msgstr "فروش تخصیص‌یافته"
+
+#: admin-app/src/routes/Analytics.tsx:596
+msgid "Sales attributed to Goal Cart"
+msgstr "فروش تخصیص‌یافته به گال کارت"
+
+#: admin-app/src/routes/Analytics.tsx:193
+#: admin-app/src/routes/GoalPerformance.tsx:82
+msgid "Sales attributed to Goal Cart — the incremental order value driven by this goal."
+msgstr "فروش تخصیص‌یافته به گال کارت — ارزش افزایشی سفارش ناشی از این هدف."
+
+#: admin-app/src/routes/Analytics.tsx:683
+msgid "Sales generated after Goal Cart interaction."
+msgstr "فروش ایجادشده پس از تعامل با گال کارت."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:127
+msgid "Set up product costs"
+msgstr "راه‌اندازی هزینه‌های محصول"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:177
+msgid "Shipping cost"
+msgstr "هزینهٔ ارسال"
+
+#: admin-app/src/routes/GoalPerformance.tsx:556
+msgid "Some orders do not have complete cost information."
+msgstr "برخی سفارش‌ها اطلاعات کامل هزینه ندارند."
+
+#: admin-app/src/routes/RevenueOverview.tsx:661
+msgid "Store average"
+msgstr "میانگین فروشگاه"
+
+#: admin-app/src/routes/RevenueOverview.tsx:657
+msgid "Store-wide comparison is not available in this window."
+msgstr "مقایسهٔ سراسری فروشگاه در این بازه در دسترس نیست."
+
+#: admin-app/src/routes/GoalPerformance.tsx:213
+msgid "Target: %s"
+msgstr "آستانه: %s"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:227
+msgid "The calculation includes product cost/margin, reward cost, shipping cost and incremental revenue."
+msgstr "محاسبه شامل هزینه/حاشیهٔ محصول، هزینهٔ پاداش، هزینهٔ ارسال و درآمد افزایشی است."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:25
+msgid "The goalcart_product_cost filter"
+msgstr "فیلتر goalcart_product_cost"
+
+#: admin-app/src/routes/Analytics.tsx:597
+msgid "The incremental order value from orders where customers interacted with a goal before purchasing."
+msgstr "ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید با یک هدف تعامل کردند."
+
+#: admin-app/src/routes/GoalPerformance.tsx:298
+msgid "The incremental order value from orders where customers progressed or completed this goal before ordering."
+msgstr "ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به این هدف پیشرفت کردند یا آن را تکمیل کردند."
+
+#: admin-app/src/routes/Analytics.tsx:882
+msgid "These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting."
+msgstr "این شاخص‌ها از مدل تخصیص گال کارت استفاده می‌کنند — مستقیم در برابر کمکی، سفارش‌های متمایز، بدون شمارش دوبار."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:184
+msgid "This is an analytical estimate based on available WooCommerce cost and order data. It is not accounting profit."
+msgstr "این یک برآورد تحلیلی بر پایهٔ داده‌های موجود هزینه و سفارش ووکامرس است. سود حسابداری نیست."
+
+#: admin-app/src/routes/RevenueOverview.tsx:386
+msgid "Trend metrics"
+msgstr "شاخص‌های روند"
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:26
+msgid "Variation falls back to its parent product"
+msgstr "متغیر به محصول والد خود بازمی‌گردد"
+
+#: admin-app/src/routes/GoalPerformance.tsx:60
+#: admin-app/src/routes/GoalPerformance.tsx:225
+msgid "Viewed"
+msgstr "بازدیدشده"
+
+#: admin-app/src/routes/RevenueOverview.tsx:508
+msgid "What happened?"
+msgstr "چه اتفاقی افتاد؟"
+
+#: admin-app/src/routes/Analytics.tsx:440
+msgid "What happens after customers see and complete your goals — purchases, sales and profit."
+msgstr "پس از دیدن و تکمیل اهداف شما توسط مشتریان چه اتفاقی می‌افتد — خریدها، فروش و سود."
+
+#: admin-app/src/routes/GoalPerformance.tsx:455
+msgid "Which goals generated purchases, sales and profit? Completion is not the same as purchase."
+msgstr "کدام اهداف خرید، فروش و سود ایجاد کردند؟ تکمیل با خرید یکی نیست."
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:23
+msgid "WooCommerce product cost field (_cost)"
+msgstr "فیلد هزینهٔ محصول ووکامرس (_cost)"
+
+#: admin-app/src/routes/Analytics.tsx:580
+#: admin-app/src/routes/GoalPerformance.tsx:231
+#: admin-app/src/routes/RevenueOverview.tsx:349
+msgid "after Goal Cart interaction"
+msgstr "پس از تعامل با گال کارت"
+
+#: admin-app/src/routes/Recommendations.tsx:364
+msgid "%d days"
+msgstr "%d روز"
+
+#: admin-app/src/routes/Recommendations.tsx:669
+msgid "Set the goal target to %s?"
+msgstr "آستانهٔ هدف را روی %s تنظیم کنم؟"
+

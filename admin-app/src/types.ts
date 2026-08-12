@@ -934,10 +934,40 @@ export interface RecommendationData {
   margin: {
     available: boolean;
     average_margin_pct: number | null;
+    /** Newest-catalog products sampled for the average. */
+    sampled?: number;
+    /** Of the sample, how many carried cost data. */
+    with_cost?: number;
     reason?: string | null;
   } | null;
   goal_history: Record<string, unknown> | null;
   reward_type: string | null;
+}
+
+/**
+ * The raw scoring factors behind one recommendation candidate
+ * (Improvement.md §33 — shown only in the Advanced details).
+ */
+export interface RecommendationFactors {
+  threshold: number;
+  /** Candidate ÷ store AOV (null when AOV is 0). */
+  aov_ratio: number | null;
+  /** Candidate ÷ store median order value (null when median is 0). */
+  median_ratio: number | null;
+  /** Share of orders within the reach band below the threshold. */
+  reach_share: number;
+  /** Share of orders already at or above the threshold. */
+  already_at_share: number;
+  /** The four 0–100 component scores. */
+  reachability_score: number;
+  distance_score: number;
+  economics_score: number;
+  history_score: number;
+  /** Estimated reward cost at this threshold (null when not costable). */
+  reward_cost: number | null;
+  reward_cost_available: boolean;
+  /** Sampled average product margin (null when the store stores no costs). */
+  margin_pct: number | null;
 }
 
 /** One scored recommendation candidate (`candidates[]`). */
@@ -952,7 +982,7 @@ export interface RecommendationCandidate {
   reachable_orders_pct: number;
   reward_cost: number | null;
   reasons: string[];
-  factors: Record<string, unknown>;
+  factors: RecommendationFactors;
 }
 
 /**

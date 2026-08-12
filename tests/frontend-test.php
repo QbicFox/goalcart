@@ -556,6 +556,27 @@ if ( $block_type ) {
 }
 
 // ---------------------------------------------------------------------------
+// 11. Smart Recommendations presentation (Improvement.md Phase 7 / §33–§34)
+// ---------------------------------------------------------------------------
+echo "\n== 11. Recommendations presentation ==\n";
+
+// The Phase 7 redesign simplifies the recommendation presentation: the
+// primary card shows the business outcome first (recommended target,
+// "Confidence: High/Medium/Low" label, expected impact range, expected
+// profit with the §34 unavailable state, plain-English "Why?" bullets)
+// and moves the raw scoring details (score, component scores, ratios)
+// behind the Advanced details expander. Source-scanned so a regression
+// back to the raw numeric-first layout cannot slip through silently.
+$recommendations_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/Recommendations.tsx' );
+check( 'recommendations page composes a business confidence label', false !== strpos( $recommendations_tsx, 'confidenceTier(' ) && false !== strpos( $recommendations_tsx, ': ${tier.label}' ) );
+check( 'recommendations page labels expected impact in business terms', false !== strpos( $recommendations_tsx, "__('Expected impact', 'goalcart')" ) && false !== strpos( $recommendations_tsx, "__('average basket value', 'goalcart')" ) );
+check( 'recommendations page shows the Why? reasons on the primary card', false !== strpos( $recommendations_tsx, "__('Why?', 'goalcart')" ) && false !== strpos( $recommendations_tsx, 'candidate.reasons.map' ) );
+check( 'recommendations page explains unavailable expected profit (§34)', false !== strpos( $recommendations_tsx, "__('Add product cost data to estimate profitability.', 'goalcart')" ) );
+check( 'recommendations page hides raw scoring behind Advanced details', false !== strpos( $recommendations_tsx, "__('Advanced details', 'goalcart')" ) && false !== strpos( $recommendations_tsx, 'Scoring factors' ) );
+check( 'recommendations page no longer leads with the raw confidence percent', false === strpos( $recommendations_tsx, 'formatPercent(top.confidence / 100)' ) && false === strpos( $recommendations_tsx, 'formatPercent(candidate.confidence / 100)' ) );
+check( 'recommendations page keeps the explicit apply + dismiss flow', false !== strpos( $recommendations_tsx, "__('Apply recommendation', 'goalcart')" ) && false !== strpos( $recommendations_tsx, "__('Dismiss', 'goalcart')" ) && false !== strpos( $recommendations_tsx, 'ConfirmDialog' ) );
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 echo "\n==========================================\n";

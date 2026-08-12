@@ -462,17 +462,30 @@ number when the store provides no margin data (revenue-only analytics).
 
 ## 5. Smart Recommendations (Goal Recommendation UI)
 
-The Phase 33.4 payload rendered end-to-end: analyzed store data (AOV,
-median, coefficient of variation, order-distribution bars, shipping,
-margin availability, confidence tier), the top recommendation card
-(threshold, confidence, expected AOV impact range, expected completion
-rate, expected profit, plain-English reasons) with **Apply / View
-details / Dismiss**, and the ranked candidate list (score bar, confidence,
-reachable share, reward cost, expandable reasons).
+The Phase 33.4 payload rendered with the Phase 7 simplified presentation
+(`Improvement.md` §33–§34) — the same engine, the same endpoint, a
+business-first layout:
 
-Applying a recommendation is always an explicit admin action — a
-confirm dialog then `PUT /goals/{id}` updates the selected goal's
-target. The engine never modifies a goal (P33-53).
+- **Top recommendation card** — the recommended goal target up front,
+  a **"Confidence: High / Medium / Low"** label (tiered from the raw
+  0–100 score, which stays hidden), the **expected impact** as
+  "+8% – +14% average basket value", the expected profit with the §34
+  unavailable state ("Not available — add product cost data to estimate
+  profitability", never a guessed number), and the plain-English
+  **"Why?"** bullets directly on the card. The raw scoring details
+  (score, component scores, AOV/median ratios, reach shares, reward
+  cost) live behind an **Advanced details** expander.
+- **Analyzed store data** — AOV, median, orders analyzed, window,
+  shipping/margin availability and a business-language data-sufficiency
+  label (Limited / Moderate / Good data), plus the order-value
+  distribution bars.
+- **Ranked candidates** — one row per threshold with its expected
+  impact and confidence label; the score bar, reasons and reward cost
+  are behind the row's Details expander.
+- **Apply / View details / Dismiss** on the top card, and the same
+  explicit-apply flow as before: a confirm dialog then `PUT /goals/{id}`
+  updates the selected goal's target. The engine never modifies a goal
+  (P33-53).
 
 ## 6. Upsell Analytics
 

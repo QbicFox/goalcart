@@ -125,6 +125,76 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   - **Tests/verification** — `tsc --noEmit`, ESLint and `vite build`
     all clean on the changed files.
 
+- **Phase 5 — Goal Performance Redesign (Revenue & Analytics UX
+  simplification)** — the Goals revenue page is now a commercial-outcome
+  table (Improvement.md §16–§20): **Goal / Viewed / Progressed /
+  Completed / Purchased / Purchase Rate / Sales / Estimated Profit**,
+  sortable (default: attributed sales; unavailable values always sort
+  last) with header tooltips keeping completion and purchase distinct.
+  Clicking a row opens a detail drawer with the performance summary,
+  the customer-journey funnel (stage-to-stage drop-off, ending in
+  **Purchased**), the costs panel (reusing the shared
+  `EstimatedProfitCard`), advanced attribution details (direct /
+  assisted / influenced revenue + incremental cart value) and an
+  Advanced section (attribution model, window, data sufficiency,
+  observed basket impact). Additive backend fields on
+  `AttributionEngine::goal_metrics()` (`influenced_revenue`,
+  `attribution_window_days`, `data_sufficiency`) — no new queries;
+  `FunnelVisual` gained `showTransitions`; `tests/revenue-admin-test.php`
+  extended to 56 checks; POT regenerated (847 strings).
+
+- **Phase 6 — Analytics Redesign (Revenue & Analytics UX
+  simplification)** — the Analytics page is now **Goal Conversion &
+  Purchase Analysis** (Improvement.md §21–§30, §50): primary KPI row
+  (Purchased Orders, Purchase Rate, Attributed Sales and the shared
+  Estimated Profit card) with Goal Views + Completions secondary; the
+  customer-journey funnel ending in **Purchased** with drop-off
+  percentages; a purchase-analysis section (completed vs purchased,
+  purchase rate, attributed sales, average purchased order, estimated
+  profit); a sortable goal-comparison table (default sort: attributed
+  sales); deterministic drop-off insights; an advanced-attribution
+  accordion; and the legacy activity metrics preserved behind a
+  Detailed Activity accordion. Backend additions are additive:
+  `RevenueRepository::resolve_goal_ids()` / `goal_comparison()` and the
+  `/analytics` summary carrying `funnel`, `assisted_sales`,
+  `influenced_sales` and `goal_comparison` — legacy fields intact.
+  `StatRow` extracted as the shared detail row; `tests/analytics-
+  dashboard-test.php` extended; POT regenerated (868 strings).
+
+- **Phase 7 — Recommendations (Revenue & Analytics UX simplification)**
+  — the Smart Recommendations page keeps the deterministic Phase 33.4
+  engine but presents it business-first (Improvement.md §33–§34):
+  - **Top recommendation card** — the recommended goal target up front,
+    a **"Confidence: High / Medium / Low"** label (tiered from the raw
+    score — the number is no longer the primary read), the expected
+    impact as "+X% – +Y% average basket value", expected profit with
+    the §34 unavailable state ("Not available — add product cost data
+    to estimate profitability", never a guessed number) and the
+    plain-English **"Why?"** bullets directly on the card. The raw
+    scoring details (score, component scores, AOV/median ratios, reach
+    shares, reward cost) moved behind an **Advanced details** expander
+    (shared by the top card and every candidate row).
+  - **Simplified supporting sections** — the analyzed-store-data panel
+    now carries a business-language data-sufficiency label (Limited /
+    Moderate / Good data) instead of the raw confidence-tier chip, and
+    each ranked candidate shows threshold + expected impact + confidence
+    label with its score bar/reasons/reward cost behind a Details
+    expander. The explicit **Apply → confirm → `PUT /goals/{id}`** flow
+    and the Dismiss behavior are unchanged.
+  - **Types** — `RecommendationCandidate.factors` is now the typed
+    `RecommendationFactors` interface (component scores, ratios,
+    availability flags); `RecommendationData.margin` gains the sample
+    counts.
+  - **i18n** — the POT is regenerated (887 strings) and the fa_IR
+    translation closes the Phase 4–6 coverage gap (159 new strings,
+    including the previously missing profit/data-state labels), so
+    `tests/i18n-test.php` is fully green again (53 checks).
+  - **Tests/verification** — `tests/frontend-test.php` gained Phase 7
+    source-scan guards (business confidence label, Why? bullets,
+    §34 profit state, Advanced details, no raw confidence first); the
+    recommendation suite stays green (90 checks); `tsc --noEmit`,
+    ESLint and `vite build` all clean.
+
 - **Sticky bottom action bar** — the admin dashboard now docks every
   save / settings / reset action in a sticky bottom bar instead of the
   page body. A new `ActionBar` shell component (`AdminLayout`) renders
