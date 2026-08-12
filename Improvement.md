@@ -24,13 +24,13 @@ The goal is:
 
 # ✅ IMPLEMENTATION PROGRESS
 
-**Overall:** Phases 1–3 complete · Phases 4–10 not started.
+**Overall:** Phases 1–4 complete · Phases 5–10 not started.
 
 ```text
 Phase 1 : ████████████████████ 100%   Codebase Audit (REVENUE_ANALYTICS_AUDIT.md)
 Phase 2 : ████████████████████ 100%   Backend / Data Layer
 Phase 3 : ████████████████████ 100%   Profit Availability
-Phase 4 : ░░░░░░░░░░░░░░░░░░░░   0%   Revenue Overview Redesign
+Phase 4 : ████████████████████ 100%   Revenue Overview Redesign
 Phase 5 : ░░░░░░░░░░░░░░░░░░░░   0%   Goal Performance Redesign
 Phase 6 : ░░░░░░░░░░░░░░░░░░░░   0%   Analytics Redesign
 Phase 7 : ░░░░░░░░░░░░░░░░░░░░   0%   Recommendations
@@ -44,7 +44,7 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | 1 — Codebase Audit | [x] 100% | `REVENUE_ANALYTICS_AUDIT.md` (no code modified) |
 | 2 — Backend / Data Layer | [x] 100% | purchase/profit metrics on the legacy `/analytics` summary, profit reason codes + cost coverage + profit details, goal filter resolution, `tests/purchase-metrics-test.php` |
 | 3 — Profit Availability | [x] 100% | cost sources verified (`_cost` / `_wc_cog_cost` / variation fallback / `goalcart_product_cost`), `cost_sources` + `store_has_cost_data` metadata, `tests/profit-availability-test.php` |
-| 4 — Revenue Overview Redesign | [ ] 0% | — |
+| 4 — Revenue Overview Redesign | [x] 100% | Sales Performance page: 4 KPI cards, profit states + details, simplified trend with toggles, insight cards, advanced attribution drawer, nav rename |
 | 5 — Goal Performance Redesign | [ ] 0% | — |
 | 6 — Analytics Redesign | [ ] 0% | — |
 | 7 — Recommendations | [ ] 0% | — |
@@ -52,7 +52,7 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | 9 — UX Polish | [ ] 0% | — |
 | 10 — Testing & Regression | [ ] 0% | — |
 
-**Last update:** 2026-08-12 — Phase 3 (Profit Availability) complete; all suites green (`purchase-metrics`, `attribution`, `aggregation`, `phase33`, `revenue-admin`, `profit-availability`), PHP lint + TS typecheck clean.
+**Last update:** 2026-08-12 — Phase 4 (Revenue Overview Redesign) complete; `tsc`, ESLint and `vite build` clean; POT regenerated (816 strings).
 
 ---
 
@@ -1958,6 +1958,8 @@ Do not invent costs.
 
 # Phase 4 — Revenue Overview Redesign
 
+> **STATUS: ✅ COMPLETE — 2026-08-12** (see progress register at the top of this document)
+
 Implement:
 
 * four KPI cards
@@ -1971,6 +1973,45 @@ Implement:
 * profit details drawer
 
 Remove unnecessary technical metrics from the primary view.
+
+**Deliverables** (frontend only — the backend payload from Phases 2–3
+already supplied every value):
+
+* `admin-app/src/routes/RevenueOverview.tsx` rewritten as **Sales
+  Performance**:
+  - **Four KPI cards** (§5–§8): Sales Attributed to Goal Cart (direct
+    incremental + purchased-orders sub-line + expandable "How is this
+    calculated?" with direct/assisted/influenced + methodology),
+    Average Basket Increase (signed %, observed impact + compare panel:
+    store average / goal-exposed / difference / percentage), Purchased
+    Orders, Estimated Profit.
+  - **Estimated Profit card** (`components/revenue/EstimatedProfitCard.tsx`,
+    reusable by later phases) — all §10–§13 states: available (zero and
+    negative included, with the rewards-vs-margin explanation), "Not
+    available" with a **Set up product costs** CTA + in-plugin help
+    panel (Phase 3 `cost_sources` + `store_has_cost_data`), "Limited
+    data" with §11 cost coverage, "—" for insufficient data; the §12
+    profit-details panel (sales attributed / estimated margin / reward
+    cost / shipping / estimated profit) + "analytical estimate, not
+    accounting profit" disclaimer.
+  - **Simplified trend** (§14): defaults to Attributed Sales + Purchased
+    Orders; toggles add Goal Completions and an optional advanced
+    Incremental Revenue series.
+  - **Insight cards** (§15/§26): 2–3 deterministic plain-English
+    insights computed from the real payload (purchases influenced,
+    basket change, completion→purchase drop-off, profit guidance) —
+    only shown when the data supports them.
+  - **Advanced attribution drawer** (§30): direct / assisted /
+    influenced revenue, incremental cart value, attributed orders,
+    attribution window + observed-impact disclaimer, behind an
+    accordion.
+* `components/layout/navigation.ts` — admin section renamed to **Sales
+  Performance**; the Attribution Dashboard is removed from primary
+  navigation (§3) while the `/revenue/attribution` route stays for
+  backward compatibility.
+* `languages/goalcart.pot` regenerated (816 strings) so translators see
+  the new labels.
+* Verification: `tsc --noEmit`, ESLint and `vite build` all clean.
 
 ---
 

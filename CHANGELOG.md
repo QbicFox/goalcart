@@ -85,6 +85,46 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     `cost_sources` / `store_has_cost_data` fields to
     `AnalyticsSummary`, `RevenueSummary` and `GoalPerformanceRow`.
 
+- **Phase 4 — Revenue Overview Redesign (Revenue & Analytics UX
+  simplification)** — the `/revenue` page is now **Sales Performance**,
+  answering "how much did Goal Cart sell, how many customers purchased,
+  and how profitable was it" (Improvement.md §5–§15, §49):
+  - **Four primary KPI cards** (§5–§8) — **Sales Attributed to Goal
+    Cart** (direct incremental revenue with an expandable "How is this
+    calculated?" panel), **Average Basket Increase** (signed observed
+    impact with a comparison panel: store average / goal-exposed /
+    difference / percentage), **Purchased Orders** and **Estimated
+    Profit**. The old seven-card row of technical metrics is gone from
+    the primary view.
+  - **Estimated Profit card** (§8/§10–§13) — every data state without
+    inventing numbers: available (incl. zero and negative with an
+    explanation), "Not available" with a **Set up product costs** CTA
+    and an in-plugin help panel (cost sources from Phase 3, how the
+    model works, link to the products screen), "Limited data" with the
+    cost-coverage line, and "—" when there is not enough data yet. The
+    expandable profit panel shows sales attributed / estimated margin /
+    reward cost / shipping cost / estimated profit plus the
+    "analytical estimate, not accounting profit" disclaimer.
+  - **Simplified trend** (§14) — "Goal Cart Sales Performance" defaults
+    to Attributed Sales + Purchased Orders with toggles for Goal
+    Completions and an optional advanced Incremental Revenue series.
+  - **Insight cards** (§15/§26) — 2–3 deterministic plain-English
+    insights derived from the actual payload (purchases influenced,
+    basket change, completion→purchase drop-off, profit), shown only
+    when the data supports them.
+  - **Advanced attribution drawer** (§30) — direct / assisted /
+    influenced revenue, incremental cart value, attributed orders,
+    attribution window and the observed-impact disclaimer behind an
+    accordion.
+  - **Navigation** (§3/§4) — the admin section is renamed to **Sales
+    Performance** and the Attribution Dashboard is no longer a primary
+    navigation item (the `/revenue/attribution` route stays for
+    backward compatibility).
+  - **i18n** — all new labels go through `__()`/`sprintf()` and the POT
+    is regenerated (816 entries) for translators.
+  - **Tests/verification** — `tsc --noEmit`, ESLint and `vite build`
+    all clean on the changed files.
+
 - **Sticky bottom action bar** — the admin dashboard now docks every
   save / settings / reset action in a sticky bottom bar instead of the
   page body. A new `ActionBar` shell component (`AdminLayout`) renders

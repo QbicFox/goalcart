@@ -1,5 +1,4 @@
 import type { SvgIconComponent } from '@mui/icons-material';
-import AccountTreeIcon from '@mui/icons-material/AccountTree';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -45,15 +44,17 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    title: __('Revenue', 'goalcart'),
+    title: __('Sales Performance', 'goalcart'),
     items: [
       { path: '/revenue', label: __('Overview', 'goalcart'), icon: BarChartIcon },
       { path: '/revenue/goals', label: __('Goal Performance', 'goalcart'), icon: LeaderboardIcon },
-      { path: '/revenue/attribution', label: __('Attribution', 'goalcart'), icon: AccountTreeIcon },
       { path: '/revenue/recommendations', label: __('Recommendations', 'goalcart'), icon: TipsAndUpdatesIcon },
       { path: '/revenue/upsells', label: __('Upsell Analytics', 'goalcart'), icon: TrendingUpIcon },
     ],
   },
+  // The Attribution Dashboard stays reachable at /revenue/attribution for
+  // backward compatibility but is no longer a primary navigation item
+  // (Improvement.md §3 — advanced attribution lives in the page drawers).
   {
     title: __('Configuration', 'goalcart'),
     items: [

@@ -696,7 +696,8 @@ export interface RevenueSummary {
   profit_impact: number | null;
   profit_available: boolean;
   profit_reason: string | null;
-  // Phase 2 — profit availability metadata (Improvement.md §38/§39/§11/§12).	profit_reason_code: ProfitReasonCode;
+  // Phase 2 — profit availability metadata (Improvement.md §38/§39/§11/§12).
+  profit_reason_code: ProfitReasonCode;
   profit_details: ProfitDetails;
   cost_coverage: CostCoverage;
   // Phase 3 — UI-ready profit availability metadata (§10).
