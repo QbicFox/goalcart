@@ -24,12 +24,12 @@ The goal is:
 
 # ✅ IMPLEMENTATION PROGRESS
 
-**Overall:** Phases 1–2 complete · Phases 3–10 not started.
+**Overall:** Phases 1–3 complete · Phases 4–10 not started.
 
 ```text
 Phase 1 : ████████████████████ 100%   Codebase Audit (REVENUE_ANALYTICS_AUDIT.md)
 Phase 2 : ████████████████████ 100%   Backend / Data Layer
-Phase 3 : ░░░░░░░░░░░░░░░░░░░░   0%   Profit Availability
+Phase 3 : ████████████████████ 100%   Profit Availability
 Phase 4 : ░░░░░░░░░░░░░░░░░░░░   0%   Revenue Overview Redesign
 Phase 5 : ░░░░░░░░░░░░░░░░░░░░   0%   Goal Performance Redesign
 Phase 6 : ░░░░░░░░░░░░░░░░░░░░   0%   Analytics Redesign
@@ -43,7 +43,7 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | --- | --- | --- |
 | 1 — Codebase Audit | [x] 100% | `REVENUE_ANALYTICS_AUDIT.md` (no code modified) |
 | 2 — Backend / Data Layer | [x] 100% | purchase/profit metrics on the legacy `/analytics` summary, profit reason codes + cost coverage + profit details, goal filter resolution, `tests/purchase-metrics-test.php` |
-| 3 — Profit Availability | [ ] 0% | — |
+| 3 — Profit Availability | [x] 100% | cost sources verified (`_cost` / `_wc_cog_cost` / variation fallback / `goalcart_product_cost`), `cost_sources` + `store_has_cost_data` metadata, `tests/profit-availability-test.php` |
 | 4 — Revenue Overview Redesign | [ ] 0% | — |
 | 5 — Goal Performance Redesign | [ ] 0% | — |
 | 6 — Analytics Redesign | [ ] 0% | — |
@@ -52,7 +52,7 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | 9 — UX Polish | [ ] 0% | — |
 | 10 — Testing & Regression | [ ] 0% | — |
 
-**Last update:** 2026-08-12 — Phase 2 (Backend/Data Layer) complete; all suites green (`purchase-metrics`, `attribution`, `aggregation`, `phase33`, `revenue-admin`), PHP lint + TS typecheck clean.
+**Last update:** 2026-08-12 — Phase 3 (Profit Availability) complete; all suites green (`purchase-metrics`, `attribution`, `aggregation`, `phase33`, `revenue-admin`, `profit-availability`), PHP lint + TS typecheck clean.
 
 ---
 
@@ -1897,6 +1897,8 @@ Update API tests.
 
 # Phase 3 — Profit Availability
 
+> **STATUS: ✅ COMPLETE — 2026-08-12** (see progress register at the top of this document)
+
 Verify actual WooCommerce cost sources.
 
 Test:
@@ -1913,6 +1915,44 @@ Make sure existing `estimated_profit` calculation remains correct.
 Add UI-ready availability metadata.
 
 Do not invent costs.
+
+**Deliverables:**
+
+* `RewardCostEstimator` — `COST_SOURCES` constant (stable source keys:
+  `_cost`, `_wc_cog_cost`, `goalcart_product_cost`, `variation_fallback`)
+  and `store_has_cost_data()` (one cheap indexed postmeta scan, LIMIT 1,
+  memoized per request — tells the UI whether any product carries cost
+  data, so "set up product costs" and "partial coverage" are distinct
+  states).
+* **Variation fallback fix** — a variation inheriting its parent's cost
+  now runs the parent through the `goalcart_product_cost` filter too
+  (previously raw meta only), so filter-based cost sources are honored
+  for variations.
+* **Safety consistency** — a stored cost of zero/negative is treated as
+  "no cost data" on every path (never a 100%-margin assumption); the
+  `estimated_profit = incremental × margin − reward − shipping` formula
+  is byte-for-byte unchanged.
+* `AttributionEngine` — every attribution summary now carries the
+  UI-ready availability metadata `cost_sources` and
+  `store_has_cost_data` (plus a delegating `store_has_cost_data()`
+  accessor); mirrored through `goal_metrics()`, the zeroed empty summary
+  (`RevenueRepository`) and the `/analytics` summary
+  (`AnalyticsController` — `store_has_cost_data` is `null` for filters
+  attribution cannot express).
+* `admin-app/src/types.ts` — `CostSource` type + `cost_sources` /
+  `store_has_cost_data` on `AnalyticsSummary`, `RevenueSummary` and
+  `GoalPerformanceRow`.
+* `tests/profit-availability-test.php` — 44 checks: every cost source
+  (`_cost`, `_wc_cog_cost`, precedence, zero/negative safety, variation
+  → parent raw meta, variation → parent via filter, filter override,
+  filter null fall-through), reward cost (percent capped / fixed / free
+  shipping via context and a real order / free gift costed + uncosted),
+  shipping cost, the `estimated_profit` formula regression and the
+  availability metadata on a real attributed summary — all rolled back
+  with zero residue.
+* All suites remain green: `purchase-metrics` (107), `attribution`
+  (72), `aggregation` (74), `phase33` (99), `revenue-admin` (53),
+  `profit-availability` (44); PHP lint + TS typecheck clean.
 
 ---
 

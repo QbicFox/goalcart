@@ -154,6 +154,43 @@ the existing attribution reads — no new engine, no new order scans:
   fields (never a fabricated number). The pre-existing Phase 17 fields
   are untouched.
 
+## 5.2 Profit availability — cost sources (Phase 3)
+
+The profit model never invents costs (`Improvement.md` Phase 3, §9/§10/
+§40): product cost is read only from the store's own data, in this order
+(`RewardCostEstimator::COST_SOURCES`, exposed as `cost_sources` in every
+attribution summary):
+
+1. **`goalcart_product_cost` filter** — a store plugin can plug its own
+   cost source (return `float`, or `null` to fall through).
+2. **`_cost`** — the standard WooCommerce product cost field.
+3. **`_wc_cog_cost`** — the common cost-of-goods field, read when `_cost`
+   is absent. `_cost` takes precedence when both are present.
+4. **Variation fallback** — a variation with no cost of its own inherits
+   its parent's cost through the same source chain (filter first, then
+   raw meta).
+
+Safety rules (unchanged): a stored cost of zero or negative is treated as
+"no cost data" (never a 100%-margin assumption); a product with no cost
+returns `null`; `estimated_profit = incremental_revenue × margin% −
+reward_cost − shipping_cost` is preserved byte-for-byte.
+
+### UI-ready availability metadata
+
+Every attribution summary additionally carries:
+
+- `cost_sources` — the stable source keys above (the React layer
+  translates them for the §10 "how to enable profit" help panel).
+- `store_has_cost_data` — one cheap store-wide signal (indexed postmeta
+  scan, LIMIT 1, memoized per request) telling the UI whether *any*
+  product carries cost data. This lets the unavailable state distinguish
+  "no cost data anywhere — set up product costs" from "some orders lack
+  cost data — coverage X%".
+
+Both keys are mirrored in `GoalPerformanceRow`, the `/analytics` summary
+(`null` when the filter cannot be expressed in attribution) and the
+zeroed empty summary.
+
 ## 6. Terminology
 
 Use these labels consistently (never present estimates as facts):

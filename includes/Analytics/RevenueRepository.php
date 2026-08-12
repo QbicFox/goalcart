@@ -476,6 +476,12 @@ final class RevenueRepository {
 				'coverage_pct'          => null,
 				'available'             => false,
 			),
+			// Phase 3 availability metadata — mirrored from
+			// AttributionEngine::attribution_summary() (see the sync note
+			// above): the cost sources stay constant; the store-wide signal
+			// is read once through the engine.
+			'cost_sources'           => RewardCostEstimator::COST_SOURCES,
+			'store_has_cost_data'    => $this->engine->store_has_cost_data(),
 			'funnel'                 => array(
 				'views'           => 0,
 				'progressed'      => 0,

@@ -8,6 +8,7 @@
 namespace GoalCart\REST;
 
 use GoalCart\Analytics\AnalyticsRepository;
+use GoalCart\Analytics\RewardCostEstimator;
 use GoalCart\Analytics\RevenueRepository;
 use GoalCart\Hooks\HookManager;
 use GoalCart\Rewards\Reward;
@@ -192,6 +193,11 @@ class AnalyticsController extends BaseController {
 					'coverage_pct'          => null,
 					'available'             => false,
 				),
+				// Phase 3: the cost sources are a constant; the store-wide
+				// signal is unknown for a filter attribution cannot express
+				// (null — the UI must not claim "no cost data" here).
+				'cost_sources'       => RewardCostEstimator::COST_SOURCES,
+				'store_has_cost_data'=> null,
 				'profit_details'     => null,
 			);
 		}
@@ -206,6 +212,8 @@ class AnalyticsController extends BaseController {
 			'profit_reason'      => $purchase['profit_reason'],
 			'profit_reason_code' => $purchase['profit_reason_code'],
 			'cost_coverage'      => $purchase['cost_coverage'],
+			'cost_sources'       => $purchase['cost_sources'],
+			'store_has_cost_data'=> (bool) $purchase['store_has_cost_data'],
 			'profit_details'     => $purchase['profit_details'],
 		);
 	}

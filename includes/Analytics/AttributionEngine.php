@@ -843,6 +843,12 @@ final class AttributionEngine {
 				// it is false and coverage_pct is null.
 				'available'             => $profit_result['orders_total'] > 0,
 			),
+			// UI-ready availability metadata (Phase 3): the cost sources the
+			// estimator consults and whether the store carries ANY cost data
+			// — the help panel uses this to explain how to make Estimated
+			// Profit available (§10) vs how much of the data is covered (§11).
+			'cost_sources'          => RewardCostEstimator::COST_SOURCES,
+			'store_has_cost_data'   => $this->costs->store_has_cost_data(),
 			'funnel'                => $this->funnel( $args ),
 		);
 	}
@@ -927,6 +933,8 @@ final class AttributionEngine {
 			'profit_reason_code'  => $summary['profit_reason_code'],
 			'profit_details'      => $summary['profit_details'],
 			'cost_coverage'       => $summary['cost_coverage'],
+			'cost_sources'        => $summary['cost_sources'],
+			'store_has_cost_data' => $summary['store_has_cost_data'],
 		);
 	}
 
@@ -1393,6 +1401,19 @@ final class AttributionEngine {
 		$this->goal_cache[ $goal_id ] = $goal ? $goal : null;
 
 		return $this->goal_cache[ $goal_id ];
+	}
+
+	/**
+	 * Whether the store carries any product cost data.
+	 *
+	 * Phase 3 availability metadata — delegates to the shared
+	 * RewardCostEstimator so every profit surface (summary, goal metrics,
+	 * empty windows) reports the same store-wide signal.
+	 *
+	 * @return bool
+	 */
+	public function store_has_cost_data() {
+		return $this->costs->store_has_cost_data();
 	}
 
 	/**

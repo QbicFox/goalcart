@@ -46,6 +46,30 @@ defined( 'ABSPATH' ) || exit;
 final class RewardCostEstimator {
 
 	/**
+	 * The product-cost sources the estimator consults, in order, plus the
+	 * variation-fallback behavior — stable identifiers the React layer can
+	 * translate for the "how to enable profit" help panel (Improvement.md
+	 * Phase 3 / §10). Labels are kept in the UI layer; these keys never
+	 * change across versions.
+	 *
+	 * @var string[]
+	 */
+	const COST_SOURCES = array(
+		'_cost',
+		'_wc_cog_cost',
+		'goalcart_product_cost',
+		'variation_fallback',
+	);
+
+	/**
+	 * Per-request memo of store_has_cost_data() — one indexed scan per
+	 * request that touches profit, never per order.
+	 *
+	 * @var bool|null
+	 */
+	protected $store_cost_checked = null;
+
+	/**
 	 * Estimate the cost of a goal's reward granted on an order.
 	 *
 	 * Deterministic and transparent: the returned array always carries the
@@ -181,10 +205,14 @@ final class RewardCostEstimator {
 		 *
 		 * Returning a float enables margin-aware analytics for that
 		 * product; returning null means "no cost data" and the estimator
-		 * degrades gracefully.
+		 * degrades gracefully. The product type is NOT guaranteed — during
+		 * the variation fallback this filter is also called with the
+		 * parent product (a WC_Product_Variable), so guard against
+		 * variation-only methods (e.g. get_variation_id()) inside.
 		 *
 		 * @param float|null   $cost    Estimated cost, or null.
-		 * @param \WC_Product  $product Product object.
+		 * @param \WC_Product  $product Product object (simple, variation
+		 *                              or variable — type not guaranteed).
 		 */
 		$cost = apply_filters( 'goalcart_product_cost', null, $product );
 
@@ -192,19 +220,71 @@ final class RewardCostEstimator {
 			$cost = $this->raw_product_cost( $product );
 		}
 
+		// Variation fallback: a variation with no cost of its own inherits
+		// the parent's cost. The parent runs through the SAME source chain
+		// (filter first, then raw meta) so stores that plug costs via the
+		// goalcart_product_cost filter are honored for variations too.
 		if ( null === $cost && $product->get_parent_id() > 0 ) {
 			$parent = wc_get_product( $product->get_parent_id() );
 
 			if ( $parent ) {
-				$cost = $this->raw_product_cost( $parent );
+				$cost = apply_filters( 'goalcart_product_cost', null, $parent );
+
+				if ( null === $cost ) {
+					$cost = $this->raw_product_cost( $parent );
+				}
 			}
 		}
 
-		if ( null === $cost || (float) $cost < 0 ) {
+		// A stored cost of zero/negative is "no cost data" — treating it as
+		// a real 100%-margin value would assume a margin the store never
+		// declared (Improvement.md §40).
+		if ( null === $cost || (float) $cost <= 0 ) {
 			return null;
 		}
 
 		return (float) $cost;
+	}
+
+	/**
+	 * Whether any product in the store carries cost data.
+	 *
+	 * UI-ready availability metadata (Phase 3): one cheap indexed scan
+	 * (postmeta JOIN posts, LIMIT 1) tells the UI whether Estimated Profit
+	 * can ever become available, letting it distinguish "no cost data
+	 * anywhere" (show the set-up guidance, §10) from "some orders lack
+	 * cost data" (show coverage, §11). Never scans orders or products.
+	 *
+	 * @return bool
+	 */
+	public function store_has_cost_data() {
+		if ( null !== $this->store_cost_checked ) {
+			return $this->store_cost_checked;
+		}
+
+		global $wpdb;
+
+		$found = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT pm.meta_id
+				 FROM {$wpdb->postmeta} pm
+				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+				 WHERE p.post_type IN (%s, %s)
+				   AND pm.meta_key IN (%s, %s)
+				   AND pm.meta_value != ''
+				   AND pm.meta_value IS NOT NULL
+				   AND CAST(pm.meta_value AS DECIMAL(19,4)) > 0
+				 LIMIT 1",
+				'product',
+				'product_variation',
+				'_cost',
+				'_wc_cog_cost'
+			)
+		);
+
+		$this->store_cost_checked = (bool) $found;
+
+		return $this->store_cost_checked;
 	}
 
 	/**

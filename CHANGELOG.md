@@ -53,6 +53,38 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     extended `AnalyticsSummary` / `RevenueSummary` /
     `GoalPerformanceRow`).
 
+- **Phase 3 — Profit Availability (Revenue & Analytics UX simplification)**
+  verifying the WooCommerce cost sources behind estimated profit and
+  adding UI-ready availability metadata (`Improvement.md` Phase 3 — no
+  invented costs, no changes to the profit formula):
+  - **Cost source chain verified** — `_cost`, `_wc_cog_cost` (read when
+    `_cost` is absent; `_cost` wins when both exist), variation
+    fallback to the parent, and the `goalcart_product_cost` filter.
+  - **Variation fallback fix** — a variation inheriting its parent's
+    cost now runs the parent through the `goalcart_product_cost`
+    filter too (previously raw meta only), so stores that plug costs
+    via the filter are honored for variations.
+  - **Zero/negative stored costs are "no data"** — a stored cost of 0
+    or less is treated as missing (never a 100%-margin assumption),
+    consistent across the filter and meta paths.
+  - **UI-ready availability metadata** — every attribution summary now
+    carries `cost_sources` (the stable source keys, §10 help panel)
+    and `store_has_cost_data` (one cheap store-wide scan: whether any
+    product has cost data — distinguishes "set up product costs" from
+    "partial coverage"). Mirrored in the `/analytics` summary (null
+    for filters attribution cannot express), goal rows and empty
+    summaries.
+  - **Tests** — new `tests/profit-availability-test.php` (44 checks):
+    every cost source (incl. precedence, safety, both variation
+    fallback paths, filter override + fall-through), reward cost
+    models (percent capped / fixed / free shipping via context and
+    real order / free gift costed and uncosted), shipping cost, the
+    `estimated_profit` formula regression and the availability
+    metadata on a real attributed summary. All rolled back.
+  - **Types** — `admin-app/src/types.ts` adds `CostSource` and the
+    `cost_sources` / `store_has_cost_data` fields to
+    `AnalyticsSummary`, `RevenueSummary` and `GoalPerformanceRow`.
+
 - **Sticky bottom action bar** — the admin dashboard now docks every
   save / settings / reset action in a sticky bottom bar instead of the
   page body. A new `ActionBar` shell component (`AdminLayout`) renders

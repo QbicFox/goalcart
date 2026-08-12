@@ -489,6 +489,17 @@ export type ProfitReasonCode =
   | 'incomplete_product_cost'
   | 'insufficient_data';
 
+/**
+ * The product-cost sources the backend estimator consults, in order
+ * (Improvement.md Phase 3 / §10). Keys are stable; translate them in the
+ * UI when explaining where cost data comes from.
+ */
+export type CostSource =
+  | '_cost'
+  | '_wc_cog_cost'
+  | 'goalcart_product_cost'
+  | 'variation_fallback';
+
 /** Cost-data coverage over the attributed (incremental) orders (§11). */
 export interface CostCoverage {
   /** Direct-attribution orders that carry incremental revenue. */
@@ -529,10 +540,14 @@ export interface AnalyticsSummary {
   attributed_sales: number | null;
   estimated_profit: number | null;
   profit_available: boolean;
-  profit_reason: string | null;
-  profit_reason_code: ProfitReasonCode | null;
+  profit_reason: string | null;	profit_reason_code: ProfitReasonCode | null;
   cost_coverage: CostCoverage;
-  profit_details: ProfitDetails | null;
+  // Phase 3 — UI-ready profit availability metadata (§10): which cost
+  // sources are consulted and whether the store carries any cost data.
+  // `store_has_cost_data` is null when the filter cannot be expressed in
+  // attribution (e.g. product_id).
+  cost_sources: CostSource[];
+  store_has_cost_data: boolean | null;
 }
 
 /** One daily bucket of the Phase 17 trend series. */
@@ -681,10 +696,12 @@ export interface RevenueSummary {
   profit_impact: number | null;
   profit_available: boolean;
   profit_reason: string | null;
-  // Phase 2 — profit availability metadata (Improvement.md §38/§39/§11/§12).
-  profit_reason_code: ProfitReasonCode;
+  // Phase 2 — profit availability metadata (Improvement.md §38/§39/§11/§12).	profit_reason_code: ProfitReasonCode;
   profit_details: ProfitDetails;
   cost_coverage: CostCoverage;
+  // Phase 3 — UI-ready profit availability metadata (§10).
+  cost_sources: CostSource[];
+  store_has_cost_data: boolean;
   funnel: RevenueFunnel;
 }
 
@@ -779,10 +796,12 @@ export interface GoalPerformanceRow {
   reward_cost_available: boolean;
   profit_impact: number | null;
   profit_available: boolean;
-  profit_reason: string | null;
-  profit_reason_code: ProfitReasonCode;
+  profit_reason: string | null;	profit_reason_code: ProfitReasonCode;
   profit_details: ProfitDetails;
   cost_coverage: CostCoverage;
+  // Phase 3 — UI-ready profit availability metadata (§10).
+  cost_sources: CostSource[];
+  store_has_cost_data: boolean;
 }
 
 /** The `GET /goalcart/v1/revenue/goals` payload. */
