@@ -1,8 +1,12 @@
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import { useQuery } from '@tanstack/react-query';
 import Alert from '@mui/material/Alert';
 import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 import Chip from '@mui/material/Chip';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -23,7 +27,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { fetchUpsellAnalytics, fetchUpsellProduct } from '../api/revenue';
 import EmptyState from '../components/EmptyState';
@@ -33,11 +37,11 @@ import { useDateRange } from '../date-range/DateRangeContext';
 import { formatCurrency, formatNumber, formatPercent } from '../lib/format';
 import type { UpsellAnalyticsRow, UpsellComponentScores, UpsellRecommendation } from '../types';
 
-/** Sort modes for the analytics table (the spec's four views). */
-type SortMode = 'score' | 'lowest' | 'conversion' | 'margin';
+/** Sort modes for the analytics table — all re-based on commercial outcomes. */
+type SortMode = 'top' | 'lowest' | 'conversion' | 'margin';
 
 const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
-  { value: 'score', label: __('Top performing', 'goalcart') },
+  { value: 'top', label: __('Top performing', 'goalcart') },
   { value: 'lowest', label: __('Lowest performing', 'goalcart') },
   { value: 'conversion', label: __('Best conversion', 'goalcart') },
   { value: 'margin', label: __('Highest margin', 'goalcart') },
@@ -52,21 +56,39 @@ const COMPONENT_LABELS: Array<{ key: keyof UpsellComponentScores; label: string 
   { key: 'conversion', label: __('Conversion', 'goalcart') },
 ];
 
-/** Sort one mode of the analytics rows (client-side views). */
+/**
+ * Sort one mode of the analytics rows (client-side views). Phase 8 re-bases
+ * the four views on commercial outcomes (§35): "Top performing" is ordered
+ * by purchases then sales (what actually converts), "Lowest performing" by
+ * the underperformers, "Best conversion" by the purchase rate (products
+ * without impressions sort last — no denominator), "Highest margin" by
+ * the sampled margin (unavailable margins last).
+ */
 function sortRows(rows: UpsellAnalyticsRow[], mode: SortMode): UpsellAnalyticsRow[] {
   const copy = [...rows];
 
   switch (mode) {
     case 'lowest':
-      return copy.sort((a, b) => a.upsell_score - b.upsell_score);
+      return copy.sort((a, b) => a.orders - b.orders || a.revenue - b.revenue);
     case 'conversion':
-      return copy.sort((a, b) => b.conversion_rate - a.conversion_rate);
+      return copy.sort(
+        (a, b) =>
+          (b.impressions > 0 ? b.conversion_rate : -1) - (a.impressions > 0 ? a.conversion_rate : -1)
+      );
     case 'margin':
       return copy.sort((a, b) => (b.margin_pct ?? -1) - (a.margin_pct ?? -1));
-    case 'score':
+    case 'top':
     default:
-      return copy.sort((a, b) => b.upsell_score - a.upsell_score);
+      return copy.sort((a, b) => b.orders - a.orders || b.revenue - a.revenue || b.impressions - a.impressions);
   }
+}
+
+/**
+ * A percentage from the real funnel counts, "—" when there is no
+ * denominator (e.g. no impressions) — never a fabricated 0% (§43).
+ */
+function funnelRate(numerator: number, denominator: number): string {
+  return denominator > 0 ? formatPercent(numerator / denominator) : '—';
 }
 
 /** Per-product score-breakdown dialog (the P33-34 transparency contract). */
@@ -200,19 +222,25 @@ function ProductDetailDialog({
 }
 
 /**
- * Upsell Analytics (Phase 33.6).
+ * Upsell Analytics (Phase 33.6 engine — Phase 8 commercial-first UI).
  *
- * The top-products upsell table from
- * `GET /goalcart/v1/revenue/upsells?analytics=1` — impressions / clicks /
- * adds / orders / conversion / revenue / estimated profit / upsell score —
- * with the spec's four views (top / lowest performing, best conversion,
- * highest margin) and a per-product score-breakdown drill-down.
+ * The top-products upsell table from `GET /goalcart/v1/revenue/upsells?analytics=1`.
+ * The first screen answers "which suggested products actually generate
+ * purchases and sales?" (Improvement.md §35): Product / Purchased Orders /
+ * Sales / Estimated profit / Conversion are the primary columns; the
+ * interaction funnel (impressions, clicks, adds, CTR, add-to-cart rate) and
+ * the upsell score sit behind a "Show interaction details" toggle, and the
+ * full score breakdown stays available through the per-product dialog.
+ * CTR and add-to-cart rate are derived client-side from the real funnel
+ * counts (clicks/impressions, adds/impressions — "—" without a
+ * denominator), never fabricated.
  */
 export default function UpsellAnalytics() {
   const { range } = useDateRange();
   const [goalId, setGoalId] = useState<number>(0);
   const [limit, setLimit] = useState<number>(20);
-  const [sortMode, setSortMode] = useState<SortMode>('score');
+  const [sortMode, setSortMode] = useState<SortMode>('top');
+  const [showDetails, setShowDetails] = useState<boolean>(false);
   const [detailProductId, setDetailProductId] = useState<number>(0);
 
   const query = useQuery({
@@ -226,13 +254,27 @@ export default function UpsellAnalytics() {
       }),
   });
 
-  const rows = sortRows(query.data ?? [], sortMode);
+  const rows = useMemo(() => sortRows(query.data ?? [], sortMode), [query.data, sortMode]);
+
+  // Commercial summary over the loaded rows — purchases, sales, conversion.
+  const summary = useMemo(() => {
+    const totalOrders = rows.reduce((sum, row) => sum + row.orders, 0);
+    const totalSales = rows.reduce((sum, row) => sum + row.revenue, 0);
+    const totalImpressions = rows.reduce((sum, row) => sum + row.impressions, 0);
+
+    return {
+      products: rows.length,
+      orders: totalOrders,
+      sales: totalSales,
+      conversion: totalImpressions > 0 ? totalOrders / totalImpressions : null,
+    };
+  }, [rows]);
 
   return (
     <PageContainer
       title={__('Upsell Analytics', 'goalcart')}
       description={__(
-        'Which recommended products convert — impressions, orders, revenue and profit per product.',
+        'Which suggested products actually generate purchases and sales — orders, revenue and estimated profit per product.',
         'goalcart'
       )}
     >
@@ -251,20 +293,31 @@ export default function UpsellAnalytics() {
         </TextField>
       </RevenueToolbar>
 
-      <ToggleButtonGroup
-        exclusive
-        size="small"
-        value={sortMode}
-        onChange={(_, next) => next && setSortMode(next)}
-        aria-label={__('Sort products', 'goalcart')}
-        sx={{ alignSelf: 'flex-start' }}
-      >
-        {SORT_OPTIONS.map((option) => (
-          <ToggleButton key={option.value} value={option.value}>
-            {option.label}
-          </ToggleButton>
-        ))}
-      </ToggleButtonGroup>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} useFlexGap sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <ToggleButtonGroup
+          exclusive
+          size="small"
+          value={sortMode}
+          onChange={(_, next) => next && setSortMode(next)}
+          aria-label={__('Sort products', 'goalcart')}
+        >
+          {SORT_OPTIONS.map((option) => (
+            <ToggleButton key={option.value} value={option.value}>
+              {option.label}
+            </ToggleButton>
+          ))}
+        </ToggleButtonGroup>
+        <Box sx={{ flexGrow: 1 }} />
+        <Button
+          size="small"
+          variant="outlined"
+          endIcon={<ExpandMoreIcon sx={{ transform: showDetails ? 'rotate(180deg)' : 'none' }} />}
+          onClick={() => setShowDetails((current) => !current)}
+          aria-expanded={showDetails}
+        >
+          {showDetails ? __('Hide interaction details', 'goalcart') : __('Show interaction details', 'goalcart')}
+        </Button>
+      </Stack>
 
       {query.isError && (
         <Alert severity="error" variant="outlined">
@@ -279,7 +332,7 @@ export default function UpsellAnalytics() {
           <Skeleton variant="rounded" height={72} />
           <Skeleton variant="rounded" height={420} />
         </Stack>
-      ) : rows.length === 0 ? (
+      ) : !query.isError && rows.length === 0 ? (
         <EmptyState
           icon={<TrendingUpIcon fontSize="large" />}
           title={__('No upsell activity yet', 'goalcart')}
@@ -289,56 +342,134 @@ export default function UpsellAnalytics() {
           )}
         />
       ) : (
-        <TableContainer component={Paper} variant="outlined">
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>{__('Product', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Impressions', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Clicks', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Adds', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Orders', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Conversion', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Revenue', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Est. profit', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Score', 'goalcart')}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow key={row.product_id} hover sx={{ cursor: 'pointer' }} onClick={() => setDetailProductId(row.product_id)}>
-                  <TableCell sx={{ fontWeight: 600 }}>{row.name}</TableCell>
-                  <TableCell align="right">{formatNumber(row.impressions)}</TableCell>
-                  <TableCell align="right">{formatNumber(row.clicks)}</TableCell>
-                  <TableCell align="right">{formatNumber(row.adds)}</TableCell>
-                  <TableCell align="right">
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      color={row.orders > 0 ? 'success' : 'default'}
-                      label={formatNumber(row.orders)}
-                    />
-                  </TableCell>
-                  <TableCell align="right">{formatPercent(row.conversion_rate)}</TableCell>
-                  <TableCell align="right">{formatCurrency(row.revenue)}</TableCell>
-                  <TableCell align="right">
-                    {row.profit_available && row.estimated_profit !== null
-                      ? formatCurrency(row.estimated_profit)
-                      : '—'}
-                  </TableCell>
-                  <TableCell align="right">
-                    <Chip size="small" variant="outlined" color="primary" label={formatNumber(row.upsell_score)} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
+        <Stack spacing={2}>
+          {/* Commercial summary (§35 — the first screen answers how many
+              purchases and how much sales the suggestions generated). */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' },
+              gap: 2,
+            }}
+          >
+            <Card variant="outlined">
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Typography variant="caption" color="text.secondary">
+                  {__('Products', 'goalcart')}
+                </Typography>
+                <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 600 }}>
+                  {formatNumber(summary.products)}
+                </Typography>
+              </CardContent>
+            </Card>
+            <Card variant="outlined">
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Typography variant="caption" color="text.secondary">
+                  {__('Purchased Orders', 'goalcart')}
+                </Typography>
+                <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 600 }}>
+                  {formatNumber(summary.orders)}
+                </Typography>
+              </CardContent>
+            </Card>
+            <Card variant="outlined">
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Typography variant="caption" color="text.secondary">
+                  {__('Sales', 'goalcart')}
+                </Typography>
+                <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 600 }}>
+                  {formatCurrency(summary.sales)}
+                </Typography>
+              </CardContent>
+            </Card>
+            <Card variant="outlined">
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                <Typography variant="caption" color="text.secondary">
+                  {__('Conversion', 'goalcart')}
+                </Typography>
+                <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 600 }}>
+                  {summary.conversion !== null ? formatPercent(summary.conversion) : '—'}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
 
-      <Typography variant="caption" color="text.secondary">
-        {__('Click a product row for its full score breakdown.', 'goalcart')}
-      </Typography>
+          <TableContainer component={Paper} variant="outlined">
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>{__('Product', 'goalcart')}</TableCell>
+                  <TableCell align="right">{__('Orders', 'goalcart')}</TableCell>
+                  <TableCell align="right">{__('Sales', 'goalcart')}</TableCell>
+                  <TableCell align="right">{__('Estimated profit', 'goalcart')}</TableCell>
+                  <TableCell align="right">{__('Conversion', 'goalcart')}</TableCell>
+                  {showDetails && (
+                    <>
+                      <TableCell align="right">{__('Impressions', 'goalcart')}</TableCell>
+                      <TableCell align="right">{__('Clicks', 'goalcart')}</TableCell>
+                      <TableCell align="right">{__('Adds', 'goalcart')}</TableCell>
+                      <TableCell align="right">{__('CTR', 'goalcart')}</TableCell>
+                      <TableCell align="right">{__('Add-to-cart', 'goalcart')}</TableCell>
+                      <TableCell align="right">{__('Score', 'goalcart')}</TableCell>
+                    </>
+                  )}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((row) => (
+                  <TableRow
+                    key={row.product_id}
+                    hover
+                    tabIndex={0}
+                    role="button"
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => setDetailProductId(row.product_id)}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setDetailProductId(row.product_id);
+                      }
+                    }}
+                  >
+                    <TableCell sx={{ fontWeight: 600 }}>{row.name}</TableCell>
+                    <TableCell align="right">
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        color={row.orders > 0 ? 'success' : 'default'}
+                        label={formatNumber(row.orders)}
+                      />
+                    </TableCell>
+                    <TableCell align="right">{formatCurrency(row.revenue)}</TableCell>
+                    <TableCell align="right">
+                      {row.profit_available && row.estimated_profit !== null
+                        ? formatCurrency(row.estimated_profit)
+                        : '—'}
+                    </TableCell>
+                    <TableCell align="right">{funnelRate(row.orders, row.impressions)}</TableCell>
+                    {showDetails && (
+                      <>
+                        <TableCell align="right">{formatNumber(row.impressions)}</TableCell>
+                        <TableCell align="right">{formatNumber(row.clicks)}</TableCell>
+                        <TableCell align="right">{formatNumber(row.adds)}</TableCell>
+                        <TableCell align="right">{funnelRate(row.clicks, row.impressions)}</TableCell>
+                        <TableCell align="right">{funnelRate(row.adds, row.impressions)}</TableCell>
+                        <TableCell align="right">
+                          <Chip size="small" variant="outlined" color="primary" label={formatNumber(row.upsell_score)} />
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <Typography variant="caption" color="text.secondary">
+            {__('Click a product row for its full score breakdown.', 'goalcart')}
+          </Typography>
+        </Stack>
+      )}
 
       <ProductDetailDialog
         productId={detailProductId}

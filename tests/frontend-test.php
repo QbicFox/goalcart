@@ -577,6 +577,28 @@ check( 'recommendations page no longer leads with the raw confidence percent', f
 check( 'recommendations page keeps the explicit apply + dismiss flow', false !== strpos( $recommendations_tsx, "__('Apply recommendation', 'goalcart')" ) && false !== strpos( $recommendations_tsx, "__('Dismiss', 'goalcart')" ) && false !== strpos( $recommendations_tsx, 'ConfirmDialog' ) );
 
 // ---------------------------------------------------------------------------
+// 12. Upsell Analytics presentation (Improvement.md Phase 8 / §35)
+// ---------------------------------------------------------------------------
+echo "\n== 12. Upsell Analytics presentation ==\n";
+
+// The Phase 8 redesign makes purchases/sales the primary metrics: the
+// table leads with Product / Orders / Sales / Estimated profit /
+// Conversion and hides the interaction funnel (impressions, clicks,
+// adds, CTR, add-to-cart rate) plus the upsell score behind a "Show
+// interaction details" toggle; a summary strip answers the first-screen
+// question at a glance. Source-scanned so the commercial-first layout
+// cannot silently regress to a score/metrics-first table.
+$upsell_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/UpsellAnalytics.tsx' );
+check( 'upsell table leads with the commercial columns', false !== strpos( $upsell_tsx, "__('Orders', 'goalcart')" ) && false !== strpos( $upsell_tsx, "__('Estimated profit', 'goalcart')" ) && false !== strpos( $upsell_tsx, "__('Conversion', 'goalcart')" ) );
+check( 'upsell orders column comes before the interaction funnel', strpos( $upsell_tsx, "__('Orders', 'goalcart')" ) < strpos( $upsell_tsx, "__('Impressions', 'goalcart')" ) );
+check( 'upsell interaction details sit behind the show-details toggle', false !== strpos( $upsell_tsx, "__('Show interaction details', 'goalcart')" ) && false !== strpos( $upsell_tsx, 'showDetails && (' ) );
+check( 'upsell score is inside the interaction-details block', strpos( $upsell_tsx, "__('Score', 'goalcart')" ) > strpos( $upsell_tsx, 'showDetails && (' ) );
+check( 'upsell page shows a commercial summary strip', false !== strpos( $upsell_tsx, "__('Purchased Orders', 'goalcart')" ) && false !== strpos( $upsell_tsx, "__('Sales', 'goalcart')" ) );
+check( 'upsell funnel rates never fabricate a denominator', false !== strpos( $upsell_tsx, 'denominator > 0 ? formatPercent' ) && false !== strpos( $upsell_tsx, '\'—\'' ) );
+check( 'upsell top-performing view sorts by purchases then sales', false !== strpos( $upsell_tsx, 'b.orders - a.orders || b.revenue - a.revenue' ) );
+check( 'upsell per-product score breakdown stays available', false !== strpos( $upsell_tsx, 'ProductDetailDialog' ) && false !== strpos( $upsell_tsx, 'Score breakdown' ) );
+
+// ---------------------------------------------------------------------------
 // Summary
 // ---------------------------------------------------------------------------
 echo "\n==========================================\n";

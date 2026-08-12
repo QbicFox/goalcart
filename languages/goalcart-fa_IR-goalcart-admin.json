@@ -2829,6 +2829,15 @@
             ],
             "Set the goal target to %s?": [
                 "آستانهٔ هدف را روی %s تنظیم کنم؟"
+            ],
+            "Which suggested products actually generate purchases and sales — orders, revenue and estimated profit per product.": [
+                "کدام محصولات پیشنهادی واقعاً خرید و فروش ایجاد می‌کنند — سفارش‌ها، درآمد و سود تخمینی هر محصول."
+            ],
+            "Show interaction details": [
+                "نمایش جزئیات تعامل"
+            ],
+            "Hide interaction details": [
+                "پنهان کردن جزئیات تعامل"
             ]
         }
     }

@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-12T08:59:51Z\n"
+"POT-Creation-Date: 2026-08-12T09:05:24Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -223,6 +223,7 @@ msgid "Add your first goal"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1063
+#: admin-app/src/routes/UpsellAnalytics.tsx:412
 msgid "Add-to-cart"
 msgstr ""
 
@@ -235,7 +236,7 @@ msgstr ""
 msgid "Adding…"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:299
+#: admin-app/src/routes/UpsellAnalytics.tsx:410
 msgid "Adds"
 msgstr ""
 
@@ -580,7 +581,7 @@ msgstr ""
 msgid "Behavior"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:42
+#: admin-app/src/routes/UpsellAnalytics.tsx:46
 msgid "Best conversion"
 msgstr ""
 
@@ -617,6 +618,7 @@ msgid "Brand attribute"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1062
+#: admin-app/src/routes/UpsellAnalytics.tsx:411
 msgid "CTR"
 msgstr ""
 
@@ -750,12 +752,12 @@ msgstr ""
 msgid "Circular gauge — the target as a filled ring with the percentage centered."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:340
+#: admin-app/src/routes/UpsellAnalytics.tsx:461
 msgid "Click a product row for its full score breakdown."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1060
-#: admin-app/src/routes/UpsellAnalytics.tsx:298
+#: admin-app/src/routes/UpsellAnalytics.tsx:409
 msgid "Clicks"
 msgstr ""
 
@@ -888,8 +890,9 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:52
-#: admin-app/src/routes/UpsellAnalytics.tsx:301
+#: admin-app/src/routes/UpsellAnalytics.tsx:56
+#: admin-app/src/routes/UpsellAnalytics.tsx:388
+#: admin-app/src/routes/UpsellAnalytics.tsx:405
 msgid "Conversion"
 msgstr ""
 
@@ -967,7 +970,7 @@ msgstr ""
 msgid "Could not load the settings."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:273
+#: admin-app/src/routes/UpsellAnalytics.tsx:326
 msgid "Could not load upsell analytics."
 msgstr ""
 
@@ -1375,10 +1378,6 @@ msgstr ""
 msgid "Ends in"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:303
-msgid "Est. profit"
-msgstr ""
-
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:88
 #: admin-app/src/routes/Analytics.tsx:197
 #: admin-app/src/routes/Analytics.tsx:692
@@ -1398,6 +1397,7 @@ msgstr ""
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:181
 #: admin-app/src/routes/Analytics.tsx:292
 #: admin-app/src/routes/RevenueOverview.tsx:170
+#: admin-app/src/routes/UpsellAnalytics.tsx:404
 msgid "Estimated profit"
 msgstr ""
 
@@ -1768,6 +1768,10 @@ msgstr ""
 msgid "Hide details"
 msgstr ""
 
+#: admin-app/src/routes/UpsellAnalytics.tsx:318
+msgid "Hide interaction details"
+msgstr ""
+
 #: admin-app/src/routes/Settings.tsx:515
 msgid "Hide on mobile"
 msgstr ""
@@ -1780,7 +1784,7 @@ msgstr ""
 msgid "High"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:43
+#: admin-app/src/routes/UpsellAnalytics.tsx:47
 msgid "Highest margin"
 msgstr ""
 
@@ -1792,7 +1796,7 @@ msgstr ""
 msgid "Historical goal completion rate is %s."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:178
+#: admin-app/src/routes/UpsellAnalytics.tsx:200
 msgid "Historical performance"
 msgstr ""
 
@@ -1863,7 +1867,7 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:957
 #: admin-app/src/routes/Analytics.tsx:1059
-#: admin-app/src/routes/UpsellAnalytics.tsx:297
+#: admin-app/src/routes/UpsellAnalytics.tsx:408
 msgid "Impressions"
 msgstr ""
 
@@ -1958,7 +1962,7 @@ msgstr ""
 msgid "Invalid tracking nonce."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:50
+#: admin-app/src/routes/UpsellAnalytics.tsx:54
 msgid "Inventory"
 msgstr ""
 
@@ -2011,7 +2015,7 @@ msgstr ""
 msgid "Leave empty to apply to the whole cart."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:242
+#: admin-app/src/routes/UpsellAnalytics.tsx:284
 msgid "Limit"
 msgstr ""
 
@@ -2040,7 +2044,7 @@ msgstr ""
 msgid "Loading Goal Cart…"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:93
+#: admin-app/src/routes/UpsellAnalytics.tsx:115
 msgid "Loading product…"
 msgstr ""
 
@@ -2085,7 +2089,7 @@ msgstr ""
 msgid "Lower numbers win conflicts."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:41
+#: admin-app/src/routes/UpsellAnalytics.tsx:45
 msgid "Lowest performing"
 msgstr ""
 
@@ -2098,7 +2102,7 @@ msgid "Makes every shipping rate free once the goal is reached. Zone/method-spec
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:185
-#: admin-app/src/routes/UpsellAnalytics.tsx:51
+#: admin-app/src/routes/UpsellAnalytics.tsx:55
 msgid "Margin"
 msgstr ""
 
@@ -2309,7 +2313,7 @@ msgstr ""
 msgid "No templates are registered for this scope yet. Add one on the backend template registry."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:285
+#: admin-app/src/routes/UpsellAnalytics.tsx:338
 msgid "No upsell activity yet"
 msgstr ""
 
@@ -2475,7 +2479,7 @@ msgstr ""
 msgid "Order value distribution (share of orders)"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:300
+#: admin-app/src/routes/UpsellAnalytics.tsx:402
 msgid "Orders"
 msgstr ""
 
@@ -2568,7 +2572,7 @@ msgstr ""
 msgid "Popular product (%d units sold, %s rating)."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:49
+#: admin-app/src/routes/UpsellAnalytics.tsx:53
 msgid "Popularity"
 msgstr ""
 
@@ -2608,7 +2612,7 @@ msgstr ""
 msgid "Price %s fits the remaining %s %s."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:47
+#: admin-app/src/routes/UpsellAnalytics.tsx:51
 msgid "Price gap"
 msgstr ""
 
@@ -2631,8 +2635,8 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:503
 #: admin-app/src/routes/Analytics.tsx:1058
 #: admin-app/src/routes/Goals.tsx:56
-#: admin-app/src/routes/UpsellAnalytics.tsx:93
-#: admin-app/src/routes/UpsellAnalytics.tsx:296
+#: admin-app/src/routes/UpsellAnalytics.tsx:115
+#: admin-app/src/routes/UpsellAnalytics.tsx:401
 msgid "Product"
 msgstr ""
 
@@ -2666,6 +2670,7 @@ msgstr ""
 
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:164
 #: admin-app/src/components/goal-builder/TargetFields.tsx:144
+#: admin-app/src/routes/UpsellAnalytics.tsx:358
 msgid "Products"
 msgstr ""
 
@@ -2738,6 +2743,7 @@ msgstr ""
 #: admin-app/src/routes/RevenueOverview.tsx:199
 #: admin-app/src/routes/RevenueOverview.tsx:346
 #: admin-app/src/routes/RevenueOverview.tsx:467
+#: admin-app/src/routes/UpsellAnalytics.tsx:368
 msgid "Purchased Orders"
 msgstr ""
 
@@ -2838,7 +2844,7 @@ msgstr ""
 msgid "Recurring schedule"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:48
+#: admin-app/src/routes/UpsellAnalytics.tsx:52
 msgid "Relevance"
 msgstr ""
 
@@ -2878,7 +2884,6 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:946
 #: admin-app/src/routes/Analytics.tsx:971
-#: admin-app/src/routes/UpsellAnalytics.tsx:302
 msgid "Revenue"
 msgstr ""
 
@@ -2943,6 +2948,8 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:191
 #: admin-app/src/routes/GoalPerformance.tsx:80
+#: admin-app/src/routes/UpsellAnalytics.tsx:378
+#: admin-app/src/routes/UpsellAnalytics.tsx:403
 msgid "Sales"
 msgstr ""
 
@@ -3015,11 +3022,11 @@ msgid "Schedule & priority"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:139
-#: admin-app/src/routes/UpsellAnalytics.tsx:304
+#: admin-app/src/routes/UpsellAnalytics.tsx:413
 msgid "Score"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:141
+#: admin-app/src/routes/UpsellAnalytics.tsx:163
 msgid "Score breakdown"
 msgstr ""
 
@@ -3122,6 +3129,10 @@ msgstr ""
 
 #: includes/Frontend/ProgressUI.php:194
 msgid "Show cart goals, progress and rewards (Goal Cart)."
+msgstr ""
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:318
+msgid "Show interaction details"
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:77
@@ -3255,7 +3266,7 @@ msgstr ""
 msgid "Something went wrong"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:259
+#: admin-app/src/routes/UpsellAnalytics.tsx:302
 msgid "Sort products"
 msgstr ""
 
@@ -3550,7 +3561,7 @@ msgstr ""
 msgid "The product attribute that identifies the brand (typically pa_brand)."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:104
+#: admin-app/src/routes/UpsellAnalytics.tsx:126
 msgid "The product breakdown could not be loaded."
 msgstr ""
 
@@ -3598,7 +3609,7 @@ msgstr ""
 msgid "This offer is not available for your cart."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:194
+#: admin-app/src/routes/UpsellAnalytics.tsx:216
 msgid "This product could not be scored."
 msgstr ""
 
@@ -3648,7 +3659,7 @@ msgstr ""
 msgid "Top campaigns by completions"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:40
+#: admin-app/src/routes/UpsellAnalytics.tsx:44
 msgid "Top performing"
 msgstr ""
 
@@ -3737,11 +3748,11 @@ msgid "Updating…"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:52
-#: admin-app/src/routes/UpsellAnalytics.tsx:233
+#: admin-app/src/routes/UpsellAnalytics.tsx:275
 msgid "Upsell Analytics"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:286
+#: admin-app/src/routes/UpsellAnalytics.tsx:339
 msgid "Upsell impressions and orders are recorded once the storefront reports them. Widen the date range or check that tracking is enabled."
 msgstr ""
 
@@ -3862,11 +3873,11 @@ msgstr ""
 msgid "Which goals generated purchases, sales and profit? Completion is not the same as purchase."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:234
-msgid "Which recommended products convert — impressions, orders, revenue and profit per product."
+#: admin-app/src/routes/UpsellAnalytics.tsx:276
+msgid "Which suggested products actually generate purchases and sales — orders, revenue and estimated profit per product."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:164
+#: admin-app/src/routes/UpsellAnalytics.tsx:186
 msgid "Why this product"
 msgstr ""
 
@@ -3991,7 +4002,7 @@ msgstr ""
 msgid "shares a tag with the cart"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:116
+#: admin-app/src/routes/UpsellAnalytics.tsx:138
 msgid "upsell score"
 msgstr ""
 

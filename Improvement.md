@@ -24,7 +24,7 @@ The goal is:
 
 # ✅ IMPLEMENTATION PROGRESS
 
-**Overall:** Phases 1–7 complete · Phases 8–10 not started.
+**Overall:** Phases 1–8 complete · Phases 9–10 not started.
 
 ```text
 Phase 1 : ████████████████████ 100%   Codebase Audit (REVENUE_ANALYTICS_AUDIT.md)
@@ -34,7 +34,7 @@ Phase 4 : ████████████████████ 100%   Re
 Phase 5 : ████████████████████ 100%   Goal Performance Redesign
 Phase 6 : ████████████████████ 100%   Analytics Redesign
 Phase 7 : ████████████████████ 100%   Recommendations
-Phase 8 : ░░░░░░░░░░░░░░░░░░░░   0%   Upsell Analytics
+Phase 8 : ████████████████████ 100%   Upsell Analytics
 Phase 9 : ░░░░░░░░░░░░░░░░░░░░   0%   UX Polish
 Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Testing & Regression
 ```
@@ -48,11 +48,11 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | 5 — Goal Performance Redesign | [x] 100% | commercial-outcomes Goal table (Viewed/Progressed/Completed/Purchased/Purchase Rate/Sales/Estimated Profit, sortable), per-goal detail drawer (performance summary, funnel with drop-off, costs via the shared profit card, advanced attribution + advanced accordions), additive `goal_metrics()` fields, `tests/revenue-admin-test.php` (56 checks) |
 | 6 — Analytics Redesign | [x] 100% | Analytics page → Goal Conversion & Purchase Analysis: purchase KPI row + secondary views/completions, customer-journey funnel with drop-off, completion-vs-purchase analysis, sortable goal comparison table, deterministic drop-off insights, advanced attribution accordion, legacy activity metrics preserved behind an accordion; additive `goal_comparison`/`funnel`/assisted/influenced payload fields |
 | 7 — Recommendations | [x] 100% | business-first Smart Recommendations page (Confidence: High/Medium/Low label, Expected impact, §34 expected-profit state, Why? bullets, raw scoring behind an Advanced details expander); typed `RecommendationFactors`; fa_IR coverage gap closed (i18n 53/53); `tests/frontend-test.php` Phase 7 source-scan guards; docs + CHANGELOG updated |
-| 8 — Upsell Analytics | [ ] 0% | — |
+| 8 — Upsell Analytics | [x] 100% | commercial-first Upsell Analytics page (summary strip Products/Purchased Orders/Sales/Conversion; table leads Product/Orders/Sales/Estimated profit/Conversion; interaction funnel + score behind a Show-interaction-details toggle; CTR/add-to-cart derived from real counts, "—" without a denominator; commercial sort views — top by purchases then sales; score breakdown kept in the per-product dialog); `tests/frontend-test.php` Phase 8 source-scan guards; docs + CHANGELOG updated |
 | 9 — UX Polish | [ ] 0% | — |
 | 10 — Testing & Regression | [ ] 0% | — |
 
-**Last update:** 2026-08-12 — Phase 7 (Recommendations) complete; `tsc`, ESLint and `vite build` clean; POT regenerated (887 strings) and the fa_IR translation coverage gap from Phases 4–6 closed (i18n 53/53); PHP suites green (recommendation 90, purchase-metrics 107, revenue-admin 56, attribution 72, aggregation 74, phase33 99, profit-availability 45); the legacy `analytics-dashboard` suite stays at its documented pre-existing dev-DB drift baseline (31 failures) — every Phase 6 check in it passes.
+**Last update:** 2026-08-12 — Phase 8 (Upsell Analytics) complete; `tsc`, ESLint and `vite build` clean; POT regenerated (891 strings), all Phase 8 strings translated to fa_IR (i18n 53/53); recommendation 90/90 and the upsell/revenue suites green; `tests/frontend-test.php` Phase 8 source-scan guards pass (its 4 remaining FAILs are the documented pre-existing live-store setting drift, identical on unmodified code); the legacy `analytics-dashboard` suite stays at its documented pre-existing dev-DB drift baseline (31 failures) — every Phase 6 check in it passes.
 
 ---
 
@@ -2228,9 +2228,43 @@ supplied every value; no backend change needed):
 
 # Phase 8 — Upsell Analytics
 
-Make purchases/sales the primary metrics.
+✅ **Complete (2026-08-12).** Purchases/sales are now the primary
+metrics; the technical score breakdowns stay available as details.
 
-Keep technical score breakdowns available as details.
+## What was built
+
+* **Commercial summary strip** — Products / Purchased Orders / Sales /
+  Conversion over the loaded rows: the first screen answers "which
+  suggested products actually generate purchases and sales?" at a
+  glance (§35).
+* **Commercial-first table** — primary columns are Product / Orders /
+  Sales / Estimated profit / Conversion. Estimated profit renders "—"
+  unless the row carries `profit_available` — never a guessed number.
+* **Interaction details behind a toggle** — Impressions / Clicks /
+  Adds / CTR / Add-to-cart / Score only appear with "Show interaction
+  details". CTR and add-to-cart are derived client-side from the real
+  funnel counts and show "—" without a denominator (never a fabricated
+  0%).
+* **Commercial sort views** — the four spec views are re-based on
+  commercial outcomes: top performing (purchases then sales, then
+  impressions), lowest performing, best conversion (no-impression rows
+  sort last) and highest margin (unavailable margins last).
+* **Score transparency kept** — clicking a row still opens the
+  `upsell_product_detail()` score-breakdown dialog (six 0–100
+  components, plain-English reasons, historical funnel stats).
+* **Empty state** — points store owners at tracking enablement and the
+  date range when there is no recorded activity.
+
+## Verification
+
+* `tsc --noEmit`, ESLint and `vite build` — clean.
+* `tests/frontend-test.php` — Phase 8 source-scan guards added and
+  green (commercial columns first, toggle-gated funnel, score in the
+  details block, summary strip, no fabricated denominators, commercial
+  sort, per-product dialog); the 4 remaining FAILs are the documented
+  pre-existing live-store setting drift.
+* i18n — POT regenerated (891 strings), all new strings in fa_IR;
+  `tests/i18n-test.php` green (53 checks).
 
 ---
 

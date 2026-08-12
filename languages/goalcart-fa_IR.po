@@ -4223,3 +4223,15 @@ msgstr "%d روز"
 msgid "Set the goal target to %s?"
 msgstr "آستانهٔ هدف را روی %s تنظیم کنم؟"
 
+#: admin-app/src/routes/UpsellAnalytics.tsx:276
+msgid "Which suggested products actually generate purchases and sales — orders, revenue and estimated profit per product."
+msgstr "کدام محصولات پیشنهادی واقعاً خرید و فروش ایجاد می‌کنند — سفارش‌ها، درآمد و سود تخمینی هر محصول."
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:318
+msgid "Show interaction details"
+msgstr "نمایش جزئیات تعامل"
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:318
+msgid "Hide interaction details"
+msgstr "پنهان کردن جزئیات تعامل"
+

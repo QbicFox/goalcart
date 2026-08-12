@@ -489,13 +489,25 @@ business-first layout:
 
 ## 6. Upsell Analytics
 
-The top-products table (`upsell_analytics()` over the window):
-impressions / clicks / adds / orders / conversion / revenue /
-estimated profit / upsell score, with the four spec views (top
-performing, lowest performing, best conversion, highest margin —
-client-side sorts of the same rows). Clicking a row opens the product's
-score-breakdown dialog via `upsell_product_detail()`: the six 0–100
-components, plain-English reasons, raw factors and historical funnel
-stats. Each analytics row now also carries `estimated_profit` /
-`profit_available` / `margin_pct` — null when the store stores no
-product costs (never invented).
+The top-products page (`upsell_analytics()` over the window) is
+**commercial-first** (Improvement.md §35): the first screen answers
+*"which suggested products actually generate purchases and sales?"*.
+A summary strip leads with **Products / Purchased Orders / Sales /
+Conversion**, and the table's primary columns are **Product / Orders /
+Sales / Estimated profit / Conversion**. The interaction funnel
+(impressions / clicks / adds / CTR / add-to-cart rate) and the upsell
+score sit behind a **"Show interaction details"** toggle — kept as
+details, not the primary read. CTR and add-to-cart rate are derived
+client-side from the real funnel counts (clicks÷impressions,
+adds÷impressions) and render "—" when there is no denominator (never a
+fabricated 0%). The four spec views are client-side sorts of the same
+rows, re-based on commercial outcomes: top performing (purchases then
+sales), lowest performing, best conversion (products without
+impressions sort last — no denominator) and highest margin (unavailable
+margins last). Estimated profit renders "—" unless the row carries
+`profit_available` and `estimated_profit` — never a guessed number.
+Clicking a row opens the product's score-breakdown dialog via
+`upsell_product_detail()`: the six 0–100 components, plain-English
+reasons, raw factors and historical funnel stats. Each analytics row
+carries `estimated_profit` / `profit_available` / `margin_pct` — null
+when the store stores no product costs (never invented).

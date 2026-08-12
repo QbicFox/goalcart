@@ -195,6 +195,39 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     recommendation suite stays green (90 checks); `tsc --noEmit`,
     ESLint and `vite build` all clean.
 
+- **Phase 8 — Upsell Analytics (Revenue & Analytics UX simplification)**
+  — the top-products page keeps the Phase 33.6 analytics engine but
+  presents it commercial-first (Improvement.md §35):
+  - **Purchases/sales as the primary metrics** — a summary strip answers
+    the first-screen question at a glance (Products / Purchased Orders /
+    Sales / Conversion), and the table leads with Product / Orders /
+    Sales / Estimated profit / Conversion. The interaction funnel
+    (Impressions / Clicks / Adds / CTR / Add-to-cart) and the upsell
+    score sit behind a **"Show interaction details"** toggle instead of
+    leading the table. CTR and add-to-cart rate are derived client-side
+    from the real funnel counts and render "—" when there is no
+    denominator (never a fabricated 0%). Estimated profit renders "—"
+    unless `profit_available` (never a guessed number).
+  - **Commercial sort views** — the four spec views are re-based on
+    commercial outcomes: top performing sorts by purchases then sales
+    (what actually converts), lowest performing by underperformers,
+    best conversion by purchase rate (products without impressions sort
+    last — no denominator) and highest margin by sampled margin
+    (unavailable margins last).
+  - **Score transparency kept as details** — clicking a product row
+    still opens the `upsell_product_detail()` score-breakdown dialog
+    (six 0–100 components, plain-English reasons, historical funnel
+    stats); the empty state points store owners at tracking/date-range
+    when there is no activity.
+  - **i18n** — the POT is regenerated (891 strings) with the three new
+    Phase 8 strings translated to fa_IR; `tests/i18n-test.php` stays
+    fully green (53 checks).
+  - **Tests/verification** — `tests/frontend-test.php` gained Phase 8
+    source-scan guards (commercial columns first, interaction details
+    behind the toggle, score inside the details block, summary strip,
+    no fabricated denominators, commercial sort, per-product dialog);
+    `tsc --noEmit`, ESLint and `vite build` all clean.
+
 - **Sticky bottom action bar** — the admin dashboard now docks every
   save / settings / reset action in a sticky bottom bar instead of the
   page body. A new `ActionBar` shell component (`AdminLayout`) renders
