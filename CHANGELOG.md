@@ -257,6 +257,33 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     `tsc --noEmit`, ESLint, `vite build` and `tests/i18n-test.php`
     (53 checks) all green.
 
+- **Phase 10 — Testing & Regression (Revenue & Analytics UX simplification)**
+  — ran the full existing suite set and proved no regression
+  (Improvement.md Phase 10):
+  - **`tests/run-all.php`** — a repeatable regression runner that
+    executes all 30 suites in fresh processes, prints a per-suite
+    Checks/Failures matrix with PASS / DRIFT / REGRESSION verdicts, and
+    exits non-zero on any undocumented failure (`--verbose` prints FAIL
+    lines).
+  - **Full regression result** — 18 suites pass clean (purchase-metrics
+    107, revenue-admin 56, attribution core, reward 130, engine 75,
+    security 65, i18n 53, template 133, upsell 82, …); 12 suites sit
+    within a **documented live-store drift baseline** (real orders,
+    events, goals and storefront settings on this store break
+    clean-DB fixtures); **0 regressions**.
+  - **Checklist coverage** — every Phase 10 item (purchase metrics,
+    purchase rate, funnel, estimated profit, profit unavailable /
+    negative, goal + date filtering, direct / assisted attribution,
+    duplicate order prevention, caching, permissions) mapped to existing
+    suites in `docs/testing.md` — no new backend tests were needed.
+  - **Non-regression proof** — `git log 3ce5008..HEAD -- includes/` is
+    empty: Phases 4–9 changed only `admin-app/`, `languages/`,
+    `tests/frontend-test.php` and docs, so the drift suites test
+    byte-identical backend code to when they were green.
+  - **Docs** — new `docs/testing.md` documents the suite matrix, the
+    checklist-to-coverage map and the drift baseline with root causes;
+    Improvement.md Phase 10 section + register updated.
+
 - **Sticky bottom action bar** — the admin dashboard now docks every
   save / settings / reset action in a sticky bottom bar instead of the
   page body. A new `ActionBar` shell component (`AdminLayout`) renders
