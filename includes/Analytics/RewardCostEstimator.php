@@ -52,14 +52,38 @@ final class RewardCostEstimator {
 	 * Phase 3 / §10). Labels are kept in the UI layer; these keys never
 	 * change across versions.
 	 *
+	 * `_goalcart_product_cost` is Goal Cart's own product-cost field (the
+	 * WooCommerce product-edit metabox ProductCostField writes it) and
+	 * takes precedence when present; WooCommerce's standard `_cost` and the
+	 * common `_wc_cog_cost` cost-of-goods field are the fallbacks for
+	 * stores that already store costs elsewhere.
+	 *
 	 * @var string[]
 	 */
 	const COST_SOURCES = array(
+		'_goalcart_product_cost',
 		'_cost',
 		'_wc_cog_cost',
 		'goalcart_product_cost',
 		'variation_fallback',
 	);
+
+	/**
+	 * The plugin's own product-cost meta key (ProductCostField admin UI).
+	 *
+	 * @var string
+	 */
+	const PRODUCT_COST_META = '_goalcart_product_cost';
+
+	/**
+	 * The order-item meta key holding the unit-cost snapshot written when
+	 * the order is created (OrderCostSnapshot). Historical profit always
+	 * prefers this snapshot over the current product cost, so later cost
+	 * edits never rewrite history.
+	 *
+	 * @var string
+	 */
+	const ORDER_COST_META = '_goalcart_unit_cost';
 
 	/**
 	 * Per-request memo of store_has_cost_data() — one indexed scan per
@@ -270,13 +294,14 @@ final class RewardCostEstimator {
 				 FROM {$wpdb->postmeta} pm
 				 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
 				 WHERE p.post_type IN (%s, %s)
-				   AND pm.meta_key IN (%s, %s)
+				   AND pm.meta_key IN (%s, %s, %s)
 				   AND pm.meta_value != ''
 				   AND pm.meta_value IS NOT NULL
 				   AND CAST(pm.meta_value AS DECIMAL(19,4)) > 0
 				 LIMIT 1",
 				'product',
 				'product_variation',
+				self::PRODUCT_COST_META,
 				'_cost',
 				'_wc_cog_cost'
 			)
@@ -290,11 +315,16 @@ final class RewardCostEstimator {
 	/**
 	 * Read the raw cost from the product's own meta fields.
 	 *
+	 * Priority: Goal Cart's own `_goalcart_product_cost` field first, then
+	 * WooCommerce's standard `_cost`, then the cost-of-goods
+	 * `_wc_cog_cost`. Zero/negative values count as "no cost data" — the
+	 * same contract as product_cost().
+	 *
 	 * @param \WC_Product $product Product object.
 	 * @return float|null
 	 */
 	protected function raw_product_cost( $product ) {
-		foreach ( array( '_cost', '_wc_cog_cost' ) as $key ) {
+		foreach ( array( self::PRODUCT_COST_META, '_cost', '_wc_cog_cost' ) as $key ) {
 			$value = $product->get_meta( $key );
 
 			if ( is_numeric( $value ) && (float) $value > 0 ) {
@@ -343,6 +373,13 @@ final class RewardCostEstimator {
 	 * whole order is treated as having no margin data — never a partial
 	 * guess.
 	 *
+	 * Historical stability (UPSELL_REFACTOR §21/§22): each line's cost
+	 * prefers the `_goalcart_unit_cost` snapshot OrderCostSnapshot wrote at
+	 * order creation, so later product-cost edits never rewrite historical
+	 * profit. Orders created before the snapshot feature simply have no
+	 * snapshot and fall back to the current product cost — the pre-feature
+	 * behavior.
+	 *
 	 * @param \WC_Order|int $order Order object or id.
 	 * @return array{cost: float, revenue: float, margin: float, margin_pct: float}|null
 	 */
@@ -373,8 +410,11 @@ final class RewardCostEstimator {
 		// line therefore reports a lower margin than its undiscounted
 		// equivalent. Deterministic and documented; not a store-cost claim.
 		foreach ( $items as $item ) {
-			$product_id = $item->get_product_id() ? (int) $item->get_product_id() : (int) $item->get_variation_id();
-			$unit_cost  = $this->product_cost( $product_id );
+			// Variation first — the snapshot is stamped with the variation id
+			// (OrderCostSnapshot) and a variation may carry its own cost; the
+			// parent fallback is handled inside product_cost().
+			$product_id = $item->get_variation_id() ? (int) $item->get_variation_id() : (int) $item->get_product_id();
+			$unit_cost  = $this->order_item_unit_cost( $item, $product_id );
 
 			// Any line without cost data → no margin data for the order.
 			if ( null === $unit_cost ) {
@@ -400,6 +440,104 @@ final class RewardCostEstimator {
 			'revenue'    => round( $revenue, 4 ),
 			'margin'     => round( $margin, 4 ),
 			'margin_pct' => round( $margin_pct, 6 ),
+		);
+	}
+
+	/**
+	 * The unit cost of an order line item: the snapshot first, then the
+	 * current product cost.
+	 *
+	 * The `_goalcart_unit_cost` snapshot is written by OrderCostSnapshot
+	 * when the order is created; preferring it keeps historical profit
+	 * stable when product costs change later. Line items without a
+	 * snapshot (pre-feature orders, or products that had no cost at order
+	 * time) fall back to the current product cost.
+	 *
+	 * @param \WC_Order_Item_Product $item       Order line item.
+	 * @param int                    $product_id Resolved product/variation id.
+	 * @return float|null
+	 */
+	public function order_item_unit_cost( $item, $product_id ) {
+		$snapshot = $item->get_meta( self::ORDER_COST_META );
+
+		if ( is_numeric( $snapshot ) && (float) $snapshot > 0 ) {
+			return (float) $snapshot;
+		}
+
+		return $this->product_cost( $product_id );
+	}
+
+	/**
+	 * Product-level cost coverage (UPSELL_REFACTOR §25).
+	 *
+	 * How much of the catalog carries cost data: published products with a
+	 * direct cost meta (Goal Cart's own field, `_cost` or `_wc_cog_cost`)
+	 * OR at least one variation with cost data, over the total published
+	 * product count. Two bounded indexed EXISTS scans — never a full
+	 * product scan. Coverage semantics are guaranteed: every product in
+	 * the numerator demonstrably has a positive cost somewhere in its
+	 * chain (product or one of its variations).
+	 *
+	 * @return array{total_products: int, products_with_cost: int, coverage_pct: float|null, available: bool}
+	 */
+	public function cost_coverage() {
+		global $wpdb;
+
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = %s AND post_status = %s",
+				'product',
+				'publish'
+			)
+		);
+
+		if ( $total < 1 ) {
+			return array(
+				'total_products'     => 0,
+				'products_with_cost' => 0,
+				'coverage_pct'       => null,
+				'available'          => false,
+			);
+		}
+
+		$cost_keys = array( self::PRODUCT_COST_META, '_cost', '_wc_cog_cost' );
+		$in        = implode( ',', array_fill( 0, count( $cost_keys ), '%s' ) );
+
+		$with_cost = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT p.ID)
+				 FROM {$wpdb->posts} p
+				 WHERE p.post_type = %s AND p.post_status = %s
+				   AND (
+					 EXISTS (
+						 SELECT 1 FROM {$wpdb->postmeta} m
+						 WHERE m.post_id = p.ID AND m.meta_key IN ({$in})
+						   AND m.meta_value != '' AND m.meta_value IS NOT NULL
+						   AND CAST(m.meta_value AS DECIMAL(19,4)) > 0
+					 )
+					 OR EXISTS (
+						 SELECT 1 FROM {$wpdb->posts} v
+						 INNER JOIN {$wpdb->postmeta} vm ON vm.post_id = v.ID
+						 WHERE v.post_type = %s AND v.post_parent = p.ID
+						   AND vm.meta_key IN ({$in})
+						   AND vm.meta_value != '' AND vm.meta_value IS NOT NULL
+						   AND CAST(vm.meta_value AS DECIMAL(19,4)) > 0
+					 )
+				   )",
+				array_merge(
+					array( 'product', 'publish' ),
+					$cost_keys,
+					array( 'product_variation' ),
+					$cost_keys
+				)
+			)
+		);
+
+		return array(
+			'total_products'     => $total,
+			'products_with_cost' => $with_cost,
+			'coverage_pct'       => $total > 0 ? round( $with_cost / $total * 100, 1 ) : null,
+			'available'          => $total > 0,
 		);
 	}
 

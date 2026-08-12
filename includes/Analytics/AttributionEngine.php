@@ -910,6 +910,13 @@ final class AttributionEngine {
 		// Incremental cart value scoped to the goal.
 		$incremental = $this->incremental_cart_value( $scoped );
 
+		// Smart Upsell linkage (UPSELL_REFACTOR §29/§30/§31): the goal's
+		// upsell funnel (impressions/clicks/adds/purchases) plus the
+		// upsell-assisted completion count — completions whose session also
+		// saw a product recommendation for this goal. Only counted when the
+		// event linkage is reliable (same session + goal), never fabricated.
+		$upsell = $this->goal_upsell_stats( (int) $goal_id, $args );
+
 		return array(
 			'goal_id'             => $goal->id(),
 			'name'                => $goal->name(),
@@ -923,6 +930,18 @@ final class AttributionEngine {
 			'conversion_rate'     => $funnel['conversion_rate'],
 			'average_cart_value'  => $incremental['average_baseline'],
 			'incremental_cart_value' => $incremental['average'],
+			// Smart Upsell linkage (UPSELL_REFACTOR §30/§32/§33): how many of
+			// this goal's completions were assisted by a product
+			// recommendation, the assisted rate, and the full per-goal
+			// upsell funnel (impressions → clicks → adds → purchases).
+			'upsell_assisted'       => $upsell['assisted'],
+			'upsell_assisted_rate'  => $upsell['assisted_rate'],
+			'upsell_funnel'         => array(
+				'impressions' => $upsell['impressions'],
+				'clicks'      => $upsell['clicks'],
+				'adds'        => $upsell['adds'],
+				'orders'      => $upsell['orders'],
+			),
 			// Phase 5 (Goal Performance Redesign) — commercial-outcome and
 			// detail-drawer fields. All derived from the already-computed
 			// attribution summary + incremental read above (Improvement.md
@@ -944,6 +963,125 @@ final class AttributionEngine {
 			'cost_coverage'       => $summary['cost_coverage'],
 			'cost_sources'        => $summary['cost_sources'],
 			'store_has_cost_data' => $summary['store_has_cost_data'],
+		);
+	}
+
+	/**
+	 * The goal's Smart Upsell linkage over the window.
+	 *
+	 * Returns the per-goal upsell funnel counts (impressions / clicked /
+	 * added / upsell_order purchases from the raw upsell_events log — the
+	 * same source the Upsell Performance page reads, so the numbers always
+	 * agree) and the upsell-assisted completion count: distinct sessions
+	 * that completed the goal (a goal_completed revenue event in the
+	 * window) AND saw a product recommendation for that goal (any upsell
+	 * funnel event in the same session+goal). This is a reliable linkage —
+	 * both events are session-scoped and goal-scoped — so the metric is
+	 * never fabricated (UPSELL_REFACTOR §30).
+	 *
+	 * @param int                   $goal_id Goal id.
+	 * @param array<string, mixed>  $args    Optional: from, to.
+	 * @return array{impressions: int, clicks: int, adds: int, orders: int, assisted: int, assisted_rate: float|null}
+	 */
+	protected function goal_upsell_stats( $goal_id, array $args ) {
+		global $wpdb;
+
+		$upsell = Schema::table( 'upsell_events' );
+		$revenue = Schema::table( 'revenue_events' );
+
+		// Window bounds for the funnel counts (upsell_events has no goal
+		// window helper of its own — same semantics as revenue_where).
+		$funnel_where  = '1=1';
+		$funnel_params = array();
+
+		if ( ! empty( $args['from'] ) ) {
+			$funnel_where  .= ' AND created_at >= %s';
+			$funnel_params[] = date( 'Y-m-d 00:00:00', strtotime( (string) $args['from'] ) );
+		}
+
+		if ( ! empty( $args['to'] ) ) {
+			$funnel_where  .= ' AND created_at <= %s';
+			$funnel_params[] = date( 'Y-m-d 23:59:59', strtotime( (string) $args['to'] ) );
+		}
+
+		$types  = array( 'impressions' => RevenueTracker::EVENT_UPSELL_IMPRESSION, 'clicks' => RevenueTracker::EVENT_UPSELL_CLICKED, 'adds' => RevenueTracker::EVENT_UPSELL_ADDED, 'orders' => RevenueTracker::EVENT_UPSELL_ORDER );
+		$counts = array( 'impressions' => 0, 'clicks' => 0, 'adds' => 0, 'orders' => 0 );
+
+		foreach ( $types as $key => $event_type ) {
+			$counts[ $key ] = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$upsell} WHERE goal_id = %d AND event_type = %s AND {$funnel_where}",
+					array_merge( array( (int) $goal_id, $event_type ), $funnel_params )
+				)
+			);
+		}
+
+		// Assisted completions: sessions with a goal_completed event that
+		// also saw a recommendation (impression/clicked/added) for the goal.
+		// The window applies to the completion event (revenue_where); the
+		// upsell join is window-free but session+goal-scoped, which is the
+		// reliable linkage the metric requires.
+		list( $event_sql, $event_params ) = $this->revenue_where( $args );
+
+		// The completion is always scoped to THIS goal (`r.goal_id = %d`) —
+		// the join pins the upsell side to the same goal via
+		// `u.goal_id = r.goal_id`, so a session counts only when it both
+		// completed this goal and saw a recommendation for this goal.
+		$assisted = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT r.session_id)
+				 FROM {$revenue} r
+				 INNER JOIN {$upsell} u ON u.session_id = r.session_id AND u.goal_id = r.goal_id
+				  AND u.event_type IN (%s, %s, %s)
+				 WHERE r.event_type = %s AND r.goal_id = %d AND {$event_sql}",
+				array_merge(
+					array(
+						RevenueTracker::EVENT_UPSELL_IMPRESSION,
+						RevenueTracker::EVENT_UPSELL_CLICKED,
+						RevenueTracker::EVENT_UPSELL_ADDED,
+						RevenueTracker::EVENT_GOAL_COMPLETED,
+						(int) $goal_id,
+					),
+					$event_params
+				)
+			)
+		);
+
+		$completed = $this->goal_completions( (int) $goal_id, $args );
+
+		return array(
+			'impressions'   => $counts['impressions'],
+			'clicks'        => $counts['clicks'],
+			'adds'          => $counts['adds'],
+			'orders'        => $counts['orders'],
+			'assisted'      => $assisted,
+			'assisted_rate' => $completed > 0 ? round( $assisted / $completed, 4 ) : null,
+		);
+	}
+
+	/**
+	 * The goal's completion count over the window (revenue_events).
+	 *
+	 * Always scoped to the requested goal (`goal_id`), like the assisted
+	 * count it is the denominator for — a store-wide completion count
+	 * would dilute the rate with unrelated goals.
+	 *
+	 * @param int                   $goal_id Goal id.
+	 * @param array<string, mixed>  $args    Optional: from, to.
+	 * @return int
+	 */
+	protected function goal_completions( $goal_id, array $args ) {
+		global $wpdb;
+
+		$events = Schema::table( 'revenue_events' );
+
+		list( $where, $params ) = $this->revenue_where( $args );
+
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$events} WHERE event_type = %s AND goal_id = %d AND {$where}",
+				array_merge( array( RevenueTracker::EVENT_GOAL_COMPLETED, (int) $goal_id ), $params )
+			)
 		);
 	}
 

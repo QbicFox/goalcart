@@ -2,7 +2,6 @@ import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutli
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
-import { useQuery } from '@tanstack/react-query';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -17,11 +16,11 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
-import { updateGoal } from '../api/goals';
-import { fetchGoalRecommendations } from '../api/revenue';
+import { applyGoalRecommendation, fetchCostCoverage, fetchGoalRecommendations } from '../api/revenue';
+import { getBootData } from '../boot';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import PageContainer from '../components/PageContainer';
@@ -29,7 +28,8 @@ import RevenueToolbar from '../components/revenue/RevenueToolbar';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { useDateRange } from '../date-range/DateRangeContext';
 import { formatCurrency, formatNumber, formatPercent, formatPercentValue } from '../lib/format';
-import type { GoalRecommendationsPayload, RecommendationCandidate } from '../types';
+import { REWARD_LABELS } from '../templates/rewardLabel';
+import type { CostCoveragePayload, GoalRecommendationsPayload, RecommendationCandidate, RecommendationGoalHistory } from '../types';
 
 /** Reward-type filter options (matches the analytics reward filter). */
 const REWARD_OPTIONS: Array<{ value: string; label: string }> = [
@@ -190,10 +190,56 @@ function AdvancedDetails({ candidate }: { candidate: RecommendationCandidate }) 
   );
 }
 
+/**
+ * The "Current Goal" block of the recommendation detail (UPSELL_REFACTOR
+ * §9): current threshold, reward, completion + purchase rates, attributed
+ * sales and estimated profit — all real analytics data, never fabricated.
+ */
+function CurrentGoalBlock({ history }: { history: RecommendationGoalHistory | null }) {
+  if (!history) {
+    return null;
+  }
+
+  const profitValue =
+    history.profit_available && history.estimated_profit !== null
+      ? formatCurrency(history.estimated_profit)
+      : __('Not available', 'goalcart');
+
+  return (
+    <Box sx={{ mb: 2 }}>
+      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+        {__('Current goal', 'goalcart')}
+      </Typography>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 1.5, mt: 1 }}>
+        <StatBox label={__('Current target', 'goalcart')} value={formatCurrency(history.current_target)} />
+        <StatBox
+          label={__('Reward', 'goalcart')}
+          value={history.reward_type ? (REWARD_LABELS[history.reward_type] ?? history.reward_type) : __('None', 'goalcart')}
+        />
+        <StatBox
+          label={__('Completion rate', 'goalcart')}
+          value={history.completion_rate === null ? '—' : formatPercent(history.completion_rate)}
+        />
+        <StatBox
+          label={__('Purchase rate', 'goalcart')}
+          value={history.purchase_rate === null ? '—' : formatPercent(history.purchase_rate)}
+        />
+        <StatBox label={__('Attributed sales', 'goalcart')} value={formatCurrency(history.attributed_sales)} />
+        <StatBox label={__('Estimated profit', 'goalcart')} value={profitValue} />
+        <StatBox
+          label={__('Upsell-assisted completions', 'goalcart')}
+          value={formatNumber(history.upsell_assisted)}
+        />
+      </Box>
+    </Box>
+  );
+}
+
 /** The primary recommendation card (§33) — business outcome first. */
 function TopRecommendationCard({
   candidate,
   goalId,
+  goalHistory,
   detailsOpen,
   onToggleDetails,
   onApply,
@@ -201,6 +247,7 @@ function TopRecommendationCard({
 }: {
   candidate: RecommendationCandidate;
   goalId: number;
+  goalHistory: RecommendationGoalHistory | null;
   detailsOpen: boolean;
   onToggleDetails: () => void;
   onApply: (candidate: RecommendationCandidate) => void;
@@ -282,6 +329,7 @@ function TopRecommendationCard({
 
       <Collapse in={detailsOpen} timeout="auto" unmountOnExit>
         <Box sx={{ mt: 1.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
+          <CurrentGoalBlock history={goalHistory} />
           <AdvancedDetails candidate={candidate} />
         </Box>
       </Collapse>
@@ -504,17 +552,21 @@ function CandidateRow({
 }
 
 /**
- * Smart Recommendations (Phase 33.4 engine — Phase 7 simplified UI).
+ * Goal Optimization (Phase 33.4 engine — UPSELL_REFACTOR §4/§5/§8).
  *
- * The `GET /goalcart/v1/revenue/goal-recommendations` payload: analyzed
- * store data, ranked candidate thresholds with score/confidence/expected
- * impact/reasons, and the top recommendation. The primary card answers
- * "what threshold should I use and why?" (Improvement.md §33) — the raw
- * scoring details (score, component scores, ratios) live behind the
+ * The admin-facing surface that answers "what Goal configuration should
+ * I use?" — the `GET /goalcart/v1/revenue/goal-recommendations` payload:
+ * analyzed store data, ranked candidate thresholds with score/confidence/
+ * expected impact/reasons, and the top recommendation. It recommends Goal
+ * targets and reward economics only — never products (product
+ * recommendations belong to Smart Upsells, §11/§59). The primary card
+ * answers "what threshold should I use and why?" (§9: Current Goal →
+ * Recommended Goal → Why?), the raw scoring details live behind the
  * Advanced details expander, and an unavailable expected profit explains
- * how to enable it (§34). Applying a recommendation is always an explicit
- * admin action (ConfirmDialog → update the goal's target) — the engine
- * itself never modifies a goal (P33-53).
+ * how to enable it (§24). Applying a recommendation is always an explicit
+ * admin action (ConfirmDialog → the dedicated apply endpoint, which
+ * changes only the goal target and records the feedback-loop event) — the
+ * engine itself never modifies a goal (§10/§41).
  */
 export default function Recommendations() {
   const { range } = useDateRange();
@@ -540,8 +592,19 @@ export default function Recommendations() {
       }),
   });
 
+  // Product-cost coverage (UPSELL_REFACTOR §24/§25/§26): when the store
+  // lacks margin data, explain exactly how much of the catalog is covered
+  // and where to add costs — never a guessed margin.
+  const coverageQuery = useQuery({
+    queryKey: ['revenue', 'cost-coverage'],
+    queryFn: () => fetchCostCoverage(),
+    enabled: query.data?.available === true && query.data?.data?.margin?.available === false,
+  });
+
   const payload = query.data;
   const top = payload?.recommendation;
+  const goalHistory = payload?.data?.goal_history ?? null;
+  const coverage: CostCoveragePayload | undefined = coverageQuery.data;
 
   const applyMutation = useMutation({
     mutationFn: async (target: number) => {
@@ -549,7 +612,7 @@ export default function Recommendations() {
         throw new Error(__('Select a goal to apply the recommendation to.', 'goalcart'));
       }
 
-      await updateGoal(goalId, { target });
+      await applyGoalRecommendation(goalId, target);
     },
     onSuccess: () => {
       notify(__('Goal target updated.', 'goalcart'));
@@ -569,12 +632,20 @@ export default function Recommendations() {
 
   return (
     <PageContainer
-      title={__('Smart Recommendations', 'goalcart')}
+      title={__('Goal Optimization', 'goalcart')}
       description={__(
-        'Which goal threshold this store should use — computed deterministically from your own order data.',
+        'Improve your Goals using store performance data — which target and reward configuration to use, and why.',
         'goalcart'
       )}
     >
+      {/* §39: the one-line distinction that removes the conceptual confusion. */}
+      <Alert severity="info" variant="outlined" icon={<TipsAndUpdatesIcon fontSize="small" />}>
+        {__(
+          'Goal Optimization helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsell Performance.',
+          'goalcart'
+        )}
+      </Alert>
+
       <RevenueToolbar goalId={goalId} onGoalChange={setGoalId}>
         <TextField
           select
@@ -618,11 +689,42 @@ export default function Recommendations() {
             <TopRecommendationCard
               candidate={top}
               goalId={goalId}
+              goalHistory={goalHistory}
               detailsOpen={showTopDetails}
               onToggleDetails={() => setShowTopDetails((current) => !current)}
               onApply={handleApply}
               onDismiss={() => setTopDismissed(true)}
             />
+          )}
+
+          {/* §24/§25/§26: margin data missing → show the coverage and the
+              path to enable profit estimates instead of a guessed number. */}
+          {payload.data.margin && !payload.data.margin.available && coverage && (
+            <Alert
+              severity="warning"
+              variant="outlined"
+              action={
+                <Button
+                  size="small"
+                  color="inherit"
+                  href={`${getBootData().adminUrl}edit.php?post_type=product`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {__('Manage product costs', 'goalcart')}
+                </Button>
+              }
+            >
+              {coverage.product_coverage.coverage_pct !== null
+                ? sprintf(
+                    /* translators: 1: products with cost, 2: total products, 3: coverage percentage. */
+                    __('Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Goal economics.', 'goalcart'),
+                    formatNumber(coverage.product_coverage.products_with_cost),
+                    formatNumber(coverage.product_coverage.total_products),
+                    formatPercentValue(coverage.product_coverage.coverage_pct / 100)
+                  )
+                : __('Profit estimates need product cost data. Add product costs on your products to enable Goal economics.', 'goalcart')}
+            </Alert>
           )}
 
           {/* Restore the dismissed top recommendation. */}
@@ -664,10 +766,25 @@ export default function Recommendations() {
         description={
           applyTarget ? (
             <>
-              {sprintf(
-                /* translators: 1: threshold. */
-                __('Set the goal target to %s?', 'goalcart'),
-                formatCurrency(applyTarget.threshold)
+              {goalHistory ? (
+                <>
+                  {sprintf(
+                    /* translators: 1: current target. */
+                    __('Current target: %1$s', 'goalcart'),
+                    formatCurrency(goalHistory.current_target)
+                  )}{' '}
+                  {sprintf(
+                    /* translators: 1: recommended target. */
+                    __('→ %1$s', 'goalcart'),
+                    formatCurrency(applyTarget.threshold)
+                  )}
+                </>
+              ) : (
+                sprintf(
+                  /* translators: 1: threshold. */
+                  __('Set the goal target to %s?', 'goalcart'),
+                  formatCurrency(applyTarget.threshold)
+                )
               )}{' '}
               {__('This changes a production goal — the action is not reversible from here.', 'goalcart')}
             </>

@@ -4245,3 +4245,139 @@ msgstr "هنوز خریدی ثبت نشده"
 msgid "Customers are interacting with your goals, but no attributed purchases have been recorded for this period."
 msgstr "مشتری‌ها با اهداف شما در تعامل هستند، اما در این بازهٔ زمانی خریدی مرتبط ثبت نشده است."
 
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page."
+msgstr "%s از هدفهای سبد خرید استفاده میکند — مانند «%s بیشتر برای ارسال رایگان» — تا سبدهای بزرگتری تشویق شوند. هدفها، پاداشها و نوارهای پیشرفت از صفحهٔ «اهداف» پیکربندی میشوند."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "1. Goal Optimization"
+msgstr "۱. بهینه‌سازی هدف"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "2. Smart Upsells"
+msgstr "۲. پیشنهاد هوشمند محصول"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "3. Analytics"
+msgstr "۳. تحلیل‌ها"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Added to cart"
+msgstr "افزوده‌شده به سبد خرید"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Assisted completions"
+msgstr "تکمیل‌های کمکی"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Assisted rate"
+msgstr "نرخ کمکی"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Attributed sales"
+msgstr "فروش منتسب‌شده"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Completions where the customer also saw a product recommendation for this goal in the same session (UPSELL_REFACTOR §30)."
+msgstr "تکمیل‌هایی که مشتری در همان نشست، پیشنهاد محصولی را نیز برای این هدف دیده است (UPSELL_REFACTOR §30)."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Current goal"
+msgstr "هدف فعلی"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Current target"
+msgstr "آستانهٔ فعلی"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Dismiss how Goal Cart works"
+msgstr "بستن توضیح طرز کار گال کارت"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Find better Goal targets and reward configurations using your store data."
+msgstr "با استفاده از داده‌های فروشگاه‌تان، آستانهٔ هدف و پیکربندی پاداش بهتری بیابید."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Goal Cart's product cost field"
+msgstr "فیلد هزینهٔ محصول گال کارت"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Goal Optimization"
+msgstr "بهینه‌سازی هدف"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Goal Optimization helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsell Performance."
+msgstr "بهینه‌سازی هدف به شما کمک می‌کند آستانهٔ هدف و پیکربندی پاداش بهتری انتخاب کنید. این بخش محصول پیشنهاد نمی‌دهد — پیشنهاد محصول به مشتریان زیر «عملکرد پیشنهاد فروش» قرار دارد."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "How Goal Cart works"
+msgstr "گال کارت چگونه کار می‌کند"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Improve your Goals using store performance data — which target and reward configuration to use, and why."
+msgstr "هدف‌های خود را با داده‌های عملکرد فروشگاه بهبود دهید — از کدام آستانه و پیکربندی پاداش استفاده کنید و چرا."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Influenced sales"
+msgstr "فروش تأثیرپذیرفته"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Manage product costs"
+msgstr "مدیریت هزینهٔ محصول"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Measure purchases, sales and estimated profit — then optimize again."
+msgstr "خریدها، فروش‌ها و سود تخمینی را اندازه بگیرید — سپس دوباره بهینه کنید."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "No recommendation is available for this goal yet."
+msgstr "هنوز پیشنهادی برای این هدف در دسترس نیست."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Optimization"
+msgstr "بهینه‌سازی"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Products recommended to customers who were working toward this goal."
+msgstr "محصولاتی که به مشتریانی که روی این هدف کار می‌کردند پیشنهاد شده‌اند."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Profit estimates need product cost data. Add product costs on your products to enable Goal economics."
+msgstr "تخمین سود به دادهٔ هزینهٔ محصول نیاز دارد. برای فعال‌سازی اقتصاد هدف، هزینهٔ محصولات خود را ثبت کنید."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Recommend products that help customers reach those Goals."
+msgstr "محصولاتی پیشنهاد دهید که به مشتریان در رسیدن به آن هدف‌ها کمک می‌کنند."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Recommended target"
+msgstr "آستانهٔ پیشنهادی"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Smart Upsells"
+msgstr "پیشنهاد هوشمند محصول"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Upsell Performance"
+msgstr "عملکرد پیشنهاد فروش"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Upsell Performance shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product."
+msgstr "عملکرد پیشنهاد فروش نشان می‌دهد کدام محصولات به مشتریان در رسیدن به هدف‌ها کمک می‌کنند و فروش بیشتری ایجاد می‌کنند — خرید، فروش و سود تخمینی هر محصول."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Upsell-assisted"
+msgstr "کمک‌شده توسط پیشنهاد فروش"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "Upsell-assisted completions"
+msgstr "تکمیل‌های کمک‌شده توسط پیشنهاد فروش"
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "What target should this goal use — based on real store data."
+msgstr "این هدف باید از کدام آستانه استفاده کند — بر اساس داده‌های واقعی فروشگاه."
+
+#: admin-app/src/routes (UPSELL_REFACTOR i18n)
+msgid "of completions that saw a recommendation"
+msgstr "از تکمیل‌هایی که پیشنهادی دیده‌اند"

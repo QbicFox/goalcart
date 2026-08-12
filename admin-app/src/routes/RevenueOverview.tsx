@@ -571,7 +571,7 @@ export default function RevenueOverview() {
                   )}
                 />
                 <StatRow
-                  label={__('Influenced revenue', 'goalcart')}
+                  label={__('Influenced sales', 'goalcart')}
                   value={formatCurrency(summary.goal_influenced_revenue)}
                   explanation={__(
                     'Order totals of every order associated with a goal — distinct orders, never double counted.',
@@ -640,7 +640,7 @@ function HowCalculated({ summary }: { summary: RevenueSummary }) {
             value={formatCurrency(summary.goal_assisted_revenue)}
           />
           <StatRow
-            label={__('Influenced revenue', 'goalcart')}
+            label={__('Influenced sales', 'goalcart')}
             value={formatCurrency(summary.goal_influenced_revenue)}
           />
           <Typography variant="caption" color="text.secondary" component="p">

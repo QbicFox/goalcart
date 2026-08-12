@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import CloseIcon from '@mui/icons-material/Close';
 import FlagIcon from '@mui/icons-material/Flag';
 import InsightsIcon from '@mui/icons-material/Insights';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -8,11 +9,12 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { fetchGoals } from '../api/goals';
 import { getBootData } from '../boot';
@@ -86,6 +88,10 @@ export default function Dashboard() {
         </Alert>
       )}
 
+      {/* UPSELL_REFACTOR §40 — first-use store-owner education, dismissible
+          and never shown on every page. */}
+      <HowGoalCartWorks />
+
       {!goalsQuery.isLoading && !goalsQuery.isError && goals.length === 0 ? (
         <EmptyState
           icon={<FlagIcon fontSize="large" />}
@@ -148,7 +154,7 @@ export default function Dashboard() {
           {sprintf(
             /* translators: %s: site name. */
             __(
-              '%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page; the frontend widgets are added in a later phase.',
+              '%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page.',
               'goalcart'
             ),
             boot.siteName,
@@ -157,5 +163,91 @@ export default function Dashboard() {
         </Typography>
       </Paper>
     </PageContainer>
+  );
+}
+
+/** localStorage key remembering the education card was dismissed. */
+const EDUCATION_DISMISSED_KEY = 'goalcart:educationDismissed';
+
+/**
+ * "How Goal Cart works" education card (UPSELL_REFACTOR §40).
+ *
+ * One-time, dismissible introduction to the three-part product model:
+ * Goal Optimization (choose better Goals) → Smart Upsells (help customers
+ * reach them) → Analytics (measure purchases, sales and profit). Only
+ * shown on the Dashboard and only until dismissed.
+ */
+function HowGoalCartWorks() {
+  const [dismissed, setDismissed] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return window.localStorage.getItem(EDUCATION_DISMISSED_KEY) === '1';
+      } catch {
+        // Private mode / quota — show the card.
+      }
+    }
+    return false;
+  });
+
+  if (dismissed) {
+    return null;
+  }
+
+  const dismiss = () => {
+    try {
+      window.localStorage.setItem(EDUCATION_DISMISSED_KEY, '1');
+    } catch {
+      // Best-effort persistence.
+    }
+    setDismissed(true);
+  };
+
+  const steps: Array<{ title: string; text: string }> = [
+    {
+      title: __('1. Goal Optimization', 'goalcart'),
+      text: __('Find better Goal targets and reward configurations using your store data.', 'goalcart'),
+    },
+    {
+      title: __('2. Smart Upsells', 'goalcart'),
+      text: __('Recommend products that help customers reach those Goals.', 'goalcart'),
+    },
+    {
+      title: __('3. Analytics', 'goalcart'),
+      text: __('Measure purchases, sales and estimated profit — then optimize again.', 'goalcart'),
+    },
+  ];
+
+  return (
+    <Paper variant="outlined" sx={{ p: { xs: 2, md: 2.5 }, position: 'relative' }}>
+      <IconButton
+        size="small"
+        onClick={dismiss}
+        aria-label={__('Dismiss how Goal Cart works', 'goalcart')}
+        sx={{ position: 'absolute', top: 8, insetInlineEnd: 8, color: 'text.secondary' }}
+      >
+        <CloseIcon fontSize="small" />
+      </IconButton>
+      <Typography variant="h6" component="h3" gutterBottom>
+        {__('How Goal Cart works', 'goalcart')}
+      </Typography>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(3, 1fr)' },
+          gap: 2,
+        }}
+      >
+        {steps.map((step) => (
+          <Box key={step.title}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {step.title}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {step.text}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    </Paper>
   );
 }

@@ -1,7 +1,9 @@
 import { apiFetch } from './client';
 import type {
+  CostCoveragePayload,
   GoalPerformancePayload,
   GoalRecommendationsPayload,
+  RecommendationApplyResult,
   RevenueAttributionPayload,
   RevenueOverviewPayload,
   UpsellAnalyticsRow,
@@ -116,4 +118,33 @@ export async function fetchGoalRecommendations(
   return apiFetch<GoalRecommendationsPayload>(
     `/revenue/goal-recommendations${toQuery(params)}`
   );
+}
+
+/**
+ * Apply a recommended threshold to a goal (UPSELL_REFACTOR §10/§41) via
+ * `POST /goalcart/v1/revenue/goal-recommendations/apply`. This is the only
+ * write path for Goal Optimization — it changes only the goal's target,
+ * records the feedback-loop event and invalidates the revenue caches.
+ */
+export async function applyGoalRecommendation(
+  goalId: number,
+  threshold: number
+): Promise<RecommendationApplyResult> {
+  return apiFetch<RecommendationApplyResult>(
+    '/revenue/goal-recommendations/apply',
+    {
+      method: 'POST',
+      body: JSON.stringify({ goal_id: goalId, threshold }),
+    }
+  );
+}
+
+/**
+ * Product-cost coverage from
+ * `GET /goalcart/v1/revenue/cost-coverage` (UPSELL_REFACTOR §25/§46):
+ * how much of the catalog carries cost data, so the UI can explain why
+ * profit estimates are unavailable and how to fix it.
+ */
+export async function fetchCostCoverage(): Promise<CostCoveragePayload> {
+  return apiFetch<CostCoveragePayload>('/revenue/cost-coverage');
 }

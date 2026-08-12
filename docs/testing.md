@@ -23,7 +23,7 @@ captures each suite's Checks/Failures summary, and reports:
 Exit code 0 means no regression; 1 means a previously-green suite now
 fails and needs attention.
 
-## Suite matrix (30 suites)
+## Suite matrix (31 suites)
 
 | Suite | Checks | Covers |
 | --- | --- | --- |
@@ -45,6 +45,7 @@ fails and needs attention.
 | profit-availability-test | 45 | cost sources, unavailable states |
 | purchase-metrics-test | 107 | funnel, purchase states, profit math, dedupe |
 | recommendation-test | 90 | goal-threshold recommendation engine |
+| refactor-test | 74 | UPSELL_REFACTOR: product-cost field, order snapshots, coverage, apply endpoint, upsell-assisted completions, terminology |
 | rest-api-test | 142 | REST routes, duplicate/update/delete flows |
 | revenue-admin-test | 56 | admin payloads (overview/goals/analytics) |
 | revenue-foundation-test | 69 | revenue event recording |
@@ -91,14 +92,18 @@ below) — the failures listed are environment data, not regressions.
 | frontend-test | 4 | live storefront settings: default-location + block-widget injection drift |
 | settings-test | 1 | live default locations differ from fixture defaults (same drift) |
 | woocommerce-compatibility-test | 2 | live block checkout/mini-cart markup: widget-injection assertions |
-| analytics-dashboard-test | 23 | dev-DB drift: live orders/events change impression/completion/AOV counts (prior-phase docs said 31; count varies with DB state) |
+| analytics-dashboard-test | 31 | dev-DB drift: live orders/events change impression/completion/AOV counts (count varies with DB state) |
 | analytics-test | 9 | live events/orders change impression/completion/AOV counts |
-| revenue-foundation-test | 1 | live events leak into fixture event assertions |
-| attribution-test | 25 | live orders change AOV/store-baseline + cost assertions |
-| recommendation-test | 18 | live orders now fall inside the fixture window (store-order-values, AOV/median, order-count, distribution) |
-| aggregation-test | 3 | live "today" bucket has real views; fixture rollback residue |
-| phase33-test | 9 | cache generation moves with live activity; invalidation tests are order/timing sensitive |
+| revenue-foundation-test | 2 | live events leak into fixture event assertions |
+| attribution-test | 26 | live orders change AOV/store-baseline + cost assertions |
+| recommendation-test | 20 | live orders now fall inside the fixture window (store-order-values, AOV/median, order-count, distribution) |
+| aggregation-test | 11 | live "today" bucket has real views; fixture rollback residue |
+| phase33-test | 10 | cache generation moves with live activity; invalidation tests are order/timing sensitive |
 | profit-availability-test | 1 | a fixture product could not be rolled back on the live DB |
+| purchase-metrics-test | 4 | live goals/orders carrying the fixture reward types resolve through `ids_by_reward_type`, inflating the reward-filter and no-goals degradation assertions |
+| revenue-admin-test | 1 | live products with cost data outrank the fixture rows in `upsell_analytics`, so the top row no longer degrades profit to unavailable |
+| suggestion-test | 1 | live catalog products outrank the fixture cross-sell product in the suggestion ranking |
+| upsell-frontend-test | 1 | live catalog products fit the goal gap and outrank the fixture gap-filler product in the public ranking |
 | rest-api-test | 2 | live goals/campaigns collide with fixture names (duplicate "(copy)" suffix assertion) |
 | conflict-test | 3 | live goals/campaigns change conflict-priority ordering + rollback assertions |
 

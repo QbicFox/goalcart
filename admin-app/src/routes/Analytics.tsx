@@ -856,7 +856,7 @@ export default function Analytics() {
                     explanation={__('Order totals from orders that were only exposed to a goal, never progressed.', 'goalcart')}
                   />
                   <StatRow
-                    label={__('Influenced revenue', 'goalcart')}
+                    label={__('Influenced sales', 'goalcart')}
                     value={summary.influenced_sales === null ? '—' : formatCurrency(summary.influenced_sales)}
                     explanation={__(
                       'Order totals of every order associated with a goal — distinct orders, never double counted.',

@@ -9,6 +9,59 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
+- **UPSELL_REFACTOR — Goal Optimization & Upsell Performance** — the
+  full `UPSELL_REFACTOR.md` task list: product-cost foundation,
+  terminology, and the feedback loop:
+  - **Product Cost is a first-class field** — new
+    `Admin\ProductCostField` adds an optional "Product cost" input to
+    the WooCommerce product editor (simple products + per-variation),
+    stored under the namespaced `_goalcart_product_cost` meta. It is
+    the highest-priority meta source in `RewardCostEstimator::COST_SOURCES`
+    (filter → `_goalcart_product_cost` → `_cost` → `_wc_cog_cost` →
+    parent fallback), so Estimated Profit, Goal economics and the upsell
+    margin scorer all pick it up with zero configuration.
+  - **Historical cost snapshots** — new `Analytics\OrderCostSnapshot`
+    stamps each order line item with its unit cost at checkout
+    (`_goalcart_unit_cost`, `woocommerce_checkout_create_order_line_item`
+    — classic + Blocks). The profit model prefers the snapshot over the
+    live product cost, so editing a product's cost later never rewrites
+    historical profit. New hook: `goalcart_order_cost_snapshot`.
+  - **Catalog cost coverage** — new admin-only
+    `GET /revenue/cost-coverage` (`RevenueController`): costed vs total
+    products + coverage %, powering the "x / y products carry cost data"
+    banner on Goal Optimization.
+  - **Recommendation feedback loop** — new admin-only
+    `POST /revenue/goal-recommendations/apply` (`RecommendationsController`):
+    applies one `goal_id` + `threshold` (never other Goal settings),
+    records the `recommendation_applied` event (`RevenueTracker`, deduped
+    daily per goal, meta carries previous + applied threshold) and
+    invalidates the revenue caches.
+  - **Upsell-assisted completions** — `AttributionEngine::goal_metrics()`
+    and `GoalRecommendationEngine::goal_history()` now expose
+    `upsell_assisted` / `upsell_assisted_rate` (goal completions whose
+    session also engaged the smart-upsell panel), so Goal Performance and
+    Goal Optimization can show whether suggested products helped close
+    the goal.
+  - **Terminology & navigation** — **Smart Recommendations → Goal
+    Optimization** and **Upsell Analytics → Upsell Performance** across
+    the admin (navigation, titles, tooltips), with route redirects
+    preserving old links; "Influenced revenue → Influenced sales" on the
+    Sales Performance / Analytics pages; the Dashboard gains an education
+    card linking the profit model to product-cost setup.
+  - **React** — `Recommendations.tsx` shows the current goal's own
+    performance on the top card, applies through the new endpoint, and
+    displays cost coverage; `GoalPerformance.tsx` adds the
+    Upsell-assisted column + Smart Upsells / Goal Optimization drawer
+    sections; `UpsellAnalytics.tsx` retitles with an explanatory
+    tooltip; types + `api/revenue.ts` extended
+    (`upsell_assisted`, cost-coverage and apply calls).
+  - **Docs & tests** — CHANGELOG entry, `docs/revenue.md` (new sources,
+    snapshot, apply/coverage endpoints, terminology table, pages),
+    `HookManager` hook reference; new `tests/refactor-test.php` covering
+    the cost field + source precedence, checkout snapshots, coverage,
+    upsell-assisted completions, the apply endpoint and the terminology
+    sweep; `tests/run-all.php` registers the suite.
+
 - **Phase 2 — Backend/Data Layer (Revenue & Analytics UX simplification)**
   the purchase-analysis data layer from `Improvement.md` Phase 2, reusing
   the existing attribution engine and cached repository (no new engine,

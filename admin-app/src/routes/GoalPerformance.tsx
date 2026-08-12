@@ -1,11 +1,12 @@
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import SavingsIcon from '@mui/icons-material/Savings';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
 import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
@@ -25,9 +26,11 @@ import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo, useState, type ReactNode } from 'react';
 
-import { fetchGoalPerformance } from '../api/revenue';
+import { applyGoalRecommendation, fetchGoalPerformance, fetchGoalRecommendations } from '../api/revenue';
+import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import PageContainer from '../components/PageContainer';
+import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import EstimatedProfitCard from '../components/revenue/EstimatedProfitCard';
 import FunnelVisual from '../components/revenue/FunnelVisual';
 import RevenueToolbar from '../components/revenue/RevenueToolbar';
@@ -35,7 +38,7 @@ import StatRow from '../components/revenue/StatRow';
 import { useDateRange } from '../date-range/DateRangeContext';
 import { formatCurrency, formatNumber, formatPercent } from '../lib/format';
 import { REWARD_LABELS } from '../templates/rewardLabel';
-import type { GoalPerformanceRow } from '../types';
+import type { GoalPerformanceRow, RecommendationCandidate } from '../types';
 
 /** Sortable table columns (§16) — commercial outcomes first. */
 type SortKey =
@@ -45,6 +48,7 @@ type SortKey =
   | 'completed'
   | 'converted'
   | 'conversion_rate'
+  | 'upsell_assisted'
   | 'attributed_revenue'
   | 'profit_impact';
 
@@ -74,6 +78,15 @@ const COLUMNS: Column[] = [
     label: __('Purchase Rate', 'goalcart'),
     align: 'right',
     tooltip: __('Percentage of completed goals that were followed by an attributed purchase.', 'goalcart'),
+  },
+  {
+    key: 'upsell_assisted',
+    label: __('Upsell-assisted', 'goalcart'),
+    align: 'right',
+    tooltip: __(
+      'Completions where the customer also saw a product recommendation for this goal in the same session (UPSELL_REFACTOR §30).',
+      'goalcart'
+    ),
   },
   {
     key: 'attributed_revenue',
@@ -117,6 +130,17 @@ function sortValue(row: GoalPerformanceRow, key: SortKey): number | string {
   return typeof value === 'number' ? value : String(value);
 }
 
+/** Business-friendly confidence label (High ≥ 75, Medium ≥ 60, else Low). */
+function confidenceLabel(confidence: number): string {
+  if (confidence >= 75) {
+    return __('High', 'goalcart');
+  }
+  if (confidence >= 60) {
+    return __('Medium', 'goalcart');
+  }
+  return __('Low', 'goalcart');
+}
+
 /** Signed percentage (e.g. +8.7% / -3.1%) — for the basket-increase read. */
 function formatSignedPercent(value: number): string {
   const formatted = formatPercent(Math.abs(value));
@@ -148,6 +172,130 @@ function SectionTitle({ children }: { children: ReactNode }) {
     <Typography variant="h6" component="h3" sx={{ fontSize: '0.95rem' }}>
       {children}
     </Typography>
+  );
+}
+
+/**
+ * The Goal Optimization section of the goal detail drawer (UPSELL_REFACTOR
+ * §34): current target → recommended target → why → confidence → apply.
+ *
+ * Reads the same recommendation payload as the Goal Optimization page;
+ * applying goes through the dedicated apply endpoint (only the target
+ * changes) and records the feedback-loop event.
+ */
+function GoalOptimizationSection({ goalId, currentTarget }: { goalId: number; currentTarget: number }) {
+  const queryClient = useQueryClient();
+  const { notify } = useSnackbar();
+  const [applyTarget, setApplyTarget] = useState<RecommendationCandidate | null>(null);
+
+  const recQuery = useQuery({
+    queryKey: ['revenue', 'recommendations', { goalId, drawer: true }],
+    queryFn: () => fetchGoalRecommendations({ goal_id: goalId }),
+    enabled: goalId > 0,
+  });
+
+  const applyMutation = useMutation({
+    mutationFn: async (threshold: number) => {
+      await applyGoalRecommendation(goalId, threshold);
+    },
+    onSuccess: () => {
+      notify(__('Goal target updated.', 'goalcart'));
+      setApplyTarget(null);
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['revenue'] });
+    },
+    onError: (error: Error) => {
+      notify(error.message, 'error');
+      setApplyTarget(null);
+    },
+  });
+
+  const top = recQuery.data?.recommendation;
+
+  return (
+    <Box>
+      <SectionTitle>{__('Goal Optimization', 'goalcart')}</SectionTitle>
+      <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.25 }}>
+        {__('What target should this goal use — based on real store data.', 'goalcart')}
+      </Typography>
+
+      {recQuery.isLoading ? (
+        <Skeleton variant="rounded" height={110} sx={{ mt: 1 }} />
+      ) : !recQuery.data?.available || !top ? (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          {recQuery.data?.insufficient_reason ??
+            __('No recommendation is available for this goal yet.', 'goalcart')}
+        </Typography>
+      ) : (
+        <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5 }}>
+            <StatCell label={__('Current target', 'goalcart')} value={formatCurrency(currentTarget)} />
+            <StatCell label={__('Recommended target', 'goalcart')} value={formatCurrency(top.threshold)} />
+          </Box>
+          <Box>
+            <Chip
+              size="small"
+              variant="outlined"
+              color={top.confidence >= 75 ? 'success' : top.confidence >= 60 ? 'warning' : 'default'}
+              label={sprintf(
+                /* translators: 1: confidence label. */
+                __('Confidence: %1$s', 'goalcart'),
+                confidenceLabel(top.confidence)
+              )}
+            />
+          </Box>
+          {top.reasons.length > 0 && (
+            <Box>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {__('Why?', 'goalcart')}
+              </Typography>
+              <Stack spacing={0.25} sx={{ mt: 0.25 }}>
+                {top.reasons.slice(0, 3).map((reason, index) => (
+                  <Typography key={`${reason}-${index}`} variant="body2" color="text.secondary">
+                    • {reason}
+                  </Typography>
+                ))}
+              </Stack>
+            </Box>
+          )}
+          <Box>
+            <Button
+              size="small"
+              variant="contained"
+              onClick={() => setApplyTarget(top)}
+              sx={{ mt: 0.5 }}
+            >
+              {__('Apply recommendation', 'goalcart')}
+            </Button>
+          </Box>
+        </Box>
+      )}
+
+      <ConfirmDialog
+        open={applyTarget !== null}
+        title={__('Apply recommendation?', 'goalcart')}
+        description={
+          applyTarget ? (
+            <>
+              {sprintf(
+                /* translators: 1: current target, 2: recommended target. */
+                __('Current target %1$s → recommended target %2$s? This changes a production goal — the action is not reversible from here.', 'goalcart'),
+                formatCurrency(currentTarget),
+                formatCurrency(applyTarget.threshold)
+              )}
+            </>
+          ) : undefined
+        }
+        confirmLabel={__('Apply', 'goalcart')}
+        busy={applyMutation.isPending}
+        onConfirm={() => {
+          if (applyTarget) {
+            applyMutation.mutate(applyTarget.threshold);
+          }
+        }}
+        onCancel={() => setApplyTarget(null)}
+      />
+    </Box>
   );
 }
 
@@ -281,6 +429,37 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
 
           <Divider />
 
+          {/* Smart Upsells (UPSELL_REFACTOR §34) — the goal's own upsell
+              funnel: impressions → clicks → adds → assisted completions →
+              purchases, all session+goal-scoped from the same event log
+              the Upsell Performance page reads. */}
+          <Box>
+            <SectionTitle>{__('Smart Upsells', 'goalcart')}</SectionTitle>
+            <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.25 }}>
+              {__('Products recommended to customers who were working toward this goal.', 'goalcart')}
+            </Typography>
+            <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5, mt: 1 }}>
+              <StatCell label={__('Impressions', 'goalcart')} value={formatNumber(row.upsell_funnel.impressions)} />
+              <StatCell label={__('Clicks', 'goalcart')} value={formatNumber(row.upsell_funnel.clicks)} />
+              <StatCell label={__('Added to cart', 'goalcart')} value={formatNumber(row.upsell_funnel.adds)} />
+              <StatCell label={__('Purchased', 'goalcart')} value={formatNumber(row.upsell_funnel.orders)} />
+              <StatCell label={__('Assisted completions', 'goalcart')} value={formatNumber(row.upsell_assisted)} />
+              <StatCell
+                label={__('Assisted rate', 'goalcart')}
+                value={row.upsell_assisted_rate === null ? '—' : formatPercent(row.upsell_assisted_rate)}
+                hint={__('of completions that saw a recommendation', 'goalcart')}
+              />
+            </Box>
+          </Box>
+
+          <Divider />
+
+          {/* Goal Optimization (UPSELL_REFACTOR §34) — current vs
+              recommended target with an explicit apply action. */}
+          <GoalOptimizationSection goalId={row.goal_id} currentTarget={row.target} />
+
+          <Divider />
+
           {/* Advanced attribution details (§20 Revenue). */}
           <Accordion
             disableGutters
@@ -309,7 +488,7 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                   )}
                 />
                 <StatRow
-                  label={__('Influenced revenue', 'goalcart')}
+                  label={__('Influenced sales', 'goalcart')}
                   value={formatCurrency(row.influenced_revenue)}
                   explanation={__(
                     'Order totals of every order associated with this goal — distinct orders, never double counted.',
@@ -543,6 +722,7 @@ export default function GoalPerformance() {
                   <TableCell align="right">
                     {row.conversion_rate === null ? '—' : formatPercent(row.conversion_rate)}
                   </TableCell>
+                  <TableCell align="right">{formatNumber(row.upsell_assisted)}</TableCell>
                   <TableCell align="right">{formatCurrency(row.attributed_revenue)}</TableCell>
                   <TableCell align="right">
                     {row.profit_available && row.profit_impact !== null ? (

@@ -73,8 +73,14 @@ const router = createHashRouter([
       { path: '/revenue', element: lazyRoute(<RevenueOverview />) },
       { path: '/revenue/goals', element: lazyRoute(<GoalPerformance />) },
       { path: '/revenue/attribution', element: lazyRoute(<AttributionDashboard />) },
-      { path: '/revenue/recommendations', element: lazyRoute(<Recommendations />) },
-      { path: '/revenue/upsells', element: lazyRoute(<UpsellAnalytics />) },
+      // UPSELL_REFACTOR §36: Optimization is the canonical home of the two
+      // engines — Goal Optimization decides the Goal, Upsell Performance
+      // measures product recommendations. The pre-refactor routes stay
+      // alive as redirects so bookmarked URLs never break (§37/§53).
+      { path: '/optimization/goals', element: lazyRoute(<Recommendations />) },
+      { path: '/optimization/upsells', element: lazyRoute(<UpsellAnalytics />) },
+      { path: '/revenue/recommendations', element: <Navigate to="/optimization/goals" replace /> },
+      { path: '/revenue/upsells', element: <Navigate to="/optimization/upsells" replace /> },
       { path: '/appearance', element: lazyRoute(<Appearance />) },
       { path: '/settings', element: lazyRoute(<Settings />) },
       { path: '*', element: <NotFound /> },

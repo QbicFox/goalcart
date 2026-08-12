@@ -8,6 +8,8 @@
 namespace GoalCart\REST;
 
 use GoalCart\Analytics\RevenueRepository;
+use GoalCart\Analytics\RevenueTracker;
+use GoalCart\Goals\GoalRepository;
 use GoalCart\Hooks\HookManager;
 use GoalCart\Rewards\Reward;
 
@@ -16,8 +18,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class RecommendationsController
  *
- * Phase 33.4 (Smart Goal Recommendation) — the read-only endpoint serving
- * the deterministic goal-threshold recommendation to the admin UI:
+ * Phase 33.4 (Smart Goal Recommendation) — the endpoints behind the
+ * admin-facing Goal Optimization surface:
  *
  *  - `GET /goalcart/v1/revenue/goal-recommendations` — the full
  *    recommendation payload: analyzed store data (AOV, median, order
@@ -25,17 +27,25 @@ defined( 'ABSPATH' ) || exit;
  *    candidate threshold with its score, confidence, expected impact and
  *    plain-English reasons, plus the top recommendation.
  *
- * Optional args: goal_id (recommend for an existing goal — its reward type
- * and historical performance feed the scoring), reward_type (one of the
- * Reward::types() whitelist), reward_value / reward_max_value / reward_meta
- * (reward config for recommendations without an existing goal), window_days
- * (7–180, default 90), from / to (explicit date range).
+ *  - `POST /goalcart/v1/revenue/goal-recommendations/apply` — the only
+ *    write path (UPSELL_REFACTOR §10/§41): applies a chosen threshold to
+ *    an existing goal with explicit confirmation from the admin UI,
+ *    records the recommendation_applied feedback-loop event (goal changed
+ *    → performance can later be correlated), and invalidates the revenue
+ *    caches. It never touches unrelated Goal settings.
+ *
+ * Optional GET args: goal_id (recommend for an existing goal — its reward
+ * type and historical performance feed the scoring), reward_type (one of
+ * the Reward::types() whitelist), reward_value / reward_max_value /
+ * reward_meta (reward config for recommendations without an existing
+ * goal), window_days (7–180, default 90), from / to (explicit date
+ * range).
  *
  * Admin-only (manage_options) and rate limited per user like every other
  * admin endpoint; the payload is served through the Phase 33.3 cached read
- * layer, so repeated admin renders never recompute the analysis. The engine
- * never modifies a goal — applying a recommendation is an explicit admin
- * action handled by the existing GoalsController.
+ * layer, so repeated admin renders never recompute the analysis. The
+ * recommendation engine itself never modifies a goal — applying is an
+ * explicit, permission-checked admin action through the apply endpoint.
  */
 class RecommendationsController extends BaseController {
 
@@ -47,12 +57,30 @@ class RecommendationsController extends BaseController {
 	protected $repository;
 
 	/**
+	 * Goal repository (the apply write path).
+	 *
+	 * @var GoalRepository
+	 */
+	protected $goals;
+
+	/**
+	 * Revenue event tracker (feedback-loop event recording).
+	 *
+	 * @var RevenueTracker
+	 */
+	protected $tracker;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param RevenueRepository $repository Revenue repository.
+	 * @param GoalRepository    $goals      Goal repository.
+	 * @param RevenueTracker    $tracker    Revenue event tracker.
 	 */
-	public function __construct( RevenueRepository $repository ) {
+	public function __construct( RevenueRepository $repository, GoalRepository $goals, RevenueTracker $tracker ) {
 		$this->repository = $repository;
+		$this->goals      = $goals;
+		$this->tracker    = $tracker;
 	}
 
 	/**
@@ -80,6 +108,106 @@ class RecommendationsController extends BaseController {
 				'permission_callback' => $this->get_permission_callback(),
 				'args'                => $this->recommendation_args(),
 			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/revenue/goal-recommendations/apply',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'handle_apply' ),
+				'permission_callback' => $this->get_permission_callback(),
+				'args'                => $this->apply_args(),
+			)
+		);
+	}
+
+	/**
+	 * Apply a recommended threshold to an existing goal.
+	 *
+	 * The admin UI always confirms first (current target vs new target);
+	 * this endpoint only ever changes the goal's target — no other Goal
+	 * settings are touched. Records the recommendation_applied event for
+	 * the feedback loop and invalidates the revenue caches so every
+	 * dashboard reflects the change immediately.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function handle_apply( $request ) {
+		$goal_id   = (int) $request->get_param( 'goal_id' );
+		$threshold = (float) $request->get_param( 'threshold' );
+
+		$goal = $this->goals->find( $goal_id );
+
+		if ( null === $goal ) {
+			return $this->error(
+				'goalcart_goal_not_found',
+				__( 'The goal could not be found.', 'goalcart' ),
+				404
+			);
+		}
+
+		if ( $threshold <= 0 ) {
+			return $this->error(
+				'goalcart_invalid_threshold',
+				__( 'The recommended target must be greater than zero.', 'goalcart' ),
+				400
+			);
+		}
+
+		$previous = (float) $goal->target();
+
+		// Feedback loop (UPSELL_REFACTOR §41): record the apply before the
+		// update so the event always captures the old target.
+		$this->tracker->record(
+			RevenueTracker::EVENT_RECOMMENDATION_APPLIED,
+			array(
+				'goal_id' => $goal_id,
+				'meta'    => array(
+					'threshold'        => $threshold,
+					'previous_target'  => $previous,
+					'changed'          => abs( $previous - $threshold ) > 0.0001 ? 1 : 0,
+				),
+			)
+		);
+
+		$this->goals->update( $goal_id, array( 'target' => $threshold ) );
+
+		// The goal update fires goalcart_goals_changed → revenue cache
+		// invalidation; bump explicitly too in case that wiring is filtered
+		// away on a store.
+		$this->repository->invalidate();
+
+		return $this->success(
+			array(
+				'goal_id' => $goal_id,
+				'name'    => $goal->name(),
+				'target'  => $threshold,
+				'previous_target' => $previous,
+			)
+		);
+	}
+
+	/**
+	 * Arg schema for the apply route.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function apply_args() {
+		return array(
+			'goal_id'   => array(
+				'required'          => true,
+				'type'              => 'integer',
+				'minimum'           => 1,
+				'sanitize_callback' => 'absint',
+			),
+			'threshold' => array(
+				'required'         => true,
+				'type'             => 'number',
+				'minimum'          => 0,
+				'exclusiveMinimum' => true,
+			),
 		);
 	}
 

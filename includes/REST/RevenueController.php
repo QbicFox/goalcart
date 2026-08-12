@@ -8,6 +8,7 @@
 namespace GoalCart\REST;
 
 use GoalCart\Analytics\RevenueRepository;
+use GoalCart\Analytics\RewardCostEstimator;
 use GoalCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
@@ -33,6 +34,10 @@ defined( 'ABSPATH' ) || exit;
  *    source: per-goal metrics rows (funnel counts, completion/conversion
  *    rates, average + incremental cart value, attributed + assisted
  *    revenue, reward cost, profit impact) for every goal or one goal.
+ *  - `GET /goalcart/v1/revenue/cost-coverage` — Product Cost coverage
+ *    (UPSELL_REFACTOR §25/§46): how much of the catalog carries cost
+ *    data, so the Goal Optimization UI can show "842 / 1,000 products"
+ *    and explain why profit estimates may be unavailable.
  *
  * Optional args on every route: from / to (validated Y-m-d bounds),
  * goal_id (filter the metrics to one goal). All routes are admin-only
@@ -49,12 +54,21 @@ class RevenueController extends BaseController {
 	protected $repository;
 
 	/**
+	 * Reward cost / product cost estimator (cost coverage reads).
+	 *
+	 * @var RewardCostEstimator
+	 */
+	protected $costs;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param RevenueRepository $repository Revenue repository.
+	 * @param RevenueRepository  $repository Revenue repository.
+	 * @param RewardCostEstimator $costs     Product cost estimator.
 	 */
-	public function __construct( RevenueRepository $repository ) {
+	public function __construct( RevenueRepository $repository, RewardCostEstimator $costs ) {
 		$this->repository = $repository;
+		$this->costs      = $costs;
 	}
 
 	/**
@@ -103,6 +117,37 @@ class RevenueController extends BaseController {
 				'callback'            => array( $this, 'handle_goals' ),
 				'permission_callback' => $this->get_permission_callback(),
 				'args'                => $this->window_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/revenue/cost-coverage',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'handle_cost_coverage' ),
+				'permission_callback' => $this->get_permission_callback(),
+				'args'                => array(),
+			)
+		);
+	}
+
+	/**
+	 * Product Cost coverage payload (UPSELL_REFACTOR §25/§46).
+	 *
+	 * Exposes only the minimal admin surface: the product-level coverage
+	 * counts, the store-wide availability flag and the cost sources — no
+	 * internal cost values, and never to the storefront.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function handle_cost_coverage( $request ) {
+		return $this->success(
+			array(
+				'product_coverage'    => $this->costs->cost_coverage(),
+				'store_has_cost_data' => $this->costs->store_has_cost_data(),
+				'cost_sources'        => RewardCostEstimator::COST_SOURCES,
 			)
 		);
 	}

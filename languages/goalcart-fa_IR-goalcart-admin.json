@@ -2844,6 +2844,108 @@
             ],
             "Customers are interacting with your goals, but no attributed purchases have been recorded for this period.": [
                 "مشتری‌ها با اهداف شما در تعامل هستند، اما در این بازهٔ زمانی خریدی مرتبط ثبت نشده است."
+            ],
+            "%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page.": [
+                "%s از هدفهای سبد خرید استفاده میکند — مانند «%s بیشتر برای ارسال رایگان» — تا سبدهای بزرگتری تشویق شوند. هدفها، پاداشها و نوارهای پیشرفت از صفحهٔ «اهداف» پیکربندی میشوند."
+            ],
+            "1. Goal Optimization": [
+                "۱. بهینه‌سازی هدف"
+            ],
+            "2. Smart Upsells": [
+                "۲. پیشنهاد هوشمند محصول"
+            ],
+            "3. Analytics": [
+                "۳. تحلیل‌ها"
+            ],
+            "Added to cart": [
+                "افزوده‌شده به سبد خرید"
+            ],
+            "Assisted completions": [
+                "تکمیل‌های کمکی"
+            ],
+            "Assisted rate": [
+                "نرخ کمکی"
+            ],
+            "Attributed sales": [
+                "فروش منتسب‌شده"
+            ],
+            "Completions where the customer also saw a product recommendation for this goal in the same session (UPSELL_REFACTOR §30).": [
+                "تکمیل‌هایی که مشتری در همان نشست، پیشنهاد محصولی را نیز برای این هدف دیده است (UPSELL_REFACTOR §30)."
+            ],
+            "Current goal": [
+                "هدف فعلی"
+            ],
+            "Current target": [
+                "آستانهٔ فعلی"
+            ],
+            "Dismiss how Goal Cart works": [
+                "بستن توضیح طرز کار گال کارت"
+            ],
+            "Find better Goal targets and reward configurations using your store data.": [
+                "با استفاده از داده‌های فروشگاه‌تان، آستانهٔ هدف و پیکربندی پاداش بهتری بیابید."
+            ],
+            "Goal Cart's product cost field": [
+                "فیلد هزینهٔ محصول گال کارت"
+            ],
+            "Goal Optimization": [
+                "بهینه‌سازی هدف"
+            ],
+            "Goal Optimization helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsell Performance.": [
+                "بهینه‌سازی هدف به شما کمک می‌کند آستانهٔ هدف و پیکربندی پاداش بهتری انتخاب کنید. این بخش محصول پیشنهاد نمی‌دهد — پیشنهاد محصول به مشتریان زیر «عملکرد پیشنهاد فروش» قرار دارد."
+            ],
+            "How Goal Cart works": [
+                "گال کارت چگونه کار می‌کند"
+            ],
+            "Improve your Goals using store performance data — which target and reward configuration to use, and why.": [
+                "هدف‌های خود را با داده‌های عملکرد فروشگاه بهبود دهید — از کدام آستانه و پیکربندی پاداش استفاده کنید و چرا."
+            ],
+            "Influenced sales": [
+                "فروش تأثیرپذیرفته"
+            ],
+            "Manage product costs": [
+                "مدیریت هزینهٔ محصول"
+            ],
+            "Measure purchases, sales and estimated profit — then optimize again.": [
+                "خریدها، فروش‌ها و سود تخمینی را اندازه بگیرید — سپس دوباره بهینه کنید."
+            ],
+            "No recommendation is available for this goal yet.": [
+                "هنوز پیشنهادی برای این هدف در دسترس نیست."
+            ],
+            "Optimization": [
+                "بهینه‌سازی"
+            ],
+            "Products recommended to customers who were working toward this goal.": [
+                "محصولاتی که به مشتریانی که روی این هدف کار می‌کردند پیشنهاد شده‌اند."
+            ],
+            "Profit estimates need product cost data. Add product costs on your products to enable Goal economics.": [
+                "تخمین سود به دادهٔ هزینهٔ محصول نیاز دارد. برای فعال‌سازی اقتصاد هدف، هزینهٔ محصولات خود را ثبت کنید."
+            ],
+            "Recommend products that help customers reach those Goals.": [
+                "محصولاتی پیشنهاد دهید که به مشتریان در رسیدن به آن هدف‌ها کمک می‌کنند."
+            ],
+            "Recommended target": [
+                "آستانهٔ پیشنهادی"
+            ],
+            "Smart Upsells": [
+                "پیشنهاد هوشمند محصول"
+            ],
+            "Upsell Performance": [
+                "عملکرد پیشنهاد فروش"
+            ],
+            "Upsell Performance shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product.": [
+                "عملکرد پیشنهاد فروش نشان می‌دهد کدام محصولات به مشتریان در رسیدن به هدف‌ها کمک می‌کنند و فروش بیشتری ایجاد می‌کنند — خرید، فروش و سود تخمینی هر محصول."
+            ],
+            "Upsell-assisted": [
+                "کمک‌شده توسط پیشنهاد فروش"
+            ],
+            "Upsell-assisted completions": [
+                "تکمیل‌های کمک‌شده توسط پیشنهاد فروش"
+            ],
+            "What target should this goal use — based on real store data.": [
+                "این هدف باید از کدام آستانه استفاده کند — بر اساس داده‌های واقعی فروشگاه."
+            ],
+            "of completions that saw a recommendation": [
+                "از تکمیل‌هایی که پیشنهادی دیده‌اند"
             ]
         }
     }

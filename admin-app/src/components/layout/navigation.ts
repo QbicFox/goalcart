@@ -27,11 +27,18 @@ export interface NavSection {
 }
 
 /**
- * Goal Cart sidebar navigation (Phase 8 admin shell).
+ * Goal Cart sidebar navigation (UPSELL_REFACTOR §36).
  *
- * The full feature pages (Goals CRUD, Campaigns, Analytics, Appearance)
- * are built by their phases (9, 10, 16–17, 12); the shell already routes
- * to their page containers.
+ * The navigation makes the two-system product model obvious:
+ *
+ *   Sales Performance — what happened (business outcomes).
+ *   Optimization      — what to do next: Goal Optimization decides what
+ *                       the Goal should be; Upsell Performance shows how
+ *                       product recommendations helped customers reach
+ *                       Goals (UPSELL_REFACTOR §59).
+ *
+ * Old routes are preserved through redirects (App.tsx), so bookmarked
+ * URLs keep working (§37/§53).
  */
 export const NAV_SECTIONS: NavSection[] = [
   {
@@ -40,7 +47,6 @@ export const NAV_SECTIONS: NavSection[] = [
       { path: '/dashboard', label: __('Dashboard', 'goalcart'), icon: DashboardIcon },
       { path: '/goals', label: __('Goals', 'goalcart'), icon: FlagIcon },
       { path: '/campaigns', label: __('Campaigns', 'goalcart'), icon: CampaignIcon },
-      { path: '/analytics', label: __('Analytics', 'goalcart'), icon: InsightsIcon },
     ],
   },
   {
@@ -48,8 +54,14 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { path: '/revenue', label: __('Overview', 'goalcart'), icon: BarChartIcon },
       { path: '/revenue/goals', label: __('Goal Performance', 'goalcart'), icon: LeaderboardIcon },
-      { path: '/revenue/recommendations', label: __('Recommendations', 'goalcart'), icon: TipsAndUpdatesIcon },
-      { path: '/revenue/upsells', label: __('Upsell Analytics', 'goalcart'), icon: TrendingUpIcon },
+      { path: '/analytics', label: __('Analytics', 'goalcart'), icon: InsightsIcon },
+    ],
+  },
+  {
+    title: __('Optimization', 'goalcart'),
+    items: [
+      { path: '/optimization/goals', label: __('Goal Optimization', 'goalcart'), icon: TipsAndUpdatesIcon },
+      { path: '/optimization/upsells', label: __('Upsell Performance', 'goalcart'), icon: TrendingUpIcon },
     ],
   },
   // The Attribution Dashboard stays reachable at /revenue/attribution for

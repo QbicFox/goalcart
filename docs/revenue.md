@@ -108,10 +108,20 @@ instead of a guessed number.
 
 ## 5. Margin & profit impact
 
-- **Product cost** — read from the standard WooCommerce `_cost` field and
-  the common cost-of-goods `_wc_cog_cost` field (variations fall back to
-  their parent), through the `goalcart_product_cost` filter. Product cost
-  data is **never modified**, and a missing cost is never invented.
+- **Product cost** — read from the standard WooCommerce `_cost` field, the
+  common cost-of-goods `_wc_cog_cost` field (variations fall back to
+  their parent) and Goal Cart's own optional **`_goalcart_product_cost`**
+  field (UPSELL_REFACTOR §19/§20 — a namespaced "Product cost" input on
+  the product editor, simple products and per-variation, saved through
+  `ProductCostField`), all through the `goalcart_product_cost` filter.
+  Product cost data is **never modified**, and a missing cost is never
+  invented.
+- **Order cost snapshot (UPSELL_REFACTOR §21/§22)** — at checkout
+  (`woocommerce_checkout_create_order_line_item`, classic + Blocks) each
+  line item is stamped with the unit cost it was created with
+  (`_goalcart_unit_cost`, `OrderCostSnapshot`). The profit model prefers
+  the snapshot over the live product cost, so editing a product's cost
+  later never rewrites historical profit.
 - **Order margin** — `order_margin_stats()` requires cost data on *every*
   line item; otherwise the order has no margin data (graceful).
 - **Profit impact** — `estimated_profit = incremental_revenue × margin% −
@@ -163,12 +173,21 @@ attribution summary):
 
 1. **`goalcart_product_cost` filter** — a store plugin can plug its own
    cost source (return `float`, or `null` to fall through).
-2. **`_cost`** — the standard WooCommerce product cost field.
-3. **`_wc_cog_cost`** — the common cost-of-goods field, read when `_cost`
+2. **`_goalcart_product_cost`** — Goal Cart's own product-editor field
+   (UPSELL_REFACTOR §19/§20), read before the standard WooCommerce keys
+   so a store using the Goal Cart field always wins.
+3. **`_cost`** — the standard WooCommerce product cost field.
+4. **`_wc_cog_cost`** — the common cost-of-goods field, read when `_cost`
    is absent. `_cost` takes precedence when both are present.
-4. **Variation fallback** — a variation with no cost of its own inherits
+5. **Variation fallback** — a variation with no cost of its own inherits
    its parent's cost through the same source chain (filter first, then
    raw meta).
+
+On the order side, the **`_goalcart_unit_cost` order-item snapshot**
+(§21/§22, written at checkout by `OrderCostSnapshot`) takes precedence
+over the live product cost in `order_item_unit_cost()` — historical
+orders keep the cost they were created with, so the snapshot and live
+paths never disagree about a historical order.
 
 Safety rules (unchanged): a stored cost of zero or negative is treated as
 "no cost data" (never a 100%-margin assumption); a product with no cost
@@ -290,12 +309,24 @@ layer — excluded without margin data.
   without an existing goal), `window_days`, `from`, `to`. Returns the
   analysis, the ranked candidates (score, confidence, expected impact,
   reasons, factors) and the top `recommendation`.
+- `POST /goalcart/v1/revenue/goal-recommendations/apply` (admin-only,
+  UPSELL_REFACTOR §10/§41) — the only write path: `goal_id` +
+  `threshold` applies a chosen threshold to an existing goal (never any
+  other Goal setting), records the `recommendation_applied`
+  feedback-loop event (old target + applied threshold, deduped daily
+  per goal) and invalidates the revenue caches. The engine itself never
+  modifies a goal — applying is an explicit, permission-checked admin
+  action.
+- `GET /goalcart/v1/revenue/cost-coverage` (admin-only, §25/§46) —
+  catalog product-cost coverage (`costed_products` / `total_products` /
+  `coverage_pct` / `has_cost_data`) so the Goal Optimization UI can
+  explain why profit estimates may be unavailable.
 - Served through `RevenueRepository::goal_recommendations()` — the same
   generation-versioned transients; the existing invalidation (order
   payment/status, goal CRUD, product saves, aggregation) already keeps
   recommendations fresh. TTL: `goalcart_recommendation_cache_ttl`.
 - **Safety:** the engine never changes a goal. Applying a recommendation
-  is an explicit admin action through the existing GoalsController.
+  is an explicit admin action through the apply endpoint.
 
 ## 5. Graceful degradation
 
@@ -421,8 +452,8 @@ Phase 33.3 `RevenueRepository` reads only — no new uncached queries.
 | Revenue Overview | `/revenue` | `GET /revenue/overview` | `overview()` + `daily_trend()` |
 | Goal Performance | `/revenue/goals` | `GET /revenue/goals` | `goal_performance()` |
 | Attribution Dashboard | `/revenue/attribution` | `GET /revenue/attribution` | `overview()` |
-| Smart Recommendations | `/revenue/recommendations` | `GET /revenue/goal-recommendations` | `goal_recommendations()` |
-| Upsell Analytics | `/revenue/upsells` | `GET /revenue/upsells?analytics=1` + `GET /revenue/upsells/{id}` | `upsell_analytics()` / `upsell_product_detail()` |
+| Goal Optimization | `/revenue/recommendations` | `GET /revenue/goal-recommendations` + `POST /revenue/goal-recommendations/apply` | `goal_recommendations()` |
+| Upsell Performance | `/revenue/upsells` | `GET /revenue/upsells?analytics=1` + `GET /revenue/upsells/{id}` | `upsell_analytics()` / `upsell_product_detail()` |
 
 The three new routes (`/revenue/overview`, `/revenue/attribution`,
 `/revenue/goals`) live in the new admin-only `RevenueController`
@@ -450,7 +481,13 @@ AOV impact %, goal conversion rate, reward cost, estimated profit) plus:
 One row per goal: funnel counts (views → progressed → completed →
 converted), completion/conversion rates, average + incremental cart
 value, attributed + assisted revenue, reward cost and profit impact.
-Rows expand into the funnel visual + detail panel.
+Since the UPSELL_REFACTOR pass, each row also carries
+`upsell_assisted` / `upsell_assisted_rate` (completions whose session
+also engaged the smart-upsell panel — the "suggested products helped
+close the goal" signal, computed as distinct sessions in the goal's
+completion funnel that also have an upsell interaction). The Goal
+Optimization drawer and the Upsell Performance page surface this same
+signal. Rows expand into the funnel visual + detail panel.
 
 ## 4. Attribution Dashboard
 
@@ -460,7 +497,7 @@ model revenue cards (plus distinct order count), incremental cart value
 profit-impact panel — which shows its `profit_reason` instead of a
 number when the store provides no margin data (revenue-only analytics).
 
-## 5. Smart Recommendations (Goal Recommendation UI)
+## 5. Goal Optimization (Goal Recommendation UI)
 
 The Phase 33.4 payload rendered with the Phase 7 simplified presentation
 (`Improvement.md` §33–§34) — the same engine, the same endpoint, a
@@ -482,12 +519,20 @@ business-first layout:
 - **Ranked candidates** — one row per threshold with its expected
   impact and confidence label; the score bar, reasons and reward cost
   are behind the row's Details expander.
-- **Apply / View details / Dismiss** on the top card, and the same
-  explicit-apply flow as before: a confirm dialog then `PUT /goals/{id}`
-  updates the selected goal's target. The engine never modifies a goal
-  (P33-53).
+- **Apply / View details / Dismiss** on the top card. **Apply** now goes
+  through the dedicated `POST /revenue/goal-recommendations/apply`
+  endpoint (confirm dialog → one `goal_id` + `threshold` write — the
+  engine never modifies a goal, P33-53), which records the
+  `recommendation_applied` feedback-loop event and invalidates the
+  revenue caches. The selected goal's own current performance (its
+  funnel + `upsell_assisted` completion count from
+  `goal_history`) is shown on the card.
+- **Product-cost coverage** — a banner ties the Profit estimates to the
+  catalog coverage (`GET /revenue/cost-coverage`: "x / y products carry
+  cost data"), so "Not available" is explained instead of appearing
+  arbitrary.
 
-## 6. Upsell Analytics
+## 6. Upsell Performance
 
 The top-products page (`upsell_analytics()` over the window) is
 **commercial-first** (Improvement.md §35): the first screen answers

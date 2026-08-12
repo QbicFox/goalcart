@@ -900,23 +900,41 @@ final class GoalRecommendationEngine {
 	}
 
 	/**
-	 * The goal's funnel history over the window (views, completion and
-	 * conversion rates) — the "current goal performance" input.
+	 * The goal's current performance over the window — the "current goal"
+	 * block of the recommendation detail (UPSELL_REFACTOR §9).
+	 *
+	 * Built from the same goal_metrics() the Goal Performance page reads,
+	 * so the recommendation's "current" numbers always agree with the
+	 * analytics: funnel counts + rates, current threshold, reward type,
+	 * attributed/influenced sales, estimated profit and the upsell-assisted
+	 * completions linkage. Null when the goal cannot be resolved.
 	 *
 	 * @param int                  $goal_id Goal id.
 	 * @param array<string, mixed> $window  from/to.
 	 * @return array<string, mixed>|null
 	 */
 	protected function goal_history( $goal_id, array $window ) {
-		$funnel = $this->engine->funnel( array_merge( $window, array( 'goal_id' => (int) $goal_id ) ) );
+		$metrics = $this->engine->goal_metrics( (int) $goal_id, $window );
+
+		if ( null === $metrics ) {
+			return null;
+		}
 
 		return array(
-			'views'           => (int) $funnel['views'],
-			'progressed'      => (int) $funnel['progressed'],
-			'completed'       => (int) $funnel['completed'],
-			'converted'       => (int) $funnel['converted'],
-			'completion_rate' => $funnel['completion_rate'],
-			'conversion_rate' => $funnel['conversion_rate'],
+			'views'             => (int) $metrics['views'],
+			'progressed'        => (int) $metrics['progressed'],
+			'completed'         => (int) $metrics['completed'],
+			'converted'         => (int) $metrics['converted'],
+			'completion_rate'   => $metrics['completion_rate'],
+			'conversion_rate'   => $metrics['conversion_rate'],
+			'purchase_rate'     => $metrics['conversion_rate'],
+			'current_target'    => (float) $metrics['target'],
+			'reward_type'       => $metrics['reward_type'],
+			'attributed_sales'  => (float) $metrics['attributed_revenue'],
+			'influenced_sales'  => (float) $metrics['influenced_revenue'],
+			'estimated_profit'  => $metrics['profit_impact'],
+			'profit_available'  => (bool) $metrics['profit_available'],
+			'upsell_assisted'   => isset( $metrics['upsell_assisted'] ) ? (int) $metrics['upsell_assisted'] : 0,
 		);
 	}
 

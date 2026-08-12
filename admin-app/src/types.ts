@@ -491,14 +491,42 @@ export type ProfitReasonCode =
 
 /**
  * The product-cost sources the backend estimator consults, in order
- * (Improvement.md Phase 3 / §10). Keys are stable; translate them in the
- * UI when explaining where cost data comes from.
+ * (Improvement.md Phase 3 / §10 + UPSELL_REFACTOR §20). Keys are stable;
+ * translate them in the UI when explaining where cost data comes from.
  */
 export type CostSource =
+  | '_goalcart_product_cost'
   | '_cost'
   | '_wc_cog_cost'
   | 'goalcart_product_cost'
   | 'variation_fallback';
+
+/**
+ * Product-level cost coverage (UPSELL_REFACTOR §25): how much of the
+ * catalog carries cost data — served by `GET /revenue/cost-coverage`.
+ */
+export interface ProductCostCoverage {
+  total_products: number;
+  products_with_cost: number;
+  /** 0–100, null when there are no published products. */
+  coverage_pct: number | null;
+  available: boolean;
+}
+
+/** The `GET /goalcart/v1/revenue/cost-coverage` payload (UPSELL_REFACTOR §46). */
+export interface CostCoveragePayload {
+  product_coverage: ProductCostCoverage;
+  store_has_cost_data: boolean;
+  cost_sources: CostSource[];
+}
+
+/** The result of applying a goal-threshold recommendation (§10). */
+export interface RecommendationApplyResult {
+  goal_id: number;
+  name: string;
+  target: number;
+  previous_target: number;
+}
 
 /** Cost-data coverage over the attributed (incremental) orders (§11). */
 export interface CostCoverage {
@@ -826,6 +854,19 @@ export interface GoalPerformanceRow {
   // Phase 3 — UI-ready profit availability metadata (§10).
   cost_sources: CostSource[];
   store_has_cost_data: boolean;
+  // UPSELL_REFACTOR §30/§32/§33 — Smart Upsell linkage: how many of this
+  // goal's completions were assisted by a product recommendation, the
+  // assisted rate (assisted ÷ completed, null without completions), and
+  // the goal's full upsell funnel (impressions → clicks → adds →
+  // purchases) over the window.
+  upsell_assisted: number;
+  upsell_assisted_rate: number | null;
+  upsell_funnel: {
+    impressions: number;
+    clicks: number;
+    adds: number;
+    orders: number;
+  };
 }
 
 /** The `GET /goalcart/v1/revenue/goals` payload. */
@@ -920,6 +961,30 @@ export interface UpsellRankingPayload {
   generated_at: string;
 }
 
+/**
+ * The current performance of the goal being recommended for (UPSELL_REFACTOR
+ * §9 — the "Current Goal" block of the recommendation detail). Built from
+ * the same goal_metrics() the Goal Performance page reads, so the numbers
+ * always agree with the analytics.
+ */
+export interface RecommendationGoalHistory {
+  views: number;
+  progressed: number;
+  completed: number;
+  converted: number;
+  completion_rate: number | null;
+  conversion_rate: number | null;
+  /** Purchase rate (converted ÷ completed) — never confused with completion. */
+  purchase_rate: number | null;
+  current_target: number;
+  reward_type: RewardType;
+  attributed_sales: number;
+  influenced_sales: number;
+  estimated_profit: number | null;
+  profit_available: boolean;
+  upsell_assisted: number;
+}
+
 /** The analyzed store data block of a goal recommendation. */
 export interface RecommendationData {
   aov: number;
@@ -940,7 +1005,7 @@ export interface RecommendationData {
     with_cost?: number;
     reason?: string | null;
   } | null;
-  goal_history: Record<string, unknown> | null;
+  goal_history: RecommendationGoalHistory | null;
   reward_type: string | null;
 }
 

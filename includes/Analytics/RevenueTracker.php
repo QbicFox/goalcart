@@ -68,6 +68,16 @@ final class RevenueTracker {
 	const EVENT_CART_VALUE      = 'cart_value';
 
 	/**
+	 * Event type (revenue_events) — the admin recommendation feedback
+	 * loop (UPSELL_REFACTOR §41): recorded when an administrator applies a
+	 * goal-threshold recommendation (POST /revenue/goal-recommendations/
+	 * apply). Meta carries the applied threshold and the previous target,
+	 * so future analysis can correlate "recommendation applied → goal
+	 * changed → goal performance" without any ML machinery.
+	 */
+	const EVENT_RECOMMENDATION_APPLIED = 'recommendation_applied';
+
+	/**
 	 * Event types (upsell_events).
 	 */
 	const EVENT_UPSELL_IMPRESSION = 'upsell_impression';
@@ -187,6 +197,7 @@ final class RevenueTracker {
 			self::EVENT_GOAL_COMPLETED,
 			self::EVENT_ORDER_PAID,
 			self::EVENT_CART_VALUE,
+			self::EVENT_RECOMMENDATION_APPLIED,
 		);
 	}
 
@@ -428,6 +439,27 @@ final class RevenueTracker {
 					WHERE event_type = %s AND session_id = %s AND created_at >= %s",
 					$event_type,
 					$session_id,
+					$cutoff
+				)
+			);
+
+			return $count > 0;
+		}
+
+		// Recommendation applies carry a goal but no order: dedup per
+		// session+goal within the daily window (an admin re-applying the
+		// same recommendation from a fresh page load records once a day —
+		// enough signal for the feedback loop without event spam).
+		if ( self::EVENT_RECOMMENDATION_APPLIED === $event_type ) {
+			$cutoff = date( 'Y-m-d H:i:s', strtotime( current_time( 'mysql' ) ) - self::DEDUP_WINDOW_DAILY );
+
+			$count = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM {$table}
+					WHERE event_type = %s AND session_id = %s AND goal_id = %s AND created_at >= %s",
+					$event_type,
+					$session_id,
+					$goal_id > 0 ? $goal_id : null,
 					$cutoff
 				)
 			);

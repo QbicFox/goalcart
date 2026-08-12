@@ -108,6 +108,7 @@ class HookManager {
 			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_retention_days', 'description' => 'Retention window (days) for the revenue/upsell event logs before the weekly cleanup purges them.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_enabled', 'description' => 'Whether Phase 33.2 revenue attribution (order association) is on.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_product_cost', 'description' => 'Product cost used by the Phase 33.2 reward-cost / profit estimation (null = no cost data).' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_order_cost_snapshot', 'description' => 'The order-item unit-cost snapshot written at checkout (UPSELL_REFACTOR §21) — return a float to stamp it, null to leave the line without a snapshot.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_metric_rows', 'description' => 'Row cap for the bounded Phase 33.2 metric reads.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_order_scan_pages', 'description' => 'Page cap for the Phase 33.2 store-wide order scans (AOV, shipping).' ),
 			array( 'type' => 'action', 'hook' => 'goalcart_goals_changed', 'description' => 'Fires after a goal is created, updated or deleted (cache invalidation).' ),

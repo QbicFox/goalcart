@@ -9,7 +9,9 @@ namespace GoalCart;
 
 use GoalCart\Admin\Admin;
 use GoalCart\Admin\AssetLoader;
+use GoalCart\Admin\ProductCostField;
 use GoalCart\Analytics\AnalyticsRepository;
+use GoalCart\Analytics\OrderCostSnapshot;
 use GoalCart\Analytics\AttributionEngine;
 use GoalCart\Analytics\DailyAggregator;
 use GoalCart\Analytics\GoalRecommendationEngine;
@@ -218,6 +220,13 @@ final class Plugin {
 		// attribution / goal-performance endpoints serving the React Admin
 		// Revenue section through the cached repository layer.
 		$this->hooks()->register( $this->container->get( RevenueController::class ) );
+
+		// Product cost (UPSELL_REFACTOR §18–§22): the WooCommerce product
+		// editor gains Goal Cart's own cost field (simple + variations), and
+		// order creation snapshots each line's unit cost so historical
+		// profit never changes when a product cost is edited later.
+		$this->hooks()->register( $this->container->get( ProductCostField::class ) );
+		$this->hooks()->register( $this->container->get( OrderCostSnapshot::class ) );
 
 		// Storefront progress UI (Phase 11): shortcode, display-location
 		// injection, sticky bar and frontend assets.
@@ -540,12 +549,18 @@ final class Plugin {
 			return new TemplatesController( $container->get( TemplateEngine::class ) );
 		} );
 
-		// Goal recommendation endpoint (Phase 33.4): admin-only read of the
-		// deterministic threshold recommendation, served through the cached
-		// revenue repository (recommendations are cached and invalidated
-		// like the other revenue summaries).
+		// Goal recommendation endpoints (Phase 33.4 + UPSELL_REFACTOR §41):
+		// the read-only deterministic threshold recommendation served
+		// through the cached revenue repository, plus the apply write path
+		// (explicit admin confirmation → goal target update + the
+		// recommendation_applied feedback-loop event + cache
+		// invalidation).
 		$this->container->singleton( RecommendationsController::class, function ( Container $container ) {
-			return new RecommendationsController( $container->get( RevenueRepository::class ) );
+			return new RecommendationsController(
+				$container->get( RevenueRepository::class ),
+				$container->get( GoalRepository::class ),
+				$container->get( RevenueTracker::class )
+			);
 		} );
 
 		// Upsell endpoints (Phase 33.5/33.7): the public nonce-guarded
@@ -566,11 +581,15 @@ final class Plugin {
 			);
 		} );
 
-		// Revenue optimization admin reads (Phase 33.6): the overview /
-		// attribution / goal-performance endpoints serving the React Admin
-		// Revenue section, all through the cached revenue repository.
+		// Revenue optimization admin reads (Phase 33.6 + UPSELL_REFACTOR
+		// §25): the overview / attribution / goal-performance endpoints
+		// serving the React Admin Revenue section through the cached
+		// revenue repository, plus the product-cost coverage read.
 		$this->container->singleton( RevenueController::class, function ( Container $container ) {
-			return new RevenueController( $container->get( RevenueRepository::class ) );
+			return new RevenueController(
+				$container->get( RevenueRepository::class ),
+				$container->get( RewardCostEstimator::class )
+			);
 		} );
 
 		$this->container->singleton( AssetLoader::class, function ( Container $container ) {
@@ -579,6 +598,21 @@ final class Plugin {
 
 		$this->container->singleton( Admin::class, function ( Container $container ) {
 			return new Admin( $container->get( Settings::class ), $container->get( AssetLoader::class ) );
+		} );
+
+		// WooCommerce product-cost field (UPSELL_REFACTOR §19/§20): adds
+		// the `_goalcart_product_cost` input to simple products and
+		// variations, saved with the product-edit screen's own capability
+		// guard.
+		$this->container->singleton( ProductCostField::class, function () {
+			return new ProductCostField();
+		} );
+
+		// Order cost snapshot (UPSELL_REFACTOR §21/§22): stamps each line
+		// item with the unit cost used at order creation so historical
+		// profit is stable when product costs change.
+		$this->container->singleton( OrderCostSnapshot::class, function ( Container $container ) {
+			return new OrderCostSnapshot( $container->get( RewardCostEstimator::class ) );
 		} );
 
 		// Storefront progress UI (Phase 11): renders widget containers and

@@ -222,18 +222,19 @@ function ProductDetailDialog({
 }
 
 /**
- * Upsell Analytics (Phase 33.6 engine — Phase 8 commercial-first UI).
+ * Upsell Performance (Phase 33.6 engine — UPSELL_REFACTOR §4/§32/§39).
  *
- * The top-products upsell table from `GET /goalcart/v1/revenue/upsells?analytics=1`.
- * The first screen answers "which suggested products actually generate
- * purchases and sales?" (Improvement.md §35): Product / Purchased Orders /
- * Sales / Estimated profit / Conversion are the primary columns; the
- * interaction funnel (impressions, clicks, adds, CTR, add-to-cart rate) and
- * the upsell score sit behind a "Show interaction details" toggle, and the
- * full score breakdown stays available through the per-product dialog.
- * CTR and add-to-cart rate are derived client-side from the real funnel
- * counts (clicks/impressions, adds/impressions — "—" without a
- * denominator), never fabricated.
+ * The customer-facing recommendation system's admin report: the
+ * top-products upsell table from `GET /goalcart/v1/revenue/upsells?analytics=1`.
+ * The first screen answers "which suggested products actually help
+ * customers reach Goals and generate purchases and sales?" (§35): Product
+ * / Purchased Orders / Sales / Estimated profit / Conversion are the
+ * primary columns; the interaction funnel (impressions, clicks, adds, CTR,
+ * add-to-cart rate) and the upsell score sit behind a "Show interaction
+ * details" toggle, and the full score breakdown stays available through
+ * the per-product dialog. CTR and add-to-cart rate are derived client-side
+ * from the real funnel counts (clicks/impressions, adds/impressions — "—"
+ * without a denominator), never fabricated.
  */
 export default function UpsellAnalytics() {
   const { range } = useDateRange();
@@ -272,9 +273,9 @@ export default function UpsellAnalytics() {
 
   return (
     <PageContainer
-      title={__('Upsell Analytics', 'goalcart')}
+      title={__('Upsell Performance', 'goalcart')}
       description={__(
-        'Which suggested products actually generate purchases and sales — orders, revenue and estimated profit per product.',
+        'Upsell Performance shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product.',
         'goalcart'
       )}
     >

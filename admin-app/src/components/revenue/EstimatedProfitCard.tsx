@@ -20,6 +20,7 @@ import type { CostCoverage, CostSource, ProfitDetails, ProfitReasonCode } from '
 
 /** User-facing labels for the cost sources the estimator consults (§10). */
 const SOURCE_LABELS: Record<CostSource, string> = {
+  _goalcart_product_cost: __("Goal Cart's product cost field", 'goalcart'),
   _cost: __('WooCommerce product cost field (_cost)', 'goalcart'),
   _wc_cog_cost: __('Cost of goods field (_wc_cog_cost)', 'goalcart'),
   goalcart_product_cost: __('The goalcart_product_cost filter', 'goalcart'),
