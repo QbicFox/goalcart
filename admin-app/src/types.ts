@@ -791,6 +791,12 @@ export interface GoalPerformanceRow {
   conversion_rate: number | null;
   average_cart_value: number;
   incremental_cart_value: number;
+  // Phase 5 — commercial-outcome + detail-drawer fields (§16/§20): total
+  // influenced order value, the engine's attribution window and the
+  // session-count data-sufficiency signal.
+  influenced_revenue: number;
+  attribution_window_days: number;
+  data_sufficiency: 'low' | 'medium' | 'high';
   attributed_revenue: number;
   assisted_revenue: number;
   reward_cost: number;

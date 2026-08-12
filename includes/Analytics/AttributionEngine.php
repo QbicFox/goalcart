@@ -923,6 +923,15 @@ final class AttributionEngine {
 			'conversion_rate'     => $funnel['conversion_rate'],
 			'average_cart_value'  => $incremental['average_baseline'],
 			'incremental_cart_value' => $incremental['average'],
+			// Phase 5 (Goal Performance Redesign) — commercial-outcome and
+			// detail-drawer fields. All derived from the already-computed
+			// attribution summary + incremental read above (Improvement.md
+			// §20): total influenced order value, the engine's attribution
+			// window, and the session-count data-sufficiency signal. Nothing
+			// new is queried.
+			'influenced_revenue'    => $summary['goal_influenced_revenue'],
+			'attribution_window_days' => (int) ( self::ATTRIBUTION_WINDOW / DAY_IN_SECONDS ),
+			'data_sufficiency'      => $incremental['data_sufficiency'],
 			'attributed_revenue'  => $summary['goal_driven_revenue'],
 			'assisted_revenue'    => $summary['goal_assisted_revenue'],
 			'reward_cost'         => $summary['reward_cost'],

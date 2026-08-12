@@ -174,6 +174,12 @@ if ( ! empty( $goals['items'] ) ) {
 	check( 'goal row has profit_reason_code', array_key_exists( 'profit_reason_code', $first ) );
 	check( 'goal row has cost_coverage', array_key_exists( 'cost_coverage', $first ) );
 	check( 'goal row has profit_details', array_key_exists( 'profit_details', $first ) );
+	// Phase 5 (Goal Performance Redesign): commercial-outcome + detail
+	// drawer fields — total influenced revenue, the attribution window and
+	// the data-sufficiency signal (Improvement.md §20/§45).
+	check( 'goal row has influenced_revenue', array_key_exists( 'influenced_revenue', $first ) );
+	check( 'goal row has attribution_window_days', array_key_exists( 'attribution_window_days', $first ) && $first['attribution_window_days'] > 0 );
+	check( 'goal row has data_sufficiency', array_key_exists( 'data_sufficiency', $first ) && in_array( $first['data_sufficiency'], array( 'low', 'medium', 'high' ), true ) );
 }
 
 // ---------------------------------------------------------------------------

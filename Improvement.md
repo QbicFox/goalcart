@@ -24,14 +24,14 @@ The goal is:
 
 # ✅ IMPLEMENTATION PROGRESS
 
-**Overall:** Phases 1–4 complete · Phases 5–10 not started.
+**Overall:** Phases 1–5 complete · Phases 6–10 not started.
 
 ```text
 Phase 1 : ████████████████████ 100%   Codebase Audit (REVENUE_ANALYTICS_AUDIT.md)
 Phase 2 : ████████████████████ 100%   Backend / Data Layer
 Phase 3 : ████████████████████ 100%   Profit Availability
 Phase 4 : ████████████████████ 100%   Revenue Overview Redesign
-Phase 5 : ░░░░░░░░░░░░░░░░░░░░   0%   Goal Performance Redesign
+Phase 5 : ████████████████████ 100%   Goal Performance Redesign
 Phase 6 : ░░░░░░░░░░░░░░░░░░░░   0%   Analytics Redesign
 Phase 7 : ░░░░░░░░░░░░░░░░░░░░   0%   Recommendations
 Phase 8 : ░░░░░░░░░░░░░░░░░░░░   0%   Upsell Analytics
@@ -45,14 +45,14 @@ Phase 10: ░░░░░░░░░░░░░░░░░░░░   0%   Te
 | 2 — Backend / Data Layer | [x] 100% | purchase/profit metrics on the legacy `/analytics` summary, profit reason codes + cost coverage + profit details, goal filter resolution, `tests/purchase-metrics-test.php` |
 | 3 — Profit Availability | [x] 100% | cost sources verified (`_cost` / `_wc_cog_cost` / variation fallback / `goalcart_product_cost`), `cost_sources` + `store_has_cost_data` metadata, `tests/profit-availability-test.php` |
 | 4 — Revenue Overview Redesign | [x] 100% | Sales Performance page: 4 KPI cards, profit states + details, simplified trend with toggles, insight cards, advanced attribution drawer, nav rename |
-| 5 — Goal Performance Redesign | [ ] 0% | — |
+| 5 — Goal Performance Redesign | [x] 100% | commercial-outcomes Goal table (Viewed/Progressed/Completed/Purchased/Purchase Rate/Sales/Estimated Profit, sortable), per-goal detail drawer (performance summary, funnel with drop-off, costs via the shared profit card, advanced attribution + advanced accordions), additive `goal_metrics()` fields, `tests/revenue-admin-test.php` (56 checks) |
 | 6 — Analytics Redesign | [ ] 0% | — |
 | 7 — Recommendations | [ ] 0% | — |
 | 8 — Upsell Analytics | [ ] 0% | — |
 | 9 — UX Polish | [ ] 0% | — |
 | 10 — Testing & Regression | [ ] 0% | — |
 
-**Last update:** 2026-08-12 — Phase 4 (Revenue Overview Redesign) complete; `tsc`, ESLint and `vite build` clean; POT regenerated (816 strings).
+**Last update:** 2026-08-12 — Phase 5 (Goal Performance Redesign) complete; `tsc`, ESLint and `vite build` clean; POT regenerated (847 strings); all PHP suites green (revenue-admin 56, attribution 72, purchase-metrics 107, aggregation 74, phase33 99, profit-availability 45, revenue-foundation 69).
 
 ---
 
@@ -2017,6 +2017,8 @@ already supplied every value):
 
 # Phase 5 — Goal Performance Redesign
 
+> **STATUS: ✅ COMPLETE — 2026-08-12** (see progress register at the top of this document)
+
 Implement:
 
 * Views
@@ -2032,6 +2034,50 @@ Add expandable goal details.
 Add detailed funnel.
 
 Add advanced attribution section.
+
+**Deliverables:**
+
+* `AttributionEngine::goal_metrics()` — additive fields (all derived from
+  the already-computed summary + incremental read — nothing new queried)
+  for the redesign: `influenced_revenue` (total order value of the goal's
+  associated orders, §20 Revenue), `attribution_window_days` (the engine's
+  attribution-window constant, exposed for the Advanced section) and
+  `data_sufficiency` (the session-count signal behind the existing
+  incremental-cart-value read, §45).
+* `admin-app/src/routes/GoalPerformance.tsx` rewritten as the
+  **commercial outcomes table** (§16): Goal / Viewed / Progressed /
+  Completed / **Purchased** / **Purchase Rate** / **Sales** / **Estimated
+  Profit**, sortable (default: attributed sales descending; unavailable
+  profit/rate always sorts last, in either direction), with header
+  tooltips that keep completion and purchase distinct (§17/§28).
+  Clicking a row (mouse or keyboard — Enter/Space) opens a right-side
+  **detail drawer** (§20):
+  - **Performance Summary** — viewed / progressed / completed / purchased
+    / attributed sales / estimated profit.
+  - **Customer Journey** — the full funnel with stage-to-stage drop-off
+    percentages plus the completion-vs-purchase explanation (§17).
+  - **Costs** — reuses the shared `EstimatedProfitCard` (reward cost,
+    shipping cost, estimated profit in every data state §10–§13).
+  - **Advanced attribution details** — direct / assisted / influenced
+    revenue + incremental cart value behind an accordion (§20 Revenue).
+  - **Advanced** — attribution model, attribution window, data
+    sufficiency (translated to Limited / Moderate / Good data, §45),
+    average basket increase (labeled observed impact, §46) and attributed
+    orders.
+* `admin-app/src/components/revenue/FunnelVisual.tsx` — optional
+  `showTransitions` prop renders the percentage carried between funnel
+  stages (the drop-off read §20/§23, reusable by the Phase 6 Analytics
+  funnel), and the final stage is labeled **Purchased**, never
+  "Converted" (§32).
+* `admin-app/src/types.ts` — `GoalPerformanceRow` extended with
+  `influenced_revenue`, `attribution_window_days`, `data_sufficiency`.
+* `languages/goalcart.pot` regenerated (847 strings) so translators see
+  the new labels.
+* Tests: `tests/revenue-admin-test.php` extended with the new goal-row
+  field checks (56 checks, 0 failures); every regression suite stays
+  green — `attribution` (72), `purchase-metrics` (107), `aggregation`
+  (74), `phase33` (99), `profit-availability` (45), `revenue-foundation`
+  (69). PHP lint, `tsc --noEmit`, ESLint and `vite build` all clean.
 
 ---
 
@@ -2152,11 +2198,11 @@ The implementation is complete only when all of the following are true:
 
 ## Goals
 
-* [ ] Goal table includes purchased orders.
-* [ ] Goal table includes purchase rate.
-* [ ] Goal table includes sales.
-* [ ] Goal detail shows the complete funnel.
-* [ ] Advanced attribution remains accessible.
+* [x] Goal table includes purchased orders.
+* [x] Goal table includes purchase rate.
+* [x] Goal table includes sales.
+* [x] Goal detail shows the complete funnel.
+* [x] Advanced attribution remains accessible.
 
 ## Profit
 
