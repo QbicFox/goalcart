@@ -9,6 +9,40 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
+- **Best Recommendation + `NaN%` fix on `/optimization/goals`** — the
+  Recommendations page now shows the store administrator exactly ONE
+  optimization recommendation — the single best one:
+  - **Single best recommendation** — the engine already generates and
+    ranks every eligible candidate deterministically (score desc, ties
+    → lower threshold) and the API payload still returns
+    `candidates[]` plus the selected `recommendation` (the best). The
+    page renders only `payload.recommendation` and the old "Ranked
+    candidates" list (and its `CandidateRow` component) was removed —
+    no frontend re-ranking, no array slicing, no duplicate
+    recommendation UI. The empty state (`No recommendation available`
+    + `insufficient_reason`) is unchanged.
+  - **`NaN%` root cause fixed** — the order-value distribution in
+    "Analyzed store data" was typed `Record<string, number>` while the
+    backend sends an array of bucket objects `{label, min, max, count,
+    share}`; `Object.entries()` then passed the bucket *object* into
+    `formatPercent()`, producing `NaN%`. The type is now the real
+    `DistributionBucket[]` shape and the bars render `bucket.label` +
+    `formatPercent(bucket.share)`.
+  - **Percentage correctness on the same page** — the margin factor
+    (a 0–1 rate) is formatted with `formatPercent` instead of
+    `formatPercentValue` (was "0.6%" for a 60% margin), the product-cost
+    coverage percentage is no longer divided by 100 (was "0.9%" for
+    92%), and the shared `formatPercent` / `formatPercentValue`
+    formatters now render non-finite / missing inputs as "—" (a 0
+    denominator or absent value can never surface as `NaN%` /
+    `Infinity%` anywhere in the admin).
+  - **Tests** — `tests/recommendation-test.php` asserts the
+    recommendation is the highest-scored candidate (best, not merely
+    first); `tests/frontend-test.php` gained source-scan guards (no
+    ranked-candidates list, distribution renders buckets, formatter
+    guards, coverage/margin scale). `docs/revenue.md` updated; POT
+    regenerated.
+
 - **UICHANGES.md — Revenue & Analytics UX Consolidation** — closes the
   remaining gaps of the Sales Performance redesign (`UICHANGES.md` §18/
   §30/§36/§40):

@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-14T09:16:47Z\n"
+"POT-Creation-Date: 2026-08-14T09:42:17Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:78
 #: admin-app/src/routes/CampaignBuilder.tsx:40
 #: admin-app/src/routes/Goals.tsx:45
-#: admin-app/src/routes/Recommendations.tsx:38
+#: admin-app/src/routes/Recommendations.tsx:37
 #: admin-app/src/templates/rewardLabel.ts:9
 msgid "% discount"
 msgstr ""
@@ -27,7 +27,7 @@ msgstr ""
 msgid "% off the eligible cart value"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:412
+#: admin-app/src/routes/Recommendations.tsx:408
 msgid "%d days"
 msgstr ""
 
@@ -157,7 +157,7 @@ msgstr ""
 msgid "AOV comparisons are observed impact — they do not prove that Goal Cart caused the difference."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:177
+#: admin-app/src/routes/Recommendations.tsx:171
 msgid "AOV ratio"
 msgstr ""
 
@@ -214,7 +214,7 @@ msgstr ""
 msgid "Add product cost data to estimate profit."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:310
+#: admin-app/src/routes/Recommendations.tsx:306
 msgid "Add product cost data to estimate profitability."
 msgstr ""
 
@@ -236,7 +236,7 @@ msgid "Add your first goal"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1082
-#: admin-app/src/routes/UpsellAnalytics.tsx:413
+#: admin-app/src/routes/UpsellAnalytics.tsx:414
 msgid "Add-to-cart"
 msgstr ""
 
@@ -258,7 +258,7 @@ msgstr ""
 msgid "Additional Sales Value"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:411
+#: admin-app/src/routes/UpsellAnalytics.tsx:412
 msgid "Adds"
 msgstr ""
 
@@ -295,7 +295,7 @@ msgstr ""
 msgid "Advanced attribution details"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:129
+#: admin-app/src/routes/Recommendations.tsx:123
 msgid "Advanced details"
 msgstr ""
 
@@ -336,7 +336,7 @@ msgstr ""
 msgid "Almost there! Only {remaining} left"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:183
+#: admin-app/src/routes/Recommendations.tsx:177
 msgid "Already at share"
 msgstr ""
 
@@ -365,7 +365,7 @@ msgstr ""
 msgid "Analytics tracking"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:377
+#: admin-app/src/routes/Recommendations.tsx:373
 msgid "Analyzed store data"
 msgstr ""
 
@@ -413,8 +413,7 @@ msgid "Appended to the widget styles. Applied only while this template renders."
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:290
-#: admin-app/src/routes/Recommendations.tsx:530
-#: admin-app/src/routes/Recommendations.tsx:794
+#: admin-app/src/routes/Recommendations.tsx:698
 msgid "Apply"
 msgstr ""
 
@@ -423,12 +422,12 @@ msgid "Apply range"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:269
-#: admin-app/src/routes/Recommendations.tsx:346
+#: admin-app/src/routes/Recommendations.tsx:342
 msgid "Apply recommendation"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:277
-#: admin-app/src/routes/Recommendations.tsx:766
+#: admin-app/src/routes/Recommendations.tsx:670
 msgid "Apply recommendation?"
 msgstr ""
 
@@ -470,7 +469,7 @@ msgstr ""
 msgid "Attributed orders"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:227
+#: admin-app/src/routes/Recommendations.tsx:223
 msgid "Attributed sales"
 msgstr ""
 
@@ -493,7 +492,7 @@ msgstr ""
 msgid "Auto"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:36
+#: admin-app/src/routes/Recommendations.tsx:35
 msgid "Auto (from goal)"
 msgstr ""
 
@@ -534,7 +533,7 @@ msgstr ""
 msgid "Average lift per session"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:383
+#: admin-app/src/routes/Recommendations.tsx:379
 msgid "Average order value"
 msgstr ""
 
@@ -550,11 +549,11 @@ msgstr ""
 msgid "Average shipping cost is %s — a free-shipping goal absorbs this cost."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:430
+#: admin-app/src/routes/Recommendations.tsx:426
 msgid "Avg. margin"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:420
+#: admin-app/src/routes/Recommendations.tsx:416
 msgid "Avg. shipping"
 msgstr ""
 
@@ -652,7 +651,7 @@ msgid "Brand attribute"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1081
-#: admin-app/src/routes/UpsellAnalytics.tsx:412
+#: admin-app/src/routes/UpsellAnalytics.tsx:413
 msgid "CTR"
 msgstr ""
 
@@ -786,13 +785,13 @@ msgstr ""
 msgid "Circular gauge — the target as a filled ring with the percentage centered."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:470
+#: admin-app/src/routes/UpsellAnalytics.tsx:471
 msgid "Click a product row for its full score breakdown."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1079
 #: admin-app/src/routes/GoalPerformance.tsx:445
-#: admin-app/src/routes/UpsellAnalytics.tsx:410
+#: admin-app/src/routes/UpsellAnalytics.tsx:411
 msgid "Clicks"
 msgstr ""
 
@@ -877,7 +876,7 @@ msgstr ""
 msgid "Completion"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:220
+#: admin-app/src/routes/Recommendations.tsx:216
 msgid "Completion rate"
 msgstr ""
 
@@ -903,9 +902,8 @@ msgstr ""
 msgid "Conditions"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:141
-#: admin-app/src/routes/Recommendations.tsx:285
-#: admin-app/src/routes/Recommendations.tsx:517
+#: admin-app/src/routes/Recommendations.tsx:135
+#: admin-app/src/routes/Recommendations.tsx:281
 msgid "Confidence"
 msgstr ""
 
@@ -934,8 +932,8 @@ msgid "Content"
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:56
-#: admin-app/src/routes/UpsellAnalytics.tsx:389
-#: admin-app/src/routes/UpsellAnalytics.tsx:406
+#: admin-app/src/routes/UpsellAnalytics.tsx:390
+#: admin-app/src/routes/UpsellAnalytics.tsx:407
 msgid "Conversion"
 msgstr ""
 
@@ -968,7 +966,7 @@ msgstr ""
 msgid "Could not load goal performance."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:671
+#: admin-app/src/routes/Recommendations.tsx:593
 msgid "Could not load recommendations."
 msgstr ""
 
@@ -1017,7 +1015,7 @@ msgstr ""
 msgid "Could not load the settings."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:327
+#: admin-app/src/routes/UpsellAnalytics.tsx:328
 msgid "Could not load upsell analytics."
 msgstr ""
 
@@ -1041,7 +1039,7 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:81
 #: admin-app/src/routes/CampaignBuilder.tsx:43
 #: admin-app/src/routes/Goals.tsx:48
-#: admin-app/src/routes/Recommendations.tsx:41
+#: admin-app/src/routes/Recommendations.tsx:40
 #: admin-app/src/templates/rewardLabel.ts:12
 #: includes/Frontend/ProgressUI.php:878
 #: includes/Goals/MessageEngine.php:303
@@ -1084,12 +1082,12 @@ msgstr ""
 msgid "Currency display"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:211
+#: admin-app/src/routes/Recommendations.tsx:207
 msgid "Current goal"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:233
-#: admin-app/src/routes/Recommendations.tsx:214
+#: admin-app/src/routes/Recommendations.tsx:210
 msgid "Current target"
 msgstr ""
 
@@ -1163,7 +1161,7 @@ msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:199
 #: admin-app/src/routes/GoalPerformance.tsx:545
-#: admin-app/src/routes/Recommendations.tsx:439
+#: admin-app/src/routes/Recommendations.tsx:437
 msgid "Data sufficiency"
 msgstr ""
 
@@ -1246,10 +1244,6 @@ msgstr ""
 msgid "Detailed Activity"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:527
-msgid "Details"
-msgstr ""
-
 #: admin-app/src/routes/Settings.tsx:802
 msgid "Developer hooks"
 msgstr ""
@@ -1311,7 +1305,7 @@ msgstr ""
 msgid "Discounted subtotal"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:352
+#: admin-app/src/routes/Recommendations.tsx:348
 #: includes/Frontend/ProgressUI.php:883
 msgid "Dismiss"
 msgstr ""
@@ -1337,7 +1331,7 @@ msgstr ""
 msgid "Display locations"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:171
+#: admin-app/src/routes/Recommendations.tsx:165
 msgid "Distance"
 msgstr ""
 
@@ -1381,7 +1375,7 @@ msgstr ""
 msgid "Duplicated “%s”."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:172
+#: admin-app/src/routes/Recommendations.tsx:166
 msgid "Economics"
 msgstr ""
 
@@ -1463,9 +1457,9 @@ msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:182
 #: admin-app/src/routes/Analytics.tsx:292
-#: admin-app/src/routes/Recommendations.tsx:228
+#: admin-app/src/routes/Recommendations.tsx:224
 #: admin-app/src/routes/RevenueOverview.tsx:171
-#: admin-app/src/routes/UpsellAnalytics.tsx:405
+#: admin-app/src/routes/UpsellAnalytics.tsx:406
 msgid "Estimated profit"
 msgstr ""
 
@@ -1477,7 +1471,7 @@ msgstr ""
 msgid "Estimated profit is calculated only for orders with complete cost data."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:154
+#: admin-app/src/routes/Recommendations.tsx:148
 msgid "Estimated reward cost"
 msgstr ""
 
@@ -1531,16 +1525,15 @@ msgstr ""
 msgid "Expand all"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:146
+#: admin-app/src/routes/Recommendations.tsx:140
 msgid "Expected completion"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:291
-#: admin-app/src/routes/Recommendations.tsx:503
+#: admin-app/src/routes/Recommendations.tsx:287
 msgid "Expected impact"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:303
+#: admin-app/src/routes/Recommendations.tsx:299
 msgid "Expected profit"
 msgstr ""
 
@@ -1584,7 +1577,7 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:79
 #: admin-app/src/routes/CampaignBuilder.tsx:41
 #: admin-app/src/routes/Goals.tsx:46
-#: admin-app/src/routes/Recommendations.tsx:39
+#: admin-app/src/routes/Recommendations.tsx:38
 #: admin-app/src/templates/rewardLabel.ts:10
 #: includes/Frontend/ProgressUI.php:876
 #: includes/Goals/MessageEngine.php:290
@@ -1596,7 +1589,7 @@ msgstr ""
 #: admin-app/src/routes/Appearance.tsx:84
 #: admin-app/src/routes/CampaignBuilder.tsx:42
 #: admin-app/src/routes/Goals.tsx:47
-#: admin-app/src/routes/Recommendations.tsx:40
+#: admin-app/src/routes/Recommendations.tsx:39
 #: admin-app/src/templates/rewardLabel.ts:11
 #: includes/Frontend/ProgressUI.php:877
 #: includes/Goals/MessageEngine.php:300
@@ -1609,7 +1602,7 @@ msgstr ""
 #: admin-app/src/routes/Appearance.tsx:75
 #: admin-app/src/routes/CampaignBuilder.tsx:39
 #: admin-app/src/routes/Goals.tsx:44
-#: admin-app/src/routes/Recommendations.tsx:37
+#: admin-app/src/routes/Recommendations.tsx:36
 #: admin-app/src/templates/rewardLabel.ts:8
 #: includes/Frontend/ProgressUI.php:874
 #: includes/Goals/MessageEngine.php:277
@@ -1775,7 +1768,7 @@ msgid "Goal reward"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:203
-#: admin-app/src/routes/Recommendations.tsx:619
+#: admin-app/src/routes/Recommendations.tsx:541
 msgid "Goal target updated."
 msgstr ""
 
@@ -1807,7 +1800,7 @@ msgid "Goals define what you want shoppers to reach — a cart amount, quantity,
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:116
-#: admin-app/src/routes/Recommendations.tsx:66
+#: admin-app/src/routes/Recommendations.tsx:60
 msgid "Good data"
 msgstr ""
 
@@ -1831,11 +1824,11 @@ msgstr ""
 msgid "Healthy stock levels."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:349
+#: admin-app/src/routes/Recommendations.tsx:345
 msgid "Hide details"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:319
+#: admin-app/src/routes/UpsellAnalytics.tsx:320
 msgid "Hide interaction details"
 msgstr ""
 
@@ -1848,7 +1841,7 @@ msgid "Hide the WordPress admin chrome and let the dashboard fill the whole brow
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:136
-#: admin-app/src/routes/Recommendations.tsx:55
+#: admin-app/src/routes/Recommendations.tsx:49
 msgid "High"
 msgstr ""
 
@@ -1872,7 +1865,7 @@ msgstr ""
 msgid "Historical upsell performance: %d impressions, %d orders (%s conversion)."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:173
+#: admin-app/src/routes/Recommendations.tsx:167
 msgid "History"
 msgstr ""
 
@@ -1940,11 +1933,11 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:976
 #: admin-app/src/routes/Analytics.tsx:1078
 #: admin-app/src/routes/GoalPerformance.tsx:444
-#: admin-app/src/routes/UpsellAnalytics.tsx:409
+#: admin-app/src/routes/UpsellAnalytics.tsx:410
 msgid "Impressions"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:637
+#: admin-app/src/routes/Recommendations.tsx:559
 msgid "Improve your Goals using store performance data — which target and reward configuration to use, and why."
 msgstr ""
 
@@ -2088,12 +2081,12 @@ msgstr ""
 msgid "Leave empty to apply to the whole cart."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:285
+#: admin-app/src/routes/UpsellAnalytics.tsx:286
 msgid "Limit"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:108
-#: admin-app/src/routes/Recommendations.tsx:71
+#: admin-app/src/routes/Recommendations.tsx:65
 msgid "Limited data"
 msgstr ""
 
@@ -2154,7 +2147,7 @@ msgid "Logging"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:141
-#: admin-app/src/routes/Recommendations.tsx:60
+#: admin-app/src/routes/Recommendations.tsx:54
 msgid "Low"
 msgstr ""
 
@@ -2175,11 +2168,11 @@ msgstr ""
 msgid "Makes every shipping rate free once the goal is reached. Zone/method-specific rules are configured in a later phase."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:715
+#: admin-app/src/routes/Recommendations.tsx:637
 msgid "Manage product costs"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:185
+#: admin-app/src/routes/Recommendations.tsx:181
 #: admin-app/src/routes/UpsellAnalytics.tsx:55
 msgid "Margin"
 msgstr ""
@@ -2196,16 +2189,16 @@ msgstr ""
 msgid "Measure purchases, sales and estimated profit — then optimize again."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:391
+#: admin-app/src/routes/Recommendations.tsx:387
 msgid "Median order value"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:180
+#: admin-app/src/routes/Recommendations.tsx:174
 msgid "Median ratio"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:139
-#: admin-app/src/routes/Recommendations.tsx:58
+#: admin-app/src/routes/Recommendations.tsx:52
 msgid "Medium"
 msgstr ""
 
@@ -2254,7 +2247,7 @@ msgid "Mobile behavior"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:112
-#: admin-app/src/routes/Recommendations.tsx:69
+#: admin-app/src/routes/Recommendations.tsx:63
 msgid "Moderate data"
 msgstr ""
 
@@ -2371,7 +2364,7 @@ msgstr ""
 msgid "No purchases yet"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:683
+#: admin-app/src/routes/Recommendations.tsx:605
 msgid "No recommendation available"
 msgstr ""
 
@@ -2405,19 +2398,19 @@ msgstr ""
 msgid "No templates are registered for this scope yet. Add one on the backend template registry."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:339
+#: admin-app/src/routes/UpsellAnalytics.tsx:340
 msgid "No upsell activity yet"
 msgstr ""
 
 #: admin-app/src/routes/Goals.tsx:71
-#: admin-app/src/routes/Recommendations.tsx:217
+#: admin-app/src/routes/Recommendations.tsx:213
 msgid "None"
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:99
 #: admin-app/src/routes/GoalPerformance.tsx:319
-#: admin-app/src/routes/Recommendations.tsx:206
-#: admin-app/src/routes/Recommendations.tsx:306
+#: admin-app/src/routes/Recommendations.tsx:202
+#: admin-app/src/routes/Recommendations.tsx:302
 msgid "Not available"
 msgstr ""
 
@@ -2430,7 +2423,7 @@ msgstr ""
 msgid "Not enough attributed order data yet."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:684
+#: admin-app/src/routes/Recommendations.tsx:606
 msgid "Not enough data for a reliable recommendation."
 msgstr ""
 
@@ -2577,11 +2570,11 @@ msgstr ""
 msgid "Order value distribution (share of orders)"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:403
+#: admin-app/src/routes/UpsellAnalytics.tsx:404
 msgid "Orders"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:399
+#: admin-app/src/routes/Recommendations.tsx:395
 msgid "Orders analyzed"
 msgstr ""
 
@@ -2734,7 +2727,7 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:1077
 #: admin-app/src/routes/Goals.tsx:56
 #: admin-app/src/routes/UpsellAnalytics.tsx:115
-#: admin-app/src/routes/UpsellAnalytics.tsx:402
+#: admin-app/src/routes/UpsellAnalytics.tsx:403
 msgid "Product"
 msgstr ""
 
@@ -2773,7 +2766,7 @@ msgstr ""
 
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:164
 #: admin-app/src/components/goal-builder/TargetFields.tsx:144
-#: admin-app/src/routes/UpsellAnalytics.tsx:359
+#: admin-app/src/routes/UpsellAnalytics.tsx:360
 msgid "Products"
 msgstr ""
 
@@ -2785,7 +2778,7 @@ msgstr ""
 msgid "Products recommended to customers who were working toward this goal."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:727
+#: admin-app/src/routes/Recommendations.tsx:651
 msgid "Profit estimates need product cost data. Add product costs on your products to enable Goal economics."
 msgstr ""
 
@@ -2836,7 +2829,7 @@ msgid "Purchase conversion"
 msgstr ""
 
 #: admin-app/src/components/revenue/FunnelVisual.tsx:130
-#: admin-app/src/routes/Recommendations.tsx:224
+#: admin-app/src/routes/Recommendations.tsx:220
 msgid "Purchase rate"
 msgstr ""
 
@@ -2856,7 +2849,7 @@ msgstr ""
 #: admin-app/src/routes/RevenueOverview.tsx:200
 #: admin-app/src/routes/RevenueOverview.tsx:398
 #: admin-app/src/routes/RevenueOverview.tsx:519
-#: admin-app/src/routes/UpsellAnalytics.tsx:369
+#: admin-app/src/routes/UpsellAnalytics.tsx:370
 msgid "Purchased Orders"
 msgstr ""
 
@@ -2882,10 +2875,6 @@ msgstr ""
 #: admin-app/src/components/goal-builder/goalTypes.tsx:33
 #: admin-app/src/routes/Goals.tsx:53
 msgid "Quantity"
-msgstr ""
-
-#: admin-app/src/routes/Recommendations.tsx:745
-msgid "Ranked candidates"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:924
@@ -2928,15 +2917,15 @@ msgstr ""
 msgid "Reach an amount or quantity of specific products."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:182
+#: admin-app/src/routes/Recommendations.tsx:176
 msgid "Reach share"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:170
+#: admin-app/src/routes/Recommendations.tsx:164
 msgid "Reachability"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:150
+#: admin-app/src/routes/Recommendations.tsx:144
 msgid "Reachable orders"
 msgstr ""
 
@@ -2951,15 +2940,15 @@ msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:61
 #: admin-app/src/routes/GoalPerformance.tsx:218
-#: admin-app/src/routes/Recommendations.tsx:636
+#: admin-app/src/routes/Recommendations.tsx:558
 msgid "Recommendations"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:644
+#: admin-app/src/routes/Recommendations.tsx:566
 msgid "Recommendations helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:272
+#: admin-app/src/routes/Recommendations.tsx:268
 msgid "Recommended Goal Target"
 msgstr ""
 
@@ -3030,7 +3019,7 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:498
 #: admin-app/src/routes/GoalBuilder.tsx:358
 #: admin-app/src/routes/Goals.tsx:264
-#: admin-app/src/routes/Recommendations.tsx:216
+#: admin-app/src/routes/Recommendations.tsx:212
 msgid "Reward"
 msgstr ""
 
@@ -3047,7 +3036,7 @@ msgid "Reward label"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:104
-#: admin-app/src/routes/Recommendations.tsx:653
+#: admin-app/src/routes/Recommendations.tsx:575
 msgid "Reward type"
 msgstr ""
 
@@ -3076,8 +3065,8 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:191
 #: admin-app/src/routes/GoalPerformance.tsx:93
-#: admin-app/src/routes/UpsellAnalytics.tsx:379
-#: admin-app/src/routes/UpsellAnalytics.tsx:404
+#: admin-app/src/routes/UpsellAnalytics.tsx:380
+#: admin-app/src/routes/UpsellAnalytics.tsx:405
 msgid "Sales"
 msgstr ""
 
@@ -3149,8 +3138,8 @@ msgstr ""
 msgid "Schedule & priority"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:139
-#: admin-app/src/routes/UpsellAnalytics.tsx:414
+#: admin-app/src/routes/Recommendations.tsx:133
+#: admin-app/src/routes/UpsellAnalytics.tsx:415
 msgid "Score"
 msgstr ""
 
@@ -3158,7 +3147,7 @@ msgstr ""
 msgid "Score breakdown"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:160
+#: admin-app/src/routes/Recommendations.tsx:154
 msgid "Scoring factors"
 msgstr ""
 
@@ -3182,11 +3171,11 @@ msgstr ""
 msgid "Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:356
+#: admin-app/src/routes/Recommendations.tsx:352
 msgid "Select a goal above to enable applying."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:613
+#: admin-app/src/routes/Recommendations.tsx:535
 msgid "Select a goal to apply the recommendation to."
 msgstr ""
 
@@ -3198,7 +3187,7 @@ msgstr ""
 msgid "Sessions"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:786
+#: admin-app/src/routes/Recommendations.tsx:690
 msgid "Set the goal target to %s?"
 msgstr ""
 
@@ -3259,7 +3248,7 @@ msgstr ""
 msgid "Show cart goals, progress and rewards (Goal Cart)."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:319
+#: admin-app/src/routes/UpsellAnalytics.tsx:320
 msgid "Show interaction details"
 msgstr ""
 
@@ -3321,7 +3310,7 @@ msgstr ""
 msgid "Show the target labels"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:734
+#: admin-app/src/routes/Recommendations.tsx:658
 msgid "Show the top recommendation again"
 msgstr ""
 
@@ -3390,7 +3379,7 @@ msgstr ""
 msgid "Something went wrong"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:303
+#: admin-app/src/routes/UpsellAnalytics.tsx:304
 msgid "Sort products"
 msgstr ""
 
@@ -3722,7 +3711,7 @@ msgstr ""
 msgid "These products never count toward the goal, even when they would otherwise qualify."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:790
+#: admin-app/src/routes/Recommendations.tsx:694
 msgid "This changes a production goal — the action is not reversible from here."
 msgstr ""
 
@@ -3748,10 +3737,6 @@ msgstr ""
 
 #: includes/Analytics/GoalRecommendationEngine.php:680
 msgid "This threshold is %s above the median order value (%s)."
-msgstr ""
-
-#: admin-app/src/routes/Recommendations.tsx:495
-msgid "Threshold"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:28
@@ -3796,7 +3781,7 @@ msgstr ""
 msgid "Top performing"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:265
+#: admin-app/src/routes/Recommendations.tsx:261
 msgid "Top recommendation"
 msgstr ""
 
@@ -3880,7 +3865,7 @@ msgstr ""
 msgid "Updating…"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:340
+#: admin-app/src/routes/UpsellAnalytics.tsx:341
 msgid "Upsell impressions and orders are recorded once the storefront reports them. Widen the date range or check that tracking is enabled."
 msgstr ""
 
@@ -3888,17 +3873,17 @@ msgstr ""
 msgid "Upsell-assisted"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:230
+#: admin-app/src/routes/Recommendations.tsx:226
 msgid "Upsell-assisted completions"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:62
 #: admin-app/src/routes/GoalPerformance.tsx:439
-#: admin-app/src/routes/UpsellAnalytics.tsx:276
+#: admin-app/src/routes/UpsellAnalytics.tsx:277
 msgid "Upsells"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:277
+#: admin-app/src/routes/UpsellAnalytics.tsx:278
 msgid "Upsells shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product."
 msgstr ""
 
@@ -3919,7 +3904,7 @@ msgstr ""
 msgid "Variation falls back to its parent product"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:349
+#: admin-app/src/routes/Recommendations.tsx:345
 msgid "View details"
 msgstr ""
 
@@ -4024,12 +4009,11 @@ msgid "Why this product"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:251
-#: admin-app/src/routes/Recommendations.tsx:319
-#: admin-app/src/routes/Recommendations.tsx:537
+#: admin-app/src/routes/Recommendations.tsx:315
 msgid "Why?"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:407
+#: admin-app/src/routes/Recommendations.tsx:403
 msgid "Window"
 msgstr ""
 
@@ -4092,8 +4076,7 @@ msgstr ""
 msgid "almost exactly"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:297
-#: admin-app/src/routes/Recommendations.tsx:509
+#: admin-app/src/routes/Recommendations.tsx:293
 msgid "average basket value"
 msgstr ""
 

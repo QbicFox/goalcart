@@ -322,6 +322,16 @@ try {
 	check( 'candidates ranked by score desc, scores and confidence bounded', $sorted );
 	check( 'top candidate is the recommendation', $rec['recommendation']['threshold'] === $rec['candidates'][0]['threshold'] );
 
+	// The single best recommendation must be the highest-scored candidate —
+	// not merely the first one generated (generation order is threshold
+	// order, which never equals score order in general). Proves the
+	// deterministic score-desc ranking picks the true best.
+	$top_score = (float) $rec['recommendation']['score'];
+	$max_score = max( array_map( function ( $c ) {
+		return (float) $c['score'];
+	}, $rec['candidates'] ) );
+	check( 'recommendation is the highest-scored candidate (best, not first)', close( $top_score, $max_score ) );
+
 	$top = $rec['recommendation'];
 	check( 'every candidate exposes scoring factors', isset( $top['factors']['reachability_score'], $top['factors']['distance_score'], $top['factors']['economics_score'], $top['factors']['history_score'] ) );
 	check( 'every candidate exposes plain-English reasons', is_array( $top['reasons'] ) && count( $top['reasons'] ) >= 2 );

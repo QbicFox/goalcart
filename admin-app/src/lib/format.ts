@@ -32,16 +32,29 @@ export function formatNumber(value: number): string {
   }
 }
 
-/** Format a 0–1 rate as a percentage string (e.g. 0.231 → "23.1%"). */
-export function formatPercent(value: number): string {
+/**
+ * Format a 0–1 rate as a percentage string (e.g. 0.231 → "23.1%").
+ *
+ * Non-finite / missing inputs render as "—" (an undefined ratio is not
+ * 0%) so a 0 denominator or an absent value can never surface as
+ * "NaN%" / "Infinity%" anywhere in the admin (UICHANGES.md §33).
+ */
+export function formatPercent(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return '—';
+  }
   return `${(value * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
 }
 
 /**
  * Format an already-percentage number (e.g. 12.5 → "12.5%").
  * Use for backend values that are percentage points (0–100), not rates.
+ * Non-finite / missing inputs render as "—" like `formatPercent`.
  */
-export function formatPercentValue(value: number): string {
+export function formatPercentValue(value: number | null | undefined): string {
+  if (value === null || value === undefined || !Number.isFinite(value)) {
+    return '—';
+  }
   return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
 }
 

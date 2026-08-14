@@ -1,5 +1,4 @@
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 import Alert from '@mui/material/Alert';
@@ -40,11 +39,6 @@ const REWARD_OPTIONS: Array<{ value: string; label: string }> = [
   { value: 'free_gift', label: __('Free gift', 'goalcart') },
   { value: 'coupon', label: __('Coupon', 'goalcart') },
 ];
-
-/** Distribution bucket label (AOV-relative ranges from the engine). */
-function formatBucket(key: string): string {
-  return key.replace('_', '–').replace('>', '> ').replace('<', '< ');
-}
 
 /**
  * Business-friendly confidence label (Improvement.md §33 — the raw 0–100
@@ -117,8 +111,8 @@ function Factor({ label, value }: { label: string; value: string }) {
 /**
  * The raw scoring detail block (Improvement.md §33 — score, component
  * scores, ratios and availability flags). Only rendered inside the
- * "Advanced details" expander of the top card and candidate rows — never
- * as the primary experience.
+ * "Advanced details" expander of the top recommendation card — never as
+ * the primary experience.
  */
 function AdvancedDetails({ candidate }: { candidate: RecommendationCandidate }) {
   const factors = candidate.factors;
@@ -181,8 +175,10 @@ function AdvancedDetails({ candidate }: { candidate: RecommendationCandidate }) 
           )}
           <Factor label={__('Reach share', 'goalcart')} value={formatPercent(factors.reach_share)} />
           <Factor label={__('Already at share', 'goalcart')} value={formatPercent(factors.already_at_share)} />
+          {/* margin_pct is a 0–1 rate (e.g. 0.6 = 60%) — formatPercent
+              multiplies by 100; formatPercentValue would print "0.6%". */}
           {factors.margin_pct !== null && (
-            <Factor label={__('Margin', 'goalcart')} value={formatPercentValue(factors.margin_pct)} />
+            <Factor label={__('Margin', 'goalcart')} value={formatPercent(factors.margin_pct)} />
           )}
         </Box>
       </Box>
@@ -430,7 +426,9 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
               {__('Avg. margin', 'goalcart')}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
-              {formatPercent(data.margin.average_margin_pct ?? 0)}
+              {/* average_margin_pct is a 0–1 rate; the formatter renders
+                  null as "—" (never a fabricated 0%). */}
+              {formatPercent(data.margin.average_margin_pct)}
             </Typography>
           </Stack>
         )}
@@ -444,23 +442,25 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
         </Stack>
       </Box>
 
-      {/* Order distribution */}
+      {/* Order distribution — the engine sends an array of buckets with a
+          0–1 `share` rate each; render the bucket's translated label and
+          the share as a real percentage (never NaN on a 0-denominator). */}
       <Box sx={{ mt: 2 }}>
         <Typography variant="caption" color="text.secondary">
           {__('Order value distribution (share of orders)', 'goalcart')}
         </Typography>
         <Stack spacing={0.75} sx={{ mt: 1 }}>
-          {Object.entries(data.distribution).map(([bucket, share]) => (
-            <Box key={bucket}>
+          {data.distribution.map((bucket) => (
+            <Box key={bucket.label}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
-                <Typography variant="caption">{formatBucket(bucket)}</Typography>
+                <Typography variant="caption">{bucket.label}</Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {formatPercent(share)}
+                  {formatPercent(bucket.share)}
                 </Typography>
               </Box>
               <LinearProgress
                 variant="determinate"
-                value={Math.min(100, share * 100)}
+                value={Math.min(100, Math.max(0, bucket.share * 100))}
                 sx={{ height: 5, borderRadius: 3 }}
               />
             </Box>
@@ -471,103 +471,26 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
   );
 }
 
-/** One ranked candidate — threshold + impact + confidence, details hidden. */
-function CandidateRow({
-  candidate,
-  goalId,
-  expanded,
-  onToggle,
-  onApply,
-}: {
-  candidate: RecommendationCandidate;
-  goalId: number;
-  expanded: boolean;
-  onToggle: () => void;
-  onApply: (candidate: RecommendationCandidate) => void;
-}) {
-  const tier = confidenceTier(candidate.confidence);
-
-  return (
-    <Paper variant="outlined" sx={{ p: 1.5 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-        <Box sx={{ minWidth: 150 }}>
-          <Typography variant="body2" color="text.secondary">
-            {__('Threshold', 'goalcart')}
-          </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 600 }}>
-            {formatCurrency(candidate.threshold)}
-          </Typography>
-        </Box>
-        <Box sx={{ minWidth: 180 }}>
-          <Typography variant="body2" color="text.secondary">
-            {__('Expected impact', 'goalcart')}
-          </Typography>
-          <Typography variant="body1" sx={{ fontWeight: 600 }}>
-            +{formatPercentValue(candidate.expected_aov_impact.low)} – +{formatPercentValue(candidate.expected_aov_impact.high)}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {__('average basket value', 'goalcart')}
-          </Typography>
-        </Box>
-        <Chip
-          size="small"
-          variant="outlined"
-          color={tier.color}
-          icon={tier.icon}
-          label={`${__('Confidence', 'goalcart')}: ${tier.label}`}
-        />
-        <Box sx={{ flexGrow: 1 }} />
-        <Button
-          size="small"
-          variant="outlined"
-          endIcon={<ExpandMoreIcon sx={{ transform: expanded ? 'rotate(180deg)' : 'none' }} />}
-          onClick={onToggle}
-          aria-expanded={expanded}
-        >
-          {__('Details', 'goalcart')}
-        </Button>
-        <Button size="small" variant="contained" disabled={goalId < 1} onClick={() => onApply(candidate)}>
-          {__('Apply', 'goalcart')}
-        </Button>
-      </Box>
-      <Collapse in={expanded} timeout="auto" unmountOnExit>
-        <Box sx={{ mt: 1.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
-          <Box sx={{ mb: 1.5 }}>
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {__('Why?', 'goalcart')}
-            </Typography>
-            <Stack spacing={0.5} sx={{ mt: 0.5 }}>
-              {candidate.reasons.map((reason, index) => (
-                <Typography key={`${reason}-${index}`} variant="body2" color="text.secondary">
-                  • {reason}
-                </Typography>
-              ))}
-            </Stack>
-          </Box>
-          <AdvancedDetails candidate={candidate} />
-        </Box>
-      </Collapse>
-    </Paper>
-  );
-}
-
 /**
  * Recommendations (Phase 33.4 engine — UPSELL_REFACTOR §4/§5/§8;
  * UICHANGES.md §40 label).
  *
  * The admin-facing surface that answers "what Goal configuration should
  * I use?" — the `GET /goalcart/v1/revenue/goal-recommendations` payload:
- * analyzed store data, ranked candidate thresholds with score/confidence/
- * expected impact/reasons, and the top recommendation. It recommends Goal
- * targets and reward economics only — never products (product
- * recommendations belong to Upsells, §11/§59). The primary card answers
+ * analyzed store data plus the single best recommendation. The backend
+ * engine generates and ranks every eligible candidate deterministically
+ * (score desc, ties → lower threshold) and returns the best one as
+ * `recommendation`; this page renders ONLY that one — never a list of
+ * competing candidates (UICHANGES.md Best-Recommendation UX). It
+ * recommends Goal targets and reward economics only — never products
+ * (product recommendations belong to Upsells, §11/§59). The card answers
  * "what threshold should I use and why?" (§9: Current Goal → Recommended
  * Goal → Why?), the raw scoring details live behind the Advanced details
  * expander, and an unavailable expected profit explains how to enable it
- * (§24). Applying a recommendation is always an explicit admin action
- * (ConfirmDialog → the dedicated apply endpoint, which changes only the
- * goal target and records the feedback-loop event) — the engine itself
- * never modifies a goal (§10/§41).
+ * (§24). Applying is always an explicit admin action (ConfirmDialog → the
+ * dedicated apply endpoint, which changes only the goal target and
+ * records the feedback-loop event) — the engine itself never modifies a
+ * goal (§10/§41).
  */
 export default function Recommendations() {
   const { range } = useDateRange();
@@ -576,7 +499,6 @@ export default function Recommendations() {
 
   const [goalId, setGoalId] = useState<number>(0);
   const [rewardType, setRewardType] = useState<string>('');
-  const [expandedCandidate, setExpandedCandidate] = useState<number | null>(null);
   const [applyTarget, setApplyTarget] = useState<RecommendationCandidate | null>(null);
   const [topDismissed, setTopDismissed] = useState<boolean>(false);
   const [showTopDetails, setShowTopDetails] = useState<boolean>(false);
@@ -722,7 +644,9 @@ export default function Recommendations() {
                     __('Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Goal economics.', 'goalcart'),
                     formatNumber(coverage.product_coverage.products_with_cost),
                     formatNumber(coverage.product_coverage.total_products),
-                    formatPercentValue(coverage.product_coverage.coverage_pct / 100)
+                    // coverage_pct is already a 0–100 percentage point value
+                    // (never divide by 100 and print as a 0–1 rate).
+                    formatPercentValue(coverage.product_coverage.coverage_pct)
                   )
                 : __('Profit estimates need product cost data. Add product costs on your products to enable Goal economics.', 'goalcart')}
             </Alert>
@@ -738,26 +662,6 @@ export default function Recommendations() {
           {/* Analyzed store data — the context behind the "why". */}
           <AnalyzedData payload={payload} />
 
-          {/* Ranked candidates — simplified rows, details behind an expander. */}
-          {payload.candidates.length > 0 && (
-            <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="h6" component="h3" gutterBottom>
-                {__('Ranked candidates', 'goalcart')}
-              </Typography>
-              <Stack spacing={1.5}>
-                {payload.candidates.map((candidate, index) => (
-                  <CandidateRow
-                    key={candidate.threshold}
-                    candidate={candidate}
-                    goalId={goalId}
-                    expanded={expandedCandidate === index}
-                    onToggle={() => setExpandedCandidate(expandedCandidate === index ? null : index)}
-                    onApply={handleApply}
-                  />
-                ))}
-              </Stack>
-            </Paper>
-          )}
         </>
       ) : null}
 

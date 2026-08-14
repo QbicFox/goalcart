@@ -576,6 +576,30 @@ check( 'recommendations page hides raw scoring behind Advanced details', false !
 check( 'recommendations page no longer leads with the raw confidence percent', false === strpos( $recommendations_tsx, 'formatPercent(top.confidence / 100)' ) && false === strpos( $recommendations_tsx, 'formatPercent(candidate.confidence / 100)' ) );
 check( 'recommendations page keeps the explicit apply + dismiss flow', false !== strpos( $recommendations_tsx, "__('Apply recommendation', 'goalcart')" ) && false !== strpos( $recommendations_tsx, "__('Dismiss', 'goalcart')" ) && false !== strpos( $recommendations_tsx, 'ConfirmDialog' ) );
 
+// UICHANGES.md Best-Recommendation UX: the page renders ONLY the single
+// backend-ranked best recommendation (`payload.recommendation`), never the
+// full ranked-candidate list. The backend still generates + ranks every
+// candidate deterministically and returns them in the API payload; the
+// UI simply never renders the list. Source-scanned so a "Ranked
+// candidates" list cannot silently reappear.
+check( 'recommendations page renders the top recommendation card', false !== strpos( $recommendations_tsx, '<TopRecommendationCard' ) );
+check( 'recommendations page never renders the ranked-candidate list', false === strpos( $recommendations_tsx, 'Ranked candidates' ) && false === strpos( $recommendations_tsx, 'candidates.map' ) && false === strpos( $recommendations_tsx, 'CandidateRow' ) );
+check( 'recommendations page relies on the backend best (payload.recommendation)', false !== strpos( $recommendations_tsx, 'const top = payload?.recommendation' ) );
+check( 'recommendations page keeps an empty state when no recommendation exists', false !== strpos( $recommendations_tsx, "__('No recommendation available', 'goalcart')" ) );
+
+// Percentage safety in the analyzed-store-data section: the order-value
+// distribution is an array of buckets with a 0-1 share each (formatted
+// with formatPercent), never a Record<string, number> that renders
+// NaN%. The margin factor (a 0-1 rate) and coverage (0-100 points) use
+// the correct formatters — no division-by-100, no object arithmetic.
+$format_src = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/lib/format.ts' );
+check( 'formatPercent guards non-finite/missing values with an em dash', false !== strpos( $format_src, '!Number.isFinite(value)' ) && false !== strpos( $format_src, "return '—'" ) );
+check( 'formatPercentValue guards non-finite/missing values too', false !== strpos( $format_src, 'export function formatPercentValue(value: number | null | undefined)' ) );
+check( 'distribution renders each bucket label + share, not Object.entries', false !== strpos( $recommendations_tsx, 'data.distribution.map((bucket)' ) && false === strpos( $recommendations_tsx, 'Object.entries(data.distribution)' ) && false === strpos( $recommendations_tsx, 'formatBucket' ) );
+check( 'distribution share formatted as a 0-1 rate percentage', false !== strpos( $recommendations_tsx, 'formatPercent(bucket.share)' ) );
+check( 'margin factor uses the 0-1 rate formatter (formatPercent)', false !== strpos( $recommendations_tsx, "formatPercent(factors.margin_pct)" ) );
+check( 'coverage percentage is not divided by 100', false !== strpos( $recommendations_tsx, 'formatPercentValue(coverage.product_coverage.coverage_pct)' ) && false === strpos( $recommendations_tsx, 'coverage_pct / 100' ) );
+
 // ---------------------------------------------------------------------------
 // 12. Upsell Analytics presentation (Improvement.md Phase 8 / §35)
 // ---------------------------------------------------------------------------

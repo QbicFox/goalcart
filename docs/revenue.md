@@ -542,30 +542,39 @@ The Phase 33.4 payload rendered with the simplified presentation
 (`Improvement.md` §33–§34 / `UICHANGES.md` §40) — the same engine, the
 same endpoint, a business-first layout:
 
-- **Top recommendation card** — the recommended goal target up front,
-  a **"Confidence: High / Medium / Low"** label (tiered from the raw
-  0–100 score, which stays hidden), the **expected impact** as
-  "+8% – +14% average basket value", the expected profit with the §34
-  unavailable state ("Not available — add product cost data to estimate
-  profitability", never a guessed number), and the plain-English
-  **"Why?"** bullets directly on the card. The raw scoring details
-  (score, component scores, AOV/median ratios, reach shares, reward
-  cost) live behind an **Advanced details** expander.
+- **Single best recommendation** — the engine still generates and ranks
+  every eligible candidate deterministically (score desc, ties → lower
+  threshold) and the payload still carries `candidates[]` plus the
+  selected `recommendation` (= `scored[0]`, the best); the page renders
+  **only that one** — never a list of competing candidates. The card
+  shows the recommended goal target up front, a **"Confidence: High /
+  Medium / Low"** label (tiered from the raw 0–100 score, which stays
+  hidden), the **expected impact** as "+8% – +14% average basket value",
+  the expected profit with the §34 unavailable state ("Not available —
+  add product cost data to estimate profitability", never a guessed
+  number), and the plain-English **"Why?"** bullets directly on the
+  card. The raw scoring details (score, component scores, AOV/median
+  ratios, reach shares, reward cost) live behind an **Advanced details**
+  expander.
 - **Analyzed store data** — AOV, median, orders analyzed, window,
   shipping/margin availability and a business-language data-sufficiency
   label (Limited / Moderate / Good data), plus the order-value
-  distribution bars.
-- **Ranked candidates** — one row per threshold with its expected
-  impact and confidence label; the score bar, reasons and reward cost
-  are behind the row's Details expander.
-- **Apply / View details / Dismiss** on the top card. **Apply** now goes
-  through the dedicated `POST /revenue/goal-recommendations/apply`
-  endpoint (confirm dialog → one `goal_id` + `threshold` write — the
-  engine never modifies a goal, P33-53), which records the
-  `recommendation_applied` feedback-loop event and invalidates the
-  revenue caches. The selected goal's own current performance (its
-  funnel + `upsell_assisted` completion count from
-  `goal_history`) is shown on the card.
+  distribution bars. Every percentage is mathematically valid: the
+  distribution is rendered bucket-by-bucket from the engine's
+  `share` rates (never `Object.entries()` over the array — that was the
+  `NaN%` bug), the margin factor formats its 0–1 rate with
+  `formatPercent` (not `formatPercentValue`), the coverage percentage
+  is used as 0–100 points (never divided by 100), and the shared
+  `formatPercent` / `formatPercentValue` formatters render
+  non-finite / missing inputs as "—" so a 0 denominator can never
+  surface as `NaN%` / `Infinity%` anywhere.
+- **Apply / View details / Dismiss** on the card. **Apply** goes through
+  the dedicated `POST /revenue/goal-recommendations/apply` endpoint
+  (confirm dialog → one `goal_id` + `threshold` write — the engine never
+  modifies a goal, P33-53), which records the `recommendation_applied`
+  feedback-loop event and invalidates the revenue caches. The selected
+  goal's own current performance (its funnel + `upsell_assisted`
+  completion count from `goal_history`) is shown on the card.
 - **Product-cost coverage** — a banner ties the Profit estimates to the
   catalog coverage (`GET /revenue/cost-coverage`: "x / y products carry
   cost data"), so "Not available" is explained instead of appearing

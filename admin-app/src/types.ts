@@ -985,12 +985,27 @@ export interface RecommendationGoalHistory {
   upsell_assisted: number;
 }
 
+/**
+ * One AOV-relative order-value distribution bucket
+ * (GoalRecommendationEngine::distribution()): `share` is a 0–1 rate of
+ * orders in this bucket (never a raw percentage), `min`/`max` are the
+ * bucket edges in store currency (null for the open-ended outer buckets).
+ */
+export interface DistributionBucket {
+  /** Translated bucket label (e.g. "< 0.5× AOV"). */
+  label: string;
+  min: number | null;
+  max: number | null;
+  count: number;
+  share: number;
+}
+
 /** The analyzed store data block of a goal recommendation. */
 export interface RecommendationData {
   aov: number;
   median: number;
   coefficient_of_variation: number;
-  distribution: Record<string, number>;
+  distribution: DistributionBucket[];
   shipping: {
     available: boolean;
     average_shipping: number | null;

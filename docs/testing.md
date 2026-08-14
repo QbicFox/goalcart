@@ -35,7 +35,7 @@ fails and needs attention.
 | cart-rest-initialization-test | 24 | cart REST init |
 | conflict-test | 57 | goal/campaign conflict resolution, rollback |
 | engine-test | 75 | goal engine evaluation |
-| frontend-test | 130 | storefront widget, templates, Phase 7–9 source-scan guards |
+| frontend-test | 140 | storefront widget, templates, Phase 7–9 source-scan guards, best-recommendation + percentage-safety guards |
 | i18n-test | 53 | POT ⇄ fa_IR sync, JED/MO build |
 | message-test | 50 | goal message engine |
 | performance-test | 38 | query/cache performance guardrails |
@@ -44,7 +44,7 @@ fails and needs attention.
 | preview-test | 90 | template previews |
 | profit-availability-test | 45 | cost sources, unavailable states |
 | purchase-metrics-test | 107 | funnel, purchase states, profit math, dedupe |
-| recommendation-test | 90 | goal-threshold recommendation engine |
+| recommendation-test | 91 | goal-threshold recommendation engine, best-recommendation ranking |
 | refactor-test | 81 | UPSELL_REFACTOR: product-cost field, order snapshots, coverage, apply endpoint, upsell-assisted completions, terminology (UICHANGES.md §30/§40 labels) |
 | rest-api-test | 142 | REST routes, duplicate/update/delete flows |
 | revenue-admin-test | 56 | admin payloads (overview/goals/analytics) |
