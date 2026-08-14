@@ -22,7 +22,8 @@ defined( 'ABSPATH' ) || exit;
  * from the store's historical orders, shipping stats and (when present)
  * product margins.
  *
- * Inputs (P33-16, all optional except the order window):
+ * Inputs (P33-16; the admin page requires goal_id, everything else is
+ * optional except the order window):
  *
  *  - AOV, median order value and the order-value distribution over a
  *    configurable window (7–180 days, default 90 — the spec's preferred
@@ -31,7 +32,8 @@ defined( 'ABSPATH' ) || exit;
  *  - product margins (sampled from the newest catalog products when the
  *    store stores cost data — never invented)
  *  - current goal performance (completion/conversion rates via the
- *    attribution funnel when a goal_id is supplied)
+ *    attribution funnel for the selected goal — the recommendation is
+ *    always scoped to that goal, never "all goals")
  *
  * Algorithm (P33-22): candidate thresholds are generated around the
  * current AOV (0.9×–1.5× per the spec's candidate inputs) plus
@@ -196,7 +198,10 @@ final class GoalRecommendationEngine {
 	 * Deterministic: the same store data always yields the same ranked
 	 * candidates. Never modifies a goal — the caller must apply explicitly.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, reward_type,
+	 * @param array<string, mixed> $args Optional: goal_id (required by the
+	 *                                   admin page — a supplied goal_id must
+	 *                                   resolve, otherwise the payload is
+	 *                                   unavailable), reward_type,
 	 *                                   reward_value, reward_max_value,
 	 *                                   reward_meta, window_days, from, to.
 	 * @return array<string, mixed> The recommendation payload.
@@ -205,6 +210,7 @@ final class GoalRecommendationEngine {
 		$unavailable = function ( $reason ) use ( $args ) {
 			return array(
 				'available'         => false,
+				'goal_id'           => ! empty( $args['goal_id'] ) ? (int) $args['goal_id'] : null,
 				'status'            => 'unavailable',
 				'insufficient_reason' => $reason,
 				'window_days'       => $this->window_days( $args ),
@@ -218,6 +224,18 @@ final class GoalRecommendationEngine {
 
 		if ( ! $this->enabled() ) {
 			return $unavailable( __( 'Smart goal recommendations are disabled.', 'goalcart' ) );
+		}
+
+		// Goal context (required by the admin Recommendations page): a
+		// supplied goal_id must resolve to an existing goal — never
+		// recommend for a goal that was deleted or archived after
+		// selection, and never fall back to a store-wide "all goals"
+		// context. Resolved early so an invalid goal fails before any
+		// order analysis runs.
+		$goal = $this->resolve_goal( $args );
+
+		if ( ! empty( $args['goal_id'] ) && null === $goal ) {
+			return $unavailable( __( 'The selected goal could not be found.', 'goalcart' ) );
 		}
 
 		// Resolve the analysis window (explicit range wins over window_days).
@@ -255,7 +273,6 @@ final class GoalRecommendationEngine {
 		$stats   = $this->order_statistics( $orders['totals'] );
 		$shipping = $this->engine->shipping_stats( $window );
 		$margin  = $this->margin_analyzer();
-		$goal    = $this->resolve_goal( $args );
 		$history = null !== $goal ? $this->goal_history( $goal->id(), $window ) : null;
 
 		// Reward config for economics: the goal's own when supplied, else a
@@ -313,6 +330,7 @@ final class GoalRecommendationEngine {
 
 		$payload = array(
 			'available'         => true,
+			'goal_id'           => null !== $goal ? (int) $goal->id() : null,
 			'status'            => $this->data_tier( $stats['count'] ),
 			'insufficient_reason' => null,
 			'window_days'       => $this->window_days( $args ),

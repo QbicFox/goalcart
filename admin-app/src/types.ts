@@ -1072,6 +1072,12 @@ export interface RecommendationCandidate {
  */
 export interface GoalRecommendationsPayload {
   available: boolean;
+  /**
+   * The goal the payload was computed for (null when unavailable). The
+   * page validates it against the selected goal before rendering — a
+   * recommendation can never belong to a different goal.
+   */
+  goal_id: number | null;
   status: string;
   insufficient_reason: string | null;
   window_days: number;

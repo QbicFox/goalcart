@@ -34,11 +34,14 @@ defined( 'ABSPATH' ) || exit;
  *    → performance can later be correlated), and invalidates the revenue
  *    caches. It never touches unrelated Goal settings.
  *
- * Optional GET args: goal_id (recommend for an existing goal — its reward
- * type and historical performance feed the scoring), reward_type (one of
- * the Reward::types() whitelist), reward_value / reward_max_value /
- * reward_meta (reward config for recommendations without an existing
- * goal), window_days (7–180, default 90), from / to (explicit date
+ * GET args: goal_id is REQUIRED (the admin Recommendations page always
+ * analyzes exactly one selected goal — the goal's reward type and
+ * historical performance feed the scoring, and a goal_id that no longer
+ * resolves is rejected instead of silently recommending for a deleted
+ * goal). Optional: reward_type (one of the Reward::types() whitelist),
+ * reward_value / reward_max_value / reward_meta (reward config override
+ * for advanced callers — the goal's own reward config is used when
+ * omitted), window_days (7–180, default 90), from / to (explicit date
  * range).
  *
  * Admin-only (manage_options) and rate limited per user like every other
@@ -219,6 +222,7 @@ class RecommendationsController extends BaseController {
 	 */
 	public function handle_get( $request ) {
 		$args = array(
+			// Required by the route schema; always ≥ 1 on this page.
 			'goal_id'          => (int) $request->get_param( 'goal_id' ),
 			'reward_type'      => (string) $request->get_param( 'reward_type' ),
 			'reward_value'     => $request->get_param( 'reward_value' ),
@@ -246,14 +250,19 @@ class RecommendationsController extends BaseController {
 	/**
 	 * Arg schema for the recommendation route.
 	 *
+	 * goal_id is required: recommendations are always computed for exactly
+	 * one selected goal (the admin page never requests an "all goals"
+	 * context).
+	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function recommendation_args() {
 		return array(
 			'goal_id'          => array(
-				'type'    => 'integer',
-				'default' => 0,
-				'minimum' => 0,
+				'required'          => true,
+				'type'              => 'integer',
+				'minimum'           => 1,
+				'sanitize_callback' => 'absint',
 			),
 			'reward_type'      => array(
 				'type'    => 'string',

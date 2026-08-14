@@ -1459,6 +1459,9 @@
             "Play a confetti burst when a goal is reached (Phase 32).": [
                 "هنگام رسیدن به هدف، کاغذرنگی بپاشید (فاز ۳۲)."
             ],
+            "Please select another goal.": [
+                "لطفاً یک هدف دیگر انتخاب کنید."
+            ],
             "Plugin version": [
                 "نسخهٔ افزونه"
             ],
@@ -1722,6 +1725,9 @@
             ],
             "Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront.": [
                 "یک محصول هدیه انتخاب کنید — بدون آن، هدیه هرگز به سبد خرید اضافه نمی‌شود و جایزه در فروشگاه در دسترس باقی نمی‌ماند."
+            ],
+            "Select a goal": [
+                "انتخاب هدف"
             ],
             "Select a goal above to enable applying.": [
                 "برای فعال شدن گزینهٔ اعمال، در بالا یک هدف انتخاب کنید."
@@ -2053,6 +2059,12 @@
             "The product could not be found.": [
                 "محصول یافت نشد."
             ],
+            "The selected goal could not be found": [
+                "هدف انتخاب‌شده پیدا نشد"
+            ],
+            "The selected goal could not be found.": [
+                "هدف انتخاب‌شده پیدا نشد."
+            ],
             "The stored default template is no longer registered. The storefront falls back to the Basic template until you pick another one here.": [
                 "قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا انتخاب قالب دیگری در اینجا، از قالب پایه استفاده می‌کند."
             ],
@@ -2091,6 +2103,9 @@
             ],
             "Title": [
                 "عنوان"
+            ],
+            "To see the best optimization recommendation for a goal, first choose one of your store goals.": [
+                "برای مشاهده بهترین پیشنهاد بهینه‌سازی برای یک هدف، ابتدا یکی از اهداف فروشگاه را انتخاب کنید."
             ],
             "Today": [
                 "امروز"

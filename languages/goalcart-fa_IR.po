@@ -2205,6 +2205,10 @@ msgstr "هدیهٔ رایگان خود را انتخاب کنید"
 msgid "Play a confetti burst when a goal is reached (Phase 32)."
 msgstr "هنگام رسیدن به هدف، کاغذرنگی بپاشید (فاز ۳۲)."
 
+#: admin-app/src/routes/Recommendations.tsx:612
+msgid "Please select another goal."
+msgstr "لطفاً یک هدف دیگر انتخاب کنید."
+
 #: admin-app/src/routes/Dashboard.tsx:135
 msgid "Plugin version"
 msgstr "نسخهٔ افزونه"
@@ -2600,6 +2604,11 @@ msgstr "جستجو…"
 #: admin-app/src/components/goal-builder/RewardFields.tsx:207
 msgid "Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront."
 msgstr "یک محصول هدیه انتخاب کنید — بدون آن، هدیه هرگز به سبد خرید اضافه نمی‌شود و جایزه در فروشگاه در دسترس باقی نمی‌ماند."
+
+#: admin-app/src/components/revenue/RevenueToolbar.tsx:58
+#: admin-app/src/routes/Recommendations.tsx:605
+msgid "Select a goal"
+msgstr "انتخاب هدف"
 
 #: admin-app/src/routes/Recommendations.tsx:362
 msgid "Select a goal above to enable applying."
@@ -3085,6 +3094,14 @@ msgstr "بارگذاری جزئیات محصول ممکن نشد."
 msgid "The product could not be found."
 msgstr "محصول یافت نشد."
 
+#: admin-app/src/routes/Recommendations.tsx:611
+msgid "The selected goal could not be found"
+msgstr "هدف انتخاب‌شده پیدا نشد"
+
+#: includes/Analytics/GoalRecommendationEngine.php:181
+msgid "The selected goal could not be found."
+msgstr "هدف انتخاب‌شده پیدا نشد."
+
 #: admin-app/src/routes/Appearance.tsx:567
 msgid "The stored default template is no longer registered. The storefront falls back to the Basic template until you pick another one here."
 msgstr "قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا انتخاب قالب دیگری در اینجا، از قالب پایه استفاده می‌کند."
@@ -3136,6 +3153,10 @@ msgstr "پنجشنبه"
 #: admin-app/src/components/goal-builder/DisplayFields.tsx:65
 msgid "Title"
 msgstr "عنوان"
+
+#: admin-app/src/routes/Recommendations.tsx:608
+msgid "To see the best optimization recommendation for a goal, first choose one of your store goals."
+msgstr "برای مشاهده بهترین پیشنهاد بهینه‌سازی برای یک هدف، ابتدا یکی از اهداف فروشگاه را انتخاب کنید."
 
 #: admin-app/src/date-range/dateRange.ts:74
 msgid "Today"

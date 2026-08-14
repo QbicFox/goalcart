@@ -317,11 +317,15 @@ layer — excluded without margin data.
 ## 4. API & caching
 
 - `GET /goalcart/v1/revenue/goal-recommendations` (admin-only) — args:
-  `goal_id`, `reward_type` (whitelist), `reward_value` /
-  `reward_max_value` / `reward_meta` (config for recommendations
-  without an existing goal), `window_days`, `from`, `to`. Returns the
-  analysis, the ranked candidates (score, confidence, expected impact,
-  reasons, factors) and the top `recommendation`.
+  `goal_id` (required — the Recommendations page always analyzes exactly
+  one selected goal, never an "all goals" context; a `goal_id` that no
+  longer resolves returns unavailable instead of silently recommending
+  for a deleted goal), `reward_type` (whitelist, optional), `reward_value`
+  / `reward_max_value` / `reward_meta` (reward config overrides for
+  advanced callers), `window_days`, `from`, `to`. Returns the analysis,
+  the ranked candidates (score, confidence, expected impact, reasons,
+  factors), the top `recommendation` and `goal_id` (so the UI can
+  validate the payload belongs to the selected goal).
 - `POST /goalcart/v1/revenue/goal-recommendations/apply` (admin-only,
   UPSELL_REFACTOR §10/§41) — the only write path: `goal_id` +
   `threshold` applies a chosen threshold to an existing goal (never any

@@ -9,11 +9,17 @@ import { fetchGoals } from '../../api/goals';
 import DateRangeFilter from '../date-range/DateRangeFilter';
 
 interface RevenueToolbarProps {
-  /** Currently selected goal id (0 = all goals). */
+  /** Currently selected goal id (0 = none / all goals). */
   goalId: number;
   onGoalChange: (goalId: number) => void;
   /** Hide the goal selector (pages that do not support goal filtering). */
   showGoal?: boolean;
+  /**
+   * Required-goal mode (Recommendations): hide the "All goals" option and
+   * show a "Select a goal" placeholder — a goal must be chosen before the
+   * page can do anything.
+   */
+  goalRequired?: boolean;
   /** Extra filter controls rendered after the goal selector. */
   children?: ReactNode;
 }
@@ -28,6 +34,7 @@ export default function RevenueToolbar({
   goalId,
   onGoalChange,
   showGoal = true,
+  goalRequired = false,
   children,
 }: RevenueToolbarProps) {
   const goalsQuery = useQuery({
@@ -53,7 +60,13 @@ export default function RevenueToolbar({
           value={goalId}
           onChange={(event) => onGoalChange(Number(event.target.value))}
         >
-          <MenuItem value={0}>{__('All goals', 'goalcart')}</MenuItem>
+          {goalRequired ? (
+            <MenuItem value={0} disabled>
+              {__('Select a goal', 'goalcart')}
+            </MenuItem>
+          ) : (
+            <MenuItem value={0}>{__('All goals', 'goalcart')}</MenuItem>
+          )}
           {(goalsQuery.data?.items ?? []).map((goal) => (
             <MenuItem key={goal.id} value={goal.id}>
               {goal.name}

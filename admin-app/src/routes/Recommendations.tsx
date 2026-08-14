@@ -8,16 +8,15 @@ import Chip from '@mui/material/Chip';
 import Collapse from '@mui/material/Collapse';
 import Divider from '@mui/material/Divider';
 import LinearProgress from '@mui/material/LinearProgress';
-import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
-import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
+import { fetchGoals } from '../api/goals';
 import { applyGoalRecommendation, fetchCostCoverage, fetchGoalRecommendations } from '../api/revenue';
 import { getBootData } from '../boot';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -29,16 +28,6 @@ import { useDateRange } from '../date-range/DateRangeContext';
 import { formatCurrency, formatNumber, formatPercent, formatPercentValue } from '../lib/format';
 import { REWARD_LABELS } from '../templates/rewardLabel';
 import type { CostCoveragePayload, GoalRecommendationsPayload, RecommendationCandidate, RecommendationGoalHistory } from '../types';
-
-/** Reward-type filter options (matches the analytics reward filter). */
-const REWARD_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: '', label: __('Auto (from goal)', 'goalcart') },
-  { value: 'free_shipping', label: __('Free shipping', 'goalcart') },
-  { value: 'percent_discount', label: __('% discount', 'goalcart') },
-  { value: 'fixed_discount', label: __('Fixed discount', 'goalcart') },
-  { value: 'free_gift', label: __('Free gift', 'goalcart') },
-  { value: 'coupon', label: __('Coupon', 'goalcart') },
-];
 
 /**
  * Business-friendly confidence label (Improvement.md §33 — the raw 0–100
@@ -235,6 +224,7 @@ function CurrentGoalBlock({ history }: { history: RecommendationGoalHistory | nu
 function TopRecommendationCard({
   candidate,
   goalId,
+  goalName,
   goalHistory,
   detailsOpen,
   onToggleDetails,
@@ -243,6 +233,8 @@ function TopRecommendationCard({
 }: {
   candidate: RecommendationCandidate;
   goalId: number;
+  /** The selected goal's name — makes it unmistakable which goal the card belongs to. */
+  goalName: string | null;
   goalHistory: RecommendationGoalHistory | null;
   detailsOpen: boolean;
   onToggleDetails: () => void;
@@ -261,6 +253,15 @@ function TopRecommendationCard({
         label={__('Top recommendation', 'goalcart')}
         sx={{ position: 'absolute', top: -12, insetInlineStart: 16 }}
       />
+      {goalName && (
+        <Chip
+          size="small"
+          variant="outlined"
+          color="primary"
+          label={goalName}
+          sx={{ position: 'absolute', top: -12, insetInlineEnd: 16 }}
+        />
+      )}
 
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'flex-end' }}>
         <Box sx={{ minWidth: 190 }}>
@@ -347,11 +348,6 @@ function TopRecommendationCard({
         <Button variant="text" color="inherit" onClick={onDismiss}>
           {__('Dismiss', 'goalcart')}
         </Button>
-        {goalId < 1 && (
-          <Typography variant="caption" color="text.secondary" sx={{ alignSelf: 'center' }}>
-            {__('Select a goal above to enable applying.', 'goalcart')}
-          </Typography>
-        )}
       </Stack>
     </Paper>
   );
@@ -491,28 +487,64 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
  * dedicated apply endpoint, which changes only the goal target and
  * records the feedback-loop event) — the engine itself never modifies a
  * goal (§10/§41).
+ *
+ * Goal selection is REQUIRED: the page opens with no goal selected and
+ * shows an instruction state (the API is not called, no fake loading),
+ * the admin picks exactly one goal, and the analysis runs only for that
+ * goal (`goal_id` is required by the endpoint and echoed back for
+ * ownership validation). There is no "all goals" mode and no reward-type
+ * filter — reward type stays part of each goal's data model, it is just
+ * never an independent page-level filter. Switching goals clears the
+ * previous goal's card before the new one loads, so a stale
+ * recommendation can never survive a goal change.
  */
 export default function Recommendations() {
   const { range } = useDateRange();
   const queryClient = useQueryClient();
   const { notify } = useSnackbar();
 
+  // Goal selection is REQUIRED (0 = no goal selected): the page never
+  // analyzes an "all goals" context and never picks a goal automatically.
   const [goalId, setGoalId] = useState<number>(0);
-  const [rewardType, setRewardType] = useState<string>('');
   const [applyTarget, setApplyTarget] = useState<RecommendationCandidate | null>(null);
   const [topDismissed, setTopDismissed] = useState<boolean>(false);
   const [showTopDetails, setShowTopDetails] = useState<boolean>(false);
 
+  // The store's goals (same query key RevenueToolbar uses, so it is a
+  // shared cache): validates that the selected goal still exists and
+  // supplies its name for the UI.
+  const goalsQuery = useQuery({
+    queryKey: ['goals', 'revenue-filter-options'],
+    queryFn: () => fetchGoals({ per_page: 100 }),
+  });
+
+  const selectedGoal = (goalsQuery.data?.items ?? []).find((goal) => goal.id === goalId) ?? null;
+
+  // A selected goal id that no longer exists (deleted/archived) is
+  // invalid — never show recommendations (or a fake loading state) for it.
+  const goalMissing = goalId > 0 && goalsQuery.isSuccess && selectedGoal === null;
+
+  const handleGoalChange = (nextGoalId: number) => {
+    setGoalId(nextGoalId);
+    // Clear every goal-scoped UI state so a previous goal's card, details
+    // or apply dialog can never linger while the new goal loads.
+    setTopDismissed(false);
+    setShowTopDetails(false);
+    setApplyTarget(null);
+  };
+
   const query = useQuery({
-    queryKey: ['revenue', 'recommendations', { from: range.from, to: range.to, goalId, rewardType }],
+    queryKey: ['revenue', 'recommendations', { from: range.from, to: range.to, goalId }],
     queryFn: () =>
       fetchGoalRecommendations({
         from: range.from,
         to: range.to,
-        goal_id: goalId || undefined,
-        reward_type: rewardType || undefined,
+        goal_id: goalId,
         window_days: 90,
       }),
+    // No recommendations without a selected goal: the API is not called
+    // (and no fake loading state shown) until a valid goal is chosen.
+    enabled: goalId > 0 && !goalMissing,
   });
 
   // Product-cost coverage (UPSELL_REFACTOR §24/§25/§26): when the store
@@ -528,6 +560,11 @@ export default function Recommendations() {
   const top = payload?.recommendation;
   const goalHistory = payload?.data?.goal_history ?? null;
   const coverage: CostCoveragePayload | undefined = coverageQuery.data;
+
+  // Ownership guard: a payload must belong to the selected goal — if the
+  // response's goal_id does not match, the recommendation is invalid and
+  // is never rendered.
+  const ownsGoal = payload ? payload.goal_id === goalId : false;
 
   const applyMutation = useMutation({
     mutationFn: async (target: number) => {
@@ -569,37 +606,35 @@ export default function Recommendations() {
         )}
       </Alert>
 
-      <RevenueToolbar goalId={goalId} onGoalChange={setGoalId}>
-        <TextField
-          select
-          label={__('Reward type', 'goalcart')}
-          size="small"
-          sx={{ minWidth: 170 }}
-          value={rewardType}
-          onChange={(event) => setRewardType(event.target.value)}
-        >
-          {REWARD_OPTIONS.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
-            </MenuItem>
-          ))}
-        </TextField>
-      </RevenueToolbar>
+      <RevenueToolbar goalId={goalId} onGoalChange={handleGoalChange} goalRequired />
 
-      {query.isError && (
+      {goalId < 1 ? (
+        <EmptyState
+          icon={<TipsAndUpdatesIcon fontSize="large" />}
+          title={__('Select a goal', 'goalcart')}
+          description={__(
+            'To see the best optimization recommendation for a goal, first choose one of your store goals.',
+            'goalcart'
+          )}
+        />
+      ) : goalMissing ? (
+        <EmptyState
+          icon={<TipsAndUpdatesIcon fontSize="large" />}
+          title={__('The selected goal could not be found', 'goalcart')}
+          description={__('Please select another goal.', 'goalcart')}
+        />
+      ) : query.isError ? (
         <Alert severity="error" variant="outlined">
           {query.error instanceof Error
             ? query.error.message
             : __('Could not load recommendations.', 'goalcart')}
         </Alert>
-      )}
-
-      {query.isLoading ? (
+      ) : query.isLoading ? (
         <Stack spacing={2}>
           <Skeleton variant="rounded" height={120} />
           <Skeleton variant="rounded" height={420} />
         </Stack>
-      ) : !payload ? null : !payload.available ? (
+      ) : !payload ? null : !payload.available || !ownsGoal ? (
         <EmptyState
           icon={<TipsAndUpdatesIcon fontSize="large" />}
           title={__('No recommendation available', 'goalcart')}
@@ -612,6 +647,7 @@ export default function Recommendations() {
             <TopRecommendationCard
               candidate={top}
               goalId={goalId}
+              goalName={selectedGoal?.name ?? null}
               goalHistory={goalHistory}
               detailsOpen={showTopDetails}
               onToggleDetails={() => setShowTopDetails((current) => !current)}
