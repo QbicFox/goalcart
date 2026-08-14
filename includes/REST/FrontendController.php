@@ -20,9 +20,9 @@ use GoalCart\Goals\MessageEngine;
 use GoalCart\Hooks\HookManager;
 use GoalCart\Rewards\Reward;
 use GoalCart\Rewards\RewardEngine;
+use GoalCart\Recommendations\ProductRecommendationEngine;
 use GoalCart\Rewards\RewardResult;
 use GoalCart\Settings\Settings;
-use GoalCart\Suggestions\SuggestionEngine;
 use GoalCart\Templates\TemplateEngine;
 
 defined( 'ABSPATH' ) || exit;
@@ -47,13 +47,15 @@ defined( 'ABSPATH' ) || exit;
  *    source of truth for the item shape above. It is consumed by this
  *    endpoint and by the Phase 15 PreviewController, so the admin preview
  *    and the storefront payload can never drift.
- *	 * Security (P07-T04): public by design — guests must be able to read their
-	 * own cart progress — so it requires no capability, returns only aggregate
-	 * numbers (no PII), and is rate limited per IP. Message copy is rendered
-	 * by the Phase 13 MessageEngine (state-aware, display-settings
-	 * overridable); suggestions come from the Phase 14 SuggestionEngine
-	 * (published, in-stock products only).
-	 */
+ * Security (P07-T04): public by design — guests must be able to read
+ * their own cart progress — so it requires no capability, returns only
+ * aggregate numbers (no PII), and is rate limited per IP. Message copy
+ * is rendered by the Phase 13 MessageEngine (state-aware,
+ * display-settings overridable); suggestions come from the unified
+ * product recommendation engine (Phase 14 SuggestionEngine + Phase
+ * 33.5 UpsellRanker merged into ONE ranked, deduplicated list —
+ * published, in-stock products only).
+ */
 class FrontendController extends BaseController {
 
 	/**
@@ -85,11 +87,13 @@ class FrontendController extends BaseController {
 	protected $messages;
 
 	/**
-	 * Suggestion engine instance (Phase 14: smart product suggestions).
+	 * Unified product recommendation engine (Phase 14 + Phase 33.5):
+	 * merges the suggestion and upsell strategies into ONE ranked,
+	 * deduplicated customer-facing list.
 	 *
-	 * @var SuggestionEngine
+	 * @var ProductRecommendationEngine
 	 */
-	protected $suggestions;
+	protected $recommendations;
 
 	/**
 	 * Settings instance (Phase 18: goal behavior, suggestions, caching).
@@ -134,17 +138,18 @@ class FrontendController extends BaseController {
 	 * @param GoalRepository    $goals           Goal repository.
 	 * @param CartIntegration   $cart_integration Cart snapshot service.
 	 * @param MessageEngine     $messages        Message template engine.
-	 * @param SuggestionEngine  $suggestions     Suggestion engine.
+	 * @param ProductRecommendationEngine $recommendations Unified recommendation
+	 *                                           engine (Phase 14 + Phase 33.5).
 	 * @param Settings          $settings        Settings service.
 	 * @param RewardEngine|null $reward_engine   Reward engine (Phase 26
 	 *                                           display/grant parity).
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, SuggestionEngine $suggestions, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null ) {
+	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, ProductRecommendationEngine $recommendations, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null ) {
 		$this->engine           = $engine;
 		$this->goals            = $goals;
 		$this->cart_integration = $cart_integration;
 		$this->messages         = $messages;
-		$this->suggestions      = $suggestions;
+		$this->recommendations  = $recommendations;
 		$this->settings         = $settings;
 		$this->reward_engine    = $reward_engine;
 		$this->templates        = $templates;
@@ -580,7 +585,7 @@ class FrontendController extends BaseController {
 			'state'        => $this->messages->state( $goal, $result ),
 			'message'      => $this->messages->message( $goal, $result, $extra ),
 			'reward'       => $this->reward( $goal, ! $full_reward_meta ),
-			'suggestions'  => $this->suggestions_on() ? $this->suggestions->suggest( $goal, $result, $context ) : array(),
+			'suggestions'  => $this->suggestions_on() ? $this->recommendations->recommend( $goal, $result, $context ) : array(),
 			'reward_state' => $result->reward_state(),
 			'eligible'     => $result->eligible(),
 			'reason'       => $result->reason(),

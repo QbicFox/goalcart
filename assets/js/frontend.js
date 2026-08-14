@@ -11,8 +11,12 @@
  *   ProgressBar      percentage fill bar
  *   GoalMessage      the goal's progress message
  *   RewardStatus     locked / unlocked reward chip
- *   SuggestionList   product suggestions (Phase 14: served by the
- *                     SuggestionEngine, price shown server-formatted)
+ *   UnifiedRecommendations  one customer-facing product block
+ *                     (Suggestions + Upsells consolidation: the payload
+ *                     carries the merged, deduplicated, ranked list
+ *                     from the ProductRecommendationEngine with per-row
+ *                     source attribution; a rank-endpoint fallback
+ *                     closes money-goal gaps)
  *   StickyGoalBar    fixed bottom bar (cart/checkout progress at a glance)
  *
  * Every eligible goal renders as its own card, stacked in a shared
@@ -468,35 +472,38 @@
 				} );
 			}
 
+			// Unified recommendations preserve source attribution in the
+			// existing funnels: suggestion-sourced items feed the Phase 16
+			// suggestion funnel, upsell-sourced items feed the Phase 33.5
+			// upsell funnel, and 'both' items feed both — one impression per
+			// goal + product per session per funnel, never duplicates.
 			if ( goal.suggestions && goal.suggestions.length ) {
 				for ( var j = 0; j < goal.suggestions.length; j++ ) {
-					var productId = String( goal.suggestions[ j ].id || 0 );
+					var item = goal.suggestions[ j ] || {};
+					var productId = String( item.product_id || item.id || 0 );
 					var key = goalId + ':' + productId;
+					var src = String( item.source || '' );
 
-					if ( productId && ! reportedSuggestionImpressions[ key ] ) {
+					if ( productId && ! reportedSuggestionImpressions[ key ] && ( src === 'suggestion' || src === 'both' ) ) {
 						reportedSuggestionImpressions[ key ] = true;
 						sendTrack( 'suggestion_impression', {
 							goal_id: goalId,
 							product_id: productId,
 						} );
 					}
+
+					if ( productId && ! reportedUpsellImpressions[ key ] && ( src === 'upsell' || src === 'both' ) ) {
+						reportedUpsellImpressions[ key ] = true;
+						sendUpsellTrack( 'upsell_impression', {
+							goal_id: goalId,
+							product_id: productId,
+							cart_value: Number( goal.current ) || 0,
+							source: src,
+						} );
+					}
 				}
 			}
 		}
-	}
-
-	/**
-	 * Report a suggestion click (Phase 16).
-	 *
-	 * @param {string} goalId    Goal id (data attribute, may be '').
-	 * @param {string} productId Product id (data attribute, may be '').
-	 * @return {void}
-	 */
-	function trackSuggestionClick( goalId, productId ) {
-		sendTrack( 'suggestion_clicked', {
-			goal_id: goalId || 0,
-			product_id: productId || 0,
-		} );
 	}
 
 	/**
@@ -798,49 +805,24 @@
 	}
 
 	/**
-	 * SuggestionList — products that help reach the goal.
+	 * The unified recommendation source for tracking.
 	 *
-	 * @param {Object} goal Progress goal entry.
-	 * @return {HTMLElement|null}
+	 * Payload items carry the merged source the backend preserved
+	 * ('suggestion' | 'upsell' | 'both'); rank-endpoint fallback items
+	 * carry the ranker's internal source keys and belong to the upsell
+	 * funnel in the unified experience.
+	 *
+	 * @param {Object} item Recommendation item.
+	 * @return {string} 'suggestion' | 'upsell' | 'both' | ''.
 	 */
-	function suggestionList( goal ) {
-		var items = ( goal.suggestions && goal.suggestions.length ) ? goal.suggestions : [];
+	function recommendationSource( item ) {
+		var src = String( ( item && item.source ) || '' );
 
-		if ( ! items.length ) {
-			return null;
+		if ( src === 'suggestion' || src === 'both' ) {
+			return src;
 		}
 
-		var list = el( 'ul', 'goalcart-suggestions' );
-
-		for ( var i = 0; i < items.length; i++ ) {
-			var item = items[ i ];
-			var li = el( 'li', 'goalcart-suggestion' );
-
-			if ( item.permalink && isSafeUrl( item.permalink ) ) {
-				var link = el( 'a', 'goalcart-suggestion__link' );
-				link.href = String( item.permalink );
-				// Phase 16 analytics: the ids ride on the link so a delegated
-				// click handler can report suggestion_clicked without
-				// resolving the product again.
-				if ( item.id ) {
-					link.setAttribute( 'data-goalcart-suggestion-id', String( item.id ) );
-				}
-				if ( goal && goal.goal_id ) {
-					link.setAttribute( 'data-goalcart-goal-id', String( goal.goal_id ) );
-				}
-				link.appendChild( el( 'span', 'goalcart-suggestion__name', String( item.name || '' ) ) );
-				// price_html is the server-formatted price (Phase 14); fall
-				// back to the raw price for hand-built payloads.
-				link.appendChild( el( 'span', 'goalcart-suggestion__price', String( item.price_html || item.price || '' ) ) );
-				li.appendChild( link );
-			} else {
-				li.appendChild( el( 'span', 'goalcart-suggestion__name', String( item.name || '' ) ) );
-			}
-
-			list.appendChild( li );
-		}
-
-		return list;
+		return src ? 'upsell' : '';
 	}
 
 	/**
@@ -874,10 +856,13 @@
 	function upsellRow( item, goal ) {
 		var row = el( 'div', 'goalcart-upsell' );
 
-		row.setAttribute( 'data-goalcart-upsell-product', String( item.product_id || 0 ) );
+		row.setAttribute( 'data-goalcart-upsell-product', String( item.product_id || item.id || 0 ) );
 		row.setAttribute( 'data-goalcart-upsell-goal', String( goal.goal_id || 0 ) );
 		row.setAttribute( 'data-goalcart-upsell-permalink', String( item.permalink || '' ) );
 		row.setAttribute( 'data-goalcart-upsell-value', String( Number( goal.current ) || 0 ) );
+		// Source attribution rides on the row so the delegated handlers can
+		// keep the suggestion and upsell funnels separate after unification.
+		row.setAttribute( 'data-goalcart-upsell-source', recommendationSource( item ) );
 
 		if ( item.image ) {
 			var img = el( 'img', 'goalcart-upsell__image' );
@@ -889,8 +874,9 @@
 
 		var link = el( 'a', 'goalcart-upsell__name' );
 		link.setAttribute( 'href', isSafeUrl( item.permalink ) ? String( item.permalink ) : '#' );
-		link.setAttribute( 'data-goalcart-upsell-id', String( item.product_id || 0 ) );
+		link.setAttribute( 'data-goalcart-upsell-id', String( item.product_id || item.id || 0 ) );
 		link.setAttribute( 'data-goalcart-upsell-goal', String( goal.goal_id || 0 ) );
+		link.setAttribute( 'data-goalcart-upsell-source', recommendationSource( item ) );
 		link.textContent = String( item.name || '' );
 		row.appendChild( link );
 
@@ -907,44 +893,52 @@
 	}
 
 	/**
-	 * UpsellPanel — ranked products that close the goal's remaining gap
-	 * (Phase 33.7).
+	 * UnifiedRecommendations — one customer-facing product recommendation
+	 * panel (Suggestions + Upsells consolidation).
 	 *
-	 * Renders only for money goals with a positive remaining gap inside
-	 * full-variant cards. The ranking is fetched from the public rank
-	 * endpoint (the server computes the gap from the live cart); the
-	 * result is cached per goal:remaining so cart-change re-renders reuse
-	 * it. Each rendered product reports one upsell_impression per
-	 * session.
+	 * Renders the goal's unified recommendation list — the progress
+	 * payload already carries the merged, deduplicated, ranked candidates
+	 * (suggestion + upsell engines, `source` preserved per row) — for any
+	 * goal that has one. Money goals with a positive remaining gap fall
+	 * back to the public rank endpoint when the payload carried nothing:
+	 * the ranker closes the gap from the live cart with signals beyond
+	 * the suggestion pool (the result is cached per goal:remaining so
+	 * cart-change re-renders reuse it). Every rendered product reports
+	 * one impression per session per funnel (suggestion-sourced rows feed
+	 * the Phase 16 suggestion funnel, upsell-sourced rows the Phase 33.7
+	 * upsell funnel, 'both' rows feed both).
 	 *
 	 * @param {Object} goal Progress goal entry.
 	 * @return {HTMLElement|null}
 	 */
 	function upsellPanel( goal ) {
-		if ( ! upsells || ! upsells.enabled || ! upsells.endpoint ) {
-			return null;
-		}
-
-		// Only money goals have a gap to close — and a completed goal
-		// needs no recommendations.
-		if ( ! goal.is_money || goal.completed ) {
-			return null;
-		}
-
-		var remaining = Number( goal.remaining );
-
-		if ( ! ( remaining > 0 ) ) {
-			return null;
-		}
-
 		var goalId = String( goal.goal_id || 0 );
 
 		if ( ! goalId ) {
 			return null;
 		}
 
+		// The unified recommendations ride on the payload; they render for
+		// any goal that has them (money or not, like the original
+		// suggestions block they replace).
+		var payloadItems = ( goal.suggestions && goal.suggestions.length ) ? goal.suggestions : [];
+
+		// Money goals with a gap fall back to the rank endpoint when the
+		// payload carried nothing — a completed goal needs no
+		// recommendations.
+		var useRank = false;
+		var remaining = Number( goal.remaining );
+
+		if ( upsells && upsells.enabled && upsells.endpoint && goal.is_money && ! goal.completed && remaining > 0 ) {
+			useRank = true;
+		}
+
+		if ( ! payloadItems.length && ! useRank ) {
+			return null;
+		}
+
 		var panel = el( 'div', 'goalcart-upsells' );
-		panel.appendChild( el( 'div', 'goalcart-upsells__title', upsellLabel( 'heading', 'Complete your goal' ) ) );
+		panel.appendChild( el( 'div', 'goalcart-upsells__title', upsellLabel( 'heading', 'Products suggested for you' ) ) );
 
 		var list = el( 'div', 'goalcart-upsells__list' );
 		panel.appendChild( list );
@@ -952,19 +946,8 @@
 		var cacheKey = goalId + ':' + Math.round( remaining );
 		var cached = upsellRankCache[ cacheKey ] || null;
 
-		function fill( payload ) {
-			if ( ! payload ) {
-				// Network/parse failure: drop the panel entirely — never a
-				// broken half-rendered widget.
-				try {
-					panel.remove();
-				} catch ( error ) {}
-				return;
-			}
-
+		function renderRows( rows ) {
 			list.replaceChildren();
-
-			var rows = ( payload.available && payload.recommendations ) ? payload.recommendations : [];
 
 			if ( ! rows.length ) {
 				list.appendChild( el( 'div', 'goalcart-upsells__empty', upsellLabel( 'unavailable', 'No recommendations available right now.' ) ) );
@@ -980,19 +963,48 @@
 
 				list.appendChild( upsellRow( item, goal ) );
 
-				// Phase 33.7 conversion tracking: one impression per goal +
-				// product per session (deduped like suggestion impressions).
-				var key = goalId + ':' + String( item.product_id );
+				// Upsell-funnel impressions for upsell/both-sourced rows.
+				// Suggestion-sourced rows skip this — trackGoals reports
+				// their suggestion_impression (and the upsell side of a
+				// 'both' row) when it scans the payload; the shared dedup
+				// map keeps a single impression per goal + product per
+				// funnel per session.
+				var src = recommendationSource( item );
 
-				if ( ! reportedUpsellImpressions[ key ] ) {
-					reportedUpsellImpressions[ key ] = true;
-					sendUpsellTrack( 'upsell_impression', {
-						goal_id: goalId,
-						product_id: String( item.product_id ),
-						cart_value: Number( goal.current ) || 0,
-					} );
+				if ( src !== 'suggestion' ) {
+					var key = goalId + ':' + String( item.product_id );
+
+					if ( ! reportedUpsellImpressions[ key ] ) {
+						reportedUpsellImpressions[ key ] = true;
+						sendUpsellTrack( 'upsell_impression', {
+							goal_id: goalId,
+							product_id: String( item.product_id ),
+							cart_value: Number( goal.current ) || 0,
+							source: src || 'upsell',
+						} );
+					}
 				}
 			}
+		}
+
+		// Payload-first: the unified recommendations render synchronously.
+		if ( payloadItems.length ) {
+			renderRows( payloadItems );
+			return panel;
+		}
+
+		function fill( payload ) {
+			if ( ! payload ) {
+				// Network/parse failure: drop the panel entirely — never a
+				// broken half-rendered widget.
+				try {
+					panel.remove();
+				} catch ( error ) {}
+				return;
+			}
+
+			var rows = ( payload.available && payload.recommendations ) ? payload.recommendations : [];
+			renderRows( rows );
 		}
 
 		if ( cached ) {
@@ -1021,10 +1033,16 @@
 	}
 
 	/**
-	 * Add a ranked upsell product to the cart (Phase 33.7).
+	 * Add a unified recommendation to the cart (Suggestions + Upsells
+	 * consolidation, ex Phase 33.7).
 	 *
-	 * Reports upsell_clicked up front, then adds through WooCommerce's own
-	 * public `?wc-ajax=add_to_cart` endpoint (no nonce needed — the same
+	 * Reports the click up front with source attribution — suggestion-
+	 * sourced items feed the Phase 16 suggestion funnel, upsell-sourced
+	 * items the Phase 33.7 upsell funnel, 'both' items feed both (rank-
+	 * endpoint fallback rows carry no source and belong to the upsell
+	 * funnel; suggestion adds are attributed server-side from their
+	 * impressions). Then adds through WooCommerce's own public
+	 * `?wc-ajax=add_to_cart` endpoint (no nonce needed — the same
 	 * endpoint the theme's add-to-cart buttons use, so it works in every
 	 * theme). On success it reports upsell_added and funnels into the
 	 * centralized cart-changed bridge, which re-polls the progress
@@ -1046,17 +1064,26 @@
 		var goalId = row.getAttribute( 'data-goalcart-upsell-goal' ) || '';
 		var permalink = row.getAttribute( 'data-goalcart-upsell-permalink' ) || '';
 		var cartValue = Number( row.getAttribute( 'data-goalcart-upsell-value' ) || 0 );
+		var src = row.getAttribute( 'data-goalcart-upsell-source' ) || '';
 
 		if ( ! productId ) {
 			return;
 		}
 
-		sendUpsellTrack( 'upsell_clicked', {
-			goal_id: goalId,
-			product_id: productId,
-			cart_value: cartValue,
-		} );
+		if ( src === 'suggestion' || src === 'both' ) {
+			sendTrack( 'suggestion_clicked', {
+				goal_id: goalId,
+				product_id: productId,
+			} );
+		}
 
+		if ( ! src || src === 'upsell' || src === 'both' ) {
+			sendUpsellTrack( 'upsell_clicked', {
+				goal_id: goalId,
+				product_id: productId,
+				cart_value: cartValue,
+			} );
+		}
 		var ajaxUrl = '';
 		var params = window.wc_add_to_cart_params || null;
 
@@ -1068,11 +1095,16 @@
 			button.textContent = upsellLabel( 'added', 'Added' );
 			button.disabled = true;
 
-			sendUpsellTrack( 'upsell_added', {
-				goal_id: goalId,
-				product_id: productId,
-				cart_value: cartValue,
-			} );
+			// upsell_added only for upsell/both-sourced items: suggestion
+			// adds are attributed server-side on conversion from their
+			// impression, so no separate add event for them.
+			if ( ! src || src === 'upsell' || src === 'both' ) {
+				sendUpsellTrack( 'upsell_added', {
+					goal_id: goalId,
+					product_id: productId,
+					cart_value: cartValue,
+				} );
+			}
 
 			// Re-poll progress: the gap shrinks and the panel/bar update.
 			emitCartChanged();
@@ -1556,10 +1588,10 @@
 	/**
 	 * GoalContainer — the widget body for one goal's card.
 	 *
-	 * Full: reward chip + template body + message + suggestions. Compact:
-	 * template body + message + reward chip. Every eligible goal renders
-	 * as its own card (renderWidget stacks them), so there is no
-	 * cross-goal ladder here anymore.
+	 * Full: reward chip + template body + message + the unified
+	 * recommendations panel. Compact: template body + message + reward
+	 * chip. Every eligible goal renders as its own card (renderWidget
+	 * stacks them), so there is no cross-goal ladder here anymore.
 	 *
 	 * @param {Object} goal     Goal this card renders.
 	 * @param {string} currency ISO currency code.
@@ -1625,19 +1657,14 @@
 			card.appendChild( countdown );
 		}
 
-		var suggestions = suggestionList( goal );
-		if ( suggestions ) {
-			card.appendChild( suggestions );
-		}
-
 		var gift = giftPicker( goal );
 		if ( gift ) {
 			card.appendChild( gift );
 		}
 
-		// Phase 33.7 (Frontend Upsell Integration): the ranked
-		// gap-closers render at the bottom of the full card, after the
-		// reward, message, countdown, suggestions and gift picker.
+		// Unified product recommendations (Suggestions + Upsells
+		// consolidation): the merged panel renders at the bottom of the
+		// full card, after the reward, message, countdown and gift picker.
 		var upsell = upsellPanel( goal );
 		if ( upsell ) {
 			card.appendChild( upsell );
@@ -2379,39 +2406,16 @@
 	}
 
 	/**
-	 * Bind the delegated suggestion-click tracker (Phase 16).
-	 *
-	 * One listener on document.body covers every widget and the sticky
-	 * bar; the suggestion ids ride on the link's data attributes.
-	 *
-	 * @return {void}
-	 */
-	function bindSuggestionTracking() {
-		if ( ! tracking || ! tracking.endpoint ) {
-			return;
-		}
-
-		document.body.addEventListener( 'click', function ( event ) {
-			var target = event.target;
-
-			while ( target && target !== document.body ) {
-				if ( target.classList && target.classList.contains( 'goalcart-suggestion__link' ) ) {
-					var goalId = target.getAttribute( 'data-goalcart-goal-id' ) || '';
-					var productId = target.getAttribute( 'data-goalcart-suggestion-id' ) || '';
-					trackSuggestionClick( goalId, productId );
-					return;
-				}
-				target = target.parentNode;
-			}
-		} );
-	}
-
-	/**
-	 * Bind the delegated upsell-panel click handler (Phase 33.7).
+	 * Bind the delegated unified-recommendation click handler (Suggestions
+	 * + Upsells consolidation).
 	 *
 	 * One listener on document.body covers every widget's panel: the add
 	 * buttons run the AJAX add-to-cart flow, and the product name links
-	 * report the upsell_clicked event. The ids ride on the row's data
+	 * report the click. Attribution follows the row's merged source —
+	 * suggestion-sourced items keep the Phase 16 suggestion funnel,
+	 * upsell-sourced items the Phase 33.7 upsell funnel, 'both' items
+	 * feed both (rank-endpoint fallback rows carry no source and belong
+	 * to the upsell funnel). The ids and source ride on the row's data
 	 * attributes.
 	 *
 	 * @return {void}
@@ -2434,11 +2438,21 @@
 					if ( target.classList.contains( 'goalcart-upsell__name' ) ) {
 						var goalId = target.getAttribute( 'data-goalcart-upsell-goal' ) || '';
 						var productId = target.getAttribute( 'data-goalcart-upsell-id' ) || '';
+						var src = target.getAttribute( 'data-goalcart-upsell-source' ) || '';
 
-						sendUpsellTrack( 'upsell_clicked', {
-							goal_id: goalId,
-							product_id: productId,
-						} );
+						if ( src === 'suggestion' || src === 'both' ) {
+							sendTrack( 'suggestion_clicked', {
+								goal_id: goalId,
+								product_id: productId,
+							} );
+						}
+
+						if ( ! src || src === 'upsell' || src === 'both' ) {
+							sendUpsellTrack( 'upsell_clicked', {
+								goal_id: goalId,
+								product_id: productId,
+							} );
+						}
 						return;
 					}
 				}
@@ -2528,7 +2542,6 @@
 		bindCartChangedBridge();
 		bindCartEvents();
 		bindBlockStore();
-		bindSuggestionTracking();
 		bindUpsellPanel();
 		bindGiftPicker();
 		bindCountdownTicker();

@@ -91,6 +91,7 @@ $EXPECTED_CHECKS = array(
 	'template-test'                   => 133,
 	'upsell-frontend-test'            => 69,
 	'upsell-test'                     => 82,
+	'unified-recommendation-test'     => 47,
 	'woocommerce-compatibility-test'  => 29,
 	'wordpress-compatibility-test'    => 28,
 );

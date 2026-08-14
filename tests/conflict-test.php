@@ -129,7 +129,7 @@ $settings_ctrl   = $container->get( SettingsController::class );
 $engine          = $container->get( GoalEngine::class );
 $ci              = $container->get( CartIntegration::class );
 $messages        = $container->get( MessageEngine::class );
-$suggestions     = $container->get( SuggestionEngine::class );
+$recommendations = $container->get( \GoalCart\Recommendations\ProductRecommendationEngine::class );
 $all_before      = $settings->all();
 
 $resolver = new ConflictResolver();
@@ -401,7 +401,7 @@ try {
 	$settings->set( 'default_goal_behavior', 'all' );
 	$settings->set( 'conflict_resolution', ConflictResolver::MODE_FIRST );
 
-	$frontend = new FrontendController( $engine, new GoalRepository(), $ci, $messages, $suggestions, $settings, new RewardEngine( $engine, new GoalRepository(), $settings, $ci ) );
+	$frontend = new FrontendController( $engine, new GoalRepository(), $ci, $messages, $recommendations, $settings, new RewardEngine( $engine, new GoalRepository(), $settings, $ci ) );
 	$req      = new \WP_REST_Request( 'GET', '/goalcart/v1/progress' );
 	$resp     = $frontend->handle_progress( $req, $cart );
 	$data     = $resp->get_data()['data'];
@@ -424,7 +424,7 @@ try {
 	$reward_engine  = new RewardEngine( $engine, new GoalRepository(), $settings, $ci );
 	$engine_results = $reward_engine->sync_cart( $cart );
 
-	$frontend = new FrontendController( $engine, new GoalRepository(), $ci, $messages, $suggestions, $settings, $reward_engine );
+	$frontend = new FrontendController( $engine, new GoalRepository(), $ci, $messages, $recommendations, $settings, $reward_engine );
 	$resp     = $frontend->handle_progress( $req, $cart );
 	$data     = $resp->get_data()['data'];
 
@@ -454,7 +454,7 @@ try {
 	$reward_engine  = new RewardEngine( $engine, new GoalRepository(), $settings, $ci );
 	$engine_results = $reward_engine->sync_cart( $cart );
 
-	$frontend = new FrontendController( $engine, new GoalRepository(), $ci, $messages, $suggestions, $settings, $reward_engine );
+	$frontend = new FrontendController( $engine, new GoalRepository(), $ci, $messages, $recommendations, $settings, $reward_engine );
 	$resp     = $frontend->handle_progress( $req, $cart );
 	$data     = $resp->get_data()['data'];
 

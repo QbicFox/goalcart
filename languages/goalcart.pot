@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-14T10:00:19Z\n"
+"POT-Creation-Date: 2026-08-14T11:58:06Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -131,7 +131,7 @@ msgstr ""
 msgid "A goal ladder of dots and targets, bar underneath."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:286
+#: includes/Analytics/UpsellRanker.php:293
 msgid "A goal target or an explicit remaining amount is required to rank upsells."
 msgstr ""
 
@@ -222,7 +222,7 @@ msgstr ""
 msgid "Add product cost data to see the estimated profit of Goal Cart."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:489
+#: includes/Frontend/ProgressUI.php:492
 msgid "Add to cart"
 msgstr ""
 
@@ -240,7 +240,7 @@ msgid "Add-to-cart"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1080
-#: includes/Frontend/ProgressUI.php:491
+#: includes/Frontend/ProgressUI.php:494
 msgid "Added"
 msgstr ""
 
@@ -248,7 +248,7 @@ msgstr ""
 msgid "Added to cart"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:490
+#: includes/Frontend/ProgressUI.php:493
 msgid "Adding…"
 msgstr ""
 
@@ -851,10 +851,6 @@ msgstr ""
 msgid "Complete"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:488
-msgid "Complete your goal"
-msgstr ""
-
 #: admin-app/src/components/revenue/FunnelVisual.tsx:25
 #: admin-app/src/routes/Analytics.tsx:173
 #: admin-app/src/routes/GoalPerformance.tsx:66
@@ -1035,7 +1031,7 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:43
 #: admin-app/src/routes/Goals.tsx:48
 #: admin-app/src/templates/rewardLabel.ts:12
-#: includes/Frontend/ProgressUI.php:878
+#: includes/Frontend/ProgressUI.php:881
 #: includes/Goals/MessageEngine.php:303
 msgid "Coupon"
 msgstr ""
@@ -1300,7 +1296,7 @@ msgid "Discounted subtotal"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:349
-#: includes/Frontend/ProgressUI.php:883
+#: includes/Frontend/ProgressUI.php:886
 msgid "Dismiss"
 msgstr ""
 
@@ -1420,7 +1416,7 @@ msgstr ""
 msgid "Enable Goal Cart"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:880
+#: includes/Frontend/ProgressUI.php:883
 msgid "Ended"
 msgstr ""
 
@@ -1429,7 +1425,7 @@ msgstr ""
 msgid "Ends at"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:879
+#: includes/Frontend/ProgressUI.php:882
 msgid "Ends in"
 msgstr ""
 
@@ -1441,7 +1437,7 @@ msgstr ""
 msgid "Estimated Profit"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1192
+#: includes/Analytics/UpsellRanker.php:1199
 msgid "Estimated margin %s%% on the product price."
 msgstr ""
 
@@ -1572,7 +1568,7 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:41
 #: admin-app/src/routes/Goals.tsx:46
 #: admin-app/src/templates/rewardLabel.ts:10
-#: includes/Frontend/ProgressUI.php:876
+#: includes/Frontend/ProgressUI.php:879
 #: includes/Goals/MessageEngine.php:290
 msgid "Fixed discount"
 msgstr ""
@@ -1583,7 +1579,7 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:42
 #: admin-app/src/routes/Goals.tsx:47
 #: admin-app/src/templates/rewardLabel.ts:11
-#: includes/Frontend/ProgressUI.php:877
+#: includes/Frontend/ProgressUI.php:880
 #: includes/Goals/MessageEngine.php:300
 msgid "Free gift"
 msgstr ""
@@ -1595,7 +1591,7 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:39
 #: admin-app/src/routes/Goals.tsx:44
 #: admin-app/src/templates/rewardLabel.ts:8
-#: includes/Frontend/ProgressUI.php:874
+#: includes/Frontend/ProgressUI.php:877
 #: includes/Goals/MessageEngine.php:277
 msgid "Free shipping"
 msgstr ""
@@ -1638,7 +1634,7 @@ msgstr ""
 msgid "Generate a coupon from these rules"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:882
+#: includes/Frontend/ProgressUI.php:885
 msgid "Gift added to your cart"
 msgstr ""
 
@@ -1811,7 +1807,7 @@ msgstr ""
 msgid "Guests (not logged in)"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1184
+#: includes/Analytics/UpsellRanker.php:1191
 msgid "Healthy stock levels."
 msgstr ""
 
@@ -1840,7 +1836,7 @@ msgstr ""
 msgid "Highest margin"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1169
+#: includes/Analytics/UpsellRanker.php:1176
 msgid "Highly relevant to the goal and the current cart contents."
 msgstr ""
 
@@ -1852,7 +1848,7 @@ msgstr ""
 msgid "Historical performance"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1202
+#: includes/Analytics/UpsellRanker.php:1209
 msgid "Historical upsell performance: %d impressions, %d orders (%s conversion)."
 msgstr ""
 
@@ -2085,7 +2081,7 @@ msgstr ""
 msgid "Limited data — based on orders with complete cost information"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1186
+#: includes/Analytics/UpsellRanker.php:1193
 msgid "Limited stock remaining."
 msgstr ""
 
@@ -2305,7 +2301,7 @@ msgstr ""
 msgid "No campaigns yet"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:307
+#: includes/Analytics/UpsellRanker.php:314
 msgid "No candidate products could be collected for this cart and goal."
 msgstr ""
 
@@ -2313,7 +2309,7 @@ msgstr ""
 msgid "No candidate thresholds could be generated from the order data."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1212
+#: includes/Analytics/UpsellRanker.php:1219
 msgid "No cart contents provided — relevance scored from the goal only."
 msgstr ""
 
@@ -2342,7 +2338,7 @@ msgstr ""
 msgid "No goals yet — create a goal on the Goals page first."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1208
+#: includes/Analytics/UpsellRanker.php:1215
 msgid "No historical upsell performance data yet — conversion scored neutral."
 msgstr ""
 
@@ -2363,7 +2359,7 @@ msgstr ""
 msgid "No recommendation is available for this goal yet."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:492
+#: includes/Frontend/ProgressUI.php:495
 msgid "No recommendations available right now."
 msgstr ""
 
@@ -2601,7 +2597,7 @@ msgid "Percentage"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:25
-#: includes/Frontend/ProgressUI.php:875
+#: includes/Frontend/ProgressUI.php:878
 #: includes/Goals/MessageEngine.php:281
 msgid "Percentage discount"
 msgstr ""
@@ -2629,7 +2625,7 @@ msgstr ""
 msgid "Pick the default progress template and tune its appearance — separately for Goals and Campaigns."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:881
+#: includes/Frontend/ProgressUI.php:884
 msgid "Pick your free gift"
 msgstr ""
 
@@ -2654,7 +2650,7 @@ msgstr ""
 msgid "Plugin-wide configuration. Changes apply immediately."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1177
+#: includes/Analytics/UpsellRanker.php:1184
 msgid "Popular product (%d units sold, %s rating)."
 msgstr ""
 
@@ -2694,7 +2690,7 @@ msgstr ""
 msgid "Previous month"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1155
+#: includes/Analytics/UpsellRanker.php:1162
 msgid "Price %s fits the remaining %s %s."
 msgstr ""
 
@@ -2743,7 +2739,7 @@ msgstr ""
 msgid "Product margin data is not available — profit estimates are excluded."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1196
+#: includes/Analytics/UpsellRanker.php:1203
 msgid "Product margin data is not available — profitability scored neutral."
 msgstr ""
 
@@ -2771,6 +2767,10 @@ msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:441
 msgid "Products recommended to customers who were working toward this goal."
+msgstr ""
+
+#: includes/Frontend/ProgressUI.php:491
+msgid "Products suggested for you"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:687
@@ -2959,7 +2959,7 @@ msgstr ""
 msgid "Relevance"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1171
+#: includes/Analytics/UpsellRanker.php:1178
 msgid "Relevant to the goal or the current cart contents."
 msgstr ""
 
@@ -3362,7 +3362,7 @@ msgstr ""
 msgid "Smart upsell ranking is not available."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:276
+#: includes/Analytics/UpsellRanker.php:277
 msgid "Smart upsells are disabled."
 msgstr ""
 
@@ -3378,7 +3378,7 @@ msgstr ""
 msgid "Sort products"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1165
+#: includes/Analytics/UpsellRanker.php:1172
 msgid "Source: %s."
 msgstr ""
 
@@ -3602,7 +3602,7 @@ msgstr ""
 msgid "The goal could not be updated."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:287
+#: includes/Analytics/UpsellRanker.php:294
 msgid "The goal gap is already closed — no upsells needed."
 msgstr ""
 
@@ -4024,7 +4024,7 @@ msgstr ""
 msgid "Window"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1230
+#: includes/Analytics/UpsellRanker.php:1237
 msgid "WooCommerce cross-sell of a cart item"
 msgstr ""
 
@@ -4040,7 +4040,7 @@ msgstr ""
 msgid "WooCommerce product cost field (_cost)"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1229
+#: includes/Analytics/UpsellRanker.php:1236
 msgid "WooCommerce upsell of a cart item"
 msgstr ""
 
@@ -4079,7 +4079,7 @@ msgstr ""
 msgid "after Goal Cart interaction"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1158
+#: includes/Analytics/UpsellRanker.php:1165
 msgid "almost exactly"
 msgstr ""
 
@@ -4087,7 +4087,7 @@ msgstr ""
 msgid "average basket value"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1234
+#: includes/Analytics/UpsellRanker.php:1241
 msgid "best seller"
 msgstr ""
 
@@ -4107,11 +4107,11 @@ msgstr ""
 msgid "e.g. 🎁 or a dashicon name"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1228
+#: includes/Analytics/UpsellRanker.php:1235
 msgid "inside the goal's categories"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1226
+#: includes/Analytics/UpsellRanker.php:1233
 msgid "manually selected for this goal"
 msgstr ""
 
@@ -4119,23 +4119,23 @@ msgstr ""
 msgid "of completions that saw a recommendation"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1158
+#: includes/Analytics/UpsellRanker.php:1165
 msgid "partially"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1227
+#: includes/Analytics/UpsellRanker.php:1234
 msgid "previously recommended for this goal"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1231
+#: includes/Analytics/UpsellRanker.php:1238
 msgid "related to a cart item"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1232
+#: includes/Analytics/UpsellRanker.php:1239
 msgid "shares a category with the cart"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1233
+#: includes/Analytics/UpsellRanker.php:1240
 msgid "shares a tag with the cart"
 msgstr ""
 

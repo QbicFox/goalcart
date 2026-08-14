@@ -207,7 +207,8 @@ These are the acceptance-level expectations the implementation phases must satis
 
 ### 5.3 Frontend
 - Reusable component set: `GoalContainer` (one card per eligible goal),
-  `ProgressBar`, `GoalMessage`, `RewardStatus`, `SuggestionList`,
+  `ProgressBar`, `GoalMessage`, `RewardStatus`, `UnifiedRecommendations`
+  (Suggestions + Upsells consolidation, Phase 14 + Phase 33.7),
   `StickyGoalBar` (Phase 11) — names following the reference project
   conventions. Every eligible goal renders as its own stacked card; the
   cross-goal `GoalMilestones` ladder was removed when that landed.

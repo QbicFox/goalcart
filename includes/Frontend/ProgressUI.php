@@ -485,7 +485,10 @@ final class ProgressUI {
 			'trackEndpoint' => esc_url_raw( rest_url( 'goalcart/v1/upsell/track' ) ),
 			'limit'         => max( 1, min( 6, (int) apply_filters( 'goalcart_frontend_upsell_limit', 3 ) ) ),
 			'labels'        => array(
-				'heading'     => __( 'Complete your goal', 'goalcart' ),
+				// Unified customer-facing copy: suggestions and upsells are
+				// one experience now, so the heading never names the
+				// internal strategy.
+				'heading'     => __( 'Products suggested for you', 'goalcart' ),
 				'add'         => __( 'Add to cart', 'goalcart' ),
 				'adding'      => __( 'Adding…', 'goalcart' ),
 				'added'       => __( 'Added', 'goalcart' ),

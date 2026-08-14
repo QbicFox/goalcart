@@ -43,6 +43,7 @@ use GoalCart\REST\SettingsController;
 use GoalCart\REST\TemplatesController;
 use GoalCart\REST\TrackController;
 use GoalCart\REST\UpsellController;
+use GoalCart\Recommendations\ProductRecommendationEngine;
 use GoalCart\Rewards\RewardEngine;
 use GoalCart\Settings\Settings;
 use GoalCart\Suggestions\SuggestionEngine;
@@ -297,6 +298,18 @@ final class Plugin {
 			return new SuggestionEngine( $container->get( Settings::class ) );
 		} );
 
+		// Unified product recommendation engine: merges the Suggestion
+		// engine and the Upsell ranker into ONE customer-facing ranked,
+		// deduplicated list (both internal strategies preserved, scored on
+		// the same 0–100 scale) — consumed by the storefront progress
+		// payload through FrontendController.
+		$this->container->singleton( ProductRecommendationEngine::class, function ( Container $container ) {
+			return new ProductRecommendationEngine(
+				$container->get( SuggestionEngine::class ),
+				$container->get( UpsellRanker::class )
+			);
+		} );
+
 		// Analytics (Phase 16): anonymous session, event recorder, and the
 		// metrics repository consumed by the Phase 17 dashboard. The
 		// Tracker registers the session cookie, the frontend config print
@@ -487,7 +500,7 @@ final class Plugin {
 				$container->get( GoalRepository::class ),
 				$container->get( CartIntegration::class ),
 				$container->get( MessageEngine::class ),
-				$container->get( SuggestionEngine::class ),
+				$container->get( ProductRecommendationEngine::class ),
 				$container->get( Settings::class ),
 				$container->get( RewardEngine::class ),
 				$container->get( TemplateEngine::class )

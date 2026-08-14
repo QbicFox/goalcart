@@ -253,7 +253,8 @@ final class UpsellRanker {
 	 * ranking. Never writes anything — the historical events are recorded
 	 * by the tracker endpoint and the order hooks, never here.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, cart_value,
+	 * @param array<string, mixed> $args Optional: goal_id, goal (an already
+	 *                                   loaded Goal instance), cart_value,
 	 *                                   remaining, cart (product ids),
 	 *                                   limit, exclude.
 	 * @return array<string, mixed> The ranking payload.
@@ -276,7 +277,13 @@ final class UpsellRanker {
 			return $unavailable( __( 'Smart upsells are disabled.', 'goalcart' ) );
 		}
 
-		$goal     = $this->resolve_goal( $args );
+		// Prefer an already-loaded goal (the unified engine hands its
+		// in-memory Goal over so unpersisted/fresh goals rank correctly);
+		// fall back to resolving from the repository by id for the REST
+		// endpoint and other id-only callers.
+		$goal = ( isset( $args['goal'] ) && $args['goal'] instanceof Goal )
+			? $args['goal']
+			: $this->resolve_goal( $args );
 		$remaining = $this->remaining( $args, $goal );
 
 		// No measurable money gap → nothing to close with priced products.

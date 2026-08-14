@@ -56,16 +56,20 @@ shared `.goalcart-widget__goals` wrapper — a campaign's milestones each
 get a full card instead of one featured card + a tiny ladder:
 
 - **GoalContainer** — one goal's card; `full` = reward chip + progress +
-  message + suggestions, `compact` = progress + message + reward chip.
+  message + unified recommendations, `compact` = progress + message +
+  reward chip.
 - **ProgressBar** — percentage fill bar (animated, logical-property
   based so it fills right-to-left on RTL sites).
 - **GoalMessage** — the goal's progress message (rendered by the Phase 13
   MessageEngine).
 - **RewardStatus** — locked 🔒 / unlocked ✓ reward chip, labels
   localized server-side (`frontend_config()` → `labels`).
-- **SuggestionList** — renders `goal.suggestions` when present (filled
-  by the Phase 14 SuggestionEngine — upsells, cross-sells, related,
-  in-category and best-seller products ranked by price proximity).
+- **UnifiedRecommendations** — one customer-facing product panel that
+  renders the goal's merged, deduplicated, ranked recommendations
+  (Suggestions + Upsells consolidation: the Phase 14 SuggestionEngine
+  and the Phase 33.5 UpsellRanker are merged into ONE list by the
+  `ProductRecommendationEngine`). Money goals with an open gap fall back
+  to the public rank endpoint when the payload carries nothing.
 - **StickyGoalBar** — fixed bottom bar with the featured goal's progress
   (the first eligible one — a slim bar keeps a single goal at a glance)
   and a dismiss button; hidden when the cart has no progress to show.
@@ -367,13 +371,19 @@ first-class settings toggle; until then the filter is the privacy switch.
 
 ---
 
-# Smart Product Suggestions (Phase 14)
+# Unified Recommendations (Suggestions + Upsells)
 
-The widget's **SuggestionList** is served by
-`GoalCart\Suggestions\SuggestionEngine`
-(`includes/Suggestions/SuggestionEngine.php`), evaluated server-side per
-goal and shipped in the `/progress` payload as `goal.suggestions` — the
-widget renders each item's name + server-formatted price
+The widget's **UnifiedRecommendations** panel is served by
+`GoalCart\Recommendations\ProductRecommendationEngine`
+(`includes/Recommendations/ProductRecommendationEngine.php`) — the
+single customer-facing recommendation layer that merges the Phase 14
+SuggestionEngine and the Phase 33.5 UpsellRanker into ONE ranked,
+deduplicated list, evaluated server-side per goal and shipped in the
+`/progress` payload as `goal.suggestions`. Each item carries a
+`source` attribution (`suggestion` | `upsell` | `both`) so the
+storefront's existing tracking funnels stay separate without exposing
+the strategy to the shopper; `score` carries the unified 0–100 rank.
+The widget renders each item's name + server-formatted price
 (`price_html`, falling back to the raw price for hand-built payloads)
 linked to the product. Money labels are plain text: the `wc_price`
 markup is stripped **and** its HTML entities decoded (WooCommerce ships
@@ -382,7 +392,7 @@ entity text.
 
 ## Sources
 
-Candidates are gathered from, in order of priority:
+The suggestion half gathers candidates from, in order of priority:
 
 1. the goal's own `products` (they count toward it)
 2. products in the goal's `categories` (category goals)
@@ -392,42 +402,34 @@ Candidates are gathered from, in order of priority:
 6. the shopper's `woocommerce_recently_viewed` cookie
 7. best sellers by `total_sales` (low-scoring fallback filler)
 
+The upsell half adds the ranker's own candidates (goal manual +
+historical funnel + category + cart-endorsed + taxonomy matches + best
+sellers) and scores every candidate on the SAME normalized 0–100 scale
+(`score_product`), so the two halves never compare incompatible scores.
+A product present in both halves appears exactly once with source
+`both`; the stronger (ranker composite) score wins. Rank: score desc,
+then lower price, then id (deterministic).
+
 ## Filters & ranking
 
-Never suggested: out-of-stock, unpublished or unpriced products, the
-cart's own items, `excluded_products`, and ghost/missing ids (a stale
-upsell id can never break the engine — loads fall back to the direct
-product data store when the `wc_product_meta_lookup` table lags, e.g.
-after bulk imports).
-
-Ranking score (higher wins, then id asc):
-
-| Signal | Bonus |
-|---|---:|
-| Manual — in the goal's `products` | +3 |
-| Counts toward the goal (product / category) | +2 |
-| Price in the 0.6–1.4× band of `remaining` (money goals) | +2 |
-| Shares a category with a cart item | +1 |
-| Cheaper than the band (still helps) | +0.75 |
-| WC-endorsed source (upsell / cross-sell / related) | +0.5 |
-
-Completed or ineligible goals return no suggestions; the list is capped
-at `SuggestionEngine::MAX_SUGGESTIONS` (4) and filterable via the
+Never recommended: out-of-stock, unpublished or unpriced products, the
+cart's own items, `excluded_products`, and ghost/missing ids. Completed
+or ineligible goals — or a closed gap — return no recommendations.
+Weak candidates that score 0 under the merged weights are dropped, so
+the panel never pads to the configured limit (`goalcart_frontend_upsell_limit`, 1–6, default 3):
+fewer strong candidates → fewer items. Money goals with an open gap
+fall back to the public rank endpoint (`/goalcart/v1/upsell/rank`) when
+the payload carried nothing; the list is filterable via the existing
 `goalcart_suggestions` filter (4 args: items, goal, result, context).
-Margin-aware and AI-ranked recommendations remain roadmap futures
-(P14-T05).
 
 ---
 
-# Smart Upsell Panel (Phase 33.7)
+# Upsell Endpoint & Tracking (Phase 33.7)
 
-The Phase 33.5 Smart Upsell engine gets its **storefront half**: a
-ranked "complete your goal" product panel rendered inside full-variant
-widget cards (cart/checkout pages) for money goals with a positive
-remaining gap. Unlike the Phase 14 suggestion list (bundled into the
-`/progress` payload), the panel fetches its products on demand from a
-new **public** endpoint — the server computes the gap, so the ranking
-is always based on the live cart.
+The Phase 33.5 Smart Upsell engine still exposes its **public** rank
+endpoint — the rank-endpoint fallback for the unified panel fetches its
+products on demand, and the server computes the gap, so the ranking is
+always based on the live cart.
 
 ## Contract
 
