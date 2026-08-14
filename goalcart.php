@@ -71,8 +71,12 @@ if ( ! defined( 'GOALCART_DB_VERSION' ) ) {
 	 * 0.5.0 = Phase 33 (Revenue Optimization): revenue_events,
 	 *         revenue_daily, goal_attribution, upsell_events and
 	 *         upsell_stats tables plus the daily aggregation cron.
+	 * 0.6.0 = Phase 36 (Per-User Goal Completion Limit):
+	 *         goals.max_completions_per_user (NULL = unlimited) plus the
+	 *         goal_completions history table — dbDelta adds the column
+	 *         and table on upgrade.
 	 */
-	define( 'GOALCART_DB_VERSION', '0.5.0' );
+	define( 'GOALCART_DB_VERSION', '0.6.0' );
 }
 
 // Load the Composer autoloader (PSR-4: GoalCart\ => includes/).

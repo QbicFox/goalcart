@@ -546,7 +546,8 @@ exposes only the minimum data the widgets need:
 		"reward_state": "locked",
         "eligible": true,
         "reason": "",
-        "conflict": { "resolved": true, "reason": "" }
+        "conflict": { "resolved": true, "reason": "" },
+        "completion": { "completion_limit": null, "completion_count": 0, "remaining_completions": null, "can_complete": true }
       }
     ],
     "currency": "IRR",
@@ -603,19 +604,34 @@ Notes:
   pre-engine per-goal card rendering and never appears here.
 - `conflict` (Phase 26) is the per-goal conflict-resolution fragment:
   `{ "resolved": true|false, "reason": "" | "not_first" | "not_best" |
-  "exclusive" | "stacking" | "lower_priority" }`. `resolved: false`
+  "exclusive" | "stacking" | "lower_priority" | "completion_limit" }`. `resolved: false`
   means the goal reached its target but its reward is suppressed by the
   store's conflict rules (`conflict_resolution` mode, an exclusive goal,
-  or the per-reward stacking safety — a same-type non-stacking reward
-  never both grants and displays as won) — the widget renders such a
-  reward as locked, never unlocked, and the analytics layer records
-  `goal_completed` instead of `reward_activated` for it. The same
-  fragment appears in the admin preview payload, which renders a
-  "Blocked — …" chip for suppressed milestones. The reasons are always
-  exactly what the live cart grants: the payload resolves `best` with
-  the same computed reward amounts the reward engine uses, and applies
-  the same stacking suppression in the same priority order. See
-  `docs/conflicts.md` for the full rule set.
+  the per-reward stacking safety, or the per-user completion limit — a
+  same-type non-stacking reward never both grants and displays as won;
+  a goal the shopper already completed the configured maximum times
+  renders locked too) — the widget renders such a reward as locked,
+  never unlocked, and the analytics layer records `goal_completed`
+  instead of `reward_activated` for it. The same fragment appears in the
+  admin preview payload, which renders a "Blocked — …" chip for
+  suppressed milestones. The reasons are always exactly what the live
+  cart grants: the payload resolves `best` with the same computed reward
+  amounts the reward engine uses, and applies the same stacking
+  suppression in the same priority order. See `docs/conflicts.md` for
+  the full rule set.
+- `completion` (Phase 36 — per-user completion limit) is the shopper's
+  completion status for the goal: `completion_limit` (the configured
+  per-user maximum, `null` = unlimited), `completion_count` (how many
+  times THIS shopper already completed it), `remaining_completions`
+  (limit − count, `null` when unlimited) and `can_complete` (whether the
+  shopper may still complete it). The server enforces the limit; the
+  widget only reflects it. When `can_complete` is `false` the goal's
+  `state` becomes `completion_limit_reached`, its `message` switches to
+  "You have already completed this goal." and its reward chip renders
+  locked (the `conflict` fragment is overridden with reason
+  `completion_limit`) — the storefront never claims a reward the server
+  will not grant. The same fragment is user-specific, so the optional
+  progress transient is keyed by identity as well as cart state.
 - The payload contains only aggregate numbers for the shopper's own cart
   — no PII — which is what allows it to be public.
 - **Never cached** — the response carries

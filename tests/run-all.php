@@ -68,6 +68,7 @@ $EXPECTED_CHECKS = array(
 	'attribution-test'                => 72,
 	'cart-integration-test'           => 22,
 	'cart-rest-initialization-test'   => 24,
+	'completion-limit-test'           => 64,
 	'conflict-test'                   => 57,
 	'engine-test'                     => 75,
 	'frontend-test'                   => 140,

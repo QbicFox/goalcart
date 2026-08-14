@@ -45,6 +45,7 @@ final class MessageEngine {
 	const STATE_NEARLY_COMPLETE   = 'nearly_complete';
 	const STATE_COMPLETED         = 'completed';
 	const STATE_REWARD_ACTIVATED  = 'reward_activated';
+	const STATE_COMPLETION_LIMIT  = 'completion_limit_reached';
 
 	/**
 	 * The progress percentage at or above which a goal is "nearly complete".
@@ -76,21 +77,35 @@ final class MessageEngine {
 	 * State semantics (P13-T03):
 	 *  - inactive          goal is not active (status/campaign folded)
 	 *  - unavailable       goal cannot apply to this cart/shopper
+	 *  - completion_limit_reached
+	 *                      the shopper already completed this goal the
+	 *                      configured maximum number of times (Phase 36)
 	 *  - progressing       eligible, target not reached, below the
 	 *                      "nearly complete" threshold
 	 *  - nearly_complete   eligible, >= NEARLY_COMPLETE_PERCENTAGE
 	 *  - completed         target reached, no reward configured
 	 *  - reward_activated  target reached and a reward is configured
 	 *
-	 * @param Goal       $goal   Goal.
-	 * @param GoalResult $result Evaluation result.
+	 * @param Goal                     $goal       Goal.
+	 * @param GoalResult               $result     Evaluation result.
+	 * @param array<string, mixed>|null $completion Optional completion status
+	 *                      (completion_limit / completion_count /
+	 *                      remaining_completions / can_complete, Phase 36);
+	 *                      when it says the shopper cannot complete the goal
+	 *                      again, the limit state wins over every
+	 *                      progress/completion state (the goal is no longer
+	 *                      actionable for them).
 	 * @return string One of the STATE_* constants.
 	 */
-	public function state( Goal $goal, GoalResult $result ) {
+	public function state( Goal $goal, GoalResult $result, $completion = null ) {
 		if ( ! $result->eligible() ) {
 			return GoalResult::REASON_GOAL_INACTIVE === $result->reason()
 				? self::STATE_INACTIVE
 				: self::STATE_UNAVAILABLE;
+		}
+
+		if ( is_array( $completion ) && empty( $completion['can_complete'] ) ) {
+			return self::STATE_COMPLETION_LIMIT;
 		}
 
 		if ( $result->completed() ) {
@@ -107,17 +122,19 @@ final class MessageEngine {
 	/**
 	 * Render the message for a goal evaluation.
 	 *
-	 * @param Goal                  $goal   Goal.
-	 * @param GoalResult            $result Evaluation result.
-	 * @param array<string, mixed>  $extra  Extra variables (quantity,
+	 * @param Goal                     $goal       Goal.
+	 * @param GoalResult               $result     Evaluation result.
+	 * @param array<string, mixed>     $extra      Extra variables (quantity,
 	 *                                      remaining_quantity, campaign_name
 	 *                                      overrides). Values may be ints,
 	 *                                      floats or strings; formatted by
 	 *                                      the engine.
+	 * @param array<string, mixed>|null $completion Optional completion status
+	 *                                      (Phase 36) forwarded to state().
 	 * @return string
 	 */
-	public function message( Goal $goal, GoalResult $result, array $extra = array() ) {
-		$state    = $this->state( $goal, $result );
+	public function message( Goal $goal, GoalResult $result, array $extra = array(), $completion = null ) {
+		$state    = $this->state( $goal, $result, $completion );
 		$template = $this->template( $goal, $state );
 
 		return $this->render( $template, $goal, $result, $extra );
@@ -146,6 +163,15 @@ final class MessageEngine {
 
 			case self::STATE_UNAVAILABLE:
 				return __( 'This offer is not available for your cart.', 'goalcart' );
+
+			// Phase 36 (per-user completion limit): the shopper already
+			// completed this goal the configured maximum number of times —
+			// the plain "you've done this" copy, never the reward-unlocked
+			// claim (no reward can be granted again). The per-goal Display
+			// `completed_message` override deliberately does NOT apply here:
+			// it celebrates a fresh completion, which this is not.
+			case self::STATE_COMPLETION_LIMIT:
+				return __( 'You have already completed this goal.', 'goalcart' );
 
 			case self::STATE_NEARLY_COMPLETE:
 				return '' !== $message

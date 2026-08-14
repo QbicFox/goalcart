@@ -72,6 +72,10 @@ class Schema {
 	 * (raw upsell interaction log) and upsell_stats (per-product upsell
 	 * aggregates).
 	 *
+	 * Phase 36 (Per-User Goal Completion Limit) adds `goal_completions` —
+	 * the authoritative server-side completion history (one row per goal
+	 * per order per identity) backing the per-user completion limit.
+	 *
 	 * @return string[]
 	 */
 	public static function tables() {
@@ -84,6 +88,7 @@ class Schema {
 			'goal_attribution',
 			'upsell_events',
 			'upsell_stats',
+			'goal_completions',
 		);
 	}
 
@@ -106,6 +111,7 @@ class Schema {
 		$goal_attrib    = self::table( 'goal_attribution' );
 		$upsell_events  = self::table( 'upsell_events' );
 		$upsell_stats   = self::table( 'upsell_stats' );
+		$completions    = self::table( 'goal_completions' );
 		return array(
 			$campaigns => "CREATE TABLE {$campaigns} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -140,6 +146,7 @@ class Schema {
 				display_settings longtext,
 				priority int(10) unsigned NOT NULL DEFAULT 10,
 				exclusive tinyint(1) NOT NULL DEFAULT 0,
+				max_completions_per_user int(10) unsigned DEFAULT NULL,
 				campaign_id bigint(20) unsigned DEFAULT NULL,
 				menu_order int(10) unsigned NOT NULL DEFAULT 0,
 				starts_at datetime DEFAULT NULL,
@@ -303,6 +310,41 @@ class Schema {
 				PRIMARY KEY  (id),
 				UNIQUE KEY product_id (product_id)
 			) ENGINE=InnoDB {$collate};",
+
+			// Phase 36 (Per-User Goal Completion Limit): the authoritative
+			// server-side completion history. One row per (goal, order,
+			// identity) — a successful completion cycle is recorded here at
+			// order time, and the per-user completion count is a plain
+			// COUNT over this table. Deliberately separate from the
+			// analytics/revenue event logs: those are client-reported or
+			// analytics-gated + deduped, so they can never back an
+			// enforcement limit. `user_id` is the order customer id
+			// (NULL for guests); `session_id` is the anonymous Session id
+			// for guest orders (both nullable — an order resolves to at
+			// least one). The `order_goal` unique key makes recording
+			// exactly-once per order (both payment hooks + webhook replays
+			// are no-ops) and is the race-condition backstop; the
+			// `goal_user` / `goal_session` composite keys serve the
+			// per-identity COUNT queries.
+			$completions => "CREATE TABLE {$completions} (
+				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+				goal_id bigint(20) unsigned DEFAULT NULL,
+				user_id bigint(20) unsigned DEFAULT NULL,
+				session_id varchar(32) DEFAULT NULL,
+				order_id bigint(20) unsigned DEFAULT NULL,
+				reward_type varchar(20) DEFAULT NULL,
+				meta longtext,
+				created_at datetime NOT NULL,
+				PRIMARY KEY  (id),
+				KEY goal_id (goal_id),
+				KEY user_id (user_id),
+				KEY session_id (session_id),
+				KEY order_id (order_id),
+				KEY created_at (created_at),
+				KEY goal_user (goal_id, user_id),
+				KEY goal_session (goal_id, session_id),
+				UNIQUE KEY order_goal (order_id, goal_id)
+			) ENGINE=InnoDB {$collate};",
 		);
 	}
 
@@ -340,6 +382,7 @@ class Schema {
 		$goal_attrib    = self::table( 'goal_attribution' );
 		$upsell_events  = self::table( 'upsell_events' );
 		$upsell_stats   = self::table( 'upsell_stats' );
+		$completions    = self::table( 'goal_completions' );
 
 		return array(
 			$campaigns => array(
@@ -402,6 +445,15 @@ class Schema {
 			$upsell_stats => array(
 				'product_id' => array( 'product_id' ),
 			),
+			$completions => array(
+				'goal_id'      => array( 'goal_id' ),
+				'user_id'      => array( 'user_id' ),
+				'session_id'   => array( 'session_id' ),
+				'order_id'     => array( 'order_id' ),
+				'created_at'   => array( 'created_at' ),
+				'goal_user'    => array( 'goal_id', 'user_id' ),
+				'goal_session' => array( 'goal_id', 'session_id' ),
+			),
 		);
 	}
 
@@ -426,6 +478,7 @@ class Schema {
 	public static function unique_keys() {
 		$revenue_events = self::table( 'revenue_events' );
 		$upsell_events  = self::table( 'upsell_events' );
+		$completions    = self::table( 'goal_completions' );
 
 		return array(
 			$revenue_events => array(
@@ -433,6 +486,9 @@ class Schema {
 			),
 			$upsell_events => array(
 				'order_dedup' => array( 'event_type', 'order_id' ),
+			),
+			$completions => array(
+				'order_goal' => array( 'order_id', 'goal_id' ),
 			),
 		);
 	}
@@ -465,6 +521,7 @@ class Schema {
 		$revenue_daily   = self::table( 'revenue_daily' );
 		$goal_attrib     = self::table( 'goal_attribution' );
 		$upsell_events   = self::table( 'upsell_events' );
+		$completions     = self::table( 'goal_completions' );
 
 		return array(
 			array(
@@ -530,6 +587,19 @@ class Schema {
 			array(
 				'table'             => $upsell_events,
 				'name'              => 'fk_goalcart_upsell_goal',
+				'column'            => 'goal_id',
+				'references'        => $goals,
+				'referenced_column' => 'id',
+				'on_delete'         => 'SET NULL',
+			),
+			// Phase 36 (Per-User Goal Completion Limit): the completion
+			// history references the goal with the project's standard
+			// SET NULL semantics — deleting a goal preserves the history
+			// rows (they stay countable as orphaned records, matching the
+			// analytics event log convention).
+			array(
+				'table'             => $completions,
+				'name'              => 'fk_goalcart_completions_goal',
 				'column'            => 'goal_id',
 				'references'        => $goals,
 				'referenced_column' => 'id',

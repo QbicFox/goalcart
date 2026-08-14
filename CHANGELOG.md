@@ -9,6 +9,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
+- **Per-user goal completion limit (Phase 36)** — every goal now has a
+  configurable `max_completions_per_user` ("تعداد دفعات تکمیل توسط هر
+  کاربر"): how many times the same shopper may complete the goal. Null =
+  unlimited (the default, so existing goals behave exactly as before).
+  - **Server-side enforcement** — a new `goalcart_goal_completions`
+    history table (one row per goal per order per identity) records a
+    completion when a paid order meets a goal; `CompletionService`
+    counts per user (logged-in by `user_id`, guests by the existing
+    anonymous session stamped on the order at checkout) and enforces
+    the limit transactionally (row lock + fresh count inside a
+    transaction, plus an `order_goal` unique key that makes replays and
+    double-submits exactly-once).
+  - **Reward protection** — an exhausted goal drops out of the reward
+    engine's evaluation (and the gift-claim gate), so no reward is ever
+    granted past the limit; previously granted rewards are revoked by
+    the normal reconcile pass.
+  - **Admin UI** — the goal builder gains a "Completion limit" section
+    (unlimited switch + positive-integer input, zero/negative/decimals
+    rejected) and the goals list shows the limit per goal.
+  - **Storefront** — the progress payload carries the shopper's
+    `completion` status (limit / count / remaining / can_complete); a
+    reached limit renders the "You have already completed this goal."
+    state with the reward chip locked, and the optional progress cache
+    is keyed by identity so counts never leak between shoppers.
+  - **Tests** — `tests/completion-limit-test.php` (64 checks): limit 1 /
+    3 / unlimited, different users and goals, guests, reward protection,
+    order-time recording, goal-reset independence, the message copy and
+    the payload fragment.
+
 - **Best Recommendation + `NaN%` fix on `/optimization/goals`** — the
   Recommendations page now shows the store administrator exactly ONE
   optimization recommendation — the single best one:

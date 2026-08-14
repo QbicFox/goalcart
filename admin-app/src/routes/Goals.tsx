@@ -96,6 +96,28 @@ function targetLabel(goal: Goal): string {
 }
 
 /**
+ * The per-user completion limit label (Phase 36): "Unlimited", "Once",
+ * "3 times" — the compact form the list column shows.
+ */
+function completionLimitLabel(goal: Goal): string {
+  const limit = goal.max_completions_per_user;
+
+  if (limit === null || limit === undefined) {
+    return __('Unlimited', 'goalcart');
+  }
+
+  if (limit === 1) {
+    return __('Once', 'goalcart');
+  }
+
+  return sprintf(
+    /* translators: %d: number of times. */
+    __('%d times', 'goalcart'),
+    limit
+  );
+}
+
+/**
  * Goals (Phase 9: Goal Management UI). Professional goal CRUD list:
  *
  * - columns: name, type, reward, status, priority, schedule, completion
@@ -351,9 +373,20 @@ export default function Goals() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Tooltip title={__('Analytics arrive in a later phase.', 'goalcart')}>
-                        <Typography variant="body2" color="text.disabled">
-                          —
+                      <Tooltip
+                        title={
+                          goal.max_completions_per_user === null ||
+                          goal.max_completions_per_user === undefined
+                            ? __('The shopper may complete this goal as many times as they want.', 'goalcart')
+                            : sprintf(
+                                /* translators: %d: number of times. */
+                                __('Each shopper may complete this goal at most %d times.', 'goalcart'),
+                                goal.max_completions_per_user
+                              )
+                        }
+                      >
+                        <Typography variant="body2">
+                          {completionLimitLabel(goal)}
                         </Typography>
                       </Tooltip>
                     </TableCell>

@@ -61,6 +61,7 @@ function emptyGoal(): GoalInput {
     reward_meta: { stacking: 'none', label: '' },
     priority: 10,
     exclusive: false,
+    max_completions_per_user: null,
     starts_at: null,
     ends_at: null,
     display_settings: {},
@@ -113,6 +114,7 @@ function goalToInput(goal: Goal): GoalInput {
     },
     priority: goal.priority,
     exclusive: Boolean(goal.exclusive),
+    max_completions_per_user: goal.max_completions_per_user ?? null,
     starts_at: goal.starts_at,
     ends_at: goal.ends_at,
     display_settings: goal.display_settings ?? {},
@@ -377,7 +379,70 @@ export default function GoalBuilder() {
           <DisplayFields values={values} onValueChange={patch} />
         </SectionCard>
 
-        {/* 7. Priority & conflicts (Phase 26) */}
+        {/* 7. Per-user completion limit (Phase 36) */}
+        <SectionCard
+          title={__('Completion limit', 'goalcart')}
+          description={__(
+            'How many times the same shopper may complete this goal. Each completion cycle grants the reward once; after the limit is reached the goal no longer appears as completable for that shopper.',
+            'goalcart'
+          )}
+        >
+          <Stack spacing={2}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={values.max_completions_per_user === null}
+                  onChange={(event) =>
+                    patch({
+                      max_completions_per_user: event.target.checked
+                        ? null
+                        : Math.max(1, values.max_completions_per_user ?? 1),
+                    })
+                  }
+                />
+              }
+              label={
+                <Box>
+                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                    {__('Unlimited', 'goalcart')}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {__(
+                      'The shopper may complete this goal as many times as they want (default for existing goals).',
+                      'goalcart'
+                    )}
+                  </Typography>
+                </Box>
+              }
+            />
+            {values.max_completions_per_user !== null && (
+              <TextField
+                label={__('Times each user can complete', 'goalcart')}
+                type="number"
+                fullWidth
+                sx={{ maxWidth: 220 }}
+                slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                value={values.max_completions_per_user}
+                helperText={__(
+                  'A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side.',
+                  'goalcart'
+                )}
+                onChange={(event) => {
+                  const raw = event.target.value;
+                  // Only positive integers are valid (reject negatives,
+                  // decimals and empty) — empty keeps the previous value so
+                  // the field never locks the goal to zero.
+                  const parsed = /^[1-9]\d*$/.test(raw) ? Number(raw) : null;
+                  patch({
+                    max_completions_per_user: parsed ?? values.max_completions_per_user,
+                  });
+                }}
+              />
+            )}
+          </Stack>
+        </SectionCard>
+
+        {/* 8. Priority & conflicts (Phase 26) */}
         <SectionCard
           title={__('Priority & conflicts', 'goalcart')}
           description={__(

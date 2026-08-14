@@ -383,6 +383,7 @@ final class Goal {
 		$this->ends_at           = isset( $data['ends_at'] ) ? (string) $data['ends_at'] : null;
 		$this->priority          = isset( $data['priority'] ) ? (int) $data['priority'] : 10;
 		$this->exclusive         = ! empty( $data['exclusive'] );
+		$this->max_completions_per_user = $this->limit_int( isset( $data['max_completions_per_user'] ) ? $data['max_completions_per_user'] : null );
 		$this->reward_type       = isset( $data['reward_type'] ) ? (string) $data['reward_type'] : null;
 		$this->reward_value      = isset( $data['reward_value'] ) ? (float) $data['reward_value'] : null;
 		$this->reward_max_value  = isset( $data['reward_max_value'] ) ? (float) $data['reward_max_value'] : null;
@@ -449,6 +450,26 @@ final class Goal {
 		return array_values( array_filter( array_map( 'intval', $value ), function ( $id ) {
 			return $id > 0;
 		} ) );
+	}
+
+	/**
+	 * Cast a completion-limit value: positive int or null (unlimited).
+	 *
+	 * Empty strings, zero and negative values all normalize to null — the
+	 * unlimited default — so a stored '' (dbDelta on some installs) or an
+	 * explicit 0 can never accidentally lock a goal to zero completions.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return int|null
+	 */
+	protected function limit_int( $value ) {
+		if ( null === $value || '' === $value || false === $value ) {
+			return null;
+		}
+
+		$limit = (int) $value;
+
+		return $limit > 0 ? $limit : null;
 	}
 
 	/**
@@ -736,6 +757,15 @@ final class Goal {
 	 */
 	public function is_exclusive() {
 		return $this->exclusive;
+	}
+
+	/**
+	 * Maximum completion cycles per user (Phase 36). Null = unlimited.
+	 *
+	 * @return int|null
+	 */
+	public function max_completions_per_user() {
+		return $this->max_completions_per_user;
 	}
 
 	/**

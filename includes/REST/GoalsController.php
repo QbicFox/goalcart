@@ -506,6 +506,15 @@ class GoalsController extends BaseController {
 				'type'    => 'boolean',
 				'default' => false,
 			),
+			// Phase 36 (Per-User Goal Completion Limit): how many times the
+			// same user may complete this goal (null = unlimited). The
+			// schema rejects zero, negatives and non-integers; the
+			// repository additionally normalizes anything < 1 to null.
+			'max_completions_per_user' => array(
+				'type'    => array( 'integer', 'null' ),
+				'default' => null,
+				'minimum' => 1,
+			),
 			'campaign_id'       => array(
 				'type'              => 'integer',
 				'default'           => 0,
@@ -821,6 +830,9 @@ class GoalsController extends BaseController {
 			'reward_meta'       => isset( $row['reward_meta'] ) && is_array( $row['reward_meta'] ) ? $row['reward_meta'] : array(),
 			'priority'          => (int) $row['priority'],
 			'exclusive'         => ! empty( $row['exclusive'] ),
+			'max_completions_per_user' => isset( $row['max_completions_per_user'] ) && '' !== $row['max_completions_per_user']
+				? max( 1, (int) $row['max_completions_per_user'] )
+				: null,
 			'campaign_id'       => ! empty( $row['campaign_id'] ) ? (int) $row['campaign_id'] : null,
 			'menu_order'        => (int) $row['menu_order'],
 			'starts_at'         => ! empty( $row['starts_at'] ) ? (string) $row['starts_at'] : null,

@@ -11,6 +11,7 @@ use GoalCart\Analytics\Tracker;
 use GoalCart\Cart\CartIntegration;
 use GoalCart\REST\GiftController;
 use GoalCart\Goals\CartContext;
+use GoalCart\Goals\CompletionService;
 use GoalCart\Goals\ConflictResolver;
 use GoalCart\Goals\Goal;
 use GoalCart\Goals\GoalEngine;
@@ -125,6 +126,19 @@ class FrontendController extends BaseController {
 	protected $templates;
 
 	/**
+	 * Per-user completion limit service (Phase 36): the payload carries
+	 * each goal's completion status (limit / count / remaining /
+	 * can_complete) for the current shopper, and a goal the shopper has
+	 * already completed the maximum number of times renders the
+	 * limit-reached state with its reward shown locked — the storefront
+	 * only ever reflects the authoritative server state. Null when not
+	 * injected (bare constructions skip the completion block).
+	 *
+	 * @var CompletionService|null
+	 */
+	protected $completions;
+
+	/**
 	 * Progress payload transient TTL in seconds (performance_caching).
 	 *
 	 * @var int
@@ -143,8 +157,11 @@ class FrontendController extends BaseController {
 	 * @param Settings          $settings        Settings service.
 	 * @param RewardEngine|null $reward_engine   Reward engine (Phase 26
 	 *                                           display/grant parity).
+	 * @param TemplateEngine|null $templates     Template engine (Phase 32).
+	 * @param CompletionService|null $completions Per-user completion limit
+	 *                                           service (Phase 36).
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, ProductRecommendationEngine $recommendations, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null ) {
+	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, ProductRecommendationEngine $recommendations, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null, ?CompletionService $completions = null ) {
 		$this->engine           = $engine;
 		$this->goals            = $goals;
 		$this->cart_integration = $cart_integration;
@@ -153,6 +170,7 @@ class FrontendController extends BaseController {
 		$this->settings         = $settings;
 		$this->reward_engine    = $reward_engine;
 		$this->templates        = $templates;
+		$this->completions      = $completions;
 	}
 
 	/**
@@ -254,6 +272,15 @@ class FrontendController extends BaseController {
 		// progress; the conflict flag lets them show the honest reward
 		// state (a suppressed reward never renders as unlocked).
 		$resolved = $this->resolve_conflicts( $goals, $context );
+
+		// Phase 36 (per-user completion limit): one batched completion-count
+		// query primes the per-request cache so the per-goal shape below
+		// never runs N individual counts on the storefront. The completion
+		// status is user-specific, so the optional progress transient is
+		// keyed by identity too (see progress_cache_key).
+		if ( null !== $this->completions ) {
+			$this->completions->context_statuses( $goals, $context );
+		}
 
 		foreach ( $goals as $goal ) {
 			$result = $this->engine->evaluate( $goal, $context );
@@ -515,6 +542,12 @@ class FrontendController extends BaseController {
 			$goal_ids[] = $goal->id();
 		}
 
+		// Phase 36: the payload now carries per-user completion status, so
+		// the cache key MUST include the identity — a cached payload can
+		// never serve another shopper's completion counts (Phase 21 rule:
+		// identity is part of the cache key).
+		$identity = null !== $this->completions ? $this->completions->context_identity( $context ) : array();
+
 		return 'goalcart_progress_' . md5(
 			wp_json_encode(
 				array(
@@ -525,6 +558,7 @@ class FrontendController extends BaseController {
 						$context->distinct_product_count(),
 						$context->total_weight(),
 					),
+					'identity'    => $identity,
 					'goals'       => $goal_ids,
 					'behavior'    => $this->settings->get( 'default_goal_behavior', 'all' ),
 					'conflict'    => $this->settings->get( 'conflict_resolution', ConflictResolver::MODE_CUMULATIVE ),
@@ -565,6 +599,23 @@ class FrontendController extends BaseController {
 
 		$resolved = $this->templates()->resolve_goal( $goal );
 
+		// Phase 36 (per-user completion limit): the shopper's completion
+		// status for this goal (completion_limit / completion_count /
+		// remaining_completions / can_complete). Null when the service is
+		// absent (bare constructions). When the shopper can no longer
+		// complete the goal, the reward renders locked (the conflict
+		// fragment is overridden — a limit-reached reward must never look
+		// claimable) and the message switches to the limit copy.
+		$completion    = $this->completion_status( $goal, $context );
+		$limit_reached = is_array( $completion ) && empty( $completion['can_complete'] );
+
+		if ( $limit_reached ) {
+			$conflict = array(
+				'resolved' => false,
+				'reason'   => 'completion_limit',
+			);
+		}
+
 		return array(
 			'goal_id'      => $goal->id(),
 			'campaign_id'  => $goal->campaign_id(),
@@ -582,19 +633,44 @@ class FrontendController extends BaseController {
 			'remaining'    => $result->remaining(),
 			'percentage'   => $result->percentage(),
 			'completed'    => $result->completed(),
-			'state'        => $this->messages->state( $goal, $result ),
-			'message'      => $this->messages->message( $goal, $result, $extra ),
+			'state'        => $this->messages->state( $goal, $result, $completion ),
+			'message'      => $this->messages->message( $goal, $result, $extra, $completion ),
 			'reward'       => $this->reward( $goal, ! $full_reward_meta ),
 			'suggestions'  => $this->suggestions_on() ? $this->recommendations->recommend( $goal, $result, $context ) : array(),
 			'reward_state' => $result->reward_state(),
 			'eligible'     => $result->eligible(),
 			'reason'       => $result->reason(),
 			'conflict'     => $conflict,
+			// Phase 36 (per-user completion limit): the shopper's own
+			// completion status — the storefront reflects it, the server
+			// enforces it.
+			'completion'   => $completion,
 			// Phase 32 (countdown): the goal's deadline as a local-time ISO
 			// string ('' when the goal has no end time). The storefront JS
 			// renders a live countdown chip from it.
 			'countdown_end' => $this->countdown_end( $goal ),
 		);
+	}
+
+	/**
+	 * The shopper's completion status for a goal (Phase 36).
+	 *
+	 * Null when the completion service is absent (bare constructions). The
+	 * per-request count cache is primed in handle_progress() with one
+	 * batched query, so the per-goal reads here are cache hits on the
+	 * storefront; the admin preview path pays one COUNT per goal (admin
+	 * only, acceptable).
+	 *
+	 * @param Goal        $goal    Goal.
+	 * @param CartContext $context Cart snapshot.
+	 * @return array<string, mixed>|null
+	 */
+	protected function completion_status( Goal $goal, CartContext $context ) {
+		if ( null === $this->completions ) {
+			return null;
+		}
+
+		return $this->completions->context_status( $goal, $context );
 	}
 
 	/**

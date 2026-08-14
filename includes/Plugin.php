@@ -26,6 +26,7 @@ use GoalCart\Cart\CartIntegration;
 use GoalCart\Compatibility;
 use GoalCart\Database\Installer;
 use GoalCart\Frontend\ProgressUI;
+use GoalCart\Goals\CompletionService;
 use GoalCart\Goals\GoalEngine;
 use GoalCart\Goals\GoalRepository;
 use GoalCart\Goals\MessageEngine;
@@ -193,6 +194,13 @@ final class Plugin {
 		// / assisted revenue, AOV, reward cost and profit impact.
 		$this->hooks()->register( $this->container->get( AttributionEngine::class ) );
 
+		// Per-user goal completion limit (Phase 36): the order-lifecycle
+		// hooks — stamping the anonymous session on checkout and recording
+		// one completion cycle per met goal when the order is paid — keep
+		// the server-side completion history in sync with every order
+		// (idempotent via the order_goal unique key).
+		$this->hooks()->register( $this->container->get( CompletionService::class ) );
+
 		// Aggregation & performance (Phase 33.3): the daily aggregator
 		// pre-computes revenue_daily + upsell_stats on a bounded cron job, and
 		// the revenue repository serves the cached summaries (overview, goal
@@ -281,6 +289,21 @@ final class Plugin {
 		// the reward engine can decide rewards on the live cart.
 		$this->container->singleton( GoalRepository::class, function () {
 			return new GoalRepository();
+		} );
+
+		// Per-user goal completion limit (Phase 36): the authoritative
+		// completion service — per-user counts over the goal_completions
+		// history, the can_complete eligibility rule, and the
+		// transactional order-time recording — consumed by the reward
+		// engine (exhausted goals grant nothing), the storefront payload
+		// (completion status per goal) and the order hooks (recording).
+		$this->container->singleton( CompletionService::class, function ( Container $container ) {
+			return new CompletionService(
+				$container->get( Settings::class ),
+				$container->get( GoalRepository::class ),
+				$container->get( GoalEngine::class ),
+				$container->get( Session::class )
+			);
 		} );
 
 		// Message engine (Phase 13): stateless dynamic-message template
@@ -436,7 +459,9 @@ final class Plugin {
 				$container->get( GoalEngine::class ),
 				$container->get( GoalRepository::class ),
 				$container->get( Settings::class ),
-				$container->get( CartIntegration::class )
+				$container->get( CartIntegration::class ),
+				null,
+				$container->get( CompletionService::class )
 			);
 		} );
 
@@ -503,7 +528,8 @@ final class Plugin {
 				$container->get( ProductRecommendationEngine::class ),
 				$container->get( Settings::class ),
 				$container->get( RewardEngine::class ),
-				$container->get( TemplateEngine::class )
+				$container->get( TemplateEngine::class ),
+				$container->get( CompletionService::class )
 			);
 		} );
 

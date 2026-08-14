@@ -534,8 +534,13 @@ try {
 
 	// ---- Progress caching (P18-T04) ----
 	// Build the context through the same integration (memoized per cart +
-	// args, so the key in the test matches the controller's).
+	// args, so the key in the test matches the controller's). Phase 36:
+	// the key also embeds the shopper identity — the payload carries
+	// per-user completion status, so a cached payload can never serve
+	// another shopper's counts (the container's CompletionService resolves
+	// the same anonymous session the controller reads).
 	$context = $ci->context( $cart );
+	$identity = $container->get( \GoalCart\Goals\CompletionService::class )->context_identity( $context );
 	$cache_key = 'goalcart_progress_' . md5( wp_json_encode( array(
 		'ctx'         => array(
 			$context->subtotal(),
@@ -544,6 +549,7 @@ try {
 			$context->distinct_product_count(),
 			$context->total_weight(),
 		),
+		'identity'    => $identity,
 		'goals'       => array( $goal_a, $goal_b ),
 		'behavior'    => 'all',
 		'conflict'    => 'cumulative',

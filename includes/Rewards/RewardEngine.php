@@ -9,6 +9,7 @@ namespace GoalCart\Rewards;
 
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Goals\CartContext;
+use GoalCart\Goals\CompletionService;
 use GoalCart\Goals\ConflictResolver;
 use GoalCart\Goals\Goal;
 use GoalCart\Goals\GoalEngine;
@@ -134,6 +135,17 @@ final class RewardEngine {
 	protected $resolver;
 
 	/**
+	 * Per-user completion limit service (Phase 36). When injected, an
+	 * exhausted goal (completion count >= its per-user limit) drops out of
+	 * evaluation entirely — it can never grant a reward, and any reward it
+	 * previously granted is revoked by the normal reconcile pass. Null in
+	 * bare/test constructions keeps the pre-limit behavior.
+	 *
+	 * @var CompletionService|null
+	 */
+	protected $completions;
+
+	/**
 	 * Reward results for the current request: goal_id => RewardResult.
 	 *
 	 * @var array<int, RewardResult>|null
@@ -164,14 +176,19 @@ final class RewardEngine {
 	 * @param Settings|null          $settings         Plugin settings.
 	 * @param CartIntegration|null   $cart_integration Cart integration service.
 	 * @param ConflictResolver|null  $resolver         Conflict resolver (Phase 26).
+	 * @param CompletionService|null $completions      Per-user completion limit
+	 *                                                  service (Phase 36); null
+	 *                                                  disables the limit gate
+	 *                                                  (bare/test constructions).
 	 */
-	public function __construct( ?GoalEngine $engine = null, ?GoalRepository $repository = null, ?Settings $settings = null, ?CartIntegration $cart_integration = null, ?ConflictResolver $resolver = null ) {
+	public function __construct( ?GoalEngine $engine = null, ?GoalRepository $repository = null, ?Settings $settings = null, ?CartIntegration $cart_integration = null, ?ConflictResolver $resolver = null, ?CompletionService $completions = null ) {
 		$this->engine           = null !== $engine ? $engine : new GoalEngine();
 		$this->repository       = $repository;
 		$this->settings         = $settings;
 		$this->registry         = new RewardApplicatorRegistry();
 		$this->cart_integration = $cart_integration;
 		$this->resolver         = null !== $resolver ? $resolver : new ConflictResolver();
+		$this->completions      = $completions;
 	}
 
 	/**
@@ -329,6 +346,15 @@ final class RewardEngine {
 				: CartContext::from_cart( $cart, array( 'exclude_shipping' => true ) );
 
 			$goals = $this->repository->active_goals();
+
+			// Phase 36 (per-user completion limit): an exhausted goal (this
+			// identity already completed it the configured maximum times) is
+			// dropped before evaluation, so it can never grant its reward.
+			// Unlimited goals (the default for every existing goal) pass
+			// through without a single count query.
+			if ( null !== $this->completions ) {
+				$goals = $this->completions->available_goals( $goals, $context );
+			}
 
 			// Pass 1 — evaluate every completed goal's reward WITHOUT the
 			// stacking guard: the conflict-resolution pass decides the
@@ -815,6 +841,14 @@ final class RewardEngine {
 		$result = $this->engine->evaluate( $goal, $context );
 
 		if ( ! $result->eligible() || GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+			return false;
+		}
+
+		// Phase 36 (per-user completion limit): an exhausted goal must not
+		// grant its gift — the same authoritative gate the cart sync
+		// applies (an identity that already completed the goal the
+		// configured maximum times cannot claim another reward).
+		if ( null !== $this->completions && ! $this->completions->context_allows( $goal, $context ) ) {
 			return false;
 		}
 

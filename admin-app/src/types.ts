@@ -212,6 +212,8 @@ export interface GoalInput {
   priority: number;
   /** Mutually exclusive goal (Phase 26): when reached, lower-priority goals are skipped. */
   exclusive: boolean;
+  /** Per-user completion limit (Phase 36): null = unlimited. */
+  max_completions_per_user: number | null;
   starts_at: string | null;
   ends_at: string | null;
   display_settings: DisplaySettingsInput;
@@ -256,6 +258,8 @@ export interface Goal {
   priority: number;
   /** Mutually exclusive goal (Phase 26): when reached, lower-priority goals are skipped. */
   exclusive: boolean;
+  /** Per-user completion limit (Phase 36): null = unlimited. */
+  max_completions_per_user: number | null;
   campaign_id: number | null;
   menu_order: number;
   starts_at: string | null;

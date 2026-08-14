@@ -26,6 +26,7 @@ A target the customer can reach (see `docs/PRODUCT_SPEC.md` §2.1). Stored in th
 | display settings | `display_settings` | JSON — title, message, completed message, icon, plus the pluggable-template-engine keys `template_id` + `template_settings` (the legacy `template` key is kept as the engine's pre-engine alias) |
 | priority | `priority` | `int(10) unsigned`, default `10` — conflict resolution (Phase 26) |
 | exclusive | `exclusive` | `tinyint(1)`, default `0` — mutually exclusive goal: when reached, lower-priority goals are skipped (Phase 26) |
+| per-user completion limit | `max_completions_per_user` | `int(10) unsigned`, nullable — how many times the same shopper may complete this goal; `NULL` = unlimited (Phase 36) |
 | schedule | `starts_at` / `ends_at` | `datetime`, nullable — independent scheduling |
 | campaign membership | `campaign_id` + `menu_order` | `menu_order` expresses milestone ordering inside a campaign (Phase 10) |
 | limits | `limits` | JSON — e.g. per-customer, per-session, stack limits |
@@ -161,6 +162,35 @@ transients (`goalcart_revenue_cache_version`) and invalidates them on order paym
 changes, goal CRUD (`goalcart_goals_changed`), product saves and the aggregation run
 (`goalcart_revenue_aggregated`).
 
+### 1.8 Goal Completion (Phase 36)
+
+Server-side completion history — the authoritative record backing the per-user completion limit.
+Stored in `goalcart_goal_completions`, written by `GoalCart\Goals\CompletionService` when a paid
+order meets a goal (one row per goal per order per identity). Deliberately separate from the
+analytics/revenue event logs: those are client-reported or analytics-gated + deduped, so they can
+never back an enforcement limit.
+
+| Domain field | Column | Notes |
+|---|---|---|
+| id | `id` | `bigint(20) unsigned AUTO_INCREMENT` |
+| goal | `goal_id` | FK → `goals.id`, `SET NULL` |
+| customer | `user_id` | logged-in order customer id, `NULL` for guests |
+| guest session | `session_id` | anonymous `Session` id (32-char), `NULL` for logged-in orders |
+| order | `order_id` | WooCommerce order id — the `order_goal` unique key makes recording exactly-once per order |
+| reward | `reward_type` | the goal's reward type at completion (informational) |
+| extra | `meta` | `longtext` JSON, reserved |
+| timestamp | `created_at` | `datetime`, site timezone |
+
+**Write path (Phase 36):** `woocommerce_checkout_create_order` stamps the anonymous session id
+on the order (`_goalcart_session`); `woocommerce_payment_complete` + `woocommerce_order_status_completed`
+record one completion per met goal for the order's identity (idempotent — the `order_goal` unique
+key makes replays no-ops). For a limited goal the count + insert run inside a transaction with a
+row lock on the goal (`SELECT ... FOR UPDATE`), so concurrent requests cannot exceed the limit.
+The per-user count is a plain indexed `COUNT(*)` over `goal_id + user_id` / `goal_id + session_id`
+(`goal_user` / `goal_session` composite keys). Progress (the current cart cycle) and the completion
+count (successful cycles) stay separate: recording never touches progress, and progress resets
+never touch this table.
+
 ---
 
 ## 2. Schema summary
@@ -175,6 +205,7 @@ changes, goal CRUD (`goalcart_goals_changed`), product saves and the aggregation
 | `{prefix}goalcart_goal_attribution` | Per-order goal attribution (Phase 33.1) | `order_id`, `goal_id`, `session_id`, `model`, `created_at` + unique `order_goal_model` |
 | `{prefix}goalcart_upsell_events` | Upsell interaction log (Phase 33.1) | `event_type`, `goal_id`, `product_id`, `order_id`, `session_id`, `created_at` + composite `product_event` + unique `order_dedup` |
 | `{prefix}goalcart_upsell_stats` | Per-product upsell aggregates (Phase 33.1) | unique `product_id` |
+| `{prefix}goalcart_goal_completions` | Per-user completion history (Phase 36) | `goal_id`, `user_id`, `session_id`, `order_id`, `created_at` + composite `goal_user` / `goal_session` + unique `order_goal` |
 
 All tables: InnoDB, `$wpdb->get_charset_collate()`, `bigint(20) unsigned AUTO_INCREMENT` PKs,
 `decimal(19,4)` for money, `datetime` in the **site timezone** (`current_time()`), `longtext` for
@@ -192,6 +223,7 @@ structured JSON. This mirrors the reference plugin's conventions exactly.
 | `fk_goalcart_daily_goal` | `revenue_daily.goal_id` | `goals.id` | `SET NULL` |
 | `fk_goalcart_attribution_goal` | `goal_attribution.goal_id` | `goals.id` | `SET NULL` |
 | `fk_goalcart_upsell_goal` | `upsell_events.goal_id` | `goals.id` | `SET NULL` |
+| `fk_goalcart_completions_goal` | `goal_completions.goal_id` | `goals.id` | `SET NULL` |
 
 `SET NULL` preserves analytics history and standalone goals when a parent is deleted.
 
@@ -211,9 +243,10 @@ reference plugin's convention.
 
 ## 3. Database rules applied (P03-T03)
 
-1. **Reference migration strategy** — version-driven: `GOALCART_DB_VERSION` (now `0.5.0` —
-   Phase 33.1's five revenue/upsell tables on top of the Phase 12 template engine migration and
-   Phase 26's `goals.exclusive`) vs the `goalcart_db_version` option; `Installer::maybe_upgrade()`
+1. **Reference migration strategy** — version-driven: `GOALCART_DB_VERSION` (now `0.6.0` —
+   Phase 36's `goals.max_completions_per_user` column + `goal_completions` table on top of
+   Phase 33.1's five revenue/upsell tables, the Phase 12 template engine migration and Phase 26's
+   `goals.exclusive`) vs the `goalcart_db_version` option; `Installer::maybe_upgrade()`
    runs on `plugins_loaded` + `admin_init`; schema recreated idempotently via `dbDelta`; foreign
    keys added with `INFORMATION_SCHEMA`-guarded `ALTER TABLE` (safe to re-run; failures logged,
    never fatal).

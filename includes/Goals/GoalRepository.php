@@ -426,20 +426,19 @@ public function delete( $goal_id ) {
  * @return array<string, mixed>
  */
 protected function map_columns( array $data ) {
-	$row = array();
-
-	foreach ( array(
-		'name'              => 'text',
-		'description'       => 'textarea',
-		'status'            => 'key',
-		'type'              => 'key',
-		'target'            => 'float',
-		'calculation_mode'  => 'key',
-		'reward_type'       => 'key_nullable',
-		'reward_value'      => 'float_nullable',
-		'reward_max_value'  => 'float_nullable',
-		'priority'          => 'int',
-		'exclusive'         => 'bool',
+	$row = array();		foreach ( array(
+			'name'              => 'text',
+			'description'       => 'textarea',
+			'status'            => 'key',
+			'type'              => 'key',
+			'target'            => 'float',
+			'calculation_mode'  => 'key',
+			'reward_type'       => 'key_nullable',
+			'reward_value'      => 'float_nullable',
+			'reward_max_value'  => 'float_nullable',
+			'priority'          => 'int',
+			'exclusive'         => 'bool',
+			'max_completions_per_user' => 'int_nullable',
 		'campaign_id'       => 'campaign',
 		'menu_order'        => 'int',
 		'starts_at'         => 'datetime_nullable',
@@ -494,6 +493,19 @@ protected function sanitize_column( $type, $value ) {
 
 		case 'int':
 			return (int) $value;
+
+		case 'int_nullable':
+			// Phase 36 (Per-User Goal Completion Limit): positive int or
+			// null (unlimited). Empty values and non-positive ints
+			// normalize to null so a payload can never lock a goal to
+			// zero completions.
+			if ( null === $value || '' === $value ) {
+				return null;
+			}
+
+			$limit = (int) $value;
+
+			return $limit > 0 ? $limit : null;
 
 		case 'bool':
 			return (bool) $value;
