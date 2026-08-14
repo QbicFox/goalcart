@@ -2611,9 +2611,6 @@
             "How many times goal widgets were seen.": [
                 "چند بار ویجت‌های هدف دیده شدند."
             ],
-            "Incremental Revenue": [
-                "درآمد افزایشی"
-            ],
             "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the Goal Cart model: progressed\/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once.": [
                 "درآمد افزایشی همان درآمد مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که اهداف ایجاد کرده‌اند. تخصیص از مدل گال کارت پیروی می‌کند: اهداف پیشرفته\/تکمیل‌شده مستقیم‌اند، اهداف فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
             ],
@@ -2848,14 +2845,20 @@
             "%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page.": [
                 "%s از هدفهای سبد خرید استفاده میکند — مانند «%s بیشتر برای ارسال رایگان» — تا سبدهای بزرگتری تشویق شوند. هدفها، پاداشها و نوارهای پیشرفت از صفحهٔ «اهداف» پیکربندی میشوند."
             ],
-            "1. Goal Optimization": [
-                "۱. بهینه‌سازی هدف"
+            "Upsells": [
+                "پیشنهاد محصول"
             ],
-            "2. Smart Upsells": [
-                "۲. پیشنهاد هوشمند محصول"
+            "1. Recommendations": [
+                "۱. پیشنهادها"
             ],
-            "3. Analytics": [
-                "۳. تحلیل‌ها"
+            "2. Upsells": [
+                "۲. پیشنهاد محصول"
+            ],
+            "3. Sales Performance": [
+                "۳. عملکرد فروش"
+            ],
+            "Additional Sales Value": [
+                "ارزش فروش اضافی"
             ],
             "Added to cart": [
                 "افزوده‌شده به سبد خرید"
@@ -2931,6 +2934,12 @@
             ],
             "Upsell Performance": [
                 "عملکرد پیشنهاد فروش"
+            ],
+            "Recommendations helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells.": [
+                "پیشنهادها به شما کمک می‌کنند هدف‌ها و پیکربندی پاداش بهتری انتخاب کنید. این بخش محصول پیشنهاد نمی‌دهد — پیشنهاد محصول به مشتریان در بخش «پیشنهاد محصول» است."
+            ],
+            "Upsells shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product.": [
+                "پیشنهاد محصول نشان می‌دهد کدام محصولات به مشتریان در رسیدن به هدف‌ها کمک می‌کنند و فروش بیشتری ایجاد می‌کنند — خرید، فروش و سود تخمینی هر محصول."
             ],
             "Upsell Performance shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product.": [
                 "عملکرد پیشنهاد فروش نشان می‌دهد کدام محصولات به مشتریان در رسیدن به هدف‌ها کمک می‌کنند و فروش بیشتری ایجاد می‌کنند — خرید، فروش و سود تخمینی هر محصول."

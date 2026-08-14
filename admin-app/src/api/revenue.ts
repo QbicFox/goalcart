@@ -123,7 +123,7 @@ export async function fetchGoalRecommendations(
 /**
  * Apply a recommended threshold to a goal (UPSELL_REFACTOR §10/§41) via
  * `POST /goalcart/v1/revenue/goal-recommendations/apply`. This is the only
- * write path for Goal Optimization — it changes only the goal's target,
+ * write path for Recommendations — it changes only the goal's target,
  * records the feedback-loop event and invalidates the revenue caches.
  */
 export async function applyGoalRecommendation(

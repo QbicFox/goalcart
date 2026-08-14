@@ -552,21 +552,22 @@ function CandidateRow({
 }
 
 /**
- * Goal Optimization (Phase 33.4 engine — UPSELL_REFACTOR §4/§5/§8).
+ * Recommendations (Phase 33.4 engine — UPSELL_REFACTOR §4/§5/§8;
+ * UICHANGES.md §40 label).
  *
  * The admin-facing surface that answers "what Goal configuration should
  * I use?" — the `GET /goalcart/v1/revenue/goal-recommendations` payload:
  * analyzed store data, ranked candidate thresholds with score/confidence/
  * expected impact/reasons, and the top recommendation. It recommends Goal
  * targets and reward economics only — never products (product
- * recommendations belong to Smart Upsells, §11/§59). The primary card
- * answers "what threshold should I use and why?" (§9: Current Goal →
- * Recommended Goal → Why?), the raw scoring details live behind the
- * Advanced details expander, and an unavailable expected profit explains
- * how to enable it (§24). Applying a recommendation is always an explicit
- * admin action (ConfirmDialog → the dedicated apply endpoint, which
- * changes only the goal target and records the feedback-loop event) — the
- * engine itself never modifies a goal (§10/§41).
+ * recommendations belong to Upsells, §11/§59). The primary card answers
+ * "what threshold should I use and why?" (§9: Current Goal → Recommended
+ * Goal → Why?), the raw scoring details live behind the Advanced details
+ * expander, and an unavailable expected profit explains how to enable it
+ * (§24). Applying a recommendation is always an explicit admin action
+ * (ConfirmDialog → the dedicated apply endpoint, which changes only the
+ * goal target and records the feedback-loop event) — the engine itself
+ * never modifies a goal (§10/§41).
  */
 export default function Recommendations() {
   const { range } = useDateRange();
@@ -632,7 +633,7 @@ export default function Recommendations() {
 
   return (
     <PageContainer
-      title={__('Goal Optimization', 'goalcart')}
+      title={__('Recommendations', 'goalcart')}
       description={__(
         'Improve your Goals using store performance data — which target and reward configuration to use, and why.',
         'goalcart'
@@ -641,7 +642,7 @@ export default function Recommendations() {
       {/* §39: the one-line distinction that removes the conceptual confusion. */}
       <Alert severity="info" variant="outlined" icon={<TipsAndUpdatesIcon fontSize="small" />}>
         {__(
-          'Goal Optimization helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsell Performance.',
+          'Recommendations helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells.',
           'goalcart'
         )}
       </Alert>

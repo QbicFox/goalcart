@@ -38,6 +38,7 @@ import {
 import { fetchRevenueOverview } from '../api/revenue';
 import EmptyState from '../components/EmptyState';
 import EstimatedProfitCard from '../components/revenue/EstimatedProfitCard';
+import FunnelVisual from '../components/revenue/FunnelVisual';
 import PageContainer from '../components/PageContainer';
 import RevenueToolbar from '../components/revenue/RevenueToolbar';
 import StatRow from '../components/revenue/StatRow';
@@ -199,6 +200,42 @@ const TREND_PRIMARY: Array<{ value: TrendMetric; label: string }> = [
   { value: 'orders', label: __('Purchased Orders', 'goalcart') },
   { value: 'completions', label: __('Goal Completions', 'goalcart') },
 ];
+
+/**
+ * The one canonical funnel (UICHANGES.md §18): views → progressed →
+ * completed → purchased. Every stage shows its count and the percentage
+ * carried from the previous stage, so the largest drop-off reads at a
+ * glance. Only the Goal-detail drawer renders this same funnel again,
+ * scoped to a specific goal (§18/§24).
+ */
+function CustomerJourneyFunnel({ funnel }: { funnel: RevenueSummary['funnel'] }) {
+  return (
+    <Card variant="outlined">
+      <CardContent>
+        <Typography variant="h6" component="h3" gutterBottom>
+          {__('Customer Journey', 'goalcart')}
+        </Typography>
+        <FunnelVisual
+          showTransitions
+          funnel={{
+            views: funnel.views,
+            progressed: funnel.progressed,
+            completed: funnel.completed,
+            converted: funnel.converted,
+            completion_rate: funnel.completion_rate,
+            conversion_rate: funnel.conversion_rate,
+          }}
+        />
+        <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
+          {__(
+            'A completion means the customer reached the goal target. A purchase means a qualifying order was actually associated with the goal.',
+            'goalcart'
+          )}
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+}
 
 /**
  * Sales Performance (Phase 4 redesign of the Revenue Overview).
@@ -420,7 +457,7 @@ export default function RevenueOverview() {
                         selected={visibleMetrics.includes('incremental')}
                         onChange={() => toggleMetric('incremental')}
                       >
-                        {__('Incremental Revenue', 'goalcart')}
+                        {__('Additional Sales Value', 'goalcart')}
                       </ToggleButton>
                     )}
                   </Stack>
@@ -501,7 +538,7 @@ export default function RevenueOverview() {
                       <Line
                         yAxisId="revenue"
                         dataKey="incremental_revenue"
-                        name={__('Incremental Revenue', 'goalcart')}
+                        name={__('Additional Sales Value', 'goalcart')}
                         stroke={COLORS.warning}
                         strokeWidth={2}
                         strokeDasharray="4 3"
@@ -514,6 +551,12 @@ export default function RevenueOverview() {
               </Box>
             </CardContent>
           </Card>
+
+          {/* Customer journey — the canonical funnel (§18): views →
+              progressed → completed → purchased, with the percentage each
+              stage carries from the previous one so the biggest drop-off is
+              visible at a glance. */}
+          <CustomerJourneyFunnel funnel={summary.funnel} />
 
           {/* What happened? — deterministic insight cards (§15). */}
           {insights.length > 0 && (

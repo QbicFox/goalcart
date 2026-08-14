@@ -172,10 +172,11 @@ const EDUCATION_DISMISSED_KEY = 'goalcart:educationDismissed';
 /**
  * "How Goal Cart works" education card (UPSELL_REFACTOR §40).
  *
- * One-time, dismissible introduction to the three-part product model:
- * Goal Optimization (choose better Goals) → Smart Upsells (help customers
- * reach them) → Analytics (measure purchases, sales and profit). Only
- * shown on the Dashboard and only until dismissed.
+ * One-time, dismissible introduction to the three-part product model
+ * (UICHANGES.md §4/§42): Sales Performance (measure purchases, sales and
+ * profit) → Recommendations (choose better Goals) → Upsells (help
+ * customers reach them). Only shown on the Dashboard and only until
+ * dismissed.
  */
 function HowGoalCartWorks() {
   const [dismissed, setDismissed] = useState<boolean>(() => {
@@ -204,15 +205,15 @@ function HowGoalCartWorks() {
 
   const steps: Array<{ title: string; text: string }> = [
     {
-      title: __('1. Goal Optimization', 'goalcart'),
+      title: __('1. Recommendations', 'goalcart'),
       text: __('Find better Goal targets and reward configurations using your store data.', 'goalcart'),
     },
     {
-      title: __('2. Smart Upsells', 'goalcart'),
+      title: __('2. Upsells', 'goalcart'),
       text: __('Recommend products that help customers reach those Goals.', 'goalcart'),
     },
     {
-      title: __('3. Analytics', 'goalcart'),
+      title: __('3. Sales Performance', 'goalcart'),
       text: __('Measure purchases, sales and estimated profit — then optimize again.', 'goalcart'),
     },
   ];

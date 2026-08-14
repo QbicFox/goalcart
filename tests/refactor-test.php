@@ -22,8 +22,9 @@
  *  - Upsell-assisted completions: `AttributionEngine::goal_metrics()`
  *    carries `upsell_assisted` / `upsell_assisted_rate` / `upsell_funnel`
  *    (completions whose session also engaged the smart-upsell panel)
- *  - Terminology sweep: the admin labels/navigation/redirects use Goal
- *    Optimization / Upsell Performance / Influenced sales
+ *  - Terminology sweep: the admin labels/navigation/redirects use the
+ *    UICHANGES.md §30/§40 canonical terms — Recommendations / Upsells /
+ *    Influenced sales / Additional Sales Value — and never the old labels
  *
  * All writes happen inside a single database transaction that is rolled
  * back; absence of residue is asserted afterwards. Fixtures use goal ids
@@ -380,20 +381,26 @@ $goals_tsx    = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src
 $overview_tsx = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/RevenueOverview.tsx' );
 $analytics_tsx = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/Analytics.tsx' );
 
-check( 'navigation uses Goal Optimization', false !== strpos( $navigation, "label: __('Goal Optimization', 'goalcart')" ) );
-check( 'navigation uses Upsell Performance', false !== strpos( $navigation, "label: __('Upsell Performance', 'goalcart')" ) );
+check( 'navigation uses Recommendations', false !== strpos( $navigation, "label: __('Recommendations', 'goalcart')" ) );
+check( 'navigation uses Upsells', false !== strpos( $navigation, "label: __('Upsells', 'goalcart')" ) );
+check( 'navigation drops the old Goal Optimization label', false === strpos( $navigation, 'Goal Optimization' ) );
+check( 'navigation drops the old Upsell Performance label', false === strpos( $navigation, 'Upsell Performance' ) );
 check( 'navigation drops Smart Recommendations label', false === strpos( $navigation, 'Smart Recommendations' ) );
 check( 'navigation drops Upsell Analytics label', false === strpos( $navigation, 'Upsell Analytics' ) );
 check( 'App redirects old recommendations route', false !== strpos( $app_tsx, "path: '/revenue/recommendations'" ) && false !== strpos( $app_tsx, '/optimization/goals' ) );
 check( 'App redirects old upsells route', false !== strpos( $app_tsx, "path: '/revenue/upsells'" ) && false !== strpos( $app_tsx, '/optimization/upsells' ) );
-check( 'Recommendations page titled Goal Optimization', false !== strpos( $reco_tsx, "title={__('Goal Optimization', 'goalcart')}" ) );
+check( 'Recommendations page titled Recommendations', false !== strpos( $reco_tsx, "title={__('Recommendations', 'goalcart')}" ) );
 check( 'Recommendations page drops Smart Recommendations title', false === strpos( $reco_tsx, "Smart Recommendations" ) );
-check( 'Upsell Analytics page titled Upsell Performance', false !== strpos( $upsell_tsx, "title={__('Upsell Performance', 'goalcart')}" ) );
+check( 'Upsell Analytics page titled Upsells', false !== strpos( $upsell_tsx, "title={__('Upsells', 'goalcart')}" ) );
 check( 'Upsell Analytics page drops old title', false === strpos( $upsell_tsx, "title={__('Upsell Analytics', 'goalcart')}" ) );
 check( 'Goal Performance reads upsell_assisted', false !== strpos( $goals_tsx, 'upsell_assisted' ) );
-check( 'Goal Performance has Goal Optimization drawer section', false !== strpos( $goals_tsx, "__('Goal Optimization', 'goalcart')" ) );
+check( 'Goal Performance drawer uses the Recommendations section', false !== strpos( $goals_tsx, "SectionTitle>{__('Recommendations', 'goalcart')}" ) );
+check( 'Goal Performance drawer uses the Upsells section', false !== strpos( $goals_tsx, "SectionTitle>{__('Upsells', 'goalcart')}" ) );
+check( 'Goal Performance drawer drops Smart Upsells label', false === strpos( $goals_tsx, "__('Smart Upsells', 'goalcart')" ) );
 check( 'Revenue Overview labels Influenced sales', false !== strpos( $overview_tsx, "label={__('Influenced sales', 'goalcart')}" ) );
 check( 'Revenue Overview drops Influenced revenue', false === strpos( $overview_tsx, "label={__('Influenced revenue', 'goalcart')}" ) );
+check( 'Revenue Overview labels the trend series Additional Sales Value', false !== strpos( $overview_tsx, "__('Additional Sales Value', 'goalcart')" ) );
+check( 'Revenue Overview drops Incremental Revenue label', false === strpos( $overview_tsx, "__('Incremental Revenue', 'goalcart')" ) );
 check( 'Analytics labels Influenced sales', false !== strpos( $analytics_tsx, "label={__('Influenced sales', 'goalcart')}" ) );
 check( 'Analytics drops Influenced revenue', false === strpos( $analytics_tsx, "label={__('Influenced revenue', 'goalcart')}" ) );
 

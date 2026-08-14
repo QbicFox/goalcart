@@ -9,6 +9,40 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
+- **UICHANGES.md — Revenue & Analytics UX Consolidation** — closes the
+  remaining gaps of the Sales Performance redesign (`UICHANGES.md` §18/
+  §30/§36/§40):
+  - **Canonical funnel on Sales Performance Overview** (§18) — the
+    `Customer Journey` card (views → progressed → completed →
+    purchased) with the percentage each stage carries from the
+    previous one, so the largest drop-off reads at a glance. It is the
+    one store-wide funnel; the same funnel appears again only scoped
+    to a goal in the Goal Detail drawer. Data comes from the existing
+    overview payload's `summary.funnel` — no new request.
+  - **§30 terminology** — the trend's advanced toggle and series are
+    renamed **Incremental Revenue → Additional Sales Value**; the
+    page titles of the two Optimization engines now match the
+    navigation labels (**Goal Optimization → Recommendations**,
+    **Upsell Performance → Upsells**), with the copy that explained
+    the old names updated. The Goal Detail drawer's two engine
+    sections use the same canonical labels (**Goal Optimization →
+    Recommendations**, **Smart Upsells → Upsells**) and the legacy
+    Attribution Dashboard's revenue cards use the shared §30 labels
+    (Direct revenue / Assisted revenue / Influenced sales).
+    Completion Rate vs Purchase Rate stay distinct everywhere
+    (§22/§31).
+  - **Terminology test** — `tests/refactor-test.php` terminology sweep
+    updated to the canonical §30/§40 labels (Recommendations, Upsells,
+    Influenced sales, Additional Sales Value; old labels must be
+    absent), 81 checks; `tests/run-all.php` baseline bumped.
+  - **i18n (§36)** — POT regenerated; new navigation, education-card
+    and funnel/description strings translated to fa_IR and JED/MO
+    rebuilt (`tests/i18n-test.php` 53/53).
+  - **Docs** — `docs/revenue.md` rewritten for the Sales Performance
+    architecture: §30 terminology table, the canonical funnel, the
+    `/optimization/*` canonical routes (legacy `/revenue/*` redirects),
+    and a governing-spec note naming `UICHANGES.md`.
+
 - **UPSELL_REFACTOR — Goal Optimization & Upsell Performance** — the
   full `UPSELL_REFACTOR.md` task list: product-cost foundation,
   terminology, and the feedback loop:

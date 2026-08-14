@@ -2404,7 +2404,7 @@ msgstr "رسیدن به مبلغ یا تعداد محصولات مشخص."
 msgid "Reached dot color"
 msgstr "رنگ نقطهٔ رسیده"
 
-#: admin-app/src/components/layout/navigation.ts:53
+#: admin-app/src/components/layout/navigation.ts:61
 msgid "Recommendations"
 msgstr "پیشنهادها"
 
@@ -3903,10 +3903,6 @@ msgstr "چند بار مشتریان به آستانهٔ هدف رسیدند. ت
 msgid "How many times goal widgets were seen."
 msgstr "چند بار ویجت‌های هدف دیده شدند."
 
-#: admin-app/src/routes/RevenueOverview.tsx:408
-#: admin-app/src/routes/RevenueOverview.tsx:489
-msgid "Incremental Revenue"
-msgstr "درآمد افزایشی"
 
 #: admin-app/src/routes/RevenueOverview.tsx:632
 msgid "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the Goal Cart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once."
@@ -4250,17 +4246,26 @@ msgstr "مشتری‌ها با اهداف شما در تعامل هستند، ا
 msgid "%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page."
 msgstr "%s از هدفهای سبد خرید استفاده میکند — مانند «%s بیشتر برای ارسال رایگان» — تا سبدهای بزرگتری تشویق شوند. هدفها، پاداشها و نوارهای پیشرفت از صفحهٔ «اهداف» پیکربندی میشوند."
 
-#: admin-app/src/routes (UPSELL_REFACTOR i18n)
-msgid "1. Goal Optimization"
-msgstr "۱. بهینه‌سازی هدف"
+#: admin-app/src/components/layout/navigation.ts:62
+msgid "Upsells"
+msgstr "پیشنهاد محصول"
 
-#: admin-app/src/routes (UPSELL_REFACTOR i18n)
-msgid "2. Smart Upsells"
-msgstr "۲. پیشنهاد هوشمند محصول"
+#: admin-app/src/routes/Dashboard.tsx:208
+msgid "1. Recommendations"
+msgstr "۱. پیشنهادها"
 
-#: admin-app/src/routes (UPSELL_REFACTOR i18n)
-msgid "3. Analytics"
-msgstr "۳. تحلیل‌ها"
+#: admin-app/src/routes/Dashboard.tsx:212
+msgid "2. Upsells"
+msgstr "۲. پیشنهاد محصول"
+
+#: admin-app/src/routes/Dashboard.tsx:216
+msgid "3. Sales Performance"
+msgstr "۳. عملکرد فروش"
+
+#: admin-app/src/routes/RevenueOverview.tsx:460
+#: admin-app/src/routes/RevenueOverview.tsx:541
+msgid "Additional Sales Value"
+msgstr "ارزش فروش اضافی"
 
 #: admin-app/src/routes (UPSELL_REFACTOR i18n)
 msgid "Added to cart"
@@ -4361,6 +4366,14 @@ msgstr "پیشنهاد هوشمند محصول"
 #: admin-app/src/routes (UPSELL_REFACTOR i18n)
 msgid "Upsell Performance"
 msgstr "عملکرد پیشنهاد فروش"
+
+#: admin-app/src/routes/Recommendations.tsx:39
+msgid "Recommendations helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells."
+msgstr "پیشنهادها به شما کمک می‌کنند هدف‌ها و پیکربندی پاداش بهتری انتخاب کنید. این بخش محصول پیشنهاد نمی‌دهد — پیشنهاد محصول به مشتریان در بخش «پیشنهاد محصول» است."
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:228
+msgid "Upsells shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product."
+msgstr "پیشنهاد محصول نشان می‌دهد کدام محصولات به مشتریان در رسیدن به هدف‌ها کمک می‌کنند و فروش بیشتری ایجاد می‌کنند — خرید، فروش و سود تخمینی هر محصول."
 
 #: admin-app/src/routes (UPSELL_REFACTOR i18n)
 msgid "Upsell Performance shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product."

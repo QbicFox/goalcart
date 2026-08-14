@@ -69,14 +69,21 @@ const router = createHashRouter([
       { path: '/campaigns', element: lazyRoute(<Campaigns />) },
       { path: '/campaigns/new', element: lazyRoute(<CampaignBuilder />) },
       { path: '/campaigns/:id/edit', element: lazyRoute(<CampaignBuilder />) },
+      // UICHANGES.md §4/§39: the legacy Analytics page stays reachable at
+      // /analytics for backward compatibility (bookmarked URLs keep
+      // working) but is no longer a primary navigation destination — its
+      // useful functionality lives in Sales Performance (§25).
       { path: '/analytics', element: lazyRoute(<Analytics />) },
       { path: '/revenue', element: lazyRoute(<RevenueOverview />) },
       { path: '/revenue/goals', element: lazyRoute(<GoalPerformance />) },
+      // Attribution stays reachable at /revenue/attribution for backward
+      // compatibility but is not a primary navigation item (UICHANGES.md
+      // §26 — advanced attribution lives in the page drawers).
       { path: '/revenue/attribution', element: lazyRoute(<AttributionDashboard />) },
-      // UPSELL_REFACTOR §36: Optimization is the canonical home of the two
-      // engines — Goal Optimization decides the Goal, Upsell Performance
-      // measures product recommendations. The pre-refactor routes stay
-      // alive as redirects so bookmarked URLs never break (§37/§53).
+      // Optimization is the canonical home of the two engines —
+      // Recommendations (choose better Goal targets) and Upsells (product
+      // recommendations). The pre-refactor routes stay alive as redirects
+      // so bookmarked URLs never break.
       { path: '/optimization/goals', element: lazyRoute(<Recommendations />) },
       { path: '/optimization/upsells', element: lazyRoute(<UpsellAnalytics />) },
       { path: '/revenue/recommendations', element: <Navigate to="/optimization/goals" replace /> },

@@ -3,7 +3,6 @@ import BarChartIcon from '@mui/icons-material/BarChart';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import FlagIcon from '@mui/icons-material/Flag';
-import InsightsIcon from '@mui/icons-material/Insights';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import PaletteIcon from '@mui/icons-material/Palette';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -27,18 +26,18 @@ export interface NavSection {
 }
 
 /**
- * Goal Cart sidebar navigation (UPSELL_REFACTOR §36).
+ * Goal Cart sidebar navigation (UICHANGES.md §4 information architecture).
  *
- * The navigation makes the two-system product model obvious:
+ * Sales Performance is the single primary analytics destination — it
+ * answers "is Goal Cart helping my store sell more profitably?" with
+ * business outcomes. Optimization holds the two "what should I change?"
+ * engines: Recommendations (choose better Goal targets) and Upsells
+ * (which products to recommend).
  *
- *   Sales Performance — what happened (business outcomes).
- *   Optimization      — what to do next: Goal Optimization decides what
- *                       the Goal should be; Upsell Performance shows how
- *                       product recommendations helped customers reach
- *                       Goals (UPSELL_REFACTOR §59).
- *
- * Old routes are preserved through redirects (App.tsx), so bookmarked
- * URLs keep working (§37/§53).
+ * The legacy Analytics page (/analytics) and Attribution Dashboard
+ * (/revenue/attribution) stay reachable by direct URL for backward
+ * compatibility but are deliberately NOT primary navigation items
+ * (UICHANGES.md §25/§26/§39).
  */
 export const NAV_SECTIONS: NavSection[] = [
   {
@@ -54,19 +53,15 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { path: '/revenue', label: __('Overview', 'goalcart'), icon: BarChartIcon },
       { path: '/revenue/goals', label: __('Goal Performance', 'goalcart'), icon: LeaderboardIcon },
-      { path: '/analytics', label: __('Analytics', 'goalcart'), icon: InsightsIcon },
     ],
   },
   {
     title: __('Optimization', 'goalcart'),
     items: [
-      { path: '/optimization/goals', label: __('Goal Optimization', 'goalcart'), icon: TipsAndUpdatesIcon },
-      { path: '/optimization/upsells', label: __('Upsell Performance', 'goalcart'), icon: TrendingUpIcon },
+      { path: '/optimization/goals', label: __('Recommendations', 'goalcart'), icon: TipsAndUpdatesIcon },
+      { path: '/optimization/upsells', label: __('Upsells', 'goalcart'), icon: TrendingUpIcon },
     ],
   },
-  // The Attribution Dashboard stays reachable at /revenue/attribution for
-  // backward compatibility but is no longer a primary navigation item
-  // (Improvement.md §3 — advanced attribution lives in the page drawers).
   {
     title: __('Configuration', 'goalcart'),
     items: [

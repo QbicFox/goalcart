@@ -45,7 +45,7 @@ fails and needs attention.
 | profit-availability-test | 45 | cost sources, unavailable states |
 | purchase-metrics-test | 107 | funnel, purchase states, profit math, dedupe |
 | recommendation-test | 90 | goal-threshold recommendation engine |
-| refactor-test | 74 | UPSELL_REFACTOR: product-cost field, order snapshots, coverage, apply endpoint, upsell-assisted completions, terminology |
+| refactor-test | 81 | UPSELL_REFACTOR: product-cost field, order snapshots, coverage, apply endpoint, upsell-assisted completions, terminology (UICHANGES.md §30/§40 labels) |
 | rest-api-test | 142 | REST routes, duplicate/update/delete flows |
 | revenue-admin-test | 56 | admin payloads (overview/goals/analytics) |
 | revenue-foundation-test | 69 | revenue event recording |

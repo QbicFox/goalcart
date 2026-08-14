@@ -121,20 +121,24 @@ export default function AttributionDashboard() {
       ) : data && summary ? (
         <>
           <Box sx={{ display: 'grid', gridTemplateColumns: { md: 'repeat(3, 1fr)' }, gap: 2 }}>
+            {/* UICHANGES.md §30 — user-facing terminology for the attribution
+                model: Direct revenue / Assisted revenue / Influenced sales
+                (the same labels the Sales Performance advanced section and
+                the Goal Detail drawer use). Never the internal field names. */}
             <MetricCard
-              label={__('Goal-driven revenue', 'goalcart')}
+              label={__('Direct revenue', 'goalcart')}
               value={formatCurrency(summary.goal_driven_revenue)}
               icon={<PaymentsIcon fontSize="small" />}
               hint={__('Direct incremental value', 'goalcart')}
             />
             <MetricCard
-              label={__('Goal-assisted revenue', 'goalcart')}
+              label={__('Assisted revenue', 'goalcart')}
               value={formatCurrency(summary.goal_assisted_revenue)}
               icon={<AccountTreeIcon fontSize="small" />}
               hint={__('Pure-assisted order totals', 'goalcart')}
             />
             <MetricCard
-              label={__('Goal-influenced revenue', 'goalcart')}
+              label={__('Influenced sales', 'goalcart')}
               value={formatCurrency(summary.goal_influenced_revenue)}
               icon={<CallSplitIcon fontSize="small" />}
               hint={sprintf(

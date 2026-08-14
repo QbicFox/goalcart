@@ -222,7 +222,8 @@ function ProductDetailDialog({
 }
 
 /**
- * Upsell Performance (Phase 33.6 engine — UPSELL_REFACTOR §4/§32/§39).
+ * Upsells (Phase 33.6 engine — UPSELL_REFACTOR §4/§32/§39; UICHANGES.md
+ * §40 label).
  *
  * The customer-facing recommendation system's admin report: the
  * top-products upsell table from `GET /goalcart/v1/revenue/upsells?analytics=1`.
@@ -273,9 +274,9 @@ export default function UpsellAnalytics() {
 
   return (
     <PageContainer
-      title={__('Upsell Performance', 'goalcart')}
+      title={__('Upsells', 'goalcart')}
       description={__(
-        'Upsell Performance shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product.',
+        'Upsells shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product.',
         'goalcart'
       )}
     >

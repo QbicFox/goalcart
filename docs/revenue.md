@@ -212,17 +212,30 @@ zeroed empty summary.
 
 ## 6. Terminology
 
-Use these labels consistently (never present estimates as facts):
+The user-facing labels follow the `UICHANGES.md` §30 terminology table —
+internal/technical field names are never shown as primary UX. Never present
+estimates as facts:
 
 ```text
+Internal                User-facing
+goal_driven_revenue     Sales Attributed to Goal Cart
+goal_assisted_revenue   Assisted Sales
+goal_influenced_revenue Influenced Sales
+incremental_revenue     Additional Sales Value
+converted               Purchased Orders
+conversion_rate         Purchase Rate
+completion_rate         Completion Rate
+aov_analysis            Average Basket Increase
+estimated_profit        Estimated Profit
+
 Revenue              — plain order revenue
-Attributed Revenue   — goal-driven (direct incremental) revenue
-Assisted Revenue     — orders where a goal assisted but was not direct
-Incremental Revenue  — cart value growth attributed to goal exposure
 Observed Impact      — AOV before/after comparisons (no causality claimed)
 Reward Cost          — estimated cost of granted rewards
-Estimated Profit     — profit model; unavailable without margin data
 ```
+
+Two rates stay deliberately distinct everywhere: **Completion Rate**
+(`completed / views`) and **Purchase Rate** (`purchased / completed`) — a
+goal completion is never presented as a purchase (`UICHANGES.md` §22/§31).
 
 ## 7. Feature flags & developer hooks
 
@@ -319,7 +332,7 @@ layer — excluded without margin data.
   action.
 - `GET /goalcart/v1/revenue/cost-coverage` (admin-only, §25/§46) —
   catalog product-cost coverage (`costed_products` / `total_products` /
-  `coverage_pct` / `has_cost_data`) so the Goal Optimization UI can
+  `coverage_pct` / `has_cost_data`) so the Recommendations UI can
   explain why profit estimates may be unavailable.
 - Served through `RevenueRepository::goal_recommendations()` — the same
   generation-versioned transients; the existing invalidation (order
@@ -437,44 +450,70 @@ without touching the REST layer or the admin UI (P33-60).
 
 ---
 
-# Goal Cart — React Admin Revenue Section (Phase 33.6)
+# Goal Cart — React Admin Revenue Section (Phase 33.6 + UICHANGES.md)
 
-The Revenue Optimization admin section: five lazy-loaded React pages
-under a new `Revenue` navigation group, all sharing the existing admin
-conventions (date-range context + filter toolbar, skeleton loading,
-`EmptyState`, error Alerts, MUI RTL). Data flows through the cached
-Phase 33.3 `RevenueRepository` reads only — no new uncached queries.
+The admin analytics area is **Sales Performance** (`UICHANGES.md` §4/§6):
+one primary analytics destination answering "is Goal Cart helping my
+store sell more profitably?" — the Overview (four business KPI cards,
+trend, funnel, insights) and the Goal Performance comparison table —
+plus the **Optimization** engines (Recommendations for better Goal
+targets, Upsells for product recommendations). The legacy `Analytics`
+and Attribution Dashboard pages stay reachable by URL for backward
+compatibility but are not primary navigation items (§25/§26/§39).
+
+All pages share the existing admin conventions (date-range context +
+filter toolbar, skeleton loading, `EmptyState`, error Alerts, MUI RTL)
+and read through the cached Phase 33.3 `RevenueRepository` only — no
+new uncached queries.
 
 ## 1. Pages & data sources
 
 | Page | Route | REST endpoint | Repository read |
 | --- | --- | --- | --- |
-| Revenue Overview | `/revenue` | `GET /revenue/overview` | `overview()` + `daily_trend()` |
+| Overview (Sales Performance) | `/revenue` | `GET /revenue/overview` | `overview()` + `daily_trend()` |
 | Goal Performance | `/revenue/goals` | `GET /revenue/goals` | `goal_performance()` |
-| Attribution Dashboard | `/revenue/attribution` | `GET /revenue/attribution` | `overview()` |
-| Goal Optimization | `/revenue/recommendations` | `GET /revenue/goal-recommendations` + `POST /revenue/goal-recommendations/apply` | `goal_recommendations()` |
-| Upsell Performance | `/revenue/upsells` | `GET /revenue/upsells?analytics=1` + `GET /revenue/upsells/{id}` | `upsell_analytics()` / `upsell_product_detail()` |
+| Attribution Dashboard (legacy, not in primary nav) | `/revenue/attribution` | `GET /revenue/attribution` | `overview()` |
+| Recommendations | `/optimization/goals` | `GET /revenue/goal-recommendations` + `POST /revenue/goal-recommendations/apply` | `goal_recommendations()` |
+| Upsells | `/optimization/upsells` | `GET /revenue/upsells?analytics=1` + `GET /revenue/upsells/{id}` | `upsell_analytics()` / `upsell_product_detail()` |
 
-The three new routes (`/revenue/overview`, `/revenue/attribution`,
-`/revenue/goals`) live in the new admin-only `RevenueController`
+`/revenue/recommendations` and `/revenue/upsells` redirect to the
+Optimization routes so bookmarked URLs keep working (§39). The revenue
+routes (`/revenue/overview`, `/revenue/attribution`, `/revenue/goals`)
+live in the admin-only `RevenueController`
 (`includes/REST/RevenueController.php`) — manage_options-gated, per-user
 rate limited, `from`/`to`/`goal_id` validated through the arg schema, and
 served through the same generation-versioned transients as every other
 revenue read.
 
-## 2. Revenue Overview
+## 2. Revenue Overview (Sales Performance → Overview)
 
-KPIs (goal-influenced / goal-driven revenue, incremental cart value,
-AOV impact %, goal conversion rate, reward cost, estimated profit) plus:
+The first viewport answers the store owner's question in seconds
+(`UICHANGES.md` §42): exactly **four primary KPI cards** — Sales
+Attributed to Goal Cart (with a "How is this calculated?" panel),
+Average Basket Increase (labeled *Observed impact*), Purchased Orders
+and Estimated Profit (every data state, never a fabricated number).
+Below the KPIs:
 
-- **Daily revenue trend** — completions/conversions bars with revenue /
-  incremental-revenue lines, zero-filled over the window, today's live
-  bucket merged (`revenue_daily` + `AttributionEngine`).
+- **Daily revenue trend** — defaults to Attributed Sales + Purchased
+  Orders (Goal Completions toggle; Additional Sales Value behind the
+  Advanced toggle), zero-filled over the window, today's live bucket
+  merged (`revenue_daily` + `AttributionEngine`).
+- **The canonical funnel** (`UICHANGES.md` §18) — views → progressed →
+  completed → purchased with the percentage each stage carries from the
+  previous one, so the largest drop-off reads at a glance. This is the
+  only store-wide copy of the funnel; the same funnel appears again only
+  scoped to a single goal in the Goal Detail drawer.
+- **Deterministic business insights** (§17) — 2–3 plain-English cards
+  derived from the actual payload (purchases influenced, basket change,
+  completion→purchase drop-off, profit) — never an LLM, never causality.
 - **AOV impact panel** — store-wide vs goal-exposed vs non-exposed AOV
   with absolute + percentage change, labeled *observed impact* (never
   causality).
 - **Shipping panel** — average shipping, free-shipping share, orders
   with shipping and per-method averages.
+- **Advanced attribution** (§26/§30) — direct / assisted / influenced
+  sales, incremental cart value, attribution window and the
+  observed-impact disclaimer behind an accordion.
 
 ## 3. Goal Performance
 
@@ -485,8 +524,8 @@ Since the UPSELL_REFACTOR pass, each row also carries
 `upsell_assisted` / `upsell_assisted_rate` (completions whose session
 also engaged the smart-upsell panel — the "suggested products helped
 close the goal" signal, computed as distinct sessions in the goal's
-completion funnel that also have an upsell interaction). The Goal
-Optimization drawer and the Upsell Performance page surface this same
+completion funnel that also have an upsell interaction). The
+Recommendations drawer section and the Upsells page surface this same
 signal. Rows expand into the funnel visual + detail panel.
 
 ## 4. Attribution Dashboard
@@ -497,11 +536,11 @@ model revenue cards (plus distinct order count), incremental cart value
 profit-impact panel — which shows its `profit_reason` instead of a
 number when the store provides no margin data (revenue-only analytics).
 
-## 5. Goal Optimization (Goal Recommendation UI)
+## 5. Recommendations (Goal Recommendation UI)
 
-The Phase 33.4 payload rendered with the Phase 7 simplified presentation
-(`Improvement.md` §33–§34) — the same engine, the same endpoint, a
-business-first layout:
+The Phase 33.4 payload rendered with the simplified presentation
+(`Improvement.md` §33–§34 / `UICHANGES.md` §40) — the same engine, the
+same endpoint, a business-first layout:
 
 - **Top recommendation card** — the recommended goal target up front,
   a **"Confidence: High / Medium / Low"** label (tiered from the raw
@@ -532,10 +571,11 @@ business-first layout:
   cost data"), so "Not available" is explained instead of appearing
   arbitrary.
 
-## 6. Upsell Performance
+## 6. Upsells
 
 The top-products page (`upsell_analytics()` over the window) is
-**commercial-first** (Improvement.md §35): the first screen answers
+**commercial-first** (Improvement.md §35 / `UICHANGES.md` §40): the first
+screen answers
 *"which suggested products actually generate purchases and sales?"*.
 A summary strip leads with **Products / Purchased Orders / Sales /
 Conversion**, and the table's primary columns are **Product / Orders /
@@ -588,5 +628,17 @@ unavailable / partial / zero / negative states, never a blank card:
   aria-labels, interactive table rows are keyboard-activatable, and
   positive/negative states pair color with a text sign.
 - **i18n (§52)** — every label goes through `__()`/`sprintf()` with the
-  domain `goalcart`; new Phase 9 strings are translated to fa_IR and
-  the JED/MO artifacts rebuilt.
+  domain `goalcart`; new strings are translated to fa_IR and the
+  JED/MO artifacts rebuilt (`tests/i18n-test.php` gates coverage).
+
+## 8. Governing spec
+
+`UICHANGES.md` is the authoritative UX specification for this area
+(replaces the earlier `Improvement.md` initiative): the information
+architecture (§4), the four-KPI overview (§7–§15), the canonical funnel
+(§18), the commercial goal table (§19–§23), the Goal Detail drawer
+(§24), progressive disclosure of advanced attribution (§26–§28), the
+metric ownership map (§29), user-facing terminology (§30) and the
+empty/data states (§32–§33). The backend attribution model, profit
+methodology and caching are unchanged — this is a presentation/navigation
+redesign over the existing cached reads.

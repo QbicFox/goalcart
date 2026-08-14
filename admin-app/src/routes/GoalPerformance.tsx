@@ -176,12 +176,13 @@ function SectionTitle({ children }: { children: ReactNode }) {
 }
 
 /**
- * The Goal Optimization section of the goal detail drawer (UPSELL_REFACTOR
+ * The Recommendations section of the goal detail drawer (UPSELL_REFACTOR
  * §34): current target → recommended target → why → confidence → apply.
  *
- * Reads the same recommendation payload as the Goal Optimization page;
+ * Reads the same recommendation payload as the Recommendations page;
  * applying goes through the dedicated apply endpoint (only the target
- * changes) and records the feedback-loop event.
+ * changes) and records the feedback-loop event. The section title uses
+ * the canonical §40 label (Recommendations), matching the navigation.
  */
 function GoalOptimizationSection({ goalId, currentTarget }: { goalId: number; currentTarget: number }) {
   const queryClient = useQueryClient();
@@ -214,7 +215,7 @@ function GoalOptimizationSection({ goalId, currentTarget }: { goalId: number; cu
 
   return (
     <Box>
-      <SectionTitle>{__('Goal Optimization', 'goalcart')}</SectionTitle>
+      <SectionTitle>{__('Recommendations', 'goalcart')}</SectionTitle>
       <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.25 }}>
         {__('What target should this goal use — based on real store data.', 'goalcart')}
       </Typography>
@@ -429,12 +430,13 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
 
           <Divider />
 
-          {/* Smart Upsells (UPSELL_REFACTOR §34) — the goal's own upsell
-              funnel: impressions → clicks → adds → assisted completions →
+          {/* Upsells (UPSELL_REFACTOR §34) — the goal's own upsell funnel:
+              impressions → clicks → adds → assisted completions →
               purchases, all session+goal-scoped from the same event log
-              the Upsell Performance page reads. */}
+              the Upsells page reads. The section title uses the canonical
+              §40 label (Upsells), matching the navigation. */}
           <Box>
-            <SectionTitle>{__('Smart Upsells', 'goalcart')}</SectionTitle>
+            <SectionTitle>{__('Upsells', 'goalcart')}</SectionTitle>
             <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.25 }}>
               {__('Products recommended to customers who were working toward this goal.', 'goalcart')}
             </Typography>
@@ -454,8 +456,8 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
 
           <Divider />
 
-          {/* Goal Optimization (UPSELL_REFACTOR §34) — current vs
-              recommended target with an explicit apply action. */}
+          {/* Recommendations (UPSELL_REFACTOR §34) — current vs recommended
+              target with an explicit apply action. */}
           <GoalOptimizationSection goalId={row.goal_id} currentTarget={row.target} />
 
           <Divider />

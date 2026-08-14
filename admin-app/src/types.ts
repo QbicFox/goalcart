@@ -1052,7 +1052,8 @@ export interface RecommendationCandidate {
 
 /**
  * The `GET /goalcart/v1/revenue/goal-recommendations` payload — the
- * Smart Recommendations page's data source (Phase 33.4).
+ * Recommendations page's data source (Phase 33.4; UICHANGES.md §40
+ * label).
  */
 export interface GoalRecommendationsPayload {
   available: boolean;
