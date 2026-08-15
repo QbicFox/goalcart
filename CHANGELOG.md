@@ -986,6 +986,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **The Campaign preview dialog's forced template showed plain goal
+  cards instead of the chosen campaign template (milestone chain /
+  campaign progress).** When the admin picked a template in the dialog's
+  template dropdown for a campaign that has no template configured
+  itself, the override was passed to `PreviewWidget` as a goal-card
+  `templateOverride` — but `PreviewWidget` only applies that override
+  to standalone goal cards, and the server-side preview payload's
+  campaign group (which carries no template for such a campaign) still
+  wins the grouping, so the forced "Milestone chain" degraded to the
+  fallback per-goal cards and the merchant never saw the selected
+  campaign template. The dialog now synthesizes the campaign group
+  itself (`campaign_id` + name + the forced template id + its settings)
+  when a template is forced, so `PreviewWidget` renders the whole
+  milestone group through the chosen campaign template exactly like the
+  storefront would. `tests/frontend-test.php` gained a source-scan guard
+  for the synthesized group.
 - **WooCommerce cart page / add-to-cart returning HTTP 502 (nginx "Bad
   Gateway") on PHP 8.2+** — the Phase 36 completion-limit column was
   assigned in `Goal::from_array()` as a *dynamic* property

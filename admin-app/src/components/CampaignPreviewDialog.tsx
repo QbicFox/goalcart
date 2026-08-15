@@ -10,7 +10,7 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 
-import type { Campaign, CampaignGoal } from '../types';
+import type { Campaign, CampaignGoal, ProgressCampaign } from '../types';
 import PreviewControls from './preview/PreviewControls';
 import PreviewWidget from './preview/PreviewWidget';
 import { usePreviewDialog } from './preview/usePreviewDialog';
@@ -94,6 +94,25 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
     ? templateById(templates, 'campaign', controls.template)
     : undefined;
   const resolvedTemplate = controls.template || previewQuery.data?.campaigns?.[0]?.template || '';
+
+  // A forced campaign template synthesizes the campaign group, so
+  // PreviewWidget renders the whole milestone group through the chosen
+  // campaign template (e.g. the milestone chain) even when the campaign
+  // itself has no configured template. The payload only carries a group
+  // when the campaign already has one configured; without this, the
+  // override would fall through to per-goal cards (the goal-card
+  // template override path cannot express a campaign-scope template).
+  const campaignGroups: ProgressCampaign[] =
+    forcedTemplate && campaign
+      ? [
+          {
+            campaign_id: campaign.id,
+            name: campaign.name,
+            template: forcedTemplate.id,
+            settings: forcedTemplate.settings,
+          },
+        ]
+      : (previewQuery.data?.campaigns ?? []);
   const resolvedTemplateLabel =
     forcedTemplate?.label ??
     templateById(templates, 'campaign', resolvedTemplate)?.label ??
@@ -163,11 +182,9 @@ export default function CampaignPreviewDialog({ campaign, onClose }: CampaignPre
                       {' '}
                       <PreviewWidget
                         goals={goals}
-                        campaigns={previewQuery.data.campaigns}
+                        campaigns={campaignGroups}
                         currency={previewQuery.data.currency}
                         tokens={tokens}
-                        templateOverride={controls.template || undefined}
-                        settingsOverride={forcedTemplate?.settings}
                         rewardState={controls.rewardState}
                         animation={settings?.frontend_animation ?? true}
                       />

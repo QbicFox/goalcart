@@ -435,6 +435,16 @@ echo "\n== 8. Templates & appearance ==\n";
 $appearance_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/Appearance.tsx' );
 check( 'Appearance campaign preview stamps the sample campaign id on milestones', false !== strpos( $appearance_tsx, 'campaign_id: campaign.campaign_id' ) );
 
+// The Campaign preview dialog forces a campaign template by synthesizing
+// the campaign group (id + name + template + settings) instead of
+// passing it as a goal-card template override — PreviewWidget only
+// applies that override to standalone goal cards, so without the
+// synthesized group a forced "Milestone chain" would render plain
+// template-1 milestone cards. Source-scanned so that regression cannot
+// slip through silently.
+$campaign_dialog_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/components/CampaignPreviewDialog.tsx' );
+check( 'Campaign preview dialog synthesizes the forced campaign group', false !== strpos( $campaign_dialog_tsx, 'template: forcedTemplate.id' ) && false !== strpos( $campaign_dialog_tsx, 'campaign_id: campaign.id' ) );
+
 $config = $ui->frontend_config();
 check( 'config carries the template', isset( $config['template'] ) && 'template-1' === $config['template'] );
 check( 'config carries the animation flag', array_key_exists( 'animation', $config ) && true === $config['animation'] );

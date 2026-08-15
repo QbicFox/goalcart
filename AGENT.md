@@ -1166,9 +1166,15 @@ milestones were built with `campaign_id: 0` while the sample campaign
 carries `campaign_id: 999`, so `PreviewWidget`'s grouping never joined
 them into the campaign and the campaign renderer was never mounted.
 The page now stamps the sample campaign's id onto its sample milestones
-(`campaign_id: campaign.campaign_id`); the preview dialogs were already
-correct (server-side payload). `tests/frontend-test.php` gained a
-source-scan guard.
+(`campaign_id: campaign.campaign_id`). The campaign/Goal preview dialogs
+render the same way once the campaign group reaches `PreviewWidget`; the
+Campaign dialog additionally synthesizes the campaign group itself
+(campaign id + name + the forced template id + settings) when a template
+is forced in the dialog, so the chosen campaign template (e.g. the
+milestone chain) renders even for a campaign that has no template
+configured — the goal-card `templateOverride` path cannot express a
+campaign-scope template. `tests/frontend-test.php` gained source-scan
+guards for both.
 
 ---
 
