@@ -26,6 +26,51 @@ msgstr "٪ تخفیف"
 msgid "% off the eligible cart value"
 msgstr "٪ تخفیف از ارزش واجد شرایط سبد خرید"
 
+#: admin-app/src/components/CampaignPreviewDialog.tsx:141
+msgid "%1$d/%2$d milestones"
+msgstr "نقطهٔ عطف %1$d از %2$d"
+
+#: admin-app/src/routes/Goals.tsx:82
+msgid "%1$s (%2$s)"
+msgstr "%1$s (%2$s)"
+
+#: admin-app/src/components/revenue/FunnelVisual.tsx:78
+msgid "%1$s carries %2$s of the previous stage"
+msgstr "%1$s حامل %2$s از مرحلهٔ پیشین است"
+
+#: admin-app/src/routes/AttributionDashboard.tsx:146
+msgid "%1$s distinct orders"
+msgstr "%1$s سفارش متمایز"
+
+#: admin-app/src/routes/Analytics.tsx:303
+msgid "%1$s generated the highest attributed sales (%2$s)."
+msgstr "%1$s بیشترین فروش منتسب (%2$s) را ایجاد کرد."
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:259
+msgid "%1$s impressions · %2$s orders · %3$s conversion"
+msgstr "%1$s نمایش · %2$s سفارش · %3$s نرخ تبدیل"
+
+#: admin-app/src/routes/Analytics.tsx:286
+#: admin-app/src/routes/RevenueOverview.tsx:128
+msgid "%1$s of completed goals were followed by an attributed purchase."
+msgstr "%1$s از اهداف تکمیل‌شده با یک خرید منتسب دنبال شد."
+
+#: admin-app/src/routes/Analytics.tsx:259
+msgid "%1$s of customers who viewed a goal did not progress toward it."
+msgstr "%1$s از مشتریانی که یک هدف را دیدند، به سمت آن پیشرفت نکردند."
+
+#: admin-app/src/routes/Analytics.tsx:1007
+msgid "%1$s of eligible order value"
+msgstr "%1$s از ارزش سفارش واجد شرایط"
+
+#: admin-app/src/routes/RevenueOverview.tsx:351
+msgid "%1$s purchased orders"
+msgstr "%1$s سفارش خریداری‌شده"
+
+#: admin-app/src/routes/Dashboard.tsx:267
+msgid "%1$s purchases · %2$s sales"
+msgstr "%1$s خرید · %2$s فروش"
+
 #: admin-app/src/routes/Recommendations.tsx:404
 msgid "%d days"
 msgstr "%d روز"
@@ -52,9 +97,21 @@ msgstr "پیشرفت %d٪"
 msgid "%s (copy)"
 msgstr "رونوشت از %s"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "%s completion rate"
+msgstr "نرخ تکمیل %s"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "%s is your top performer"
+msgstr "%s بهترین عملکرد شماست"
+
 #: includes/Analytics/GoalRecommendationEngine.php:706
 msgid "%s of existing orders are within reach of this threshold (below it by up to %s%%)."
 msgstr "%s از سفارش‌های موجود در دسترس این آستانه هستند (تا %s٪ پایین‌تر از آن)."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "%s purchased orders"
+msgstr "%s سفارش خریداری‌شده"
 
 #: admin-app/src/routes/Dashboard.tsx:156
 msgid "%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page."
@@ -116,6 +173,10 @@ msgstr "بیشتر از ۱٫۵ برابر میانگین ارزش سفارش"
 #: includes/Templates/Goal/PercentageTemplate.php:43
 msgid "A big percent readout above the bar."
 msgstr "نمایش درصد بزرگ بالای نوار."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "A business summary of your Goals and Smart Upsells."
+msgstr "خلاصه‌ای تجاری از اهداف و پیشنهادهای خرید هوشمند شما."
 
 #: admin-app/src/routes/Analytics.tsx:671
 #: admin-app/src/routes/GoalPerformance.tsx:404
@@ -206,6 +267,10 @@ msgstr "افزودن کمپین"
 msgid "Add condition"
 msgstr "افزودن شرط"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Add costs"
+msgstr "افزودن هزینه‌ها"
+
 #: admin-app/src/routes/GoalBuilder.tsx:249
 #: admin-app/src/routes/Goals.tsx:204
 msgid "Add goal"
@@ -229,6 +294,10 @@ msgstr "برای برآورد سودآوری، دادهٔ قیمت تمام‌ش
 #: admin-app/src/routes/RevenueOverview.tsx:182
 msgid "Add product cost data to see the estimated profit of Goal Cart."
 msgstr "برای دیدن سود تخمینی گل کارت، دادهٔ قیمت تمام‌شده را اضافه کنید."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Add product costs to unlock Estimated Profit — Goal Cart never invents a margin."
+msgstr "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — گل کارت هرگز حاشیه سود را حدس نمی‌زند."
 
 #: includes/Frontend/ProgressUI.php:492
 msgid "Add to cart"
@@ -372,6 +441,10 @@ msgstr "ردیابی تحلیل‌ها"
 msgid "Analyzed store data"
 msgstr "داده‌های تحلیل‌شدهٔ فروشگاه"
 
+#: admin-app/src/routes/Analytics.tsx:579
+msgid "Analyzing: %1$s – %2$s"
+msgstr "در حال تحلیل: %1$s – %2$s"
+
 #: admin-app/src/routes/Settings.tsx:502
 msgid "Animate progress"
 msgstr "انیمیشن پیشرفت"
@@ -506,6 +579,10 @@ msgstr "پنهانشدن خودکار"
 #: admin-app/src/routes/RevenueOverview.tsx:378
 msgid "Average Basket Increase"
 msgstr "افزایش میانگین سبد خرید"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Average Order Value"
+msgstr "میانگین ارزش سفارش"
 
 #: admin-app/src/routes/Analytics.tsx:705
 msgid "Average Purchased Order"
@@ -851,6 +928,10 @@ msgstr "حالت فشرده فقط پیشرفت را نشان میدهد؛ حا�
 msgid "Compare"
 msgstr "مقایسه"
 
+#: admin-app/src/components/date-range/DateRangeFilter.tsx:130
+msgid "Compared with previous period (%1$s – %2$s)."
+msgstr "در مقایسه با دورهٔ قبلی (%1$s – %2$s)."
+
 #: admin-app/src/components/preview/PreviewControls.tsx:34
 msgid "Complete"
 msgstr "تکمیل"
@@ -870,6 +951,10 @@ msgstr "پیام تکمیل"
 #: admin-app/src/routes/Goals.tsx:290
 msgid "Completion"
 msgstr "تکمیل"
+
+#: admin-app/src/routes/Analytics.tsx:273
+msgid "Completion is strong, but purchase conversion is weak — only %1$s of completed goals were followed by an attributed purchase."
+msgstr "تکمیل قوی است، اما تبدیل به خرید ضعیف است — تنها %1$s از اهداف تکمیل‌شده با یک خرید منتسب دنبال شد."
 
 #: admin-app/src/routes/GoalBuilder.tsx:384
 msgid "Completion limit"
@@ -906,9 +991,17 @@ msgstr "شرط‌ها"
 msgid "Confidence"
 msgstr "اطمینان"
 
+#: admin-app/src/routes/GoalPerformance.tsx:273
+msgid "Confidence: %1$s"
+msgstr "اطمینان: %1$s"
+
 #: admin-app/src/components/layout/navigation.ts:66
 msgid "Configuration"
 msgstr "پیکربندی"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Configure Smart Upsells"
+msgstr "پیشنهادهای خرید هوشمند را پیکربندی کنید"
 
 #: admin-app/src/components/ConfirmDialog.tsx:67
 msgid "Confirm"
@@ -949,13 +1042,17 @@ msgstr "شعاع گوشه (پیکسل)"
 msgid "Cost data coverage"
 msgstr "پوشش قیمت تمام‌شده"
 
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:152
+msgid "Cost data coverage: %1$s — profit is calculated only for orders with complete cost data."
+msgstr "پوشش قیمت تمام‌شده: %1$s — سود فقط برای سفارش‌هایی با دادهٔ کامل قیمت تمام‌شده محاسبه می‌شود."
+
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:25
 msgid "Cost of goods field (_wc_cog_cost)"
 msgstr "فیلد بهای تمام‌شده (_wc_cog_cost)"
 
 #: includes/Admin/ProductCostField.php:113
 msgid "Cost per unit (Goal Cart)"
-msgstr ""
+msgstr "هزینهٔ هر واحد (هدف سبد خرید)"
 
 #: admin-app/src/routes/GoalPerformance.tsx:416
 msgid "Costs"
@@ -1056,6 +1153,10 @@ msgstr "نوع تخفیف کوپن"
 msgid "Coupon value"
 msgstr "ارزش کوپن"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Create Goal"
+msgstr "ایجاد هدف"
+
 #: admin-app/src/routes/CampaignBuilder.tsx:226
 msgid "Create campaign"
 msgstr "ایجاد کمپین"
@@ -1063,6 +1164,10 @@ msgstr "ایجاد کمپین"
 #: admin-app/src/routes/GoalBuilder.tsx:208
 msgid "Create goal"
 msgstr "ایجاد هدف"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Create your first Goal"
+msgstr "اولین هدف خود را بسازید"
 
 #: admin-app/src/routes/Dashboard.tsx:99
 msgid "Create your first goal to start increasing the average order value — progress bars and rewards appear on the storefront once a goal is active."
@@ -1088,6 +1193,14 @@ msgstr "هدف فعلی"
 #: admin-app/src/routes/Recommendations.tsx:199
 msgid "Current target"
 msgstr "آستانهٔ فعلی"
+
+#: admin-app/src/routes/GoalPerformance.tsx:313
+msgid "Current target %1$s → recommended target %2$s? This changes a production goal — the action is not reversible from here."
+msgstr "آستانهٔ فعلی %1$s → آستانهٔ پیشنهادی %2$s؟ این کار یک هدف در حال اجرا را تغییر می‌دهد — این اقدام از اینجا قابل بازگشت نیست."
+
+#: admin-app/src/routes/Recommendations.tsx:714
+msgid "Current target: %1$s"
+msgstr "آستانهٔ فعلی: %1$s"
 
 #: admin-app/src/routes/Settings.tsx:788
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:141
@@ -1127,6 +1240,14 @@ msgstr "مشتریان"
 msgid "Customers are interacting with your goals, but no attributed purchases have been recorded for this period."
 msgstr "مشتری‌ها با اهداف شما در تعامل هستند، اما در این بازهٔ زمانی خریدی مرتبط ثبت نشده است."
 
+#: admin-app/src/routes/RevenueOverview.tsx:105
+msgid "Customers interacting with Goal Cart spent %1$s less per order on average (observed impact)."
+msgstr "مشتریانی که با گل کارت تعامل داشتند، به‌طور میانگین %1$s کمتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
+
+#: admin-app/src/routes/RevenueOverview.tsx:100
+msgid "Customers interacting with Goal Cart spent %1$s more per order on average (observed impact)."
+msgstr "مشتریانی که با گل کارت تعامل داشتند، به‌طور میانگین %1$s بیشتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
+
 #: admin-app/src/routes/GoalPerformance.tsx:532
 msgid "Customers who progressed or completed the goal before ordering are direct; exposure-only sessions are assisted."
 msgstr "مشتریانی که پیش از سفارش به هدف پیشرفت کردند یا آن را تکمیل کردند، مستقیم هستند؛ نشست‌های فقط-مشاهده، کمکی هستند."
@@ -1135,6 +1256,10 @@ msgstr "مشتریانی که پیش از سفارش به هدف پیشرفت ک
 #: admin-app/src/routes/Appearance.tsx:485
 msgid "Customize how the cart progress UI looks on your storefront."
 msgstr "ظاهر رابط پیشرفت سبد خرید را در فروشگاه خود سفارشی کنید."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Daily attributed sales and goal completions trend"
+msgstr "روند روزانهٔ فروش منتسب و تکمیل‌های هدف"
 
 #: admin-app/src/routes/RevenueOverview.tsx:469
 msgid "Daily attributed sales and purchased orders trend"
@@ -1441,6 +1566,10 @@ msgstr "پایان در"
 msgid "Ends in"
 msgstr "پایان در"
 
+#: admin-app/src/routes/UpsellAnalytics.tsx:198
+msgid "Est. profit %1$s"
+msgstr "سود تخمینی %1$s"
+
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:89
 #: admin-app/src/routes/Analytics.tsx:197
 #: admin-app/src/routes/Analytics.tsx:711
@@ -1494,6 +1623,18 @@ msgstr "تخمینی، نه قطعی — بر پایهٔ داده‌های مو�
 #: admin-app/src/routes/Analytics.tsx:719
 msgid "Estimated, not guaranteed."
 msgstr "تخمینی، نه قطعی."
+
+#: admin-app/src
+msgid "Example: if the target is 10 items, a cart with 7 items is 70% of the way there."
+msgstr "مثال: اگر هدف ۱۰ عدد باشد، سبدی با ۷ عدد معادل ۷۰٪ مسیر هدف است."
+
+#: admin-app/src
+msgid "Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there."
+msgstr "مثال: اگر هدف ۱۰ کیلوگرم باشد، سبدی با ۷ کیلوگرم معادل ۷۰٪ مسیر هدف است."
+
+#: admin-app/src
+msgid "Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there."
+msgstr "مثال: اگر هدف ۲٬۰۰۰٬۰۰۰ باشد، سبدی با ۱٬۵۰۰٬۰۰۰ معادل ۷۵٪ مسیر هدف است."
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:99
 msgid "Excluded products"
@@ -1702,6 +1843,15 @@ msgstr "عملکرد فروش گل کارت"
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:210
 msgid "Goal Cart does not invent product costs."
 msgstr "گل کارت قیمت تمام‌شده را اختراع نمی‌کند."
+
+#: admin-app/src/routes/Analytics.tsx:318
+#: admin-app/src/routes/RevenueOverview.tsx:141
+msgid "Goal Cart generated an estimated profit of %1$s after reward and shipping costs."
+msgstr "گل کارت پس از کسر هزینه‌های پاداش و ارسال، سود تخمینی %1$s ایجاد کرد."
+
+#: admin-app/src/routes/RevenueOverview.tsx:83
+msgid "Goal Cart influenced %1$s purchases during this period."
+msgstr "گل کارت در این بازه بر %1$s خرید تأثیر گذاشت."
 
 #: includes/Compatibility.php:172
 msgid "Goal Cart is inactive because the site does not meet its requirements:"
@@ -1913,6 +2063,14 @@ msgstr "نحوهٔ نمایش مبالغ پولی در ویجت‌های فرو�
 msgid "How multiple active goals are presented when the shopper has no campaign."
 msgstr "نحوهٔ نمایش چند هدف فعال وقتی مشتری کمپینی ندارد."
 
+#: admin-app/src
+msgid "How often this product has actually led to an order when suggested."
+msgstr "نشان می‌دهد این محصول هنگام پیشنهاد، چقدر به ثبت سفارش منجر شده است."
+
+#: admin-app/src
+msgid "How related this product is to the items already in the customer’s cart."
+msgstr "میزان ارتباط این محصول با کالاهایی که مشتری در سبد خود دارد."
+
 #: admin-app/src/routes/Settings.tsx:724
 msgid "How suggested products are ordered (Phase 32 advanced upsell ranking)."
 msgstr "نحوهٔ مرتبسازی محصولات پیشنهادی (رتبهبندی فروش پیشرفتهٔ فاز ۳۲)."
@@ -1943,6 +2101,10 @@ msgstr "نمایش‌ها"
 #: admin-app/src/routes/Recommendations.tsx:596
 msgid "Improve your Goals using store performance data — which target and reward configuration to use, and why."
 msgstr "هدف‌های خود را با داده‌های عملکرد فروشگاه بهبود دهید — از کدام آستانه و پیکربندی پاداش استفاده کنید و چرا."
+
+#: admin-app/src
+msgid "In-stock products are prioritized."
+msgstr "محصولات موجود در انبار در اولویت قرار می‌گیرند."
 
 #: admin-app/src/routes/Campaigns.tsx:47
 #: admin-app/src/routes/Dashboard.tsx:129
@@ -1978,6 +2140,10 @@ msgstr "شامل مالیات‌ها"
 #: admin-app/src/routes/Settings.tsx:675
 msgid "Include virtual products"
 msgstr "شامل محصولات مجازی"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Increase cart value with Goals and Smart Upsells."
+msgstr "با اهداف و پیشنهادهای خرید هوشمند ارزش سبد خرید را افزایش دهید."
 
 #: admin-app/src/routes/AttributionDashboard.tsx:162
 #: admin-app/src/routes/GoalPerformance.tsx:501
@@ -2035,6 +2201,10 @@ msgstr "nonce ردیابی نامعتبر است."
 msgid "Inventory"
 msgstr "موجودی"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "It generated %s in attributed sales this period."
+msgstr "در این دوره %s فروش منتسب ایجاد کرده است."
+
 #: admin-app/src/routes/Analytics.tsx:806
 msgid "Key Insights"
 msgstr "بینش‌های کلیدی"
@@ -2050,6 +2220,10 @@ msgstr "۳۰ روز گذشته"
 #: admin-app/src/date-range/dateRange.ts:78
 msgid "Last 7 days"
 msgstr "۷ روز گذشته"
+
+#: admin-app/src/date-range/dateRange.ts
+msgid "Last 90 days"
+msgstr "۹۰ روز گذشته"
 
 #: admin-app/src/routes/Settings.tsx:573
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:72
@@ -2174,6 +2348,10 @@ msgstr "پس از رسیدن به هدف، همهٔ نرخ‌های ارسال �
 #: admin-app/src/routes/Recommendations.tsx:673
 msgid "Manage product costs"
 msgstr "مدیریت قیمت تمام‌شده"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Many completions don’t become purchases"
+msgstr "بسیاری از تکمیل‌ها به خرید منجر نمی‌شوند"
 
 #: admin-app/src/routes/Recommendations.tsx:170
 #: admin-app/src/routes/UpsellAnalytics.tsx:55
@@ -2337,6 +2515,10 @@ msgstr "هنوز هدف زیرشرطی وجود ندارد. برای ساخت ه
 msgid "No goal performance yet"
 msgstr "هنوز عملکرد هدفی وجود ندارد"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "No goal performance yet."
+msgstr "هنوز عملکرد اهدافی ثبت نشده است."
+
 #: admin-app/src/routes/Analytics.tsx:741
 msgid "No goal purchase activity in this range."
 msgstr "در این بازه خرید مرتبط با هدفی وجود ندارد."
@@ -2384,6 +2566,10 @@ msgstr "در حال حاضر پیشنهادی موجود نیست."
 msgid "No reward"
 msgstr "بدون پاداش"
 
+#: admin-app/src/components/NumberPagination.tsx:66
+msgid "No rows"
+msgstr "ردیفی وجود ندارد"
+
 #: admin-app/src/routes/Analytics.tsx:561
 #: admin-app/src/routes/RevenueOverview.tsx:339
 msgid "No sales data yet"
@@ -2419,7 +2605,7 @@ msgstr "در دسترس نیست"
 
 #: includes/Analytics/AttributionEngine.php:799
 msgid "Not enough attributed order data to estimate profit yet."
-msgstr ""
+msgstr "هنوز دادهٔ کافی از سفارش‌های منتسب برای تخمین سود وجود ندارد."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:109
 #: admin-app/src/routes/GoalPerformance.tsx:739
@@ -2462,6 +2648,10 @@ msgstr "هفته‌ای یک بار"
 msgid "Once cost data exists, Estimated Profit becomes available automatically."
 msgstr "به محض وجود قیمت تمام‌شده، سود تخمینی به‌طور خودکار در دسترس می‌شود."
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Once customers interact with your Goals, performance data will appear here."
+msgstr "وقتی مشتریان با اهداف شما تعامل کنند، داده‌های عملکرد اینجا نمایش داده می‌شوند."
+
 #: admin-app/src/routes/Analytics.tsx:562
 msgid "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit insights here."
 msgstr "به محض اینکه مشتریان با اهداف شما تعامل کنند، گل کارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
@@ -2481,6 +2671,14 @@ msgstr "یک نوار پیشرفت کلی برای کل کمپین، همراه 
 #: admin-app/src/routes/Appearance.tsx:59
 msgid "Only $57.00 left to reach your goal"
 msgstr "تنها ۵۷٫۰۰ دلار تا رسیدن به هدف باقی مانده است"
+
+#: admin-app/src/routes/RevenueOverview.tsx:118
+msgid "Only %1$s of completed goals were followed by an attributed purchase."
+msgstr "تنها %1$s از اهداف تکمیل‌شده با یک خرید منتسب دنبال شد."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Only %s of completed goals were followed by a purchase. Review your goal targets."
+msgstr "تنها %s از اهداف تکمیل‌شده به خرید منجر شده‌اند. هدف‌گذاری‌های خود را بازبینی کنید."
 
 #: admin-app/src/routes/Analytics.tsx:874
 msgid "Only goal events within this window before an order are attributed to it."
@@ -2533,6 +2731,10 @@ msgstr "عملگر"
 #: admin-app/src/components/layout/navigation.ts:59
 msgid "Optimization"
 msgstr "بهینه‌سازی"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Optimization Opportunities"
+msgstr "فرصت‌های بهینه‌سازی"
 
 #: admin-app/src/routes/RevenueOverview.tsx:148
 msgid "Optimization opportunity"
@@ -2592,6 +2794,10 @@ msgstr "سفارش‌ها پس از رسیدن به وضعیت فروشزا ان
 #: admin-app/src/components/layout/navigation.ts:54
 msgid "Overview"
 msgstr "نمای کلی"
+
+#: includes/Compatibility.php:143
+msgid "PHP %1$s or newer is required (current: %2$s)."
+msgstr "نسخهٔ PHP %1$s یا جدیدتر لازم است (فعلی: %2$s)."
 
 #: admin-app/src/routes/NotFound.tsx:14
 msgid "Page not found"
@@ -2742,10 +2948,18 @@ msgstr "سفارشهای در حال پردازش + تکمیلشده."
 msgid "Product"
 msgstr "محصول"
 
+#: admin-app/src/routes/Recommendations.tsx:680
+msgid "Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Goal economics."
+msgstr "پوشش قیمت تمام‌شده: %1$s از %2$s محصول (%3$s). تخمین سود به دادهٔ قیمت تمام‌شده نیاز دارد — برای فعال‌سازی اقتصاد هدف، آن را اضافه کنید."
+
 #: includes/Admin/ProductCostField.php:75
 #: includes/Admin/ProductCostField.php:106
 msgid "Product cost"
 msgstr "قیمت تمام‌شده"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Product cost data is incomplete"
+msgstr "داده‌های قیمت تمام‌شده ناقص است"
 
 #: includes/Analytics/RewardCostEstimator.php:571
 msgid "Product cost data is not available — profit impact unavailable (revenue-only analytics)."
@@ -2785,13 +2999,21 @@ msgstr "محصولات"
 msgid "Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target."
 msgstr "محصولاتی که هر یک از این ویژگیها (مثلاً pa_color) را دارند در هدف محاسبه میشوند."
 
+#: admin-app/src
+msgid "Products priced close to the amount remaining until the goal usually make a better suggestion."
+msgstr "محصولاتی که قیمتشان به مبلغ باقی‌مانده تا هدف نزدیک‌تر است، معمولاً پیشنهاد مناسب‌تری هستند."
+
+#: admin-app/src
+msgid "Products purchased more often in your store rank higher."
+msgstr "محصولاتی که در فروشگاه بیشتر خریداری شده‌اند، امتیاز بالاتری می‌گیرند."
+
 #: admin-app/src/routes/GoalPerformance.tsx:441
 msgid "Products recommended to customers who were working toward this goal."
 msgstr "محصولاتی که به مشتریانی که روی این هدف کار می‌کردند پیشنهاد شده‌اند."
 
 #: includes/Frontend/ProgressUI.php:491
 msgid "Products suggested for you"
-msgstr ""
+msgstr "محصولات پیشنهادی برای شما"
 
 #: admin-app/src/routes/Recommendations.tsx:687
 msgid "Profit estimates need product cost data. Add product costs on your products to enable Goal economics."
@@ -2975,6 +3197,10 @@ msgstr "آستانهٔ پیشنهادی"
 msgid "Recurring schedule"
 msgstr "زمانبندی تکراری"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Refresh"
+msgstr "به‌روزرسانی"
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:52
 msgid "Relevance"
 msgstr "ارتباط محصول"
@@ -3031,6 +3257,10 @@ msgstr "فروش حاصل از ارزش افزایشی سفارش‌هایی ک�
 msgid "Revenue-only analytics continue to work."
 msgstr "تحلیل‌های صرفاً مبتنی بر فروش همچنان کار می‌کنند."
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Review"
+msgstr "بازبینی"
+
 #: admin-app/src/routes/Analytics.tsx:498
 #: admin-app/src/routes/GoalBuilder.tsx:360
 #: admin-app/src/routes/Goals.tsx:286
@@ -3077,12 +3307,20 @@ msgstr "رنگ حلقه"
 msgid "Ring size (px)"
 msgstr "اندازه حلقه (پیکسل)"
 
+#: admin-app/src/components/NumberPagination.tsx:79
+msgid "Rows per page"
+msgstr "ردیف در هر صفحه"
+
 #: admin-app/src/routes/Analytics.tsx:191
 #: admin-app/src/routes/GoalPerformance.tsx:93
 #: admin-app/src/routes/UpsellAnalytics.tsx:380
 #: admin-app/src/routes/UpsellAnalytics.tsx:405
 msgid "Sales"
 msgstr "فروش"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Sales & Goal Performance"
+msgstr "فروش و عملکرد اهداف"
 
 #: admin-app/src/routes/RevenueOverview.tsx:365
 msgid "Sales Attributed to Goal Cart"
@@ -3329,6 +3567,10 @@ msgstr "نمایش برچسب‌های هدف"
 msgid "Show the top recommendation again"
 msgstr "نمایش دوبارهٔ پیشنهاد برتر"
 
+#: admin-app/src/components/NumberPagination.tsx:69
+msgid "Showing %d–%d of %d"
+msgstr "نمایش %d–%d از %d"
+
 #: admin-app/src/components/goal-builder/RewardFields.tsx:284
 msgid "Shown to the customer (fee/coupon name)."
 msgstr "به مشتری نمایش داده می‌شود (نام کارمزد/کوپن)."
@@ -3374,6 +3616,10 @@ msgstr "رد شد — اولویت پایین‌تر"
 msgid "Slide the progress-bar fill on updates."
 msgstr "لغزش پر شدن نوار پیشرفت هنگام به‌روزرسانی."
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Smart Upsells assisted %s goal completions this period."
+msgstr "پیشنهادهای خرید هوشمند در این دوره %s تکمیل هدف را یاری کرده‌اند."
+
 #: includes/Analytics/GoalRecommendationEngine.php:226
 msgid "Smart goal recommendations are disabled."
 msgstr "پیشنهادهای خرید هوشمند هدف غیرفعال هستند."
@@ -3405,6 +3651,10 @@ msgstr "منبع: %s."
 #: admin-app/src/components/goal-builder/RewardFields.tsx:292
 msgid "Stack with other rewards?"
 msgstr "با پاداش‌های دیگر ترکیب شود؟"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Start collecting performance data"
+msgstr "جمع‌آوری داده‌های عملکرد را آغاز کنید"
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:319
 #: admin-app/src/routes/CampaignBuilder.tsx:343
@@ -3700,7 +3950,7 @@ msgstr "محصول یافت نشد."
 
 #: includes/REST/RecommendationsController.php:157
 msgid "The recommended target must be greater than zero."
-msgstr ""
+msgstr "هدف پیشنهادی باید بیشتر از صفر باشد."
 
 #: admin-app/src/routes/Recommendations.tsx:623
 msgid "The selected goal could not be found"
@@ -3732,7 +3982,7 @@ msgstr "آستانه‌ای که مشتریان باید به آن برسند."
 
 #: includes/Admin/ProductCostField.php:76
 msgid "The unit cost Goal Cart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown."
-msgstr ""
+msgstr "هزینهٔ هر واحدی که هدف سبد خرید برای «سود تخمینی»، اقتصاد هدف و امتیازدهی حاشیهٔ سودِ پیشنهاد خرید به کار می‌برد. اگر نامشخص است خالی بگذارید."
 
 #: admin-app/src/routes/Analytics.tsx:901
 msgid "These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting."
@@ -3753,6 +4003,10 @@ msgstr "این هدیه دیگر برای این هدف در دسترس نیست
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:185
 msgid "This is an analytical estimate based on available WooCommerce cost and order data. It is not accounting profit."
 msgstr "این یک برآورد تحلیلی بر پایهٔ داده‌های موجود هزینه و سفارش ووکامرس است. سود حسابداری نیست."
+
+#: admin-app/src/date-range/dateRange.ts
+msgid "This month"
+msgstr "این ماه"
 
 #: includes/Goals/MessageEngine.php:162
 msgid "This offer is not active right now."
@@ -3909,6 +4163,10 @@ msgstr "فعال شد"
 msgid "Updating…"
 msgstr "در حال به‌روزرسانی…"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Upsell Performance"
+msgstr "عملکرد پیشنهاد خرید"
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:341
 msgid "Upsell impressions and orders are recorded once the storefront reports them. Widen the date range or check that tracking is enabled."
 msgstr "نمایش‌ها و سفارش‌های فروش بیشتر پس از گزارش‌دهی فروشگاه ثبت می‌شوند. بازهٔ تاریخ را گسترش دهید یا مطمئن شوید ردیابی فعال است."
@@ -3926,6 +4184,10 @@ msgstr "تکمیل‌های کمک‌شده توسط پیشنهاد فروش"
 #: admin-app/src/routes/UpsellAnalytics.tsx:277
 msgid "Upsells"
 msgstr "پیشنهاد خرید"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Upsells are assisting completions"
+msgstr "پیشنهادها در حال کمک به تکمیل اهداف هستند"
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:278
 msgid "Upsells shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product."
@@ -3948,9 +4210,25 @@ msgstr "فقط مشتریان ویژه (VIP)"
 msgid "Variation falls back to its parent product"
 msgstr "متغیر به محصول والد خود بازمی‌گردد"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "View"
+msgstr "مشاهده"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "View all"
+msgstr "مشاهدهٔ همه"
+
 #: admin-app/src/routes/Recommendations.tsx:346
 msgid "View details"
 msgstr "مشاهدهٔ جزئیات"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "View goals"
+msgstr "مشاهدهٔ اهداف"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "View performance"
+msgstr "مشاهدهٔ عملکرد"
 
 #: admin-app/src/components/layout/AdminLayout.tsx:356
 #: admin-app/src/components/layout/AdminLayout.tsx:362
@@ -3967,6 +4245,10 @@ msgstr "بازدیدشده"
 msgid "Views"
 msgstr "مشاهدات"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "We couldn’t load your analytics. Your Goals are still working normally."
+msgstr "نتوانستیم تحلیل‌های شما را بارگیری کنیم. اهداف شما همچنان به‌درستی کار می‌کنند."
+
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:27
 msgid "Wed"
 msgstr "چهارشنبه"
@@ -3979,6 +4261,10 @@ msgstr "چهارشنبه"
 #: admin-app/src/routes/Goals.tsx:57
 msgid "Weight"
 msgstr "وزن"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Welcome to Goal Cart"
+msgstr "به گل کارت خوش آمدید"
 
 #: admin-app/src/routes/RevenueOverview.tsx:566
 msgid "What happened?"
@@ -4019,6 +4305,11 @@ msgstr "وقتی خاموش است، محصولات مجازی و قابل دا�
 #: admin-app/src/routes/Settings.tsx:658
 msgid "When on, shipping charges count toward the cart-total basis."
 msgstr "وقتی روشن است، هزینه‌های ارسال به سمت مبنای کل سبد محاسبه می‌شوند."
+
+#: admin-app/src
+msgid "When product cost is recorded, its profit is also considered in the ranking."
+msgstr "اگر قیمت تمام‌شده محصول ثبت شده باشد، سود آن نیز در اولویت‌بندی پیشنهادها در نظر گرفته می‌شود."
+
 
 #: admin-app/src/routes/CampaignBuilder.tsx:335
 msgid "When the campaign runs, and how it competes with other campaigns."
@@ -4061,6 +4352,10 @@ msgstr "چرا؟"
 msgid "Window"
 msgstr "بازه"
 
+#: includes/Compatibility.php:154
+msgid "WooCommerce %1$s or newer is required (current: %2$s)."
+msgstr "نسخهٔ ووکامرس %1$s یا جدیدتر لازم است (فعلی: %2$s)."
+
 #: includes/Analytics/UpsellRanker.php:1237
 msgid "WooCommerce cross-sell of a cart item"
 msgstr "فروش جانبی ووکامرس برای یک قلم سبد"
@@ -4080,6 +4375,10 @@ msgstr "فیلد قیمت تمام‌شده ووکامرس (_cost)"
 #: includes/Analytics/UpsellRanker.php:1236
 msgid "WooCommerce upsell of a cart item"
 msgstr "فروش بیشتر ووکامرس برای یک قلم سبد"
+
+#: includes/Compatibility.php:134
+msgid "WordPress %1$s or newer is required (current: %2$s)."
+msgstr "نسخهٔ وردپرس %1$s یا جدیدتر لازم است (فعلی: %2$s)."
 
 #: admin-app/src/routes/Settings.tsx:750
 msgid "Write detailed (debug-level) entries to the plugin log when logging is enabled."
@@ -4110,9 +4409,17 @@ msgstr "شما قبلاً این هدف را تکمیل کرده‌اید."
 msgid "You reached your goal!"
 msgstr "به هدف خود رسیدید!"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Your analytics are getting ready"
+msgstr "تحلیل‌های شما در حال آماده‌سازی است"
+
 #: includes/REST/GiftController.php:159
 msgid "Your cart is empty."
 msgstr "سبد خرید شما خالی است."
+
+#: admin-app/src/routes/AttributionDashboard.tsx:230
+msgid "after %1$s estimated reward cost"
+msgstr "پس از هزینهٔ پاداش تخمینی %1$s"
 
 #: admin-app/src/routes/Analytics.tsx:599
 #: admin-app/src/routes/GoalPerformance.tsx:380
@@ -4148,6 +4455,10 @@ msgstr "مثلاً ارسال رایگان تابستانی"
 msgid "e.g. 🎁 or a dashicon name"
 msgstr "مثلاً 🎁 یا نام یک آیکون dashicon"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "goal-exposed customers"
+msgstr "مشتریانی که هدف را دیده‌اند"
+
 #: includes/Analytics/UpsellRanker.php:1235
 msgid "inside the goal's categories"
 msgstr "درون دسته‌بندی‌های هدف"
@@ -4168,6 +4479,10 @@ msgstr "تا حدی"
 msgid "previously recommended for this goal"
 msgstr "قبلاً برای این هدف پیشنهاد شده"
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "purchases per completed goal"
+msgstr "خرید به ازای هر هدف تکمیل‌شده"
+
 #: includes/Analytics/UpsellRanker.php:1238
 msgid "related to a cart item"
 msgstr "مرتبط با یک قلم سبد"
@@ -4184,6 +4499,10 @@ msgstr "در یک برچسب با سبد مشترک است"
 msgid "upsell score"
 msgstr "امتیاز فروش بیشتر"
 
+#: admin-app/src/components/dashboard/TrendIndicator.tsx
+msgid "vs previous period"
+msgstr "نسبت به دورهٔ قبل"
+
 #: admin-app/src/routes/Campaigns.tsx:287
 msgid "“%s” will be permanently deleted. Its goals are kept and detached — they can be reused by other campaigns."
 msgstr "«%s» برای همیشه حذف می‌شود. اهداف آن حفظ و جدا می‌شوند و می‌توانند توسط کمپین‌های دیگر استفاده شوند."
@@ -4192,190 +4511,6 @@ msgstr "«%s» برای همیشه حذف می‌شود. اهداف آن حفظ 
 msgid "“%s” will be permanently deleted. This cannot be undone."
 msgstr "«%s» برای همیشه حذف می‌شود. این عمل قابل بازگشت نیست."
 
-#: admin-app/src/routes/Dashboard.tsx
-msgid "%s completion rate"
-msgstr "نرخ تکمیل %s"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "%s is your top performer"
-msgstr "%s بهترین عملکرد شماست"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "%s purchased orders"
-msgstr "%s سفارش خریداری‌شده"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "A business summary of your Goals and Smart Upsells."
-msgstr "خلاصه‌ای تجاری از اهداف و پیشنهادهای خرید هوشمند شما."
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Add costs"
-msgstr "افزودن هزینه‌ها"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Add product costs to unlock Estimated Profit — Goal Cart never invents a margin."
-msgstr "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — گل کارت هرگز حاشیه سود را حدس نمی‌زند."
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Average Order Value"
-msgstr "میانگین ارزش سفارش"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Configure Smart Upsells"
-msgstr "پیشنهادهای خرید هوشمند را پیکربندی کنید"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Create Goal"
-msgstr "ایجاد هدف"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Create your first Goal"
-msgstr "اولین هدف خود را بسازید"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Daily attributed sales and goal completions trend"
-msgstr "روند روزانهٔ فروش منتسب و تکمیل‌های هدف"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Increase cart value with Goals and Smart Upsells."
-msgstr "با اهداف و پیشنهادهای خرید هوشمند ارزش سبد خرید را افزایش دهید."
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "It generated %s in attributed sales this period."
-msgstr "در این دوره %s فروش منتسب ایجاد کرده است."
-
-#: admin-app/src/date-range/dateRange.ts
-msgid "Last 90 days"
-msgstr "۹۰ روز گذشته"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Many completions don’t become purchases"
-msgstr "بسیاری از تکمیل‌ها به خرید منجر نمی‌شوند"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "No goal performance yet."
-msgstr "هنوز عملکرد اهدافی ثبت نشده است."
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Once customers interact with your Goals, performance data will appear here."
-msgstr "وقتی مشتریان با اهداف شما تعامل کنند، داده‌های عملکرد اینجا نمایش داده می‌شوند."
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Only %s of completed goals were followed by a purchase. Review your goal targets."
-msgstr "تنها %s از اهداف تکمیل‌شده به خرید منجر شده‌اند. هدف‌گذاری‌های خود را بازبینی کنید."
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Optimization Opportunities"
-msgstr "فرصت‌های بهینه‌سازی"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Product cost data is incomplete"
-msgstr "داده‌های قیمت تمام‌شده ناقص است"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Refresh"
-msgstr "به‌روزرسانی"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Review"
-msgstr "بازبینی"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Sales & Goal Performance"
-msgstr "فروش و عملکرد اهداف"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Smart Upsells assisted %s goal completions this period."
-msgstr "پیشنهادهای خرید هوشمند در این دوره %s تکمیل هدف را یاری کرده‌اند."
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Start collecting performance data"
-msgstr "جمع‌آوری داده‌های عملکرد را آغاز کنید"
-
-#: admin-app/src/date-range/dateRange.ts
-msgid "This month"
-msgstr "این ماه"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Upsell Performance"
-msgstr "عملکرد پیشنهاد خرید"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Upsells are assisting completions"
-msgstr "پیشنهادها در حال کمک به تکمیل اهداف هستند"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "View"
-msgstr "مشاهده"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "View all"
-msgstr "مشاهدهٔ همه"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "View goals"
-msgstr "مشاهدهٔ اهداف"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "View performance"
-msgstr "مشاهدهٔ عملکرد"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "We couldn’t load your analytics. Your Goals are still working normally."
-msgstr "نتوانستیم تحلیل‌های شما را بارگیری کنیم. اهداف شما همچنان به‌درستی کار می‌کنند."
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Welcome to Goal Cart"
-msgstr "به گل کارت خوش آمدید"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "Your analytics are getting ready"
-msgstr "تحلیل‌های شما در حال آماده‌سازی است"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "goal-exposed customers"
-msgstr "مشتریانی که هدف را دیده‌اند"
-
-#: admin-app/src/routes/Dashboard.tsx
-msgid "purchases per completed goal"
-msgstr "خرید به ازای هر هدف تکمیل‌شده"
-
-#: admin-app/src/components/dashboard/TrendIndicator.tsx
-msgid "vs previous period"
-msgstr "نسبت به دورهٔ قبل"
-
-#: admin-app/src
-msgid "Example: if the target is 10 items, a cart with 7 items is 70% of the way there."
-msgstr "مثال: اگر هدف ۱۰ عدد باشد، سبدی با ۷ عدد معادل ۷۰٪ مسیر هدف است."
-
-#: admin-app/src
-msgid "Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there."
-msgstr "مثال: اگر هدف ۱۰ کیلوگرم باشد، سبدی با ۷ کیلوگرم معادل ۷۰٪ مسیر هدف است."
-
-#: admin-app/src
-msgid "Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there."
-msgstr "مثال: اگر هدف ۲٬۰۰۰٬۰۰۰ باشد، سبدی با ۱٬۵۰۰٬۰۰۰ معادل ۷۵٪ مسیر هدف است."
-
-#: admin-app/src
-msgid "How often this product has actually led to an order when suggested."
-msgstr "نشان می‌دهد این محصول هنگام پیشنهاد، چقدر به ثبت سفارش منجر شده است."
-
-#: admin-app/src
-msgid "How related this product is to the items already in the customer’s cart."
-msgstr "میزان ارتباط این محصول با کالاهایی که مشتری در سبد خود دارد."
-
-#: admin-app/src
-msgid "In-stock products are prioritized."
-msgstr "محصولات موجود در انبار در اولویت قرار می‌گیرند."
-
-#: admin-app/src
-msgid "Products priced close to the amount remaining until the goal usually make a better suggestion."
-msgstr "محصولاتی که قیمتشان به مبلغ باقی‌مانده تا هدف نزدیک‌تر است، معمولاً پیشنهاد مناسب‌تری هستند."
-
-#: admin-app/src
-msgid "Products purchased more often in your store rank higher."
-msgstr "محصولاتی که در فروشگاه بیشتر خریداری شده‌اند، امتیاز بالاتری می‌گیرند."
-
-#: admin-app/src
-msgid "When product cost is recorded, its profit is also considered in the ranking."
-msgstr "اگر قیمت تمام‌شده محصول ثبت شده باشد، سود آن نیز در اولویت‌بندی پیشنهادها در نظر گرفته می‌شود."
+#: admin-app/src/routes/Recommendations.tsx:719
+msgid "→ %1$s"
+msgstr "→ %1$s"

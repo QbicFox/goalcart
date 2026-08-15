@@ -66,7 +66,7 @@ export default function NumberPagination({
           ? __('No rows', 'goalcart')
           : sprintf(
               /* translators: 1: first visible row, 2: last visible row, 3: total rows. */
-              __('Showing %1$d–%2$d of %3$d', 'goalcart'),
+              __('Showing %d–%d of %d', 'goalcart'),
               from,
               to,
               count

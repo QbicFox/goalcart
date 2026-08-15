@@ -87,8 +87,12 @@ function gc_i18n_unquote( $s ) {
 
 	// Never extract interpolated strings (PHP "$var" / "{$var}" / JS
 	// "${var}"). A literal dollar sign without a variable ("Save $5")
-	// is a perfectly translatable string and is kept.
-	if ( preg_match( '/\$(?:\{?[A-Za-z_])/', $body ) ) {
+	// is a perfectly translatable string and is kept. sprintf positional
+	// placeholders ("%1$s", "%2$d") are placeholders, not variables —
+	// strip their "%<n>$" prefix first so they don't trip the guard.
+	$interpolated = preg_replace( '/%\d+\$/', '', $body );
+
+	if ( preg_match( '/\$(?:\{?[A-Za-z_])/', $interpolated ) ) {
 		return '';
 	}
 
@@ -309,12 +313,12 @@ if ( $check ) {
 
 		foreach ( $missing as $key => $_ ) {
 			$parts = explode( "\x04", $key );
-			fwrite( STDERR, "  missing: " . end( $parts ) . "\n" );
+			fwrite( STDERR, "  missing: " . ( $parts[1] ?? $parts[0] ) . "\n" );
 		}
 
 		foreach ( $stale as $key => $_ ) {
 			$parts = explode( "\x04", $key );
-			fwrite( STDERR, "  stale:   " . end( $parts ) . "\n" );
+			fwrite( STDERR, "  stale:   " . ( $parts[1] ?? $parts[0] ) . "\n" );
 		}
 
 		exit( 1 );
