@@ -4623,3 +4623,190 @@ msgstr "با خریدی به ارزش"
 #: admin-app/src/templates/renderers/Template3Renderer.tsx
 msgid "With a purchase of %s"
 msgstr "با خریدی به ارزش %s"
+
+#: includes/Frontend/ProgressUI.php:970
+msgid "%s is active"
+msgstr "%s فعال است"
+
+#: includes/Frontend/ProgressUI.php:973
+msgid "Almost there!"
+msgstr "تقریباً رسیدید!"
+
+#: includes/Templates/Goal/Template5.php:75
+msgid "Bar background"
+msgstr "پس‌زمینه نوار"
+
+#: includes/Templates/Goal/Template1.php:128
+#: includes/Templates/Goal/Template2.php:117
+#: includes/Templates/Goal/Template3.php:130
+#: includes/Templates/Goal/Template4.php:123
+#: includes/Templates/Goal/Template5.php:122
+#: includes/Templates/Goal/Template6.php:122
+msgid "Button"
+msgstr "دکمه"
+
+#: includes/Templates/Goal/Template1.php:127
+#: includes/Templates/Goal/Template2.php:116
+#: includes/Templates/Goal/Template3.php:129
+#: includes/Templates/Goal/Template4.php:122
+#: includes/Templates/Goal/Template5.php:121
+#: includes/Templates/Goal/Template6.php:121
+msgid "Button color"
+msgstr "رنگ دکمه"
+
+#: includes/Templates/Goal/Template2.php:128
+#: includes/Templates/Goal/Template4.php:134
+#: includes/Templates/Goal/Template5.php:133
+msgid "Button radius (px)"
+msgstr "شعاع گوشه دکمه (پیکسل)"
+
+#: includes/Templates/Goal/Template1.php:139
+#: includes/Templates/Goal/Template3.php:141
+#: includes/Templates/Goal/Template6.php:133
+msgid "Button style"
+msgstr "سبک دکمه"
+
+#: includes/Templates/Goal/Template1.php:133
+#: includes/Templates/Goal/Template2.php:122
+#: includes/Templates/Goal/Template3.php:135
+#: includes/Templates/Goal/Template4.php:128
+#: includes/Templates/Goal/Template5.php:127
+#: includes/Templates/Goal/Template6.php:127
+msgid "Button text color"
+msgstr "رنگ متن دکمه"
+
+#: includes/Templates/Goal/Template1.php:149
+msgid "Card density"
+msgstr "تراکم کارت"
+
+#: includes/Templates/Goal/Template3.php:45
+msgid "Circular gauge — percentage ring with the goal details beside it."
+msgstr "نمودار حلقه‌ای — حلقه درصد با جزئیات هدف در کنار آن."
+
+#: includes/Templates/Goal/Template1.php:153
+msgid "Comfortable"
+msgstr "راحت"
+
+#: includes/Templates/Goal/Template5.php:45
+msgid "Compact dark bar — icon, progress, remaining amount and a small CTA."
+msgstr "نوار تیره فشرده — آیکون، پیشرفت، مبلغ باقی‌مانده و یک دکمه کوچک."
+
+#: includes/Templates/Goal/Template6.php:69
+msgid "Gold accent color"
+msgstr "رنگ تأکیدی طلایی"
+
+#: includes/Templates/Goal/Template4.php:76
+msgid "Header color"
+msgstr "رنگ سربرگ"
+
+#: includes/Templates/Goal/Template1.php:75
+msgid "Icon background"
+msgstr "پس‌زمینه آیکون"
+
+#: includes/Templates/Goal/Template1.php:81
+msgid "Icon color"
+msgstr "رنگ آیکون"
+
+#: includes/Templates/Goal/Template2.php:46
+msgid "Minimal inline strip — icon, title, remaining amount and a slim bar."
+msgstr "نوار خطی مینیمال — آیکون، عنوان، مبلغ باقی‌مانده و نوار باریک."
+
+#: includes/Templates/Goal/Template1.php:144
+#: includes/Templates/Goal/Template3.php:146
+#: includes/Templates/Goal/Template6.php:138
+msgid "Outline"
+msgstr "خطی"
+
+#: includes/Templates/Goal/Template6.php:45
+msgid "Premium card — gold accents, elegant progress and a refined call-to-action."
+msgstr "کارت لوکس — تأکید طلایی، پیشرفت ظریف و فراخوان شیک."
+
+#: includes/Templates/Goal/Template4.php:142
+msgid "Product image size (px)"
+msgstr "اندازه تصویر محصول (پیکسل)"
+
+#: includes/Templates/Goal/Template1.php:45
+msgid "Progress card with icon, title, percentage, amounts and a call-to-action."
+msgstr "کارت پیشرفت با آیکون، عنوان، درصد، مبالغ و فراخوان."
+
+#: includes/Templates/Goal/Template6.php:75
+msgid "Progress color"
+msgstr "رنگ پیشرفت"
+
+#: includes/Templates/Goal/Template4.php:46
+msgid "Progress header plus recommended products with add-to-cart buttons."
+msgstr "سربرگ پیشرفت همراه با محصولات پیشنهادی و دکمه‌های افزودن به سبد خرید."
+
+#: includes/Templates/Goal/Template5.php:99
+msgid "Progress track color"
+msgstr "رنگ پس‌زمینه نوار پیشرفت"
+
+#: includes/Templates/Goal/Template3.php:113
+msgid "Ring thickness (px)"
+msgstr "ضخامت حلقه (پیکسل)"
+
+#: includes/Templates/Goal/Template1.php:105
+#: includes/Templates/Goal/Template2.php:94
+#: includes/Templates/Goal/Template3.php:99
+#: includes/Templates/Goal/Template4.php:100
+#: includes/Templates/Goal/Template5.php:93
+#: includes/Templates/Goal/Template6.php:99
+msgid "Secondary text"
+msgstr "متن ثانویه"
+
+#: includes/Templates/Goal/Template5.php:141
+msgid "Shadow intensity"
+msgstr "شدت سایه"
+
+#: includes/Templates/Goal/Template1.php:171
+#: includes/Templates/Goal/Template3.php:163
+#: includes/Templates/Goal/Template6.php:143
+msgid "Show the amounts"
+msgstr "نمایش مبالغ"
+
+#: includes/Templates/Goal/Template1.php:183
+#: includes/Templates/Goal/Template2.php:154
+#: includes/Templates/Goal/Template3.php:169
+#: includes/Templates/Goal/Template5.php:161
+#: includes/Templates/Goal/Template6.php:149
+msgid "Show the call-to-action"
+msgstr "نمایش دکمه فراخوان"
+
+#: includes/Templates/Goal/Template3.php:157
+msgid "Show the goal description"
+msgstr "نمایش توضیحات هدف"
+
+#: includes/Templates/Goal/Template2.php:142
+msgid "Show the goal title"
+msgstr "نمایش عنوان هدف"
+
+#: includes/Templates/Goal/Template1.php:159
+#: includes/Templates/Goal/Template2.php:136
+#: includes/Templates/Goal/Template5.php:149
+msgid "Show the icon"
+msgstr "نمایش آیکون"
+
+#: includes/Templates/Goal/Template1.php:165
+msgid "Show the percentage"
+msgstr "نمایش درصد"
+
+#: includes/Templates/Goal/Template4.php:150
+msgid "Show the recommendation heading"
+msgstr "نمایش عنوان پیشنهادها"
+
+#: includes/Templates/Goal/Template1.php:177
+#: includes/Templates/Goal/Template2.php:148
+#: includes/Templates/Goal/Template4.php:156
+#: includes/Templates/Goal/Template5.php:155
+msgid "Show the remaining amount"
+msgstr "نمایش مبلغ باقی‌مانده"
+
+#: includes/Templates/Goal/Template1.php:143
+#: includes/Templates/Goal/Template3.php:145
+#: includes/Templates/Goal/Template6.php:137
+msgid "Solid"
+msgstr "توپر"
+
+#: includes/Templates/Goal/Template5.php:87
+msgid "Text color"
+msgstr "رنگ متن"

@@ -120,9 +120,9 @@ class Template3 extends AbstractTemplate {
 				'type'    => 'number',
 				'label'   => __( 'Corner radius (px)', 'goalcart' ),
 				'group'   => __( 'Shape', 'goalcart' ),
-				'default' => 16,
+				'default' => 2,
 				'min'     => 0,
-				'max'     => 40,
+				'max'     => 5,
 			),
 			'buttonColor'   => array(
 				'type'    => 'color',

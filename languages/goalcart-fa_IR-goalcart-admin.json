@@ -3114,6 +3114,117 @@
             ],
             "With a purchase of %s": [
                 "با خریدی به ارزش %s"
+            ],
+            "%s is active": [
+                "%s فعال است"
+            ],
+            "Almost there!": [
+                "تقریباً رسیدید!"
+            ],
+            "Bar background": [
+                "پس‌زمینه نوار"
+            ],
+            "Button": [
+                "دکمه"
+            ],
+            "Button color": [
+                "رنگ دکمه"
+            ],
+            "Button radius (px)": [
+                "شعاع گوشه دکمه (پیکسل)"
+            ],
+            "Button style": [
+                "سبک دکمه"
+            ],
+            "Button text color": [
+                "رنگ متن دکمه"
+            ],
+            "Card density": [
+                "تراکم کارت"
+            ],
+            "Circular gauge — percentage ring with the goal details beside it.": [
+                "نمودار حلقه‌ای — حلقه درصد با جزئیات هدف در کنار آن."
+            ],
+            "Comfortable": [
+                "راحت"
+            ],
+            "Compact dark bar — icon, progress, remaining amount and a small CTA.": [
+                "نوار تیره فشرده — آیکون، پیشرفت، مبلغ باقی‌مانده و یک دکمه کوچک."
+            ],
+            "Gold accent color": [
+                "رنگ تأکیدی طلایی"
+            ],
+            "Header color": [
+                "رنگ سربرگ"
+            ],
+            "Icon background": [
+                "پس‌زمینه آیکون"
+            ],
+            "Icon color": [
+                "رنگ آیکون"
+            ],
+            "Minimal inline strip — icon, title, remaining amount and a slim bar.": [
+                "نوار خطی مینیمال — آیکون، عنوان، مبلغ باقی‌مانده و نوار باریک."
+            ],
+            "Outline": [
+                "خطی"
+            ],
+            "Premium card — gold accents, elegant progress and a refined call-to-action.": [
+                "کارت لوکس — تأکید طلایی، پیشرفت ظریف و فراخوان شیک."
+            ],
+            "Product image size (px)": [
+                "اندازه تصویر محصول (پیکسل)"
+            ],
+            "Progress card with icon, title, percentage, amounts and a call-to-action.": [
+                "کارت پیشرفت با آیکون، عنوان، درصد، مبالغ و فراخوان."
+            ],
+            "Progress color": [
+                "رنگ پیشرفت"
+            ],
+            "Progress header plus recommended products with add-to-cart buttons.": [
+                "سربرگ پیشرفت همراه با محصولات پیشنهادی و دکمه‌های افزودن به سبد خرید."
+            ],
+            "Progress track color": [
+                "رنگ پس‌زمینه نوار پیشرفت"
+            ],
+            "Ring thickness (px)": [
+                "ضخامت حلقه (پیکسل)"
+            ],
+            "Secondary text": [
+                "متن ثانویه"
+            ],
+            "Shadow intensity": [
+                "شدت سایه"
+            ],
+            "Show the amounts": [
+                "نمایش مبالغ"
+            ],
+            "Show the call-to-action": [
+                "نمایش دکمه فراخوان"
+            ],
+            "Show the goal description": [
+                "نمایش توضیحات هدف"
+            ],
+            "Show the goal title": [
+                "نمایش عنوان هدف"
+            ],
+            "Show the icon": [
+                "نمایش آیکون"
+            ],
+            "Show the percentage": [
+                "نمایش درصد"
+            ],
+            "Show the recommendation heading": [
+                "نمایش عنوان پیشنهادها"
+            ],
+            "Show the remaining amount": [
+                "نمایش مبلغ باقی‌مانده"
+            ],
+            "Solid": [
+                "توپر"
+            ],
+            "Text color": [
+                "رنگ متن"
             ]
         }
     }

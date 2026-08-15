@@ -216,7 +216,7 @@ $cleaned = $engine->sanitize_settings(
 
 check( 'invalid color falls back to the schema default', '#f97316' === $cleaned['accent'] );
 check( 'valid color kept', '#ff0000' === $cleaned['bg'] );
-check( 'radius clamped to max', 40 === $cleaned['radius'] );
+check( 'radius clamped to max', 5 === $cleaned['radius'] );
 check( 'barHeight clamped to min', 4 === $cleaned['barHeight'] );
 check( 'bool normalized', true === $cleaned['animation'] && true === $cleaned['showPercent'] );
 check( 'css class trimmed', 'my-class' === $cleaned['cssClass'] );
@@ -494,7 +494,7 @@ $sanitized = $settings_ctrl->sanitize_template_settings(
 );
 
 check( 'sanitizer keeps valid goal templates', '#ff0000' === $sanitized['goal']['template-1']['accent'] );
-check( 'sanitizer clamps against the schema', 40 === $sanitized['goal']['template-1']['radius'] );
+check( 'sanitizer clamps against the schema', 5 === $sanitized['goal']['template-1']['radius'] );
 check( 'sanitizer drops unknown keys', ! isset( $sanitized['goal']['template-1']['bogus_key'] ) );
 check( 'sanitizer drops unregistered templates', ! isset( $sanitized['goal']['not_here'] ) );
 check( 'sanitizer cleans the campaign scope', '#123456' === $sanitized['campaign']['milestone_chain']['dotColor'] && true === $sanitized['campaign']['milestone_chain']['showLabels'] );
@@ -544,7 +544,7 @@ try {
 	$data3 = $resp3->get_data()['data'];
 
 	check( 'invalid color falls back in the full save path', '#f97316' === $data3['template_settings']['goal']['template-1']['accent'] );
-	check( 'radius clamped in the full save path', 40 === $data3['template_settings']['goal']['template-1']['radius'] );
+	check( 'radius clamped in the full save path', 5 === $data3['template_settings']['goal']['template-1']['radius'] );
 } finally {
 	$wpdb->query( 'ROLLBACK' );
 
@@ -617,7 +617,7 @@ $goal = new \GoalCart\Goals\Goal( array(
 	'type'             => 'amount',
 	'target'           => 100,
 	'calculation_mode' => 'subtotal',
-	'display_settings' => array( 'template_id' => 'template-4', 'template_settings' => array( 'radius' => 20 ) ),
+	'display_settings' => array( 'template_id' => 'template-4', 'template_settings' => array( 'radius' => 4 ) ),
 ) );
 
 $ctx    = new \GoalCart\Goals\CartContext( array( 'subtotal' => 40, 'total' => 40, 'items' => array() ) );
@@ -625,7 +625,7 @@ $result = $container->get( \GoalCart\Goals\GoalEngine::class )->evaluate( $goal,
 $shaped = $frontend->shape_goal( $goal, $result, $ctx );
 
 check( 'shape_goal carries the resolved template', 'template-4' === $shaped['template'] );
-check( 'shape_goal carries the resolved settings', 20 === $shaped['template_settings']['radius'] );
+check( 'shape_goal carries the resolved settings', 4 === $shaped['template_settings']['radius'] );
 check( 'shape_goal settings are schema-complete', count( $shaped['template_settings'] ) === count( $registry->get( 'template-4' )->schema() ) );
 
 // /progress builds campaign template groups from the DB rows.

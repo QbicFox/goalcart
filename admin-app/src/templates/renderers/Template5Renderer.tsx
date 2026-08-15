@@ -35,7 +35,7 @@ export default function Template5Renderer({ goal, currency, settings, animation 
         py: 1.25,
         background: `linear-gradient(135deg, ${bg}, ${bg}cc)`,
         border: `1px solid ${border}`,
-        borderRadius: num(settings, 'radius', 12),
+        borderRadius: num(settings, 'radius', 2),
         boxShadow: shadow > 0 ? `0 ${Math.max(2, shadow)}px ${shadow * 2}px rgba(0,0,0,0.35)` : 'none',
       }}
     >
