@@ -13,11 +13,12 @@
  * equivalents are scoped to the mount point here. */
 
 #goalcart-admin {
-  /* Full-screen dashboard: the mount point fills the viewport and the
-     app shell (AdminLayout) scrolls its own content area. Embedded mode:
-     the page grows normally inside the WP admin chrome. */
-  height: 100vh;
-  height: 100dvh;
+  /* Full-screen sizing is applied by admin-fullscreen.css only when the
+     setting is enabled. In embedded mode the mount must remain in normal
+     document flow so WordPress can place #wpfooter after the dashboard
+     instead of showing it over the middle of the app. */
+  height: auto;
+  min-height: 0;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell,
     'Helvetica Neue', sans-serif;

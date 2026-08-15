@@ -37,6 +37,16 @@ body.goalcart-admin-page #wpbody {
 	padding-top: 0 !important;
 }
 
+/* In embedded mode the React mount now uses normal document flow. Make
+   the WordPress footer follow that content as well; its core absolute
+   positioning can otherwise place #wpfooter over the middle of a
+   viewport-height dashboard. Full-screen mode keeps the footer hidden
+   below, so this rule cannot affect the app-owned layout. */
+body.goalcart-admin-page:not(.goalcart-fullscreen) #wpfooter {
+	position: static !important;
+	clear: both !important;
+}
+
 /* Hide the left admin menu (all its wrapper layers). */
 body.goalcart-fullscreen #adminmenumain,
 body.goalcart-fullscreen #adminmenuback,

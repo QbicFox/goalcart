@@ -313,7 +313,10 @@ export default function AdminLayout() {
 							"@supports (height: 100dvh)": { height: "100dvh" },
 						}
 					: {
-							minHeight: "100vh",
+							// Embedded mode stays in WordPress's normal document flow;
+							// forcing a viewport-height shell makes #wpfooter appear
+							// over the middle of the dashboard on some WP layouts.
+							minHeight: 0,
 							borderWidth: "1px",
 							borderStyle: "solid",
 							borderColor: "divider",
