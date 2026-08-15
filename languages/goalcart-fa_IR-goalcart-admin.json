@@ -62,7 +62,7 @@
                 "۱۰٪ تخفیف"
             ],
             "2. Upsells": [
-                "۲. پیشنهاد محصول"
+                "۲. پیشنهاد خرید"
             ],
             "3. Sales Performance": [
                 "۳. عملکرد فروش"
@@ -110,7 +110,7 @@
                 "و (همهٔ زیرشرط‌ها الزامی)"
             ],
             "AOV comparisons are observed impact — they do not prove that Goal Cart caused the difference.": [
-                "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاهده‌شده است — ثابت نمی‌کند که گال کارت باعث این تفاوت شده است."
+                "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاهده‌شده است — ثابت نمی‌کند که گل کارت باعث این تفاوت شده است."
             ],
             "AOV ratio": [
                 "نسبت به میانگین ارزش سفارش"
@@ -143,13 +143,13 @@
                 "مالیات‌های ردیف را به مبناهای پولی نوع جمع فرعی اضافه کنید."
             ],
             "Add product cost data to estimate profit.": [
-                "برای برآورد سود، دادهٔ هزینهٔ محصول را اضافه کنید."
+                "برای برآورد سود، دادهٔ قیمت تمام‌شده را اضافه کنید."
             ],
             "Add product cost data to estimate profitability.": [
-                "برای برآورد سودآوری، دادهٔ هزینهٔ محصول را اضافه کنید."
+                "برای برآورد سودآوری، دادهٔ قیمت تمام‌شده را اضافه کنید."
             ],
             "Add product cost data to see the estimated profit of Goal Cart.": [
-                "برای دیدن سود تخمینی گال کارت، دادهٔ هزینهٔ محصول را اضافه کنید."
+                "برای دیدن سود تخمینی گل کارت، دادهٔ قیمت تمام‌شده را اضافه کنید."
             ],
             "Add to cart": [
                 "افزودن به سبد خرید"
@@ -185,10 +185,10 @@
                 "تحلیل‌های پیشرفته"
             ],
             "Advanced attribution": [
-                "تخصیص پیشرفته"
+                "انتساب پیشرفته"
             ],
             "Advanced attribution details": [
-                "جزئیات تخصیص پیشرفته"
+                "جزئیات انتساب پیشرفته"
             ],
             "Advanced details": [
                 "جزئیات پیشرفته"
@@ -281,7 +281,7 @@
                 "نرخ کمکی"
             ],
             "Assisted revenue": [
-                "درآمد کمکی"
+                "فروش کمکی"
             ],
             "At least one of these coupon codes must be applied for the goal to count.": [
                 "برای محاسبهٔ هدف باید حداقل یکی از این کدهای تخفیف اعمال شده باشد."
@@ -290,10 +290,10 @@
                 "ویژگی"
             ],
             "Attributed Sales": [
-                "فروش تخصیص‌یافته"
+                "فروش منتسب"
             ],
             "Attributed orders": [
-                "سفارش‌های تخصیص‌یافته"
+                "سفارش‌های منتسب"
             ],
             "Attributed sales": [
                 "فروش منتسب‌شده"
@@ -302,10 +302,10 @@
                 "ویژگیها"
             ],
             "Attribution model": [
-                "مدل تخصیص"
+                "مدل انتساب"
             ],
             "Attribution window": [
-                "بازهٔ تخصیص"
+                "بازهٔ انتساب"
             ],
             "Auto": [
                 "خودکار"
@@ -344,7 +344,7 @@
                 "میانگین ارزش سفارش %s بر اساس %d سفارش است."
             ],
             "Average order value of the attributed purchased orders.": [
-                "میانگین ارزش سفارش خریدهای تخصیص‌یافته."
+                "میانگین ارزش سفارش خریدهای منتسب."
             ],
             "Average shipping cost is %s — a free-shipping goal absorbs this cost.": [
                 "میانگین هزینهٔ ارسال %s است — هدف ارسال رایگان این هزینه را پوشش می‌دهد."
@@ -548,7 +548,7 @@
                 "تکمیل‌ها"
             ],
             "Completions where the customer also saw a product recommendation for this goal in the same session (UPSELL_REFACTOR §30).": [
-                "تکمیل‌هایی که مشتری در همان نشست، پیشنهاد محصولی را نیز برای این هدف دیده است (UPSELL_REFACTOR §30)."
+                "تکمیل‌هایی که مشتری در همان نشست، پیشنهاد خریدی را نیز برای این هدف دیده است (UPSELL_REFACTOR §30)."
             ],
             "Composite": [
                 "ترکیبی"
@@ -578,13 +578,13 @@
                 "محتوا"
             ],
             "Conversion": [
-                "تبدیل"
+                "نرخ تبدیل"
             ],
             "Corner radius (px)": [
                 "شعاع گوشه (پیکسل)"
             ],
             "Cost data coverage": [
-                "پوشش دادهٔ هزینه"
+                "پوشش قیمت تمام‌شده"
             ],
             "Cost of goods field (_wc_cog_cost)": [
                 "فیلد بهای تمام‌شده (_wc_cog_cost)"
@@ -605,7 +605,7 @@
                 "بارگذاری تحلیل‌ها ممکن نشد."
             ],
             "Could not load the attribution dashboard.": [
-                "بارگذاری داشبورد نسبت‌دهی ممکن نشد."
+                "بارگذاری داشبورد انتساب ممکن نشد."
             ],
             "Could not load the campaign.": [
                 "بارگذاری کمپین ممکن نشد."
@@ -713,13 +713,13 @@
                 "ظاهر رابط پیشرفت سبد خرید را در فروشگاه خود سفارشی کنید."
             ],
             "Daily attributed sales and purchased orders trend": [
-                "روند روزانهٔ فروش تخصیص‌یافته و سفارش‌های خریداری‌شده"
+                "روند روزانهٔ فروش منتسب و سفارش‌های خریداری‌شده"
             ],
             "Daily from": [
                 "روزانه از"
             ],
             "Daily impressions, completions and revenue trend": [
-                "روند روزانهٔ نمایش‌ها، تکمیل‌ها و درآمد"
+                "روند روزانهٔ نمایش‌ها، تکمیل‌ها و فروش"
             ],
             "Daily until": [
                 "روزانه تا"
@@ -800,10 +800,10 @@
                 "ارزش افزایشی مستقیم"
             ],
             "Direct revenue": [
-                "درآمد مستقیم"
+                "فروش مستقیم"
             ],
             "Direct revenue is the incremental amount this goal moved — it is a slice of the influenced total, not an extra value on top of it.": [
-                "درآمد مستقیم، مقدار افزایشی‌ای است که این هدف ایجاد کرده — بخشی از کل تأثیرگذار است، نه ارزش اضافی روی آن."
+                "فروش مستقیم، مقدار افزایشی‌ای است که این هدف ایجاد کرده — بخشی از کل تأثیرگذار است، نه ارزش اضافی روی آن."
             ],
             "Disable": [
                 "غیرفعال کردن"
@@ -824,7 +824,7 @@
                 "رد کردن"
             ],
             "Dismiss how Goal Cart works": [
-                "بستن توضیح طرز کار گال کارت"
+                "بستن توضیح طرز کار گل کارت"
             ],
             "Dismissible": [
                 "قابل بستن"
@@ -902,7 +902,7 @@
                 "فعال کردن"
             ],
             "Enable Goal Cart": [
-                "فعال کردن Goal Cart"
+                "فعال کردن گل کارت"
             ],
             "Ended": [
                 "پایان‌یافته"
@@ -929,7 +929,7 @@
                 "تأثیر تخمینی بر سود"
             ],
             "Estimated profit is calculated only for orders with complete cost data.": [
-                "سود تخمینی فقط برای سفارش‌هایی محاسبه می‌شود که دادهٔ هزینهٔ کامل دارند."
+                "سود تخمینی فقط برای سفارش‌هایی محاسبه می‌شود که قیمت تمام‌شدهٔ کامل دارند."
             ],
             "Estimated reward cost": [
                 "هزینهٔ تخمینی پاداش"
@@ -941,7 +941,7 @@
                 "تخمینی، نه قطعی"
             ],
             "Estimated, not guaranteed — based on available product cost, reward and shipping data.": [
-                "تخمینی، نه قطعی — بر پایهٔ داده‌های موجود هزینهٔ محصول، پاداش و ارسال."
+                "تخمینی، نه قطعی — بر پایهٔ داده‌های موجود قیمت تمام‌شده، پاداش و ارسال."
             ],
             "Estimated, not guaranteed.": [
                 "تخمینی، نه قطعی."
@@ -1052,7 +1052,7 @@
                 "به کمپین یک نام بدهید."
             ],
             "Give the goal a name.": [
-                "به هدف یک نام بدهید."
+                "برای این هدف یک نام وارد کنید."
             ],
             "Goal": [
                 "هدف"
@@ -1061,28 +1061,28 @@
                 "محاسبهٔ هدف"
             ],
             "Goal Cart": [
-                "Goal Cart"
+                "گل کارت"
             ],
             "Goal Cart Progress": [
-                "پیشرفت Goal Cart"
+                "پیشرفت گل کارت"
             ],
             "Goal Cart Sales Performance": [
-                "عملکرد فروش گال کارت"
+                "عملکرد فروش گل کارت"
             ],
             "Goal Cart does not invent product costs.": [
-                "گال کارت هزینهٔ محصول را اختراع نمی‌کند."
+                "گل کارت قیمت تمام‌شده را اختراع نمی‌کند."
             ],
             "Goal Cart is inactive because the site does not meet its requirements:": [
-                "Goal Cart غیرفعال است، زیرا سایت الزامات آن را برآورده نمی‌کند:"
+                "گل کارت غیرفعال است، زیرا سایت الزامات آن را برآورده نمی‌کند:"
             ],
             "Goal Cart needs product cost data to estimate profit.": [
-                "گال کارت برای برآورد سود به دادهٔ هزینهٔ محصول نیاز دارد."
+                "گل کارت برای برآورد سود به دادهٔ قیمت تمام‌شده نیاز دارد."
             ],
             "Goal Cart's product cost field": [
-                "فیلد هزینهٔ محصول گال کارت"
+                "فیلد قیمت تمام‌شده گل کارت"
             ],
             "Goal Cart:": [
-                "Goal Cart:"
+                "گل کارت:"
             ],
             "Goal Comparison": [
                 "مقایسهٔ اهداف"
@@ -1193,13 +1193,13 @@
                 "چگونه سود تخمینی در دسترس می‌شود"
             ],
             "How Goal Cart works": [
-                "گال کارت چگونه کار می‌کند"
+                "گل کارت چگونه کار می‌کند"
             ],
             "How completed goals grant rewards when several compete: combine them, grant only the highest-priority matching goal, or grant only the best reward. Per-goal exclusive flags and priorities are respected in every mode.": [
                 "نحوهٔ اعطای پاداش اهداف تکمیل‌شده وقتی چند هدف رقابت می‌کنند: ترکیب آن‌ها، اعطای فقط به هدف منطبق با بالاترین اولویت، یا اعطای فقط بهترین پاداش. پرچم‌های انحصاری و اولویت‌های هر هدف در هر حالت رعایت می‌شوند."
             ],
             "How did Goal Cart perform? Sales attributed, purchased orders, average basket and estimated profit.": [
-                "گال کارت چه عملکردی داشت؟ فروش تخصیص‌یافته، سفارش‌های خریداری‌شده، میانگین سبد و سود تخمینی."
+                "گل کارت چه عملکردی داشت؟ فروش منتسب، سفارش‌های خریداری‌شده، میانگین سبد و سود تخمینی."
             ],
             "How is this calculated?": [
                 "این چگونه محاسبه می‌شود؟"
@@ -1277,13 +1277,13 @@
                 "حاشیهٔ سود افزایشی در این آستانه هزینهٔ پاداش را به‌طور کامل پوشش نمی‌دهد."
             ],
             "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the Goal Cart model: progressed\/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once.": [
-                "درآمد افزایشی همان درآمد مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که اهداف ایجاد کرده‌اند. تخصیص از مدل گال کارت پیروی می‌کند: اهداف پیشرفته\/تکمیل‌شده مستقیم‌اند، اهداف فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
+                "فروش افزایشی همان فروش مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که اهداف ایجاد کرده‌اند. انتساب از مدل گل کارت پیروی می‌کند: اهداف پیشرفته\/تکمیل‌شده مستقیم‌اند، اهداف فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
             ],
             "Influenced sales": [
                 "فروش تأثیرپذیرفته"
             ],
             "Internal name shown in the admin.": [
-                "نام داخلی نمایش داده‌شده در مدیریت."
+                "این نام فقط در مدیریت فروشگاه نمایش داده می‌شود."
             ],
             "Internal notes about this campaign.": [
                 "یادداشت‌های داخلی دربارهٔ این کمپین."
@@ -1352,7 +1352,7 @@
                 "پیش‌نمایش زنده"
             ],
             "Loading Goal Cart…": [
-                "در حال بارگذاری Goal Cart…"
+                "در حال بارگذاری گل کارت…"
             ],
             "Loading product…": [
                 "در حال بارگذاری محصول…"
@@ -1397,7 +1397,7 @@
                 "پس از رسیدن به هدف، همهٔ نرخ‌های ارسال رایگان می‌شوند. قوانین ویژهٔ مناطق\/روش‌ها در فاز بعدی پیکربندی می‌شوند."
             ],
             "Manage product costs": [
-                "مدیریت هزینهٔ محصول"
+                "مدیریت قیمت تمام‌شده"
             ],
             "Margin": [
                 "حاشیهٔ سود"
@@ -1484,7 +1484,7 @@
                 "خیر (انحصاری)"
             ],
             "No attributed orders yet": [
-                "هنوز سفارش نسبت‌داده‌شده‌ای وجود ندارد"
+                "هنوز سفارش منتسبی وجود ندارد"
             ],
             "No campaign activity in this range.": [
                 "هیچ فعالیت کمپینی در این بازه نیست."
@@ -1571,7 +1571,7 @@
                 ""
             ],
             "Not enough attributed order data yet.": [
-                "هنوز دادهٔ کافی از سفارش‌های تخصیص‌یافته وجود ندارد."
+                "هنوز دادهٔ کافی از سفارش‌های منتسب وجود ندارد."
             ],
             "Not enough data for a reliable recommendation.": [
                 "دادهٔ کافی برای یک پیشنهاد قابل اعتماد وجود ندارد."
@@ -1586,10 +1586,10 @@
                 "تأثیر مشاهده‌شده"
             ],
             "Observed impact — incremental cart value relative to the baseline. It does not prove that Goal Cart caused the difference.": [
-                "تأثیر مشاهده‌شده — ارزش افزایشی سبد نسبت به خط مبنا. ثابت نمی‌کند که گال کارت باعث این تفاوت شده است."
+                "تأثیر مشاهده‌شده — ارزش افزایشی سبد نسبت به خط مبنا. ثابت نمی‌کند که گل کارت باعث این تفاوت شده است."
             ],
             "Observed impact — this comparison does not prove that Goal Cart caused the difference.": [
-                "تأثیر مشاهده‌شده — این مقایسه ثابت نمی‌کند که گال کارت باعث این تفاوت شده است."
+                "تأثیر مشاهده‌شده — این مقایسه ثابت نمی‌کند که گل کارت باعث این تفاوت شده است."
             ],
             "Once": [
                 "یک بار"
@@ -1598,16 +1598,16 @@
                 "هفته‌ای یک بار"
             ],
             "Once cost data exists, Estimated Profit becomes available automatically.": [
-                "به محض وجود دادهٔ هزینه، سود تخمینی به‌طور خودکار در دسترس می‌شود."
+                "به محض وجود قیمت تمام‌شده، سود تخمینی به‌طور خودکار در دسترس می‌شود."
             ],
             "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit insights here.": [
-                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گال کارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
+                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گل کارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
             ],
             "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit per goal here.": [
-                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گال کارت خرید، فروش و سود هر هدف را اینجا نشان می‌دهد."
+                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گل کارت خرید، فروش و سود هر هدف را اینجا نشان می‌دهد."
             ],
             "Once customers start interacting with your goals, Goal Cart will show sales, purchases and profit insights here.": [
-                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گال کارت فروش، خریدها و بینش‌های سود را اینجا نشان می‌دهد."
+                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گل کارت فروش، خریدها و بینش‌های سود را اینجا نشان می‌دهد."
             ],
             "One overall progress bar for the whole campaign, with a milestone counter and the rewards still on display.": [
                 "یک نوار پیشرفت کلی برای کل کمپین، همراه با شمارندهٔ نقاط عطف و پاداش‌های در حال نمایش."
@@ -1616,7 +1616,7 @@
                 "تنها ۵۷٫۰۰ دلار تا رسیدن به هدف باقی مانده است"
             ],
             "Only goal events within this window before an order are attributed to it.": [
-                "فقط رویدادهای هدف در این بازه قبل از سفارش به آن تخصیص می‌یابند."
+                "فقط رویدادهای هدف در این بازه قبل از سفارش به آن منتسب می‌شوند."
             ],
             "Only products carrying any of these tags count toward the goal. Leave empty to count every product.": [
                 "فقط محصولاتی که هر یک از این برچسبها را دارند در هدف محاسبه میشوند. برای شمارش همهٔ محصولات خالی بگذارید."
@@ -1691,7 +1691,7 @@
                 "سفارش‌های تحلیل‌شده"
             ],
             "Orders are attributed once they reach a revenue-producing status. No goal-influenced orders were found in this range.": [
-                "سفارش‌ها پس از رسیدن به وضعیت درآمدزا نسبت داده می‌شوند. در این بازه هیچ سفارش متأثر از هدفی یافت نشد."
+                "سفارش‌ها پس از رسیدن به وضعیت فروشزا انتساب داده می‌شوند. در این بازه هیچ سفارش متأثر از هدفی یافت نشد."
             ],
             "Overview": [
                 "نمای کلی"
@@ -1715,7 +1715,7 @@
                 "تخفیف درصدی"
             ],
             "Percentage of completed goals that were followed by an attributed purchase.": [
-                "درصد اهداف تکمیل‌شده‌ای که پس از آن یک خرید تخصیص‌یافته رخ داده است."
+                "درصد اهداف تکمیل‌شده‌ای که پس از آن یک خرید منتسب رخ داده است."
             ],
             "Percentage off": [
                 "درصد تخفیف"
@@ -1778,7 +1778,7 @@
                 "قیمت %s به مقدار باقیماندهٔ %s %s می‌خورد."
             ],
             "Price gap": [
-                "شکاف قیمت"
+                "فاصله قیمتی"
             ],
             "Priority": [
                 "اولویت"
@@ -1793,13 +1793,13 @@
                 "محصول"
             ],
             "Product cost": [
-                ""
+                "قیمت تمام‌شده"
             ],
             "Product cost data is not available — profit impact unavailable (revenue-only analytics).": [
-                "دادهٔ هزینهٔ محصول در دسترس نیست — تأثیر بر سود در دسترس نیست (تحلیل‌های صرفاً مبتنی بر درآمد)."
+                "دادهٔ قیمت تمام‌شده در دسترس نیست — تأثیر بر سود در دسترس نیست (تحلیل‌های صرفاً مبتنی بر فروش)."
             ],
             "Product cost must come from WooCommerce or your product-cost data. Goal Cart reads, in order:": [
-                "هزینهٔ محصول باید از ووکامرس یا داده‌های هزینهٔ محصول شما باشد. گال کارت به ترتیب می‌خواند:"
+                "قیمت تمام‌شده باید از ووکامرس یا داده‌های قیمت تمام‌شده شما باشد. گل کارت به ترتیب می‌خواند:"
             ],
             "Product margin data is not available — profit estimates are excluded.": [
                 "دادهٔ حاشیهٔ سود محصول در دسترس نیست — تخمین سود حذف شد."
@@ -1829,13 +1829,13 @@
                 ""
             ],
             "Profit estimates need product cost data. Add product costs on your products to enable Goal economics.": [
-                "تخمین سود به دادهٔ هزینهٔ محصول نیاز دارد. برای فعال‌سازی اقتصاد هدف، هزینهٔ محصولات خود را ثبت کنید."
+                "تخمین سود به دادهٔ قیمت تمام‌شده نیاز دارد. برای فعال‌سازی اقتصاد هدف، قیمت تمام‌شدهات خود را ثبت کنید."
             ],
             "Profit impact could not be estimated for this threshold.": [
                 "تأثیر بر سود برای این آستانه قابل تخمین نبود."
             ],
             "Profit impact is unavailable because product cost data is not available.": [
-                "تأثیر بر سود در دسترس نیست، زیرا دادهٔ هزینهٔ محصول موجود نیست."
+                "تأثیر بر سود در دسترس نیست، زیرا دادهٔ قیمت تمام‌شده موجود نیست."
             ],
             "Profit not estimated yet": [
                 "سود هنوز برآورد نشده"
@@ -1886,7 +1886,7 @@
                 "تعداد"
             ],
             "Raw interaction metrics from the event log — impressions, completions, revenue and suggestions.": [
-                "شاخص‌های خام تعامل از گزارش رویداد — نمایش‌ها، تکمیل‌ها، درآمد و پیشنهادها."
+                "شاخص‌های خام تعامل از گزارش رویداد — نمایش‌ها، تکمیل‌ها، فروش و پیشنهادها."
             ],
             "Reach a cart amount — subtotal, total or discounted subtotal.": [
                 "رسیدن به یک مبلغ سبد — جمع فرعی، کل یا جمع فرعی پس از تخفیف."
@@ -1919,7 +1919,7 @@
                 "سهم در دسترس"
             ],
             "Reachability": [
-                "دسترس‌پذیری"
+                "دسترس‌پذیری هدف"
             ],
             "Reachable orders": [
                 "سفارش‌های قابل دستیابی"
@@ -1934,7 +1934,7 @@
                 "پیشنهادها"
             ],
             "Recommendations helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells.": [
-                "پیشنهادها به شما کمک می‌کنند هدف‌ها و پیکربندی پاداش بهتری انتخاب کنید. این بخش محصول پیشنهاد نمی‌دهد — پیشنهاد محصول به مشتریان در بخش «پیشنهاد محصول» است."
+                "پیشنهادها به شما کمک می‌کنند هدف‌ها و پیکربندی پاداش بهتری انتخاب کنید. این بخش محصول پیشنهاد نمی‌دهد — پیشنهاد خرید به مشتریان در بخش «پیشنهاد خرید» است."
             ],
             "Recommended Goal Target": [
                 "آستانهٔ هدف پیشنهادی"
@@ -1946,7 +1946,7 @@
                 "زمانبندی تکراری"
             ],
             "Relevance": [
-                "ارتباط"
+                "ارتباط محصول"
             ],
             "Relevant to the goal or the current cart contents.": [
                 "مرتبط با هدف یا محتوای فعلی سبد خرید."
@@ -1973,16 +1973,16 @@
                 "محدودیت‌ها و زمان‌بندی این هدف."
             ],
             "Revenue": [
-                "درآمد"
+                "فروش"
             ],
             "Revenue Attribution": [
-                "نسبت‌دهی درآمد"
+                "انتساب فروش"
             ],
             "Revenue from the incremental value of orders where customers progressed toward or completed a goal before ordering.": [
-                "درآمد حاصل از ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به سمت هدف پیشرفت کردند یا آن را تکمیل کردند."
+                "فروش حاصل از ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به سمت هدف پیشرفت کردند یا آن را تکمیل کردند."
             ],
             "Revenue-only analytics continue to work.": [
-                "تحلیل‌های صرفاً مبتنی بر درآمد همچنان کار می‌کنند."
+                "تحلیل‌های صرفاً مبتنی بر فروش همچنان کار می‌کنند."
             ],
             "Reward": [
                 "پاداش"
@@ -2018,22 +2018,22 @@
                 "فروش"
             ],
             "Sales Attributed to Goal Cart": [
-                "فروش تخصیص‌یافته به گال کارت"
+                "فروش منتسب به گل کارت"
             ],
             "Sales Performance": [
                 "عملکرد فروش"
             ],
             "Sales attributed": [
-                "فروش تخصیص‌یافته"
+                "فروش منتسب"
             ],
             "Sales attributed to Goal Cart": [
-                "فروش تخصیص‌یافته به گال کارت"
+                "فروش منتسب به گل کارت"
             ],
             "Sales attributed to Goal Cart — the incremental order value driven by this goal.": [
-                "فروش تخصیص‌یافته به گال کارت — ارزش افزایشی سفارش ناشی از این هدف."
+                "فروش منتسب به گل کارت — ارزش افزایشی سفارش ناشی از این هدف."
             ],
             "Sales generated after Goal Cart interaction.": [
-                "فروش ایجادشده پس از تعامل با گال کارت."
+                "فروش ایجادشده پس از تعامل با گل کارت."
             ],
             "Sample campaign": [
                 "کمپین نمونه"
@@ -2132,7 +2132,7 @@
                 "نمایش نام کمپین"
             ],
             "Show cart goals, progress and rewards (Goal Cart).": [
-                "اهداف سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (Goal Cart)."
+                "اهداف سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (گل کارت)."
             ],
             "Show interaction details": [
                 "نمایش جزئیات تعامل"
@@ -2216,7 +2216,7 @@
                 "لغزش پر شدن نوار پیشرفت هنگام به‌روزرسانی."
             ],
             "Smart goal recommendations are disabled.": [
-                "پیشنهادهای هوشمند هدف غیرفعال هستند."
+                "پیشنهادهای خرید هوشمند هدف غیرفعال هستند."
             ],
             "Smart upsell ranking is not available.": [
                 "رتبه‌بندی فروش بیشتر هوشمند در دسترس نیست."
@@ -2318,7 +2318,7 @@
                 "نوار چسبان پیشرفتهٔ پایین\/بالا (فاز ۳۲): موقعیت، رفتار، شمارش معکوس و پیشنهادها."
             ],
             "The calculation includes product cost\/margin, reward cost, shipping cost and incremental revenue.": [
-                "محاسبه شامل هزینه\/حاشیهٔ محصول، هزینهٔ پاداش، هزینهٔ ارسال و درآمد افزایشی است."
+                "محاسبه شامل هزینه\/حاشیهٔ محصول، هزینهٔ پاداش، هزینهٔ ارسال و فروش افزایشی است."
             ],
             "The campaign could not be created.": [
                 "ایجاد کمپین ممکن نشد."
@@ -2363,7 +2363,7 @@
                 "این تخفیف هرگز روی این محصولات اعمال نمی‌شود."
             ],
             "The funnel and the direct vs assisted models behind Goal Cart’s attributed revenue.": [
-                "قیف و مدل‌های مستقیم در برابر کمکی پشت درآمد نسبت‌داده‌شدهٔ Goal Cart."
+                "قیف و مدل‌های مستقیم در برابر کمکی پشت فروش منتسب گل کارت."
             ],
             "The goal could not be created.": [
                 "ایجاد هدف ممکن نشد."
@@ -2414,7 +2414,7 @@
                 "ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به این هدف پیشرفت کردند یا آن را تکمیل کردند."
             ],
             "The internal identity of the goal.": [
-                "هویت داخلی هدف."
+                "نامی برای شناسایی این هدف در مدیریت فروشگاه."
             ],
             "The ordered goals of the campaign. Shoppers unlock each goal in order as their cart grows.": [
                 "اهداف مرتب‌شدهٔ کمپین. مشتریان با رشد سبدشان هر هدف را به ترتیب باز می‌کنند."
@@ -2456,7 +2456,7 @@
                 "قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا انتخاب قالب دیگری در اینجا، از قالب پایه استفاده می‌کند."
             ],
             "The threshold shoppers need to reach": [
-                "آستانه‌ای که مشتریان باید به آن برسند"
+                "مبلغی که مشتری باید به آن برسد تا هدف را تکمیل کند."
             ],
             "The threshold shoppers need to reach.": [
                 "آستانه‌ای که مشتریان باید به آن برسند."
@@ -2465,7 +2465,7 @@
                 ""
             ],
             "These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting.": [
-                "این شاخص‌ها از مدل تخصیص گال کارت استفاده می‌کنند — مستقیم در برابر کمکی، سفارش‌های متمایز، بدون شمارش دوبار."
+                "این شاخص‌ها از مدل انتساب گل کارت استفاده می‌کنند — مستقیم در برابر کمکی، سفارش‌های متمایز، بدون شمارش دوبار."
             ],
             "These products never count toward the goal, even when they would otherwise qualify.": [
                 "این محصولات هرگز به سمت هدف محاسبه نمی‌شوند، حتی وقتی در غیر این صورت واجد شرایط باشند."
@@ -2600,10 +2600,10 @@
                 "تکمیل‌های کمک‌شده توسط پیشنهاد فروش"
             ],
             "Upsells": [
-                "پیشنهاد محصول"
+                "پیشنهاد خرید"
             ],
             "Upsells shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product.": [
-                "پیشنهاد محصول نشان می‌دهد کدام محصولات به مشتریان در رسیدن به هدف‌ها کمک می‌کنند و فروش بیشتری ایجاد می‌کنند — خرید، فروش و سود تخمینی هر محصول."
+                "پیشنهاد خرید نشان می‌دهد کدام محصولات به مشتریان در رسیدن به هدف‌ها کمک می‌کنند و فروش بیشتری ایجاد می‌کنند — خرید، فروش و سود تخمینی هر محصول."
             ],
             "Use global default": [
                 "استفاده از پیش‌فرض سراسری"
@@ -2645,16 +2645,16 @@
                 "پس از دیدن و تکمیل اهداف شما توسط مشتریان چه اتفاقی می‌افتد — خریدها، فروش و سود."
             ],
             "What is Goal Cart?": [
-                "Goal Cart چیست؟"
+                "گل کارت چیست؟"
             ],
             "What target should this goal use — based on real store data.": [
                 "این هدف باید از کدام آستانه استفاده کند — بر اساس داده‌های واقعی فروشگاه."
             ],
             "What the customer earns when the goal is reached.": [
-                "آنچه مشتری با رسیدن به هدف به دست می‌آورد."
+                "پاداشی که مشتری بعد از تکمیل هدف دریافت می‌کند؛ مثلاً ارسال رایگان، تخفیف یا هدیه."
             ],
             "What the goal measures.": [
-                "آنچه هدف اندازه‌گیری می‌کند."
+                "مشخص می‌کند مشتری برای دریافت پاداش باید چه کاری انجام دهد."
             ],
             "When off, cart coupons and discounts do not reduce the discounted-subtotal basis.": [
                 "وقتی خاموش است، کوپن‌ها و تخفیف‌های سبد، مبنای جمع فرعی پس از تخفیف را کاهش نمی‌دهند."
@@ -2708,7 +2708,7 @@
                 "دادهٔ سفارش‌های ووکامرس در دسترس نیست — هیچ پیشنهادی قابل محاسبه نیست."
             ],
             "WooCommerce product cost field (_cost)": [
-                "فیلد هزینهٔ محصول ووکامرس (_cost)"
+                "فیلد قیمت تمام‌شده ووکامرس (_cost)"
             ],
             "WooCommerce upsell of a cart item": [
                 "فروش بیشتر ووکامرس برای یک قلم سبد"
@@ -2738,7 +2738,7 @@
                 "سبد خرید شما خالی است."
             ],
             "after Goal Cart interaction": [
-                "پس از تعامل با گال کارت"
+                "پس از تعامل با گل کارت"
             ],
             "almost exactly": [
                 "تقریباً دقیقاً"
@@ -2804,19 +2804,19 @@
                 "%s سفارش خریداری‌شده"
             ],
             "A business summary of your Goals and Smart Upsells.": [
-                "خلاصه‌ای تجاری از اهداف و پیشنهادهای هوشمند شما."
+                "خلاصه‌ای تجاری از اهداف و پیشنهادهای خرید هوشمند شما."
             ],
             "Add costs": [
                 "افزودن هزینه‌ها"
             ],
             "Add product costs to unlock Estimated Profit — Goal Cart never invents a margin.": [
-                "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — گال کارت هرگز حاشیه سود را حدس نمی‌زند."
+                "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — گل کارت هرگز حاشیه سود را حدس نمی‌زند."
             ],
             "Average Order Value": [
                 "میانگین ارزش سفارش"
             ],
             "Configure Smart Upsells": [
-                "پیشنهادهای هوشمند را پیکربندی کنید"
+                "پیشنهادهای خرید هوشمند را پیکربندی کنید"
             ],
             "Create Goal": [
                 "ایجاد هدف"
@@ -2825,13 +2825,13 @@
                 "اولین هدف خود را بسازید"
             ],
             "Daily attributed sales and goal completions trend": [
-                "روند روزانهٔ فروش تخصیص‌یافته و تکمیل‌های هدف"
+                "روند روزانهٔ فروش منتسب و تکمیل‌های هدف"
             ],
             "Increase cart value with Goals and Smart Upsells.": [
-                "با اهداف و پیشنهادهای هوشمند ارزش سبد خرید را افزایش دهید."
+                "با اهداف و پیشنهادهای خرید هوشمند ارزش سبد خرید را افزایش دهید."
             ],
             "It generated %s in attributed sales this period.": [
-                "در این دوره %s فروش تخصیص‌یافته ایجاد کرده است."
+                "در این دوره %s فروش منتسب ایجاد کرده است."
             ],
             "Last 90 days": [
                 "۹۰ روز گذشته"
@@ -2852,7 +2852,7 @@
                 "فرصت‌های بهینه‌سازی"
             ],
             "Product cost data is incomplete": [
-                "داده‌های هزینهٔ محصول ناقص است"
+                "داده‌های قیمت تمام‌شده ناقص است"
             ],
             "Refresh": [
                 "به‌روزرسانی"
@@ -2864,7 +2864,7 @@
                 "فروش و عملکرد اهداف"
             ],
             "Smart Upsells assisted %s goal completions this period.": [
-                "پیشنهادهای هوشمند در این دوره %s تکمیل هدف را یاری کرده‌اند."
+                "پیشنهادهای خرید هوشمند در این دوره %s تکمیل هدف را یاری کرده‌اند."
             ],
             "Start collecting performance data": [
                 "جمع‌آوری داده‌های عملکرد را آغاز کنید"
@@ -2873,7 +2873,7 @@
                 "این ماه"
             ],
             "Upsell Performance": [
-                "عملکرد پیشنهاد محصول"
+                "عملکرد پیشنهاد خرید"
             ],
             "Upsells are assisting completions": [
                 "پیشنهادها در حال کمک به تکمیل اهداف هستند"
@@ -2894,7 +2894,7 @@
                 "نتوانستیم تحلیل‌های شما را بارگیری کنیم. اهداف شما همچنان به‌درستی کار می‌کنند."
             ],
             "Welcome to Goal Cart": [
-                "به گال کارت خوش آمدید"
+                "به گل کارت خوش آمدید"
             ],
             "Your analytics are getting ready": [
                 "تحلیل‌های شما در حال آماده‌سازی است"
@@ -2907,6 +2907,33 @@
             ],
             "vs previous period": [
                 "نسبت به دورهٔ قبل"
+            ],
+            "Example: if the target is 10 items, a cart with 7 items is 70% of the way there.": [
+                "مثال: اگر هدف ۱۰ عدد باشد، سبدی با ۷ عدد معادل ۷۰٪ مسیر هدف است."
+            ],
+            "Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there.": [
+                "مثال: اگر هدف ۱۰ کیلوگرم باشد، سبدی با ۷ کیلوگرم معادل ۷۰٪ مسیر هدف است."
+            ],
+            "Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there.": [
+                "مثال: اگر هدف ۲٬۰۰۰٬۰۰۰ باشد، سبدی با ۱٬۵۰۰٬۰۰۰ معادل ۷۵٪ مسیر هدف است."
+            ],
+            "How often this product has actually led to an order when suggested.": [
+                "نشان می‌دهد این محصول هنگام پیشنهاد، چقدر به ثبت سفارش منجر شده است."
+            ],
+            "How related this product is to the items already in the customer’s cart.": [
+                "میزان ارتباط این محصول با کالاهایی که مشتری در سبد خود دارد."
+            ],
+            "In-stock products are prioritized.": [
+                "محصولات موجود در انبار در اولویت قرار می‌گیرند."
+            ],
+            "Products priced close to the amount remaining until the goal usually make a better suggestion.": [
+                "محصولاتی که قیمتشان به مبلغ باقی‌مانده تا هدف نزدیک‌تر است، معمولاً پیشنهاد مناسب‌تری هستند."
+            ],
+            "Products purchased more often in your store rank higher.": [
+                "محصولاتی که در فروشگاه بیشتر خریداری شده‌اند، امتیاز بالاتری می‌گیرند."
+            ],
+            "When product cost is recorded, its profit is also considered in the ranking.": [
+                "اگر قیمت تمام‌شده محصول ثبت شده باشد، سود آن نیز در اولویت‌بندی پیشنهادها در نظر گرفته می‌شود."
             ]
         }
     }

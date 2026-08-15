@@ -47,13 +47,46 @@ const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
   { value: 'margin', label: __('Highest margin', 'goalcart') },
 ];
 
-const COMPONENT_LABELS: Array<{ key: keyof UpsellComponentScores; label: string }> = [
-  { key: 'price_gap', label: __('Price gap', 'goalcart') },
-  { key: 'relevance', label: __('Relevance', 'goalcart') },
-  { key: 'popularity', label: __('Popularity', 'goalcart') },
-  { key: 'inventory', label: __('Inventory', 'goalcart') },
-  { key: 'margin', label: __('Margin', 'goalcart') },
-  { key: 'conversion', label: __('Conversion', 'goalcart') },
+const COMPONENT_LABELS: Array<{ key: keyof UpsellComponentScores; label: string; help: string }> = [
+  {
+    key: 'price_gap',
+    label: __('Price gap', 'goalcart'),
+    help: __(
+      'Products priced close to the amount remaining until the goal usually make a better suggestion.',
+      'goalcart'
+    ),
+  },
+  {
+    key: 'relevance',
+    label: __('Relevance', 'goalcart'),
+    help: __(
+      'How related this product is to the items already in the customer’s cart.',
+      'goalcart'
+    ),
+  },
+  {
+    key: 'popularity',
+    label: __('Popularity', 'goalcart'),
+    help: __('Products purchased more often in your store rank higher.', 'goalcart'),
+  },
+  {
+    key: 'inventory',
+    label: __('Inventory', 'goalcart'),
+    help: __('In-stock products are prioritized.', 'goalcart'),
+  },
+  {
+    key: 'margin',
+    label: __('Margin', 'goalcart'),
+    help: __(
+      'When product cost is recorded, its profit is also considered in the ranking.',
+      'goalcart'
+    ),
+  },
+  {
+    key: 'conversion',
+    label: __('Conversion', 'goalcart'),
+    help: __('How often this product has actually led to an order when suggested.', 'goalcart'),
+  },
 ];
 
 /**
@@ -163,10 +196,12 @@ function ProductDetailDialog({
                 {__('Score breakdown', 'goalcart')}
               </Typography>
               <Stack spacing={1}>
-                {COMPONENT_LABELS.map(({ key, label }) => (
+                {COMPONENT_LABELS.map(({ key, label, help }) => (
                   <Box key={key}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.25 }}>
-                      <Typography variant="caption">{label}</Typography>
+                      <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                        {label}
+                      </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {formatNumber(detail.components[key])} / 100
                       </Typography>
@@ -176,6 +211,9 @@ function ProductDetailDialog({
                       value={detail.components[key]}
                       sx={{ height: 5, borderRadius: 3 }}
                     />
+                    <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.25 }}>
+                      {help}
+                    </Typography>
                   </Box>
                 ))}
               </Stack>

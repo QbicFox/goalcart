@@ -4,6 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Grid from '@mui/material/Grid';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
 
 import { searchAttributes, searchCategories, searchProducts, searchTags } from '../../api/search';
@@ -64,6 +65,30 @@ function targetSuffix(type: GoalType, mode: string): string {
     return __('(items)', 'goalcart');
   }
   return __('(amount)', 'goalcart');
+}
+
+/**
+ * A concrete, plain-Persian example under the target field (§9) — a small
+ * mental model of "how far along is the cart?", adapted to the target's
+ * unit (money, items or weight).
+ */
+function targetExample(type: GoalType, mode: string): string {
+  if (type === 'weight') {
+    return __(
+      'Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there.',
+      'goalcart'
+    );
+  }
+  if (type === 'quantity' || type === 'distinct_quantity' || mode === 'quantity') {
+    return __(
+      'Example: if the target is 10 items, a cart with 7 items is 70% of the way there.',
+      'goalcart'
+    );
+  }
+  return __(
+    'Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there.',
+    'goalcart'
+  );
 }
 
 /**
@@ -197,6 +222,12 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
           />
         </Grid>
       )}
+
+      <Grid size={12}>
+        <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
+          {targetExample(type, mode)}
+        </Typography>
+      </Grid>
     </Grid>
   );
 }

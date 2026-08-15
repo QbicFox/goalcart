@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-15T08:25:27Z\n"
+"POT-Creation-Date: 2026-08-15T09:00:49Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -68,15 +68,15 @@ msgstr ""
 msgid "%s purchased orders"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:66
+#: admin-app/src/components/goal-builder/TargetFields.tsx:67
 msgid "(amount)"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:64
+#: admin-app/src/components/goal-builder/TargetFields.tsx:65
 msgid "(items)"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:61
+#: admin-app/src/components/goal-builder/TargetFields.tsx:62
 msgid "(weight units)"
 msgstr ""
 
@@ -250,7 +250,7 @@ msgid "Add your first goal"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1082
-#: admin-app/src/routes/UpsellAnalytics.tsx:414
+#: admin-app/src/routes/UpsellAnalytics.tsx:452
 msgid "Add-to-cart"
 msgstr ""
 
@@ -273,7 +273,7 @@ msgstr ""
 msgid "Additional Sales Value"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:412
+#: admin-app/src/routes/UpsellAnalytics.tsx:450
 msgid "Adds"
 msgstr ""
 
@@ -483,7 +483,7 @@ msgstr ""
 msgid "Attributed sales"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:174
+#: admin-app/src/components/goal-builder/TargetFields.tsx:199
 msgid "Attributes"
 msgstr ""
 
@@ -657,12 +657,12 @@ msgstr ""
 msgid "Brand"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:189
+#: admin-app/src/components/goal-builder/TargetFields.tsx:214
 msgid "Brand attribute"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1081
-#: admin-app/src/routes/UpsellAnalytics.tsx:413
+#: admin-app/src/routes/UpsellAnalytics.tsx:451
 msgid "CTR"
 msgstr ""
 
@@ -675,7 +675,7 @@ msgid "Caching and what the storefront measures."
 msgstr ""
 
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:118
-#: admin-app/src/components/goal-builder/TargetFields.tsx:111
+#: admin-app/src/components/goal-builder/TargetFields.tsx:136
 msgid "Calculate against"
 msgstr ""
 
@@ -748,18 +748,18 @@ msgid "Cart state"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:28
-#: admin-app/src/components/goal-builder/TargetFields.tsx:23
-#: admin-app/src/components/goal-builder/TargetFields.tsx:29
-#: admin-app/src/components/goal-builder/TargetFields.tsx:35
-#: admin-app/src/components/goal-builder/TargetFields.tsx:42
-#: admin-app/src/components/goal-builder/TargetFields.tsx:48
-#: admin-app/src/components/goal-builder/TargetFields.tsx:54
+#: admin-app/src/components/goal-builder/TargetFields.tsx:24
+#: admin-app/src/components/goal-builder/TargetFields.tsx:30
+#: admin-app/src/components/goal-builder/TargetFields.tsx:36
+#: admin-app/src/components/goal-builder/TargetFields.tsx:43
+#: admin-app/src/components/goal-builder/TargetFields.tsx:49
+#: admin-app/src/components/goal-builder/TargetFields.tsx:55
 #: admin-app/src/routes/Settings.tsx:462
 msgid "Cart total (incl. tax & shipping)"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:153
-#: admin-app/src/components/goal-builder/TargetFields.tsx:129
+#: admin-app/src/components/goal-builder/TargetFields.tsx:154
 msgid "Categories"
 msgstr ""
 
@@ -796,14 +796,14 @@ msgstr ""
 msgid "Circular gauge — the target as a filled ring with the percentage centered."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:471
+#: admin-app/src/routes/UpsellAnalytics.tsx:509
 msgid "Click a product row for its full score breakdown."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1079
 #: admin-app/src/routes/Dashboard.tsx:299
 #: admin-app/src/routes/GoalPerformance.tsx:445
-#: admin-app/src/routes/UpsellAnalytics.tsx:411
+#: admin-app/src/routes/UpsellAnalytics.tsx:449
 msgid "Clicks"
 msgstr ""
 
@@ -947,9 +947,9 @@ msgstr ""
 msgid "Content"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:56
-#: admin-app/src/routes/UpsellAnalytics.tsx:390
-#: admin-app/src/routes/UpsellAnalytics.tsx:407
+#: admin-app/src/routes/UpsellAnalytics.tsx:87
+#: admin-app/src/routes/UpsellAnalytics.tsx:428
+#: admin-app/src/routes/UpsellAnalytics.tsx:445
 msgid "Conversion"
 msgstr ""
 
@@ -1027,7 +1027,7 @@ msgstr ""
 msgid "Could not load the settings."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:328
+#: admin-app/src/routes/UpsellAnalytics.tsx:366
 msgid "Could not load upsell analytics."
 msgstr ""
 
@@ -1309,12 +1309,12 @@ msgid "Discount percentage"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:27
-#: admin-app/src/components/goal-builder/TargetFields.tsx:22
-#: admin-app/src/components/goal-builder/TargetFields.tsx:28
-#: admin-app/src/components/goal-builder/TargetFields.tsx:34
-#: admin-app/src/components/goal-builder/TargetFields.tsx:41
-#: admin-app/src/components/goal-builder/TargetFields.tsx:47
-#: admin-app/src/components/goal-builder/TargetFields.tsx:53
+#: admin-app/src/components/goal-builder/TargetFields.tsx:23
+#: admin-app/src/components/goal-builder/TargetFields.tsx:29
+#: admin-app/src/components/goal-builder/TargetFields.tsx:35
+#: admin-app/src/components/goal-builder/TargetFields.tsx:42
+#: admin-app/src/components/goal-builder/TargetFields.tsx:48
+#: admin-app/src/components/goal-builder/TargetFields.tsx:54
 #: admin-app/src/routes/Settings.tsx:458
 msgid "Discounted subtotal"
 msgstr ""
@@ -1473,7 +1473,7 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:292
 #: admin-app/src/routes/Recommendations.tsx:213
 #: admin-app/src/routes/RevenueOverview.tsx:138
-#: admin-app/src/routes/UpsellAnalytics.tsx:406
+#: admin-app/src/routes/UpsellAnalytics.tsx:444
 msgid "Estimated profit"
 msgstr ""
 
@@ -1505,6 +1505,18 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:719
 msgid "Estimated, not guaranteed."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/TargetFields.tsx:83
+msgid "Example: if the target is 10 items, a cart with 7 items is 70% of the way there."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/TargetFields.tsx:77
+msgid "Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there."
+msgstr ""
+
+#: admin-app/src/components/goal-builder/TargetFields.tsx:88
+msgid "Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there."
 msgstr ""
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:99
@@ -1838,7 +1850,7 @@ msgstr ""
 msgid "Hide details"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:320
+#: admin-app/src/routes/UpsellAnalytics.tsx:358
 msgid "Hide interaction details"
 msgstr ""
 
@@ -1867,7 +1879,7 @@ msgstr ""
 msgid "Historical goal completion rate is %s."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:200
+#: admin-app/src/routes/UpsellAnalytics.tsx:238
 msgid "Historical performance"
 msgstr ""
 
@@ -1920,6 +1932,14 @@ msgstr ""
 msgid "How multiple active goals are presented when the shopper has no campaign."
 msgstr ""
 
+#: admin-app/src/routes/UpsellAnalytics.tsx:88
+msgid "How often this product has actually led to an order when suggested."
+msgstr ""
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:62
+msgid "How related this product is to the items already in the customer’s cart."
+msgstr ""
+
 #: admin-app/src/routes/Settings.tsx:738
 msgid "How suggested products are ordered (Phase 32 advanced upsell ranking)."
 msgstr ""
@@ -1944,12 +1964,16 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:1078
 #: admin-app/src/routes/Dashboard.tsx:298
 #: admin-app/src/routes/GoalPerformance.tsx:444
-#: admin-app/src/routes/UpsellAnalytics.tsx:410
+#: admin-app/src/routes/UpsellAnalytics.tsx:448
 msgid "Impressions"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:596
 msgid "Improve your Goals using store performance data — which target and reward configuration to use, and why."
+msgstr ""
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:75
+msgid "In-stock products are prioritized."
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:47
@@ -2042,7 +2066,7 @@ msgstr ""
 msgid "Invalid tracking nonce."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:54
+#: admin-app/src/routes/UpsellAnalytics.tsx:74
 msgid "Inventory"
 msgstr ""
 
@@ -2103,7 +2127,7 @@ msgstr ""
 msgid "Leave empty to apply to the whole cart."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:286
+#: admin-app/src/routes/UpsellAnalytics.tsx:324
 msgid "Limit"
 msgstr ""
 
@@ -2132,7 +2156,7 @@ msgstr ""
 msgid "Loading Goal Cart…"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:115
+#: admin-app/src/routes/UpsellAnalytics.tsx:148
 msgid "Loading product…"
 msgstr ""
 
@@ -2199,7 +2223,7 @@ msgid "Many completions don’t become purchases"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:170
-#: admin-app/src/routes/UpsellAnalytics.tsx:55
+#: admin-app/src/routes/UpsellAnalytics.tsx:79
 msgid "Margin"
 msgstr ""
 
@@ -2423,7 +2447,7 @@ msgstr ""
 msgid "No templates are registered for this scope yet. Add one on the backend template registry."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:340
+#: admin-app/src/routes/UpsellAnalytics.tsx:378
 msgid "No upsell activity yet"
 msgstr ""
 
@@ -2520,11 +2544,11 @@ msgstr ""
 msgid "Only products carrying any of these tags count toward the goal. Leave empty to count every product."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:163
+#: admin-app/src/components/goal-builder/TargetFields.tsx:188
 msgid "Only products carrying any of these tags count toward the target."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:133
+#: admin-app/src/components/goal-builder/TargetFields.tsx:158
 msgid "Only products in these categories count toward the target."
 msgstr ""
 
@@ -2532,7 +2556,7 @@ msgstr ""
 msgid "Only shoppers with no completed orders see this goal. Guests always qualify."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:148
+#: admin-app/src/components/goal-builder/TargetFields.tsx:173
 msgid "Only these products count toward the target. Variations are matched by their parent product."
 msgstr ""
 
@@ -2611,7 +2635,7 @@ msgstr ""
 msgid "Order value distribution (share of orders)"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:404
+#: admin-app/src/routes/UpsellAnalytics.tsx:442
 msgid "Orders"
 msgstr ""
 
@@ -2705,7 +2729,7 @@ msgstr ""
 msgid "Popular product (%d units sold, %s rating)."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:53
+#: admin-app/src/routes/UpsellAnalytics.tsx:69
 msgid "Popularity"
 msgstr ""
 
@@ -2747,7 +2771,7 @@ msgstr ""
 msgid "Price %s fits the remaining %s %s."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:51
+#: admin-app/src/routes/UpsellAnalytics.tsx:53
 msgid "Price gap"
 msgstr ""
 
@@ -2770,8 +2794,8 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:513
 #: admin-app/src/routes/Analytics.tsx:1077
 #: admin-app/src/routes/Goals.tsx:56
-#: admin-app/src/routes/UpsellAnalytics.tsx:115
-#: admin-app/src/routes/UpsellAnalytics.tsx:403
+#: admin-app/src/routes/UpsellAnalytics.tsx:148
+#: admin-app/src/routes/UpsellAnalytics.tsx:441
 msgid "Product"
 msgstr ""
 
@@ -2813,13 +2837,21 @@ msgid "Product tags"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:164
-#: admin-app/src/components/goal-builder/TargetFields.tsx:144
-#: admin-app/src/routes/UpsellAnalytics.tsx:360
+#: admin-app/src/components/goal-builder/TargetFields.tsx:169
+#: admin-app/src/routes/UpsellAnalytics.tsx:398
 msgid "Products"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:178
+#: admin-app/src/components/goal-builder/TargetFields.tsx:203
 msgid "Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target."
+msgstr ""
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:54
+msgid "Products priced close to the amount remaining until the goal usually make a better suggestion."
+msgstr ""
+
+#: admin-app/src/routes/UpsellAnalytics.tsx:70
+msgid "Products purchased more often in your store rank higher."
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:441
@@ -2903,7 +2935,7 @@ msgstr ""
 #: admin-app/src/routes/RevenueOverview.tsx:167
 #: admin-app/src/routes/RevenueOverview.tsx:379
 #: admin-app/src/routes/RevenueOverview.tsx:509
-#: admin-app/src/routes/UpsellAnalytics.tsx:370
+#: admin-app/src/routes/UpsellAnalytics.tsx:408
 msgid "Purchased Orders"
 msgstr ""
 
@@ -2922,11 +2954,11 @@ msgid "Pure-assisted order totals"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:25
-#: admin-app/src/components/goal-builder/TargetFields.tsx:26
-#: admin-app/src/components/goal-builder/TargetFields.tsx:32
-#: admin-app/src/components/goal-builder/TargetFields.tsx:39
-#: admin-app/src/components/goal-builder/TargetFields.tsx:45
-#: admin-app/src/components/goal-builder/TargetFields.tsx:51
+#: admin-app/src/components/goal-builder/TargetFields.tsx:27
+#: admin-app/src/components/goal-builder/TargetFields.tsx:33
+#: admin-app/src/components/goal-builder/TargetFields.tsx:40
+#: admin-app/src/components/goal-builder/TargetFields.tsx:46
+#: admin-app/src/components/goal-builder/TargetFields.tsx:52
 #: admin-app/src/components/goal-builder/goalTypes.tsx:33
 #: admin-app/src/routes/Goals.tsx:53
 msgid "Quantity"
@@ -3016,7 +3048,7 @@ msgstr ""
 msgid "Refresh"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:52
+#: admin-app/src/routes/UpsellAnalytics.tsx:61
 msgid "Relevance"
 msgstr ""
 
@@ -3124,8 +3156,8 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:191
 #: admin-app/src/routes/GoalPerformance.tsx:93
-#: admin-app/src/routes/UpsellAnalytics.tsx:380
-#: admin-app/src/routes/UpsellAnalytics.tsx:405
+#: admin-app/src/routes/UpsellAnalytics.tsx:418
+#: admin-app/src/routes/UpsellAnalytics.tsx:443
 msgid "Sales"
 msgstr ""
 
@@ -3203,11 +3235,11 @@ msgid "Schedule & priority"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:122
-#: admin-app/src/routes/UpsellAnalytics.tsx:415
+#: admin-app/src/routes/UpsellAnalytics.tsx:453
 msgid "Score"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:163
+#: admin-app/src/routes/UpsellAnalytics.tsx:196
 msgid "Score breakdown"
 msgstr ""
 
@@ -3219,7 +3251,7 @@ msgstr ""
 msgid "Search and select…"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:294
+#: admin-app/src/components/goal-builder/TargetFields.tsx:325
 msgid "Search attributes…"
 msgstr ""
 
@@ -3313,7 +3345,7 @@ msgstr ""
 msgid "Show cart goals, progress and rewards (Goal Cart)."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:320
+#: admin-app/src/routes/UpsellAnalytics.tsx:358
 msgid "Show interaction details"
 msgstr ""
 
@@ -3448,7 +3480,7 @@ msgstr ""
 msgid "Something went wrong"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:304
+#: admin-app/src/routes/UpsellAnalytics.tsx:342
 msgid "Sort products"
 msgstr ""
 
@@ -3500,12 +3532,12 @@ msgid "Stroke width (px)"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:26
-#: admin-app/src/components/goal-builder/TargetFields.tsx:21
-#: admin-app/src/components/goal-builder/TargetFields.tsx:27
-#: admin-app/src/components/goal-builder/TargetFields.tsx:33
-#: admin-app/src/components/goal-builder/TargetFields.tsx:40
-#: admin-app/src/components/goal-builder/TargetFields.tsx:46
-#: admin-app/src/components/goal-builder/TargetFields.tsx:52
+#: admin-app/src/components/goal-builder/TargetFields.tsx:22
+#: admin-app/src/components/goal-builder/TargetFields.tsx:28
+#: admin-app/src/components/goal-builder/TargetFields.tsx:34
+#: admin-app/src/components/goal-builder/TargetFields.tsx:41
+#: admin-app/src/components/goal-builder/TargetFields.tsx:47
+#: admin-app/src/components/goal-builder/TargetFields.tsx:53
 #: admin-app/src/routes/Settings.tsx:454
 msgid "Subtotal (before discounts)"
 msgstr ""
@@ -3544,12 +3576,12 @@ msgstr ""
 msgid "Tag"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:159
+#: admin-app/src/components/goal-builder/TargetFields.tsx:184
 msgid "Tags"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:102
-#: admin-app/src/components/goal-builder/TargetFields.tsx:97
+#: admin-app/src/components/goal-builder/TargetFields.tsx:122
 #: admin-app/src/routes/GoalBuilder.tsx:323
 msgid "Target"
 msgstr ""
@@ -3744,11 +3776,11 @@ msgstr ""
 msgid "The product added to the cart as a gift."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:193
+#: admin-app/src/components/goal-builder/TargetFields.tsx:218
 msgid "The product attribute that identifies the brand (typically pa_brand)."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:126
+#: admin-app/src/routes/UpsellAnalytics.tsx:159
 msgid "The product breakdown could not be loaded."
 msgstr ""
 
@@ -3780,7 +3812,7 @@ msgstr ""
 msgid "The stored default template is no longer registered. The storefront falls back to the Basic template until you pick another one here."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:102
+#: admin-app/src/components/goal-builder/TargetFields.tsx:127
 msgid "The threshold shoppers need to reach"
 msgstr ""
 
@@ -3824,7 +3856,7 @@ msgstr ""
 msgid "This offer is not available for your cart."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:216
+#: admin-app/src/routes/UpsellAnalytics.tsx:254
 msgid "This product could not be scored."
 msgstr ""
 
@@ -3973,7 +4005,7 @@ msgstr ""
 msgid "Upsell Performance"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:341
+#: admin-app/src/routes/UpsellAnalytics.tsx:379
 msgid "Upsell impressions and orders are recorded once the storefront reports them. Widen the date range or check that tracking is enabled."
 msgstr ""
 
@@ -3987,7 +4019,7 @@ msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:62
 #: admin-app/src/routes/GoalPerformance.tsx:439
-#: admin-app/src/routes/UpsellAnalytics.tsx:277
+#: admin-app/src/routes/UpsellAnalytics.tsx:315
 msgid "Upsells"
 msgstr ""
 
@@ -3995,7 +4027,7 @@ msgstr ""
 msgid "Upsells are assisting completions"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:278
+#: admin-app/src/routes/UpsellAnalytics.tsx:316
 msgid "Upsells shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product."
 msgstr ""
 
@@ -4108,6 +4140,10 @@ msgstr ""
 msgid "When on, shipping charges count toward the cart-total basis."
 msgstr ""
 
+#: admin-app/src/routes/UpsellAnalytics.tsx:80
+msgid "When product cost is recorded, its profit is also considered in the ranking."
+msgstr ""
+
 #: admin-app/src/routes/CampaignBuilder.tsx:335
 msgid "When the campaign runs, and how it competes with other campaigns."
 msgstr ""
@@ -4136,7 +4172,7 @@ msgstr ""
 msgid "Which goals generated purchases, sales and profit? Completion is not the same as purchase."
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:186
+#: admin-app/src/routes/UpsellAnalytics.tsx:224
 msgid "Why this product"
 msgstr ""
 
@@ -4281,7 +4317,7 @@ msgstr ""
 msgid "shares a tag with the cart"
 msgstr ""
 
-#: admin-app/src/routes/UpsellAnalytics.tsx:138
+#: admin-app/src/routes/UpsellAnalytics.tsx:171
 msgid "upsell score"
 msgstr ""
 
