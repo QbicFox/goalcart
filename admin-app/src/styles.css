@@ -1,9 +1,16 @@
 /* Scoped styles for the Goal Cart admin mount point.
  *
- * MUI (emotion) injects class-scoped component styles, so WP admin styles
- * do not bleed into the app. CssBaseline is intentionally NOT used — its
- * `* { box-sizing }` and `body` resets would leak into the whole WP admin
- * page — so the equivalents are scoped to the mount point here. */
+ * MUI (emotion) injects class-scoped component styles — but that alone
+ * does not isolate the app from the WP admin stylesheet. WP admin's
+ * element-level form rules (wp-admin/css/forms.css, e.g.
+ * `input[type="text"]`) out-specify MUI's single-class selectors, so the
+ * WP chrome styling (borders, padding, checkbox geometry, disabled
+ * backgrounds, …) leaks into the MUI controls. The neutralization block
+ * at the bottom of this file restores the neutral values MUI expects.
+ *
+ * CssBaseline is intentionally NOT used — its `* { box-sizing }` and
+ * `body` resets would leak into the whole WP admin page — so the
+ * equivalents are scoped to the mount point here. */
 
 #goalcart-admin {
   /* Full-screen dashboard: the mount point fills the viewport and the
@@ -28,4 +35,126 @@
 #goalcart-admin .goalcart-admin-loading {
   padding: 48px 0;
   color: #50575e;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+ * WP admin form-style neutralization for MUI controls
+ * ─────────────────────────────────────────────────────────────────────
+ *
+ * WordPress loads element-level form styles on every admin screen
+ * (wp-admin/css/forms.css). Its attribute selectors — `input[type="text"]`
+ * and friends, specificity 0-1-1 — beat MUI's single-class selectors
+ * (e.g. `.MuiOutlinedInput-input`, 0-1-0), so WP rules like
+ * `border: 1px solid #949494`, `padding: 0 12px`, `min-height: 40px`,
+ * the WP checkbox/radio geometry and the opaque disabled background leak
+ * into the MUI controls. The rules below neutralize exactly those leaks
+ * and restore the values MUI ships.
+ *
+ * Scoping: the mount point plus MUI's portaled surfaces — Dialogs,
+ * Drawers, Popovers and Menus render into <body>, outside
+ * #goalcart-admin (e.g. the preview dialogs' PreviewControls). `:is()`
+ * keeps the specificity of its most specific argument (the ID), so every
+ * rule outranks the WP admin selectors on both the mount point and the
+ * portals.
+ * ───────────────────────────────────────────────────────────────────── */
+
+/* Text-like inputs and textareas: strip WP's border, radius, shadow,
+   background, color and height constraints. The decorated MUI surface
+   (the OutlinedInput fieldset) becomes the only border, and the inner
+   input keeps MUI's own sizing (paddings are restored below — WP's
+   `padding: 0 12px` must not win). */
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='text'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='password'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='email'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='url'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='tel'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='search'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='number'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='date'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='datetime'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='datetime-local'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='month'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='week'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='time'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='color'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) textarea {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+  color: inherit;
+  min-height: 0;
+}
+
+/* Restore MUI's per-variant input paddings, which WP's `padding: 0 12px`
+   would otherwise override. Values mirror the installed
+   @mui/material v9 (InputBase / OutlinedInput). The textarea keeps MUI's
+   own multiline padding, and the Select display (a div carrying the
+   input classes) keeps MUI's arrow clearance. */
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+  .MuiInputBase-input:not(textarea):not(.MuiSelect-select) {
+  padding: 4px 0 5px;
+}
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+  .MuiOutlinedInput-input:not(textarea):not(.MuiSelect-select) {
+  padding: 16.5px 14px;
+}
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+  .MuiOutlinedInput-root.MuiInputBase-sizeSmall
+  .MuiOutlinedInput-input:not(textarea):not(.MuiSelect-select) {
+  padding: 8.5px 14px;
+}
+
+/* Checkbox / radio / switch: WP admin styles the native input like a
+   visible checkbox (1rem box, negative margin, `padding: 0 !important`),
+   which shrinks and displaces the visually-hidden input MUI stretches
+   over its control. Restore the neutral geometry. */
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='checkbox'],
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='radio'] {
+  margin: 0;
+  padding: 0 !important; /* WP admin uses !important here */
+  min-width: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+/* Restore the full-fill geometry MUI expects (WP's 1rem sizing would
+   otherwise beat MUI's single-class 100% rules). The switch's input has
+   its own wide shape (`left: -100%; width: 300%`) — only its height
+   needs restoring. */
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+  input[type='checkbox']:not(.MuiSwitch-input),
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='radio'] {
+  width: 100%;
+  height: 100%;
+}
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+  input[type='checkbox'].MuiSwitch-input {
+  height: 100%;
+}
+
+/* WP draws its own checkmark/dot glyph on the native input; MUI draws
+   its own icon, so suppress the WP ::before glyphs (defensive — the
+   inputs are visually hidden). */
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='checkbox']::before,
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='radio']::before {
+  content: none;
+}
+
+/* WP admin's generic `li { margin-bottom: 6px }` (common.css) leaks into
+   MUI list surfaces (Select dropdowns, menus, list boxes). */
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) .MuiMenuItem-root,
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) .MuiListItem-root {
+  margin-bottom: 0;
+}
+
+/* WP admin colors every <a> blue (`a { color: #2271b1 }`); MUI controls
+   that render as links (e.g. `MenuItem component="a"`) inherit the page
+   color instead of their own. */
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) a.MuiMenuItem-root {
+  color: inherit;
 }
