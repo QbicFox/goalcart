@@ -4192,3 +4192,155 @@ msgstr "«%s» برای همیشه حذف می‌شود. اهداف آن حفظ 
 msgid "“%s” will be permanently deleted. This cannot be undone."
 msgstr "«%s» برای همیشه حذف می‌شود. این عمل قابل بازگشت نیست."
 
+#: admin-app/src/routes/Dashboard.tsx
+msgid "%s completion rate"
+msgstr "نرخ تکمیل %s"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "%s is your top performer"
+msgstr "%s بهترین عملکرد شماست"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "%s purchased orders"
+msgstr "%s سفارش خریداری‌شده"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "A business summary of your Goals and Smart Upsells."
+msgstr "خلاصه‌ای تجاری از اهداف و پیشنهادهای هوشمند شما."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Add costs"
+msgstr "افزودن هزینه‌ها"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Add product costs to unlock Estimated Profit — Goal Cart never invents a margin."
+msgstr "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — گال کارت هرگز حاشیه سود را حدس نمی‌زند."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Average Order Value"
+msgstr "میانگین ارزش سفارش"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Configure Smart Upsells"
+msgstr "پیشنهادهای هوشمند را پیکربندی کنید"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Create Goal"
+msgstr "ایجاد هدف"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Create your first Goal"
+msgstr "اولین هدف خود را بسازید"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Daily attributed sales and goal completions trend"
+msgstr "روند روزانهٔ فروش تخصیص‌یافته و تکمیل‌های هدف"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Increase cart value with Goals and Smart Upsells."
+msgstr "با اهداف و پیشنهادهای هوشمند ارزش سبد خرید را افزایش دهید."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "It generated %s in attributed sales this period."
+msgstr "در این دوره %s فروش تخصیص‌یافته ایجاد کرده است."
+
+#: admin-app/src/date-range/dateRange.ts
+msgid "Last 90 days"
+msgstr "۹۰ روز گذشته"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Many completions don’t become purchases"
+msgstr "بسیاری از تکمیل‌ها به خرید منجر نمی‌شوند"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "No goal performance yet."
+msgstr "هنوز عملکرد اهدافی ثبت نشده است."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Once customers interact with your Goals, performance data will appear here."
+msgstr "وقتی مشتریان با اهداف شما تعامل کنند، داده‌های عملکرد اینجا نمایش داده می‌شوند."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Only %s of completed goals were followed by a purchase. Review your goal targets."
+msgstr "تنها %s از اهداف تکمیل‌شده به خرید منجر شده‌اند. هدف‌گذاری‌های خود را بازبینی کنید."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Optimization Opportunities"
+msgstr "فرصت‌های بهینه‌سازی"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Product cost data is incomplete"
+msgstr "داده‌های هزینهٔ محصول ناقص است"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Refresh"
+msgstr "به‌روزرسانی"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Review"
+msgstr "بازبینی"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Sales & Goal Performance"
+msgstr "فروش و عملکرد اهداف"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Smart Upsells assisted %s goal completions this period."
+msgstr "پیشنهادهای هوشمند در این دوره %s تکمیل هدف را یاری کرده‌اند."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Start collecting performance data"
+msgstr "جمع‌آوری داده‌های عملکرد را آغاز کنید"
+
+#: admin-app/src/date-range/dateRange.ts
+msgid "This month"
+msgstr "این ماه"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Upsell Performance"
+msgstr "عملکرد پیشنهاد محصول"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Upsells are assisting completions"
+msgstr "پیشنهادها در حال کمک به تکمیل اهداف هستند"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "View"
+msgstr "مشاهده"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "View all"
+msgstr "مشاهدهٔ همه"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "View goals"
+msgstr "مشاهدهٔ اهداف"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "View performance"
+msgstr "مشاهدهٔ عملکرد"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "We couldn’t load your analytics. Your Goals are still working normally."
+msgstr "نتوانستیم تحلیل‌های شما را بارگیری کنیم. اهداف شما همچنان به‌درستی کار می‌کنند."
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Welcome to Goal Cart"
+msgstr "به گال کارت خوش آمدید"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "Your analytics are getting ready"
+msgstr "تحلیل‌های شما در حال آماده‌سازی است"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "goal-exposed customers"
+msgstr "مشتریانی که هدف را دیده‌اند"
+
+#: admin-app/src/routes/Dashboard.tsx
+msgid "purchases per completed goal"
+msgstr "خرید به ازای هر هدف تکمیل‌شده"
+
+#: admin-app/src/components/dashboard/TrendIndicator.tsx
+msgid "vs previous period"
+msgstr "نسبت به دورهٔ قبل"
+

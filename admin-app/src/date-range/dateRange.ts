@@ -36,6 +36,25 @@ export function isYmd(value: unknown): value is string {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
+/** First day of the month containing `dateStr` (`Y-m-d` → `Y-m-01`). */
+function startOfMonth(dateStr: string): string {
+  return `${dateStr.slice(0, 7)}-01`;
+}
+
+/** Last day of the month containing `dateStr` (`Y-m-d`). */
+function endOfMonth(dateStr: string): string {
+  const [year, month] = dateStr.slice(0, 7).split('-').map(Number);
+
+  return toYmd(new Date(year, month, 0, 12));
+}
+
+/** First day of the month `months` months before/after `dateStr`. */
+function shiftMonth(dateStr: string, months: number): string {
+  const [year, month] = dateStr.slice(0, 7).split('-').map(Number);
+
+  return toYmd(new Date(year, month - 1 + months, 1, 12));
+}
+
 /**
  * Resolve a fixed preset to its concrete inclusive `Y-m-d` bounds,
  * anchored to the site-local "today" from boot data.
@@ -48,6 +67,15 @@ export function presetRange(preset: FixedRangePreset, today: string): { from: st
       return { from: shiftDate(today, -1), to: shiftDate(today, -1) };
     case 'last7':
       return { from: shiftDate(today, -6), to: today };
+    case 'last90':
+      return { from: shiftDate(today, -89), to: today };
+    case 'this_month':
+      return { from: startOfMonth(today), to: today };
+    case 'previous_month': {
+      const first = startOfMonth(shiftMonth(today, -1));
+
+      return { from: first, to: endOfMonth(first) };
+    }
     case 'last30':
     default:
       return { from: shiftDate(today, -29), to: today };
@@ -76,10 +104,32 @@ export function presetLabel(preset: FixedRangePreset): string {
       return __('Yesterday', 'goalcart');
     case 'last7':
       return __('Last 7 days', 'goalcart');
+    case 'last90':
+      return __('Last 90 days', 'goalcart');
+    case 'this_month':
+      return __('This month', 'goalcart');
+    case 'previous_month':
+      return __('Previous month', 'goalcart');
     case 'last30':
     default:
       return __('Last 30 days', 'goalcart');
   }
+}
+
+/** The fixed presets offered by the date-range filter, in menu order. */
+export const FIXED_PRESETS: FixedRangePreset[] = [
+  'today',
+  'yesterday',
+  'last7',
+  'last30',
+  'last90',
+  'this_month',
+  'previous_month',
+];
+
+/** Whether a string is a fixed (non-custom) preset key. */
+export function isFixedPreset(value: string): value is FixedRangePreset {
+  return (FIXED_PRESETS as string[]).includes(value);
 }
 
 /** Sort a custom from/to pair so `from <= to` (swaps if reversed). */

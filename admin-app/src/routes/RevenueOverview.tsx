@@ -37,13 +37,21 @@ import {
 
 import { fetchRevenueOverview } from '../api/revenue';
 import EmptyState from '../components/EmptyState';
+import KpiCard from '../components/dashboard/KpiCard';
 import EstimatedProfitCard from '../components/revenue/EstimatedProfitCard';
 import FunnelVisual from '../components/revenue/FunnelVisual';
 import PageContainer from '../components/PageContainer';
 import RevenueToolbar from '../components/revenue/RevenueToolbar';
 import StatRow from '../components/revenue/StatRow';
 import { useDateRange } from '../date-range/DateRangeContext';
-import { formatCompact, formatCurrency, formatNumber, formatPercent, formatShortDay } from '../lib/format';
+import {
+  formatCompact,
+  formatCurrency,
+  formatNumber,
+  formatPercent,
+  formatShortDay,
+  percentChange,
+} from '../lib/format';
 import type { AovAnalysis, RevenueSummary } from '../types';
 
 const COLORS = {
@@ -59,47 +67,6 @@ const COLORS = {
 function formatSignedPercent(value: number): string {
   const formatted = formatPercent(Math.abs(value));
   return value > 0 ? `+${formatted}` : value < 0 ? `-${formatted}` : formatPercent(value);
-}
-
-function KpiCard({
-  label,
-  value,
-  icon,
-  hint,
-  accent,
-  children,
-}: {
-  label: string;
-  value: string;
-  icon: ReactNode;
-  hint?: ReactNode;
-  accent?: 'success' | 'error' | 'warning' | 'default';
-  children?: ReactNode;
-}) {
-  const accentColor =
-    accent === 'success' ? COLORS.success : accent === 'error' ? '#d63638' : accent === 'warning' ? COLORS.warning : 'text.primary';
-
-  return (
-    <Card variant="outlined" sx={{ height: '100%' }}>
-      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
-          {icon}
-          <Typography variant="body2" color="text.secondary" noWrap>
-            {label}
-          </Typography>
-        </Box>
-        <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 600, color: accentColor }}>
-          {value}
-        </Typography>
-        {hint && (
-          <Typography variant="caption" color="text.secondary">
-            {hint}
-          </Typography>
-        )}
-        {children}
-      </CardContent>
-    </Card>
-  );
 }
 
 /** Deterministic plain-English insights (§15) — only shown when the data supports them. */
@@ -249,7 +216,7 @@ function CustomerJourneyFunnel({ funnel }: { funnel: RevenueSummary['funnel'] })
  * range + goal filter.
  */
 export default function RevenueOverview() {
-  const { range } = useDateRange();
+  const { range, comparison } = useDateRange();
   const [goalId, setGoalId] = useState<number>(0);
   const [visibleMetrics, setVisibleMetrics] = useState<TrendMetric[]>(['sales', 'orders']);
   const [showAdvancedTrend, setShowAdvancedTrend] = useState(false);
@@ -264,8 +231,21 @@ export default function RevenueOverview() {
       }),
   });
 
+  // Previous equal-length period — the "vs previous period" context for
+  // the KPI trend indicators (§7/§8).
+  const comparisonQuery = useQuery({
+    queryKey: ['revenue', 'overview', { from: comparison.from, to: comparison.to, goalId }],
+    queryFn: () =>
+      fetchRevenueOverview({
+        from: comparison.from,
+        to: comparison.to,
+        goal_id: goalId || undefined,
+      }),
+  });
+
   const data = query.data;
   const summary = data?.summary;
+  const previous = comparisonQuery.data?.summary;
   const hasData = data !== undefined && summary !== undefined;
 
   // §44 — two distinct empty states: no interactions at all vs interactions
@@ -365,6 +345,7 @@ export default function RevenueOverview() {
               label={__('Sales Attributed to Goal Cart', 'goalcart')}
               value={formatCurrency(summary.goal_driven_revenue)}
               icon={<PaymentsIcon fontSize="small" />}
+              trend={{ change: percentChange(previous?.goal_driven_revenue, summary.goal_driven_revenue) }}
               hint={sprintf(
                 /* translators: 1: purchased orders. */
                 __('%1$s purchased orders', 'goalcart'),
@@ -398,6 +379,7 @@ export default function RevenueOverview() {
               label={__('Purchased Orders', 'goalcart')}
               value={formatNumber(summary.orders)}
               icon={<ShoppingCartCheckoutIcon fontSize="small" />}
+              trend={{ change: percentChange(previous?.orders, summary.orders) }}
               hint={__('after Goal Cart interaction', 'goalcart')}
             />
 
@@ -410,6 +392,14 @@ export default function RevenueOverview() {
               costCoverage={summary.cost_coverage}
               costSources={summary.cost_sources}
               storeHasCostData={summary.store_has_cost_data}
+              trend={
+                summary.profit_available &&
+                previous?.profit_available &&
+                summary.profit_impact !== null &&
+                previous.profit_impact !== null
+                  ? { change: percentChange(previous.profit_impact, summary.profit_impact) }
+                  : null
+              }
             />
           </Box>
 

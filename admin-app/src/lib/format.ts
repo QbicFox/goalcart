@@ -59,6 +59,30 @@ export function formatPercentValue(value: number | null | undefined): string {
   return `${value.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
 }
 
+/**
+ * Percentage change from a previous value to a current value, as a signed
+ * percentage-point number (e.g. 18.4 for +18.4%). Returns null when no
+ * meaningful change can be computed (missing values, or a zero previous
+ * value — a %-change off zero is undefined). `previous` may be negative
+ * (e.g. a prior-period loss), so the denominator uses its absolute value.
+ */
+export function percentChange(
+  previous: number | null | undefined,
+  current: number
+): number | null {
+  if (
+    previous === null ||
+    previous === undefined ||
+    !Number.isFinite(previous) ||
+    !Number.isFinite(current) ||
+    previous === 0
+  ) {
+    return null;
+  }
+
+  return ((current - previous) / Math.abs(previous)) * 100;
+}
+
 /** Compact number for axis ticks / badges (e.g. 1200 → "1.2K"). */
 export function formatCompact(value: number): string {
   try {

@@ -15,6 +15,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useState } from 'react';
 
 import { getBootData } from '../../boot';
+import TrendIndicator, { type Trend } from '../dashboard/TrendIndicator';
 import { formatCurrency, formatPercentValue } from '../../lib/format';
 import type { CostCoverage, CostSource, ProfitDetails, ProfitReasonCode } from '../../types';
 
@@ -36,6 +37,8 @@ interface EstimatedProfitCardProps {
   costCoverage: CostCoverage;
   costSources: CostSource[];
   storeHasCostData: boolean | null;
+  /** Signed change vs the previous period (shown only when computable). */
+  trend?: Trend | null;
 }
 
 /**
@@ -62,6 +65,7 @@ export default function EstimatedProfitCard({
   costCoverage,
   costSources,
   storeHasCostData,
+  trend,
 }: EstimatedProfitCardProps) {
   const [helpOpen, setHelpOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -99,6 +103,8 @@ export default function EstimatedProfitCard({
             {noDataYet ? '—' : __('Not available', 'goalcart')}
           </Typography>
         )}
+
+        {trend && <TrendIndicator trend={trend} />}
 
         <Typography variant="caption" color="text.secondary">
           {isAvailable

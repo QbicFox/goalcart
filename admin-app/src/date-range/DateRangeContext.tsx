@@ -5,7 +5,7 @@ import { createContext, useCallback, useContext, useMemo, useState, type ReactNo
 import { useSearchParams } from 'react-router-dom';
 
 import { getBootData } from '../boot';
-import { comparisonRange, isYmd, normalizeBounds, presetRange } from './dateRange';
+import { comparisonRange, isFixedPreset, isYmd, normalizeBounds, presetRange } from './dateRange';
 import type { DateRange, FixedRangePreset } from './types';
 
 /** localStorage key holding the persisted range JSON. */
@@ -39,13 +39,7 @@ function parseRange(value: unknown): DateRange | null {
   const record = value as Record<string, unknown>;
   const preset = record.preset;
 
-  if (
-    preset !== 'today' &&
-    preset !== 'yesterday' &&
-    preset !== 'last7' &&
-    preset !== 'last30' &&
-    preset !== 'custom'
-  ) {
+  if (typeof preset !== 'string' || (!isFixedPreset(preset) && preset !== 'custom')) {
     return null;
   }
 
@@ -76,7 +70,7 @@ function initialRange(params: URLSearchParams): DateRange {
   // non-custom ranges, so it round-trips exactly.
   const preset = params.get('preset');
 
-  if (preset === 'today' || preset === 'yesterday' || preset === 'last7' || preset === 'last30') {
+  if (preset && isFixedPreset(preset)) {
     return { preset, ...presetRange(preset, today) };
   }
 

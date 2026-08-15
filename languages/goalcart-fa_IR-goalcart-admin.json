@@ -2793,6 +2793,120 @@
             ],
             "“%s” will be permanently deleted. This cannot be undone.": [
                 "«%s» برای همیشه حذف می‌شود. این عمل قابل بازگشت نیست."
+            ],
+            "%s completion rate": [
+                "نرخ تکمیل %s"
+            ],
+            "%s is your top performer": [
+                "%s بهترین عملکرد شماست"
+            ],
+            "%s purchased orders": [
+                "%s سفارش خریداری‌شده"
+            ],
+            "A business summary of your Goals and Smart Upsells.": [
+                "خلاصه‌ای تجاری از اهداف و پیشنهادهای هوشمند شما."
+            ],
+            "Add costs": [
+                "افزودن هزینه‌ها"
+            ],
+            "Add product costs to unlock Estimated Profit — Goal Cart never invents a margin.": [
+                "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — گال کارت هرگز حاشیه سود را حدس نمی‌زند."
+            ],
+            "Average Order Value": [
+                "میانگین ارزش سفارش"
+            ],
+            "Configure Smart Upsells": [
+                "پیشنهادهای هوشمند را پیکربندی کنید"
+            ],
+            "Create Goal": [
+                "ایجاد هدف"
+            ],
+            "Create your first Goal": [
+                "اولین هدف خود را بسازید"
+            ],
+            "Daily attributed sales and goal completions trend": [
+                "روند روزانهٔ فروش تخصیص‌یافته و تکمیل‌های هدف"
+            ],
+            "Increase cart value with Goals and Smart Upsells.": [
+                "با اهداف و پیشنهادهای هوشمند ارزش سبد خرید را افزایش دهید."
+            ],
+            "It generated %s in attributed sales this period.": [
+                "در این دوره %s فروش تخصیص‌یافته ایجاد کرده است."
+            ],
+            "Last 90 days": [
+                "۹۰ روز گذشته"
+            ],
+            "Many completions don’t become purchases": [
+                "بسیاری از تکمیل‌ها به خرید منجر نمی‌شوند"
+            ],
+            "No goal performance yet.": [
+                "هنوز عملکرد اهدافی ثبت نشده است."
+            ],
+            "Once customers interact with your Goals, performance data will appear here.": [
+                "وقتی مشتریان با اهداف شما تعامل کنند، داده‌های عملکرد اینجا نمایش داده می‌شوند."
+            ],
+            "Only %s of completed goals were followed by a purchase. Review your goal targets.": [
+                "تنها %s از اهداف تکمیل‌شده به خرید منجر شده‌اند. هدف‌گذاری‌های خود را بازبینی کنید."
+            ],
+            "Optimization Opportunities": [
+                "فرصت‌های بهینه‌سازی"
+            ],
+            "Product cost data is incomplete": [
+                "داده‌های هزینهٔ محصول ناقص است"
+            ],
+            "Refresh": [
+                "به‌روزرسانی"
+            ],
+            "Review": [
+                "بازبینی"
+            ],
+            "Sales & Goal Performance": [
+                "فروش و عملکرد اهداف"
+            ],
+            "Smart Upsells assisted %s goal completions this period.": [
+                "پیشنهادهای هوشمند در این دوره %s تکمیل هدف را یاری کرده‌اند."
+            ],
+            "Start collecting performance data": [
+                "جمع‌آوری داده‌های عملکرد را آغاز کنید"
+            ],
+            "This month": [
+                "این ماه"
+            ],
+            "Upsell Performance": [
+                "عملکرد پیشنهاد محصول"
+            ],
+            "Upsells are assisting completions": [
+                "پیشنهادها در حال کمک به تکمیل اهداف هستند"
+            ],
+            "View": [
+                "مشاهده"
+            ],
+            "View all": [
+                "مشاهدهٔ همه"
+            ],
+            "View goals": [
+                "مشاهدهٔ اهداف"
+            ],
+            "View performance": [
+                "مشاهدهٔ عملکرد"
+            ],
+            "We couldn’t load your analytics. Your Goals are still working normally.": [
+                "نتوانستیم تحلیل‌های شما را بارگیری کنیم. اهداف شما همچنان به‌درستی کار می‌کنند."
+            ],
+            "Welcome to Goal Cart": [
+                "به گال کارت خوش آمدید"
+            ],
+            "Your analytics are getting ready": [
+                "تحلیل‌های شما در حال آماده‌سازی است"
+            ],
+            "goal-exposed customers": [
+                "مشتریانی که هدف را دیده‌اند"
+            ],
+            "purchases per completed goal": [
+                "خرید به ازای هر هدف تکمیل‌شده"
+            ],
+            "vs previous period": [
+                "نسبت به دورهٔ قبل"
             ]
         }
     }

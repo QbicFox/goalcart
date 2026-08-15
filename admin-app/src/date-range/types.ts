@@ -8,7 +8,15 @@
  */
 
 /** Preset keys offered by the date-range filter. */
-export type RangePreset = 'today' | 'yesterday' | 'last7' | 'last30' | 'custom';
+export type RangePreset =
+  | 'today'
+  | 'yesterday'
+  | 'last7'
+  | 'last30'
+  | 'last90'
+  | 'this_month'
+  | 'previous_month'
+  | 'custom';
 
 /**
  * A resolved date-range selection.

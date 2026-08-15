@@ -15,14 +15,12 @@ import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
 
 import { useDateRange } from '../../date-range/DateRangeContext';
-import { formatDay, formatRangeLabel, presetLabel } from '../../date-range/dateRange';
+import { FIXED_PRESETS, formatDay, formatRangeLabel, presetLabel } from '../../date-range/dateRange';
 import type { FixedRangePreset } from '../../date-range/types';
 
 // The custom range grid is only fetched when the user opens "Custom
 // range" — keeps it out of the initial bundle.
 const CustomRangePicker = lazy(() => import('./CustomRangePicker'));
-
-const FIXED_PRESETS: FixedRangePreset[] = ['today', 'yesterday', 'last7', 'last30'];
 
 /**
  * Date-range filter (Phase 17), shown in the analytics filter toolbar.

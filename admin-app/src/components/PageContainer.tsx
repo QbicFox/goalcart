@@ -1,13 +1,12 @@
 import type { ReactNode } from 'react';
 import Box from '@mui/material/Box';
-import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 interface PageContainerProps {
   title: string;
   description?: string;
-  /** Optional header actions (e.g. a primary button). */
+  /** Optional header actions (e.g. filters or a primary button). */
   actions?: ReactNode;
   children: ReactNode;
 }
@@ -15,9 +14,10 @@ interface PageContainerProps {
 /**
  * Consistent page header + content wrapper used by every admin page.
  *
- * Provides the WP-admin-style title block (heading + muted description +
- * optional actions) so all routed pages share the same hierarchy, then
- * renders the page content below.
+ * A clean, SaaS-style header (title + muted description + optional
+ * actions) separated from the content by a hairline divider rather than
+ * a boxed WP-admin title block (UICHANGES.md §5), so all routed pages
+ * share the same hierarchy without the WordPress table look.
  */
 export default function PageContainer({
   title,
@@ -27,29 +27,34 @@ export default function PageContainer({
 }: PageContainerProps) {
   return (
     <Stack spacing={3}>
-      <Paper variant="outlined" sx={{ p: { xs: 2.5, md: 3 } }}>
-        <Stack
-          direction={{ xs: 'column', md: 'row' }}
-          spacing={2}
-          sx={{ alignItems: { md: 'center' }, justifyContent: 'space-between' }}
-        >
-          <Box>
-            <Typography variant="h5" component="h2" gutterBottom>
-              {title}
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 2,
+          alignItems: { md: 'center' },
+          justifyContent: 'space-between',
+          pb: 2,
+          borderBottom: 1,
+          borderColor: 'divider',
+        }}
+      >
+        <Box>
+          <Typography variant="h5" component="h1" sx={{ fontSize: '1.5rem' }} gutterBottom>
+            {title}
+          </Typography>
+          {description && (
+            <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 720 }}>
+              {description}
             </Typography>
-            {description && (
-              <Typography variant="body2" color="text.secondary">
-                {description}
-              </Typography>
-            )}
-          </Box>
-          {actions && (
-            <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-              {actions}
-            </Stack>
           )}
-        </Stack>
-      </Paper>
+        </Box>
+        {actions && (
+          <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+            {actions}
+          </Stack>
+        )}
+      </Box>
       {children}
     </Stack>
   );
