@@ -84,9 +84,9 @@ final class ProgressUI {
 	 * Storefront progress template variants.
 	 *
 	 * The six design templates (template-1 … template-6). The retired
-	 * Phase 12 variants (basic / percentage / milestone / card) are no
-	 * longer selectable; persisted old ids resolve through the
-	 * TemplateEngine's legacy map.
+	 * Phase 12 variants (basic / percentage / milestone / card / ring) are
+	 * no longer registered and are never mapped — an unregistered value
+	 * falls back to template-1.
 	 *
 	 * @var string[]
 	 */
@@ -576,20 +576,8 @@ final class ProgressUI {
 			return $template;
 		}
 
-		// Retired Phase 12 ids (e.g. a stored 'card') map to their closest
-		// design template before falling back to the default.
-		$legacy_map = array(
-			'basic'      => 'template-1',
-			'milestone'  => 'template-1',
-			'card'       => 'template-1',
-			'percentage' => 'template-3',
-			'ring'       => 'template-3',
-		);
-
-		if ( isset( $legacy_map[ $template ] ) && in_array( $legacy_map[ $template ], self::TEMPLATES, true ) ) {
-			return $legacy_map[ $template ];
-		}
-
+		// Unregistered / retired ids (e.g. a stored 'card') are never
+		// mapped — fall back to the default template.
 		return 'template-1';
 	}
 

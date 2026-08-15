@@ -13,20 +13,16 @@
  *  - schema validation: sanitize_settings() clamps numbers, validates
  *    colors/enums/booleans, strips tags from CSS, drops unknown keys, and
  *    scope checks reject the wrong template in the wrong scope
- *  - resolution order: item override → scope default → legacy
- *    frontend_template → hardcoded 'template-1' fallback, with the legacy
- *    `display_settings.template` alias read as the pre-engine storage
- *    shape, a retired pre-design id (basic / percentage / milestone /
- *    card / ring) resolving through the migration map to its closest
- *    design template, and a removed template id falling back to the
- *    scope default instead of failing
+ *  - resolution order: item override → scope default → store-wide
+ *    frontend_template → hardcoded 'template-1' fallback; retired
+ *    pre-design ids (basic / percentage / milestone / card / ring) are
+ *    never mapped — they resolve to '' and fall back through the chain,
+ *    and the pre-engine `display_settings.template` alias is no longer
+ *    read
  *  - campaign resolution: campaign display_rules drive a campaign-scoped
  *    template; none configured means per-goal cards ('' template id)
  *  - extensibility: a custom template registers through the
  *    goalcart_template_classes filter and resolves through the engine
- *  - migration: Installer::maybe_migrate_template_storage() copies legacy
- *    display_settings.template onto template_id (+ empty
- *    template_settings), is idempotent, and never touches unknown values
  *  - settings REST: the save schema carries template_defaults /
  *    template_settings with server-side validation, the sanitizer drops
  *    unknown scopes/templates and cleans values against each schema, and
@@ -116,10 +112,11 @@ $frontend      = $container->get( FrontendController::class );
 $all_before = $settings->all();
 
 // Deterministic baseline: clear the per-scope defaults so resolution runs
-// against the legacy surface only until a section sets them explicitly.
+// against the store-wide surface only until a section sets them
+// explicitly.
 $settings->set( 'template_defaults', array( 'goal' => '', 'campaign' => '' ) );
 $settings->set( 'template_settings', array( 'goal' => array(), 'campaign' => array() ) );
-$settings->set( 'frontend_template', 'basic' );
+$settings->set( 'frontend_template', 'template-1' );
 
 // ---------------------------------------------------------------------------
 // 1. Registry & contract
@@ -198,7 +195,8 @@ check( 'unknown id rejected', ! $engine->is_registered( TemplateEngine::SCOPE_GO
 check( 'empty id rejected', ! $engine->is_registered( TemplateEngine::SCOPE_GOAL, '' ) );
 check( 'normalize rejects unknown ids', '' === $engine->normalize_template_id( TemplateEngine::SCOPE_GOAL, 'countdown' ) );
 check( 'normalize keeps known ids', 'template-4' === $engine->normalize_template_id( TemplateEngine::SCOPE_GOAL, 'template-4' ) );
-check( 'retired id normalizes through the migration map', 'template-1' === $engine->normalize_template_id( TemplateEngine::SCOPE_GOAL, 'card' ) );
+check( 'retired id is rejected (no mapping)', '' === $engine->normalize_template_id( TemplateEngine::SCOPE_GOAL, 'card' ) );
+check( 'retired ring id is rejected (no mapping)', '' === $engine->normalize_template_id( TemplateEngine::SCOPE_GOAL, 'ring' ) );
 
 // Colors, numbers, booleans, enums, CSS and unknown keys.
 $cleaned = $engine->sanitize_settings(
@@ -268,10 +266,12 @@ check( 'fallback resolves to template-1', 'template-1' === $resolved['template_i
 check( 'fallback settings are complete', count( $resolved['settings'] ) === count( $schema ) );
 check( 'fallback settings carry the schema defaults', '#f97316' === $resolved['settings']['accent'] );
 
-// 3.2 Retired store-wide template maps through the migration map.
+// 3.2 Retired store-wide template is never mapped: 'card' is not
+// registered, so resolution falls through the scope default ('' here)
+// and the hardcoded fallback still yields template-1.
 $settings->set( 'frontend_template', 'card' );
 $resolved = $engine->resolve_goal( goal_display( array() ) );
-check( 'retired frontend_template maps to template-1', 'template-1' === $resolved['template_id'] );
+check( 'retired frontend_template falls back to template-1 (never mapped)', 'template-1' === $resolved['template_id'] );
 
 // 3.3 Scope default beats the legacy surface.
 $settings->set( 'template_defaults', array( 'goal' => 'template-2', 'campaign' => '' ) );
@@ -282,14 +282,15 @@ check( 'scope default wins over legacy template', 'template-2' === $resolved['te
 $resolved = $engine->resolve_goal( goal_display( array( 'template_id' => 'template-4' ) ) );
 check( 'item template_id wins', 'template-4' === $resolved['template_id'] );
 
-// 3.5 Migration alias: pre-engine display_settings.template reads as the
-// template id (lossless either way — the Installer also copies it).
+// 3.5 The pre-engine display_settings.template alias is no longer read:
+// a goal storing only `template` resolves through the scope default
+// (template-2, set above) instead of through any old-id mapping.
 $resolved = $engine->resolve_goal( goal_display( array( 'template' => 'card' ) ) );
-check( 'legacy display_settings.template alias resolves', 'template-1' === $resolved['template_id'] );
+check( 'pre-engine template alias is ignored', 'template-2' === $resolved['template_id'] );
 
-// 3.6 Explicit template_id beats the legacy alias.
+// 3.6 Explicit template_id beats any stale `template` value.
 $resolved = $engine->resolve_goal( goal_display( array( 'template_id' => 'template-2', 'template' => 'card' ) ) );
-check( 'template_id beats the legacy alias', 'template-2' === $resolved['template_id'] );
+check( 'template_id beats a stale template value', 'template-2' === $resolved['template_id'] );
 
 // 3.7 Removed template: falls back to the scope default, never fails.
 $resolved = $engine->resolve_goal( goal_display( array( 'template_id' => 'countdown' ) ) );
@@ -426,102 +427,41 @@ check( 'custom template resolves with its schema defaults', 'test_custom' === $r
 remove_all_filters( 'goalcart_template_classes' );
 
 // ---------------------------------------------------------------------------
-// 6. Migration (Installer::maybe_migrate_template_storage)
+// 6. Persisted old ids never map (no migration step needed)
 // ---------------------------------------------------------------------------
-echo "\n== 6. Migration ==\n";
+echo "\n== 6. Persisted old ids never map ==\n";
 
 $wpdb = $GLOBALS['wpdb'];
 $goals_table = Schema::table( 'goals' );
-$wpdb->query( 'START TRANSACTION' );
 
-try {
-	$legacy_id = 0;
+// A stored old id in display_settings resolves through the normal chain
+// (scope default → store-wide → hardcoded fallback) — it is never
+// translated to a different template.
+$settings->set( 'template_defaults', array( 'goal' => '', 'campaign' => '' ) );
+$settings->set( 'template_settings', array( 'goal' => array(), 'campaign' => array() ) );
+$settings->set( 'frontend_template', 'template-2' );
 
-	$wpdb->insert(
-		$goals_table,
-		array(
-			'name'             => 'Legacy template goal',
-			'description'      => '',
-			'status'           => 'active',
-			'type'             => 'amount',
-			'target'           => 100,
-			'calculation_mode' => 'subtotal',
-			'display_settings' => wp_json_encode( array( 'template' => 'card' ) ),
-			'priority'         => 10,
-			'created_at'       => current_time( 'mysql' ),
-			'updated_at'       => current_time( 'mysql' ),
-		)
-	);
-	$legacy_id = (int) $wpdb->insert_id;
+$resolved = $engine->resolve_goal( goal_display( array( 'template_id' => 'card' ) ) );
+check( 'stored old template_id falls back to the store-wide template', 'template-2' === $resolved['template_id'] );
 
-	$wpdb->insert(
-		$goals_table,
-		array(
-			'name'             => 'Bogus template goal',
-			'description'      => '',
-			'status'           => 'active',
-			'type'             => 'amount',
-			'target'           => 100,
-			'calculation_mode' => 'subtotal',
-			'display_settings' => wp_json_encode( array( 'template' => 'bogus' ) ),
-			'priority'         => 10,
-			'created_at'       => current_time( 'mysql' ),
-			'updated_at'       => current_time( 'mysql' ),
-		)
-	);
-	$bogus_id = (int) $wpdb->insert_id;
+$resolved = $engine->resolve_goal( goal_display( array( 'template_id' => 'ring' ) ) );
+check( 'stored ring id is never mapped to template-3', 'template-2' === $resolved['template_id'] );
 
-	$wpdb->insert(
-		$goals_table,
-		array(
-			'name'             => 'Already migrated goal',
-			'description'      => '',
-			'status'           => 'active',
-			'type'             => 'amount',
-			'target'           => 100,
-			'calculation_mode' => 'subtotal',
-			'display_settings' => wp_json_encode( array( 'template' => 'basic', 'template_id' => 'percentage', 'template_settings' => array() ) ),
-			'priority'         => 10,
-			'created_at'       => current_time( 'mysql' ),
-			'updated_at'       => current_time( 'mysql' ),
-		)
-	);
-	$migrated_id = (int) $wpdb->insert_id;
+$settings->set( 'template_defaults', array( 'goal' => 'template-4', 'campaign' => '' ) );
+$resolved = $engine->resolve_goal( goal_display( array( 'template_id' => 'percentage' ) ) );
+check( 'stored old id falls back to the scope default', 'template-4' === $resolved['template_id'] );
 
-	$ref = new ReflectionMethod( Installer::class, 'maybe_migrate_template_storage' );
-	$ref->setAccessible( true );
-	$ref->invoke( null );
+$settings->set( 'template_defaults', array( 'goal' => '', 'campaign' => '' ) );
+$settings->set( 'frontend_template', '' );
+$resolved = $engine->resolve_goal( goal_display( array( 'template_id' => 'basic' ) ) );
+check( 'stored old id falls back to the hardcoded template-1', 'template-1' === $resolved['template_id'] );
 
-	$legacy_row = $wpdb->get_row( $wpdb->prepare( "SELECT display_settings FROM {$goals_table} WHERE id = %d", $legacy_id ), ARRAY_A );
-	$legacy_decoded = json_decode( $legacy_row['display_settings'], true );
+// The Installer no longer ships a template-storage migration: the old
+// method is gone and nothing copies display_settings.template onto
+// template_id.
+check( 'legacy template migration method removed', ! method_exists( Installer::class, 'maybe_migrate_template_storage' ) );
 
-	check( 'legacy template copied to template_id', 'card' === $legacy_decoded['template_id'] );
-	check( 'legacy template kept as alias', 'card' === $legacy_decoded['template'] );
-	check( 'empty template_settings added', array() === $legacy_decoded['template_settings'] );
-
-	$bogus_row = $wpdb->get_row( $wpdb->prepare( "SELECT display_settings FROM {$goals_table} WHERE id = %d", $bogus_id ), ARRAY_A );
-	$bogus_decoded = json_decode( $bogus_row['display_settings'], true );
-	check( 'unknown legacy value left untouched', ! isset( $bogus_decoded['template_id'] ) );
-
-	$migrated_row = $wpdb->get_row( $wpdb->prepare( "SELECT display_settings FROM {$goals_table} WHERE id = %d", $migrated_id ), ARRAY_A );
-	$migrated_decoded = json_decode( $migrated_row['display_settings'], true );
-	check( 'already-migrated row untouched', 'percentage' === $migrated_decoded['template_id'] );
-
-	// Re-run: idempotent (rows already carry template_id).
-	$ref->invoke( null );
-	$again = json_decode( $wpdb->get_var( $wpdb->prepare( "SELECT display_settings FROM {$goals_table} WHERE id = %d", $legacy_id ) ), true );
-	check( 're-run is a no-op', 'card' === $again['template_id'] && array() === $again['template_settings'] );
-
-	// The migration is lossless at the engine level too: the legacy alias
-	// still resolves (through the migration map) before the row is ever
-	// rewritten.
-	$resolved = $engine->resolve_goal( goal_display( array( 'template' => 'card' ) ) );
-	check( 'legacy storage shape still resolves pre-migration', 'template-1' === $resolved['template_id'] );
-} finally {
-	$wpdb->query( 'ROLLBACK' );
-}
-
-check( 'migration row residue rolled back', 0 === (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE name = %s", 'Legacy template goal' ) ) );
+$settings->set_many( $all_before );
 
 // ---------------------------------------------------------------------------
 // 7. Settings REST (template keys)

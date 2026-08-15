@@ -1125,25 +1125,23 @@ goal and campaign — identically for the live storefront and the Phase 15
 preview:
 
 1. **item override** — `display_settings.template_id` +
-   `template_settings` (campaigns: `display_rules`), with the
-   pre-engine `template` key kept as the legacy alias,
+   `template_settings` (campaigns: `display_rules`),
 2. **scope default** — `template_defaults[scope]` + the stored
    per-template default appearance `template_settings[scope][template_id]`,
-3. **legacy fallback** (goals only) — `frontend_template` + the
+3. **store-wide fallback** (goals only) — `frontend_template` + the
    `frontend_*` appearance tokens,
-4. **hardcoded fallback** — `basic` for goals; a campaign without a
+4. **hardcoded fallback** — `template-1` for goals; a campaign without a
    template renders per-goal cards (the pre-engine behavior).
 
-A stored `template_id` that is no longer registered falls back to the
-scope default instead of failing. Every settings value is sanitized
-server-side against the template's schema (colors, ranges, enums,
-tag-free CSS, unknown keys dropped); the settings form is generated
-generically from the schema (`admin-app/src/templates/SchemaForm.tsx`),
-so a new template automatically gets a working settings UI. Goals and
-Campaigns save endpoints validate `template_id` + `template_settings`
-server-side. DB `0.4.0` migrates legacy `display_settings.template`
-onto `template_id` (+ empty `template_settings`) safely and
-idempotently, so existing goals upgrade with no visual change.
+A stored `template_id` that is no longer registered (an old Phase 12 id
+such as `card`, or a removed template) falls back to the scope default
+instead of failing — old template ids are never mapped to a current
+template. Every settings value is sanitized server-side against the
+template's schema (colors, ranges, enums, tag-free CSS, unknown keys
+dropped); the settings form is generated generically from the schema
+(`admin-app/src/templates/SchemaForm.tsx`), so a new template
+automatically gets a working settings UI. Goals and Campaigns save
+endpoints validate `template_id` + `template_settings` server-side.
 
 ### Template settings presentation (UI refinement of P12/P18)
 

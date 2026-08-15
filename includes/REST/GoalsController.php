@@ -616,8 +616,7 @@ class GoalsController extends BaseController {
 	/**
 	 * Validate the display_settings payload (template engine).
 	 *
-	 * The legacy `template` key stays accepted (pre-engine storage); a
-	 * `template_id` must be registered for the goal scope.
+	 * A `template_id` must be registered for the goal scope.
 	 *
 	 * @param mixed $value Raw display_settings value.
 	 * @return bool

@@ -27,11 +27,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     settings form generically and the live preview updates instantly.
     Defaults match the reference designs (orange card, indigo inline,
     indigo ring, blue recommendation, dark sticky, premium gold).
-  - **Migration & fallback** — persisted old ids (goal
+  - **No old-template mapping** — persisted old Phase 12 ids (goal
     `display_settings`, `template_defaults.goal`, `frontend_template`)
-    resolve through the TemplateEngine's legacy map (basic / milestone /
-    card → template-1; percentage / ring → template-3), so existing
-    goals keep rendering without reconfiguration.
+    are never mapped to a current template; an old id simply falls back
+    to the scope default / store-wide template (`template-1`). The
+    legacy migration map and the pre-engine `display_settings.template`
+    alias were removed.
   - **i18n** — the admin selector lists the six templates by name and
     the Persian catalog translates them to قالب ۱ … قالب ۶; the POT /
     JED were regenerated and all new admin strings carry Persian

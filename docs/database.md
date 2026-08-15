@@ -23,7 +23,7 @@ A target the customer can reach (see `docs/PRODUCT_SPEC.md` §2.1). Stored in th
 | calculation mode | `calculation_mode` | `varchar(20)`, default `subtotal` (tax/discount/shipping basis, Phase 18) |
 | reward | `reward_type` / `reward_value` / `reward_max_value` / `reward_meta` | MVP embeds one reward per goal; `reward_meta` is JSON for extended config (eligible products/categories, stacking rules) |
 | conditions | `conditions` | JSON — category/product/role/cart conditions (grow in later phases) |
-| display settings | `display_settings` | JSON — title, message, completed message, icon, plus the pluggable-template-engine keys `template_id` + `template_settings` (the legacy `template` key is kept as the engine's pre-engine alias) |
+| display settings | `display_settings` | JSON — title, message, completed message, icon, plus the pluggable-template-engine keys `template_id` + `template_settings` (the retired Phase 12 `template` key is no longer read by the engine) |
 | priority | `priority` | `int(10) unsigned`, default `10` — conflict resolution (Phase 26) |
 | exclusive | `exclusive` | `tinyint(1)`, default `0` — mutually exclusive goal: when reached, lower-priority goals are skipped (Phase 26) |
 | per-user completion limit | `max_completions_per_user` | `int(10) unsigned`, nullable — how many times the same shopper may complete this goal; `NULL` = unlimited (Phase 36) |
@@ -251,13 +251,11 @@ reference plugin's convention.
    keys added with `INFORMATION_SCHEMA`-guarded `ALTER TABLE` (safe to re-run; failures logged,
    never fatal).
 
-   **0.4.0 data migration** — `Installer::maybe_migrate_template_storage()` copies the legacy
-   `display_settings.template` value (one of `basic` / `percentage` / `milestone` / `card`) onto
-   `display_settings.template_id` and adds an empty `template_settings` object, so existing goals
-   adopt the pluggable template engine's storage shape losslessly. Rows that already carry a
-   `template_id` are skipped and unknown `template` values are left untouched, so re-running the
-   migration (activation, every upgrade) is a no-op; the engine also keeps reading the legacy
-   `template` key as an alias, so even an un-migrated row renders correctly.
+   **0.4.0** — the pluggable template engine introduced
+   `display_settings.template_id` + `template_settings` as the storage shape for goals. The old
+   Phase 12 `display_settings.template` ids (`basic` / `percentage` / `milestone` / `card` / `ring`)
+   are no longer registered and are never mapped to a current template — a persisted old id simply
+   falls back to the scope default / store-wide template (`template-1`).
 2. **Proper indexes** — every query path is covered: status/type filters, campaign grouping,
    date-range scans, event-type/session/order lookups.
 3. **No duplicated WooCommerce data** — products/orders are referenced by ID only (plain indexed

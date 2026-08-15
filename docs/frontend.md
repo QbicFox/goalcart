@@ -74,10 +74,9 @@ get a full card instead of one featured card + a tiny ladder:
   (the first eligible one — a slim bar keeps a single goal at a glance)
   and a dismiss button; hidden when the cart has no progress to show.
 
-There is no cross-goal ladder anymore: every goal is its own card (each
-renders through its resolved design template — the retired `milestone`
-variant maps to `template-1`). Ineligible goals never render a card, and
-when no goals are eligible the container is hidden
+There is no cross-goal ladder anymore: every goal is its own card, each
+rendering through its resolved design template. Ineligible goals never
+render a card, and when no goals are eligible the container is hidden
 (`goalcart-widget--empty`) instead of showing a broken bar.
 
 ## Refresh & events
@@ -229,10 +228,11 @@ independently for Goals and Campaigns. See `includes/Templates/`
 ## Built-in templates
 
 The six design templates (`template-1` … `template-6`) replace the
-original Phase 12 Goal variants; retired ids (`basic` / `percentage` /
-`milestone` / `card` / `ring`) resolve through the TemplateEngine's
-legacy map to their closest design template, so persisted goals keep
-rendering. The two Campaign templates are unchanged.
+original Phase 12 Goal variants. Retired ids (`basic` / `percentage` /
+`milestone` / `card` / `ring`) are no longer registered and are never
+mapped to a current template — a persisted old id falls back to the
+scope default / store-wide template. The two Campaign templates are
+unchanged.
 
 | Variant | Scope | Layout |
 |---|---|---|
@@ -270,20 +270,18 @@ re-resolves — it renders exactly what the engine resolved:
 2. **scope default** — the Appearance page's per-scope default template
    and its stored default appearance (`template_defaults` /
    `template_settings` in the settings option),
-3. **legacy fallback** — the pre-engine `frontend_template` +
-   `frontend_*` appearance tokens (goals only),
+3. **store-wide fallback** — the `frontend_template` + `frontend_*`
+   appearance tokens (goals only),
 4. **hardcoded fallback** — `template-1` for goals; a campaign without
 a template renders per-goal cards (the pre-engine behavior).
 
-The pre-engine `display_settings.template` key still reads as the legacy
-alias (step 1) and the DB migration (0.4.0) copies it onto
-`template_id`, so existing goals upgrade with no visual change. A stored
-template id that is no longer registered falls back to the scope default
-instead of failing. The Phase 15 admin preview resolves through the same
-engine, so what the merchant previews is what customers see. The
-per-widget shortcode `template` attribute and the
-`goalcart_frontend_template` filter still override the store-wide
-variant (`ProgressUI::template()`).
+A stored template id that is no longer registered (an old Phase 12 id
+such as `card`, or a removed template) falls back to the scope default
+instead of failing — old template ids are never mapped to a current
+template. The Phase 15 admin preview resolves through the same engine,
+so what the merchant previews is what customers see. The per-widget
+shortcode `template` attribute and the `goalcart_frontend_template`
+filter still override the store-wide variant (`ProgressUI::template()`).
 
 ## Customization
 

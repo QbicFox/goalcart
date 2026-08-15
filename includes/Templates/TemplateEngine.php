@@ -22,19 +22,20 @@ defined( 'ABSPATH' ) || exit;
  * so what a merchant previews is what customers see):
  *
  *   1. item override  — goal display_settings / campaign display_rules:
- *      `template_id` (with `display_settings.template` kept as the
- *      pre-engine legacy alias) + `template_settings`
+ *      `template_id` + `template_settings`
  *   2. scope default  — plugin settings `template_defaults[scope]` plus
  *      the stored per-template default appearance
  *      `template_settings[scope][template_id]`
- *   3. legacy fallback (goals only) — the pre-engine Appearance surface:
+ *   3. store-wide fallback (goals only) — the Appearance setting
  *      `frontend_template` + the `frontend_*` appearance tokens
- *   4. hardcoded fallback — 'basic' (goals only; campaigns with no
+ *   4. hardcoded fallback — `template-1` (goals only; campaigns with no
  *      template render per-goal cards, the pre-engine behavior)
  *
- * If a stored template_id is no longer registered (e.g. a template was
- * removed), resolution falls back to the scope default / legacy value
- * rather than failing — a removed template can never break rendering.
+ * If a stored template_id is not registered (e.g. an old Phase 12 id
+ * such as 'card', or a template that was removed), resolution falls back
+ * to the scope default / store-wide value rather than mapping it to a
+ * different template — old template ids are never translated, and a
+ * removed template can never break rendering.
  *
  * Settings validation is schema-driven: every field is sanitized against
  * the template's schema (colors, ranges, enums, tag-free CSS), so
@@ -62,30 +63,6 @@ final class TemplateEngine {
 	 * @var string
 	 */
 	const FALLBACK_GOAL = 'template-1';
-
-	/**
-	 * Migration map from the retired pre-design Goal template ids to the
-	 * closest design template (goals only).
-	 *
-	 * The old Phase 12 Goal templates (basic / percentage / milestone /
-	 * card) plus the Ring gauge are no longer registered, but their ids
-	 * are persisted in goal display_settings (`template_id` or the legacy
-	 * `template` alias), in per-scope defaults and in the legacy
-	 * `frontend_template` setting. Resolution maps them so existing goals
-	 * keep rendering without manual reconfiguration:
-	 *
-	 *  - basic / milestone / card → template-1 (the classic progress card)
-	 *  - percentage / ring → template-3 (the circular percentage gauge)
-	 *
-	 * @var array<string, string>
-	 */
-	const LEGACY_GOAL_MAP = array(
-		'basic'      => 'template-1',
-		'milestone'  => 'template-1',
-		'card'       => 'template-1',
-		'percentage' => 'template-3',
-		'ring'       => 'template-3',
-	);
 
 	/**
 	 * Template registry instance.
@@ -128,10 +105,10 @@ final class TemplateEngine {
 	 * @return array{template_id: string, settings: array<string, mixed>}
 	 */
 	public function resolve_goal( Goal $goal ) {
-		$display = $goal->display_settings();
-		$legacy  = (string) $this->settings->get( 'frontend_template', self::FALLBACK_GOAL );
+		$display    = $goal->display_settings();
+		$store_wide = (string) $this->settings->get( 'frontend_template', self::FALLBACK_GOAL );
 
-		return $this->resolve( self::SCOPE_GOAL, is_array( $display ) ? $display : array(), $legacy );
+		return $this->resolve( self::SCOPE_GOAL, is_array( $display ) ? $display : array(), $store_wide );
 	}
 
 	/**
@@ -147,20 +124,19 @@ final class TemplateEngine {
 	/**
 	 * Core resolution.
 	 *
-	 * @param string $scope           SCOPE_GOAL | SCOPE_CAMPAIGN.
-	 * @param array  $display         Item display config (display_settings /
-	 *                                display_rules).
-	 * @param string $legacy_template Legacy store-wide goal template.
+	 * @param string $scope            SCOPE_GOAL | SCOPE_CAMPAIGN.
+	 * @param array  $display          Item display config (display_settings /
+	 *                                 display_rules).
+	 * @param string $store_wide_template Store-wide goal template ('' for
+	 *                                 campaigns, which have no store-wide
+	 *                                 template setting).
 	 * @return array{template_id: string, settings: array<string, mixed>}
 	 */
-	public function resolve( $scope, array $display, $legacy_template = '' ) {
+	public function resolve( $scope, array $display, $store_wide_template = '' ) {
 		$template_id = '';
 
 		// 1. Item override: the goal/campaign pins its own template.
-		$override = isset( $display['template_id'] ) ? (string) $display['template_id'] : '';
-		if ( '' === $override && isset( $display['template'] ) && is_string( $display['template'] ) ) {
-			$override = $display['template']; // Legacy pre-engine alias.
-		}
+		$override    = isset( $display['template_id'] ) ? (string) $display['template_id'] : '';
 		$template_id = $this->normalize_template_id( $scope, $override );
 
 		// 2. Scope default from plugin settings.
@@ -170,11 +146,11 @@ final class TemplateEngine {
 			$template_id = isset( $defaults[ $scope ] ) ? $this->normalize_template_id( $scope, $defaults[ $scope ] ) : '';
 		}
 
-		// 3. Legacy fallback (goal scope only): the pre-engine Appearance
-		// template setting keeps working for stores that never touched the
-		// new per-template UI.
+		// 3. Store-wide fallback (goal scope only): the Appearance template
+		// setting keeps working for goals that pin no template of their
+		// own.
 		if ( '' === $template_id && self::SCOPE_GOAL === $scope ) {
-			$template_id = $this->normalize_template_id( $scope, $legacy_template );
+			$template_id = $this->normalize_template_id( $scope, $store_wide_template );
 		}
 
 		// 4. Hardcoded fallback: 'template-1' for goals; campaigns without
@@ -219,10 +195,10 @@ final class TemplateEngine {
 	/**
 	 * Normalize a candidate template id for a scope ('' when invalid).
 	 *
-	 * A retired Goal template id (e.g. 'card') resolves through the
-	 * legacy migration map to its closest design template before falling
-	 * back to '' — persisted old ids keep rendering instead of silently
-	 * degrading to the hardcoded fallback.
+	 * Only currently registered template ids resolve; anything else
+	 * (an old Phase 12 id such as 'card', or a removed template) returns
+	 * '' so resolution falls through to the scope default / store-wide
+	 * value / hardcoded fallback. Old template ids are never translated.
 	 *
 	 * @param string $scope SCOPE_GOAL | SCOPE_CAMPAIGN.
 	 * @param mixed  $id    Candidate template id.
@@ -231,16 +207,6 @@ final class TemplateEngine {
 	public function normalize_template_id( $scope, $id ) {
 		if ( $this->is_registered( $scope, $id ) ) {
 			return (string) $id;
-		}
-
-		// Migration: a persisted pre-design Goal template id maps to its
-		// closest registered design template.
-		if ( self::SCOPE_GOAL === $scope && is_string( $id ) && isset( self::LEGACY_GOAL_MAP[ $id ] ) ) {
-			$mapped = self::LEGACY_GOAL_MAP[ $id ];
-
-			if ( $this->is_registered( $scope, $mapped ) ) {
-				return $mapped;
-			}
 		}
 
 		return '';

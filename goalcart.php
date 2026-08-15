@@ -65,9 +65,8 @@ if ( ! defined( 'GOALCART_DB_VERSION' ) ) {
 	 *         tables, so Installer::maybe_add_indexes() applies them.
 	 * 0.3.0 = Phase 26: goals.exclusive (mutually exclusive goals) —
 	 *         dbDelta adds the missing column on upgrade.
-	 * 0.4.0 = Pluggable template engine: migrates stored goals' legacy
-	 *         display_settings.template onto display_settings.template_id
-	 *         (safe, repeatable — see Installer::maybe_migrate_template_storage).
+	 * 0.4.0 = Pluggable template engine (display_settings.template_id +
+	 *         template_settings storage shape).
 	 * 0.5.0 = Phase 33 (Revenue Optimization): revenue_events,
 	 *         revenue_daily, goal_attribution, upsell_events and
 	 *         upsell_stats tables plus the daily aggregation cron.

@@ -245,7 +245,7 @@ sanitizer (direct handler saves included). The full Phase 18 surface:
 | `default_goal_behavior` | enum `all` `first` `closest` | unknown → `all` |
 | `conflict_resolution` | enum `cumulative` `best` `first` | unknown → `cumulative` |
 | `calculation_mode` | enum `subtotal` `discounted_subtotal` `total` | unknown → `subtotal` |
-| `frontend_template` | enum `template-1` … `template-6` (legacy stored ids resolve via the TemplateEngine's migration map) | unknown → `template-1`; does not sync `template_defaults.goal` |
+| `frontend_template` | enum `template-1` … `template-6` | unknown → `template-1`; does not sync `template_defaults.goal` |
 | `template_defaults` | object `{ goal?, campaign? }` — ids registered for that scope ('' allowed) | unknown ids rejected; does not sync `frontend_template` |
 | `template_settings` | object `{ goal?, campaign? }` → per-template appearance maps | sanitized against each template's schema (unknown scopes/templates dropped, colors/ranges/enums/CSS cleaned) |
 | `frontend_animation` | boolean | cast |
@@ -591,9 +591,9 @@ Notes:
   id and appearance, computed server-side by the template engine
   (pluggable template engine, Phase 12): item override
   `display_settings.template_id` + `template_settings` → scope default
-  → legacy `frontend_template` → `basic` fallback. The pre-engine
-  `display_settings.template` key reads as the legacy alias (step 1), so
-  existing goals keep their template with no migration step needed. The
+  → store-wide `frontend_template` → `template-1` fallback. Old Phase 12
+  ids (`basic` / `percentage` / `milestone` / `card` / `ring`) are never
+  mapped — a stored old id falls back through the same chain. The
   widget renders exactly what the engine resolved — no client-side
   re-resolution.
 - `campaigns` lists the campaign template groups: one entry per
@@ -957,7 +957,7 @@ no-matching-items ineligibility), weight and composite (AND) goals
 - Phase 13 messaging: the public /progress payload carries the
   engine-rendered message (no unresolved placeholders) and the message
   state
-- per-goal display template: `display_settings.template` persists on
+- per-goal display template: `display_settings.template_id` persists on
   create and the /progress payload carries the normalized per-goal
   `template`
 - campaign CRUD + milestone ordering: create, order/reorder goals,

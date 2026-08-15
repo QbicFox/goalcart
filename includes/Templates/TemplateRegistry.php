@@ -44,8 +44,9 @@ class TemplateRegistry {
 	 * Recommendation + Goal, Compact Floating / Sticky Goal and Premium /
 	 * Elegant E-commerce Style) replace the original Phase 12 Goal
 	 * templates (basic, percentage, milestone, card) and the Ring gauge.
-	 * The old ids are no longer registered; persisted old ids resolve
-	 * through the TemplateEngine's legacy map instead of failing. The two
+	 * The old ids are no longer registered and are never mapped — a
+	 * persisted old id falls back to the scope default / store-wide
+	 * template instead of resolving to a different template. The two
 	 * Campaign templates (milestone_chain, campaign_progress) keep their
 	 * separate campaign scope.
 	 *

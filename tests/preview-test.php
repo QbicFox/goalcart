@@ -140,7 +140,7 @@ try {
 	$req->set_param( 'display_settings', array(
 		'message'         => 'Only {remaining} left to unlock {reward}!',
 		'completed_message' => 'Reward unlocked: {reward}',
-		'template'        => 'card',
+		'template_id'     => 'template-2',
 		'icon'            => '🎯',
 	) );
 
@@ -195,7 +195,7 @@ try {
 	check( '50% message has no unresolved placeholders', false === strpos( $goal_out['message'], '{' ) );
 	check( '50% message includes remaining', false !== strpos( $goal_out['message'], '500' ) );
 	check( '50% reward shape', 'percent_discount' === $goal_out['reward']['type'] );
-	check( '50% template from display settings', 'template-1' === $goal_out['template'] );
+	check( '50% template from display settings', 'template-2' === $goal_out['template'] );
 	check( '50% icon from display settings', '🎯' === $goal_out['icon'] );
 	check( '50% suggestions is array', is_array( $goal_out['suggestions'] ) );
 	check( '50% simulated echoed', near( 500, $resp->get_data()['data']['simulated']['amount'] ) );

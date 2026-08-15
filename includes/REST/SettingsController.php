@@ -179,7 +179,8 @@ class SettingsController extends BaseController {
 		// (causing a 400 error on the next Settings-page save) or silently
 		// overwrite the Appearance page's template selection. The
 		// TemplateEngine already handles the correct fallback chain:
-		// template_defaults.goal → frontend_template → template-1.
+		// template_defaults.goal → frontend_template → template-1. Old
+		// pre-design ids are never mapped.
 
 		if ( isset( $clean['template_settings'] ) ) {
 			// Defense in depth: the REST arg schema runs the same sanitizer
@@ -252,7 +253,7 @@ class SettingsController extends BaseController {
 			// Frontend (P18-T02).
 			'frontend_template'     => array(
 				'type' => 'string',
-				'enum' => Settings::LEGACY_GOAL_TEMPLATES,
+				'enum' => Settings::GOAL_TEMPLATES,
 			),
 			'frontend_animation'    => $bool,
 			'frontend_locations'    => array(
@@ -509,7 +510,7 @@ class SettingsController extends BaseController {
 				return array_values( array_unique( $cleaned ) );
 
 			case 'frontend_template':
-				return in_array( $value, Settings::LEGACY_GOAL_TEMPLATES, true ) ? $value : $defaults['frontend_template'];
+				return in_array( $value, Settings::GOAL_TEMPLATES, true ) ? $value : $defaults['frontend_template'];
 
 			case 'frontend_bar_height':
 				return min( 48, max( 4, (int) $value ) );
