@@ -117,10 +117,15 @@ check( 'wp_footer config print hooked at 5', 5 === hook_priority( 'wp_footer', a
 check( 'wp_footer sticky bar hooked at 20', 20 === hook_priority( 'wp_footer', array( $ui, 'render_sticky_bar' ) ) );
 check( 'init shortcode registration hooked', false !== has_action( 'init', array( $ui, 'register_shortcode' ) ) );
 check( 'cart location hooked', false !== has_action( 'woocommerce_before_cart', array( $ui, 'render_cart_widget' ) ) );
+check( 'cart bottom location hooked', false !== has_action( 'woocommerce_after_cart', array( $ui, 'render_cart_widget_bottom' ) ) );
 check( 'mini-cart location hooked', false !== has_action( 'woocommerce_after_mini_cart', array( $ui, 'render_mini_cart_widget' ) ) );
+check( 'mini-cart top location hooked', false !== has_action( 'woocommerce_before_mini_cart', array( $ui, 'render_mini_cart_widget_top' ) ) );
 check( 'checkout location hooked', false !== has_action( 'woocommerce_before_checkout_form', array( $ui, 'render_checkout_widget' ) ) );
+check( 'checkout bottom location hooked', false !== has_action( 'woocommerce_after_checkout_form', array( $ui, 'render_checkout_widget_bottom' ) ) );
 check( 'shop location hooked', false !== has_action( 'woocommerce_archive_description', array( $ui, 'render_shop_widget' ) ) );
+check( 'shop bottom location hooked', false !== has_action( 'woocommerce_after_shop_loop', array( $ui, 'render_shop_widget_bottom' ) ) );
 check( 'product location hooked at 45', 45 === hook_priority( 'woocommerce_single_product_summary', array( $ui, 'render_product_widget' ) ) );
+check( 'product bottom location hooked', 20 === hook_priority( 'woocommerce_after_single_product_summary', array( $ui, 'render_product_widget_bottom' ) ) );
 
 // ---------------------------------------------------------------------------
 // 3. Shortcode + container markup (P11-T02 — configurable widget)
@@ -156,6 +161,10 @@ check( 'bogus variant normalizes to full', false !== strpos( $ui->widget_contain
 // ---------------------------------------------------------------------------
 echo "\n== 4. Duplicate-render guard ==\n";
 
+// Keep this source-level duplicate test deterministic when a developer has
+// saved the optional position setting as bottom on the live test site.
+$settings->set( 'frontend_position', 'top' );
+
 ob_start();
 $ui->render_cart_widget();
 $ui->render_cart_widget(); // second call must be suppressed
@@ -163,6 +172,18 @@ $cart_out = ob_get_clean();
 
 check( 'cart location renders once', 1 === substr_count( $cart_out, 'id="goalcart-cart"' ) );
 check( 'cart widget markup is escaped/safe', false === strpos( $cart_out, '<script' ) );
+
+$bottom_ui = new ProgressUI( $settings );
+$settings->set( 'frontend_position', 'bottom' );
+ob_start();
+$bottom_ui->render_cart_widget();
+$top_suppressed = ob_get_clean();
+ob_start();
+$bottom_ui->render_cart_widget_bottom();
+$bottom_rendered = ob_get_clean();
+check( 'top cart hook is suppressed for bottom position', '' === $top_suppressed );
+check( 'bottom cart hook renders for bottom position', false !== strpos( $bottom_rendered, 'id="goalcart-cart"' ) );
+$settings->set( 'frontend_position', 'top' );
 
 // ---------------------------------------------------------------------------
 // 5. Frontend config payload (P11-T02)
@@ -173,6 +194,7 @@ $config = $ui->frontend_config();
 check( 'config has a progress endpoint', isset( $config['endpoint'] ) && '' !== $config['endpoint'] );
 check( 'config endpoint points at /progress', false !== strpos( $config['endpoint'], '/goalcart/v1/progress' ) );
 check( 'config has a currency key', array_key_exists( 'currency', $config ) );
+check( 'config has a page position key', array_key_exists( 'position', $config ) );
 check( 'config is RTL-aware', array_key_exists( 'isRtl', $config ) );
 check( 'config labels cover reward types', isset( $config['labels']['free_shipping'], $config['labels']['percent_discount'], $config['labels']['fixed_discount'], $config['labels']['free_gift'], $config['labels']['coupon'] ) );
 

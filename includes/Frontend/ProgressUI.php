@@ -25,11 +25,16 @@ defined( 'ABSPATH' ) || exit;
  * Display locations (P11: Cart, Mini Cart, Checkout, Shop, Product page,
  * configurable widget/shortcode, sticky bar):
  *
- *  - `woocommerce_before_cart`             → full widget on the cart page
- *  - `woocommerce_after_mini_cart`         → compact widget in the mini cart
- *  - `woocommerce_before_checkout_form`    → full widget on checkout
- *  - `woocommerce_archive_description`     → compact widget on shop/archives
- *  - `woocommerce_single_product_summary`  → compact widget on product pages
+ *  - `woocommerce_before_cart` / `woocommerce_after_cart`
+ *                                           → full widget on the cart page
+ *  - `woocommerce_before_mini_cart` / `woocommerce_after_mini_cart`
+ *                                           → compact widget in the mini cart
+ *  - `woocommerce_before_checkout_form` / `woocommerce_after_checkout_form`
+ *                                           → full widget on checkout
+ *  - `woocommerce_archive_description` / `woocommerce_after_shop_loop`
+ *                                           → compact widget on shop/archives
+ *  - `woocommerce_single_product_summary` / `woocommerce_after_single_product_summary`
+ *                                           → compact widget on product pages
  *  - `[goalcart_progress]` shortcode       → widget anywhere (full/compact)
  *  - `wp_footer`                           → sticky bottom progress bar
  *
@@ -134,12 +139,19 @@ final class ProgressUI {
 		// ready (reference plugin's config-before-script convention).
 		$hooks->add_action( 'wp_footer', array( $this, 'print_config' ), 5 );
 
-		// Display locations (each guarded against double injection).
+		// Display locations (each guarded against double injection). Both
+		// boundary hooks are registered so changing the global position
+		// setting takes effect without requiring a hook re-registration.
 		$hooks->add_action( 'woocommerce_before_cart', array( $this, 'render_cart_widget' ) );
+		$hooks->add_action( 'woocommerce_after_cart', array( $this, 'render_cart_widget_bottom' ) );
+		$hooks->add_action( 'woocommerce_before_mini_cart', array( $this, 'render_mini_cart_widget_top' ) );
 		$hooks->add_action( 'woocommerce_after_mini_cart', array( $this, 'render_mini_cart_widget' ) );
 		$hooks->add_action( 'woocommerce_before_checkout_form', array( $this, 'render_checkout_widget' ) );
+		$hooks->add_action( 'woocommerce_after_checkout_form', array( $this, 'render_checkout_widget_bottom' ) );
 		$hooks->add_action( 'woocommerce_archive_description', array( $this, 'render_shop_widget' ) );
+		$hooks->add_action( 'woocommerce_after_shop_loop', array( $this, 'render_shop_widget_bottom' ) );
 		$hooks->add_action( 'woocommerce_single_product_summary', array( $this, 'render_product_widget' ), 45 );
+		$hooks->add_action( 'woocommerce_after_single_product_summary', array( $this, 'render_product_widget_bottom' ), 20 );
 
 		// WooCommerce Blocks (Phase 19): the classic WooCommerce actions
 		// (woocommerce_before_cart, woocommerce_before_checkout_form) only
@@ -306,6 +318,21 @@ final class ProgressUI {
 	}
 
 	/**
+	 * The position of page widgets (top or bottom), normalized and filterable.
+	 *
+	 * Sticky bars use their separate sticky_position setting. This setting
+	 * controls the regular cart, mini-cart, checkout, shop and product
+	 * widgets only.
+	 *
+	 * @return string
+	 */
+	public function position() {
+		$position = apply_filters( 'goalcart_frontend_position', $this->settings->get( 'frontend_position', 'top' ) );
+
+		return in_array( $position, array( 'top', 'bottom' ), true ) ? $position : 'top';
+	}
+
+	/**
 	 * Enqueue the frontend stylesheet and script.
 	 *
 	 * Assets load only when the master toggle is on and the current page
@@ -409,6 +436,7 @@ final class ProgressUI {
 			// browser's default locale.
 			'locale'    => get_locale(),
 			'isRtl'     => is_rtl(),
+			'position'  => $this->position(),
 			'template'  => $this->template(),
 			'animation' => (bool) apply_filters( 'goalcart_frontend_animation', $this->settings->get( 'frontend_animation', true ) ),
 			'currencyDisplay' => $this->currency_display(),
@@ -636,7 +664,12 @@ final class ProgressUI {
 	 * @return void
 	 */
 	public function render_cart_widget() {
-		$this->render_widget( 'cart', 'full' );
+		$this->render_widget( 'cart', 'full', 'top' );
+	}
+
+	/** Render the cart-page widget at the bottom boundary. */
+	public function render_cart_widget_bottom() {
+		$this->render_widget( 'cart', 'full', 'bottom' );
 	}
 
 	/**
@@ -647,8 +680,12 @@ final class ProgressUI {
 	 *
 	 * @return void
 	 */
+	public function render_mini_cart_widget_top() {
+		$this->render_widget( 'mini-cart', 'compact', 'top' );
+	}
+
 	public function render_mini_cart_widget() {
-		$this->render_widget( 'mini-cart', 'compact' );
+		$this->render_widget( 'mini-cart', 'compact', 'bottom' );
 	}
 
 	/**
@@ -657,7 +694,12 @@ final class ProgressUI {
 	 * @return void
 	 */
 	public function render_checkout_widget() {
-		$this->render_widget( 'checkout', 'full' );
+		$this->render_widget( 'checkout', 'full', 'top' );
+	}
+
+	/** Render the checkout widget at the bottom boundary. */
+	public function render_checkout_widget_bottom() {
+		$this->render_widget( 'checkout', 'full', 'bottom' );
 	}
 
 	/**
@@ -666,7 +708,12 @@ final class ProgressUI {
 	 * @return void
 	 */
 	public function render_shop_widget() {
-		$this->render_widget( 'shop', 'compact' );
+		$this->render_widget( 'shop', 'compact', 'top' );
+	}
+
+	/** Render the shop/archive widget at the bottom boundary. */
+	public function render_shop_widget_bottom() {
+		$this->render_widget( 'shop', 'compact', 'bottom' );
 	}
 
 	/**
@@ -678,7 +725,12 @@ final class ProgressUI {
 	 * @return void
 	 */
 	public function render_product_widget() {
-		$this->render_widget( 'product', 'compact' );
+		$this->render_widget( 'product', 'compact', 'top' );
+	}
+
+	/** Render the product widget at the bottom boundary. */
+	public function render_product_widget_bottom() {
+		$this->render_widget( 'product', 'compact', 'bottom' );
 	}
 
 	/**
@@ -751,7 +803,7 @@ final class ProgressUI {
 	}
 
 	/**
-	 * Append the full progress widget after WooCommerce Cart/Checkout blocks.
+	 * Place the progress widget around WooCommerce Cart/Checkout blocks.
 	 *
 	 * Phase 19 (WooCommerce Compatibility): the classic template actions
 	 * (woocommerce_before_cart, woocommerce_before_checkout_form,
@@ -802,7 +854,9 @@ final class ProgressUI {
 		$this->rendered[ $location ] = true;
 
 		// phpcs:ignore WordPress.Security.EscapeOutput -- widget_container escapes its own attributes.
-		return $block_content . $this->widget_container( 'goalcart-' . $location, $variant );
+		$widget = $this->widget_container( 'goalcart-' . $location, $variant );
+
+		return 'top' === $this->position() ? $widget . $block_content : $block_content . $widget;
 	}
 
 	/**
@@ -811,12 +865,17 @@ final class ProgressUI {
 	 * Each location renders at most once per request; the JS mount guard
 	 * additionally prevents double mounting on fragment refreshes.
 	 *
-	 * @param string $location Location key.
-	 * @param string $variant  full|compact.
+	 * @param string      $location Location key.
+	 * @param string      $variant  full|compact.
+	 * @param string|null $position Required page boundary, or null for either.
 	 * @return void
 	 */
-	protected function render_widget( $location, $variant ) {
+	protected function render_widget( $location, $variant, $position = null ) {
 		if ( is_admin() || ! $this->is_enabled() ) {
+			return;
+		}
+
+		if ( null !== $position && $position !== $this->position() ) {
 			return;
 		}
 

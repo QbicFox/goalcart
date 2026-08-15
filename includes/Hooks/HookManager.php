@@ -94,6 +94,7 @@ class HookManager {
 			array( 'type' => 'filter', 'hook' => 'goalcart_admin_capability', 'description' => 'Capability required for the admin menu page.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_enabled', 'description' => 'Master storefront widget toggle.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_locations', 'description' => 'Enabled widget display locations.' ),
+			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_position', 'description' => 'Page widget position (top|bottom).' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_template', 'description' => 'Store-wide widget template variant.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_animation', 'description' => 'Storefront progress-bar animation flag.' ),
 			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_mobile', 'description' => 'Storefront mobile behavior (show|hide).' ),

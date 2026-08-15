@@ -164,6 +164,7 @@ check( 'default_goal_behavior defaults to all', 'all' === $d['default_goal_behav
 check( 'conflict_resolution defaults to cumulative', 'cumulative' === $d['conflict_resolution'] );
 check( 'calculation_mode defaults to subtotal', 'subtotal' === $d['calculation_mode'] );
 check( 'frontend_locations defaults to six locations', 6 === count( $d['frontend_locations'] ) );
+check( 'frontend_position defaults to top', 'top' === $d['frontend_position'] );
 check( 'frontend_mobile defaults to show', 'show' === $d['frontend_mobile'] );
 check( 'include_tax defaults false', false === $d['calculation_include_tax'] );
 check( 'include_discount defaults true', true === $d['calculation_include_discount'] );
@@ -210,6 +211,8 @@ check( 'valid conflict mode accepted', true === rest_validate_value_from_schema(
 check( 'calculation_mode schema enum', isset( $save['calculation_mode']['enum'] ) );
 check( 'invalid calculation_mode rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['calculation_mode'], 'calculation_mode' ) ) );
 
+check( 'frontend_position schema enum', isset( $save['frontend_position']['enum'] ) );
+check( 'invalid position rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['frontend_position'], 'frontend_position' ) ) );
 check( 'frontend_mobile schema enum', isset( $save['frontend_mobile']['enum'] ) );
 check( 'invalid mobile rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['frontend_mobile'], 'frontend_mobile' ) ) );
 
@@ -235,6 +238,7 @@ try {
 	$req->set_param( 'default_goal_behavior', 'bogus' );
 	$req->set_param( 'conflict_resolution', 'bogus' );
 	$req->set_param( 'calculation_mode', 'bogus' );
+	$req->set_param( 'frontend_position', 'bogus' );
 	$req->set_param( 'frontend_mobile', 'bogus' );
 	$req->set_param( 'frontend_locations', array( 'cart', 'bogus', 'sticky', 'sticky' ) );
 	$req->set_param( 'calculation_include_tax', true );
@@ -256,6 +260,7 @@ try {
 	check( 'invalid behavior falls back to all', 'all' === $data['default_goal_behavior'] );
 	check( 'invalid conflict mode falls back to cumulative', 'cumulative' === $data['conflict_resolution'] );
 	check( 'invalid mode falls back to subtotal', 'subtotal' === $data['calculation_mode'] );
+	check( 'invalid position falls back to top', 'top' === $data['frontend_position'] );
 	check( 'invalid mobile falls back to show', 'show' === $data['frontend_mobile'] );
 	check( 'locations filtered + deduped', array( 'cart', 'sticky' ) === $data['frontend_locations'] );
 	check( 'include_tax persisted true', true === $data['calculation_include_tax'] );
@@ -433,15 +438,19 @@ check( 'sticky location back on', true === in_array( 'sticky', $ui->locations(),
 	// values (e.g. a dev site saved currency 'name'), so pin the settings
 	// before asserting the config passthrough.
 	$settings->set( 'currency_display', 'symbol' );
+	$settings->set( 'frontend_position', 'top' );
 	$settings->set( 'frontend_mobile', 'show' );
 	$config = $ui->frontend_config();
 	check( 'config carries currencyDisplay', isset( $config['currencyDisplay'] ) && 'symbol' === $config['currencyDisplay'] );
+	check( 'config carries page position', isset( $config['position'] ) && 'top' === $config['position'] );
 	check( 'config carries mobile', isset( $config['mobile'] ) && 'show' === $config['mobile'] );
 
 	$settings->set( 'currency_display', 'code' );
+	$settings->set( 'frontend_position', 'bottom' );
 	$settings->set( 'frontend_mobile', 'hide' );
 $config = $ui->frontend_config();
 check( 'currencyDisplay follows setting', 'code' === $config['currencyDisplay'] );
+check( 'page position follows setting', 'bottom' === $config['position'] );
 check( 'admin boot currencyDisplay follows setting', 'code' === ( new AssetLoader( $settings ) )->boot_data()['currencyDisplay'] );
 check( 'mobile follows setting', 'hide' === $config['mobile'] );
 $settings->set_many( $all_before );

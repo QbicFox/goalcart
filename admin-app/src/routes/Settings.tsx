@@ -491,6 +491,15 @@ export default function Settings() {
                   />
                   <SelectField
                     control={control}
+                    name="frontend_position"
+                    label={__('Position', 'goalcart')}
+                    options={[
+                      { value: 'top', label: __('Top', 'goalcart') },
+                      { value: 'bottom', label: __('Bottom', 'goalcart') },
+                    ]}
+                  />
+                  <SelectField
+                    control={control}
                     name="frontend_template"
                     label={__('Template', 'goalcart')}
                     description={__('Store-wide progress widget variant.', 'goalcart')}

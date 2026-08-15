@@ -33,13 +33,13 @@ own JS events without a page reload.
 
 ## Display locations
 
-| Location | Hook | Variant |
-|---|---|---|
-| Cart page | `woocommerce_before_cart` | full |
-| Mini cart | `woocommerce_after_mini_cart` (inside the fragment) | compact |
-| Checkout | `woocommerce_before_checkout_form` | full |
-| Shop / archives | `woocommerce_archive_description` | compact |
-| Product page | `woocommerce_single_product_summary` (prio 45) | compact |
+| Location | Top hook | Bottom hook | Variant |
+|---|---|---|---|
+| Cart page | `woocommerce_before_cart` | `woocommerce_after_cart` | full |
+| Mini cart | `woocommerce_before_mini_cart` (inside the fragment) | `woocommerce_after_mini_cart` (inside the fragment) | compact |
+| Checkout | `woocommerce_before_checkout_form` | `woocommerce_after_checkout_form` | full |
+| Shop / archives | `woocommerce_archive_description` | `woocommerce_after_shop_loop` | compact |
+| Product page | `woocommerce_single_product_summary` (prio 45) | `woocommerce_after_single_product_summary` (prio 20) | compact |
 | Anywhere | `[goalcart_progress variant="full|compact"]` shortcode | full/compact |
 | Sticky bar | `wp_footer` | fixed bottom bar |
 
@@ -128,6 +128,11 @@ layers are asserted by `tests/frontend-test.php`.
   containers plus the sticky bar are all gated on the configured set
   (filter `goalcart_frontend_locations`); dropping `sticky` from the list
   disables the sticky bar entirely.
+- **Page position:** the `frontend_position` setting (`top` | `bottom`)
+  selects the top or bottom hook for all regular page widgets. The sticky
+  bar keeps its independent `sticky_position` setting. Both boundary hooks
+  remain registered and the selected one renders the container, so the
+  setting is normalized and applied on every request.
 - **Mobile behavior:** the `frontend_mobile` setting (`show` | `hide`,
   Phase 18) — when `hide`, the JS adds a `goalcart-mobile-hidden` class
   to every container and the CSS hides the widgets under 600 px.

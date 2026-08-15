@@ -482,6 +482,9 @@ export type ConflictResolution = 'cumulative' | 'best' | 'first';
 /** Store-wide default money basis (Phase 18, calculation_mode). */
 export type CalculationMode = 'subtotal' | 'discounted_subtotal' | 'total';
 
+/** Storefront page-widget position (frontend_position). */
+export type FrontendPosition = 'top' | 'bottom';
+
 /** Storefront mobile behavior (Phase 18, frontend_mobile). */
 export type MobileBehavior = 'show' | 'hide';
 
@@ -670,6 +673,7 @@ export interface GoalCartSettings {
   frontend_template: FrontendTemplate;
   frontend_animation: boolean;
   frontend_locations: FrontendLocation[];
+  frontend_position: FrontendPosition;
   frontend_mobile: MobileBehavior;
   frontend_bar_height: number;
   frontend_accent: string;

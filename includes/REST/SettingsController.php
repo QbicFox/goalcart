@@ -262,6 +262,7 @@ class SettingsController extends BaseController {
 					'enum' => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ),
 				),
 			),
+			'frontend_position'     => array( 'type' => 'string', 'enum' => array( 'top', 'bottom' ) ),
 			'frontend_mobile'       => array( 'type' => 'string', 'enum' => array( 'show', 'hide' ) ),
 			'frontend_bar_height'   => array( 'type' => 'integer', 'minimum' => 4, 'maximum' => 48 ),
 			'frontend_accent'       => array( 'type' => 'string' ),
@@ -477,6 +478,9 @@ class SettingsController extends BaseController {
 
 			case 'calculation_mode':
 				return in_array( $value, array( 'subtotal', 'discounted_subtotal', 'total' ), true ) ? $value : $defaults['calculation_mode'];
+
+			case 'frontend_position':
+				return in_array( $value, array( 'top', 'bottom' ), true ) ? $value : $defaults['frontend_position'];
 
 			case 'frontend_mobile':
 				return in_array( $value, array( 'show', 'hide' ), true ) ? $value : $defaults['frontend_mobile'];

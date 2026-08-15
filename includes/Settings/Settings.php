@@ -70,6 +70,7 @@ class Settings {
 		'frontend_template'     => 'basic',
 		'frontend_animation'    => true,
 		'frontend_locations'    => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ),
+		'frontend_position'     => 'top',               // top | bottom for page widgets
 		'frontend_mobile'       => 'show',             // show | hide
 		'frontend_bar_height'   => 10,
 		'frontend_accent'       => '#2271b1',
