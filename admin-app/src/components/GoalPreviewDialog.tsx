@@ -85,7 +85,7 @@ export default function GoalPreviewDialog({ goal, onClose }: GoalPreviewDialogPr
     ? templateById(templates, 'goal', controls.template)
     : undefined;
   const resolvedTemplate =
-    controls.template || featured?.template || settings?.frontend_template || 'basic';
+    controls.template || featured?.template || settings?.frontend_template || 'template-1';
   const resolvedTemplateLabel =
     forcedTemplate?.label ??
     templateById(templates, 'goal', resolvedTemplate)?.label ??

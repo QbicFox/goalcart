@@ -16,9 +16,9 @@
  *   --goalcart-shadow        card elevation
  *   --goalcart-bar-height    progress bar thickness
  *
- * Phase 12 (Progress Templates): the goal body renders per the active
- * template variant (basic / percentage / milestone / card) via
- * .goalcart-template--* classes, the bar reads --goalcart-bar-height, and
+ * The six design templates (template-1 … template-6): the goal body
+ * renders per the active template variant via .goalcart-template--*
+ * classes, the bar reads --goalcart-bar-height, and
  * .goalcart-widget--no-anim / .goalcart-no-anim disable the fill
  * transition. The Appearance settings override every token through an
  * inline style block printed by ProgressUI::appearance_css().
@@ -46,6 +46,18 @@
 	--goalcart-dot-color: #dcdcde;
 	--goalcart-done-color: #00a32a;
 	--goalcart-connector-color: #dcdcde;
+	/* Design-template tokens (the six progress templates). */
+	--goalcart-progress-color: #f97316;
+	--goalcart-button-bg: #f97316;
+	--goalcart-button-text: #ffffff;
+	--goalcart-button-radius: 8px;
+	--goalcart-icon-bg: #ffedd5;
+	--goalcart-icon-color: #f97316;
+	--goalcart-header-bg: #2563eb;
+	--goalcart-ring-size: 100px;
+	--goalcart-ring-stroke: 8px;
+	--goalcart-product-image: 40px;
+	--goalcart-shadow-intensity: 16px;
 
 	color: var(--goalcart-text);
 	font-family: inherit;
@@ -152,115 +164,845 @@
 }
 
 /* ------------------------------------------------------------------ *
- * Progress Templates (Phase 12)
+ * Progress Templates (the six design templates)
  * ------------------------------------------------------------------ */
 
-/* Percentage template: large readout above the bar. */
+/* The shared icon glyph inside template bodies (goal emoji/dashicon
+ * text, or the template fallback). */
 
-.goalcart-percentage {
+.goalcart-tpl-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	line-height: 1;
+}
+
+/* The shared CTA anchor — full-width, styled per template below. */
+
+.goalcart-cta {
+	display: block;
+	width: 100%;
+	box-sizing: border-box;
+	margin-block-start: 0.75rem;
+	padding: 0.625rem 1rem;
+	border-radius: var(--goalcart-button-radius, 8px);
+	font-size: 14px;
+	font-weight: 700;
+	text-align: center;
+	text-decoration: none;
+	transition: opacity 0.2s ease;
+}
+
+.goalcart-cta:hover,
+.goalcart-cta:focus-visible {
+	opacity: 0.9;
+}
+
+/* ------------------------------------------------------------------ *
+ * Template 1 — Classic Progress Card (Concept 01)
+ * ------------------------------------------------------------------ */
+
+.goalcart-t1__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-block-end: 0.75rem;
+}
+
+.goalcart-t1__head-main {
 	display: flex;
 	align-items: center;
-	gap: 0.75rem;
+	gap: 0.5rem;
+	min-width: 0;
 }
 
-.goalcart-percentage__value {
-	font-size: var(--goalcart-percent-size, 1.75rem);
-	font-weight: 800;
-	line-height: 1;
-	letter-spacing: -0.02em;
+.goalcart-t1__head-main .goalcart-tpl-icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background: var(--goalcart-icon-bg, #ffedd5);
+	color: var(--goalcart-icon-color, var(--goalcart-accent));
+	font-size: 14px;
+}
+
+.goalcart-t1__head-text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.goalcart-t1__label {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-t1__title {
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--goalcart-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.goalcart-t1__percent {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+	padding: 0.125rem 0.5rem;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 700;
 	font-variant-numeric: tabular-nums;
-	color: var(--goalcart-percent-color, var(--goalcart-accent));
-	min-width: 3.2em;
+	color: var(--goalcart-accent);
+	background: color-mix( in srgb, var(--goalcart-accent) 8%, transparent );
+	border: 1px solid color-mix( in srgb, var(--goalcart-accent) 15%, transparent );
 }
 
-.goalcart-template--percentage .goalcart-progress {
-	flex: 1 1 auto;
-}
-
-/* Milestone template: the ladder is the hero element. */
-
-.goalcart-template--milestone .goalcart-milestones {
+.goalcart-template--template-1 .goalcart-progress {
 	margin-block-start: 0;
-	margin-block-end: 0.875rem;
+}
+
+.goalcart-t1__amounts {
+	display: flex;
+	align-items: center;
 	justify-content: space-between;
+	gap: 0.75rem;
+	margin-block-start: 0.625rem;
+	font-size: 12px;
 }
 
-.goalcart-template--milestone .goalcart-milestone__dot {
-	width: 12px;
-	height: 12px;
-	border: 2px solid var(--goalcart-bg);
-	box-shadow: 0 0 0 1px var(--goalcart-border);
+.goalcart-t1__current {
+	color: var(--goalcart-text-muted);
 }
 
-.goalcart-template--milestone .goalcart-milestone--complete .goalcart-milestone__dot {
-	box-shadow: 0 0 0 1px var(--goalcart-accent);
+.goalcart-t1__remaining {
+	font-weight: 600;
+	color: var(--goalcart-accent);
+	white-space: nowrap;
 }
 
-/* Card template: icon + title header above the bar. */
+.goalcart-t1__cta {
+	background: var(--goalcart-button-bg, var(--goalcart-accent));
+	color: var(--goalcart-button-text, #ffffff);
+}
 
-.goalcart-card-panel {
+/* Completed state: green success card with a check. */
+
+.goalcart-t1--done .goalcart-t1__done {
+	padding: 0.75rem 1rem;
+	border-radius: 0.75rem;
+	background: #f0fdf4;
+	border: 1px solid #bbf7d0;
+}
+
+.goalcart-t1__done-row {
+	display: flex;
+	align-items: center;
+	gap: 0.625rem;
+	margin-block-end: 0.5rem;
+}
+
+.goalcart-t1--done .goalcart-tpl-icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background: #dcfce7;
+	color: #16a34a;
+	font-size: 14px;
+}
+
+.goalcart-t1__done-info {
+	display: flex;
+	flex-direction: column;
+}
+
+.goalcart-t1__done-label {
+	font-size: 12px;
+	font-weight: 500;
+	color: #16a34a;
+}
+
+.goalcart-t1__done-title {
+	font-size: 14px;
+	font-weight: 700;
+	color: #166534;
+}
+
+.goalcart-t1--done .goalcart-progress {
+	--goalcart-accent: #16a34a;
+	--goalcart-track: #bbf7d0;
+}
+
+/* Expired state: muted clock row. */
+
+.goalcart-t1--expired {
+	opacity: 0.75;
+}
+
+.goalcart-t1__expired {
 	display: flex;
 	align-items: center;
 	gap: 0.625rem;
 }
 
-.goalcart-card-panel__icon {
-	font-size: 1.5rem;
-	line-height: 1;
+.goalcart-t1__expired .goalcart-tpl-icon {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background: #e5e7eb;
+	color: #9ca3af;
+	font-size: 14px;
 }
 
-.goalcart-card-panel__title {
+.goalcart-t1__expired-info {
+	display: flex;
+	flex-direction: column;
 	flex: 1 1 auto;
 	min-width: 0;
+}
+
+.goalcart-t1__expired-label {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-t1__expired-title {
+	font-size: 14px;
 	font-weight: 700;
+	color: var(--goalcart-text-muted);
 }
 
-.goalcart-template--card .goalcart-progress {
-	flex: 0 0 100%;
-	margin-block-start: 0.625rem;
+.goalcart-t1__expired-chip {
+	flex-shrink: 0;
+	padding: 0.125rem 0.5rem;
+	border-radius: 999px;
+	font-size: 12px;
+	color: var(--goalcart-text-muted);
+	background: #e5e7eb;
 }
 
-.goalcart-template--card .goalcart-card-panel {
-	flex-wrap: wrap;
+/* ------------------------------------------------------------------ *
+ * Template 2 — Minimal Inline Cart Goal (Concept 02)
+ * ------------------------------------------------------------------ */
+
+/* The card itself is the compact strip — keep its height small. */
+
+.goalcart-template--template-2 {
+	padding: 0.625rem 0.875rem;
 }
 
-/* Ring template: circular gauge (SVG). Logical properties keep the
-   centered readout direction-agnostic under RTL. */
+.goalcart-t2 {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
 
-.goalcart-ring {
+.goalcart-t2 .goalcart-tpl-icon {
+	font-size: 14px;
+	color: var(--goalcart-accent);
+}
+
+.goalcart-t2__body {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.goalcart-t2__row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-block-end: 0.25rem;
+	font-size: 12px;
+}
+
+.goalcart-t2__title {
+	font-weight: 600;
+	color: var(--goalcart-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.goalcart-t2__remaining {
+	font-weight: 700;
+	color: var(--goalcart-text-muted);
+	white-space: nowrap;
+}
+
+.goalcart-t2__done {
+	font-weight: 700;
+	color: #16a34a;
+	white-space: nowrap;
+}
+
+.goalcart-t2__cta {
+	flex-shrink: 0;
+	margin-block-start: 0;
+	padding: 0.375rem 0.625rem;
+	font-size: 12px;
+	font-weight: 600;
+	border-radius: var(--goalcart-button-radius, 8px);
+	background: var(--goalcart-button-bg, var(--goalcart-accent));
+	color: var(--goalcart-button-text, #ffffff);
+}
+
+/* ------------------------------------------------------------------ *
+ * Template 3 — Circular Progress (Concept 03)
+ * ------------------------------------------------------------------ */
+
+.goalcart-t3__row {
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+}
+
+.goalcart-t3__ring {
 	position: relative;
-	inline-size: fit-content;
+	flex-shrink: 0;
 	max-inline-size: 100%;
-	margin-inline: auto;
 }
 
-.goalcart-ring__svg {
+.goalcart-t3__svg {
 	display: block;
 	max-inline-size: 100%;
 	height: auto;
 }
 
-.goalcart-ring__fill {
+.goalcart-t3__fill {
 	transition: stroke-dashoffset 0.6s ease;
 }
 
-.goalcart-widget--no-anim .goalcart-ring__fill,
-.goalcart-no-anim .goalcart-ring__fill {
+.goalcart-widget--no-anim .goalcart-t3__fill,
+.goalcart-no-anim .goalcart-t3__fill {
 	transition: none;
 }
 
-.goalcart-ring__percent {
+.goalcart-t3__readout {
+	position: absolute;
+	inset: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+}
+
+.goalcart-t3__percent {
+	font-size: calc( var(--goalcart-ring-size, 100px) * 0.19 );
+	font-weight: 900;
+	line-height: 1;
+	font-variant-numeric: tabular-nums;
+	color: var(--goalcart-accent);
+}
+
+.goalcart-t3__progress-label {
+	margin-block-start: 0.125rem;
+	font-size: calc( var(--goalcart-ring-size, 100px) * 0.085 );
+	font-weight: 500;
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-t3__check {
 	position: absolute;
 	inset: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-weight: 800;
-	line-height: 1;
-	letter-spacing: -0.02em;
-	font-variant-numeric: tabular-nums;
-	color: var(--goalcart-text);
+	font-size: calc( var(--goalcart-ring-size, 100px) * 0.28 );
+	font-weight: 900;
+	color: #059669;
 	pointer-events: none;
+}
+
+.goalcart-t3__info {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.goalcart-t3__title-row {
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	margin-block-end: 0.25rem;
+}
+
+.goalcart-t3__title-row .goalcart-tpl-icon {
+	font-size: 14px;
+	color: var(--goalcart-accent);
+}
+
+.goalcart-t3__title {
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--goalcart-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.goalcart-t3__desc {
+	margin: 0 0 0.625rem;
+	font-size: 12px;
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-t3__amount {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	font-size: 12px;
+}
+
+.goalcart-t3__amount + .goalcart-t3__amount {
+	margin-block-start: 0.25rem;
+}
+
+.goalcart-t3__amount-label {
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-t3__amount-value {
+	font-weight: 700;
+	color: var(--goalcart-text);
+}
+
+.goalcart-t3__amount-value--accent {
+	color: var(--goalcart-accent);
+}
+
+.goalcart-t3__cta {
+	background: transparent;
+	border: 1px solid var(--goalcart-button-bg, var(--goalcart-accent));
+	color: var(--goalcart-button-text, var(--goalcart-accent));
+}
+
+/* Completed circular state. */
+
+.goalcart-t3__done-row {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.goalcart-t3__done-info {
+	display: flex;
+	flex-direction: column;
+}
+
+.goalcart-t3__done-title {
+	font-size: 14px;
+	font-weight: 800;
+	color: #166534;
+}
+
+.goalcart-t3__done-sub {
+	font-size: 12px;
+	color: #15803d;
+}
+
+/* ------------------------------------------------------------------ *
+ * Template 4 — Product Recommendation + Goal (Concept 07)
+ * ------------------------------------------------------------------ */
+
+/* Flush header: the card surface is the template's own (no card padding). */
+
+.goalcart-template--template-4 {
+	padding: 0;
+	overflow: hidden;
+}
+
+.goalcart-t4__header {
+	padding: 0.875rem 1rem;
+	color: #ffffff;
+}
+
+.goalcart-t4__header-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-block-end: 0.5rem;
+}
+
+.goalcart-t4__title {
+	font-size: 12px;
+	font-weight: 700;
+	opacity: 0.9;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.goalcart-t4__chip {
+	flex-shrink: 0;
+	padding: 0.125rem 0.5rem;
+	border-radius: 999px;
+	font-size: 12px;
+	font-weight: 700;
+	white-space: nowrap;
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.goalcart-t4__header .goalcart-progress {
+	--goalcart-track: rgba(255, 255, 255, 0.25);
+}
+
+.goalcart-t4__header .goalcart-progress__fill {
+	background: #ffffff;
+}
+
+.goalcart-t4__header .goalcart-progress--complete .goalcart-progress__fill {
+	background: #ffffff;
+}
+
+.goalcart-t4__body {
+	padding: 1rem 1.125rem;
+}
+
+.goalcart-t4__heading {
+	display: flex;
+	align-items: center;
+	gap: 0.25rem;
+	margin: 0 0 0.75rem;
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--goalcart-text);
+}
+
+.goalcart-t4__heading-icon {
+	font-size: 14px;
+	color: #eab308;
+}
+
+.goalcart-t4__empty {
+	margin: 0;
+	font-size: 12px;
+	color: var(--goalcart-text-muted);
+}
+
+/* One recommended product row. */
+
+.goalcart-recommend {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.5rem 0.625rem;
+	border-radius: 0.625rem;
+	border: 1px solid var(--goalcart-border);
+	transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.goalcart-recommend + .goalcart-recommend {
+	margin-block-start: 0.375rem;
+}
+
+.goalcart-recommend:hover {
+	border-color: var(--goalcart-accent);
+	box-shadow: 0 0 0 2px color-mix( in srgb, var(--goalcart-accent) 15%, transparent );
+	transform: translateY(-1px);
+}
+
+.goalcart-recommend__image {
+	width: var(--goalcart-product-image, 40px);
+	height: var(--goalcart-product-image, 40px);
+	flex-shrink: 0;
+	border-radius: 0.5rem;
+	object-fit: cover;
+	background: #f3f4f6;
+}
+
+.goalcart-recommend__image--placeholder {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 16px;
+}
+
+.goalcart-recommend__info {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.goalcart-recommend__name {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--goalcart-text);
+	text-decoration: none;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.goalcart-recommend__name:hover {
+	color: var(--goalcart-accent);
+}
+
+.goalcart-recommend__price {
+	font-size: 10px;
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-recommend__add {
+	flex-shrink: 0;
+	padding: 0.25rem 0.5rem;
+	border: 0;
+	border-radius: var(--goalcart-button-radius, 8px);
+	background: var(--goalcart-button-bg, var(--goalcart-accent));
+	color: var(--goalcart-button-text, #ffffff);
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.4;
+	cursor: pointer;
+	transition: opacity 0.2s ease;
+}
+
+.goalcart-recommend__add:hover,
+.goalcart-recommend__add:focus-visible {
+	opacity: 0.9;
+}
+
+.goalcart-recommend__add:disabled {
+	opacity: 0.65;
+	cursor: default;
+}
+
+/* ------------------------------------------------------------------ *
+ * Template 5 — Compact Floating / Sticky Goal (Concept 08)
+ * ------------------------------------------------------------------ */
+
+.goalcart-t5 {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem 1rem;
+	border-radius: var(--goalcart-radius);
+	border: 1px solid var(--goalcart-border);
+	background: linear-gradient( 135deg, var(--goalcart-bg), color-mix( in srgb, var(--goalcart-bg) 85%, #0f172a ) );
+	box-shadow: 0 var(--goalcart-shadow-intensity, 16px) calc( var(--goalcart-shadow-intensity, 16px) * 2 ) rgba(0, 0, 0, 0.35);
+}
+
+.goalcart-t5__badge {
+	width: 28px;
+	height: 28px;
+	flex-shrink: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 50%;
+	background: color-mix( in srgb, var(--goalcart-accent) 20%, transparent );
+	color: var(--goalcart-accent);
+	font-size: 13px;
+	line-height: 1;
+}
+
+.goalcart-t5__body {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.goalcart-t5__row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-block-end: 0.25rem;
+	font-size: 12px;
+}
+
+.goalcart-t5__title {
+	font-weight: 600;
+	color: var(--goalcart-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.goalcart-t5__remaining {
+	color: var(--goalcart-text-muted);
+	white-space: nowrap;
+}
+
+.goalcart-t5__done {
+	font-weight: 700;
+	color: var(--goalcart-accent);
+	white-space: nowrap;
+}
+
+.goalcart-t5__cta {
+	flex-shrink: 0;
+	margin-block-start: 0;
+	padding: 0.375rem 0.625rem;
+	font-size: 11px;
+	font-weight: 800;
+	border-radius: var(--goalcart-button-radius, 8px);
+	background: var(--goalcart-button-bg, var(--goalcart-accent));
+	color: var(--goalcart-button-text, #0f172a);
+}
+
+/* ------------------------------------------------------------------ *
+ * Template 6 — Premium / Elegant E-commerce Style (Concept 09)
+ * ------------------------------------------------------------------ */
+
+.goalcart-t6__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding-block-end: 0.625rem;
+	margin-block-end: 0.625rem;
+	border-block-end: 1px solid var(--goalcart-border);
+}
+
+.goalcart-t6__header-main {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.goalcart-t6__rail {
+	width: 4px;
+	height: 24px;
+	border-radius: 999px;
+	background: linear-gradient( to bottom, var(--goalcart-accent), color-mix( in srgb, var(--goalcart-accent) 60%, #000 ) );
+}
+
+.goalcart-t6__eyebrow {
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.2em;
+	text-transform: uppercase;
+	color: #9ca3af;
+}
+
+.goalcart-t6__header-icon {
+	font-size: 16px;
+	color: var(--goalcart-border);
+}
+
+.goalcart-t6__title {
+	margin: 0 0 0.125rem;
+	font-size: 20px;
+	font-weight: 900;
+	color: var(--goalcart-text);
+}
+
+.goalcart-t6__desc {
+	margin: 0 0 0.75rem;
+	font-size: 12px;
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-t6__progress {
+	position: relative;
+	margin-block-end: 0.75rem;
+}
+
+.goalcart-t6__progress .goalcart-progress {
+	--goalcart-track: #f3f4f6;
+}
+
+.goalcart-t6__progress .goalcart-progress__fill {
+	background: var(--goalcart-progress-color, var(--goalcart-accent));
+}
+
+.goalcart-t6__progress .goalcart-progress--complete .goalcart-progress__fill {
+	background: #00a32a;
+}
+
+.goalcart-t6__dot {
+	position: absolute;
+	inset-block-start: 50%;
+	inset-inline-start: calc( var(--goalcart-t6-dot, 0%) );
+	transform: translate(-50%, -50%);
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: var(--goalcart-bg);
+	border: 2px solid var(--goalcart-progress-color, var(--goalcart-accent));
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.goalcart-t6__amounts {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.75rem;
+	margin-block-end: 0.75rem;
+}
+
+.goalcart-t6__amount {
+	display: flex;
+	flex-direction: column;
+}
+
+.goalcart-t6__amount--end {
+	text-align: end;
+}
+
+.goalcart-t6__amount-label {
+	font-size: 11px;
+	color: var(--goalcart-text-muted);
+}
+
+.goalcart-t6__amount-value {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--goalcart-text);
+}
+
+.goalcart-t6__amount-value--gold {
+	color: color-mix( in srgb, var(--goalcart-accent) 80%, #000 );
+}
+
+.goalcart-t6__cta {
+	background: transparent;
+	border: 1px solid var(--goalcart-button-bg, var(--goalcart-accent));
+	color: var(--goalcart-button-text, var(--goalcart-accent));
+	letter-spacing: 0.06em;
+}
+
+/* Almost-completed callout. */
+
+.goalcart-t6__callout {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-block-start: 0.75rem;
+	padding: 0.5rem 0.75rem;
+	border-radius: 0.5rem;
+	background: #fffbeb;
+	border: 1px solid #fde68a;
+}
+
+.goalcart-t6__callout-icon {
+	font-size: 18px;
+	color: #f59e0b;
+	flex-shrink: 0;
+}
+
+.goalcart-t6__callout-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.goalcart-t6__callout-title {
+	font-size: 12px;
+	font-weight: 800;
+	color: #78350f;
+}
+
+.goalcart-t6__callout-sub {
+	font-size: 10px;
+	color: #92400e;
 }
 
 /* Message states (Phase 13): the payload `state` lands as a card class.
@@ -321,49 +1063,6 @@
 .goalcart-reward__icon {
 	font-size: 13px;
 	line-height: 1;
-}
-
-/* ------------------------------------------------------------------ *
- * GoalMilestones (single-rung milestone template marker)
- * ------------------------------------------------------------------ */
-
-/* Every goal renders as its own card, so the milestone template shows
- * exactly one rung (the goal's own threshold). The multi-rung connector
- * was removed with the cross-goal ladder. */
-
-.goalcart-milestones {
-	display: flex;
-	align-items: center;
-	gap: 0.375rem;
-	margin: 0.875rem 0 0;
-	padding: 0;
-	list-style: none;
-	flex-wrap: wrap;
-}
-
-.goalcart-milestone {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.3rem;
-	color: var(--goalcart-text-muted);
-	font-size: 12px;
-	font-weight: 500;
-}
-
-.goalcart-milestone__dot {
-	width: 9px;
-	height: 9px;
-	border-radius: 50%;
-	background: var(--goalcart-dot-color, var(--goalcart-border));
-	transition: background 0.3s ease;
-}
-
-.goalcart-milestone--complete {
-	color: var(--goalcart-text);
-}
-
-.goalcart-milestone--complete .goalcart-milestone__dot {
-	background: var(--goalcart-done-color, var(--goalcart-accent));
 }
 
 /* ------------------------------------------------------------------ *
@@ -913,7 +1612,10 @@
 
 @media ( prefers-reduced-motion: reduce ) {
 	.goalcart-progress__fill,
-	.goalcart-ring__fill,
+	.goalcart-t3__fill,
+	.goalcart-cta,
+	.goalcart-recommend,
+	.goalcart-recommend__add,
 	.goalcart-sticky,
 	.goalcart-card--celebrate,
 	.goalcart-confetti__piece,

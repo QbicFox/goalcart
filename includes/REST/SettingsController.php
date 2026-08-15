@@ -172,14 +172,14 @@ class SettingsController extends BaseController {
 		// Note: the template_defaults.goal and frontend_template values are
 		// deliberately NOT synced here — they are independent settings with
 		// different validation scopes. frontend_template only accepts the
-		// four legacy enum values (basic, percentage, milestone, card) via
-		// the REST schema, while template_defaults.goal can hold any valid
+		// six design template ids (template-1 … template-6) via the REST
+		// schema, while template_defaults.goal can hold any valid
 		// pluggable-template id (e.g. milestone_chain). Back-syncing them
 		// would either corrupt frontend_template with an out-of-enum value
 		// (causing a 400 error on the next Settings-page save) or silently
 		// overwrite the Appearance page's template selection. The
 		// TemplateEngine already handles the correct fallback chain:
-		// template_defaults.goal → frontend_template → basic.
+		// template_defaults.goal → frontend_template → template-1.
 
 		if ( isset( $clean['template_settings'] ) ) {
 			// Defense in depth: the REST arg schema runs the same sanitizer

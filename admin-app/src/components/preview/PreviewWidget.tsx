@@ -185,11 +185,14 @@ function GoalCard({
 }) {
   // Property lookup (not a call result) keeps the component reference
   // static across renders — react-hooks/static-components.
-  const Renderer = GOAL_RENDERERS[template] ?? GOAL_RENDERERS.basic;
+  const Renderer = GOAL_RENDERERS[template] ?? GOAL_RENDERERS['template-1'];
   const chipState: 'locked' | 'unlocked' =
     rewardState === 'auto' ? (goal.completed ? 'unlocked' : 'locked') : rewardState;
   const nearlyComplete = goal.state === 'nearly_complete';
-  const showReward = template !== 'card' || bool(settings, 'showReward', true);
+  const showReward = bool(settings, 'showReward', true);
+  // Template 4 renders the recommended products inline (its body), so the
+  // shared bottom suggestion list would duplicate them — suppress it.
+  const showSuggestions = template !== 'template-4';
   const showMessage = bool(settings, 'showMessage', true);
   const cssClass = str(settings, 'cssClass', '');
 
@@ -241,8 +244,9 @@ function GoalCard({
         </Box>
       )}
 
-      {/* SuggestionList (Phase 14). */}
-      <SuggestionList goal={goal} currency={currency} tokens={tokens} />
+      {/* SuggestionList (Phase 14) — hidden for template-4 whose body
+          already renders the recommended products. */}
+      {showSuggestions && <SuggestionList goal={goal} currency={currency} tokens={tokens} />}
     </Box>
   );
 }
@@ -340,7 +344,7 @@ export default function PreviewWidget({
           goal={goal}
           currency={currency}
           tokens={tokens}
-          template={templateOverride || goal.template || 'basic'}
+          template={templateOverride || goal.template || 'template-1'}
           settings={effectiveSettings(goal, tokens, templateOverride, settingsOverride)}
           rewardState={rewardState}
           animation={animation}

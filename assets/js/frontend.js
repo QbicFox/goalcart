@@ -22,15 +22,18 @@
  * Every eligible goal renders as its own card, stacked in a shared
  * wrapper (`.goalcart-widget__goals`) — a campaign's milestones each get
  * a full card instead of one featured card + a tiny ladder. Each card
- * sees only itself, so the milestone template degrades to the goal's own
- * single rung.
+ * sees only itself.
  *
- * Templates (P12): the goal body renders per the active variant — basic
- * (bar), percentage (big % + bar), milestone (single threshold rung +
- * bar), card (icon + title + bar) or ring (circular gauge) — driven by
- * `cfg.template` or a per-container `data-goalcart-template` override.
- * Appearance tokens (colors, radius, bar height) come from the same
- * config; the animation toggle adds a no-transition class when disabled.
+ * Templates (the six design templates): the goal body renders per the
+ * active variant — template-1 (classic progress card), template-2
+ * (minimal inline cart goal), template-3 (circular progress), template-4
+ * (product recommendation + goal), template-5 (compact floating / sticky
+ * goal) or template-6 (premium / elegant e-commerce style) — driven by
+ * the goal's resolved `template` (item override → scope default →
+ * legacy → fallback) or a per-container `data-goalcart-template`
+ * override. Appearance tokens (colors, radius, bar height) come from
+ * the resolved `template_settings`; the animation toggle adds a
+ * no-transition class when disabled.
  *
  * Contracts:
  *   - config comes from `window.goalcartFrontend` (printed early in
@@ -1072,7 +1075,9 @@
 	 * @return {void}
 	 */
 	function upsellAdd( button ) {
-		var row = button.closest ? button.closest( '.goalcart-upsell' ) : null;
+		// The unified upsell rows AND the template-4 recommend rows share
+		// the same data attributes, so one handler serves both.
+		var row = button.closest ? button.closest( '.goalcart-upsell, .goalcart-recommend' ) : null;
 
 		if ( ! row ) {
 			return;
@@ -1320,7 +1325,7 @@
 	 */
 	function widgetTemplate( container, goal ) {
 		var override = container.getAttribute( 'data-goalcart-template' );
-		var names = [ 'basic', 'percentage', 'milestone', 'card', 'ring', 'milestone_chain' ];
+		var names = [ 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6', 'milestone_chain', 'campaign_progress' ];
 
 		if ( override && names.indexOf( override ) !== -1 ) {
 			return override;
@@ -1336,7 +1341,7 @@
 			return cfg.template;
 		}
 
-		return 'basic';
+		return 'template-1';
 	}
 
 	/**
@@ -1363,8 +1368,21 @@
 			bg: '--goalcart-bg',
 			border: '--goalcart-border',
 			text: '--goalcart-text',
+			secondaryText: '--goalcart-text-muted',
 			radius: '--goalcart-radius',
 			barHeight: '--goalcart-bar-height',
+			trackColor: '--goalcart-track',
+			progressColor: '--goalcart-progress-color',
+			buttonColor: '--goalcart-button-bg',
+			buttonTextColor: '--goalcart-button-text',
+			buttonRadius: '--goalcart-button-radius',
+			iconBg: '--goalcart-icon-bg',
+			iconColor: '--goalcart-icon-color',
+			headerBg: '--goalcart-header-bg',
+			ringSize: '--goalcart-ring-size',
+			strokeWidth: '--goalcart-ring-stroke',
+			productImageSize: '--goalcart-product-image',
+			shadow: '--goalcart-shadow-intensity',
 			percentColor: '--goalcart-percent-color',
 			percentSize: '--goalcart-percent-size',
 			dotColor: '--goalcart-dot-color',
@@ -1383,7 +1401,9 @@
 				continue;
 			}
 
-			var isPx = 'radius' === key || 'barHeight' === key || 'percentSize' === key;
+			var isPx = 'radius' === key || 'barHeight' === key || 'percentSize' === key
+				|| 'ringSize' === key || 'strokeWidth' === key || 'productImageSize' === key
+				|| 'buttonRadius' === key || 'shadow' === key;
 			node.style.setProperty( map[ key ], isPx ? Number( value ) + 'px' : String( value ) );
 		}
 	}
@@ -1432,109 +1452,111 @@
 	}
 
 	/**
-	 * Percentage template — a large percent readout above the bar.
+	 * Clamp a progress value to 0–100.
 	 *
-	 * @param {Object}  goal    Progress goal entry.
-	 * @param {boolean} showBar Whether the bar renders under the percent.
-	 * @return {HTMLElement}
+	 * @param {number} value Raw progress value.
+	 * @return {number}
 	 */
-	function percentagePanel( goal, showBar ) {
-		var wrap = el( 'div', 'goalcart-percentage' );
-		var percent = Math.max( 0, Math.min( 100, Number( goal.percentage ) || 0 ) );
-
-		wrap.appendChild( el( 'span', 'goalcart-percentage__value', Math.round( percent ) + '%' ) );
-		if ( false !== showBar ) {
-			wrap.appendChild( progressBar( goal ) );
-		}
-
-		return wrap;
+	function clampPercent( value ) {
+		return Math.max( 0, Math.min( 100, Number( value ) || 0 ) );
 	}
 
 	/**
-	 * Milestone template — the goal's own threshold as a single rung
-	 * (dot + target label) above the bar.
+	 * The goal's icon glyph — the configured goal icon (emoji / dashicon
+	 * name) as text, or a template fallback glyph when none is set.
 	 *
-	 * Every goal renders as its own card now, so there is no cross-goal
-	 * ladder to climb: the milestone template shows the one threshold this
-	 * card is tracking, keeping the template visually distinct from basic
-	 * without duplicating the other goals' cards. The single rung is tiny,
-	 * so it fits the compact variant too.
-	 *
-	 * @param {Object}  goal     Goal this card renders.
-	 * @param {string}  currency ISO currency code.
+	 * @param {Object} goal     Progress goal entry.
+	 * @param {string} fallback Fallback glyph.
 	 * @return {HTMLElement}
 	 */
-	function milestonePanel( goal, currency, showBar ) {
-		var wrap = el( 'div', 'goalcart-milestone-panel' );
-		var rung = el( 'ol', 'goalcart-milestones' );
-		var step = el( 'li', 'goalcart-milestone' );
-		var settings = goal.template_settings || {};
-		var showLabels = settings.showLabels !== false;
-		var target = goal.is_money
-			? formatMoney( goal.target, currency )
-			: formatNumber( goal.target );
+	function tplIcon( goal, fallback ) {
+		var icon = String( goal.icon || '' ).trim();
 
-		if ( goal.completed ) {
-			step.classList.add( 'goalcart-milestone--complete' );
-		}
-
-		step.appendChild( el( 'span', 'goalcart-milestone__dot' ) );
-		if ( showLabels ) {
-			step.appendChild( el( 'span', 'goalcart-milestone__target', target ) );
-		}
-		rung.appendChild( step );
-		wrap.appendChild( rung );
-		if ( false !== showBar ) {
-			wrap.appendChild( progressBar( goal ) );
-		}
-
-		return wrap;
+		return el( 'span', 'goalcart-tpl-icon', icon || fallback );
 	}
 
 	/**
-	 * Card template — icon + goal title above the bar (the reward chip and
-	 * message come from the standard flow; suggestions act as the CTA once
-	 * Phase 14 fills them).
+	 * The template CTA — links to the top recommended product (the
+	 * gap-closing product) when one exists; hidden otherwise.
 	 *
-	 * @param {Object} goal Progress goal entry.
-	 * @return {HTMLElement}
+	 * @param {Object} goal     Progress goal entry.
+	 * @param {string} currency ISO currency code.
+	 * @param {string} label    Button label.
+	 * @param {string} klass    Extra class ('' = none).
+	 * @return {HTMLElement|null}
 	 */
-	function cardPanel( goal ) {
-		var panel = el( 'div', 'goalcart-card-panel' );
+	function tplCta( goal, currency, label, klass ) {
+		var items = ( goal.suggestions && goal.suggestions.length ) ? goal.suggestions : [];
 
-		panel.appendChild( el( 'span', 'goalcart-card-panel__icon', String( goal.icon || '\uD83C\uDFAF' ) ) );
-		panel.appendChild( el( 'span', 'goalcart-card-panel__title', String( goal.goal_name || '' ) ) );
-		panel.appendChild( progressBar( goal ) );
+		if ( ! items.length ) {
+			return null;
+		}
 
-		return panel;
+		var item = items[ 0 ];
+		var cta = el( 'a', 'goalcart-cta' + ( klass ? ' ' + klass : '' ) );
+
+		if ( item.permalink && isSafeUrl( item.permalink ) ) {
+			cta.href = String( item.permalink );
+		}
+
+		cta.setAttribute( 'rel', 'noreferrer' );
+		cta.textContent = label;
+		return cta;
 	}
 
 	/**
-	 * Ring template — a circular gauge (SVG circle instead of a fill bar).
+	 * The remaining-amount label ("%s left"), localized.
 	 *
-	 * The target renders as a ring whose stroke-dashoffset draws exactly
-	 * `percentage` of the circumference; the percent readout sits centered
-	 * inside (locale-aware digits via formatNumber, so Persian stores see
-	 * Persian digits). The ring-specific settings (size, stroke width,
-	 * track color) come from the resolved template settings; the shared
-	 * accent drives the progress stroke.
+	 * @param {Object} goal     Progress goal entry.
+	 * @param {string} currency ISO currency code.
+	 * @return {string}
+	 */
+	function remainingLabel( goal, currency ) {
+		var amount = goal.is_money
+			? formatMoney( goal.remaining, currency )
+			: formatNumber( goal.remaining );
+
+		return uiLabel( 'left', '%s left' ).replace( '%s', amount );
+	}
+
+	/**
+	 * The "Add %s more" CTA label, localized.
 	 *
-	 * @param {Object} goal Progress goal entry.
+	 * @param {Object} goal     Progress goal entry.
+	 * @param {string} currency ISO currency code.
+	 * @return {string}
+	 */
+	function addMoreLabel( goal, currency ) {
+		var amount = goal.is_money
+			? formatMoney( goal.remaining, currency )
+			: formatNumber( goal.remaining );
+
+		return uiLabel( 'add_more', 'Add %s more' ).replace( '%s', amount );
+	}
+
+	/**
+	 * A circular gauge — SVG ring whose stroke-dashoffset draws exactly
+	 * `percent` of the circumference (Concept 03 / template-3). The center
+	 * readout is a localized percent + "Progress" label, or a check when
+	 * the goal is done.
+	 *
+	 * @param {number} percent    0–100 progress.
+	 * @param {number} size       Ring diameter (px).
+	 * @param {number} stroke     Stroke width (px).
+	 * @param {string} trackColor Track stroke color.
+	 * @param {string} accent     Progress stroke color.
+	 * @param {string} inner      'percent' | 'check' | ''.
 	 * @return {HTMLElement}
 	 */
-	function ringPanel( goal ) {
-		var settings = goal.template_settings || {};
-		var percent = Math.max( 0, Math.min( 100, Number( goal.percentage ) || 0 ) );
-		var size = Number( settings.ringSize ) || 120;
-		var stroke = Number( settings.strokeWidth ) || 12;
-		var accent = settings.accent || '#2271b1';
-		var trackColor = settings.trackColor || '#f0f0f1';
-		var showPercent = settings.showPercent !== false;
+	function circularSvg( percent, size, stroke, trackColor, accent, inner ) {
 		var radius = ( size - stroke ) / 2;
 		var circumference = 2 * Math.PI * radius;
 		var NS = 'http://www.w3.org/2000/svg';
+		var wrap = el( 'div', 'goalcart-t3__ring' );
 
-		var wrap = el( 'div', 'goalcart-ring' );
+		wrap.style.width = size + 'px';
+		wrap.style.height = size + 'px';
+
 		var svg = document.createElementNS( NS, 'svg' );
 		var track = document.createElementNS( NS, 'circle' );
 		var fill = document.createElementNS( NS, 'circle' );
@@ -1543,10 +1565,9 @@
 		svg.setAttribute( 'width', String( size ) );
 		svg.setAttribute( 'height', String( size ) );
 		svg.setAttribute( 'role', 'img' );
-		svg.setAttribute( 'class', 'goalcart-ring__svg' );
+		svg.setAttribute( 'class', 'goalcart-t3__svg' );
 
-		// Track: the full circle behind the progress stroke.
-		track.setAttribute( 'class', 'goalcart-ring__track' );
+		track.setAttribute( 'class', 'goalcart-t3__track' );
 		track.setAttribute( 'cx', String( size / 2 ) );
 		track.setAttribute( 'cy', String( size / 2 ) );
 		track.setAttribute( 'r', String( radius ) );
@@ -1554,17 +1575,13 @@
 		track.setAttribute( 'stroke', trackColor );
 		track.setAttribute( 'stroke-width', String( stroke ) );
 
-		// Progress: same circle, dashed so only `percent` of the ring is
-		// drawn, rotated to start at 12 o'clock.
-		fill.setAttribute( 'class', 'goalcart-ring__fill' );
+		fill.setAttribute( 'class', 'goalcart-t3__fill' );
 		fill.setAttribute( 'cx', String( size / 2 ) );
 		fill.setAttribute( 'cy', String( size / 2 ) );
 		fill.setAttribute( 'r', String( radius ) );
 		fill.setAttribute( 'fill', 'none' );
 		fill.setAttribute( 'stroke', accent );
 		fill.setAttribute( 'stroke-width', String( stroke ) );
-		// Round caps can render a residual dot at the start point when the
-		// dash is empty (0%), so fall back to butt caps at zero progress.
 		fill.setAttribute( 'stroke-linecap', 0 === percent ? 'butt' : 'round' );
 		fill.setAttribute( 'stroke-dasharray', String( circumference ) );
 		fill.setAttribute( 'stroke-dashoffset', String( circumference * ( 1 - percent / 100 ) ) );
@@ -1574,11 +1591,457 @@
 		svg.appendChild( fill );
 		wrap.appendChild( svg );
 
-		if ( showPercent ) {
-			wrap.appendChild( el( 'span', 'goalcart-ring__percent', formatNumber( Math.round( percent ) ) + '%' ) );
+		if ( 'check' === inner ) {
+			wrap.appendChild( el( 'span', 'goalcart-t3__check', '\u2713' ) );
+		} else if ( 'percent' === inner ) {
+			var readout = el( 'div', 'goalcart-t3__readout' );
+			readout.appendChild( el( 'span', 'goalcart-t3__percent', formatNumber( Math.round( percent ) ) + '%' ) );
+			readout.appendChild( el( 'span', 'goalcart-t3__progress-label', uiLabel( 'progress', 'Progress' ) ) );
+			wrap.appendChild( readout );
 		}
 
 		return wrap;
+	}
+
+	/**
+	 * One recommended product row (template-4 / Concept 07): real product
+	 * image (or a neutral placeholder), name, "Only %s" price and an
+	 * add-to-cart button. The row carries the same data attributes the
+	 * unified upsell rows use, so the single delegated add-to-cart handler
+	 * serves it without a second code path.
+	 *
+	 * @param {Object} item Recommended product payload row.
+	 * @param {Object} goal Progress goal entry.
+	 * @return {HTMLElement}
+	 */
+	function recommendRow( item, goal ) {
+		var row = el( 'div', 'goalcart-recommend' );
+		var productId = String( item.id || item.product_id || 0 );
+
+		row.setAttribute( 'data-goalcart-upsell-product', productId );
+		row.setAttribute( 'data-goalcart-upsell-goal', String( goal.goal_id || 0 ) );
+		row.setAttribute( 'data-goalcart-upsell-permalink', String( item.permalink || '' ) );
+		row.setAttribute( 'data-goalcart-upsell-value', String( Number( goal.current ) || 0 ) );
+		row.setAttribute( 'data-goalcart-upsell-source', 'suggestion' );
+
+		var image;
+		if ( item.image ) {
+			image = el( 'img', 'goalcart-recommend__image' );
+			image.setAttribute( 'src', String( item.image ) );
+			image.setAttribute( 'alt', String( item.name || '' ) );
+			image.setAttribute( 'loading', 'lazy' );
+		} else {
+			image = el( 'span', 'goalcart-recommend__image goalcart-recommend__image--placeholder', '\uD83D\uDECD' );
+		}
+		row.appendChild( image );
+
+		var info = el( 'div', 'goalcart-recommend__info' );
+		var link = el( 'a', 'goalcart-recommend__name' );
+
+		if ( item.permalink && isSafeUrl( item.permalink ) ) {
+			link.href = String( item.permalink );
+		}
+
+		link.textContent = String( item.name || '' );
+		info.appendChild( link );
+		info.appendChild( el( 'span', 'goalcart-recommend__price', uiLabel( 'only_price', 'Only %s' ).replace( '%s', formatProductPrice( item ) ) ) );
+		row.appendChild( info );
+
+		var button = el( 'button', 'goalcart-recommend__add' );
+		button.type = 'button';
+		button.textContent = uiLabel( 'add', 'Add' );
+		row.appendChild( button );
+
+		return row;
+	}
+
+	/**
+	 * Template 1 — Classic Progress Card (Concept 01). The most
+	 * general-purpose template: icon badge + label/title + percentage
+	 * chip, a horizontal bar, current/remaining amounts and a CTA, with
+	 * completed and expired states.
+	 *
+	 * @param {Object} goal     Progress goal entry.
+	 * @param {string} currency ISO currency code.
+	 * @return {HTMLElement}
+	 */
+	function t1Panel( goal, currency ) {
+		var settings = goal.template_settings || {};
+		var percent = clampPercent( goal.percentage );
+		var accent = settings.accent || '#f97316';
+		var muted = settings.secondaryText || '#9ca3af';
+		var text = settings.text || '#1f2937';
+		var panel = el( 'div', 'goalcart-t1' );
+
+		// Expired / ended: muted clock row.
+		if ( goal.eligible === false || goal.state === 'inactive' || goal.state === 'unavailable' ) {
+			panel.classList.add( 'goalcart-t1--expired' );
+			var expiredRow = el( 'div', 'goalcart-t1__expired' );
+			expiredRow.appendChild( tplIcon( goal, '\u23F0' ) );
+			var expiredInfo = el( 'div', 'goalcart-t1__expired-info' );
+			expiredInfo.appendChild( el( 'span', 'goalcart-t1__expired-label', uiLabel( 'expired', 'Expired' ) ) );
+			expiredInfo.appendChild( el( 'span', 'goalcart-t1__expired-title', uiLabel( 'goal_ended', 'This goal has ended' ) ) );
+			expiredRow.appendChild( expiredInfo );
+			expiredRow.appendChild( el( 'span', 'goalcart-t1__expired-chip', uiLabel( 'expired', 'Expired' ) ) );
+			panel.appendChild( expiredRow );
+			return panel;
+		}
+
+		// Completed: green card with a check + full bar.
+		if ( goal.completed ) {
+			panel.classList.add( 'goalcart-t1--done' );
+			var done = el( 'div', 'goalcart-t1__done' );
+			var doneRow = el( 'div', 'goalcart-t1__done-row' );
+			doneRow.appendChild( tplIcon( goal, '\u2705' ) );
+			var doneInfo = el( 'div', 'goalcart-t1__done-info' );
+			doneInfo.appendChild( el( 'span', 'goalcart-t1__done-label', uiLabel( 'goal_reached', 'Goal completed' ) + ' \uD83C\uDF89' ) );
+			doneInfo.appendChild( el( 'span', 'goalcart-t1__done-title', String( goal.goal_name || '' ) ) );
+			doneRow.appendChild( doneInfo );
+			done.appendChild( doneRow );
+			done.appendChild( progressBar( goal ) );
+			panel.appendChild( done );
+			return panel;
+		}
+
+		// Head: icon + label/title + percent chip.
+		var head = el( 'div', 'goalcart-t1__head' );
+		var headMain = el( 'div', 'goalcart-t1__head-main' );
+
+		if ( settings.showIcon !== false ) {
+			headMain.appendChild( tplIcon( goal, '\uD83D\uDE9A' ) );
+		}
+
+		var headText = el( 'div', 'goalcart-t1__head-text' );
+		headText.appendChild( el( 'span', 'goalcart-t1__label', uiLabel( 'shopping_goal', 'Shopping goal' ) ) );
+		headText.appendChild( el( 'span', 'goalcart-t1__title', String( goal.goal_name || '' ) ) );
+		headMain.appendChild( headText );
+		head.appendChild( headMain );
+
+		if ( settings.showPercent !== false ) {
+			head.appendChild( el( 'span', 'goalcart-t1__percent', Math.round( percent ) + '%' ) );
+		}
+
+		panel.appendChild( head );
+		panel.appendChild( progressBar( goal ) );
+
+		if ( settings.showAmounts !== false ) {
+			var amounts = el( 'div', 'goalcart-t1__amounts' );
+			amounts.appendChild( el( 'span', 'goalcart-t1__current', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
+
+			if ( settings.showRemaining !== false ) {
+				amounts.appendChild( el( 'span', 'goalcart-t1__remaining', remainingLabel( goal, currency ) ) );
+			}
+
+			panel.appendChild( amounts );
+		}
+
+		if ( settings.showCta !== false ) {
+			var cta = tplCta( goal, currency, addMoreLabel( goal, currency ), 'goalcart-t1__cta' );
+
+			if ( cta ) {
+				panel.appendChild( cta );
+			}
+		}
+
+		return panel;
+	}
+
+	/**
+	 * Template 2 — Minimal Inline Cart Goal (Concept 02). A very compact
+	 * inline strip: icon, title, remaining amount, a slim bar and a
+	 * compact CTA. Fits between the cart content and the totals.
+	 *
+	 * @param {Object} goal     Progress goal entry.
+	 * @param {string} currency ISO currency code.
+	 * @return {HTMLElement}
+	 */
+	function t2Panel( goal, currency ) {
+		var settings = goal.template_settings || {};
+		var panel = el( 'div', 'goalcart-t2' );
+
+		if ( settings.showIcon !== false ) {
+			panel.appendChild( tplIcon( goal, '\uD83D\uDE9A' ) );
+		}
+
+		var body = el( 'div', 'goalcart-t2__body' );
+		var row = el( 'div', 'goalcart-t2__row' );
+
+		if ( settings.showTitle !== false ) {
+			row.appendChild( el( 'span', 'goalcart-t2__title', String( goal.goal_name || '' ) ) );
+		}
+
+		if ( goal.completed ) {
+			row.appendChild( el( 'span', 'goalcart-t2__done', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
+		} else if ( settings.showRemaining !== false ) {
+			row.appendChild( el( 'span', 'goalcart-t2__remaining', remainingLabel( goal, currency ) ) );
+		}
+
+		body.appendChild( row );
+		body.appendChild( progressBar( goal ) );
+		panel.appendChild( body );
+
+		if ( settings.showCta !== false && ! goal.completed ) {
+			var cta = tplCta( goal, currency, uiLabel( 'add', 'Add' ), 'goalcart-t2__cta' );
+
+			if ( cta ) {
+				panel.appendChild( cta );
+			}
+		}
+
+		return panel;
+	}
+
+	/**
+	 * Template 3 — Circular Progress (Concept 03). A circular gauge with
+	 * the percentage centered inside, beside the icon, title, description
+	 * and the current/remaining amounts, plus a CTA; the completed state
+	 * draws a full green ring with a check.
+	 *
+	 * @param {Object} goal     Progress goal entry.
+	 * @param {string} currency ISO currency code.
+	 * @return {HTMLElement}
+	 */
+	function t3Panel( goal, currency ) {
+		var settings = goal.template_settings || {};
+		var percent = clampPercent( goal.percentage );
+		var accent = settings.accent || '#6366f1';
+		var trackColor = settings.trackColor || '#e5e7eb';
+		var muted = settings.secondaryText || '#6b7280';
+		var text = settings.text || '#1f2937';
+		var size = Number( settings.ringSize ) || 100;
+		var stroke = Number( settings.strokeWidth ) || 8;
+		var panel = el( 'div', 'goalcart-t3' );
+
+		if ( goal.completed ) {
+			var doneRow = el( 'div', 'goalcart-t3__done-row' );
+			doneRow.appendChild( circularSvg( 100, Math.round( size * 0.8 ), stroke, trackColor, '#10b981', 'check' ) );
+			var doneInfo = el( 'div', 'goalcart-t3__done-info' );
+			doneInfo.appendChild( el( 'span', 'goalcart-t3__done-title', uiLabel( 'congrats', 'Congratulations!' ) + ' \uD83C\uDF89' ) );
+			doneInfo.appendChild( el( 'span', 'goalcart-t3__done-sub', String( goal.goal_name || '' ) ) );
+			doneRow.appendChild( doneInfo );
+			panel.appendChild( doneRow );
+			return panel;
+		}
+
+		var row = el( 'div', 'goalcart-t3__row' );
+		row.appendChild( circularSvg( percent, size, stroke, trackColor, accent, settings.showPercent === false ? '' : 'percent' ) );
+
+		var info = el( 'div', 'goalcart-t3__info' );
+		var titleRow = el( 'div', 'goalcart-t3__title-row' );
+		titleRow.appendChild( tplIcon( goal, '\uD83D\uDE9A' ) );
+		titleRow.appendChild( el( 'span', 'goalcart-t3__title', String( goal.goal_name || '' ) ) );
+		info.appendChild( titleRow );
+
+		if ( settings.showDescription !== false ) {
+			info.appendChild( el( 'p', 'goalcart-t3__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( goal.is_money ? formatMoney( goal.target, currency ) : formatNumber( goal.target ) ) ) );
+		}
+
+		if ( settings.showAmounts !== false ) {
+			var paid = el( 'div', 'goalcart-t3__amount' );
+			paid.appendChild( el( 'span', 'goalcart-t3__amount-label', uiLabel( 'paid', 'Paid' ) ) );
+			paid.appendChild( el( 'span', 'goalcart-t3__amount-value', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
+			info.appendChild( paid );
+
+			var left = el( 'div', 'goalcart-t3__amount' );
+			left.appendChild( el( 'span', 'goalcart-t3__amount-label', uiLabel( 'remaining', 'Remaining' ) ) );
+			left.appendChild( el( 'span', 'goalcart-t3__amount-value goalcart-t3__amount-value--accent', goal.is_money ? formatMoney( goal.remaining, currency ) : formatNumber( goal.remaining ) ) );
+			info.appendChild( left );
+		}
+
+		row.appendChild( info );
+		panel.appendChild( row );
+
+		if ( settings.showCta !== false ) {
+			var cta = tplCta( goal, currency, uiLabel( 'view_products', 'View products' ), 'goalcart-t3__cta' );
+
+			if ( cta ) {
+				panel.appendChild( cta );
+			}
+		}
+
+		return panel;
+	}
+
+	/**
+	 * Template 4 — Product Recommendation + Goal (Concept 07). A gradient
+	 * progress header (title + remaining chip + bar) followed by the
+	 * goal's own recommended products (the existing Goal Cart / WooCommerce
+	 * recommendation data) with add-to-cart buttons.
+	 *
+	 * @param {Object} goal     Progress goal entry.
+	 * @param {string} currency ISO currency code.
+	 * @return {HTMLElement}
+	 */
+	function t4Panel( goal, currency ) {
+		var settings = goal.template_settings || {};
+		var accent = settings.accent || '#2563eb';
+		var headerBg = settings.headerBg || accent;
+		var muted = settings.secondaryText || '#6b7280';
+		var text = settings.text || '#1f2937';
+		var products = ( goal.suggestions && goal.suggestions.length ) ? goal.suggestions : [];
+		var panel = el( 'div', 'goalcart-t4' );
+
+		// Gradient progress header.
+		var header = el( 'div', 'goalcart-t4__header' );
+		header.style.background = 'linear-gradient(135deg, ' + headerBg + ', ' + headerBg + 'cc)';
+		var headerRow = el( 'div', 'goalcart-t4__header-row' );
+		headerRow.appendChild( el( 'span', 'goalcart-t4__title', String( goal.goal_name || '' ) ) );
+
+		if ( goal.completed ) {
+			headerRow.appendChild( el( 'span', 'goalcart-t4__chip', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
+		} else if ( settings.showRemaining !== false ) {
+			headerRow.appendChild( el( 'span', 'goalcart-t4__chip', remainingLabel( goal, currency ) ) );
+		}
+
+		header.appendChild( headerRow );
+		header.appendChild( progressBar( goal ) );
+		panel.appendChild( header );
+
+		// Recommended products.
+		var body = el( 'div', 'goalcart-t4__body' );
+
+		if ( settings.showHeading !== false ) {
+			var heading = el( 'p', 'goalcart-t4__heading' );
+			heading.appendChild( el( 'span', 'goalcart-t4__heading-icon', '\uD83D\uDCA1' ) );
+			heading.appendChild( document.createTextNode( ' ' + uiLabel( 'recommend_heading', 'Add these products to reach your goal faster:' ) ) );
+			body.appendChild( heading );
+		}
+
+		if ( ! products.length ) {
+			body.appendChild( el( 'p', 'goalcart-t4__empty', uiLabel( 'unavailable', 'No recommendations available right now.' ) ) );
+		} else {
+			for ( var i = 0; i < products.length; i++ ) {
+				body.appendChild( recommendRow( products[ i ], goal ) );
+			}
+		}
+
+		panel.appendChild( body );
+		return panel;
+	}
+
+	/**
+	 * Template 5 — Compact Floating / Sticky Goal (Concept 08). A compact
+	 * dark bar: icon badge, slim progress, remaining amount and a small
+	 * CTA. Deliberately compact — never a normal large card.
+	 *
+	 * @param {Object} goal     Progress goal entry.
+	 * @param {string} currency ISO currency code.
+	 * @return {HTMLElement}
+	 */
+	function t5Panel( goal, currency ) {
+		var settings = goal.template_settings || {};
+		var accent = settings.accent || '#4ade80';
+		var panel = el( 'div', 'goalcart-t5' );
+
+		if ( settings.showIcon !== false ) {
+			var badge = el( 'span', 'goalcart-t5__badge', String( goal.icon || '' ).trim() || '\uD83D\uDE9A' );
+			panel.appendChild( badge );
+		}
+
+		var body = el( 'div', 'goalcart-t5__body' );
+		var row = el( 'div', 'goalcart-t5__row' );
+		row.appendChild( el( 'span', 'goalcart-t5__title', String( goal.goal_name || '' ) ) );
+
+		if ( goal.completed ) {
+			row.appendChild( el( 'span', 'goalcart-t5__done', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
+		} else if ( settings.showRemaining !== false ) {
+			row.appendChild( el( 'span', 'goalcart-t5__remaining', remainingLabel( goal, currency ) ) );
+		}
+
+		body.appendChild( row );
+		body.appendChild( progressBar( goal ) );
+		panel.appendChild( body );
+
+		if ( settings.showCta !== false && ! goal.completed ) {
+			var cta = tplCta( goal, currency, uiLabel( 'add', 'Add' ), 'goalcart-t5__cta' );
+
+			if ( cta ) {
+				panel.appendChild( cta );
+			}
+		}
+
+		return panel;
+	}
+
+	/**
+	 * Template 6 — Premium / Elegant E-commerce Style (Concept 09).
+	 * Gold-accented elegant card: a slim header with a gold rail, a large
+	 * title + description, a thin gold bar with a marker dot, the
+	 * current/remaining amounts and a refined outline CTA, plus a
+	 * highlighted "almost completed" callout.
+	 *
+	 * @param {Object} goal     Progress goal entry.
+	 * @param {string} currency ISO currency code.
+	 * @return {HTMLElement}
+	 */
+	function t6Panel( goal, currency ) {
+		var settings = goal.template_settings || {};
+		var percent = clampPercent( goal.percentage );
+		var gold = settings.accent || '#d4af37';
+		var progressColor = settings.progressColor || gold;
+		var muted = settings.secondaryText || '#9ca3af';
+		var text = settings.text || '#111827';
+		var outlineColor = settings.buttonTextColor || '#b8922a';
+		var panel = el( 'div', 'goalcart-t6' );
+
+		// Slim header with a gold rail.
+		var header = el( 'div', 'goalcart-t6__header' );
+		var headerMain = el( 'div', 'goalcart-t6__header-main' );
+		headerMain.appendChild( el( 'span', 'goalcart-t6__rail' ) );
+		headerMain.appendChild( el( 'span', 'goalcart-t6__eyebrow', uiLabel( 'shopping_goal', 'Shopping goal' ) ) );
+		header.appendChild( headerMain );
+		header.appendChild( el( 'span', 'goalcart-t6__header-icon', '\uD83D\uDE9A' ) );
+		panel.appendChild( header );
+
+		panel.appendChild( el( 'h4', 'goalcart-t6__title', String( goal.goal_name || '' ) ) );
+		panel.appendChild( el( 'p', 'goalcart-t6__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( goal.is_money ? formatMoney( goal.target, currency ) : formatNumber( goal.target ) ) ) );
+
+		// Elegant progress with a marker dot at the end.
+		var progress = el( 'div', 'goalcart-t6__progress' );
+		progress.appendChild( progressBar( goal ) );
+
+		if ( ! goal.completed && percent > 0 && percent < 100 ) {
+			var dot = el( 'span', 'goalcart-t6__dot' );
+			dot.style.setProperty( '--goalcart-t6-dot', percent + '%' );
+			progress.appendChild( dot );
+		}
+
+		panel.appendChild( progress );
+
+		if ( settings.showAmounts !== false ) {
+			var amounts = el( 'div', 'goalcart-t6__amounts' );
+			var paid = el( 'div', 'goalcart-t6__amount' );
+			paid.appendChild( el( 'span', 'goalcart-t6__amount-label', uiLabel( 'paid', 'Paid' ) ) );
+			paid.appendChild( el( 'span', 'goalcart-t6__amount-value', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
+			amounts.appendChild( paid );
+
+			var left = el( 'div', 'goalcart-t6__amount goalcart-t6__amount--end' );
+			left.appendChild( el( 'span', 'goalcart-t6__amount-label', uiLabel( 'remaining', 'Remaining' ) ) );
+			left.appendChild( el( 'span', 'goalcart-t6__amount-value goalcart-t6__amount-value--gold', goal.is_money ? formatMoney( goal.remaining, currency ) : formatNumber( goal.remaining ) ) );
+			amounts.appendChild( left );
+			panel.appendChild( amounts );
+		}
+
+		if ( settings.showCta !== false ) {
+			var cta = tplCta( goal, currency, uiLabel( 'view_products', 'View products' ), 'goalcart-t6__cta' );
+
+			if ( cta ) {
+				panel.appendChild( cta );
+			}
+		}
+
+		// Almost-completed callout.
+		if ( goal.state === 'nearly_complete' && ! goal.completed ) {
+			var callout = el( 'div', 'goalcart-t6__callout' );
+			callout.appendChild( el( 'span', 'goalcart-t6__callout-icon', '\uD83D\uDD25' ) );
+			var calloutText = el( 'div', 'goalcart-t6__callout-text' );
+			calloutText.appendChild( el( 'span', 'goalcart-t6__callout-title', uiLabel( 'almost_done', 'Almost there!' ) + ' — ' + remainingLabel( goal, currency ) ) );
+			calloutText.appendChild( el( 'span', 'goalcart-t6__callout-sub', uiLabel( 'finish_today', 'Finish today — your reward is waiting' ) ) );
+			callout.appendChild( calloutText );
+			panel.appendChild( callout );
+		}
+
+		return panel;
 	}
 
 	/**
@@ -1592,14 +2055,18 @@
 	 */
 	function templateBody( goal, currency, template, showBar ) {
 		switch ( template ) {
-			case 'percentage':
-				return percentagePanel( goal, showBar );
-			case 'milestone':
-				return milestonePanel( goal, currency, showBar );
-			case 'card':
-				return cardPanel( goal );
-			case 'ring':
-				return ringPanel( goal );
+			case 'template-1':
+				return t1Panel( goal, currency );
+			case 'template-2':
+				return t2Panel( goal, currency );
+			case 'template-3':
+				return t3Panel( goal, currency );
+			case 'template-4':
+				return t4Panel( goal, currency );
+			case 'template-5':
+				return t5Panel( goal, currency );
+			case 'template-6':
+				return t6Panel( goal, currency );
 			default:
 				return false === showBar ? null : progressBar( goal );
 		}
@@ -1638,7 +2105,7 @@
 
 		var compact = 'compact' === variant;
 		var reward = rewardStatus( goal );
-		var showReward = 'card' !== template || settings.showReward !== false;
+		var showReward = settings.showReward !== false;
 		var showMessage = settings.showMessage !== false;
 
 		if ( compact ) {
@@ -1685,9 +2152,13 @@
 		// Unified product recommendations (Suggestions + Upsells
 		// consolidation): the merged panel renders at the bottom of the
 		// full card, after the reward, message, countdown and gift picker.
-		var upsell = upsellPanel( goal );
-		if ( upsell ) {
-			card.appendChild( upsell );
+		// Template-4 renders its recommended products inline as its body,
+		// so the shared panel would duplicate them — it is suppressed.
+		if ( 'template-4' !== template ) {
+			var upsell = upsellPanel( goal );
+			if ( upsell ) {
+				card.appendChild( upsell );
+			}
 		}
 
 		return card;
@@ -2067,8 +2538,12 @@
 		bar.setAttribute( 'aria-hidden', 'false' );
 
 		// Rebuild the bar content on every refresh so the fill and message
-		// track the live cart (no mount-once freeze).
+		// track the live cart (no mount-once freeze). The featured goal's
+		// resolved template settings drive the bar's appearance too (e.g.
+		// a template-5 goal renders the dark sticky styling), so the
+		// sticky bar follows the goal's template exactly like its card.
 		var inner = el( 'div', 'goalcart-sticky__inner' );
+		applyTemplateSettings( inner, ( goal && goal.template_settings ) || {} );
 		var content = el( 'div', 'goalcart-sticky__content' );
 		var reward = rewardStatus( goal );
 
@@ -2443,16 +2918,15 @@
 	 * @return {void}
 	 */
 	function bindUpsellPanel() {
-		if ( ! upsells || ! upsells.enabled ) {
-			return;
-		}
-
+		// Bound unconditionally: the template-4 recommend add buttons must
+		// work even when the smart-upsell ranking panel is disabled (they
+		// add suggestion products through the same public wc-ajax surface).
 		document.body.addEventListener( 'click', function ( event ) {
 			var target = event.target;
 
 			while ( target && target !== document.body ) {
 				if ( target.classList ) {
-					if ( target.classList.contains( 'goalcart-upsell__add' ) ) {
+					if ( target.classList.contains( 'goalcart-upsell__add' ) || target.classList.contains( 'goalcart-recommend__add' ) ) {
 						upsellAdd( target );
 						return;
 					}

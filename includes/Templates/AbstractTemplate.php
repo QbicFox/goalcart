@@ -32,4 +32,21 @@ abstract class AbstractTemplate implements Template {
 
 		return $defaults;
 	}
+
+	/**
+	 * Whether this template inherits the legacy store-wide `frontend_*`
+	 * appearance tokens when it has not been configured yet.
+	 *
+	 * The six design templates ship their own reference defaults (their
+	 * schema defaults match the HTML design), so they opt out — an
+	 * unconfigured template must look exactly like its default design, not
+	 * like the store's legacy appearance. Templates without a strong
+	 * identity of their own (e.g. the campaign templates that predate the
+	 * design system) may opt in to keep the pre-engine behavior.
+	 *
+	 * @return bool
+	 */
+	public function inherits_legacy() {
+		return false;
+	}
 }

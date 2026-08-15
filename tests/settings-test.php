@@ -289,12 +289,12 @@ try {
 // mutated it) so the remaining sections run against the defaults.
 $settings->set_many( $all_before );
 
-// Self-heal (regression): a corrupted legacy frontend_template — a
-// pluggable template id like 'ring' back-synced by an older version
-// before the sync was removed — is normalized to the default on read.
-// Without this the Settings page echoes the out-of-enum value back and
-// the REST schema rejects the save with a 400. Wrapped in a transaction
-// so the option row always reverts, exactly like the section above.
+// Self-heal (regression): a corrupted frontend_template — a retired
+// pre-design id like 'ring' back-synced by an older version — is
+// normalized to the default on read. Without this the Settings page
+// echoes the out-of-enum value back and the REST schema rejects the save
+// with a 400. Wrapped in a transaction so the option row always reverts,
+// exactly like the section above.
 $wpdb->query( 'START TRANSACTION' );
 
 try {
@@ -306,15 +306,15 @@ try {
 	wp_cache_delete( 'alloptions', 'options' );
 
 	$fresh = new Settings();
-	check( 'invalid frontend_template self-heals on read', 'basic' === $fresh->all()['frontend_template'] );
+	check( 'invalid frontend_template self-heals on read', 'template-1' === $fresh->all()['frontend_template'] );
 
-	$stored['frontend_template'] = 'card';
+	$stored['frontend_template'] = 'template-2';
 	update_option( Settings::OPTION_NAME, $stored, false );
 	wp_cache_delete( Settings::OPTION_NAME, 'options' );
 	wp_cache_delete( 'alloptions', 'options' );
 
 	$fresh = new Settings();
-	check( 'valid frontend_template passes through', 'card' === $fresh->all()['frontend_template'] );
+	check( 'valid frontend_template passes through', 'template-2' === $fresh->all()['frontend_template'] );
 } finally {
 	$wpdb->query( 'ROLLBACK' );
 

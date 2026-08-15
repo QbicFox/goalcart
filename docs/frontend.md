@@ -74,11 +74,11 @@ get a full card instead of one featured card + a tiny ladder:
   (the first eligible one — a slim bar keeps a single goal at a glance)
   and a dismiss button; hidden when the cart has no progress to show.
 
-There is no cross-goal ladder anymore: every goal is its own card, so the
-`milestone` template shows just the goal's own threshold as a single rung
-(dot + target label). Ineligible goals never render a card, and when no
-goals are eligible the container is hidden (`goalcart-widget--empty`)
-instead of showing a broken bar.
+There is no cross-goal ladder anymore: every goal is its own card (each
+renders through its resolved design template — the retired `milestone`
+variant maps to `template-1`). Ineligible goals never render a card, and
+when no goals are eligible the container is hidden
+(`goalcart-widget--empty`) instead of showing a broken bar.
 
 ## Refresh & events
 
@@ -228,24 +228,33 @@ independently for Goals and Campaigns. See `includes/Templates/`
 
 ## Built-in templates
 
+The six design templates (`template-1` … `template-6`) replace the
+original Phase 12 Goal variants; retired ids (`basic` / `percentage` /
+`milestone` / `card` / `ring`) resolve through the TemplateEngine's
+legacy map to their closest design template, so persisted goals keep
+rendering. The two Campaign templates are unchanged.
+
 | Variant | Scope | Layout |
 |---|---|---|
-| `basic` | goal | Progress bar + message (the Phase 11 layout) |
-| `percentage` | goal | Large percent readout (`goalcart-percentage__value`) above the bar |
-| `milestone` | goal | The goal's own threshold as a single rung (`goalcart-milestones`: dot + target label), bar underneath. Every goal is its own card now, so there is no cross-goal ladder to climb — the rung keeps the template visually distinct from basic without duplicating the other goals' cards |
-| `card` | goal | Icon + goal-title header (`goalcart-card-panel`) above the bar |
+| `template-1` | goal | Classic progress card — icon badge, goal label + title, percentage chip, bar, current/remaining amounts, CTA; completed + expired states (`t1Panel()`) |
+| `template-2` | goal | Minimal inline cart goal — compact strip (small icon, title, remaining, slim bar, small CTA) meant to sit between cart content and totals (`t2Panel()`) |
+| `template-3` | goal | Circular progress — percentage inside a ring beside icon, title, description, amounts and a CTA (`t3Panel()`) |
+| `template-4` | goal | Product recommendation + goal — gradient progress header plus the goal's recommended products with add-to-cart buttons (`t4Panel()`) |
+| `template-5` | goal | Compact floating / sticky goal — dark slim bar with icon, progress, remaining and a CTA (`t5Panel()`) |
+| `template-6` | goal | Premium / elegant e-commerce style — gold accents, elegant progress with a marker dot, amounts and a refined CTA (`t6Panel()`) |
 | `milestone_chain` | campaign | The campaign's milestones as one connected ladder — dots, names, targets and rewards — with an overall progress bar (`campaignChain()`); the campaign renders as a unit instead of per-goal cards |
+| `campaign_progress` | campaign | One overall progress bar for the whole campaign with a milestone counter (`campaignProgress()`) |
 
 In JS terms the shared flow (message, reward chip, suggestions, sticky
 bar) stays identical — only `templateBody()` swaps the core visual per
-variant (`progressBar`, `percentagePanel`, `milestonePanel`,
-`cardPanel`), and a campaign group with a configured campaign template
-renders through `campaignChain()` instead of per-goal cards. The card
-icon comes from the goal's Display settings (`display_settings.icon`,
-served in the progress payload as `icon`); the widget falls back to 🎯
-when a goal has no icon. Compact widgets keep their slim footprint —
-every eligible goal still gets its own compact card, stacked with a
-tighter gap.
+variant (`t1Panel` … `t6Panel`), and a campaign group with a configured
+campaign template renders through `campaignChain()` /
+`campaignProgress()` instead of per-goal cards. The card icon comes
+from the goal's Display settings (`display_settings.icon`, served in
+the progress payload as `icon`); each template falls back to its own
+MUI-style fallback glyph when a goal has no icon. Compact widgets keep
+their slim footprint — every eligible goal still gets its own compact
+card, stacked with a tighter gap.
 
 ## Resolution
 
@@ -263,8 +272,8 @@ re-resolves — it renders exactly what the engine resolved:
    `template_settings` in the settings option),
 3. **legacy fallback** — the pre-engine `frontend_template` +
    `frontend_*` appearance tokens (goals only),
-4. **hardcoded fallback** — `basic` for goals; a campaign without a
-   template renders per-goal cards (the pre-engine behavior).
+4. **hardcoded fallback** — `template-1` for goals; a campaign without
+a template renders per-goal cards (the pre-engine behavior).
 
 The pre-engine `display_settings.template` key still reads as the legacy
 alias (step 1) and the DB migration (0.4.0) copies it onto

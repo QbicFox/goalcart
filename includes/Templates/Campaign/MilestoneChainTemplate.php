@@ -63,6 +63,17 @@ class MilestoneChainTemplate extends AbstractTemplate {
 	}
 
 	/**
+	 * The campaign templates predate the design system and have no strong
+	 * identity of their own, so an unconfigured chain keeps tracking the
+	 * legacy store-wide Appearance tokens (pre-engine behavior).
+	 *
+	 * @return bool
+	 */
+	public function inherits_legacy() {
+		return true;
+	}
+
+	/**
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function schema() {

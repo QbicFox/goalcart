@@ -9,6 +9,37 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
+- **Six new MUI design templates replace the old goal templates** — the
+  Phase 12 Goal variants (basic / percentage / milestone / card / ring)
+  are fully removed and replaced by the six design templates
+  (`template-1` … `template-6`): classic progress card, minimal inline
+  cart goal, circular progress, product recommendation + goal, compact
+  floating/sticky goal, and premium/elegant e-commerce style. Each is a
+  production MUI component shared by the admin preview and the
+  WooCommerce storefront (`admin-app/src/templates/renderers/`,
+  `includes/Templates/Goal/`, `assets/js/frontend.js` `t1Panel`…
+  `t6Panel`).
+  - **Schema-driven appearance settings** — every template exposes only
+    the settings that suit its design (colors, radius, bar height,
+    button style, density, ring size, product image size, shadow,
+    content toggles) via the pluggable template contract; the
+    Appearance page, Goal Builder and Campaign Builder render the
+    settings form generically and the live preview updates instantly.
+    Defaults match the reference designs (orange card, indigo inline,
+    indigo ring, blue recommendation, dark sticky, premium gold).
+  - **Migration & fallback** — persisted old ids (goal
+    `display_settings`, `template_defaults.goal`, `frontend_template`)
+    resolve through the TemplateEngine's legacy map (basic / milestone /
+    card → template-1; percentage / ring → template-3), so existing
+    goals keep rendering without reconfiguration.
+  - **i18n** — the admin selector lists the six templates by name and
+    the Persian catalog translates them to قالب ۱ … قالب ۶; the POT /
+    JED were regenerated and all new admin strings carry Persian
+    translations.
+  - **Tests** — `tests/template-test.php` (138 checks), plus updated
+    settings / frontend / preview / rest-api suites; PHP lint, `npm run
+    typecheck`, `npm run lint` and `npm run build` all pass.
+
 - **Per-user goal completion limit (Phase 36)** — every goal now has a
   configurable `max_completions_per_user` ("تعداد دفعات تکمیل توسط هر
   کاربر"): how many times the same shopper may complete the goal. Null =

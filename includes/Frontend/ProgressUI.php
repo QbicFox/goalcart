@@ -81,11 +81,16 @@ final class ProgressUI {
 	const HANDLE = 'goalcart-frontend';
 
 	/**
-	 * Storefront progress template variants (Phase 12).
+	 * Storefront progress template variants.
+	 *
+	 * The six design templates (template-1 … template-6). The retired
+	 * Phase 12 variants (basic / percentage / milestone / card) are no
+	 * longer selectable; persisted old ids resolve through the
+	 * TemplateEngine's legacy map.
 	 *
 	 * @var string[]
 	 */
-	const TEMPLATES = array( 'basic', 'percentage', 'milestone', 'card' );
+	const TEMPLATES = array( 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6' );
 
 	/**
 	 * Settings instance.
@@ -565,9 +570,27 @@ final class ProgressUI {
 	 * @return string
 	 */
 	public function template() {
-		$template = apply_filters( 'goalcart_frontend_template', $this->settings->get( 'frontend_template', 'basic' ) );
+		$template = apply_filters( 'goalcart_frontend_template', $this->settings->get( 'frontend_template', 'template-1' ) );
 
-		return in_array( $template, self::TEMPLATES, true ) ? $template : 'basic';
+		if ( in_array( $template, self::TEMPLATES, true ) ) {
+			return $template;
+		}
+
+		// Retired Phase 12 ids (e.g. a stored 'card') map to their closest
+		// design template before falling back to the default.
+		$legacy_map = array(
+			'basic'      => 'template-1',
+			'milestone'  => 'template-1',
+			'card'       => 'template-1',
+			'percentage' => 'template-3',
+			'ring'       => 'template-3',
+		);
+
+		if ( isset( $legacy_map[ $template ] ) && in_array( $legacy_map[ $template ], self::TEMPLATES, true ) ) {
+			return $legacy_map[ $template ];
+		}
+
+		return 'template-1';
 	}
 
 	/**
@@ -943,6 +966,27 @@ final class ProgressUI {
 			'gift_picker'      => __( 'Pick your free gift', 'goalcart' ),
 			'gift_chosen'      => __( 'Gift added to your cart', 'goalcart' ),
 			'dismiss'          => __( 'Dismiss', 'goalcart' ),
+			// Design-template storefront copy (the six progress templates).
+			'shopping_goal'    => __( 'Shopping goal', 'goalcart' ),
+			'progress'         => __( 'Progress', 'goalcart' ),
+			'paid'             => __( 'Paid', 'goalcart' ),
+			'remaining'        => __( 'Remaining', 'goalcart' ),
+			'left'             => __( '%s left', 'goalcart' ),
+			'add'              => __( 'Add', 'goalcart' ),
+			'add_more'         => __( 'Add %s more', 'goalcart' ),
+			'view_products'    => __( 'View products', 'goalcart' ),
+			'only_price'       => __( 'Only %s', 'goalcart' ),
+			'recommend_heading' => __( 'Add these products to reach your goal faster:', 'goalcart' ),
+			'completed'        => __( 'Completed', 'goalcart' ),
+			'goal_reached'     => __( 'Goal completed', 'goalcart' ),
+			'reward_active'    => __( '%s is active', 'goalcart' ),
+			'expired'          => __( 'Expired', 'goalcart' ),
+			'goal_ended'       => __( 'This goal has ended', 'goalcart' ),
+			'almost_done'      => __( 'Almost there!', 'goalcart' ),
+			'congrats'         => __( 'Congratulations!', 'goalcart' ),
+			'with_purchase'    => __( 'With a purchase of', 'goalcart' ),
+			'finish_today'     => __( 'Finish today — your reward is waiting', 'goalcart' ),
+			'unavailable'      => __( 'No recommendations available right now.', 'goalcart' ),
 		);
 	}
 }

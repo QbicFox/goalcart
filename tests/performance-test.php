@@ -111,7 +111,7 @@ check( 'React Query caches server state (staleTime)', false !== strpos( $provide
 check( 'React Query skips focus refetch storms', false !== strpos( $providers, 'refetchOnWindowFocus: false' ) );
 check( 'product/category search debounced', false !== strpos( $autocomplete, 'setTimeout' ) && false !== strpos( $autocomplete, '300' ) );
 check( 'search capped per request (per_page=20)', false !== strpos( $autocomplete, 'per_page: 20' ) );
-check( 'goal list is server-paginated (TablePagination)', false !== strpos( $goals_tsx, 'TablePagination' ) );
+check( 'goal list is server-paginated (NumberPagination)', false !== strpos( $goals_tsx, 'NumberPagination' ) );
 check( 'goal list fetches page/per_page server-side', false !== strpos( $goals_tsx, 'fetchGoals({ page: page + 1' ) );
 check( 'goal search debounced client-side', false !== strpos( $goals_tsx, 'setDebouncedSearch(search)' ) );
 check( 'analytics trend memoized (avoid re-renders)', false !== strpos( $analytics, 'useMemo' ) && false !== strpos( $analytics, 'trendData' ) );

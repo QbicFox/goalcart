@@ -504,10 +504,12 @@ export default function Settings() {
                     label={__('Template', 'goalcart')}
                     description={__('Store-wide progress widget variant.', 'goalcart')}
                     options={[
-                      { value: 'basic', label: __('Basic', 'goalcart') },
-                      { value: 'percentage', label: __('Percentage', 'goalcart') },
-                      { value: 'milestone', label: __('Milestone', 'goalcart') },
-                      { value: 'card', label: __('Card', 'goalcart') },
+                      { value: 'template-1', label: __('Template 1', 'goalcart') },
+                      { value: 'template-2', label: __('Template 2', 'goalcart') },
+                      { value: 'template-3', label: __('Template 3', 'goalcart') },
+                      { value: 'template-4', label: __('Template 4', 'goalcart') },
+                      { value: 'template-5', label: __('Template 5', 'goalcart') },
+                      { value: 'template-6', label: __('Template 6', 'goalcart') },
                     ]}
                   />
                   <BooleanField

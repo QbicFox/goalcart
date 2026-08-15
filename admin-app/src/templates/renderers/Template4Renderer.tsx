@@ -1,0 +1,127 @@
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import { __ } from '@wordpress/i18n';
+
+import type { GoalTemplateProps } from '../registry';
+import { bool, num, str } from '../utils';
+import { GoalBar, RecommendedProductItem, goalPercent, remainingLabel } from './goalShared';
+
+/**
+ * Template 4 — Product Recommendation + Goal (Concept 07).
+ *
+ * A gradient progress header (goal title + remaining chip + bar) followed
+ * by the goal's own recommended products with add-to-cart buttons. The
+ * products come from the existing Goal Cart / WooCommerce recommendation
+ * data (goal.suggestions) — nothing is hard-coded and no second
+ * recommendation engine is introduced.
+ */
+export default function Template4Renderer({ goal, currency, settings, animation }: GoalTemplateProps) {
+  const percent = goalPercent(goal);
+  const headerBg = str(settings, 'headerBg', '#2563eb');
+  const accent = str(settings, 'accent', '#2563eb');
+  const text = str(settings, 'text', '#1f2937');
+  const muted = str(settings, 'secondaryText', '#6b7280');
+  const products = goal.suggestions ?? [];
+
+  return (
+    <Box sx={{ overflow: 'hidden', borderRadius: 2 }}>
+      {/* Progress header (gradient) */}
+      <Box
+        sx={{
+          px: 2,
+          py: 1.5,
+          background: `linear-gradient(135deg, ${headerBg}, ${headerBg}cc)`,
+          color: '#ffffff',
+        }}
+      >
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, mb: 1 }}>
+          <Typography
+            sx={{
+              fontSize: 12,
+              fontWeight: 700,
+              opacity: 0.9,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {goal.goal_name}
+          </Typography>
+          {bool(settings, 'showRemaining', true) && !goal.completed && (
+            <Box
+              component="span"
+              sx={{
+                flexShrink: 0,
+                fontSize: 12,
+                fontWeight: 700,
+                background: 'rgba(255,255,255,0.2)',
+                px: 1,
+                py: 0.25,
+                borderRadius: 999,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {remainingLabel(goal, currency)}
+            </Box>
+          )}
+          {goal.completed && (
+            <Box
+              component="span"
+              sx={{
+                flexShrink: 0,
+                fontSize: 12,
+                fontWeight: 700,
+                background: 'rgba(255,255,255,0.2)',
+                px: 1,
+                py: 0.25,
+                borderRadius: 999,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {__('Completed', 'goalcart')} ✓
+            </Box>
+          )}
+        </Box>
+        <GoalBar
+          percent={goal.completed ? 100 : percent}
+          completed={goal.completed}
+          animation={animation}
+          track="rgba(255,255,255,0.25)"
+          height={num(settings, 'barHeight', 8)}
+          color="#ffffff"
+        />
+      </Box>
+
+      {/* Recommended products */}
+      <Box sx={{ p: 1.75 }}>
+        {bool(settings, 'showHeading', true) && (
+          <Typography sx={{ fontSize: 12, fontWeight: 700, color: text, mb: 1.25 }}>
+            <LightbulbIcon
+              sx={{ fontSize: 14, color: '#eab308', verticalAlign: 'middle', ml: 0.25 }}
+            />
+            {__('Add these products to reach your goal faster:', 'goalcart')}
+          </Typography>
+        )}
+
+        {products.length === 0 ? (
+          <Typography sx={{ fontSize: 12, color: muted }}>
+            {__('No recommendations available right now.', 'goalcart')}
+          </Typography>
+        ) : (
+          <Box>
+            {products.map((item) => (
+              <RecommendedProductItem
+                key={item.id}
+                item={item}
+                settings={settings}
+                currency={currency}
+                accent={accent}
+              />
+            ))}
+          </Box>
+        )}
+      </Box>
+    </Box>
+  );
+}

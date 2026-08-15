@@ -36,15 +36,17 @@ class Settings {
 	const OPTION_NAME = 'goalcart_settings';
 
 	/**
-	 * The legacy storefront template variants the frontend_template
-	 * setting accepts (pre-pluggable-engine enum). Single source of truth
-	 * shared by the REST schema (SettingsController::save_args), the
-	 * sanitizer and the read-time self-heal, so the three can never drift
-	 * apart.
+	 * The storefront goal template ids the frontend_template setting
+	 * accepts. Single source of truth shared by the REST schema
+	 * (SettingsController::save_args), the sanitizer and the read-time
+	 * self-heal, so the three can never drift apart. Retired pre-design
+	 * ids (basic / percentage / milestone / card / ring) are no longer
+	 * valid here; stored legacy values self-heal to the default and the
+	 * TemplateEngine maps persisted old ids at resolution time.
 	 *
 	 * @var array<int, string>
 	 */
-	const LEGACY_GOAL_TEMPLATES = array( 'basic', 'percentage', 'milestone', 'card' );
+	const LEGACY_GOAL_TEMPLATES = array( 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6' );
 
 	/**
 	 * Default settings, merged with stored values on load.
@@ -67,7 +69,7 @@ class Settings {
 
 		// Frontend (P18-T02). Phase 32 adds the countdown + celebration
 		// toggles and the advanced sticky-bar surface.
-		'frontend_template'     => 'basic',
+		'frontend_template'     => 'template-1',
 		'frontend_animation'    => true,
 		'frontend_locations'    => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ),
 		'frontend_position'     => 'top',               // top | bottom for page widgets
@@ -203,9 +205,9 @@ class Settings {
 			$this->settings = wp_parse_args( is_array( $stored ) ? $stored : array(), $this->defaults );
 
 			// Self-heal a corrupted legacy frontend_template. The setting
-			// only accepts the four pre-engine enum values (basic | percentage
-			// | milestone | card) via the REST schema; a stored value outside
-			// that enum (e.g. a pluggable template id such as 'ring'
+			// only accepts the six design template ids (template-1 …
+			// template-6) via the REST schema; a stored value outside that
+			// enum (e.g. a retired pre-design id such as 'card' or 'ring'
 			// back-synced by an older version before the sync was removed) is
 			// served to the Settings page and rejected on the next save with a
 			// 400. Falling back to the default keeps every consumer

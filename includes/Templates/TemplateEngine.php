@@ -61,7 +61,31 @@ final class TemplateEngine {
 	 *
 	 * @var string
 	 */
-	const FALLBACK_GOAL = 'basic';
+	const FALLBACK_GOAL = 'template-1';
+
+	/**
+	 * Migration map from the retired pre-design Goal template ids to the
+	 * closest design template (goals only).
+	 *
+	 * The old Phase 12 Goal templates (basic / percentage / milestone /
+	 * card) plus the Ring gauge are no longer registered, but their ids
+	 * are persisted in goal display_settings (`template_id` or the legacy
+	 * `template` alias), in per-scope defaults and in the legacy
+	 * `frontend_template` setting. Resolution maps them so existing goals
+	 * keep rendering without manual reconfiguration:
+	 *
+	 *  - basic / milestone / card → template-1 (the classic progress card)
+	 *  - percentage / ring → template-3 (the circular percentage gauge)
+	 *
+	 * @var array<string, string>
+	 */
+	const LEGACY_GOAL_MAP = array(
+		'basic'      => 'template-1',
+		'milestone'  => 'template-1',
+		'card'       => 'template-1',
+		'percentage' => 'template-3',
+		'ring'       => 'template-3',
+	);
 
 	/**
 	 * Template registry instance.
@@ -153,8 +177,8 @@ final class TemplateEngine {
 			$template_id = $this->normalize_template_id( $scope, $legacy_template );
 		}
 
-		// 4. Hardcoded fallback: 'basic' for goals; campaigns without a
-		// template render per-goal cards (the pre-engine behavior).
+		// 4. Hardcoded fallback: 'template-1' for goals; campaigns without
+		// a template render per-goal cards (the pre-engine behavior).
 		if ( '' === $template_id && self::SCOPE_GOAL === $scope ) {
 			$template_id = self::FALLBACK_GOAL;
 		}
@@ -195,12 +219,31 @@ final class TemplateEngine {
 	/**
 	 * Normalize a candidate template id for a scope ('' when invalid).
 	 *
+	 * A retired Goal template id (e.g. 'card') resolves through the
+	 * legacy migration map to its closest design template before falling
+	 * back to '' — persisted old ids keep rendering instead of silently
+	 * degrading to the hardcoded fallback.
+	 *
 	 * @param string $scope SCOPE_GOAL | SCOPE_CAMPAIGN.
 	 * @param mixed  $id    Candidate template id.
 	 * @return string
 	 */
 	public function normalize_template_id( $scope, $id ) {
-		return $this->is_registered( $scope, $id ) ? (string) $id : '';
+		if ( $this->is_registered( $scope, $id ) ) {
+			return (string) $id;
+		}
+
+		// Migration: a persisted pre-design Goal template id maps to its
+		// closest registered design template.
+		if ( self::SCOPE_GOAL === $scope && is_string( $id ) && isset( self::LEGACY_GOAL_MAP[ $id ] ) ) {
+			$mapped = self::LEGACY_GOAL_MAP[ $id ];
+
+			if ( $this->is_registered( $scope, $mapped ) ) {
+				return $mapped;
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -382,8 +425,11 @@ final class TemplateEngine {
 
 		// A template that was never configured keeps tracking the legacy
 		// Appearance surface (frontend_* tokens) so existing stores see no
-		// visual change until they explicitly customize this template.
-		if ( null === $scope_stored && empty( $override ) ) {
+		// visual change until they explicitly customize this template —
+		// only for templates that opt in. The design templates ship their
+		// own reference defaults and never inherit the legacy tokens, so an
+		// unconfigured template renders exactly like its default design.
+		if ( null === $scope_stored && empty( $override ) && $this->inherits_legacy( $template ) ) {
 			$base = array_merge( $base, $this->legacy_tokens_for( $template ) );
 		}
 
@@ -396,6 +442,16 @@ final class TemplateEngine {
 		}
 
 		return $this->sanitize_settings( $template, $base );
+	}
+
+	/**
+	 * Whether a template inherits the legacy frontend_* appearance tokens.
+	 *
+	 * @param Template $template Template instance.
+	 * @return bool
+	 */
+	protected function inherits_legacy( Template $template ) {
+		return method_exists( $template, 'inherits_legacy' ) && $template->inherits_legacy();
 	}
 
 	/**

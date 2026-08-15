@@ -3968,9 +3968,6 @@ msgstr "خریدار می‌تواند این هدف را هر چند بار ک�
 msgid "The shopper may complete this goal as many times as they want."
 msgstr "خریدار می‌تواند این هدف را هر چند بار که بخواهد تکمیل کند."
 
-#: admin-app/src/routes/Appearance.tsx:600
-msgid "The stored default template is no longer registered. The storefront falls back to the Basic template until you pick another one here."
-msgstr "قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا انتخاب قالب دیگری در اینجا، از قالب پایه استفاده می‌کند."
 
 #: admin-app/src/components/goal-builder/TargetFields.tsx:102
 msgid "The threshold shoppers need to reach"
@@ -4514,3 +4511,115 @@ msgstr "«%s» برای همیشه حذف می‌شود. این عمل قابل 
 #: admin-app/src/routes/Recommendations.tsx:719
 msgid "→ %1$s"
 msgstr "→ %1$s"
+
+#: admin-app/src/templates/renderers/goalShared.tsx
+msgid "%s left"
+msgstr "%s باقی مانده"
+
+#: admin-app/src/templates/renderers/goalShared.tsx
+msgid "Add %s more"
+msgstr "%s دیگر اضافه کنید"
+
+#: admin-app/src/templates/renderers/goalShared.tsx
+msgid "Add"
+msgstr "افزودن"
+
+#: admin-app/src/templates/renderers/goalShared.tsx
+msgid "Only %s"
+msgstr "فقط %s"
+
+#: admin-app/src/templates/renderers/Template4Renderer.tsx
+msgid "Add these products to reach your goal faster:"
+msgstr "این محصولات را برای رسیدن سریع‌تر به هدف اضافه کنید:"
+
+#: admin-app/src/templates/renderers/Template6Renderer.tsx
+msgid "Almost there! Only %s left"
+msgstr "تقریباً رسیدید! فقط %s باقی مانده"
+
+#: admin-app/src/routes/Appearance.tsx
+msgid "Baseball cap"
+msgstr "کلاه بیسبال"
+
+#: admin-app/src/routes/Appearance.tsx
+msgid "Classic cotton t-shirt"
+msgstr "تی‌شرت نخی کلاسیک"
+
+#: admin-app/src/templates/renderers/Template1Renderer.tsx
+msgid "Congratulations!"
+msgstr "تبریک!"
+
+#: admin-app/src/templates/renderers/Template1Renderer.tsx
+msgid "Expired"
+msgstr "منقضی‌شده"
+
+#: admin-app/src/templates/renderers/Template6Renderer.tsx
+msgid "Finish today — your reward is waiting"
+msgstr "امروز تمام کنید — پاداش شما در انتظار است"
+
+#: admin-app/src/templates/renderers/Template1Renderer.tsx
+msgid "Goal completed"
+msgstr "هدف تکمیل شد"
+
+#: admin-app/src/templates/renderers/Template2Renderer.tsx
+msgid "Only %s left to reach your goal"
+msgstr "فقط %s تا رسیدن به هدف مانده"
+
+#: admin-app/src/templates/renderers/Template5Renderer.tsx
+msgid "Paid"
+msgstr "پرداخت‌شده"
+
+#: admin-app/src/templates/renderers/Template5Renderer.tsx
+msgid "Progress"
+msgstr "پیشرفت"
+
+#: admin-app/src/templates/renderers/Template5Renderer.tsx
+msgid "Remaining"
+msgstr "باقی مانده"
+
+#: admin-app/src/templates/renderers/Template1Renderer.tsx
+msgid "Shopping goal"
+msgstr "هدف خرید"
+
+#: admin-app/src/routes/Settings.tsx
+msgid "Template 1"
+msgstr "قالب ۱"
+
+#: admin-app/src/routes/Settings.tsx
+msgid "Template 2"
+msgstr "قالب ۲"
+
+#: admin-app/src/routes/Settings.tsx
+msgid "Template 3"
+msgstr "قالب ۳"
+
+#: admin-app/src/routes/Settings.tsx
+msgid "Template 4"
+msgstr "قالب ۴"
+
+#: admin-app/src/routes/Settings.tsx
+msgid "Template 5"
+msgstr "قالب ۵"
+
+#: admin-app/src/routes/Settings.tsx
+msgid "Template 6"
+msgstr "قالب ۶"
+
+#: admin-app/src/routes/Appearance.tsx
+msgid "The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here."
+msgstr "قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا زمانی که قالب دیگری را انتخاب کنید، به قالب پیش‌فرض برمی‌گردد."
+
+#: admin-app/src/templates/renderers/Template1Renderer.tsx
+msgid "This goal has ended"
+msgstr "این هدف به پایان رسیده است"
+
+#: admin-app/src/templates/renderers/Template3Renderer.tsx
+msgid "View products"
+msgstr "مشاهده محصولات"
+
+#: admin-app/src/templates/renderers/Template3Renderer.tsx
+msgid "With a purchase of"
+msgstr "با خریدی به ارزش"
+
+#: admin-app/src/templates/renderers/Template3Renderer.tsx
+msgid "With a purchase of %s"
+msgstr "با خریدی به ارزش %s"

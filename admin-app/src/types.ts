@@ -454,8 +454,14 @@ export interface CampaignInput {
   goals: number[];
 }
 
-/** Storefront progress template variants (Phase 12). */
-export type FrontendTemplate = 'basic' | 'percentage' | 'milestone' | 'card';
+/** Storefront goal template ids (the six design templates). */
+export type FrontendTemplate =
+  | 'template-1'
+  | 'template-2'
+  | 'template-3'
+  | 'template-4'
+  | 'template-5'
+  | 'template-6';
 
 /** Storefront widget display locations (Phase 18, frontend_locations). */
 export type FrontendLocation =

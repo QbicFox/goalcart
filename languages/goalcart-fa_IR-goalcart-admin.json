@@ -2638,9 +2638,6 @@
             "The shopper may complete this goal as many times as they want.": [
                 "خریدار می‌تواند این هدف را هر چند بار که بخواهد تکمیل کند."
             ],
-            "The stored default template is no longer registered. The storefront falls back to the Basic template until you pick another one here.": [
-                "قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا انتخاب قالب دیگری در اینجا، از قالب پایه استفاده می‌کند."
-            ],
             "The threshold shoppers need to reach": [
                 "مبلغی که مشتری باید به آن برسد تا هدف را تکمیل کند."
             ],
@@ -3033,6 +3030,90 @@
             ],
             "→ %1$s": [
                 "→ %1$s"
+            ],
+            "%s left": [
+                "%s باقی مانده"
+            ],
+            "Add %s more": [
+                "%s دیگر اضافه کنید"
+            ],
+            "Add": [
+                "افزودن"
+            ],
+            "Only %s": [
+                "فقط %s"
+            ],
+            "Add these products to reach your goal faster:": [
+                "این محصولات را برای رسیدن سریع‌تر به هدف اضافه کنید:"
+            ],
+            "Almost there! Only %s left": [
+                "تقریباً رسیدید! فقط %s باقی مانده"
+            ],
+            "Baseball cap": [
+                "کلاه بیسبال"
+            ],
+            "Classic cotton t-shirt": [
+                "تی‌شرت نخی کلاسیک"
+            ],
+            "Congratulations!": [
+                "تبریک!"
+            ],
+            "Expired": [
+                "منقضی‌شده"
+            ],
+            "Finish today — your reward is waiting": [
+                "امروز تمام کنید — پاداش شما در انتظار است"
+            ],
+            "Goal completed": [
+                "هدف تکمیل شد"
+            ],
+            "Only %s left to reach your goal": [
+                "فقط %s تا رسیدن به هدف مانده"
+            ],
+            "Paid": [
+                "پرداخت‌شده"
+            ],
+            "Progress": [
+                "پیشرفت"
+            ],
+            "Remaining": [
+                "باقی مانده"
+            ],
+            "Shopping goal": [
+                "هدف خرید"
+            ],
+            "Template 1": [
+                "قالب ۱"
+            ],
+            "Template 2": [
+                "قالب ۲"
+            ],
+            "Template 3": [
+                "قالب ۳"
+            ],
+            "Template 4": [
+                "قالب ۴"
+            ],
+            "Template 5": [
+                "قالب ۵"
+            ],
+            "Template 6": [
+                "قالب ۶"
+            ],
+            "The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here.": [
+                "قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا زمانی که قالب دیگری را انتخاب کنید، به قالب پیش‌فرض برمی‌گردد."
+            ],
+            "This goal has ended": [
+                "این هدف به پایان رسیده است"
+            ],
+            "View products": [
+                "مشاهده محصولات"
+            ],
+            "With a purchase of": [
+                "با خریدی به ارزش"
+            ],
+            "With a purchase of %s": [
+                "با خریدی به ارزش %s"
             ]
         }
     }

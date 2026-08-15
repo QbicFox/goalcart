@@ -191,7 +191,7 @@ category/product/composite goals evaluate correctly.
     "default_goal_behavior": "all",
     "conflict_resolution": "cumulative",
     "calculation_mode": "subtotal",
-    "frontend_template": "basic",
+    "frontend_template": "template-1",
     "frontend_animation": true,
     "frontend_locations": ["cart", "mini-cart", "checkout", "shop", "product", "sticky"],
     "frontend_mobile": "show",
@@ -245,8 +245,8 @@ sanitizer (direct handler saves included). The full Phase 18 surface:
 | `default_goal_behavior` | enum `all` `first` `closest` | unknown → `all` |
 | `conflict_resolution` | enum `cumulative` `best` `first` | unknown → `cumulative` |
 | `calculation_mode` | enum `subtotal` `discounted_subtotal` `total` | unknown → `subtotal` |
-| `frontend_template` | enum `basic` `percentage` `milestone` `card` | unknown → `basic`; syncs `template_defaults.goal` (and vice versa) |
-| `template_defaults` | object `{ goal?, campaign? }` — ids registered for that scope ('' allowed) | unknown ids rejected; syncs `frontend_template` |
+| `frontend_template` | enum `template-1` … `template-6` (legacy stored ids resolve via the TemplateEngine's migration map) | unknown → `template-1`; does not sync `template_defaults.goal` |
+| `template_defaults` | object `{ goal?, campaign? }` — ids registered for that scope ('' allowed) | unknown ids rejected; does not sync `frontend_template` |
 | `template_settings` | object `{ goal?, campaign? }` → per-template appearance maps | sanitized against each template's schema (unknown scopes/templates dropped, colors/ranges/enums/CSS cleaned) |
 | `frontend_animation` | boolean | cast |
 | `frontend_locations` | array of the location enum (`cart` `mini-cart` `checkout` `shop` `product` `sticky`) | filtered + deduped |
@@ -823,15 +823,15 @@ on the two rendering surfaces (both already fall back safely):
 
 | Surface | File | Unknown id falls back to |
 |---|---|---|
-| Storefront | `assets/js/frontend.js` — add a case to `templateBody()` | the basic progress bar |
-| Admin preview | `admin-app/src/templates/registry.tsx` — add your component to `GOAL_RENDERERS` / `CAMPAIGN_RENDERERS` | `BasicTemplateRenderer` (goal) / per-goal cards (campaign) |
+| Storefront | `assets/js/frontend.js` — add a case to `templateBody()` | the first design template (`template-1`) |
+| Admin preview | `admin-app/src/templates/registry.tsx` — add your component to `GOAL_RENDERERS` / `CAMPAIGN_RENDERERS` | `GOAL_RENDERERS['template-1']` (goal) / per-goal cards (campaign) |
 
 Each renderer receives the goal (or campaign group + goals), the
 currency and the **resolved** settings object. A template that reuses
 a built-in visual and only adds settings fields needs no new renderer
 at all — the resolved settings reach the storefront as card-level CSS
-custom properties, and the admin falls back to the basic renderer with
-those settings applied.
+custom properties, and the admin falls back to the first design
+template with those settings applied.
 
 ---
 

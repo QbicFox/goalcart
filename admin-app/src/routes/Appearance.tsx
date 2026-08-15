@@ -39,7 +39,12 @@ import type {
 
 const SCOPES: TemplateScope[] = ['goal', 'campaign'];
 
-/** A sample in-progress goal for the live previews. */
+/**
+ * A sample in-progress goal for the live previews — the reference
+ * design's demo values (82%: 1,650,000 of 2,000,000, 350,000 left) plus
+ * two sample recommended products so every template demonstrates its
+ * actual capabilities. Preview-only; never used as production data.
+ */
 function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
   return {
     goal_id: 1,
@@ -48,17 +53,38 @@ function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
     goal_type: 'amount',
     is_money: true,
     icon: '🎯',
-    template: 'basic',
+    template: 'template-1',
     template_settings: {},
-    current: 93,
-    target: 150,
-    remaining: 57,
-    percentage: 62,
+    current: 1650000,
+    target: 2000000,
+    remaining: 350000,
+    percentage: 82,
     completed: false,
-    state: 'progressing',
-    message: __('Only $57.00 left to reach your goal', 'goalcart'),
+    state: 'nearly_complete',
+    message: __('Only %s left to reach your goal', 'goalcart').replace('%s', '350,000'),
     reward: { type: 'free_shipping', value: null, max_value: null, meta: {} },
-    suggestions: [],
+    suggestions: [
+      {
+        id: 1,
+        name: __('Classic cotton t-shirt', 'goalcart'),
+        permalink: '#',
+        price: 290000,
+        price_html: '',
+        image: '',
+        stock_status: 'instock',
+        source: 'suggestion',
+      },
+      {
+        id: 2,
+        name: __('Baseball cap', 'goalcart'),
+        permalink: '#',
+        price: 180000,
+        price_html: '',
+        image: '',
+        stock_status: 'instock',
+        source: 'suggestion',
+      },
+    ],
     reward_state: 'locked',
     eligible: true,
     reason: '',
@@ -292,7 +318,7 @@ export default function Appearance() {
   // carries the effective defaults (stored appearance merged over the
   // schema defaults and legacy tokens), so no draft is ever empty.
   const [defaults, setDefaults] = useState<Record<TemplateScope, string>>({
-    goal: 'basic',
+    goal: 'template-1',
     campaign: '',
   });
   const [drafts, setDrafts] = useState<
@@ -310,7 +336,7 @@ export default function Appearance() {
 
     seeded.current = true;
     setDefaults({
-      goal: templates.defaults.goal || 'basic',
+      goal: templates.defaults.goal || 'template-1',
       campaign: templates.defaults.campaign || '',
     });
 
@@ -397,7 +423,7 @@ export default function Appearance() {
     }
 
     setDefaults({
-      goal: templates.defaults.goal || 'basic',
+      goal: templates.defaults.goal || 'template-1',
       campaign: templates.defaults.campaign || '',
     });
 
@@ -598,7 +624,7 @@ export default function Appearance() {
             {!definition && !isCampaign && scopeTemplates.length > 0 && (
               <Alert severity="warning" variant="outlined">
                 {__(
-                  'The stored default template is no longer registered. The storefront falls back to the Basic template until you pick another one here.',
+                  'The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here.',
                   'goalcart'
                 )}
               </Alert>

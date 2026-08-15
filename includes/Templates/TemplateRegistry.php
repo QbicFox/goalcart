@@ -9,11 +9,12 @@ namespace GoalCart\Templates;
 
 use GoalCart\Templates\Campaign\CampaignProgressTemplate;
 use GoalCart\Templates\Campaign\MilestoneChainTemplate;
-use GoalCart\Templates\Goal\BasicTemplate;
-use GoalCart\Templates\Goal\CardTemplate;
-use GoalCart\Templates\Goal\MilestoneTemplate;
-use GoalCart\Templates\Goal\PercentageTemplate;
-use GoalCart\Templates\Goal\RingTemplate;
+use GoalCart\Templates\Goal\Template1;
+use GoalCart\Templates\Goal\Template2;
+use GoalCart\Templates\Goal\Template3;
+use GoalCart\Templates\Goal\Template4;
+use GoalCart\Templates\Goal\Template5;
+use GoalCart\Templates\Goal\Template6;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -38,25 +39,26 @@ class TemplateRegistry {
 	/**
 	 * Default template id => class map.
 	 *
-	 * The four original Phase 12 Goal templates (basic, percentage,
-	 * milestone, card) plus the first Campaign template (milestone_chain)
-	 * are re-implemented here as the built-ins of the pluggable engine,
-	 * alongside the Ring gauge (a genuinely different structure — an SVG
-	 * circle instead of a fill bar) added through the same registration
-	 * path, demonstrating how a fifth template ships with zero changes to
-	 * the registry core, Settings UI, builders, REST layer or preview.
-	 * Phase 32 adds the second Campaign template (campaign_progress) the
-	 * same way.
+	 * The six design templates (template-1 … template-6 — the Classic
+	 * Progress Card, Minimal Inline Cart Goal, Circular Progress, Product
+	 * Recommendation + Goal, Compact Floating / Sticky Goal and Premium /
+	 * Elegant E-commerce Style) replace the original Phase 12 Goal
+	 * templates (basic, percentage, milestone, card) and the Ring gauge.
+	 * The old ids are no longer registered; persisted old ids resolve
+	 * through the TemplateEngine's legacy map instead of failing. The two
+	 * Campaign templates (milestone_chain, campaign_progress) keep their
+	 * separate campaign scope.
 	 *
 	 * @return array<string, string>
 	 */
 	protected function default_classes() {
 		return array(
-			'basic'              => BasicTemplate::class,
-			'percentage'         => PercentageTemplate::class,
-			'milestone'          => MilestoneTemplate::class,
-			'card'               => CardTemplate::class,
-			'ring'               => RingTemplate::class,
+			'template-1'         => Template1::class,
+			'template-2'         => Template2::class,
+			'template-3'         => Template3::class,
+			'template-4'         => Template4::class,
+			'template-5'         => Template5::class,
+			'template-6'         => Template6::class,
 			'milestone_chain'    => MilestoneChainTemplate::class,
 			'campaign_progress'  => CampaignProgressTemplate::class,
 		);

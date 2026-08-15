@@ -436,25 +436,25 @@ $appearance_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/rou
 check( 'Appearance campaign preview stamps the sample campaign id on milestones', false !== strpos( $appearance_tsx, 'campaign_id: campaign.campaign_id' ) );
 
 $config = $ui->frontend_config();
-check( 'config carries the template', isset( $config['template'] ) && 'basic' === $config['template'] );
+check( 'config carries the template', isset( $config['template'] ) && 'template-1' === $config['template'] );
 check( 'config carries the animation flag', array_key_exists( 'animation', $config ) && true === $config['animation'] );
 check( 'config appearance has accent', isset( $config['appearance']['accent'] ) && '#2271b1' === $config['appearance']['accent'] );
 check( 'config appearance has radius', isset( $config['appearance']['radius'] ) && 10 === $config['appearance']['radius'] );
 check( 'config appearance has bar height', isset( $config['appearance']['barHeight'] ) && 10 === $config['appearance']['barHeight'] );
 
 // Shortcode template override lands on the container (per-widget template).
-$out = do_shortcode( '[goalcart_progress template="card"]' );
-check( 'shortcode template override', false !== strpos( $out, 'data-goalcart-template="card"' ) );
+$out = do_shortcode( '[goalcart_progress template="template-2"]' );
+check( 'shortcode template override', false !== strpos( $out, 'data-goalcart-template="template-2"' ) );
 $out = do_shortcode( '[goalcart_progress template="bogus"]' );
 check( 'bogus shortcode template ignored', false === strpos( $out, 'data-goalcart-template' ) );
 
 // Settings drive the config, the container class and the inline CSS.
-$settings->set( 'frontend_template', 'percentage' );
+$settings->set( 'frontend_template', 'template-3' );
 $settings->set( 'frontend_css_class', 'fancy-store' );
 $settings->set( 'frontend_custom_css', '.goalcart-card { padding: 2rem; }' );
 $settings->set( 'frontend_accent', 'nonsense' );
 
-check( 'config template follows settings', 'percentage' === $ui->frontend_config()['template'] );
+check( 'config template follows settings', 'template-3' === $ui->frontend_config()['template'] );
 check( 'invalid color falls back in config', '#2271b1' === $ui->frontend_config()['appearance']['accent'] );
 
 $markup = $ui->widget_container( 'goalcart-test', 'full' );
@@ -466,13 +466,13 @@ check( 'token css sets bar height', false !== strpos( $css, '--goalcart-bar-heig
 check( 'custom css appended', false !== strpos( $css, 'padding: 2rem' ) );
 
 add_filter( 'goalcart_frontend_template', function () {
-	return 'milestone';
+	return 'template-4';
 } );
-check( 'template filter overrides', 'milestone' === $ui->template() );
+check( 'template filter overrides', 'template-4' === $ui->template() );
 remove_all_filters( 'goalcart_frontend_template' );
 
 // Restore the Phase 11-visible defaults.
-$settings->set( 'frontend_template', 'basic' );
+$settings->set( 'frontend_template', 'template-1' );
 $settings->set( 'frontend_css_class', '' );
 $settings->set( 'frontend_custom_css', '' );
 $settings->set( 'frontend_accent', '#2271b1' );
@@ -542,8 +542,8 @@ if ( $block_type ) {
 	check( 'block container id is unique', preg_match( '/id="goalcart-block-\d+"/', $block_out ) === 1 );
 	check( 'block template attr passes through', false === strpos( $block_out, 'data-goalcart-template' ) );
 
-	$block_out = call_user_func( $block_type->render_callback, array( 'variant' => 'full', 'template' => 'card' ), '' );
-	check( 'block template override lands on container', false !== strpos( $block_out, 'data-goalcart-template="card"' ) );
+	$block_out = call_user_func( $block_type->render_callback, array( 'variant' => 'full', 'template' => 'template-2' ), '' );
+	check( 'block template override lands on container', false !== strpos( $block_out, 'data-goalcart-template="template-2"' ) );
 	check( 'repeated block ids stay unique', preg_match( '/id="goalcart-block-(\d+)"/', $block_out, $m ) === 1 && $m[1] !== '1' );
 
 	// A page carrying the block needs the storefront assets.
