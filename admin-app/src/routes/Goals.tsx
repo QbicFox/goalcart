@@ -22,7 +22,6 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
 import TextField from '@mui/material/TextField';
 import Tooltip from '@mui/material/Tooltip';
@@ -36,6 +35,7 @@ import type { Goal } from '../types';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import GoalPreviewDialog from '../components/GoalPreviewDialog';
+import NumberPagination from '../components/NumberPagination';
 import PageContainer from '../components/PageContainer';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { formatCurrency, formatNumber, formatSchedule } from '../lib/format';
@@ -377,17 +377,21 @@ export default function Goals() {
                         title={
                           goal.max_completions_per_user === null ||
                           goal.max_completions_per_user === undefined
-                            ? __('The shopper may complete this goal as many times as they want.', 'goalcart')
+                            ? __(
+                                'The shopper may complete this goal as many times as they want.',
+                                'goalcart'
+                              )
                             : sprintf(
                                 /* translators: %d: number of times. */
-                                __('Each shopper may complete this goal at most %d times.', 'goalcart'),
+                                __(
+                                  'Each shopper may complete this goal at most %d times.',
+                                  'goalcart'
+                                ),
                                 goal.max_completions_per_user
                               )
                         }
                       >
-                        <Typography variant="body2">
-                          {completionLimitLabel(goal)}
-                        </Typography>
+                        <Typography variant="body2">{completionLimitLabel(goal)}</Typography>
                       </Tooltip>
                     </TableCell>
                     <TableCell align="right">
@@ -452,15 +456,14 @@ export default function Goals() {
             </Table>
           </TableContainer>
 
-          <TablePagination
-            component="div"
+          <NumberPagination
             count={total}
             page={page}
             rowsPerPage={perPage}
+            onPageChange={setPage}
             rowsPerPageOptions={[10, 25, 50]}
-            onPageChange={(_event, nextPage) => setPage(nextPage)}
-            onRowsPerPageChange={(event) => {
-              setPerPage(Number(event.target.value));
+            onRowsPerPageChange={(next) => {
+              setPerPage(next);
               setPage(0);
             }}
           />

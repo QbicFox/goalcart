@@ -26,9 +26,14 @@ import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 import { useMemo, useState, type ReactNode } from 'react';
 
-import { applyGoalRecommendation, fetchGoalPerformance, fetchGoalRecommendations } from '../api/revenue';
+import {
+  applyGoalRecommendation,
+  fetchGoalPerformance,
+  fetchGoalRecommendations,
+} from '../api/revenue';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
+import NumberPagination from '../components/NumberPagination';
 import PageContainer from '../components/PageContainer';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import EstimatedProfitCard from '../components/revenue/EstimatedProfitCard';
@@ -77,7 +82,10 @@ const COLUMNS: Column[] = [
     key: 'conversion_rate',
     label: __('Purchase Rate', 'goalcart'),
     align: 'right',
-    tooltip: __('Percentage of completed goals that were followed by an attributed purchase.', 'goalcart'),
+    tooltip: __(
+      'Percentage of completed goals that were followed by an attributed purchase.',
+      'goalcart'
+    ),
   },
   {
     key: 'upsell_assisted',
@@ -92,13 +100,19 @@ const COLUMNS: Column[] = [
     key: 'attributed_revenue',
     label: __('Sales', 'goalcart'),
     align: 'right',
-    tooltip: __('Sales attributed to Goal Cart — the incremental order value driven by this goal.', 'goalcart'),
+    tooltip: __(
+      'Sales attributed to Goal Cart — the incremental order value driven by this goal.',
+      'goalcart'
+    ),
   },
   {
     key: 'profit_impact',
     label: __('Estimated Profit', 'goalcart'),
     align: 'right',
-    tooltip: __('Estimated, not guaranteed — based on available product cost, reward and shipping data.', 'goalcart'),
+    tooltip: __(
+      'Estimated, not guaranteed — based on available product cost, reward and shipping data.',
+      'goalcart'
+    ),
   },
 ];
 
@@ -121,7 +135,9 @@ const SUFFICIENCY: Record<'low' | 'medium' | 'high', { label: string; hint: stri
 /** Numeric sort value — unavailable profit/rate sorts last, never first. */
 function sortValue(row: GoalPerformanceRow, key: SortKey): number | string {
   if (key === 'profit_impact') {
-    return row.profit_available && row.profit_impact !== null ? row.profit_impact : Number.NEGATIVE_INFINITY;
+    return row.profit_available && row.profit_impact !== null
+      ? row.profit_impact
+      : Number.NEGATIVE_INFINITY;
   }
   if (key === 'conversion_rate') {
     return row.conversion_rate === null ? Number.NEGATIVE_INFINITY : row.conversion_rate;
@@ -184,7 +200,13 @@ function SectionTitle({ children }: { children: ReactNode }) {
  * changes) and records the feedback-loop event. The section title uses
  * the canonical §40 label (Recommendations), matching the navigation.
  */
-function GoalOptimizationSection({ goalId, currentTarget }: { goalId: number; currentTarget: number }) {
+function GoalOptimizationSection({
+  goalId,
+  currentTarget,
+}: {
+  goalId: number;
+  currentTarget: number;
+}) {
   const queryClient = useQueryClient();
   const { notify } = useSnackbar();
   const [applyTarget, setApplyTarget] = useState<RecommendationCandidate | null>(null);
@@ -230,14 +252,22 @@ function GoalOptimizationSection({ goalId, currentTarget }: { goalId: number; cu
       ) : (
         <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5 }}>
-            <StatCell label={__('Current target', 'goalcart')} value={formatCurrency(currentTarget)} />
-            <StatCell label={__('Recommended target', 'goalcart')} value={formatCurrency(top.threshold)} />
+            <StatCell
+              label={__('Current target', 'goalcart')}
+              value={formatCurrency(currentTarget)}
+            />
+            <StatCell
+              label={__('Recommended target', 'goalcart')}
+              value={formatCurrency(top.threshold)}
+            />
           </Box>
           <Box>
             <Chip
               size="small"
               variant="outlined"
-              color={top.confidence >= 75 ? 'success' : top.confidence >= 60 ? 'warning' : 'default'}
+              color={
+                top.confidence >= 75 ? 'success' : top.confidence >= 60 ? 'warning' : 'default'
+              }
               label={sprintf(
                 /* translators: 1: confidence label. */
                 __('Confidence: %1$s', 'goalcart'),
@@ -280,7 +310,10 @@ function GoalOptimizationSection({ goalId, currentTarget }: { goalId: number; cu
             <>
               {sprintf(
                 /* translators: 1: current target, 2: recommended target. */
-                __('Current target %1$s → recommended target %2$s? This changes a production goal — the action is not reversible from here.', 'goalcart'),
+                __(
+                  'Current target %1$s → recommended target %2$s? This changes a production goal — the action is not reversible from here.',
+                  'goalcart'
+                ),
                 formatCurrency(currentTarget),
                 formatCurrency(applyTarget.threshold)
               )}
@@ -309,7 +342,13 @@ function GoalOptimizationSection({ goalId, currentTarget }: { goalId: number; cu
  * states) and, behind accordions, the advanced attribution details and
  * engine metadata. Completion and purchase stay visually distinct (§17).
  */
-function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; onClose: () => void }) {
+function GoalDetailDrawer({
+  row,
+  onClose,
+}: {
+  row: GoalPerformanceRow | null;
+  onClose: () => void;
+}) {
   const open = row !== null;
 
   const profitValue =
@@ -353,7 +392,11 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                 {row.name}
               </Typography>
               {row.reward_type && (
-                <Chip size="small" variant="outlined" label={REWARD_LABELS[row.reward_type] ?? row.reward_type} />
+                <Chip
+                  size="small"
+                  variant="outlined"
+                  label={REWARD_LABELS[row.reward_type] ?? row.reward_type}
+                />
               )}
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -370,7 +413,14 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
           {/* Performance summary (§20). */}
           <Box>
             <SectionTitle>{__('Performance Summary', 'goalcart')}</SectionTitle>
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)' }, gap: 1.5, mt: 1 }}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: 'repeat(2, 1fr)' },
+                gap: 1.5,
+                mt: 1,
+              }}
+            >
               <StatCell label={__('Viewed', 'goalcart')} value={formatNumber(row.views)} />
               <StatCell label={__('Progressed', 'goalcart')} value={formatNumber(row.progressed)} />
               <StatCell label={__('Completed', 'goalcart')} value={formatNumber(row.completed)} />
@@ -379,8 +429,15 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                 value={formatNumber(row.converted)}
                 hint={__('after Goal Cart interaction', 'goalcart')}
               />
-              <StatCell label={__('Attributed Sales', 'goalcart')} value={formatCurrency(row.attributed_revenue)} />
-              <StatCell label={__('Estimated Profit', 'goalcart')} value={profitValue} hint={profitHint} />
+              <StatCell
+                label={__('Attributed Sales', 'goalcart')}
+                value={formatCurrency(row.attributed_revenue)}
+              />
+              <StatCell
+                label={__('Estimated Profit', 'goalcart')}
+                value={profitValue}
+                hint={profitHint}
+              />
             </Box>
           </Box>
 
@@ -438,17 +495,37 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
           <Box>
             <SectionTitle>{__('Upsells', 'goalcart')}</SectionTitle>
             <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.25 }}>
-              {__('Products recommended to customers who were working toward this goal.', 'goalcart')}
+              {__(
+                'Products recommended to customers who were working toward this goal.',
+                'goalcart'
+              )}
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5, mt: 1 }}>
-              <StatCell label={__('Impressions', 'goalcart')} value={formatNumber(row.upsell_funnel.impressions)} />
-              <StatCell label={__('Clicks', 'goalcart')} value={formatNumber(row.upsell_funnel.clicks)} />
-              <StatCell label={__('Added to cart', 'goalcart')} value={formatNumber(row.upsell_funnel.adds)} />
-              <StatCell label={__('Purchased', 'goalcart')} value={formatNumber(row.upsell_funnel.orders)} />
-              <StatCell label={__('Assisted completions', 'goalcart')} value={formatNumber(row.upsell_assisted)} />
+              <StatCell
+                label={__('Impressions', 'goalcart')}
+                value={formatNumber(row.upsell_funnel.impressions)}
+              />
+              <StatCell
+                label={__('Clicks', 'goalcart')}
+                value={formatNumber(row.upsell_funnel.clicks)}
+              />
+              <StatCell
+                label={__('Added to cart', 'goalcart')}
+                value={formatNumber(row.upsell_funnel.adds)}
+              />
+              <StatCell
+                label={__('Purchased', 'goalcart')}
+                value={formatNumber(row.upsell_funnel.orders)}
+              />
+              <StatCell
+                label={__('Assisted completions', 'goalcart')}
+                value={formatNumber(row.upsell_assisted)}
+              />
               <StatCell
                 label={__('Assisted rate', 'goalcart')}
-                value={row.upsell_assisted_rate === null ? '—' : formatPercent(row.upsell_assisted_rate)}
+                value={
+                  row.upsell_assisted_rate === null ? '—' : formatPercent(row.upsell_assisted_rate)
+                }
                 hint={__('of completions that saw a recommendation', 'goalcart')}
               />
             </Box>
@@ -542,7 +619,11 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                     row.attribution_window_days
                   )}
                 />
-                <StatRow label={__('Data sufficiency', 'goalcart')} value={sufficiency.label} explanation={sufficiency.hint} />
+                <StatRow
+                  label={__('Data sufficiency', 'goalcart')}
+                  value={sufficiency.label}
+                  explanation={sufficiency.hint}
+                />
                 <StatRow
                   label={__('Average basket increase', 'goalcart')}
                   value={aovImpact !== null ? formatSignedPercent(aovImpact) : '—'}
@@ -554,7 +635,10 @@ function GoalDetailDrawer({ row, onClose }: { row: GoalPerformanceRow | null; on
                 <StatRow
                   label={__('Attributed orders', 'goalcart')}
                   value={formatNumber(row.converted)}
-                  explanation={__('Distinct orders associated with this goal in the selected period.', 'goalcart')}
+                  explanation={__(
+                    'Distinct orders associated with this goal in the selected period.',
+                    'goalcart'
+                  )}
                 />
               </Stack>
             </AccordionDetails>
@@ -581,6 +665,7 @@ export default function GoalPerformance() {
   const [sortKey, setSortKey] = useState<SortKey>('attributed_revenue');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selected, setSelected] = useState<GoalPerformanceRow | null>(null);
+  const [page, setPage] = useState(0);
 
   const query = useQuery({
     queryKey: ['revenue', 'goals', { from: range.from, to: range.to, goalId }],
@@ -628,7 +713,13 @@ export default function GoalPerformance() {
       setSortKey(key);
       setSortDir(key === 'name' ? 'asc' : 'desc');
     }
+    setPage(0);
   };
+
+  const PER_PAGE = 10;
+  const pageCount = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+  const safePage = Math.min(page, pageCount - 1);
+  const pagedRows = sorted.slice(safePage * PER_PAGE, (safePage + 1) * PER_PAGE);
 
   return (
     <PageContainer
@@ -663,98 +754,121 @@ export default function GoalPerformance() {
           )}
         />
       ) : (
-        <TableContainer component={Paper} variant="outlined" sx={{ overflowX: 'auto' }}>
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                {COLUMNS.map((column) => {
-                  const cell = (
-                    <TableCell
-                      key={column.key}
-                      align={column.align}
-                      sortDirection={sortKey === column.key ? sortDir : false}
-                    >
-                      <TableSortLabel
-                        active={sortKey === column.key}
-                        direction={sortKey === column.key ? sortDir : 'asc'}
-                        onClick={() => handleSort(column.key)}
+        <>
+          <TableContainer component={Paper} variant="outlined" sx={{ overflowX: 'auto' }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  {COLUMNS.map((column) => {
+                    const cell = (
+                      <TableCell
+                        key={column.key}
+                        align={column.align}
+                        sortDirection={sortKey === column.key ? sortDir : false}
                       >
-                        {column.label}
-                      </TableSortLabel>
-                    </TableCell>
-                  );
-
-                  return column.tooltip ? (
-                    <Tooltip key={column.key} title={column.tooltip} arrow>
-                      {cell}
-                    </Tooltip>
-                  ) : (
-                    cell
-                  );
-                })}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {sorted.map((row) => (
-                <TableRow
-                  key={row.goal_id}
-                  hover
-                  tabIndex={0}
-                  sx={{ cursor: 'pointer', '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: -2 } }}
-                  onClick={() => setSelected(row)}
-                  onKeyDown={(event) => {
-                    // Keyboard access to the detail drawer (§53): Enter /
-                    // Space open the same row details as a click.
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault();
-                      setSelected(row);
-                    }
-                  }}
-                  aria-label={sprintf(
-                    /* translators: %s: goal name. */
-                    __('Open performance details for %s', 'goalcart'),
-                    row.name
-                  )}
-                >
-                  <TableCell sx={{ fontWeight: 600 }}>{row.name}</TableCell>
-                  <TableCell align="right">{formatNumber(row.views)}</TableCell>
-                  <TableCell align="right">{formatNumber(row.progressed)}</TableCell>
-                  <TableCell align="right">{formatNumber(row.completed)}</TableCell>
-                  <TableCell align="right">{formatNumber(row.converted)}</TableCell>
-                  <TableCell align="right">
-                    {row.conversion_rate === null ? '—' : formatPercent(row.conversion_rate)}
-                  </TableCell>
-                  <TableCell align="right">{formatNumber(row.upsell_assisted)}</TableCell>
-                  <TableCell align="right">{formatCurrency(row.attributed_revenue)}</TableCell>
-                  <TableCell align="right">
-                    {row.profit_available && row.profit_impact !== null ? (
-                      formatCurrency(row.profit_impact)
-                    ) : (
-                      <Tooltip
-                        title={
-                          row.profit_reason_code === 'missing_product_cost'
-                            ? __('Add product cost data to estimate profit.', 'goalcart')
-                            : row.profit_reason_code === 'incomplete_product_cost'
-                              ? __('Some orders do not have complete cost information.', 'goalcart')
-                              : __('Not enough attributed order data yet.', 'goalcart')
-                        }
-                        arrow
-                      >
-                        <Box
-                          component="span"
-                          sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, color: 'text.secondary' }}
+                        <TableSortLabel
+                          active={sortKey === column.key}
+                          direction={sortKey === column.key ? sortDir : 'asc'}
+                          onClick={() => handleSort(column.key)}
                         >
-                          <SavingsIcon sx={{ fontSize: 14 }} />
-                          —
-                        </Box>
+                          {column.label}
+                        </TableSortLabel>
+                      </TableCell>
+                    );
+
+                    return column.tooltip ? (
+                      <Tooltip key={column.key} title={column.tooltip} arrow>
+                        {cell}
                       </Tooltip>
-                    )}
-                  </TableCell>
+                    ) : (
+                      cell
+                    );
+                  })}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {pagedRows.map((row) => (
+                  <TableRow
+                    key={row.goal_id}
+                    hover
+                    tabIndex={0}
+                    sx={{
+                      cursor: 'pointer',
+                      '&:focus-visible': {
+                        outline: '2px solid',
+                        outlineColor: 'primary.main',
+                        outlineOffset: -2,
+                      },
+                    }}
+                    onClick={() => setSelected(row)}
+                    onKeyDown={(event) => {
+                      // Keyboard access to the detail drawer (§53): Enter /
+                      // Space open the same row details as a click.
+                      if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setSelected(row);
+                      }
+                    }}
+                    aria-label={sprintf(
+                      /* translators: %s: goal name. */
+                      __('Open performance details for %s', 'goalcart'),
+                      row.name
+                    )}
+                  >
+                    <TableCell sx={{ fontWeight: 600 }}>{row.name}</TableCell>
+                    <TableCell align="right">{formatNumber(row.views)}</TableCell>
+                    <TableCell align="right">{formatNumber(row.progressed)}</TableCell>
+                    <TableCell align="right">{formatNumber(row.completed)}</TableCell>
+                    <TableCell align="right">{formatNumber(row.converted)}</TableCell>
+                    <TableCell align="right">
+                      {row.conversion_rate === null ? '—' : formatPercent(row.conversion_rate)}
+                    </TableCell>
+                    <TableCell align="right">{formatNumber(row.upsell_assisted)}</TableCell>
+                    <TableCell align="right">{formatCurrency(row.attributed_revenue)}</TableCell>
+                    <TableCell align="right">
+                      {row.profit_available && row.profit_impact !== null ? (
+                        formatCurrency(row.profit_impact)
+                      ) : (
+                        <Tooltip
+                          title={
+                            row.profit_reason_code === 'missing_product_cost'
+                              ? __('Add product cost data to estimate profit.', 'goalcart')
+                              : row.profit_reason_code === 'incomplete_product_cost'
+                                ? __(
+                                    'Some orders do not have complete cost information.',
+                                    'goalcart'
+                                  )
+                                : __('Not enough attributed order data yet.', 'goalcart')
+                          }
+                          arrow
+                        >
+                          <Box
+                            component="span"
+                            sx={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                              color: 'text.secondary',
+                            }}
+                          >
+                            <SavingsIcon sx={{ fontSize: 14 }} />—
+                          </Box>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <NumberPagination
+            count={sorted.length}
+            page={safePage}
+            rowsPerPage={PER_PAGE}
+            onPageChange={setPage}
+          />
+        </>
       )}
 
       <GoalDetailDrawer row={selected} onClose={() => setSelected(null)} />

@@ -53,13 +53,20 @@ import { searchProducts } from '../api/search';
 import { getBootData } from '../boot';
 import DateRangeFilter from '../components/date-range/DateRangeFilter';
 import EmptyState from '../components/EmptyState';
+import NumberPagination from '../components/NumberPagination';
 import EntityAutocomplete from '../components/goal-builder/EntityAutocomplete';
 import EstimatedProfitCard from '../components/revenue/EstimatedProfitCard';
 import FunnelVisual from '../components/revenue/FunnelVisual';
 import StatRow from '../components/revenue/StatRow';
 import PageContainer from '../components/PageContainer';
 import { useDateRange } from '../date-range/DateRangeContext';
-import { formatCompact, formatCurrency, formatNumber, formatPercent, formatPercentValue } from '../lib/format';
+import {
+  formatCompact,
+  formatCurrency,
+  formatNumber,
+  formatPercent,
+  formatPercentValue,
+} from '../lib/format';
 import type { AnalyticsRewardFilter, AnalyticsSummary, GoalPerformanceRow } from '../types';
 
 /** Chart palette — WP admin blues + semantic accents. */
@@ -122,7 +129,9 @@ interface KpiCardProps {
 function KpiCard({ label, value, icon, hint, tooltip }: KpiCardProps) {
   const content = (
     <Card variant="outlined" sx={{ height: '100%' }}>
-      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 1 }}>
+      <CardContent
+        sx={{ p: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 1 }}
+      >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
           {icon}
           <Typography variant="body2" color="text.secondary" noWrap>
@@ -184,26 +193,37 @@ const COMPARISON_COLUMNS: ComparisonColumn[] = [
     key: 'conversion_rate',
     label: __('Purchase Rate', 'goalcart'),
     align: 'right',
-    tooltip: __('Percentage of completed goals that were followed by an attributed purchase.', 'goalcart'),
+    tooltip: __(
+      'Percentage of completed goals that were followed by an attributed purchase.',
+      'goalcart'
+    ),
   },
   {
     key: 'attributed_revenue',
     label: __('Sales', 'goalcart'),
     align: 'right',
-    tooltip: __('Sales attributed to Goal Cart — the incremental order value driven by this goal.', 'goalcart'),
+    tooltip: __(
+      'Sales attributed to Goal Cart — the incremental order value driven by this goal.',
+      'goalcart'
+    ),
   },
   {
     key: 'profit_impact',
     label: __('Estimated Profit', 'goalcart'),
     align: 'right',
-    tooltip: __('Estimated, not guaranteed — based on available product cost, reward and shipping data.', 'goalcart'),
+    tooltip: __(
+      'Estimated, not guaranteed — based on available product cost, reward and shipping data.',
+      'goalcart'
+    ),
   },
 ];
 
 /** Numeric sort value — unavailable profit/rate sorts last, never first. */
 function comparisonSortValue(row: GoalPerformanceRow, key: ComparisonSortKey): number | string {
   if (key === 'profit_impact') {
-    return row.profit_available && row.profit_impact !== null ? row.profit_impact : Number.NEGATIVE_INFINITY;
+    return row.profit_available && row.profit_impact !== null
+      ? row.profit_impact
+      : Number.NEGATIVE_INFINITY;
   }
   if (key === 'conversion_rate') {
     return row.conversion_rate === null ? Number.NEGATIVE_INFINITY : row.conversion_rate;
@@ -250,7 +270,10 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
         title: __('Purchase conversion', 'goalcart'),
         body: sprintf(
           /* translators: 1: percentage. */
-          __('Completion is strong, but purchase conversion is weak — only %1$s of completed goals were followed by an attributed purchase.', 'goalcart'),
+          __(
+            'Completion is strong, but purchase conversion is weak — only %1$s of completed goals were followed by an attributed purchase.',
+            'goalcart'
+          ),
           formatPercent(funnel.conversion_rate)
         ),
       });
@@ -292,11 +315,17 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
       title: __('Estimated profit', 'goalcart'),
       body: sprintf(
         /* translators: 1: estimated profit amount. */
-        __('Goal Cart generated an estimated profit of %1$s after reward and shipping costs.', 'goalcart'),
+        __(
+          'Goal Cart generated an estimated profit of %1$s after reward and shipping costs.',
+          'goalcart'
+        ),
         formatCurrency(summary.estimated_profit)
       ),
     });
-  } else if ((summary.purchased_orders ?? 0) > 0 && summary.profit_reason_code === 'missing_product_cost') {
+  } else if (
+    (summary.purchased_orders ?? 0) > 0 &&
+    summary.profit_reason_code === 'missing_product_cost'
+  ) {
     insights.push({
       icon: <PaymentsIcon fontSize="small" />,
       title: __('Profit not estimated yet', 'goalcart'),
@@ -331,6 +360,8 @@ export default function Analytics() {
   const [productId, setProductId] = useState<number>(0);
   const [sortKey, setSortKey] = useState<ComparisonSortKey>('attributed_revenue');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [comparisonPage, setComparisonPage] = useState(0);
+  const [productsPage, setProductsPage] = useState(0);
 
   const analyticsQuery = useQuery({
     queryKey: [
@@ -363,9 +394,20 @@ export default function Analytics() {
   const summary = data?.summary;
   const funnel = summary?.funnel ?? null;
 
+  // Pagination for the legacy "Top suggested products" table.
+  const topProducts = data?.top_suggested_products ?? [];
+  const PRODUCTS_PER_PAGE = 10;
+  const productsPageCount = Math.max(1, Math.ceil(topProducts.length / PRODUCTS_PER_PAGE));
+  const safeProductsPage = Math.min(productsPage, productsPageCount - 1);
+  const pagedTopProducts = topProducts.slice(
+    safeProductsPage * PRODUCTS_PER_PAGE,
+    (safeProductsPage + 1) * PRODUCTS_PER_PAGE
+  );
+
   // The purchase pipeline is unavailable when the active filter cannot be
   // expressed in attribution (product_id) — the legacy sections still work.
-  const purchaseUnavailable = !analyticsQuery.isLoading && !analyticsQuery.isError && funnel === null;
+  const purchaseUnavailable =
+    !analyticsQuery.isLoading && !analyticsQuery.isError && funnel === null;
 
   const isEmpty =
     !analyticsQuery.isLoading &&
@@ -421,6 +463,15 @@ export default function Analytics() {
     return copy;
   }, [data, sortKey, sortDir]);
 
+  // Pagination for the goal comparison table.
+  const COMPARISON_PER_PAGE = 10;
+  const comparisonPageCount = Math.max(1, Math.ceil(comparison.length / COMPARISON_PER_PAGE));
+  const safeComparisonPage = Math.min(comparisonPage, comparisonPageCount - 1);
+  const pagedComparison = comparison.slice(
+    safeComparisonPage * COMPARISON_PER_PAGE,
+    (safeComparisonPage + 1) * COMPARISON_PER_PAGE
+  );
+
   const insights = useMemo(
     () => (data && summary ? buildInsights(summary, data.goal_comparison ?? []) : []),
     [data, summary]
@@ -433,6 +484,7 @@ export default function Analytics() {
       setSortKey(key);
       setSortDir(key === 'name' ? 'asc' : 'desc');
     }
+    setComparisonPage(0);
   };
 
   // Derived purchase-analysis values (§24/§25). The average purchased
@@ -606,14 +658,22 @@ export default function Analytics() {
               label={__('Purchase Rate', 'goalcart')}
               value={summary.purchase_rate === null ? '—' : formatPercent(summary.purchase_rate)}
               icon={<PercentIcon fontSize="small" />}
-              tooltip={__('Percentage of completed goals that were followed by an attributed purchase.', 'goalcart')}
+              tooltip={__(
+                'Percentage of completed goals that were followed by an attributed purchase.',
+                'goalcart'
+              )}
             />
             <KpiCard
               label={__('Attributed Sales', 'goalcart')}
-              value={summary.attributed_sales === null ? '—' : formatCurrency(summary.attributed_sales)}
+              value={
+                summary.attributed_sales === null ? '—' : formatCurrency(summary.attributed_sales)
+              }
               icon={<PaymentsIcon fontSize="small" />}
               hint={__('Sales attributed to Goal Cart', 'goalcart')}
-              tooltip={__('The incremental order value from orders where customers interacted with a goal before purchasing.', 'goalcart')}
+              tooltip={__(
+                'The incremental order value from orders where customers interacted with a goal before purchasing.',
+                'goalcart'
+              )}
             />
             <EstimatedProfitCard
               profitImpact={summary.estimated_profit}
@@ -645,7 +705,10 @@ export default function Analytics() {
               label={__('Goal Completions', 'goalcart')}
               value={funnel ? formatNumber(funnel.completed) : '—'}
               icon={<CheckCircleOutlineOutlinedIcon fontSize="small" />}
-              tooltip={__('How many times customers reached a goal target. Completion is not the same as purchase.', 'goalcart')}
+              tooltip={__(
+                'How many times customers reached a goal target. Completion is not the same as purchase.',
+                'goalcart'
+              )}
             />
           </Box>
 
@@ -685,26 +748,40 @@ export default function Analytics() {
                   {__('Purchase Analysis', 'goalcart')}
                 </Typography>
                 <Stack spacing={1}>
-                  <StatRow label={__('Goals Completed', 'goalcart')} value={formatNumber(funnel.completed)} />
+                  <StatRow
+                    label={__('Goals Completed', 'goalcart')}
+                    value={formatNumber(funnel.completed)}
+                  />
                   <StatRow
                     label={__('Purchased After Completion', 'goalcart')}
                     value={formatNumber(funnel.converted)}
                   />
                   <StatRow
                     label={__('Purchase Rate', 'goalcart')}
-                    value={funnel.conversion_rate === null ? '—' : formatPercent(funnel.conversion_rate)}
+                    value={
+                      funnel.conversion_rate === null ? '—' : formatPercent(funnel.conversion_rate)
+                    }
                     explanation={__('Purchased orders ÷ completed goals.', 'goalcart')}
                   />
                   <Divider />
                   <StatRow
                     label={__('Attributed Sales', 'goalcart')}
-                    value={summary.attributed_sales === null ? '—' : formatCurrency(summary.attributed_sales)}
+                    value={
+                      summary.attributed_sales === null
+                        ? '—'
+                        : formatCurrency(summary.attributed_sales)
+                    }
                     explanation={__('Sales generated after Goal Cart interaction.', 'goalcart')}
                   />
                   <StatRow
                     label={__('Average Purchased Order', 'goalcart')}
-                    value={averagePurchasedOrder === null ? '—' : formatCurrency(averagePurchasedOrder)}
-                    explanation={__('Average order value of the attributed purchased orders.', 'goalcart')}
+                    value={
+                      averagePurchasedOrder === null ? '—' : formatCurrency(averagePurchasedOrder)
+                    }
+                    explanation={__(
+                      'Average order value of the attributed purchased orders.',
+                      'goalcart'
+                    )}
                   />
                   <Divider />
                   <StatRow
@@ -741,58 +818,72 @@ export default function Analytics() {
                     {__('No goal purchase activity in this range.', 'goalcart')}
                   </Typography>
                 ) : (
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          {COMPARISON_COLUMNS.map((column) => {
-                            const cell = (
-                              <TableCell
-                                key={column.key}
-                                align={column.align}
-                                sortDirection={sortKey === column.key ? sortDir : false}
-                              >
-                                <TableSortLabel
-                                  active={sortKey === column.key}
-                                  direction={sortKey === column.key ? sortDir : 'asc'}
-                                  onClick={() => handleComparisonSort(column.key)}
+                  <>
+                    <TableContainer>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            {COMPARISON_COLUMNS.map((column) => {
+                              const cell = (
+                                <TableCell
+                                  key={column.key}
+                                  align={column.align}
+                                  sortDirection={sortKey === column.key ? sortDir : false}
                                 >
-                                  {column.label}
-                                </TableSortLabel>
-                              </TableCell>
-                            );
+                                  <TableSortLabel
+                                    active={sortKey === column.key}
+                                    direction={sortKey === column.key ? sortDir : 'asc'}
+                                    onClick={() => handleComparisonSort(column.key)}
+                                  >
+                                    {column.label}
+                                  </TableSortLabel>
+                                </TableCell>
+                              );
 
-                            return column.tooltip ? (
-                              <Tooltip key={column.key} title={column.tooltip} arrow>
-                                {cell}
-                              </Tooltip>
-                            ) : (
-                              cell
-                            );
-                          })}
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {comparison.map((row) => (
-                          <TableRow key={row.goal_id} hover>
-                            <TableCell sx={{ fontWeight: 600 }}>{row.name}</TableCell>
-                            <TableCell align="right">{formatNumber(row.views)}</TableCell>
-                            <TableCell align="right">{formatNumber(row.completed)}</TableCell>
-                            <TableCell align="right">{formatNumber(row.converted)}</TableCell>
-                            <TableCell align="right">
-                              {row.conversion_rate === null ? '—' : formatPercent(row.conversion_rate)}
-                            </TableCell>
-                            <TableCell align="right">{formatCurrency(row.attributed_revenue)}</TableCell>
-                            <TableCell align="right">
-                              {row.profit_available && row.profit_impact !== null
-                                ? formatCurrency(row.profit_impact)
-                                : '—'}
-                            </TableCell>
+                              return column.tooltip ? (
+                                <Tooltip key={column.key} title={column.tooltip} arrow>
+                                  {cell}
+                                </Tooltip>
+                              ) : (
+                                cell
+                              );
+                            })}
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
+                        </TableHead>
+                        <TableBody>
+                          {pagedComparison.map((row) => (
+                            <TableRow key={row.goal_id} hover>
+                              <TableCell sx={{ fontWeight: 600 }}>{row.name}</TableCell>
+                              <TableCell align="right">{formatNumber(row.views)}</TableCell>
+                              <TableCell align="right">{formatNumber(row.completed)}</TableCell>
+                              <TableCell align="right">{formatNumber(row.converted)}</TableCell>
+                              <TableCell align="right">
+                                {row.conversion_rate === null
+                                  ? '—'
+                                  : formatPercent(row.conversion_rate)}
+                              </TableCell>
+                              <TableCell align="right">
+                                {formatCurrency(row.attributed_revenue)}
+                              </TableCell>
+                              <TableCell align="right">
+                                {row.profit_available && row.profit_impact !== null
+                                  ? formatCurrency(row.profit_impact)
+                                  : '—'}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                    <Box sx={{ px: 2 }}>
+                      <NumberPagination
+                        count={comparison.length}
+                        page={safeComparisonPage}
+                        rowsPerPage={COMPARISON_PER_PAGE}
+                        onPageChange={setComparisonPage}
+                      />
+                    </Box>
+                  </>
                 )}
               </CardContent>
             </Card>
@@ -814,7 +905,15 @@ export default function Analytics() {
                 >
                   {insights.map((insight) => (
                     <Paper key={insight.title} variant="outlined" sx={{ p: 1.5 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary', mb: 0.5 }}>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          color: 'text.secondary',
+                          mb: 0.5,
+                        }}
+                      >
                         {insight.icon}
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
                           {insight.title}
@@ -833,7 +932,12 @@ export default function Analytics() {
             <Accordion
               disableGutters
               square
-              sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
+              sx={{
+                boxShadow: 'none',
+                border: '1px solid',
+                borderColor: 'divider',
+                borderRadius: 1,
+              }}
             >
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6" component="h3" sx={{ fontSize: '1rem' }}>
@@ -844,7 +948,11 @@ export default function Analytics() {
                 <Stack spacing={1.25}>
                   <StatRow
                     label={__('Direct revenue', 'goalcart')}
-                    value={summary.attributed_sales === null ? '—' : formatCurrency(summary.attributed_sales)}
+                    value={
+                      summary.attributed_sales === null
+                        ? '—'
+                        : formatCurrency(summary.attributed_sales)
+                    }
                     explanation={__(
                       'Revenue from the incremental value of orders where customers progressed toward or completed a goal before ordering.',
                       'goalcart'
@@ -852,12 +960,21 @@ export default function Analytics() {
                   />
                   <StatRow
                     label={__('Assisted revenue', 'goalcart')}
-                    value={summary.assisted_sales === null ? '—' : formatCurrency(summary.assisted_sales)}
-                    explanation={__('Order totals from orders that were only exposed to a goal, never progressed.', 'goalcart')}
+                    value={
+                      summary.assisted_sales === null ? '—' : formatCurrency(summary.assisted_sales)
+                    }
+                    explanation={__(
+                      'Order totals from orders that were only exposed to a goal, never progressed.',
+                      'goalcart'
+                    )}
                   />
                   <StatRow
                     label={__('Influenced sales', 'goalcart')}
-                    value={summary.influenced_sales === null ? '—' : formatCurrency(summary.influenced_sales)}
+                    value={
+                      summary.influenced_sales === null
+                        ? '—'
+                        : formatCurrency(summary.influenced_sales)
+                    }
                     explanation={__(
                       'Order totals of every order associated with a goal — distinct orders, never double counted.',
                       'goalcart'
@@ -866,7 +983,10 @@ export default function Analytics() {
                   <StatRow
                     label={__('Attributed orders', 'goalcart')}
                     value={funnel ? formatNumber(funnel.converted) : '—'}
-                    explanation={__('Distinct orders associated with a goal in the selected period.', 'goalcart')}
+                    explanation={__(
+                      'Distinct orders associated with a goal in the selected period.',
+                      'goalcart'
+                    )}
                   />
                   <StatRow
                     label={__('Attribution window', 'goalcart')}
@@ -895,10 +1015,15 @@ export default function Analytics() {
                     />
                   )}
                   <Divider />
-                  <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', color: 'text.secondary' }}>
+                  <Box
+                    sx={{ display: 'flex', gap: 1, alignItems: 'center', color: 'text.secondary' }}
+                  >
                     <LocalShippingIcon fontSize="small" />
                     <Typography variant="caption">
-                      {__('These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting.', 'goalcart')}
+                      {__(
+                        'These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting.',
+                        'goalcart'
+                      )}
                     </Typography>
                   </Box>
                 </Stack>
@@ -932,8 +1057,15 @@ export default function Analytics() {
                     sx={{ width: '100%', height: 280 }}
                   >
                     <ResponsiveContainer width="100%" height="100%">
-                      <ComposedChart data={trendData} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} vertical={false} />
+                      <ComposedChart
+                        data={trendData}
+                        margin={{ top: 8, right: 8, bottom: 0, left: 0 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke={COLORS.grid}
+                          vertical={false}
+                        />
                         <XAxis
                           dataKey="label"
                           tick={{ fontSize: 11, fill: COLORS.tick }}
@@ -1026,7 +1158,11 @@ export default function Analytics() {
                             layout="vertical"
                             margin={{ top: 0, right: 12, bottom: 0, left: 0 }}
                           >
-                            <CartesianGrid strokeDasharray="3 3" stroke={COLORS.grid} horizontal={false} />
+                            <CartesianGrid
+                              strokeDasharray="3 3"
+                              stroke={COLORS.grid}
+                              horizontal={false}
+                            />
                             <XAxis
                               type="number"
                               tick={{ fontSize: 11, fill: COLORS.tick }}
@@ -1070,39 +1206,53 @@ export default function Analytics() {
                         {__('No suggestion activity in this range.', 'goalcart')}
                       </Typography>
                     ) : (
-                      <TableContainer>
-                        <Table size="small">
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>{__('Product', 'goalcart')}</TableCell>
-                              <TableCell align="right">{__('Impressions', 'goalcart')}</TableCell>
-                              <TableCell align="right">{__('Clicks', 'goalcart')}</TableCell>
-                              <TableCell align="right">{__('Added', 'goalcart')}</TableCell>
-                              <TableCell align="right">{__('CTR', 'goalcart')}</TableCell>
-                              <TableCell align="right">{__('Add-to-cart', 'goalcart')}</TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {data.top_suggested_products.map((product) => (
-                              <TableRow key={product.product_id} hover>
-                                <TableCell sx={{ fontWeight: 600 }}>{product.name}</TableCell>
-                                <TableCell align="right">{formatNumber(product.impressions)}</TableCell>
-                                <TableCell align="right">{formatNumber(product.clicks)}</TableCell>
-                                <TableCell align="right">
-                                  <Chip
-                                    size="small"
-                                    variant="outlined"
-                                    color={product.added > 0 ? 'success' : 'default'}
-                                    label={formatNumber(product.added)}
-                                  />
-                                </TableCell>
-                                <TableCell align="right">{formatPercent(product.ctr)}</TableCell>
-                                <TableCell align="right">{formatPercent(product.add_to_cart_rate)}</TableCell>
+                      <>
+                        <TableContainer>
+                          <Table size="small">
+                            <TableHead>
+                              <TableRow>
+                                <TableCell>{__('Product', 'goalcart')}</TableCell>
+                                <TableCell align="right">{__('Impressions', 'goalcart')}</TableCell>
+                                <TableCell align="right">{__('Clicks', 'goalcart')}</TableCell>
+                                <TableCell align="right">{__('Added', 'goalcart')}</TableCell>
+                                <TableCell align="right">{__('CTR', 'goalcart')}</TableCell>
+                                <TableCell align="right">{__('Add-to-cart', 'goalcart')}</TableCell>
                               </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
+                            </TableHead>
+                            <TableBody>
+                              {pagedTopProducts.map((product) => (
+                                <TableRow key={product.product_id} hover>
+                                  <TableCell sx={{ fontWeight: 600 }}>{product.name}</TableCell>
+                                  <TableCell align="right">
+                                    {formatNumber(product.impressions)}
+                                  </TableCell>
+                                  <TableCell align="right">
+                                    {formatNumber(product.clicks)}
+                                  </TableCell>
+                                  <TableCell align="right">
+                                    <Chip
+                                      size="small"
+                                      variant="outlined"
+                                      color={product.added > 0 ? 'success' : 'default'}
+                                      label={formatNumber(product.added)}
+                                    />
+                                  </TableCell>
+                                  <TableCell align="right">{formatPercent(product.ctr)}</TableCell>
+                                  <TableCell align="right">
+                                    {formatPercent(product.add_to_cart_rate)}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </TableContainer>
+                        <NumberPagination
+                          count={topProducts.length}
+                          page={safeProductsPage}
+                          rowsPerPage={PRODUCTS_PER_PAGE}
+                          onPageChange={setProductsPage}
+                        />
+                      </>
                     )}
                   </Paper>
                 </Box>

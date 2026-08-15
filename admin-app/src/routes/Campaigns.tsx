@@ -36,6 +36,7 @@ import type { Campaign } from '../types';
 import CampaignPreviewDialog from '../components/CampaignPreviewDialog';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
+import NumberPagination from '../components/NumberPagination';
 import PageContainer from '../components/PageContainer';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { formatSchedule } from '../lib/format';
@@ -61,6 +62,7 @@ export default function Campaigns() {
 
   const [pendingDelete, setPendingDelete] = useState<Campaign | null>(null);
   const [previewCampaign, setPreviewCampaign] = useState<Campaign | null>(null);
+  const [page, setPage] = useState(0);
 
   const campaignsQuery = useQuery({
     queryKey: ['campaigns'],
@@ -108,6 +110,10 @@ export default function Campaigns() {
   });
 
   const campaigns = campaignsQuery.data?.items ?? [];
+  const PER_PAGE = 10;
+  const pageCount = Math.max(1, Math.ceil(campaigns.length / PER_PAGE));
+  const safePage = Math.min(page, pageCount - 1);
+  const pagedCampaigns = campaigns.slice(safePage * PER_PAGE, (safePage + 1) * PER_PAGE);
 
   return (
     <PageContainer
@@ -158,123 +164,132 @@ export default function Campaigns() {
           }
         />
       ) : (
-        <TableContainer component={Paper} variant="outlined">
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell>{__('Name', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Milestones', 'goalcart')}</TableCell>
-                <TableCell>{__('Status', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Priority', 'goalcart')}</TableCell>
-                <TableCell>{__('Schedule', 'goalcart')}</TableCell>
-                <TableCell align="right">{__('Actions', 'goalcart')}</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {campaigns.map((campaign) => (
-                <TableRow key={campaign.id} hover>
-                  <TableCell>
-                    <Box>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {campaign.name}
-                      </Typography>
-                      {campaign.description && (
-                        <Typography variant="caption" color="text.secondary">
-                          {campaign.description}
-                        </Typography>
-                      )}
-                    </Box>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography variant="body2">{campaign.goal_count}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                      {statusChip(campaign)}
-                      <Tooltip
-                        title={
-                          campaign.status === 'active'
-                            ? __('Disable', 'goalcart')
-                            : __('Enable', 'goalcart')
-                        }
-                      >
-                        <Switch
-                          size="small"
-                          checked={campaign.status === 'active'}
-                          onChange={(_event, checked) =>
-                            toggleMutation.mutate({
-                              id: campaign.id,
-                              status: checked ? 'active' : 'inactive',
-                            })
-                          }
-                          slotProps={{
-                            input: {
-                              'aria-label': sprintf(
-                                /* translators: %s: campaign name. */
-                                __('Toggle %s', 'goalcart'),
-                                campaign.name
-                              ),
-                            },
-                          }}
-                        />
-                      </Tooltip>
-                    </Stack>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography variant="body2">{campaign.priority}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {formatSchedule(campaign.starts_at, campaign.ends_at)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
-                      <Tooltip title={__('Preview', 'goalcart')}>
-                        <IconButton
-                          size="small"
-                          aria-label={sprintf(__('Preview %s', 'goalcart'), campaign.name)}
-                          onClick={() => setPreviewCampaign(campaign)}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={__('Edit', 'goalcart')}>
-                        <IconButton
-                          size="small"
-                          aria-label={sprintf(__('Edit %s', 'goalcart'), campaign.name)}
-                          onClick={() => navigate(`/campaigns/${campaign.id}/edit`)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={__('Duplicate', 'goalcart')}>
-                        <IconButton
-                          size="small"
-                          aria-label={sprintf(__('Duplicate %s', 'goalcart'), campaign.name)}
-                          disabled={duplicateMutation.isPending}
-                          onClick={() => duplicateMutation.mutate(campaign.id)}
-                        >
-                          <ContentCopyIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={__('Delete', 'goalcart')}>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          aria-label={sprintf(__('Delete %s', 'goalcart'), campaign.name)}
-                          onClick={() => setPendingDelete(campaign)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </Stack>
-                  </TableCell>
+        <>
+          <TableContainer component={Paper} variant="outlined">
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>{__('Name', 'goalcart')}</TableCell>
+                  <TableCell align="right">{__('Milestones', 'goalcart')}</TableCell>
+                  <TableCell>{__('Status', 'goalcart')}</TableCell>
+                  <TableCell align="right">{__('Priority', 'goalcart')}</TableCell>
+                  <TableCell>{__('Schedule', 'goalcart')}</TableCell>
+                  <TableCell align="right">{__('Actions', 'goalcart')}</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+              </TableHead>
+              <TableBody>
+                {pagedCampaigns.map((campaign) => (
+                  <TableRow key={campaign.id} hover>
+                    <TableCell>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          {campaign.name}
+                        </Typography>
+                        {campaign.description && (
+                          <Typography variant="caption" color="text.secondary">
+                            {campaign.description}
+                          </Typography>
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2">{campaign.goal_count}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                        {statusChip(campaign)}
+                        <Tooltip
+                          title={
+                            campaign.status === 'active'
+                              ? __('Disable', 'goalcart')
+                              : __('Enable', 'goalcart')
+                          }
+                        >
+                          <Switch
+                            size="small"
+                            checked={campaign.status === 'active'}
+                            onChange={(_event, checked) =>
+                              toggleMutation.mutate({
+                                id: campaign.id,
+                                status: checked ? 'active' : 'inactive',
+                              })
+                            }
+                            slotProps={{
+                              input: {
+                                'aria-label': sprintf(
+                                  /* translators: %s: campaign name. */
+                                  __('Toggle %s', 'goalcart'),
+                                  campaign.name
+                                ),
+                              },
+                            }}
+                          />
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Typography variant="body2">{campaign.priority}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {formatSchedule(campaign.starts_at, campaign.ends_at)}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
+                        <Tooltip title={__('Preview', 'goalcart')}>
+                          <IconButton
+                            size="small"
+                            aria-label={sprintf(__('Preview %s', 'goalcart'), campaign.name)}
+                            onClick={() => setPreviewCampaign(campaign)}
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={__('Edit', 'goalcart')}>
+                          <IconButton
+                            size="small"
+                            aria-label={sprintf(__('Edit %s', 'goalcart'), campaign.name)}
+                            onClick={() => navigate(`/campaigns/${campaign.id}/edit`)}
+                          >
+                            <EditIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={__('Duplicate', 'goalcart')}>
+                          <IconButton
+                            size="small"
+                            aria-label={sprintf(__('Duplicate %s', 'goalcart'), campaign.name)}
+                            disabled={duplicateMutation.isPending}
+                            onClick={() => duplicateMutation.mutate(campaign.id)}
+                          >
+                            <ContentCopyIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={__('Delete', 'goalcart')}>
+                          <IconButton
+                            size="small"
+                            color="error"
+                            aria-label={sprintf(__('Delete %s', 'goalcart'), campaign.name)}
+                            onClick={() => setPendingDelete(campaign)}
+                          >
+                            <DeleteIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
+          <NumberPagination
+            count={campaigns.length}
+            page={safePage}
+            rowsPerPage={PER_PAGE}
+            onPageChange={setPage}
+          />
+        </>
       )}
 
       <ConfirmDialog

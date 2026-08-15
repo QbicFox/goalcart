@@ -31,6 +31,7 @@ import { useMemo, useState } from 'react';
 
 import { fetchUpsellAnalytics, fetchUpsellProduct } from '../api/revenue';
 import EmptyState from '../components/EmptyState';
+import NumberPagination from '../components/NumberPagination';
 import PageContainer from '../components/PageContainer';
 import RevenueToolbar from '../components/revenue/RevenueToolbar';
 import { useDateRange } from '../date-range/DateRangeContext';
@@ -106,13 +107,16 @@ function sortRows(rows: UpsellAnalyticsRow[], mode: SortMode): UpsellAnalyticsRo
     case 'conversion':
       return copy.sort(
         (a, b) =>
-          (b.impressions > 0 ? b.conversion_rate : -1) - (a.impressions > 0 ? a.conversion_rate : -1)
+          (b.impressions > 0 ? b.conversion_rate : -1) -
+          (a.impressions > 0 ? a.conversion_rate : -1)
       );
     case 'margin':
       return copy.sort((a, b) => (b.margin_pct ?? -1) - (a.margin_pct ?? -1));
     case 'top':
     default:
-      return copy.sort((a, b) => b.orders - a.orders || b.revenue - a.revenue || b.impressions - a.impressions);
+      return copy.sort(
+        (a, b) => b.orders - a.orders || b.revenue - a.revenue || b.impressions - a.impressions
+      );
   }
 }
 
@@ -145,7 +149,9 @@ function ProductDetailDialog({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
-        {detailQuery.isLoading ? __('Loading product…', 'goalcart') : detail?.name ?? __('Product', 'goalcart')}
+        {detailQuery.isLoading
+          ? __('Loading product…', 'goalcart')
+          : (detail?.name ?? __('Product', 'goalcart'))}
       </DialogTitle>
       <DialogContent dividers>
         {detailQuery.isLoading ? (
@@ -167,7 +173,12 @@ function ProductDetailDialog({
               <Box>
                 <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 700 }}>
                   {formatNumber(detail.score)}
-                  <Typography variant="caption" color="text.secondary" component="span" sx={{ ml: 1 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    component="span"
+                    sx={{ ml: 1 }}
+                  >
                     {__('upsell score', 'goalcart')}
                   </Typography>
                 </Typography>
@@ -211,7 +222,12 @@ function ProductDetailDialog({
                       value={detail.components[key]}
                       sx={{ height: 5, borderRadius: 3 }}
                     />
-                    <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.25 }}>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      component="p"
+                      sx={{ mt: 0.25 }}
+                    >
                       {help}
                     </Typography>
                   </Box>
@@ -282,6 +298,7 @@ export default function UpsellAnalytics() {
   const [sortMode, setSortMode] = useState<SortMode>('top');
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [detailProductId, setDetailProductId] = useState<number>(0);
+  const [page, setPage] = useState(0);
 
   const query = useQuery({
     queryKey: ['revenue', 'upsell-analytics', { from: range.from, to: range.to, goalId, limit }],
@@ -295,6 +312,11 @@ export default function UpsellAnalytics() {
   });
 
   const rows = useMemo(() => sortRows(query.data ?? [], sortMode), [query.data, sortMode]);
+
+  const PER_PAGE = 10;
+  const pageCount = Math.max(1, Math.ceil(rows.length / PER_PAGE));
+  const safePage = Math.min(page, pageCount - 1);
+  const pagedRows = rows.slice(safePage * PER_PAGE, (safePage + 1) * PER_PAGE);
 
   // Commercial summary over the loaded rows — purchases, sales, conversion.
   const summary = useMemo(() => {
@@ -325,7 +347,10 @@ export default function UpsellAnalytics() {
           size="small"
           sx={{ minWidth: 110 }}
           value={limit}
-          onChange={(event) => setLimit(Number(event.target.value))}
+          onChange={(event) => {
+            setLimit(Number(event.target.value));
+            setPage(0);
+          }}
         >
           <MenuItem value={10}>10</MenuItem>
           <MenuItem value={20}>20</MenuItem>
@@ -333,12 +358,22 @@ export default function UpsellAnalytics() {
         </TextField>
       </RevenueToolbar>
 
-      <Stack direction={{ xs: 'column', md: 'row' }} spacing={1} useFlexGap sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <Stack
+        direction={{ xs: 'column', md: 'row' }}
+        spacing={1}
+        useFlexGap
+        sx={{ alignItems: 'flex-start', flexWrap: 'wrap' }}
+      >
         <ToggleButtonGroup
           exclusive
           size="small"
           value={sortMode}
-          onChange={(_, next) => next && setSortMode(next)}
+          onChange={(_, next) => {
+            if (next) {
+              setSortMode(next);
+              setPage(0);
+            }
+          }}
           aria-label={__('Sort products', 'goalcart')}
         >
           {SORT_OPTIONS.map((option) => (
@@ -355,7 +390,9 @@ export default function UpsellAnalytics() {
           onClick={() => setShowDetails((current) => !current)}
           aria-expanded={showDetails}
         >
-          {showDetails ? __('Hide interaction details', 'goalcart') : __('Show interaction details', 'goalcart')}
+          {showDetails
+            ? __('Hide interaction details', 'goalcart')
+            : __('Show interaction details', 'goalcart')}
         </Button>
       </Stack>
 
@@ -456,7 +493,7 @@ export default function UpsellAnalytics() {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {rows.map((row) => (
+                {pagedRows.map((row) => (
                   <TableRow
                     key={row.product_id}
                     hover
@@ -492,10 +529,17 @@ export default function UpsellAnalytics() {
                         <TableCell align="right">{formatNumber(row.impressions)}</TableCell>
                         <TableCell align="right">{formatNumber(row.clicks)}</TableCell>
                         <TableCell align="right">{formatNumber(row.adds)}</TableCell>
-                        <TableCell align="right">{funnelRate(row.clicks, row.impressions)}</TableCell>
+                        <TableCell align="right">
+                          {funnelRate(row.clicks, row.impressions)}
+                        </TableCell>
                         <TableCell align="right">{funnelRate(row.adds, row.impressions)}</TableCell>
                         <TableCell align="right">
-                          <Chip size="small" variant="outlined" color="primary" label={formatNumber(row.upsell_score)} />
+                          <Chip
+                            size="small"
+                            variant="outlined"
+                            color="primary"
+                            label={formatNumber(row.upsell_score)}
+                          />
                         </TableCell>
                       </>
                     )}
@@ -504,6 +548,13 @@ export default function UpsellAnalytics() {
               </TableBody>
             </Table>
           </TableContainer>
+
+          <NumberPagination
+            count={rows.length}
+            page={safePage}
+            rowsPerPage={PER_PAGE}
+            onPageChange={setPage}
+          />
 
           <Typography variant="caption" color="text.secondary">
             {__('Click a product row for its full score breakdown.', 'goalcart')}
