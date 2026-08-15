@@ -276,6 +276,13 @@ final class Goal {
 	protected $exclusive;
 
 	/**
+	 * Maximum completion cycles per user (Phase 36). Null = unlimited.
+	 *
+	 * @var int|null
+	 */
+	protected $max_completions_per_user;
+
+	/**
 	 * Reward type (Phase 5): free_shipping|percent_discount|fixed_discount.
 	 *
 	 * @var string|null

@@ -954,6 +954,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
+- **WooCommerce cart page / add-to-cart returning HTTP 502 (nginx "Bad
+  Gateway") on PHP 8.2+** — the Phase 36 completion-limit column was
+  assigned in `Goal::from_array()` as a *dynamic* property
+  (`$this->max_completions_per_user` was never declared on the class), so
+  every goal hydration emitted a `Creation of dynamic property ... is
+  deprecated` notice — on PHP 8.5 (and any 8.2+ with error output wired
+  to the FastCGI stream) the 17-goal storefront evaluation pass printed
+  34 deprecation lines that corrupted the response mid-stream, and nginx
+  answered 502 instead of the cart page or the add-to-cart redirect.
+  `Goal` now declares `protected $max_completions_per_user;` (declared
+  property = no deprecation, identical behavior), so the cart totals
+  pass, add-to-cart and the cart page all complete normally. Reproduced
+  and verified on the live store (PHP 8.5 / WooCommerce 11):
+  add-to-cart and the cart page with qualifying goals now return 200
+  consistently, and `tests/run-all.php` stays regression-free.
 - **MUI form inputs clashing with WP admin form styles** — WP admin's
   element-level form rules (`wp-admin/css/forms.css`, e.g.
   `input[type="text"]`) out-specify MUI's single-class selectors, so the
