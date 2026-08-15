@@ -530,6 +530,24 @@
 	}
 
 	/**
+	 * Format a catalog price with the same settings as goal targets.
+	 *
+	 * The API keeps price_html for compatibility, but that value is
+	 * produced by WooCommerce and cannot reflect Goal Cart's currency
+	 * display setting. Raw prices therefore win whenever available.
+	 *
+	 * @param {Object} item Catalog item.
+	 * @return {string}
+	 */
+	function formatProductPrice( item ) {
+		if ( item && item.price !== null && item.price !== undefined && item.price !== '' ) {
+			return formatMoney( item.price, cfg.currency );
+		}
+
+		return String( ( item && item.price_html ) || '' );
+	}
+
+	/**
 	 * Whether the widgets should hide on this viewport.
 	 *
 	 * Phase 18 (Settings → Frontend → mobile behavior): when the config
@@ -880,9 +898,9 @@
 		link.textContent = String( item.name || '' );
 		row.appendChild( link );
 
-		// price_html is the server-formatted, entity-decoded text price
-		// (never markup) — rendered as text, so nothing injects.
-		row.appendChild( el( 'span', 'goalcart-upsell__price', String( item.price_html || item.price || '' ) ) );
+		// Prefer the raw amount so the configured currency display style is
+		// applied consistently; price_html remains a safe legacy fallback.
+		row.appendChild( el( 'span', 'goalcart-upsell__price', formatProductPrice( item ) ) );
 
 		var button = el( 'button', 'goalcart-upsell__add' );
 		button.type = 'button';
@@ -1218,7 +1236,9 @@
 
 			button.appendChild( el( 'span', 'goalcart-gift-picker__name', String( item.name || '' ) ) );
 
-			if ( item.price_html ) {
+			if ( item.price !== null && item.price !== undefined && item.price !== '' ) {
+				button.appendChild( el( 'span', 'goalcart-gift-picker__price', formatMoney( item.price, cfg.currency ) ) );
+			} else if ( item.price_html ) {
 				button.appendChild( el( 'span', 'goalcart-gift-picker__price', String( item.price_html ) ) );
 			}
 

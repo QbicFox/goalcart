@@ -57,6 +57,7 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/goalcart.php';
 
+use GoalCart\Admin\AssetLoader;
 use GoalCart\Analytics\Tracker;
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Frontend\ProgressUI;
@@ -441,6 +442,7 @@ check( 'sticky location back on', true === in_array( 'sticky', $ui->locations(),
 	$settings->set( 'frontend_mobile', 'hide' );
 $config = $ui->frontend_config();
 check( 'currencyDisplay follows setting', 'code' === $config['currencyDisplay'] );
+check( 'admin boot currencyDisplay follows setting', 'code' === ( new AssetLoader( $settings ) )->boot_data()['currencyDisplay'] );
 check( 'mobile follows setting', 'hide' === $config['mobile'] );
 $settings->set_many( $all_before );
 

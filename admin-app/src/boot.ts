@@ -23,3 +23,8 @@ export function getBootData(): GoalCartBootData {
 
   return cached;
 }
+
+/** Update boot data that can change without a full admin-page reload. */
+export function setBootCurrencyDisplay(display: GoalCartBootData['currencyDisplay']): void {
+  getBootData().currencyDisplay = display;
+}

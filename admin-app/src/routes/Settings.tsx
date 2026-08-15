@@ -23,6 +23,7 @@ import Typography from '@mui/material/Typography';
 import { useRef, useState } from 'react';
 
 import { fetchSettingsEnvelope, saveSettings } from '../api/settings';
+import { setBootCurrencyDisplay } from '../boot';
 import SectionCard from '../components/goal-builder/SectionCard';
 import PageContainer from '../components/PageContainer';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
@@ -286,6 +287,10 @@ export default function Settings() {
       // toggles the body class that hides/shows the WP admin chrome.
       if (typeof saved.fullscreen_dashboard === 'boolean') {
         setFullscreen(saved.fullscreen_dashboard);
+      }
+
+      if (saved.currency_display) {
+        setBootCurrencyDisplay(saved.currency_display);
       }
     },
     onError: (error: Error) => {

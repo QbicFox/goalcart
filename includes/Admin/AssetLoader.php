@@ -233,6 +233,9 @@ class AssetLoader {
 	public function boot_data() {
 		$user = wp_get_current_user();
 
+		$currency_display = apply_filters( 'goalcart_currency_display', $this->settings->get( 'currency_display', 'symbol' ) );
+		$currency_display = in_array( $currency_display, array( 'symbol', 'code', 'name' ), true ) ? $currency_display : 'symbol';
+
 		$data = array(
 			'nonce'    => wp_create_nonce( 'wp_rest' ),
 			'restBase' => esc_url_raw( rest_url( 'goalcart/v1' ) ),
@@ -243,6 +246,7 @@ class AssetLoader {
 			'locale'       => get_locale(),
 			'isRtl'        => is_rtl(),
 			'currency'     => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'USD',
+			'currencyDisplay' => $currency_display,
 			'currentDate'  => current_time( 'Y-m-d' ),
 			'userId'   => (int) $user->ID,
 			'user'     => array(

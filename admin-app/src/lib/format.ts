@@ -12,6 +12,7 @@ export function formatCurrency(value: number, currency?: string): string {
     return new Intl.NumberFormat(boot.locale.replace('_', '-'), {
       style: 'currency',
       currency: currency || boot.currency,
+      currencyDisplay: boot.currencyDisplay || 'symbol',
       maximumFractionDigits: 0,
     }).format(value);
   } catch {

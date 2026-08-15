@@ -22,6 +22,8 @@ export interface GoalCartBootData {
   locale: string;
   isRtl: boolean;
   currency: string;
+  /** Storefront/dashboard currency display style from Goal Cart settings. */
+  currencyDisplay: 'symbol' | 'code' | 'name';
   /** Site-local today (Y-m-d), so date math matches the backend timezone. */
   currentDate: string;
   userId: number;
@@ -281,7 +283,13 @@ export interface ProgressReward {
   max_value: number | null;
   meta: RewardMetaInput;
   /** Phase 32 (free gift selection): catalog-safe gift list + chosen flag. */
-  gift?: Array<{ id: number; name: string; image: string; price_html: string }>;
+  gift?: Array<{
+    id: number;
+    name: string;
+    image: string;
+    price: number | null;
+    price_html: string;
+  }>;
   gift_chosen?: boolean;
 }
 

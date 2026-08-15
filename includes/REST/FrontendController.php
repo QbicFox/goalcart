@@ -891,6 +891,7 @@ class FrontendController extends BaseController {
 				'id'         => (int) $product->get_id(),
 				'name'       => $product->get_name(),
 				'image'      => $image_id ? (string) wp_get_attachment_image_url( $image_id, 'woocommerce_thumbnail' ) : '',
+				'price'      => '' !== $price ? (float) $price : null,
 				'price_html' => '' !== $price && function_exists( 'wc_price' )
 					? html_entity_decode( wp_strip_all_tags( wc_price( (float) $price ) ), ENT_QUOTES, 'UTF-8' )
 					: '',

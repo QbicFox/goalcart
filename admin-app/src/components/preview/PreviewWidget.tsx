@@ -151,7 +151,7 @@ function SuggestionList({
             {item.name}
           </Box>
           <Box component="span" sx={{ color: '#646970', whiteSpace: 'nowrap' }}>
-            {item.price_html || (item.price !== null ? formatCurrency(item.price, currency) : '')}
+            {item.price !== null ? formatCurrency(item.price, currency) : item.price_html}
           </Box>
         </Box>
       ))}
