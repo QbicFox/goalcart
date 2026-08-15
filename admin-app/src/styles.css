@@ -107,6 +107,23 @@
   padding: 8.5px 14px;
 }
 
+/* Restore MUI's input box model, which the mount-point reset
+   `#goalcart-admin * { box-sizing: border-box }` (specificity 1-0-0)
+   overrides on the native input (MUI ships `content-box`, 0-1-0). With
+   border-box the input's 1.4375em height is eaten by the restored
+   vertical paddings and every text/date/time/number/color input
+   collapses to padding-only (33px medium / 23px small instead of MUI's
+   56px / 40px). Restoring MUI's values — including the native-input
+   `height`, so WP's `input[type="number"] { height: 30px }` cannot win
+   either — puts the height back under MUI's padding + line-height
+   arithmetic. The Select display keeps `height: auto`, and multiline
+   textareas their own sizing. */
+:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+  .MuiInputBase-input:not(textarea):not(.MuiSelect-select) {
+  box-sizing: content-box;
+  height: 1.4375em; /* 23px at 16px — MUI's native-input line height */
+}
+
 /* Checkbox / radio / switch: WP admin styles the native input like a
    visible checkbox (1rem box, negative margin, `padding: 0 !important`),
    which shrinks and displaces the visually-hidden input MUI stretches
