@@ -233,6 +233,9 @@ check( 'frontend JS stacks one card per eligible goal', false !== strpos( $front
 check( 'frontend JS skips ineligible goals when rendering', false !== strpos( $frontend_js, 'goal.eligible === false' ) && false !== strpos( $frontend_js, 'continue;' ) );
 check( 'frontend JS renders each goal card with its own template', false !== strpos( $frontend_js, 'goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) )' ) );
 check( 'frontend JS keeps the sticky bar featured-only', false !== strpos( $frontend_js, 'var goal = featuredGoal( goals );' ) );
+check( 'sticky auto-hide tracks the previous scroll position', false !== strpos( $frontend_js, 'var previousY = stickyLastScrollY;' ) && false !== strpos( $frontend_js, 'stickyAutoHidden = true;' ) );
+check( 'sticky auto-hide refreshes without payload changes', false !== strpos( $frontend_js, "stickyConfig.behavior === 'auto_hide'" ) );
+check( 'sticky suggestions work in compact layout', false !== strpos( $frontend_js, 'if ( sticky.suggestions ) {' ) );
 
 // Live cart-change refresh (Phase 11): every WooCommerce cart-mutation
 // signal must reach the widgets through ONE centralized bridge — the

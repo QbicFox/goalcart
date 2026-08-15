@@ -2014,8 +2014,8 @@
 	 * Visible only while the cart has progress to show (current > 0 or the
 	 * goal is completed). dismissible mode keeps the close button
 	 * (session-persistent); auto_hide mode fades the bar out while
-	 * scrolling down and back in while scrolling up. The full display
-	 * variant adds the countdown chip and the top suggestion.
+	 * scrolling down and back in while scrolling up. Countdown and
+	 * suggestions are controlled independently by their sticky settings.
 	 *
 	 * @param {Object} data Progress payload data.
 	 * @return {void}
@@ -2047,15 +2047,11 @@
 			visible = false;
 		}
 
-		// Auto-hide: hidden while scrolling down (past a small threshold),
-		// shown again when scrolling up or near the top.
-		if ( visible && sticky.behavior === 'auto_hide' ) {
-			var y = window.pageYOffset || document.documentElement.scrollTop || 0;
-
-			if ( y > 120 && y > stickyLastScrollY ) {
-				visible = false;
-				stickyAutoHidden = true;
-			}
+		// Auto-hide: the scroll listener records direction in
+		// stickyAutoHidden. Keep the bar hidden during ordinary refreshes
+		// until the shopper scrolls upward again.
+		if ( visible && sticky.behavior === 'auto_hide' && stickyAutoHidden ) {
+			visible = false;
 		}
 
 		if ( ! visible ) {
@@ -2090,8 +2086,10 @@
 			}
 		}
 
-		// Full display: the top suggestion rides along as a small link.
-		if ( sticky.display === 'full' && sticky.suggestions ) {
+		// The suggestion toggle is independent from the compact/full layout:
+		// when enabled, the top gap-closing product rides along in either
+		// sticky layout.
+		if ( sticky.suggestions ) {
 			var suggestion = stickySuggestion( goal );
 
 			if ( suggestion ) {
@@ -2140,7 +2138,7 @@
 
 		link.setAttribute( 'rel', 'noreferrer' );
 		link.appendChild( el( 'span', 'goalcart-sticky__suggestion-name', String( item.name || '' ) ) );
-		link.appendChild( el( 'span', 'goalcart-sticky__suggestion-price', String( item.price_html || item.price || '' ) ) );
+		link.appendChild( el( 'span', 'goalcart-sticky__suggestion-price', formatProductPrice( item ) ) );
 
 		return link;
 	}
@@ -2215,7 +2213,11 @@
 						renderedFingerprints[ container.id ] = fingerprint;
 					}
 
-					if ( stickyFingerprint !== fingerprint ) {
+					var stickyConfig = cfg.sticky || {};
+
+					// Auto-hide depends on scroll direction, not payload data, so
+					// it must re-render even when the cart fingerprint is unchanged.
+					if ( stickyFingerprint !== fingerprint || stickyConfig.behavior === 'auto_hide' ) {
 						renderSticky( data );
 						stickyFingerprint = fingerprint;
 					}
@@ -2547,8 +2549,17 @@
 
 		window.addEventListener( 'scroll', function () {
 			var y = window.pageYOffset || document.documentElement.scrollTop || 0;
+			var previousY = stickyLastScrollY;
+
+			// Preserve the previous position before updating it; comparing y
+			// after assignment was the reason auto-hide never activated.
+			if ( y > 120 && y > previousY ) {
+				stickyAutoHidden = true;
+			} else if ( y < previousY ) {
+				stickyAutoHidden = false;
+			}
+
 			stickyLastScrollY = y;
-			stickyAutoHidden = false;
 			safe( refresh );
 		}, { passive: true } );
 	}
