@@ -299,7 +299,7 @@ wooinsights/                      # Plugin root (slug = folder name)
     `schema` (field type, default, validation, label, group) and a
     `version` — plus a lazy, filterable `TemplateRegistry` (the same
     class-map convention as the goal-evaluator / reward-applicator
-    registries, filterable via `goalcart_template_classes`) and a
+    registries, filterable via `faracart_template_classes`) and a
     resolver (`TemplateEngine`) with a documented resolution order
     (item override → scope default → legacy → fallback) and
     schema-driven settings sanitization. The backend is the source of

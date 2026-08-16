@@ -2,10 +2,10 @@
 /**
  * Goal value object for the FaraCart engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals;
+namespace FaraCart\Goals;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -430,7 +430,7 @@ final class Goal {
 	 * wins.
 	 *
 	 * Phase 18 (Settings → Goal Calculation): the store-wide default money
-	 * basis is applied through the goalcart_default_calculation_mode
+	 * basis is applied through the faracart_default_calculation_mode
 	 * filter (registered by Settings), so a goal without its own mode
 	 * follows the store default while quantity-style types stay unchanged.
 	 *
@@ -440,7 +440,7 @@ final class Goal {
 	public static function default_calculation_mode( $type ) {
 		$mode = self::TYPE_PRODUCT === $type ? self::MODE_QUANTITY : self::MODE_SUBTOTAL;
 
-		return (string) apply_filters( 'goalcart_default_calculation_mode', $mode, (string) $type );
+		return (string) apply_filters( 'faracart_default_calculation_mode', $mode, (string) $type );
 	}
 
 	/**
@@ -598,7 +598,7 @@ final class Goal {
 			return (string) $this->attributes[0];
 		}
 
-		return (string) apply_filters( 'goalcart_brand_taxonomy', 'pa_brand' );
+		return (string) apply_filters( 'faracart_brand_taxonomy', 'pa_brand' );
 	}
 
 	/**

@@ -2,13 +2,13 @@
 /**
  * Analytics metrics repository for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
-use GoalCart\Database\Schema;
-use GoalCart\Rewards\Reward;
+use FaraCart\Database\Schema;
+use FaraCart\Rewards\Reward;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -2,13 +2,13 @@
 /**
  * Analytics event tracker for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
  *  - suggested_product_added  a suggested product was added to the cart
  *
  * Six events are reported by the storefront JS through the public REST
- * `POST /goalcart/v1/track` route (TrackController). The seventh —
+ * `POST /faracart/v1/track` route (TrackController). The seventh —
  * `suggested_product_added` — is attributed server-side on
  * `woocommerce_add_to_cart`: a cart addition is recorded as a suggestion
  * conversion when the session saw a `suggestion_impression` for that
@@ -49,7 +49,7 @@ final class Tracker {
 	 *
 	 * @var string
 	 */
-	const TRACK_NONCE_ACTION = 'goalcart_track';
+	const TRACK_NONCE_ACTION = 'faracart_track';
 
 	/**
 	 * Attribution window for suggestion → add-to-cart conversions.
@@ -169,7 +169,7 @@ final class Tracker {
 		 * @param bool    $enabled Whether tracking is enabled.
 		 * @param Tracker $tracker Tracker instance.
 		 */
-		return (bool) apply_filters( 'goalcart_tracking_enabled', true, $this );
+		return (bool) apply_filters( 'faracart_tracking_enabled', true, $this );
 	}
 
 	/**
@@ -202,7 +202,7 @@ final class Tracker {
 	/**
 	 * Print a small front-end config object for the JS tracker.
 	 *
-	 * Mirrors the reference plugin: an inline `window.goalcartTracking`
+	 * Mirrors the reference plugin: an inline `window.faracartTracking`
 	 * object (endpoint, nonce, session id) consumed by the vanilla JS
 	 * tracker in frontend.js with a must-never-throw contract.
 	 *
@@ -214,14 +214,14 @@ final class Tracker {
 		}
 
 		$config = array(
-			'endpoint'  => esc_url_raw( rest_url( 'goalcart/v1/track' ) ),
+			'endpoint'  => esc_url_raw( rest_url( 'faracart/v1/track' ) ),
 			'nonce'     => wp_create_nonce( self::TRACK_NONCE_ACTION ),
 			'sessionId' => $this->session->id(),
 		);
 
 		wp_print_inline_script_tag(
-			'window.goalcartTracking = ' . wp_json_encode( $config ) . ';',
-			array( 'id' => 'goalcart-tracking-config', 'type' => 'text/javascript' )
+			'window.faracartTracking = ' . wp_json_encode( $config ) . ';',
+			array( 'id' => 'faracart-tracking-config', 'type' => 'text/javascript' )
 		);
 	}
 
@@ -272,7 +272,7 @@ final class Tracker {
 
 		global $wpdb;
 
-		$table = \GoalCart\Database\Schema::table( 'analytics_events' );
+		$table = \FaraCart\Database\Schema::table( 'analytics_events' );
 
 		$data = array(
 			'goal_id'     => $goal_id > 0 ? $goal_id : null,
@@ -382,7 +382,7 @@ final class Tracker {
 
 		global $wpdb;
 
-		$events = \GoalCart\Database\Schema::table( 'analytics_events' );
+		$events = \FaraCart\Database\Schema::table( 'analytics_events' );
 		$since  = date( 'Y-m-d H:i:s', strtotime( current_time( 'Y-m-d H:i:s' ) ) - self::CONVERSION_WINDOW );
 
 		$row = $wpdb->get_row(

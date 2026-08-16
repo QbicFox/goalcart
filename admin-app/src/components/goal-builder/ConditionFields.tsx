@@ -22,13 +22,13 @@ interface ConditionFieldsProps {
 }
 
 const WEEKDAYS = [
-  { value: 1, label: __('Mon', 'goalcart') },
-  { value: 2, label: __('Tue', 'goalcart') },
-  { value: 3, label: __('Wed', 'goalcart') },
-  { value: 4, label: __('Thu', 'goalcart') },
-  { value: 5, label: __('Fri', 'goalcart') },
-  { value: 6, label: __('Sat', 'goalcart') },
-  { value: 7, label: __('Sun', 'goalcart') },
+  { value: 1, label: __('Mon', 'faracart') },
+  { value: 2, label: __('Tue', 'faracart') },
+  { value: 3, label: __('Wed', 'faracart') },
+  { value: 4, label: __('Thu', 'faracart') },
+  { value: 5, label: __('Fri', 'faracart') },
+  { value: 6, label: __('Sat', 'faracart') },
+  { value: 7, label: __('Sun', 'faracart') },
 ];
 
 /** Coupon pick option (code-based). */
@@ -96,13 +96,13 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
       <Grid container spacing={2}>
         <Grid size={12}>
           <EntityAutocomplete
-            label={__('Excluded products', 'goalcart')}
+            label={__('Excluded products', 'faracart')}
             value={values.excluded_products}
             onChange={(excluded_products) => patch({ excluded_products })}
             search={searchProducts}
             helperText={__(
               'These products never count toward the goal, even when they would otherwise qualify.',
-              'goalcart'
+              'faracart'
             )}
           />
         </Grid>
@@ -111,7 +111,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
       {/* Customer conditions (Phase 32) */}
       <Box>
         <Typography variant="subtitle2" gutterBottom>
-          {__('Customers', 'goalcart')}
+          {__('Customers', 'faracart')}
         </Typography>
         <Stack spacing={2}>
           <Grid container spacing={2}>
@@ -128,10 +128,10 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label={__('Allowed customer roles', 'goalcart')}
+                    label={__('Allowed customer roles', 'faracart')}
                     helperText={__(
                       'Leave empty to allow every role. Guests never match a role restriction.',
-                      'goalcart'
+                      'faracart'
                     )}
                   />
                 )}
@@ -153,7 +153,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
                       }}
                     />
                   }
-                  label={__('Guests (not logged in)', 'goalcart')}
+                  label={__('Guests (not logged in)', 'faracart')}
                 />
                 <FormControlLabel
                   control={
@@ -169,10 +169,10 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
                       }}
                     />
                   }
-                  label={__('Logged-in customers', 'goalcart')}
+                  label={__('Logged-in customers', 'faracart')}
                 />
                 <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                  {__('Leave both unchecked to allow everyone.', 'goalcart')}
+                  {__('Leave both unchecked to allow everyone.', 'faracart')}
                 </Typography>
               </Box>
             </Grid>
@@ -188,12 +188,12 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
             label={
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {__('First order only', 'goalcart')}
+                  {__('First order only', 'faracart')}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {__(
                     'Only shoppers with no completed orders see this goal. Guests always qualify.',
-                    'goalcart'
+                    'faracart'
                   )}
                 </Typography>
               </Box>
@@ -210,12 +210,12 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
             label={
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {__('VIP customers only', 'goalcart')}
+                  {__('VIP customers only', 'faracart')}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {__(
                     'Logged-in customers whose lifetime spend and order count meet the thresholds below.',
-                    'goalcart'
+                    'faracart'
                   )}
                 </Typography>
               </Box>
@@ -226,23 +226,23 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                 <TextField
-                  label={__('Minimum lifetime spend', 'goalcart')}
+                  label={__('Minimum lifetime spend', 'faracart')}
                   type="number"
                   fullWidth
                   value={values.vip_min_spend === 0 ? '' : values.vip_min_spend}
                   placeholder="0"
-                  helperText={__('Total paid across all orders.', 'goalcart')}
+                  helperText={__('Total paid across all orders.', 'faracart')}
                   onChange={(event) => patch({ vip_min_spend: Number(event.target.value) || 0 })}
                 />
               </Grid>
               <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                 <TextField
-                  label={__('Minimum completed orders', 'goalcart')}
+                  label={__('Minimum completed orders', 'faracart')}
                   type="number"
                   fullWidth
                   value={values.vip_min_orders === 0 ? '' : values.vip_min_orders}
                   placeholder="0"
-                  helperText={__('Processing + completed orders.', 'goalcart')}
+                  helperText={__('Processing + completed orders.', 'faracart')}
                   onChange={(event) => patch({ vip_min_orders: Number(event.target.value) || 0 })}
                 />
               </Grid>
@@ -254,16 +254,16 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
       {/* Shipping zones (Phase 32) */}
       <Box>
         <Typography variant="subtitle2" gutterBottom>
-          {__('Shipping destination', 'goalcart')}
+          {__('Shipping destination', 'faracart')}
         </Typography>
         <EntityAutocomplete
-          label={__('Allowed shipping zones', 'goalcart')}
+          label={__('Allowed shipping zones', 'faracart')}
           value={values.shipping_zones}
           onChange={(shipping_zones) => patch({ shipping_zones })}
           search={searchZones}
           helperText={__(
             'The goal only applies when the cart ships to one of these zones. Leave empty for every zone.',
-            'goalcart'
+            'faracart'
           )}
         />
       </Box>
@@ -271,17 +271,17 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
       {/* Cart state (Phase 32) */}
       <Box>
         <Typography variant="subtitle2" gutterBottom>
-          {__('Cart state', 'goalcart')}
+          {__('Cart state', 'faracart')}
         </Typography>
         <Stack spacing={2}>
           <TextField
-            label={__('Minimum items in cart', 'goalcart')}
+            label={__('Minimum items in cart', 'faracart')}
             type="number"
             fullWidth
             sx={{ maxWidth: 260 }}
             value={values.cart_min_items === 0 ? '' : values.cart_min_items}
             placeholder="0"
-            helperText={__('The cart must contain at least this many items.', 'goalcart')}
+            helperText={__('The cart must contain at least this many items.', 'faracart')}
             onChange={(event) => patch({ cart_min_items: Number(event.target.value) || 0 })}
           />
           <CouponPicker
@@ -294,16 +294,16 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
       {/* Product tags condition (Phase 32) */}
       <Box>
         <Typography variant="subtitle2" gutterBottom>
-          {__('Product tags', 'goalcart')}
+          {__('Product tags', 'faracart')}
         </Typography>
         <EntityAutocomplete
-          label={__('Required product tags', 'goalcart')}
+          label={__('Required product tags', 'faracart')}
           value={values.tags}
           onChange={(tags) => patch({ tags })}
           search={searchTags}
           helperText={__(
             'Only products carrying any of these tags count toward the goal. Leave empty to count every product.',
-            'goalcart'
+            'faracart'
           )}
         />
       </Box>
@@ -311,19 +311,19 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
       {/* Schedule */}
       <Box>
         <Typography variant="subtitle2" gutterBottom>
-          {__('Schedule', 'goalcart')}
+          {__('Schedule', 'faracart')}
         </Typography>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextFieldDate
-              label={__('Starts at', 'goalcart')}
+              label={__('Starts at', 'faracart')}
               value={values.starts_at}
               onChange={(starts_at) => patch({ starts_at })}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
             <TextFieldDate
-              label={__('Ends at', 'goalcart')}
+              label={__('Ends at', 'faracart')}
               value={values.ends_at}
               onChange={(ends_at) => patch({ ends_at })}
             />
@@ -332,7 +332,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
           {__(
             'Leave both empty to run the goal at all times. Local site time is used.',
-            'goalcart'
+            'faracart'
           )}
         </Typography>
 
@@ -340,7 +340,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
         <Stack spacing={1.5} sx={{ mt: 2 }}>
           <Box>
             <Typography variant="caption" color="text.secondary" component="div" gutterBottom>
-              {__('Repeat on days (optional)', 'goalcart')}
+              {__('Repeat on days (optional)', 'faracart')}
             </Typography>
             <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
               {WEEKDAYS.map((day) => {
@@ -361,7 +361,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label={__('Day window starts', 'goalcart')}
+                label={__('Day window starts', 'faracart')}
                 type="time"
                 fullWidth
                 value={values.schedule_start_time}
@@ -371,7 +371,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
-                label={__('Day window ends', 'goalcart')}
+                label={__('Day window ends', 'faracart')}
                 type="time"
                 fullWidth
                 value={values.schedule_end_time}
@@ -383,7 +383,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
           <Typography variant="caption" color="text.secondary">
             {__(
               'A window that crosses midnight (e.g. 22:00–06:00) counts the hours after start and before end.',
-              'goalcart'
+              'faracart'
             )}
           </Typography>
         </Stack>
@@ -431,10 +431,10 @@ function CouponPicker({ value, onChange }: CouponPickerProps) {
       renderInput={(params) => (
         <TextField
           {...params}
-          label={__('Required coupons in cart', 'goalcart')}
+          label={__('Required coupons in cart', 'faracart')}
           helperText={__(
             'At least one of these coupon codes must be applied for the goal to count.',
-            'goalcart'
+            'faracart'
           )}
         />
       )}

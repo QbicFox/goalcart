@@ -99,20 +99,20 @@ export function comparisonRange(range: DateRange): { from: string; to: string } 
 export function presetLabel(preset: FixedRangePreset): string {
   switch (preset) {
     case 'today':
-      return __('Today', 'goalcart');
+      return __('Today', 'faracart');
     case 'yesterday':
-      return __('Yesterday', 'goalcart');
+      return __('Yesterday', 'faracart');
     case 'last7':
-      return __('Last 7 days', 'goalcart');
+      return __('Last 7 days', 'faracart');
     case 'last90':
-      return __('Last 90 days', 'goalcart');
+      return __('Last 90 days', 'faracart');
     case 'this_month':
-      return __('This month', 'goalcart');
+      return __('This month', 'faracart');
     case 'previous_month':
-      return __('Previous month', 'goalcart');
+      return __('Previous month', 'faracart');
     case 'last30':
     default:
-      return __('Last 30 days', 'goalcart');
+      return __('Last 30 days', 'faracart');
   }
 }
 

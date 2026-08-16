@@ -10,7 +10,7 @@
  *    absent), `_cost` precedence over `_wc_cog_cost`, zero/negative cost
  *    treated as "no data" (never a 100%-margin assumption), variation
  *    fallback to the parent's cost (both the raw meta path and the
- *    `goalcart_product_cost` filter path on the parent), and filter
+ *    `faracart_product_cost` filter path on the parent), and filter
  *    overrides on the product itself
  *  - reward cost: percent discount (capped at max), fixed discount, free
  *    shipping (context and real-order paths), free gift (costed vs
@@ -55,13 +55,13 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\AttributionEngine;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\Goal;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\AttributionEngine;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\Goal;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -85,7 +85,7 @@ function close( $a, $b, $eps = 0.01 ) {
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $engine    = $container->get( AttributionEngine::class );
 $tracker   = $container->get( RevenueTracker::class );
@@ -108,7 +108,7 @@ check( 'AttributionEngine resolves', $engine instanceof AttributionEngine );
 $sources = RewardCostEstimator::COST_SOURCES;
 check( 'COST_SOURCES lists _cost', in_array( '_cost', $sources, true ) );
 check( 'COST_SOURCES lists _wc_cog_cost', in_array( '_wc_cog_cost', $sources, true ) );
-check( 'COST_SOURCES lists goalcart_product_cost', in_array( 'goalcart_product_cost', $sources, true ) );
+check( 'COST_SOURCES lists faracart_product_cost', in_array( 'faracart_product_cost', $sources, true ) );
 check( 'COST_SOURCES lists variation_fallback', in_array( 'variation_fallback', $sources, true ) );
 
 // ---------------------------------------------------------------------------
@@ -197,32 +197,32 @@ try {
 	check( 'variation falls back to parent _wc_cog_cost', close( 350, $costs->product_cost( $var_cog ) ) );
 
 	// --- Variation fallback via the filter: the PARENT runs through the
-	// goalcart_product_cost filter too (regression — the parent fallback
+	// faracart_product_cost filter too (regression — the parent fallback
 	// used to read raw meta only). ---
 	$parent_filter = $make_variable_parent( 'P3 parent filter' );
 	$var_filter    = $make_variation( $parent_filter, 'L', 1200 );
 	$filter_parent = function ( $cost, $product ) use ( $parent_filter ) {
 		return (int) $product->get_id() === $parent_filter ? 700.0 : $cost;
 	};
-	add_filter( 'goalcart_product_cost', $filter_parent, 10, 2 );
+	add_filter( 'faracart_product_cost', $filter_parent, 10, 2 );
 	check( 'variation falls back to parent cost via the filter', close( 700, $costs->product_cost( $var_filter ) ) );
-	remove_filter( 'goalcart_product_cost', $filter_parent );
+	remove_filter( 'faracart_product_cost', $filter_parent );
 
 	// --- The filter overrides the stored meta on the product itself. ---
 	$override = function () {
 		return 600.0;
 	};
-	add_filter( 'goalcart_product_cost', $override, 10, 2 );
-	check( 'goalcart_product_cost filter overrides stored _cost', close( 600, $costs->product_cost( $p_cost ) ) );
-	remove_filter( 'goalcart_product_cost', $override );
+	add_filter( 'faracart_product_cost', $override, 10, 2 );
+	check( 'faracart_product_cost filter overrides stored _cost', close( 600, $costs->product_cost( $p_cost ) ) );
+	remove_filter( 'faracart_product_cost', $override );
 
 	// --- A filter returning null falls through to the stored meta. ---
 	$filter_null = function () {
 		return null;
 	};
-	add_filter( 'goalcart_product_cost', $filter_null, 10, 2 );
+	add_filter( 'faracart_product_cost', $filter_null, 10, 2 );
 	check( 'filter returning null falls back to stored _cost', close( 400, $costs->product_cost( $p_cost ) ) );
-	remove_filter( 'goalcart_product_cost', $filter_null );
+	remove_filter( 'faracart_product_cost', $filter_null );
 
 	// --- Store-wide availability signal (UI-ready, §10). ---
 	check( 'store_has_cost_data is a bool', is_bool( $costs->store_has_cost_data() ) );

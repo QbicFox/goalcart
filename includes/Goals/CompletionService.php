@@ -2,15 +2,15 @@
 /**
  * Per-user goal completion limit service (Phase 36).
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals;
+namespace FaraCart\Goals;
 
-use GoalCart\Analytics\Session;
-use GoalCart\Database\Schema;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\Session;
+use FaraCart\Database\Schema;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -45,7 +45,7 @@ defined( 'ABSPATH' ) || exit;
  * Identity (Phase 18/19): logged-in shoppers count by `user_id` (their
  * WordPress/WooCommerce id); guests count by the existing anonymous
  * `Session` id, which is stamped onto the order at checkout
- * (`_goalcart_session`) so a guest order is always attributable to the
+ * (`_faracart_session`) so a guest order is always attributable to the
  * browsing session that placed it — no new tracking system. Counts are
  * never merged across the two identities (a guest who logs in starts a
  * separate logged-in count — Phase 20 limitation, deliberately not
@@ -64,7 +64,7 @@ final class CompletionService {
 	 *
 	 * @var string
 	 */
-	const ORDER_SESSION_META = '_goalcart_session';
+	const ORDER_SESSION_META = '_faracart_session';
 
 	/**
 	 * Plugin settings (master toggle).
@@ -167,7 +167,7 @@ final class CompletionService {
 		}
 
 		try {
-			$this->settings = \GoalCart\Plugin::instance()->container()->get( Settings::class );
+			$this->settings = \FaraCart\Plugin::instance()->container()->get( Settings::class );
 		} catch ( \Throwable $e ) {
 			return true;
 		}
@@ -183,7 +183,7 @@ final class CompletionService {
 	public function session_id() {
 		if ( null === $this->session ) {
 			try {
-				$this->session = \GoalCart\Plugin::instance()->container()->get( Session::class );
+				$this->session = \FaraCart\Plugin::instance()->container()->get( Session::class );
 			} catch ( \Throwable $e ) {
 				return '';
 			}
@@ -713,8 +713,8 @@ final class CompletionService {
 
 		if ( null === $this->repository || null === $this->engine ) {
 			try {
-				$this->repository = \GoalCart\Plugin::instance()->container()->get( GoalRepository::class );
-				$this->engine     = \GoalCart\Plugin::instance()->container()->get( GoalEngine::class );
+				$this->repository = \FaraCart\Plugin::instance()->container()->get( GoalRepository::class );
+				$this->engine     = \FaraCart\Plugin::instance()->container()->get( GoalEngine::class );
 			} catch ( \Throwable $e ) {
 				return 0;
 			}
@@ -776,7 +776,7 @@ final class CompletionService {
 	/**
 	 * Resolve the anonymous session id for an order.
 	 *
-	 * Priority: the session stamped at checkout (`_goalcart_session`) →
+	 * Priority: the session stamped at checkout (`_faracart_session`) →
 	 * the order_paid revenue event (when the analytics pipeline ran) →
 	 * the live cookie (payment-complete often fires on the checkout
 	 * request itself). Logged-in orders don't need it (user_id is the

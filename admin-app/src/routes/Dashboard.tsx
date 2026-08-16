@@ -107,12 +107,12 @@ function buildOpportunities(
   if (summary.profit_reason_code === 'missing_product_cost') {
     opportunities.push({
       icon: <WarningAmberIcon fontSize="small" color="warning" />,
-      title: __('Product cost data is incomplete', 'goalcart'),
+      title: __('Product cost data is incomplete', 'faracart'),
       body: __(
         'Add product costs to unlock Estimated Profit — FaraCart never invents a margin.',
-        'goalcart'
+        'faracart'
       ),
-      action: { label: __('Add costs', 'goalcart'), href: productsUrl },
+      action: { label: __('Add costs', 'faracart'), href: productsUrl },
     });
   }
 
@@ -120,26 +120,26 @@ function buildOpportunities(
   if (summary.funnel.completed > 0 && purchaseRate !== null && purchaseRate < 0.3) {
     opportunities.push({
       icon: <WarningAmberIcon fontSize="small" color="warning" />,
-      title: __('Many completions don’t become purchases', 'goalcart'),
+      title: __('Many completions don’t become purchases', 'faracart'),
       body: sprintf(
         /* translators: %s: purchase rate. */
-        __('Only %s of completed goals were followed by a purchase. Review your goal targets.', 'goalcart'),
+        __('Only %s of completed goals were followed by a purchase. Review your goal targets.', 'faracart'),
         formatPercent(purchaseRate)
       ),
-      action: { label: __('Review', 'goalcart'), to: '/optimization/goals' },
+      action: { label: __('Review', 'faracart'), to: '/optimization/goals' },
     });
   }
 
   if (upsellAssisted > 0) {
     opportunities.push({
       icon: <TrendingUpIcon fontSize="small" color="success" />,
-      title: __('Upsells are assisting completions', 'goalcart'),
+      title: __('Upsells are assisting completions', 'faracart'),
       body: sprintf(
         /* translators: %s: number of assisted completions. */
-        __('Smart Upsells assisted %s goal completions this period.', 'goalcart'),
+        __('Smart Upsells assisted %s goal completions this period.', 'faracart'),
         formatNumber(upsellAssisted)
       ),
-      action: { label: __('View performance', 'goalcart'), to: '/optimization/upsells' },
+      action: { label: __('View performance', 'faracart'), to: '/optimization/upsells' },
     });
   }
 
@@ -148,15 +148,15 @@ function buildOpportunities(
       icon: <InsightsIcon fontSize="small" color="primary" />,
       title: sprintf(
         /* translators: %s: goal name. */
-        __('%s is your top performer', 'goalcart'),
+        __('%s is your top performer', 'faracart'),
         topGoal.name
       ),
       body: sprintf(
         /* translators: %s: attributed sales. */
-        __('It generated %s in attributed sales this period.', 'goalcart'),
+        __('It generated %s in attributed sales this period.', 'faracart'),
         formatCurrency(topGoal.attributed_revenue)
       ),
-      action: { label: __('View goals', 'goalcart'), to: '/revenue/goals' },
+      action: { label: __('View goals', 'faracart'), to: '/revenue/goals' },
     });
   }
 
@@ -170,7 +170,7 @@ function SalesTrendChart({ data }: { data: RevenueTrendPoint[] }) {
   return (
     <Box
       role="img"
-      aria-label={__('Daily attributed sales and goal completions trend', 'goalcart')}
+      aria-label={__('Daily attributed sales and goal completions trend', 'faracart')}
       sx={{ width: '100%', height: 260 }}
     >
       <ResponsiveContainer width="100%" height="100%">
@@ -211,14 +211,14 @@ function SalesTrendChart({ data }: { data: RevenueTrendPoint[] }) {
           <Bar
             yAxisId="count"
             dataKey="completions"
-            name={__('Goal Completions', 'goalcart')}
+            name={__('Goal Completions', 'faracart')}
             fill={COLORS.completions}
             radius={[3, 3, 0, 0]}
           />
           <Line
             yAxisId="revenue"
             dataKey="revenue"
-            name={__('Attributed Sales', 'goalcart')}
+            name={__('Attributed Sales', 'faracart')}
             stroke={COLORS.sales}
             strokeWidth={2}
             dot={false}
@@ -237,10 +237,10 @@ function GoalPerformanceCard({ goals, loading }: { goals: GoalPerformanceRow[]; 
       <CardContent sx={{ height: '100%' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
           <Typography variant="h6" component="h2">
-            {__('Goal Performance', 'goalcart')}
+            {__('Goal Performance', 'faracart')}
           </Typography>
           <Button component={RouterLink} to="/revenue/goals" size="small">
-            {__('View all', 'goalcart')}
+            {__('View all', 'faracart')}
           </Button>
         </Box>
         {loading ? (
@@ -251,7 +251,7 @@ function GoalPerformanceCard({ goals, loading }: { goals: GoalPerformanceRow[]; 
           </Stack>
         ) : goals.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
-            {__('No goal performance yet.', 'goalcart')}
+            {__('No goal performance yet.', 'faracart')}
           </Typography>
         ) : (
           <Stack spacing={1.75}>
@@ -264,7 +264,7 @@ function GoalPerformanceCard({ goals, loading }: { goals: GoalPerformanceRow[]; 
                   <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
                     {sprintf(
                       /* translators: 1: purchases, 2: sales. */
-                      __('%1$s purchases · %2$s sales', 'goalcart'),
+                      __('%1$s purchases · %2$s sales', 'faracart'),
                       formatNumber(goal.converted),
                       formatCurrency(goal.attributed_revenue)
                     )}
@@ -295,12 +295,12 @@ function UpsellPerformanceCard({
   loading: boolean;
 }) {
   const rows = [
-    { label: __('Impressions', 'goalcart'), value: formatNumber(totals.impressions) },
-    { label: __('Clicks', 'goalcart'), value: formatNumber(totals.clicks) },
-    { label: __('Added to cart', 'goalcart'), value: formatNumber(totals.adds) },
-    { label: __('Purchases', 'goalcart'), value: formatNumber(totals.orders) },
-    { label: __('Assisted completions', 'goalcart'), value: formatNumber(assisted) },
-    { label: __('Attributed sales', 'goalcart'), value: formatCurrency(totals.revenue) },
+    { label: __('Impressions', 'faracart'), value: formatNumber(totals.impressions) },
+    { label: __('Clicks', 'faracart'), value: formatNumber(totals.clicks) },
+    { label: __('Added to cart', 'faracart'), value: formatNumber(totals.adds) },
+    { label: __('Purchases', 'faracart'), value: formatNumber(totals.orders) },
+    { label: __('Assisted completions', 'faracart'), value: formatNumber(assisted) },
+    { label: __('Attributed sales', 'faracart'), value: formatCurrency(totals.revenue) },
   ];
 
   return (
@@ -308,10 +308,10 @@ function UpsellPerformanceCard({
       <CardContent sx={{ height: '100%' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
           <Typography variant="h6" component="h2">
-            {__('Upsell Performance', 'goalcart')}
+            {__('Upsell Performance', 'faracart')}
           </Typography>
           <Button component={RouterLink} to="/optimization/upsells" size="small">
-            {__('View', 'goalcart')}
+            {__('View', 'faracart')}
           </Button>
         </Box>
         {loading ? (
@@ -349,7 +349,7 @@ function OpportunitiesCard({ opportunities }: { opportunities: Opportunity[] }) 
     <Card variant="outlined">
       <CardContent>
         <Typography variant="h6" component="h2" gutterBottom>
-          {__('Optimization Opportunities', 'goalcart')}
+          {__('Optimization Opportunities', 'faracart')}
         </Typography>
         <Stack spacing={2}>
           {opportunities.map((opportunity, index) => (
@@ -422,9 +422,9 @@ function DashboardSkeleton() {
 /** First-run onboarding for a store with no goals yet (§18). */
 function Onboarding() {
   const steps = [
-    __('Create your first Goal', 'goalcart'),
-    __('Configure Smart Upsells', 'goalcart'),
-    __('Start collecting performance data', 'goalcart'),
+    __('Create your first Goal', 'faracart'),
+    __('Configure Smart Upsells', 'faracart'),
+    __('Start collecting performance data', 'faracart'),
   ];
 
   return (
@@ -433,10 +433,10 @@ function Onboarding() {
         <FlagIcon sx={{ fontSize: 48 }} />
       </Box>
       <Typography variant="h5" component="h2" gutterBottom>
-        {__('Welcome to FaraCart', 'goalcart')}
+        {__('Welcome to FaraCart', 'faracart')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 480, mx: 'auto' }}>
-        {__('Increase cart value with Goals and Smart Upsells.', 'goalcart')}
+        {__('Increase cart value with Goals and Smart Upsells.', 'faracart')}
       </Typography>
       <Box
         component="ol"
@@ -474,7 +474,7 @@ function Onboarding() {
         ))}
       </Box>
       <Button component={RouterLink} to="/goals/new" variant="contained" sx={{ mt: 3 }}>
-        {__('Create Goal', 'goalcart')}
+        {__('Create Goal', 'faracart')}
       </Button>
     </Paper>
   );
@@ -578,13 +578,13 @@ export default function Dashboard() {
 
   return (
     <PageContainer
-      title={__('Overview', 'goalcart')}
-      description={__('A business summary of your Goals and Smart Upsells.', 'goalcart')}
+      title={__('Overview', 'faracart')}
+      description={__('A business summary of your Goals and Smart Upsells.', 'faracart')}
       actions={
         <>
           <DateRangeFilter />
-          <Tooltip title={__('Refresh', 'goalcart')}>
-            <IconButton size="small" onClick={refresh} aria-label={__('Refresh', 'goalcart')}>
+          <Tooltip title={__('Refresh', 'faracart')}>
+            <IconButton size="small" onClick={refresh} aria-label={__('Refresh', 'faracart')}>
               <RefreshIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -597,11 +597,11 @@ export default function Dashboard() {
           variant="outlined"
           action={
             <Button color="inherit" size="small" onClick={refresh}>
-              {__('Try again', 'goalcart')}
+              {__('Try again', 'faracart')}
             </Button>
           }
         >
-          {__('We couldn’t load your analytics. Your Goals are still working normally.', 'goalcart')}
+          {__('We couldn’t load your analytics. Your Goals are still working normally.', 'faracart')}
         </Alert>
       ) : overviewQuery.isLoading || goalsQuery.isLoading ? (
         <DashboardSkeleton />
@@ -610,10 +610,10 @@ export default function Dashboard() {
       ) : !hasData ? (
         <EmptyState
           icon={<TrendingUpIcon fontSize="large" />}
-          title={__('Your analytics are getting ready', 'goalcart')}
+          title={__('Your analytics are getting ready', 'faracart')}
           description={__(
             'Once customers interact with your Goals, performance data will appear here.',
-            'goalcart'
+            'faracart'
           )}
         />
       ) : summary && overviewQuery.data ? (
@@ -627,13 +627,13 @@ export default function Dashboard() {
             }}
           >
             <KpiCard
-              label={__('Sales Attributed to FaraCart', 'goalcart')}
+              label={__('Sales Attributed to FaraCart', 'faracart')}
               value={formatCurrency(summary.goal_driven_revenue)}
               icon={<PaymentsIcon fontSize="small" />}
               trend={salesTrend}
               hint={sprintf(
                 /* translators: %s: purchased orders. */
-                __('%s purchased orders', 'goalcart'),
+                __('%s purchased orders', 'faracart'),
                 formatNumber(summary.orders)
               )}
             />
@@ -649,34 +649,34 @@ export default function Dashboard() {
               trend={profitTrend}
             />
             <KpiCard
-              label={__('Goal Completions', 'goalcart')}
+              label={__('Goal Completions', 'faracart')}
               value={formatNumber(summary.funnel.completed)}
               icon={<FlagIcon fontSize="small" />}
               trend={completionsTrend}
               hint={sprintf(
                 /* translators: %s: completion rate. */
-                __('%s completion rate', 'goalcart'),
+                __('%s completion rate', 'faracart'),
                 formatPercent(summary.funnel.completion_rate)
               )}
             />
             <KpiCard
-              label={__('Purchased Orders', 'goalcart')}
+              label={__('Purchased Orders', 'faracart')}
               value={formatNumber(summary.orders)}
               icon={<ShoppingCartCheckoutIcon fontSize="small" />}
               trend={ordersTrend}
-              hint={__('after FaraCart interaction', 'goalcart')}
+              hint={__('after FaraCart interaction', 'faracart')}
             />
             <KpiCard
-              label={__('Purchase Rate', 'goalcart')}
+              label={__('Purchase Rate', 'faracart')}
               value={formatPercent(summary.funnel.conversion_rate)}
               icon={<PercentIcon fontSize="small" />}
-              hint={__('purchases per completed goal', 'goalcart')}
+              hint={__('purchases per completed goal', 'faracart')}
             />
             <KpiCard
-              label={__('Average Order Value', 'goalcart')}
+              label={__('Average Order Value', 'faracart')}
               value={formatCurrency(overviewQuery.data.aov.exposed_aov)}
               icon={<InsightsIcon fontSize="small" />}
-              hint={__('goal-exposed customers', 'goalcart')}
+              hint={__('goal-exposed customers', 'faracart')}
             />
           </Box>
 
@@ -684,7 +684,7 @@ export default function Dashboard() {
           <Card variant="outlined">
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
-                {__('Sales & Goal Performance', 'goalcart')}
+                {__('Sales & Goal Performance', 'faracart')}
               </Typography>
               <SalesTrendChart data={overviewQuery.data.trend} />
             </CardContent>

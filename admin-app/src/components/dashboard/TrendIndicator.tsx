@@ -27,7 +27,7 @@ interface TrendIndicatorProps {
  * unless `invert`), and the arrow + sign keep it readable without color.
  */
 export default function TrendIndicator({ trend }: TrendIndicatorProps) {
-  const { change, invert = false, context = __('vs previous period', 'goalcart') } = trend;
+  const { change, invert = false, context = __('vs previous period', 'faracart') } = trend;
 
   if (change === null || !Number.isFinite(change)) {
     return (

@@ -2,12 +2,12 @@
 /**
  * REST controller for product / category / coupon search.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Hooks\HookManager;
+use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -16,10 +16,10 @@ defined( 'ABSPATH' ) || exit;
  *
  * Phase 7 (REST API / AJAX Layer) admin search endpoints used by the goal
  * builder to pick products, categories and coupons:
- * *  - `GET /goalcart/v1/search/products`    — products/variations by name or
+ * *  - `GET /faracart/v1/search/products`    — products/variations by name or
  *    SKU (q), capped at 50 results.
- *  - `GET /goalcart/v1/search/categories`  — product_cat terms by name.
- *  - `GET /goalcart/v1/search/coupons`     — shop_coupon posts by code.
+ *  - `GET /faracart/v1/search/categories`  — product_cat terms by name.
+ *  - `GET /faracart/v1/search/coupons`     — shop_coupon posts by code.
  *
  * Every route also accepts an `ids` array: when present, the search is
  * narrowed to exactly those ids (Phase 9: the goal builder uses it to
@@ -406,7 +406,7 @@ class SearchController extends BaseController {
 
 		$zone_0 = array(
 			'id'   => 0,
-			'name' => __( 'Locations not covered by your other zones', 'goalcart' ),
+			'name' => __( 'Locations not covered by your other zones', 'faracart' ),
 		);
 
 		if ( class_exists( '\WC_Shipping_Zones' ) && method_exists( '\WC_Shipping_Zones', 'get_zones' ) ) {

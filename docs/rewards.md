@@ -42,7 +42,7 @@ WooCommerce hooks    fees / package rates / coupons / gifts on the live cart
 | `Rewards\RewardResult` | The 5-state result object (`not_applicable`, `locked`, `available`, `applied`, `blocked`) + reasons, immutable. |
 | `Rewards\RewardApplicator` | Interface (`supports()`, `evaluate()`, `apply()`); `evaluate()` is the pure, WooCommerce-independent step. |
 | `Rewards\Applicators\*` | The five applicators: free shipping, percentage discount, fixed discount, free gift, coupon. |
-| `Rewards\RewardApplicatorRegistry` | Maps reward type → applicator class, resolves lazily, filterable via `goalcart_reward_applicator_classes`. |
+| `Rewards\RewardApplicatorRegistry` | Maps reward type → applicator class, resolves lazily, filterable via `faracart_reward_applicator_classes`. |
 | `Rewards\RewardSafety` | Pure, testable safety rules: stacking, coupon existence, gift availability, deterministic generated coupon codes. |
 | `Rewards\RewardEngine` | Facade: evaluates a GoalResult into a RewardResult and syncs rewards to the live WC cart (session-tracked, re-entrancy-guarded). |
 | `Goals\GoalRepository` | Loads active goals (with campaign gating) once per request for the cart sync. |
@@ -54,7 +54,7 @@ repository (`Plugin::goal_engine()`'s sibling) is `GoalRepository` via
 ### Extension point
 
 ```php
-add_filter( 'goalcart_reward_applicator_classes', function ( $classes ) {
+add_filter( 'faracart_reward_applicator_classes', function ( $classes ) {
     $classes['loyalty_points'] = My_Loyalty_Applicator::class;
     return $classes;
 } );
@@ -67,8 +67,8 @@ add_filter( 'goalcart_reward_applicator_classes', function ( $classes ) {
 | `free_shipping` | optional `shipping_zone_ids`, `shipping_method_ids` (`flat_rate` or `flat_rate:3`) | Rates in matching packages are zeroed via `woocommerce_package_rates`; with no restrictions every rate goes free. Store shipping settings are never altered. |
 | `percent_discount` | `reward_value` (%), optional `reward_max_value` cap, eligible products/categories, excluded products | Negative cart fee (`woocommerce_cart_calculate_fees`), applied to the eligible after-discount base, never exceeding the base. |
 | `fixed_discount` | `reward_value` (amount), eligible/excluded products & categories | Negative cart fee, clamped to the eligible value. |
-| `free_gift` | `gift_product_id`, `gift_add_mode` (`automatic` \| `choose`) | Automatic: gift line added with `goalcart_gift` cart data, price zeroed during totals, removed when the goal becomes incomplete. Choose: the shopper picks one gift from the configured `gift_products` list through the storefront picker (`POST /goalcart/v1/gift`); the chosen product is added free, exactly one per goal. |
-| `coupon` | `coupon_code` (existing) or `coupon_generate` (from `reward_value`, `max_value`, eligible/excluded rules) | Existing coupons are validated then applied; generated coupons are deterministic per goal (`GOALCART-…`), persisted, individual-use by default, and cleaned up on uninstall. |
+| `free_gift` | `gift_product_id`, `gift_add_mode` (`automatic` \| `choose`) | Automatic: gift line added with `faracart_gift` cart data, price zeroed during totals, removed when the goal becomes incomplete. Choose: the shopper picks one gift from the configured `gift_products` list through the storefront picker (`POST /faracart/v1/gift`); the chosen product is added free, exactly one per goal. |
+| `coupon` | `coupon_code` (existing) or `coupon_generate` (from `reward_value`, `max_value`, eligible/excluded rules) | Existing coupons are validated then applied; generated coupons are deterministic per goal (`FARACART-…`), persisted, individual-use by default, and cleaned up on uninstall. |
 
 Reward config lives in the goal's `reward_type` / `reward_value` /
 `reward_max_value` columns plus the JSON `reward_meta` column (see
@@ -116,7 +116,7 @@ totals are reset; the tax component is a Phase 6 refinement (shipping is exclude
 reward evaluation anyway).
 
 The engine only touches what it granted: applied coupons are tracked per goal in the
-session (`goalcart_applied_coupons`), automatic gifts in `goalcart_gift_goals`, and
+session (`faracart_applied_coupons`), automatic gifts in `faracart_gift_goals`, and
 session writes are skipped when the value did not change (no per-pass session
 churn). The shopper's own coupons are never removed.
 

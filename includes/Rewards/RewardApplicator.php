@@ -2,13 +2,13 @@
 /**
  * Reward applicator contract for the FaraCart engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards;
+namespace FaraCart\Rewards;
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\GoalResult;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\GoalResult;
 
 defined( 'ABSPATH' ) || exit;
 

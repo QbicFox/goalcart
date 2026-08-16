@@ -16,15 +16,15 @@
  *    idempotent (delete-then-insert)
  *  - bounded catch-up: aggregate_revenue() starts the day after the last
  *    aggregated date (or the lookback floor), processes at most
- *    goalcart_aggregate_max_days per run and advances the option
+ *    faracart_aggregate_max_days per run and advances the option
  *  - upsell stats: aggregate_upsells() rebuilds upsell_stats from the raw
  *    upsell_events log (per-product impressions/clicks/adds/orders/revenue)
  *  - cached repository: overview / goal_performance / daily_trend (aggregated
  *    + today's live merge) / product_stats, with generation-versioned
- *    transients, the goalcart_revenue_cache_enabled bypass and invalidate()
- *  - invalidation hooks: order status, goal CRUD (goalcart_goals_changed),
+ *    transients, the faracart_revenue_cache_enabled bypass and invalidate()
+ *  - invalidation hooks: order status, goal CRUD (faracart_goals_changed),
  *    product saves and the aggregation run all bump the cache version
- *  - GoalRepository fires goalcart_goals_changed on create/update/delete
+ *  - GoalRepository fires faracart_goals_changed on create/update/delete
  *
  * All writes happen inside a single database transaction that is rolled
  * back; the absence of residue is asserted afterwards.
@@ -56,17 +56,17 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\AttributionEngine;
-use GoalCart\Analytics\DailyAggregator;
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Analytics\Session;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\AttributionEngine;
+use FaraCart\Analytics\DailyAggregator;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Analytics\Session;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -90,7 +90,7 @@ function close( $a, $b, $eps = 0.01 ) {
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $aggregator = $container->get( DailyAggregator::class );
 $repo       = $container->get( RevenueRepository::class );
@@ -108,13 +108,13 @@ echo "\n== 1. Service wiring ==\n";
 
 check( 'DailyAggregator resolves from the container', $aggregator instanceof DailyAggregator );
 check( 'RevenueRepository resolves from the container', $repo instanceof RevenueRepository );
-check( 'aggregation event name is a plugin constant', DailyAggregator::AGGREGATE_EVENT === 'goalcart_revenue_aggregate' );
+check( 'aggregation event name is a plugin constant', DailyAggregator::AGGREGATE_EVENT === 'faracart_revenue_aggregate' );
 check( 'aggregation cron is in the installer cron list', in_array( DailyAggregator::AGGREGATE_EVENT, Installer::cron_events(), true ) );
 check( 'cleanup cron still in the installer cron list', in_array( RevenueTracker::CLEANUP_EVENT, Installer::cron_events(), true ) );
 
 $intervals = Installer::cron_intervals();
 check( 'aggregation scheduled on the daily interval', isset( $intervals[ DailyAggregator::AGGREGATE_EVENT ] ) && 'daily' === $intervals[ DailyAggregator::AGGREGATE_EVENT ] );
-check( 'cleanup scheduled on the weekly interval', isset( $intervals[ RevenueTracker::CLEANUP_EVENT ] ) && 'goalcart_weekly' === $intervals[ RevenueTracker::CLEANUP_EVENT ] );
+check( 'cleanup scheduled on the weekly interval', isset( $intervals[ RevenueTracker::CLEANUP_EVENT ] ) && 'faracart_weekly' === $intervals[ RevenueTracker::CLEANUP_EVENT ] );
 
 // Register handlers through a fresh HookManager (mirrors the plugin boot path).
 $hooks = new HookManager();
@@ -124,9 +124,9 @@ $hooks->run();
 
 check( 'aggregation cron callback registered', has_action( DailyAggregator::AGGREGATE_EVENT ) );
 check( 'cache invalidated on payment_complete', has_action( 'woocommerce_payment_complete' ) );
-check( 'cache invalidated on goal changes', has_action( 'goalcart_goals_changed' ) );
+check( 'cache invalidated on goal changes', has_action( 'faracart_goals_changed' ) );
 check( 'cache invalidated on product saves', has_action( 'save_post_product' ) );
-check( 'cache invalidated after aggregation', has_action( 'goalcart_revenue_aggregated' ) );
+check( 'cache invalidated after aggregation', has_action( 'faracart_revenue_aggregated' ) );
 
 // ---------------------------------------------------------------------------
 // 2. Schema
@@ -285,13 +285,13 @@ try {
 
 	// --- Bounded catch-up. ---
 	update_option( DailyAggregator::LAST_AGGREGATED_OPTION, '2026-08-01', false );
-	add_filter( 'goalcart_aggregate_max_days', function () {
+	add_filter( 'faracart_aggregate_max_days', function () {
 		return 3;
 	} );
 
 	$processed = $aggregator->aggregate_revenue();
 
-	remove_all_filters( 'goalcart_aggregate_max_days' );
+	remove_all_filters( 'faracart_aggregate_max_days' );
 
 	$today = date( 'Y-m-d', current_time( 'timestamp' ) );
 	$expected_last = date( 'Y-m-d', strtotime( '2026-08-01 +3 days' ) );
@@ -301,11 +301,11 @@ try {
 	check( 'catch-up never aggregates the future', $today > (string) get_option( DailyAggregator::LAST_AGGREGATED_OPTION ) );
 
 	// A second run continues from where the first stopped (backlog drain).
-	add_filter( 'goalcart_aggregate_max_days', function () {
+	add_filter( 'faracart_aggregate_max_days', function () {
 		return 2;
 	} );
 	$processed_2 = $aggregator->aggregate_revenue();
-	remove_all_filters( 'goalcart_aggregate_max_days' );
+	remove_all_filters( 'faracart_aggregate_max_days' );
 
 	check( 'second run continues from the last aggregated date', 2 === $processed_2 );
 
@@ -418,9 +418,9 @@ try {
 	check( 'invalidate bumps the cache generation', $version_after === $version_before + 1 );
 
 	// The cache bypass filter forces fresh computation every call.
-	add_filter( 'goalcart_revenue_cache_enabled', '__return_false' );
+	add_filter( 'faracart_revenue_cache_enabled', '__return_false' );
 	$fresh = $repo->overview( array( 'from' => '2026-08-05', 'to' => '2026-08-05' ) );
-	remove_all_filters( 'goalcart_revenue_cache_enabled' );
+	remove_all_filters( 'faracart_revenue_cache_enabled' );
 	check( 'cache bypass still computes the overview', isset( $fresh['summary'] ) && close( 350000, $fresh['summary']['goal_driven_revenue'] ) );
 
 	$version_bypass = (int) get_option( RevenueRepository::CACHE_VERSION_OPTION, 1 );
@@ -428,7 +428,7 @@ try {
 
 	// --- Invalidation hooks actually fire. ---
 	$fired = array();
-	add_action( 'goalcart_revenue_aggregated', function () use ( &$fired ) {
+	add_action( 'faracart_revenue_aggregated', function () use ( &$fired ) {
 		$fired[] = 'aggregated';
 	} );
 
@@ -436,14 +436,14 @@ try {
 	$aggregator->run();
 	$v2 = (int) get_option( RevenueRepository::CACHE_VERSION_OPTION, 1 );
 
-	remove_all_actions( 'goalcart_revenue_aggregated' );
+	remove_all_actions( 'faracart_revenue_aggregated' );
 
 	check( 'aggregation run fires the aggregated action', in_array( 'aggregated', $fired, true ) );
 	check( 'aggregation run invalidates the revenue cache', $v2 === $v1 + 1 );
 
-	// --- GoalRepository fires goalcart_goals_changed on CRUD. ---
+	// --- GoalRepository fires faracart_goals_changed on CRUD. ---
 	$changed = array();
-	add_action( 'goalcart_goals_changed', function ( $goal_id ) use ( &$changed ) {
+	add_action( 'faracart_goals_changed', function ( $goal_id ) use ( &$changed ) {
 		$changed[] = (int) $goal_id;
 	} );
 
@@ -456,11 +456,11 @@ try {
 	$goals_repo->update( $new_id, array( 'name' => 'P33 renamed goal' ) );
 	$goals_repo->delete( $new_id );
 
-	remove_all_actions( 'goalcart_goals_changed' );
+	remove_all_actions( 'faracart_goals_changed' );
 
-	check( 'goal create fires goalcart_goals_changed', in_array( $new_id, $changed, true ) );
-	check( 'goal update fires goalcart_goals_changed', 3 === count( $changed ) );
-	check( 'goal delete fires goalcart_goals_changed', $new_id === end( $changed ) );
+	check( 'goal create fires faracart_goals_changed', in_array( $new_id, $changed, true ) );
+	check( 'goal update fires faracart_goals_changed', 3 === count( $changed ) );
+	check( 'goal delete fires faracart_goals_changed', $new_id === end( $changed ) );
 
 	// Order-status invalidation is wired through the repository's registered
 	// callback (firing the real hook with a fake order id crashes WC core

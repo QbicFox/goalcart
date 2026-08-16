@@ -4,7 +4,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import FlagIcon from '@mui/icons-material/Flag';
 import SearchIcon from '@mui/icons-material/Search';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -34,41 +33,40 @@ import { deleteGoal, duplicateGoal, fetchGoals, updateGoal } from '../api/goals'
 import type { Goal } from '../types';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
-import GoalPreviewDialog from '../components/GoalPreviewDialog';
 import NumberPagination from '../components/NumberPagination';
 import PageContainer from '../components/PageContainer';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { formatCurrency, formatNumber, formatSchedule } from '../lib/format';
 
 const REWARD_LABELS: Record<string, string> = {
-  free_shipping: __('Free shipping', 'goalcart'),
-  percent_discount: __('% discount', 'goalcart'),
-  fixed_discount: __('Fixed discount', 'goalcart'),
-  free_gift: __('Free gift', 'goalcart'),
-  coupon: __('Coupon', 'goalcart'),
+  free_shipping: __('Free shipping', 'faracart'),
+  percent_discount: __('% discount', 'faracart'),
+  fixed_discount: __('Fixed discount', 'faracart'),
+  free_gift: __('Free gift', 'faracart'),
+  coupon: __('Coupon', 'faracart'),
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  amount: __('Amount', 'goalcart'),
-  quantity: __('Quantity', 'goalcart'),
-  distinct_quantity: __('Distinct quantity', 'goalcart'),
-  category: __('Category', 'goalcart'),
-  product: __('Product', 'goalcart'),
-  weight: __('Weight', 'goalcart'),
-  composite: __('Composite', 'goalcart'),
+  amount: __('Amount', 'faracart'),
+  quantity: __('Quantity', 'faracart'),
+  distinct_quantity: __('Distinct quantity', 'faracart'),
+  category: __('Category', 'faracart'),
+  product: __('Product', 'faracart'),
+  weight: __('Weight', 'faracart'),
+  composite: __('Composite', 'faracart'),
 };
 
 function statusChip(goal: Goal) {
   return goal.status === 'active' ? (
-    <Chip label={__('Active', 'goalcart')} size="small" color="success" variant="outlined" />
+    <Chip label={__('Active', 'faracart')} size="small" color="success" variant="outlined" />
   ) : (
-    <Chip label={__('Inactive', 'goalcart')} size="small" color="default" variant="outlined" />
+    <Chip label={__('Inactive', 'faracart')} size="small" color="default" variant="outlined" />
   );
 }
 
 function rewardLabel(goal: Goal): string {
   if (!goal.reward_type) {
-    return __('None', 'goalcart');
+    return __('None', 'faracart');
   }
 
   const base = REWARD_LABELS[goal.reward_type] ?? goal.reward_type;
@@ -79,7 +77,7 @@ function rewardLabel(goal: Goal): string {
         ? `${goal.reward_value}%`
         : formatCurrency(goal.reward_value);
 
-    return sprintf(__('%1$s (%2$s)', 'goalcart'), base, value);
+    return sprintf(__('%1$s (%2$s)', 'faracart'), base, value);
   }
 
   return base;
@@ -103,16 +101,16 @@ function completionLimitLabel(goal: Goal): string {
   const limit = goal.max_completions_per_user;
 
   if (limit === null || limit === undefined) {
-    return __('Unlimited', 'goalcart');
+    return __('Unlimited', 'faracart');
   }
 
   if (limit === 1) {
-    return __('Once', 'goalcart');
+    return __('Once', 'faracart');
   }
 
   return sprintf(
     /* translators: %d: number of times. */
-    __('%d times', 'goalcart'),
+    __('%d times', 'faracart'),
     limit
   );
 }
@@ -139,7 +137,6 @@ export default function Goals() {
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [pendingDelete, setPendingDelete] = useState<Goal | null>(null);
-  const [previewGoal, setPreviewGoal] = useState<Goal | null>(null);
 
   // Debounce the search box so typing doesn't fire a request per key.
   useEffect(() => {
@@ -163,7 +160,7 @@ export default function Goals() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteGoal(id),
     onSuccess: () => {
-      notify(__('The goal was deleted.', 'goalcart'));
+      notify(__('The goal was deleted.', 'faracart'));
       setPendingDelete(null);
       invalidate();
     },
@@ -176,7 +173,7 @@ export default function Goals() {
   const duplicateMutation = useMutation({
     mutationFn: (id: number) => duplicateGoal(id),
     onSuccess: (copy) => {
-      notify(sprintf(__('Duplicated “%s”.', 'goalcart'), copy.name));
+      notify(sprintf(__('Duplicated “%s”.', 'faracart'), copy.name));
       invalidate();
     },
     onError: (error: Error) => notify(error.message, 'error'),
@@ -186,7 +183,7 @@ export default function Goals() {
     mutationFn: ({ id, status }: { id: number; status: 'active' | 'inactive' }) =>
       updateGoal(id, { status }),
     onSuccess: () => {
-      notify(__('The goal status was updated.', 'goalcart'));
+      notify(__('The goal status was updated.', 'faracart'));
       invalidate();
     },
     onError: (error: Error) => notify(error.message, 'error'),
@@ -197,11 +194,11 @@ export default function Goals() {
 
   return (
     <PageContainer
-      title={__('Goals', 'goalcart')}
-      description={__('Cart goals drive the storefront progress bars and rewards.', 'goalcart')}
+      title={__('Goals', 'faracart')}
+      description={__('Cart goals drive the storefront progress bars and rewards.', 'faracart')}
       actions={
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => navigate('/goals/new')}>
-          {__('Add goal', 'goalcart')}
+          {__('Add goal', 'faracart')}
         </Button>
       }
     >
@@ -209,14 +206,14 @@ export default function Goals() {
         <Alert severity="error" variant="outlined">
           {goalsQuery.error instanceof Error
             ? goalsQuery.error.message
-            : __('Could not load the goals.', 'goalcart')}
+            : __('Could not load the goals.', 'faracart')}
         </Alert>
       )}
 
       {/* Search + filter toolbar */}
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
         <TextField
-          label={__('Search goals', 'goalcart')}
+          label={__('Search goals', 'faracart')}
           size="small"
           fullWidth
           sx={{ maxWidth: { sm: 340 } }}
@@ -237,7 +234,7 @@ export default function Goals() {
         />
         <TextField
           select
-          label={__('Status', 'goalcart')}
+          label={__('Status', 'faracart')}
           size="small"
           sx={{ minWidth: 160 }}
           value={status}
@@ -246,9 +243,9 @@ export default function Goals() {
             setPage(0);
           }}
         >
-          <MenuItem value="">{__('All statuses', 'goalcart')}</MenuItem>
-          <MenuItem value="active">{__('Active', 'goalcart')}</MenuItem>
-          <MenuItem value="inactive">{__('Inactive', 'goalcart')}</MenuItem>
+          <MenuItem value="">{__('All statuses', 'faracart')}</MenuItem>
+          <MenuItem value="active">{__('Active', 'faracart')}</MenuItem>
+          <MenuItem value="inactive">{__('Inactive', 'faracart')}</MenuItem>
         </TextField>
       </Stack>
 
@@ -260,10 +257,10 @@ export default function Goals() {
       ) : !goalsQuery.isError && goals.length === 0 && !debouncedSearch && !status ? (
         <EmptyState
           icon={<FlagIcon fontSize="large" />}
-          title={__('No goals yet', 'goalcart')}
+          title={__('No goals yet', 'faracart')}
           description={__(
             'Goals define what you want shoppers to reach — a cart amount, quantity, category spend and more. Create your first goal to start.',
-            'goalcart'
+            'faracart'
           )}
           action={
             <Button
@@ -271,7 +268,7 @@ export default function Goals() {
               startIcon={<AddIcon />}
               onClick={() => navigate('/goals/new')}
             >
-              {__('Add your first goal', 'goalcart')}
+              {__('Add your first goal', 'faracart')}
             </Button>
           }
         />
@@ -281,14 +278,14 @@ export default function Goals() {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>{__('Name', 'goalcart')}</TableCell>
-                  <TableCell>{__('Type', 'goalcart')}</TableCell>
-                  <TableCell>{__('Reward', 'goalcart')}</TableCell>
-                  <TableCell>{__('Status', 'goalcart')}</TableCell>
-                  <TableCell align="right">{__('Priority', 'goalcart')}</TableCell>
-                  <TableCell>{__('Schedule', 'goalcart')}</TableCell>
-                  <TableCell>{__('Completion', 'goalcart')}</TableCell>
-                  <TableCell align="right">{__('Actions', 'goalcart')}</TableCell>
+                  <TableCell>{__('Name', 'faracart')}</TableCell>
+                  <TableCell>{__('Type', 'faracart')}</TableCell>
+                  <TableCell>{__('Reward', 'faracart')}</TableCell>
+                  <TableCell>{__('Status', 'faracart')}</TableCell>
+                  <TableCell align="right">{__('Priority', 'faracart')}</TableCell>
+                  <TableCell>{__('Schedule', 'faracart')}</TableCell>
+                  <TableCell>{__('Completion', 'faracart')}</TableCell>
+                  <TableCell align="right">{__('Actions', 'faracart')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -304,11 +301,11 @@ export default function Goals() {
                             <Tooltip
                               title={__(
                                 'Exclusive: when this goal is reached, lower-priority goals are skipped.',
-                                'goalcart'
+                                'faracart'
                               )}
                             >
                               <Chip
-                                label={__('Exclusive', 'goalcart')}
+                                label={__('Exclusive', 'faracart')}
                                 size="small"
                                 color="warning"
                                 variant="outlined"
@@ -321,7 +318,7 @@ export default function Goals() {
                         </Typography>
                         {goal.campaign_id !== null && (
                           <Typography variant="caption" color="text.secondary" component="div">
-                            {sprintf(__('Campaign #%d', 'goalcart'), goal.campaign_id)}
+                            {sprintf(__('Campaign #%d', 'faracart'), goal.campaign_id)}
                           </Typography>
                         )}
                       </Box>
@@ -338,8 +335,8 @@ export default function Goals() {
                         <Tooltip
                           title={
                             goal.status === 'active'
-                              ? __('Disable', 'goalcart')
-                              : __('Enable', 'goalcart')
+                              ? __('Disable', 'faracart')
+                              : __('Enable', 'faracart')
                           }
                         >
                           <Switch
@@ -355,7 +352,7 @@ export default function Goals() {
                               input: {
                                 'aria-label': sprintf(
                                   /* translators: %s: goal name. */
-                                  __('Toggle %s', 'goalcart'),
+                                  __('Toggle %s', 'faracart'),
                                   goal.name
                                 ),
                               },
@@ -379,13 +376,13 @@ export default function Goals() {
                           goal.max_completions_per_user === undefined
                             ? __(
                                 'The shopper may complete this goal as many times as they want.',
-                                'goalcart'
+                                'faracart'
                               )
                             : sprintf(
                                 /* translators: %d: number of times. */
                                 __(
                                   'Each shopper may complete this goal at most %d times.',
-                                  'goalcart'
+                                  'faracart'
                                 ),
                                 goal.max_completions_per_user
                               )
@@ -396,39 +393,30 @@ export default function Goals() {
                     </TableCell>
                     <TableCell align="right">
                       <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
-                        <Tooltip title={__('Preview', 'goalcart')}>
+                        <Tooltip title={__('Edit', 'faracart')}>
                           <IconButton
                             size="small"
-                            aria-label={sprintf(__('Preview %s', 'goalcart'), goal.name)}
-                            onClick={() => setPreviewGoal(goal)}
-                          >
-                            <VisibilityIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title={__('Edit', 'goalcart')}>
-                          <IconButton
-                            size="small"
-                            aria-label={sprintf(__('Edit %s', 'goalcart'), goal.name)}
+                            aria-label={sprintf(__('Edit %s', 'faracart'), goal.name)}
                             onClick={() => navigate(`/goals/${goal.id}/edit`)}
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title={__('Duplicate', 'goalcart')}>
+                        <Tooltip title={__('Duplicate', 'faracart')}>
                           <IconButton
                             size="small"
-                            aria-label={sprintf(__('Duplicate %s', 'goalcart'), goal.name)}
+                            aria-label={sprintf(__('Duplicate %s', 'faracart'), goal.name)}
                             disabled={duplicateMutation.isPending}
                             onClick={() => duplicateMutation.mutate(goal.id)}
                           >
                             <ContentCopyIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title={__('Delete', 'goalcart')}>
+                        <Tooltip title={__('Delete', 'faracart')}>
                           <IconButton
                             size="small"
                             color="error"
-                            aria-label={sprintf(__('Delete %s', 'goalcart'), goal.name)}
+                            aria-label={sprintf(__('Delete %s', 'faracart'), goal.name)}
                             onClick={() => setPendingDelete(goal)}
                           >
                             <DeleteIcon fontSize="small" />
@@ -447,7 +435,7 @@ export default function Goals() {
                         color="text.secondary"
                         sx={{ py: 3, textAlign: 'center' }}
                       >
-                        {__('No goals match your search.', 'goalcart')}
+                        {__('No goals match your search.', 'faracart')}
                       </Typography>
                     </TableCell>
                   </TableRow>
@@ -472,17 +460,17 @@ export default function Goals() {
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        title={__('Delete this goal?', 'goalcart')}
+        title={__('Delete this goal?', 'faracart')}
         description={
           pendingDelete
             ? sprintf(
                 /* translators: %s: goal name. */
-                __('“%s” will be permanently deleted. This cannot be undone.', 'goalcart'),
+                __('“%s” will be permanently deleted. This cannot be undone.', 'faracart'),
                 pendingDelete.name
               )
             : undefined
         }
-        confirmLabel={__('Delete', 'goalcart')}
+        confirmLabel={__('Delete', 'faracart')}
         destructive
         busy={deleteMutation.isPending}
         onConfirm={() => {
@@ -492,8 +480,6 @@ export default function Goals() {
         }}
         onCancel={() => setPendingDelete(null)}
       />
-
-      <GoalPreviewDialog goal={previewGoal} onClose={() => setPreviewGoal(null)} />
     </PageContainer>
   );
 }

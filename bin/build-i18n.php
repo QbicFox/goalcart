@@ -2,28 +2,28 @@
 /**
  * Compile FaraCart .po translation files into .mo and JED JSON.
  *
- * Phase 27 (Internationalization): for every `languages/goalcart-<locale>.po`
+ * Phase 27 (Internationalization): for every `languages/faracart-<locale>.po`
  * this writes:
  *
- *  - `languages/goalcart-<locale>.mo`      — GNU gettext machine object
+ *  - `languages/faracart-<locale>.mo`      — GNU gettext machine object
  *    (the classic PHP `load_textdomain` binary; also consumed by the
  *    WordPress plugin-translation loader from the Domain Path).
- *  - `languages/goalcart-<locale>-goalcart-admin.json` — JED JSON for the
+ *  - `languages/faracart-<locale>-faracart-admin.json` — JED JSON for the
  *    React admin app, named for WP 7's `load_script_textdomain()`
  *    convention `{domain}-{locale}-{handle}.json` (verified against the
- *    installed core), loaded via `wp_set_script_translations( 'goalcart-admin',
- *    'goalcart', GOALCART_PATH . 'languages' )`.
+ *    installed core), loaded via `wp_set_script_translations( 'faracart-admin',
+ *    'faracart', FARACART_PATH . 'languages' )`.
  *
  * A compact native implementation so translators ship .po files without
  * needing gettext tooling or wp-cli. Run with `--check` to verify every
  * .po is newer than (or equal to) its compiled outputs.
  *
  * Usage:
- *   php bin/build-i18n.php             # compile all languages/goalcart-*.po
+ *   php bin/build-i18n.php             # compile all languages/faracart-*.po
  *   php bin/build-i18n.php --check     # exit 1 when any output is stale
  *   php bin/build-i18n.php --dir /tmp/pofiles
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
 if ( PHP_SAPI !== 'cli' ) {
@@ -196,11 +196,11 @@ function gc_i18n_plural_forms( array $entries ) {
  */
 function gc_i18n_build_jed( $locale, array $entries ) {
 	$data = array(
-		'domain'      => 'goalcart',
+		'domain'      => 'faracart',
 		'locale_data' => array(
-			'goalcart' => array(
+			'faracart' => array(
 				'' => array(
-					'domain'       => 'goalcart',
+					'domain'       => 'faracart',
 					'lang'         => $locale,
 					'plural-forms' => gc_i18n_plural_forms( $entries ),
 				),
@@ -215,7 +215,7 @@ function gc_i18n_build_jed( $locale, array $entries ) {
 
 		$key = ( '' !== $entry['msgctxt'] ? $entry['msgctxt'] . "\x04" : '' ) . $entry['msgid'];
 
-		$data['locale_data']['goalcart'][ $key ] = array( $entry['msgstr'] );
+		$data['locale_data']['faracart'][ $key ] = array( $entry['msgstr'] );
 	}
 
 	return wp_json_encode_compat( $data );
@@ -233,7 +233,7 @@ function wp_json_encode_compat( $data ) {
 	return false === $json ? '{}' : $json . "\n";
 }
 
-$po_files = glob( $dir . '/goalcart-*.po' );
+$po_files = glob( $dir . '/faracart-*.po' );
 
 if ( false === $po_files ) {
 	$po_files = array();
@@ -244,10 +244,10 @@ $failed     = false;
 
 foreach ( $po_files as $po_path ) {
 	$locale = basename( $po_path, '.po' );
-	$locale = preg_replace( '/^goalcart-/', '', $locale );
+	$locale = preg_replace( '/^faracart-/', '', $locale );
 
-	$mo_path = dirname( $po_path ) . '/goalcart-' . $locale . '.mo';
-	$jed_path = dirname( $po_path ) . '/goalcart-' . $locale . '-goalcart-admin.json';
+	$mo_path = dirname( $po_path ) . '/faracart-' . $locale . '.mo';
+	$jed_path = dirname( $po_path ) . '/faracart-' . $locale . '-faracart-admin.json';
 
 	$entries = gc_i18n_parse_po( (string) file_get_contents( $po_path ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
@@ -282,7 +282,7 @@ if ( $check ) {
 }
 
 if ( ! $any_output ) {
-	fwrite( STDOUT, "No goalcart-*.po files found in {$dir} — nothing to build.\n" );
+	fwrite( STDOUT, "No faracart-*.po files found in {$dir} — nothing to build.\n" );
 }
 
 exit( 0 );

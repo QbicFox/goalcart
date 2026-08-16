@@ -12,7 +12,7 @@
  *      stripping through the repository), and output escaping (widget
  *      container attributes)
  *  - P22-T02 REST:
- *      every goalcart/v1 route carries a permission callback, arg-schema
+ *      every faracart/v1 route carries a permission callback, arg-schema
  *      validation on the request surface, per-user and per-IP rate
  *      limiting (429 after the budget), and the public /progress payload
  *      data-minimization contract (reward_meta — coupon codes, gift
@@ -62,15 +62,15 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\AnalyticsRepository;
-use GoalCart\Analytics\Tracker;
-use GoalCart\Frontend\ProgressUI;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Hooks\HookManager;
-use GoalCart\REST\BaseController;
-use GoalCart\REST\FrontendController;
-use GoalCart\REST\GoalsController;
-use GoalCart\REST\TrackController;
+use FaraCart\Analytics\AnalyticsRepository;
+use FaraCart\Analytics\Tracker;
+use FaraCart\Frontend\ProgressUI;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Hooks\HookManager;
+use FaraCart\REST\BaseController;
+use FaraCart\REST\FrontendController;
+use FaraCart\REST\GoalsController;
+use FaraCart\REST\TrackController;
 
 $failures = 0;
 $checks   = 0;
@@ -87,17 +87,17 @@ function check( $label, $cond ) {
 }
 
 // Fire REST route registration once (rest_api_init never fires in CLI).
-if ( ! did_action( 'goalcart_security_test_ready' ) ) {
+if ( ! did_action( 'faracart_security_test_ready' ) ) {
 	do_action( 'rest_api_init' );
-	do_action( 'goalcart_security_test_ready' );
+	do_action( 'faracart_security_test_ready' );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $goals_ctrl     = $container->get( GoalsController::class );
 $frontend_ctrl  = $container->get( FrontendController::class );
 $track_ctrl     = $container->get( TrackController::class );
-$settings       = $container->get( \GoalCart\Settings\Settings::class );
+$settings       = $container->get( \FaraCart\Settings\Settings::class );
 
 $server = rest_get_server();
 $routes = $server->get_routes();
@@ -133,7 +133,7 @@ $protected = 0;
 $missing   = 0;
 
 foreach ( $routes as $route => $handlers ) {
-	if ( 0 !== strpos( (string) $route, '/goalcart/v1/' ) ) {
+	if ( 0 !== strpos( (string) $route, '/faracart/v1/' ) ) {
 		continue;
 	}
 
@@ -146,16 +146,16 @@ foreach ( $routes as $route => $handlers ) {
 	}
 }
 
-check( 'every goalcart/v1 route has a permission callback', 0 === $missing && $protected > 0 );
+check( 'every faracart/v1 route has a permission callback', 0 === $missing && $protected > 0 );
 
 // Anonymous dispatch is rejected with 403 on every admin route.
 foreach ( array(
-	'GET /goalcart/v1/goals',
-	'GET /goalcart/v1/settings',
-	'GET /goalcart/v1/campaigns',
-	'GET /goalcart/v1/analytics',
-	'GET /goalcart/v1/search/products',
-	'POST /goalcart/v1/preview',
+	'GET /faracart/v1/goals',
+	'GET /faracart/v1/settings',
+	'GET /faracart/v1/campaigns',
+	'GET /faracart/v1/analytics',
+	'GET /faracart/v1/search/products',
+	'POST /faracart/v1/preview',
 ) as $spec ) {
 	list( $method, $path ) = explode( ' ', $spec, 2 );
 	$req  = new \WP_REST_Request( $method, $path );
@@ -164,7 +164,7 @@ foreach ( array(
 }
 
 // The public progress endpoint stays readable without a capability.
-$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/progress' );
+$req  = new \WP_REST_Request( 'GET', '/faracart/v1/progress' );
 $resp = $server->dispatch( $req );
 check( 'public progress readable anonymously', ! is_wp_error( $resp ) && 200 === $resp->get_status() );
 
@@ -174,12 +174,12 @@ check( 'public progress readable anonymously', ! is_wp_error( $resp ) && 200 ===
 echo "\n== 2. Track nonce verification (P22-T01) ==\n";
 
 $schema = array();
-foreach ( $routes['/goalcart/v1/track'] as $handler ) {
+foreach ( $routes['/faracart/v1/track'] as $handler ) {
 	$schema = $handler['args'];
 }
 check( 'track route declares the nonce arg', isset( $schema['nonce'] ) && ! empty( $schema['nonce']['required'] ) );
 
-$req  = new \WP_REST_Request( 'POST', '/goalcart/v1/track' );
+$req  = new \WP_REST_Request( 'POST', '/faracart/v1/track' );
 $req->set_param( 'event_type', 'goal_impression' );
 $req->set_param( 'nonce', 'bogus-nonce' );
 $resp = $server->dispatch( $req );
@@ -190,7 +190,7 @@ check( 'bad nonce rejected (403)', 403 === $resp->get_status() );
 // ---------------------------------------------------------------------------
 echo "\n== 3. Rate limiting (P22-T02) ==\n";
 
-$rl_req = new \WP_REST_Request( 'GET', '/goalcart/v1/goals' );
+$rl_req = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
 
 check( 'admin limiter allows first request', true === $rate->call_rate_limit( $rl_req, 2, 600 ) );
 check( 'admin limiter allows second request', true === $rate->call_rate_limit( $rl_req, 2, 600 ) );
@@ -199,10 +199,10 @@ $third = $rate->call_rate_limit( $rl_req, 2, 600 );
 check( 'admin limiter blocks third request (429)', is_wp_error( $third ) && 429 === $third->get_error_data()['status'] );
 
 // Cleanup the admin bucket.
-$key = 'goalcart_rl_' . md5( get_current_user_id() . '|/goalcart/v1/goals' );
+$key = 'faracart_rl_' . md5( get_current_user_id() . '|/faracart/v1/goals' );
 delete_transient( $key );
 
-$ip_req = new \WP_REST_Request( 'GET', '/goalcart/v1/progress' );
+$ip_req = new \WP_REST_Request( 'GET', '/faracart/v1/progress' );
 
 check( 'ip limiter allows first request', true === $rate->call_rate_limit_ip( $ip_req, 2, 600 ) );
 check( 'ip limiter allows second request', true === $rate->call_rate_limit_ip( $ip_req, 2, 600 ) );
@@ -211,7 +211,7 @@ $ip_third = $rate->call_rate_limit_ip( $ip_req, 2, 600 );
 check( 'ip limiter blocks third request (429)', is_wp_error( $ip_third ) && 429 === $ip_third->get_error_data()['status'] );
 
 // Cleanup the IP bucket (127.0.0.1 is the test REMOTE_ADDR).
-$ip_key = 'goalcart_rl_ip_' . md5( '127.0.0.1|/goalcart/v1/progress' );
+$ip_key = 'faracart_rl_ip_' . md5( '127.0.0.1|/faracart/v1/progress' );
 delete_transient( $ip_key );
 
 // ---------------------------------------------------------------------------
@@ -247,22 +247,22 @@ check( 'non-array children collapses to empty', array() === $goals_ctrl->sanitiz
 // the attribute, and the configured CSS class is attribute-escaped.
 $ui = $container->get( ProgressUI::class );
 
-$markup = $ui->widget_container( 'goalcart-x" onclick="alert(1)', 'full' );
+$markup = $ui->widget_container( 'faracart-x" onclick="alert(1)', 'full' );
 check( 'widget container id attribute-escaped', false === strpos( $markup, 'onclick="' ) && false !== strpos( $markup, '&quot;' ) );
 
 $settings->set( 'frontend_css_class', 'my <script>alert(1)</script>class' );
-$markup = $ui->widget_container( 'goalcart-esc', 'full' );
+$markup = $ui->widget_container( 'faracart-esc', 'full' );
 check( 'widget container css class escaped', false === strpos( $markup, '<script' ) );
 
 // Variant and template are normalized to the enum on the way out.
-check( 'widget variant normalized to full', false !== strpos( $ui->widget_container( 'goalcart-v', 'bogus' ), 'goalcart-widget--full' ) );
+check( 'widget variant normalized to full', false !== strpos( $ui->widget_container( 'faracart-v', 'bogus' ), 'faracart-widget--full' ) );
 
 // ---------------------------------------------------------------------------
 // 5. P22-T04 Database: SQL-injection resistance + schema hygiene
 // ---------------------------------------------------------------------------
 echo "\n== 5. Database hardening (P22-T04) ==\n";
 
-$goals_table = \GoalCart\Database\Schema::table( 'goals' );
+$goals_table = \FaraCart\Database\Schema::table( 'goals' );
 $created_ids = array();
 
 $wpdb->query( 'START TRANSACTION' );
@@ -272,7 +272,7 @@ try {
 	// errors nor widens the result set.
 	$repo = $container->get( GoalRepository::class );
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Unique Security Test Goal' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 100 );
@@ -303,7 +303,7 @@ try {
 	// top of the arg schema): percentage is a 0-100 readout, cart_value a
 	// non-negative amount.
 	$session = str_repeat( 'a', 32 );
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/track' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/track' );
 	$req->set_param( 'event_type', 'goal_progress' );
 	$req->set_param( 'goal_id', 0 );
 	$req->set_param( 'campaign_id', 0 );
@@ -314,7 +314,7 @@ try {
 	$resp = $track_ctrl->handle( $req );
 	check( 'clamped track event accepted', ! is_wp_error( $resp ) );
 
-	$events_table = \GoalCart\Database\Schema::table( 'analytics_events' );
+	$events_table = \FaraCart\Database\Schema::table( 'analytics_events' );
 	$row = $wpdb->get_row(
 		$wpdb->prepare(
 			"SELECT cart_value, meta FROM {$events_table} WHERE session_id = %s AND event_type = %s ORDER BY id DESC LIMIT 1",
@@ -360,8 +360,8 @@ $table_indexes = function ( $table ) use ( $wpdb ) {
 	return $names;
 };
 
-$campaigns_table = \GoalCart\Database\Schema::table( 'campaigns' );
-$events_table    = \GoalCart\Database\Schema::table( 'analytics_events' );
+$campaigns_table = \FaraCart\Database\Schema::table( 'campaigns' );
+$events_table    = \FaraCart\Database\Schema::table( 'analytics_events' );
 
 $goal_indexes     = $table_indexes( $goals_table );
 $campaign_indexes = $table_indexes( $campaigns_table );
@@ -398,22 +398,22 @@ foreach ( (array) $fk_rows as $row ) {
 	$fk_names[] = $row['CONSTRAINT_NAME'];
 }
 
-check( 'goals→campaigns FK present', in_array( 'fk_goalcart_goals_campaign', $fk_names, true ) );
-check( 'events→goals FK present', in_array( 'fk_goalcart_analytics_goal', $fk_names, true ) );
-check( 'events→campaigns FK present', in_array( 'fk_goalcart_analytics_campaign', $fk_names, true ) );
+check( 'goals→campaigns FK present', in_array( 'fk_faracart_goals_campaign', $fk_names, true ) );
+check( 'events→goals FK present', in_array( 'fk_faracart_analytics_goal', $fk_names, true ) );
+check( 'events→campaigns FK present', in_array( 'fk_faracart_analytics_campaign', $fk_names, true ) );
 
 // ---------------------------------------------------------------------------
 // 6. Public payload data minimization: reward secrets never leave the server
 // ---------------------------------------------------------------------------
 echo "\n== 6. Public payload redaction (P22-T01 / P22-T02) ==\n";
 
-$settings_option = \GoalCart\Settings\Settings::OPTION_NAME;
+$settings_option = \FaraCart\Settings\Settings::OPTION_NAME;
 $option_before   = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $settings_option ) );
 
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Redaction Security Goal' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 1000 );
@@ -422,7 +422,7 @@ try {
 	$req->set_param(
 		'reward_meta',
 		array(
-			'coupon_code'        => 'GOALCART-SECRET-12345',
+			'coupon_code'        => 'FARACART-SECRET-12345',
 			'coupon_generate'    => true,
 			'gift_product_id'    => 42,
 			'shipping_zone_ids'  => array( 1 ),
@@ -443,7 +443,7 @@ try {
 
 	// The admin detail payload (manage_options contract) may carry the
 	// full reward configuration...
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/goals/' . $goal_id );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals/' . $goal_id );
 	$req->set_param( 'id', $goal_id );
 	$admin_payload = $goals_ctrl->handle_get( $req )->get_data()['data'];
 	check( 'admin detail keeps reward_meta', isset( $admin_payload['reward_meta']['coupon_code'] ) );
@@ -462,13 +462,13 @@ try {
 		'line_tax'          => 0.0,
 	);
 
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/progress' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/progress' );
 	$resp = $frontend_ctrl->handle_progress( $req, $cart );
 	$json = wp_json_encode( $resp->get_data() );
 
 	check( 'public payload has no reward_meta key', false === strpos( $json, '"reward_meta"' ) );
 	check( 'public payload has no coupon_code key', false === strpos( $json, '"coupon_code"' ) );
-	check( 'public payload never echoes the coupon secret', false === strpos( $json, 'GOALCART-SECRET-12345' ) );
+	check( 'public payload never echoes the coupon secret', false === strpos( $json, 'FARACART-SECRET-12345' ) );
 	check( 'public payload has no gift_product_id key', false === strpos( $json, '"gift_product_id"' ) );
 	check( 'public payload has no shipping restrictions', false === strpos( $json, '"shipping_zone_ids"' ) && false === strpos( $json, '"shipping_method_ids"' ) );
 	check( 'public payload has no children/conditions', false === strpos( $json, '"children"' ) && false === strpos( $json, '"conditions"' ) );

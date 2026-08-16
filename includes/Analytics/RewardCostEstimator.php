@@ -2,13 +2,13 @@
 /**
  * Reward cost & profit impact estimator for FaraCart (Phase 33.2).
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
-use GoalCart\Goals\Goal;
-use GoalCart\Rewards\Reward;
+use FaraCart\Goals\Goal;
+use FaraCart\Rewards\Reward;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -40,7 +40,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Product margin (P33.2): reads the standard WooCommerce `_cost` field and
  * the common `_wc_cog_cost` cost-of-goods field through the
- * `goalcart_product_cost` filter so stores can plug their own cost source.
+ * `faracart_product_cost` filter so stores can plug their own cost source.
  * Returns null whenever a product has no cost data — never a guessed number.
  */
 final class RewardCostEstimator {
@@ -52,7 +52,7 @@ final class RewardCostEstimator {
 	 * Phase 3 / §10). Labels are kept in the UI layer; these keys never
 	 * change across versions.
 	 *
-	 * `_goalcart_product_cost` is FaraCart's own product-cost field (the
+	 * `_faracart_product_cost` is FaraCart's own product-cost field (the
 	 * WooCommerce product-edit metabox ProductCostField writes it) and
 	 * takes precedence when present; WooCommerce's standard `_cost` and the
 	 * common `_wc_cog_cost` cost-of-goods field are the fallbacks for
@@ -61,10 +61,10 @@ final class RewardCostEstimator {
 	 * @var string[]
 	 */
 	const COST_SOURCES = array(
-		'_goalcart_product_cost',
+		'_faracart_product_cost',
 		'_cost',
 		'_wc_cog_cost',
-		'goalcart_product_cost',
+		'faracart_product_cost',
 		'variation_fallback',
 	);
 
@@ -73,7 +73,7 @@ final class RewardCostEstimator {
 	 *
 	 * @var string
 	 */
-	const PRODUCT_COST_META = '_goalcart_product_cost';
+	const PRODUCT_COST_META = '_faracart_product_cost';
 
 	/**
 	 * The order-item meta key holding the unit-cost snapshot written when
@@ -83,7 +83,7 @@ final class RewardCostEstimator {
 	 *
 	 * @var string
 	 */
-	const ORDER_COST_META = '_goalcart_unit_cost';
+	const ORDER_COST_META = '_faracart_unit_cost';
 
 	/**
 	 * Per-request memo of store_has_cost_data() — one indexed scan per
@@ -203,7 +203,7 @@ final class RewardCostEstimator {
 	/**
 	 * The product cost when the store provides one (null otherwise).
 	 *
-	 * Reads, in order: the `goalcart_product_cost` filter (lets stores plug
+	 * Reads, in order: the `faracart_product_cost` filter (lets stores plug
 	 * their own cost source), the standard WooCommerce `_cost` field, and
 	 * the common cost-of-goods `_wc_cog_cost` field. Variations fall back
 	 * to their parent product. Never invents a cost.
@@ -238,7 +238,7 @@ final class RewardCostEstimator {
 		 * @param \WC_Product  $product Product object (simple, variation
 		 *                              or variable — type not guaranteed).
 		 */
-		$cost = apply_filters( 'goalcart_product_cost', null, $product );
+		$cost = apply_filters( 'faracart_product_cost', null, $product );
 
 		if ( null === $cost ) {
 			$cost = $this->raw_product_cost( $product );
@@ -247,12 +247,12 @@ final class RewardCostEstimator {
 		// Variation fallback: a variation with no cost of its own inherits
 		// the parent's cost. The parent runs through the SAME source chain
 		// (filter first, then raw meta) so stores that plug costs via the
-		// goalcart_product_cost filter are honored for variations too.
+		// faracart_product_cost filter are honored for variations too.
 		if ( null === $cost && $product->get_parent_id() > 0 ) {
 			$parent = wc_get_product( $product->get_parent_id() );
 
 			if ( $parent ) {
-				$cost = apply_filters( 'goalcart_product_cost', null, $parent );
+				$cost = apply_filters( 'faracart_product_cost', null, $parent );
 
 				if ( null === $cost ) {
 					$cost = $this->raw_product_cost( $parent );
@@ -315,7 +315,7 @@ final class RewardCostEstimator {
 	/**
 	 * Read the raw cost from the product's own meta fields.
 	 *
-	 * Priority: FaraCart's own `_goalcart_product_cost` field first, then
+	 * Priority: FaraCart's own `_faracart_product_cost` field first, then
 	 * WooCommerce's standard `_cost`, then the cost-of-goods
 	 * `_wc_cog_cost`. Zero/negative values count as "no cost data" — the
 	 * same contract as product_cost().
@@ -374,7 +374,7 @@ final class RewardCostEstimator {
 	 * guess.
 	 *
 	 * Historical stability (UPSELL_REFACTOR §21/§22): each line's cost
-	 * prefers the `_goalcart_unit_cost` snapshot OrderCostSnapshot wrote at
+	 * prefers the `_faracart_unit_cost` snapshot OrderCostSnapshot wrote at
 	 * order creation, so later product-cost edits never rewrite historical
 	 * profit. Orders created before the snapshot feature simply have no
 	 * snapshot and fall back to the current product cost — the pre-feature
@@ -447,7 +447,7 @@ final class RewardCostEstimator {
 	 * The unit cost of an order line item: the snapshot first, then the
 	 * current product cost.
 	 *
-	 * The `_goalcart_unit_cost` snapshot is written by OrderCostSnapshot
+	 * The `_faracart_unit_cost` snapshot is written by OrderCostSnapshot
 	 * when the order is created; preferring it keeps historical profit
 	 * stable when product costs change later. Line items without a
 	 * snapshot (pre-feature orders, or products that had no cost at order
@@ -568,7 +568,7 @@ final class RewardCostEstimator {
 			return array(
 				'estimated_profit'  => null,
 				'available'         => false,
-				'reason'            => __( 'Product cost data is not available — profit impact unavailable (revenue-only analytics).', 'goalcart' ),
+				'reason'            => __( 'Product cost data is not available — profit impact unavailable (revenue-only analytics).', 'faracart' ),
 				// Stable machine-readable code (Improvement.md §39): the UI
 				// translates it; the human reason stays in 'reason'.
 				'reason_code'       => 'missing_product_cost',

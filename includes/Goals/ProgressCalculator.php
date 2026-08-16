@@ -2,10 +2,10 @@
 /**
  * Shared progress math for the FaraCart engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals;
+namespace FaraCart\Goals;
 
 defined( 'ABSPATH' ) || exit;
 

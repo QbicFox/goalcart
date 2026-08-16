@@ -141,7 +141,7 @@ export default function CustomRangePicker({ from, to, onApply }: CustomRangePick
         <IconButton
           size="small"
           onClick={() => goMonth(-1)}
-          aria-label={__('Previous month', 'goalcart')}
+          aria-label={__('Previous month', 'faracart')}
         >
           <ChevronLeftIcon fontSize="small" />
         </IconButton>
@@ -151,7 +151,7 @@ export default function CustomRangePicker({ from, to, onApply }: CustomRangePick
         <IconButton
           size="small"
           onClick={() => goMonth(1)}
-          aria-label={__('Next month', 'goalcart')}
+          aria-label={__('Next month', 'faracart')}
         >
           <ChevronRightIcon fontSize="small" />
         </IconButton>
@@ -226,7 +226,7 @@ export default function CustomRangePicker({ from, to, onApply }: CustomRangePick
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1.5 }}>
         {start && end
           ? `${formatDay(start)} – ${formatDay(end)}`
-          : __('Choose a start and end date.', 'goalcart')}
+          : __('Choose a start and end date.', 'faracart')}
       </Typography>
 
       <Button
@@ -237,7 +237,7 @@ export default function CustomRangePicker({ from, to, onApply }: CustomRangePick
         disabled={!start || !end}
         sx={{ mt: 1 }}
       >
-        {__('Apply range', 'goalcart')}
+        {__('Apply range', 'faracart')}
       </Button>
     </Box>
   );

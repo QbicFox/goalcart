@@ -52,7 +52,7 @@ export default function Template3Renderer({ goal, currency, settings, animation 
         </Box>
         <Box>
           <Typography sx={{ fontSize: 14, fontWeight: 800, color: '#166534' }}>
-            {__('Congratulations!', 'goalcart')} 🎉
+            {__('Congratulations!', 'faracart')} 🎉
           </Typography>
           <Typography sx={{ fontSize: 12, color: '#15803d' }}>{goal.goal_name}</Typography>
         </Box>
@@ -97,7 +97,7 @@ export default function Template3Renderer({ goal, currency, settings, animation 
                 {Math.round(percent)}%
               </Typography>
               <Typography sx={{ fontSize: size * 0.085, fontWeight: 500, color: muted, mt: 0.25 }}>
-                {__('Progress', 'goalcart')}
+                {__('Progress', 'faracart')}
               </Typography>
             </Box>
           )}
@@ -128,13 +128,13 @@ export default function Template3Renderer({ goal, currency, settings, animation 
           {bool(settings, 'showAmounts', true) && (
             <Box sx={{ '& > * + *': { mt: 0.375 } }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                <Typography sx={{ fontSize: 12, color: muted }}>{__('Paid', 'goalcart')}</Typography>
+                <Typography sx={{ fontSize: 12, color: muted }}>{__('Paid', 'faracart')}</Typography>
                 <Typography sx={{ fontSize: 12, fontWeight: 700, color: text }}>
                   {formatGoalAmount(goal, goal.current, currency)}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
-                <Typography sx={{ fontSize: 12, color: muted }}>{__('Remaining', 'goalcart')}</Typography>
+                <Typography sx={{ fontSize: 12, color: muted }}>{__('Remaining', 'faracart')}</Typography>
                 <Typography sx={{ fontSize: 12, fontWeight: 700, color: accent }}>
                   {formatGoalAmount(goal, goal.remaining, currency)}
                 </Typography>
@@ -165,7 +165,7 @@ export default function Template3Renderer({ goal, currency, settings, animation 
             '&:hover': { background: 'transparent', opacity: 0.85 },
           }}
         >
-          {__('View products', 'goalcart')}
+          {__('View products', 'faracart')}
         </Button>
       )}
     </Box>
@@ -174,5 +174,5 @@ export default function Template3Renderer({ goal, currency, settings, animation 
 
 /** A goal description derived from the target, e.g. "With a purchase of 2,000,000". */
 function sprintfWithGoal(goal: GoalTemplateProps['goal'], currency: string): string {
-  return `${__('With a purchase of', 'goalcart')} ${formatGoalAmount(goal, goal.target, currency)}`;
+  return `${__('With a purchase of', 'faracart')} ${formatGoalAmount(goal, goal.target, currency)}`;
 }

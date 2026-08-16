@@ -19,7 +19,7 @@ interface AppProvidersProps {
 /**
  * Wraps the app in every global provider:
  * - MUI theme (WP-admin palette, RTL-aware)
- * - A dedicated Emotion cache with a unique 'goalcart' key (so our
+ * - A dedicated Emotion cache with a unique 'faracart' key (so our
  *   styles never collide with other admin plugins) that is RTL-flipped
  *   when the WordPress locale is RTL, mirroring the whole dashboard
  * - TanStack Query client
@@ -41,7 +41,7 @@ interface AppProvidersProps {
  *
  * Note: no CssBaseline — its `* { box-sizing }` and `body` resets would
  * leak outside the mount point into the whole WP admin. Scoped resets
- * live in styles.css under `#goalcart-admin` instead.
+ * live in styles.css under `#faracart-admin` instead.
  *
  * Mirrors the reference plugin (WooInsights\AppProviders).
  */
@@ -69,7 +69,7 @@ export default function AppProviders({ children }: AppProvidersProps) {
     const isRtl = getBootData().isRtl;
 
     return createCache({
-      key: 'goalcart',
+      key: 'faracart',
       stylisPlugins: isRtl ? [prefixer, rtlPlugin] : undefined,
     });
   }, []);

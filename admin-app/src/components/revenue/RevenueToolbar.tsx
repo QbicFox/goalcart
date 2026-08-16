@@ -54,7 +54,7 @@ export default function RevenueToolbar({
       {showGoal && (
         <TextField
           select
-          label={__('Goal', 'goalcart')}
+          label={__('Goal', 'faracart')}
           size="small"
           sx={{ minWidth: 190, flexGrow: { lg: 1 } }}
           value={goalId}
@@ -62,10 +62,10 @@ export default function RevenueToolbar({
         >
           {goalRequired ? (
             <MenuItem value={0} disabled>
-              {__('Select a goal', 'goalcart')}
+              {__('Select a goal', 'faracart')}
             </MenuItem>
           ) : (
-            <MenuItem value={0}>{__('All goals', 'goalcart')}</MenuItem>
+            <MenuItem value={0}>{__('All goals', 'faracart')}</MenuItem>
           )}
           {(goalsQuery.data?.items ?? []).map((goal) => (
             <MenuItem key={goal.id} value={goal.id}>

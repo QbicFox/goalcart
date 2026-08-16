@@ -2,24 +2,24 @@
 /**
  * REST controller for the admin preview system.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Campaigns\CampaignRepository;
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\CartItem;
-use GoalCart\Goals\ConflictResolver;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Rewards\RewardEngine;
-use GoalCart\Rewards\RewardResult;
-use GoalCart\Settings\Settings;
-use GoalCart\Templates\TemplateEngine;
+use FaraCart\Campaigns\CampaignRepository;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\CartItem;
+use FaraCart\Goals\ConflictResolver;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Rewards\RewardEngine;
+use FaraCart\Rewards\RewardResult;
+use FaraCart\Settings\Settings;
+use FaraCart\Templates\TemplateEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
  * Phase 15 (Admin Preview System): lets administrators see the customer
  * experience before publishing.
  *
- *  - `POST /goalcart/v1/preview` — evaluates a goal (or a campaign's
+ *  - `POST /faracart/v1/preview` — evaluates a goal (or a campaign's
  *    milestone goals) against a SIMULATED cart and returns the exact same
  *    per-goal payload shape as the public `GET /progress` endpoint, so the
  *    admin React preview renders the real storefront widget (templates,
@@ -152,7 +152,7 @@ class PreviewController extends BaseController {
 	 */
 	protected function templates() {
 		if ( null === $this->templates ) {
-			$this->templates = \GoalCart\Plugin::instance()->container()->get( TemplateEngine::class );
+			$this->templates = \FaraCart\Plugin::instance()->container()->get( TemplateEngine::class );
 		}
 
 		return $this->templates;
@@ -197,12 +197,12 @@ class PreviewController extends BaseController {
 	 */
 	public function get_preview_permission_callback() {
 		return function ( $request ) {
-			$capability = apply_filters( 'goalcart_rest_capability', self::CAPABILITY );
+			$capability = apply_filters( 'faracart_rest_capability', self::CAPABILITY );
 
 			if ( ! current_user_can( $capability ) ) {
 				return $this->error(
-					'goalcart_forbidden',
-					__( 'You are not allowed to access this endpoint.', 'goalcart' ),
+					'faracart_forbidden',
+					__( 'You are not allowed to access this endpoint.', 'faracart' ),
 					403
 				);
 			}
@@ -234,6 +234,23 @@ class PreviewController extends BaseController {
 				'default' => 0,
 				'minimum' => 0,
 			),
+			// Unsaved form state (builder live preview): a GoalInput-shaped
+			// goal or a CampaignInput-shaped campaign may be submitted
+			// instead of (or alongside) the saved ids, so the builder can
+			// preview the current form values before they are persisted.
+			// When both a saved id and a payload are present, the payload
+			// wins (it reflects the latest unsaved edits); an existing
+			// goal's row is still merged underneath for campaign context.
+			'goal' => array(
+				'type'                 => 'object',
+				'default'              => array(),
+				'additionalProperties' => true,
+			),
+			'campaign' => array(
+				'type'                 => 'object',
+				'default'              => array(),
+				'additionalProperties' => true,
+			),
 			'simulated' => array(
 				'type'                 => 'object',
 				'default'              => array(),
@@ -258,14 +275,24 @@ class PreviewController extends BaseController {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function handle_preview( $request ) {
-		$goal_id     = (int) $request->get_param( 'goal_id' );
-		$campaign_id = (int) $request->get_param( 'campaign_id' );
+		$goal_id          = (int) $request->get_param( 'goal_id' );
+		$campaign_id      = (int) $request->get_param( 'campaign_id' );
+		$goal_payload     = $request->get_param( 'goal' );
+		$campaign_payload = $request->get_param( 'campaign' );
 
-		// XOR: exactly one target (0 and 0, or both set, are invalid).
-		if ( ( $goal_id > 0 ) === ( $campaign_id > 0 ) ) {
+		$goal_payload     = is_array( $goal_payload ) && ! empty( $goal_payload ) ? $goal_payload : array();
+		$campaign_payload = is_array( $campaign_payload ) && ! empty( $campaign_payload ) ? $campaign_payload : array();
+
+		// Exactly one target: a goal (saved id and/or unsaved form payload —
+		// the payload wins for edited fields) or a campaign (same rule).
+		// Mixing a goal and a campaign (or providing neither) is invalid.
+		$goal_target     = $goal_id > 0 || ! empty( $goal_payload );
+		$campaign_target = $campaign_id > 0 || ! empty( $campaign_payload );
+
+		if ( $goal_target === $campaign_target ) {
 			return $this->error(
-				'goalcart_preview_target_required',
-				__( 'Provide exactly one of goal_id or campaign_id to preview.', 'goalcart' ),
+				'faracart_preview_target_required',
+				__( 'Provide exactly one of goal_id, campaign_id, goal or campaign to preview.', 'faracart' ),
 				400
 			);
 		}
@@ -279,12 +306,12 @@ class PreviewController extends BaseController {
 		$amount   = isset( $simulated['amount'] ) ? (float) $simulated['amount'] : 0.0;
 		$quantity = isset( $simulated['quantity'] ) ? (float) $simulated['quantity'] : 0.0;
 
-		$goals = $this->resolve_goals( $goal_id, $campaign_id );
+		$goals = $this->resolve_goals( $goal_id, $campaign_id, $goal_payload, $campaign_payload );
 
 		if ( empty( $goals ) ) {
 			return $this->error(
-				'goalcart_preview_not_found',
-				__( 'The goal or campaign could not be found.', 'goalcart' ),
+				'faracart_preview_not_found',
+				__( 'The goal or campaign could not be found.', 'faracart' ),
 				404
 			);
 		}
@@ -328,15 +355,15 @@ class PreviewController extends BaseController {
 				// live /progress payload so the preview renders a configured
 				// campaign template (e.g. the milestone chain) exactly like
 				// the storefront.
-				'campaigns' => $this->campaign_groups( $goal_id, $campaign_id ),
-				'currency' => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
+				'campaigns' => $this->campaign_groups( $goal_id, $campaign_id, $campaign_payload ),
+				'currency' => $this->settings->currency(),
 				'simulated' => array(
 					'amount'   => $amount,
 					'quantity' => $quantity,
 				),
 			),
 			array(
-				'mode' => $campaign_id > 0 ? 'campaign' : 'goal',
+				'mode' => ( $campaign_id > 0 || ! empty( $campaign_payload ) ) ? 'campaign' : 'goal',
 			)
 		);
 	}
@@ -426,22 +453,24 @@ class PreviewController extends BaseController {
 	 * The campaign template group for the preview payload.
 	 *
 	 * Mirrors FrontendController::campaign_groups(): a single-entry list
-	 * for campaign previews (resolved from the stored display_rules), and
-	 * empty for goal previews — so the preview resolves the campaign
-	 * template + settings identically to the live frontend.
+	 * for campaign previews (resolved from the submitted display_rules —
+	 * the stored row or the unsaved form payload), and empty for goal
+	 * previews — so the preview resolves the campaign template + settings
+	 * identically to the live frontend.
 	 *
-	 * @param int $goal_id     Goal id (0 when previewing a campaign).
-	 * @param int $campaign_id Campaign id (0 when previewing a goal).
+	 * @param int                    $goal_id          Goal id (0 when previewing a campaign).
+	 * @param int                    $campaign_id      Campaign id (0 when previewing a goal).
+	 * @param array<string, mixed>   $campaign_payload Unsaved campaign form state ('' for saved-id previews).
 	 * @return array<int, array<string, mixed>>
 	 */
-	protected function campaign_groups( $goal_id, $campaign_id ) {
-		if ( $campaign_id <= 0 ) {
+	protected function campaign_groups( $goal_id, $campaign_id, array $campaign_payload = array() ) {
+		if ( $campaign_id <= 0 && empty( $campaign_payload ) ) {
 			return array();
 		}
 
-		$campaign = $this->campaigns->get( (int) $campaign_id );
+		$campaign = ! empty( $campaign_payload ) ? $campaign_payload : $this->campaigns->get( (int) $campaign_id );
 
-		if ( null === $campaign ) {
+		if ( ! is_array( $campaign ) || empty( $campaign ) ) {
 			return array();
 		}
 
@@ -454,8 +483,8 @@ class PreviewController extends BaseController {
 
 		return array(
 			array(
-				'campaign_id' => (int) $campaign_id,
-				'name'        => (string) $campaign['name'],
+				'campaign_id' => $this->campaign_group_id( $campaign_id, $campaign_payload ),
+				'name'        => isset( $campaign['name'] ) ? (string) $campaign['name'] : '',
 				'template'    => $resolved['template_id'],
 				'settings'    => $resolved['settings'],
 			),
@@ -463,32 +492,80 @@ class PreviewController extends BaseController {
 	}
 
 	/**
+	 * The stable group id shared by the campaign group and its milestone
+	 * goal rows. A saved campaign uses its own id; an unsaved campaign
+	 * form (no id yet) uses a synthetic negative id so PreviewWidget's
+	 * campaign grouping still matches the milestone rows.
+	 *
+	 * @param int                  $campaign_id      Saved campaign id (0 when creating).
+	 * @param array<string, mixed> $campaign_payload Unsaved campaign form state.
+	 * @return int
+	 */
+	protected function campaign_group_id( $campaign_id, array $campaign_payload ) {
+		if ( $campaign_id > 0 ) {
+			return $campaign_id;
+		}
+
+		if ( ! empty( $campaign_payload ) && isset( $campaign_payload['id'] ) ) {
+			$id = (int) $campaign_payload['id'];
+
+			if ( $id > 0 ) {
+				return $id;
+			}
+		}
+
+		return -1;
+	}
+
+	/**
 	 * Load the preview goals, forced into their "published" state.
 	 *
-	 * Single-goal mode returns one Goal; campaign mode returns every
-	 * milestone goal in menu order (with the campaign name folded in for
-	 * the {campaign_name} message variable). Empty array when the target
-	 * does not exist or has no goals.
+	 * Single-goal mode returns one Goal (from the stored row or the
+	 * unsaved form payload, merged when both are present); campaign mode
+	 * returns every milestone goal in menu order (with the campaign name
+	 * folded in for the {campaign_name} message variable). Empty array
+	 * when the target does not exist or has no goals.
 	 *
-	 * @param int $goal_id     Goal id (0 when previewing a campaign).
-	 * @param int $campaign_id Campaign id (0 when previewing a goal).
+	 * @param int                  $goal_id          Goal id (0 when previewing a campaign or a new goal).
+	 * @param int                  $campaign_id      Campaign id (0 when previewing a goal or a new campaign).
+	 * @param array<string, mixed> $goal_payload     Unsaved goal form state.
+	 * @param array<string, mixed> $campaign_payload Unsaved campaign form state.
 	 * @return Goal[]
 	 */
-	protected function resolve_goals( $goal_id, $campaign_id ) {
+	protected function resolve_goals( $goal_id, $campaign_id, array $goal_payload = array(), array $campaign_payload = array() ) {
 		$goals = array();
 
-		if ( $campaign_id > 0 ) {
-			$campaign = $this->campaigns->get( $campaign_id );
+		if ( $campaign_id > 0 || ! empty( $campaign_payload ) ) {
+			$campaign = ! empty( $campaign_payload ) ? $campaign_payload : $this->campaigns->get( $campaign_id );
 
-			if ( null === $campaign ) {
+			if ( ! is_array( $campaign ) || empty( $campaign ) ) {
 				return $goals;
-			}
+		}
 
-			foreach ( $campaign['goals'] as $milestone ) {
-				$goal = $this->preview_goal(
-					$this->goals->get( (int) $milestone['id'] ),
-					(string) $campaign['name']
-				);
+			$group_id = $this->campaign_group_id( $campaign_id, $campaign_payload );
+			$name     = isset( $campaign['name'] ) ? (string) $campaign['name'] : '';
+			$goals_in = isset( $campaign['goals'] ) && is_array( $campaign['goals'] ) ? $campaign['goals'] : array();
+
+			foreach ( $goals_in as $milestone ) {
+				// The campaign form submits ordered goal ids; the stored row
+				// carries {id, ...} entries — accept both.
+				$milestone_id = is_array( $milestone )
+					? (int) ( isset( $milestone['id'] ) ? $milestone['id'] : 0 )
+					: (int) $milestone;
+
+				$row = $this->goals->get( $milestone_id );
+
+				if ( ! is_array( $row ) ) {
+					continue;
+				}
+
+				// The submitted campaign owns the previewed milestone rows,
+				// so the payload's campaign group (and the campaign template)
+				// can always be associated, even when the goals are not yet
+				// stored under this campaign.
+				$row['campaign_id'] = $group_id;
+
+				$goal = $this->preview_goal( $row, $name );
 
 				if ( $goal ) {
 					$goals[] = $goal;
@@ -496,6 +573,18 @@ class PreviewController extends BaseController {
 			}
 
 			return $goals;
+		}
+
+		if ( ! empty( $goal_payload ) ) {
+			// Unsaved form state: the payload wins for the edited fields,
+			// the stored row underneath keeps the id + campaign context
+			// when editing an existing goal.
+			$row = $goal_id > 0 ? $this->goals->get( $goal_id ) : null;
+			$row = is_array( $row ) ? array_merge( $row, $goal_payload ) : $goal_payload;
+
+			$goal = $this->preview_goal( $row );
+
+			return $goal ? array( $goal ) : array();
 		}
 
 		$goal = $this->preview_goal( $this->goals->get( $goal_id ) );
@@ -628,7 +717,7 @@ class PreviewController extends BaseController {
 			array(
 				'subtotal' => $amount,
 				'total'    => $amount,
-				'currency' => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
+				'currency' => $this->settings->currency(),
 				'items'    => $items,
 			)
 		);
@@ -700,7 +789,7 @@ class PreviewController extends BaseController {
 			array(
 				'product_id'    => 0,
 				'variation_id'  => 0,
-				'name'          => __( 'Preview item', 'goalcart' ),
+				'name'          => __( 'Preview item', 'faracart' ),
 				'quantity'      => 1.0,
 				'line_subtotal' => 0.0,
 				'line_total'    => 0.0,

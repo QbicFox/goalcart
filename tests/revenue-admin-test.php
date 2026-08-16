@@ -49,9 +49,9 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\REST\RevenueController;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\REST\RevenueController;
 
 $failures = 0;
 $checks   = 0;
@@ -72,12 +72,12 @@ function route_exists( $routes, $pattern ) {
 }
 
 // Fire REST route registration once (rest_api_init never fires in CLI).
-if ( ! did_action( 'goalcart_rest_test_ready' ) ) {
+if ( ! did_action( 'faracart_rest_test_ready' ) ) {
 	do_action( 'rest_api_init' );
-	do_action( 'goalcart_rest_test_ready' );
+	do_action( 'faracart_rest_test_ready' );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $revenue_ctrl = $container->get( RevenueController::class );
 $repository   = $container->get( RevenueRepository::class );
@@ -92,11 +92,11 @@ $wpdb   = $GLOBALS['wpdb'];
 // ---------------------------------------------------------------------------
 echo "\n== 1. Route registration ==\n";
 
-check( '/revenue/overview registered', route_exists( $routes, '/goalcart/v1/revenue/overview' ) );
-check( '/revenue/attribution registered', route_exists( $routes, '/goalcart/v1/revenue/attribution' ) );
-check( '/revenue/goals registered', route_exists( $routes, '/goalcart/v1/revenue/goals' ) );
-check( '/revenue/goal-recommendations registered', route_exists( $routes, '/goalcart/v1/revenue/goal-recommendations' ) );
-check( '/revenue/upsells registered', route_exists( $routes, '/goalcart/v1/revenue/upsells' ) );
+check( '/revenue/overview registered', route_exists( $routes, '/faracart/v1/revenue/overview' ) );
+check( '/revenue/attribution registered', route_exists( $routes, '/faracart/v1/revenue/attribution' ) );
+check( '/revenue/goals registered', route_exists( $routes, '/faracart/v1/revenue/goals' ) );
+check( '/revenue/goal-recommendations registered', route_exists( $routes, '/faracart/v1/revenue/goal-recommendations' ) );
+check( '/revenue/upsells registered', route_exists( $routes, '/faracart/v1/revenue/upsells' ) );
 
 // ---------------------------------------------------------------------------
 // 2. Arg-schema validation
@@ -116,7 +116,7 @@ check( 'zero goal_id accepted', true === rest_validate_value_from_schema( 0, $ar
 // ---------------------------------------------------------------------------
 echo "\n== 3. Permissions ==\n";
 
-foreach ( array( '/goalcart/v1/revenue/overview', '/goalcart/v1/revenue/attribution', '/goalcart/v1/revenue/goals' ) as $route ) {
+foreach ( array( '/faracart/v1/revenue/overview', '/faracart/v1/revenue/attribution', '/faracart/v1/revenue/goals' ) as $route ) {
 	$req  = new \WP_REST_Request( 'GET', $route );
 	$resp = $server->dispatch( $req );
 	check( "anonymous rejected on {$route} (403)", 403 === $resp->get_status() );
@@ -127,7 +127,7 @@ foreach ( array( '/goalcart/v1/revenue/overview', '/goalcart/v1/revenue/attribut
 // ---------------------------------------------------------------------------
 echo "\n== 4. Payload shapes ==\n";
 
-$overview_req = new \WP_REST_Request( 'GET', '/goalcart/v1/revenue/overview' );
+$overview_req = new \WP_REST_Request( 'GET', '/faracart/v1/revenue/overview' );
 $overview_resp = $revenue_ctrl->handle_overview( $overview_req );
 $overview      = $overview_resp->get_data()['data'];
 
@@ -148,14 +148,14 @@ check( 'overview aov labelled observed', 'observed_impact' === $overview['aov'][
 check( 'overview trend is an array', is_array( $overview['trend'] ) );
 check( 'overview trend rows have date+revenue', empty( $overview['trend'] ) || ( isset( $overview['trend'][0]['date'] ) && isset( $overview['trend'][0]['revenue'] ) ) );
 
-$attribution_resp = $revenue_ctrl->handle_attribution( new \WP_REST_Request( 'GET', '/goalcart/v1/revenue/attribution' ) );
+$attribution_resp = $revenue_ctrl->handle_attribution( new \WP_REST_Request( 'GET', '/faracart/v1/revenue/attribution' ) );
 $attribution      = $attribution_resp->get_data()['data'];
 
 check( 'attribution has summary', isset( $attribution['summary'] ) );
 check( 'attribution has incremental_cart_value', isset( $attribution['incremental_cart_value'] ) );
 check( 'attribution has no trend (overview minus trend)', ! array_key_exists( 'trend', $attribution ) );
 
-$goals_resp = $revenue_ctrl->handle_goals( new \WP_REST_Request( 'GET', '/goalcart/v1/revenue/goals' ) );
+$goals_resp = $revenue_ctrl->handle_goals( new \WP_REST_Request( 'GET', '/faracart/v1/revenue/goals' ) );
 $goals      = $goals_resp->get_data()['data'];
 
 check( 'goals payload has items', isset( $goals['items'] ) );
@@ -187,11 +187,11 @@ if ( ! empty( $goals['items'] ) ) {
 // ---------------------------------------------------------------------------
 echo "\n== 5. Fixture reads (rolled back) ==\n";
 
-$goal_repo = $container->get( \GoalCart\Goals\GoalRepository::class );
+$goal_repo = $container->get( \FaraCart\Goals\GoalRepository::class );
 
-$revenue_events_before = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \GoalCart\Database\Schema::table( 'revenue_events' ) );
-$upsell_events_before  = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \GoalCart\Database\Schema::table( 'upsell_events' ) );
-$goals_before          = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \GoalCart\Database\Schema::table( 'goals' ) );
+$revenue_events_before = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'revenue_events' ) );
+$upsell_events_before  = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'upsell_events' ) );
+$goals_before          = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'goals' ) );
 
 $wpdb->query( 'START TRANSACTION' );
 
@@ -209,7 +209,7 @@ try {
 	check( 'fixture goal created', $goal_id > 0 );
 
 	// Goal-scoped reads return only that goal.
-	$scoped_req = new \WP_REST_Request( 'GET', '/goalcart/v1/revenue/goals' );
+	$scoped_req = new \WP_REST_Request( 'GET', '/faracart/v1/revenue/goals' );
 	$scoped_req->set_param( 'goal_id', (int) $goal_id );
 	$scoped = $revenue_ctrl->handle_goals( $scoped_req )->get_data()['data']['items'];
 	check( 'goal-scoped goals returns exactly the fixture goal', 1 === count( $scoped ) && (int) $scoped[0]['goal_id'] === (int) $goal_id );
@@ -283,9 +283,9 @@ try {
 // ---------------------------------------------------------------------------
 echo "\n== 6. Rollback residue ==\n";
 
-$revenue_events_after = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \GoalCart\Database\Schema::table( 'revenue_events' ) );
-$upsell_events_after  = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \GoalCart\Database\Schema::table( 'upsell_events' ) );
-$goals_after          = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \GoalCart\Database\Schema::table( 'goals' ) );
+$revenue_events_after = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'revenue_events' ) );
+$upsell_events_after  = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'upsell_events' ) );
+$goals_after          = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'goals' ) );
 
 check( 'revenue_events unchanged after rollback', $revenue_events_after === $revenue_events_before );
 check( 'upsell_events unchanged after rollback', $upsell_events_after === $upsell_events_before );

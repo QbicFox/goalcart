@@ -21,7 +21,7 @@ interface SchemaFormProps {
  * The generic, schema-driven settings form (pluggable template engine).
  *
  * Field type → input component mapping, generated from the template's
- * schema served by `GET /goalcart/v1/templates`:
+ * schema served by `GET /faracart/v1/templates`:
  *
  *   color   → hex picker + text field
  *   bool    → switch

@@ -2,14 +2,14 @@
 /**
  * Conflict & priority resolution for the FaraCart engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals;
+namespace FaraCart\Goals;
 
-use GoalCart\Rewards\Reward;
-use GoalCart\Rewards\RewardResult;
-use GoalCart\Rewards\RewardSafety;
+use FaraCart\Rewards\Reward;
+use FaraCart\Rewards\RewardResult;
+use FaraCart\Rewards\RewardSafety;
 
 defined( 'ABSPATH' ) || exit;
 

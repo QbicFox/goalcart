@@ -2,10 +2,10 @@
 /**
  * Dependency injection container for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart;
+namespace FaraCart;
 
 defined( 'ABSPATH' ) || exit;
 

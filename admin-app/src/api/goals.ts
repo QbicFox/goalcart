@@ -16,7 +16,7 @@ export interface GoalsResult {
 }
 
 /**
- * Fetch a paginated goal list from `GET /goalcart/v1/goals`.
+ * Fetch a paginated goal list from `GET /faracart/v1/goals`.
  *
  * Reads the full envelope (unwrap=false) so the pagination totals are
  * available to the caller.
@@ -52,12 +52,12 @@ export async function fetchGoals(params: FetchGoalsParams = {}): Promise<GoalsRe
   };
 }
 
-/** Fetch a single goal via `GET /goalcart/v1/goals/{id}`. */
+/** Fetch a single goal via `GET /faracart/v1/goals/{id}`. */
 export async function fetchGoal(id: number): Promise<Goal> {
   return apiFetch<Goal>(`/goals/${id}`);
 }
 
-/** Create a goal via `POST /goalcart/v1/goals`. */
+/** Create a goal via `POST /faracart/v1/goals`. */
 export async function createGoal(input: GoalInput): Promise<Goal> {
   return apiFetch<Goal>('/goals', {
     method: 'POST',
@@ -65,7 +65,7 @@ export async function createGoal(input: GoalInput): Promise<Goal> {
   });
 }
 
-/** Update a goal (partial) via `PUT /goalcart/v1/goals/{id}`. */
+/** Update a goal (partial) via `PUT /faracart/v1/goals/{id}`. */
 export async function updateGoal(id: number, input: Partial<GoalInput>): Promise<Goal> {
   return apiFetch<Goal>(`/goals/${id}`, {
     method: 'PUT',
@@ -73,12 +73,12 @@ export async function updateGoal(id: number, input: Partial<GoalInput>): Promise
   });
 }
 
-/** Delete a goal via `DELETE /goalcart/v1/goals/{id}`. */
+/** Delete a goal via `DELETE /faracart/v1/goals/{id}`. */
 export async function deleteGoal(id: number): Promise<void> {
   await apiFetch<{ deleted: boolean }>(`/goals/${id}`, { method: 'DELETE' });
 }
 
-/** Duplicate a goal via `POST /goalcart/v1/goals/{id}/duplicate`. */
+/** Duplicate a goal via `POST /faracart/v1/goals/{id}/duplicate`. */
 export async function duplicateGoal(id: number): Promise<Goal> {
   return apiFetch<Goal>(`/goals/${id}/duplicate`, { method: 'POST' });
 }

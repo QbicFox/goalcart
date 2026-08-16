@@ -2,10 +2,10 @@
 /**
  * Cart context for the FaraCart engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals;
+namespace FaraCart\Goals;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -33,7 +33,7 @@ final class CartContext {
 	 *
 	 * @var string
 	 */
-	const OWN_FEE_PREFIX = 'goalcart_reward_';
+	const OWN_FEE_PREFIX = 'faracart_reward_';
 
 	/**
 	 * Line subtotal before cart discounts, excluding tax.

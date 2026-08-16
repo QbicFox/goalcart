@@ -12,7 +12,7 @@
  * `body` resets would leak into the whole WP admin page — so the
  * equivalents are scoped to the mount point here. */
 
-#goalcart-admin {
+#faracart-admin {
   /* Full-screen sizing is applied by admin-fullscreen.css only when the
      setting is enabled. In embedded mode the mount must remain in normal
      document flow so WordPress can place #wpfooter after the dashboard
@@ -26,14 +26,14 @@
   color: #1d2327;
 }
 
-#goalcart-admin *,
-#goalcart-admin *::before,
-#goalcart-admin *::after {
+#faracart-admin *,
+#faracart-admin *::before,
+#faracart-admin *::after {
   box-sizing: border-box;
 }
 
 /* The React app replaces the server-rendered loading placeholder. */
-#goalcart-admin .goalcart-admin-loading {
+#faracart-admin .faracart-admin-loading {
   padding: 48px 0;
   color: #50575e;
 }
@@ -53,7 +53,7 @@
  *
  * Scoping: the mount point plus MUI's portaled surfaces — Dialogs,
  * Drawers, Popovers and Menus render into <body>, outside
- * #goalcart-admin (e.g. the preview dialogs' PreviewControls). `:is()`
+ * #faracart-admin (e.g. the preview dialogs' PreviewControls). `:is()`
  * keeps the specificity of its most specific argument (the ID), so every
  * rule outranks the WP admin selectors on both the mount point and the
  * portals.
@@ -64,21 +64,21 @@
    (the OutlinedInput fieldset) becomes the only border, and the inner
    input keeps MUI's own sizing (paddings are restored below — WP's
    `padding: 0 12px` must not win). */
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='text'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='password'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='email'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='url'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='tel'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='search'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='number'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='date'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='datetime'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='datetime-local'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='month'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='week'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='time'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='color'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) textarea {
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='text'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='password'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='email'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='url'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='tel'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='search'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='number'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='date'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='datetime'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='datetime-local'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='month'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='week'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='time'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='color'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) textarea {
   margin: 0;
   padding: 0;
   border: 0;
@@ -94,22 +94,22 @@
    @mui/material v9 (InputBase / OutlinedInput). The textarea keeps MUI's
    own multiline padding, and the Select display (a div carrying the
    input classes) keeps MUI's arrow clearance. */
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root)
   .MuiInputBase-input:not(textarea):not(.MuiSelect-select) {
   padding: 4px 0 5px;
 }
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root)
   .MuiOutlinedInput-input:not(textarea):not(.MuiSelect-select) {
   padding: 16.5px 14px;
 }
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root)
   .MuiOutlinedInput-root.MuiInputBase-sizeSmall
   .MuiOutlinedInput-input:not(textarea):not(.MuiSelect-select) {
   padding: 8.5px 14px;
 }
 
 /* Restore MUI's input box model, which the mount-point reset
-   `#goalcart-admin * { box-sizing: border-box }` (specificity 1-0-0)
+   `#faracart-admin * { box-sizing: border-box }` (specificity 1-0-0)
    overrides on the native input (MUI ships `content-box`, 0-1-0). With
    border-box the input's 1.4375em height is eaten by the restored
    vertical paddings and every text/date/time/number/color input
@@ -119,7 +119,7 @@
    either — puts the height back under MUI's padding + line-height
    arithmetic. The Select display keeps `height: auto`, and multiline
    textareas their own sizing. */
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root)
   .MuiInputBase-input:not(textarea):not(.MuiSelect-select) {
   box-sizing: content-box;
   height: 1.4375em; /* 23px at 16px — MUI's native-input line height */
@@ -129,8 +129,8 @@
    visible checkbox (1rem box, negative margin, `padding: 0 !important`),
    which shrinks and displaces the visually-hidden input MUI stretches
    over its control. Restore the neutral geometry. */
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='checkbox'],
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='radio'] {
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='checkbox'],
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='radio'] {
   margin: 0;
   padding: 0 !important; /* WP admin uses !important here */
   min-width: 0;
@@ -144,13 +144,13 @@
    otherwise beat MUI's single-class 100% rules). The switch's input has
    its own wide shape (`left: -100%; width: 300%`) — only its height
    needs restoring. */
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root)
   input[type='checkbox']:not(.MuiSwitch-input),
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='radio'] {
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='radio'] {
   width: 100%;
   height: 100%;
 }
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root)
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root)
   input[type='checkbox'].MuiSwitch-input {
   height: 100%;
 }
@@ -158,21 +158,21 @@
 /* WP draws its own checkmark/dot glyph on the native input; MUI draws
    its own icon, so suppress the WP ::before glyphs (defensive — the
    inputs are visually hidden). */
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='checkbox']::before,
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='radio']::before {
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='checkbox']::before,
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) input[type='radio']::before {
   content: none;
 }
 
 /* WP admin's generic `li { margin-bottom: 6px }` (common.css) leaks into
    MUI list surfaces (Select dropdowns, menus, list boxes). */
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) .MuiMenuItem-root,
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) .MuiListItem-root {
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) .MuiMenuItem-root,
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) .MuiListItem-root {
   margin-bottom: 0;
 }
 
 /* WP admin colors every <a> blue (`a { color: #2271b1 }`); MUI controls
    that render as links (e.g. `MenuItem component="a"`) inherit the page
    color instead of their own. */
-:is(#goalcart-admin, body .MuiPopover-root, body .MuiModal-root) a.MuiMenuItem-root {
+:is(#faracart-admin, body .MuiPopover-root, body .MuiModal-root) a.MuiMenuItem-root {
   color: inherit;
 }

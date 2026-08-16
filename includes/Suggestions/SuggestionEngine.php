@@ -2,15 +2,15 @@
 /**
  * Smart product suggestion engine for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Suggestions;
+namespace FaraCart\Suggestions;
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Settings\Settings;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -44,7 +44,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Suggestions only make sense while there is a gap to close: completed or
  * ineligible goals return an empty list. The final list is filterable via
- * `goalcart_suggestions` (Phase 28 developer API). Margin-aware and
+ * `faracart_suggestions` (Phase 28 developer API). Margin-aware and
  * AI-ranked recommendations remain roadmap futures (P14-T05).
  *
  * Queries are bounded (per-source limits, one batched include-load) and
@@ -187,7 +187,7 @@ final class SuggestionEngine {
 		 * @param GoalResult $result  Evaluation result.
 		 * @param CartContext $context Cart snapshot.
 		 */
-		return (array) apply_filters( 'goalcart_suggestions', $items, $goal, $result, $context );
+		return (array) apply_filters( 'faracart_suggestions', $items, $goal, $result, $context );
 	}
 
 	/**
@@ -450,7 +450,7 @@ final class SuggestionEngine {
 			'price'        => '' !== $price ? (float) $price : null,
 			'price_html'   => '' !== $price && function_exists( 'wc_price' )
 				? html_entity_decode(
-					wp_strip_all_tags( wc_price( (float) $price ) ),
+					wp_strip_all_tags( wc_price( (float) $price, array( 'currency' => $this->settings ? $this->settings->currency() : '' ) ) ),
 					ENT_QUOTES,
 					'UTF-8'
 				)

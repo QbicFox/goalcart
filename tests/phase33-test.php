@@ -70,22 +70,22 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\AttributionEngine;
-use GoalCart\Analytics\DailyAggregator;
-use GoalCart\Analytics\GoalRecommendationEngine;
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Analytics\Session;
-use GoalCart\Analytics\UpsellRanker;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Plugin;
-use GoalCart\REST\BaseController;
-use GoalCart\REST\RecommendationsController;
-use GoalCart\REST\RevenueController;
-use GoalCart\REST\UpsellController;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\AttributionEngine;
+use FaraCart\Analytics\DailyAggregator;
+use FaraCart\Analytics\GoalRecommendationEngine;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Analytics\Session;
+use FaraCart\Analytics\UpsellRanker;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Plugin;
+use FaraCart\REST\BaseController;
+use FaraCart\REST\RecommendationsController;
+use FaraCart\REST\RevenueController;
+use FaraCart\REST\UpsellController;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -109,7 +109,7 @@ function close( $a, $b, $eps = 0.01 ) {
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $tracker  = $container->get( RevenueTracker::class );
 $engine   = $container->get( AttributionEngine::class );
@@ -462,7 +462,7 @@ check( 'rank with an explicit gap still ranks for a ghost goal', ! empty( $ghost
 
 // --- Recommendation edge cases (pure, no DB writes). ---
 $rec = $container->get( GoalRecommendationEngine::class );
-$min = (int) apply_filters( 'goalcart_recommendation_min_orders', 50 );
+$min = (int) apply_filters( 'faracart_recommendation_min_orders', 50 );
 
 // Without any orders in the store, no recommendation is fabricated.
 $insufficient = $rec->recommend( array( 'reward_type' => 'free_shipping', 'from' => '2020-01-01', 'to' => '2020-01-02' ) );
@@ -524,19 +524,19 @@ try {
 	check( 'shipping stats include the fixture orders', $shipping['available'] && $shipping['orders'] >= 2 );
 
 	// Bounded metric reads honor the metric-rows filter.
-	add_filter( 'goalcart_attribution_metric_rows', function () {
+	add_filter( 'faracart_attribution_metric_rows', function () {
 		return 25;
 	} );
 	$bounded_icv = $engine->incremental_cart_value();
-	remove_all_filters( 'goalcart_attribution_metric_rows' );
+	remove_all_filters( 'faracart_attribution_metric_rows' );
 	check( 'metric reads bounded by the filter', is_array( $bounded_icv ) && isset( $bounded_icv['average'] ) );
 
 	// Bounded aggregation catch-up honors the max-days filter.
-	add_filter( 'goalcart_aggregate_max_days', function () {
+	add_filter( 'faracart_aggregate_max_days', function () {
 		return 2;
 	} );
 	$processed = $aggregator->aggregate_revenue();
-	remove_all_filters( 'goalcart_aggregate_max_days' );
+	remove_all_filters( 'faracart_aggregate_max_days' );
 	check( 'catch-up processes at most max-days', 2 >= $processed );
 } finally {
 	$wpdb->query( 'ROLLBACK' );
@@ -562,9 +562,9 @@ try {
 	check( 'repeat read adds no new transients', $transients_after >= 1 );
 
 	// The bypass filter forces a fresh compute (and skips the transient).
-	add_filter( 'goalcart_revenue_cache_enabled', '__return_false' );
+	add_filter( 'faracart_revenue_cache_enabled', '__return_false' );
 	$fresh = $repo->overview( $args );
-	remove_all_filters( 'goalcart_revenue_cache_enabled' );
+	remove_all_filters( 'faracart_revenue_cache_enabled' );
 	check( 'cache bypass recomputes the payload', is_array( $fresh ) && isset( $fresh['summary'] ) );
 
 	// Invalidation bumps the generation (next read recomputes).
@@ -591,14 +591,14 @@ $rec_ctrl->register_routes();
 $routes = function_exists( 'rest_get_server' ) ? rest_get_server()->get_routes() : array();
 
 // Admin endpoints are manage_options-gated.
-check( 'revenue/overview admin-gated', isset( $routes['/goalcart/v1/revenue/overview'][0]['permission_callback'] ) );
-check( 'revenue/goals admin-gated', isset( $routes['/goalcart/v1/revenue/goals'][0]['permission_callback'] ) );
-check( 'revenue/goal-recommendations admin-gated', isset( $routes['/goalcart/v1/revenue/goal-recommendations'][0]['permission_callback'] ) );
-check( 'revenue/upsells admin-gated', isset( $routes['/goalcart/v1/revenue/upsells'][0]['permission_callback'] ) );
+check( 'revenue/overview admin-gated', isset( $routes['/faracart/v1/revenue/overview'][0]['permission_callback'] ) );
+check( 'revenue/goals admin-gated', isset( $routes['/faracart/v1/revenue/goals'][0]['permission_callback'] ) );
+check( 'revenue/goal-recommendations admin-gated', isset( $routes['/faracart/v1/revenue/goal-recommendations'][0]['permission_callback'] ) );
+check( 'revenue/upsells admin-gated', isset( $routes['/faracart/v1/revenue/upsells'][0]['permission_callback'] ) );
 
 // The public rank route has no capability requirement (public by design).
-check( 'upsell/rank registered', isset( $routes['/goalcart/v1/upsell/rank'] ) );
-check( 'upsell/track registered', isset( $routes['/goalcart/v1/upsell/track'] ) );
+check( 'upsell/rank registered', isset( $routes['/faracart/v1/upsell/rank'] ) );
+check( 'upsell/track registered', isset( $routes['/faracart/v1/upsell/track'] ) );
 
 // Base capability constant is the WP admin capability.
 check( 'admin capability is manage_options', BaseController::CAPABILITY === 'manage_options' );
@@ -637,7 +637,7 @@ check( 'public payload drops margin reasons', 1 === count( $item['reasons'] ) &&
 
 // The rank route is capability-free: its permission callback does NOT
 // check current_user_can — an anonymous caller is allowed (rate limited).
-$rank_perm = $routes['/goalcart/v1/upsell/rank'][0]['permission_callback'] ?? null;
+$rank_perm = $routes['/faracart/v1/upsell/rank'][0]['permission_callback'] ?? null;
 check( 'rank route permission callback is the public one', is_callable( $rank_perm ) );
 
 // Schema privacy: no PII columns in the revenue logs.
@@ -701,13 +701,13 @@ check( 'all Phase 33 services resolve from the container', $all_resolve );
 
 // Regression: routes are all registered.
 $expected_routes = array(
-	'/goalcart/v1/revenue/overview',
-	'/goalcart/v1/revenue/attribution',
-	'/goalcart/v1/revenue/goals',
-	'/goalcart/v1/revenue/goal-recommendations',
-	'/goalcart/v1/revenue/upsells',
-	'/goalcart/v1/upsell/rank',
-	'/goalcart/v1/upsell/track',
+	'/faracart/v1/revenue/overview',
+	'/faracart/v1/revenue/attribution',
+	'/faracart/v1/revenue/goals',
+	'/faracart/v1/revenue/goal-recommendations',
+	'/faracart/v1/revenue/upsells',
+	'/faracart/v1/upsell/rank',
+	'/faracart/v1/upsell/track',
 );
 
 $routes_ok = true;
@@ -726,7 +726,7 @@ check( 'cleanup cron in the installer list', in_array( RevenueTracker::CLEANUP_E
 
 $intervals = Installer::cron_intervals();
 check( 'aggregation scheduled daily', 'daily' === $intervals[ DailyAggregator::AGGREGATE_EVENT ] );
-check( 'cleanup scheduled weekly', 'goalcart_weekly' === $intervals[ RevenueTracker::CLEANUP_EVENT ] );
+check( 'cleanup scheduled weekly', 'faracart_weekly' === $intervals[ RevenueTracker::CLEANUP_EVENT ] );
 
 // Regression: the retention cleanup is bounded and respects the filter.
 $wpdb->query( 'START TRANSACTION' );
@@ -734,11 +734,11 @@ try {
 	$old = $tracker->record( 'goal_view', array( 'goal_id' => 401, 'cart_value' => 100, 'goal_target' => 1000000, 'session_id' => $session_c ) );
 	$wpdb->update( $revenue_table, array( 'created_at' => date( 'Y-m-d H:i:s', strtotime( '-200 days' ) ) ), array( 'id' => $old ) );
 
-	add_filter( 'goalcart_revenue_retention_days', function () {
+	add_filter( 'faracart_revenue_retention_days', function () {
 		return 30;
 	} );
 	$deleted = $tracker->run_cleanup();
-	remove_all_filters( 'goalcart_revenue_retention_days' );
+	remove_all_filters( 'faracart_revenue_retention_days' );
 
 	$remaining = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$revenue_table} WHERE id = %d", $old ) );
 	check( 'cleanup purges rows beyond the retention window', $deleted >= 1 && 0 === $remaining );

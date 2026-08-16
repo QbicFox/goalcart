@@ -2,13 +2,13 @@
 /**
  * REST controller for the progress template registry.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Hooks\HookManager;
-use GoalCart\Templates\TemplateEngine;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Templates\TemplateEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Template registry endpoints (pluggable template engine):
  *
- *  - `GET /goalcart/v1/templates` — every registered template grouped by
+ *  - `GET /faracart/v1/templates` — every registered template grouped by
  *    scope (goal / campaign) with its settings schema, the current scope
  *    defaults, and the effective default appearance per template. The
  *    React admin app reads this to render the template pickers and the

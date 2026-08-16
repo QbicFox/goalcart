@@ -2,14 +2,14 @@
 /**
  * Cart integration service for the FaraCart engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Cart;
+namespace FaraCart\Cart;
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Goals\CartContext;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -2,12 +2,12 @@
 /**
  * Order cost snapshot for FaraCart (UPSELL_REFACTOR §21/§22).
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
-use GoalCart\Hooks\HookManager;
+use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * The snapshot is stored at order-item level (the project's established
  * WooCommerce order-item metadata strategy — no extra database table):
  *
- *   order_item_id → `_goalcart_unit_cost` = unit cost at order time
+ *   order_item_id → `_faracart_unit_cost` = unit cost at order time
  *
  * The read side lives in RewardCostEstimator (order_item_unit_cost() /
  * order_margin_stats()), which prefers the snapshot over the live
@@ -68,7 +68,7 @@ final class OrderCostSnapshot {
 	 * Products without cost data simply get no snapshot (limited
 	 * economics, never a guessed number). The value is filterable so
 	 * stores plugging their own cost source through
-	 * `goalcart_product_cost` get the exact same snapshot here.
+	 * `faracart_product_cost` get the exact same snapshot here.
 	 *
 	 * @param \WC_Order_Item_Product $item          Line item being created.
 	 * @param string                 $cart_item_key Cart item key (unused).
@@ -102,7 +102,7 @@ final class OrderCostSnapshot {
 		 * @param int                         $product_id Product/variation id.
 		 * @param \WC_Order_Item_Product      $item       Line item.
 		 */
-		$cost = apply_filters( 'goalcart_order_cost_snapshot', $cost, $product_id, $item );
+		$cost = apply_filters( 'faracart_order_cost_snapshot', $cost, $product_id, $item );
 
 		if ( null === $cost || (float) $cost <= 0 ) {
 			return;

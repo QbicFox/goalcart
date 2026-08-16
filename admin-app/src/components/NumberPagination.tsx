@@ -63,10 +63,10 @@ export default function NumberPagination({
     >
       <Typography variant="body2" color="text.secondary">
         {count === 0
-          ? __('No rows', 'goalcart')
+          ? __('No rows', 'faracart')
           : sprintf(
               /* translators: 1: first visible row, 2: last visible row, 3: total rows. */
-              __('Showing %d–%d of %d', 'goalcart'),
+              __('Showing %d–%d of %d', 'faracart'),
               from,
               to,
               count
@@ -76,7 +76,7 @@ export default function NumberPagination({
       {rowsPerPageOptions && onRowsPerPageChange && (
         <TextField
           select
-          label={__('Rows per page', 'goalcart')}
+          label={__('Rows per page', 'faracart')}
           size="small"
           sx={{ minWidth: 110 }}
           value={rowsPerPage}

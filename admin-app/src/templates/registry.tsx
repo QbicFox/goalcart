@@ -42,7 +42,7 @@ export type CampaignTemplateRenderer = ComponentType<CampaignTemplateProps>;
 /**
  * The React template registry: `template id → renderer component`.
  *
- * The backend (GET /goalcart/v1/templates) is the source of truth for
+ * The backend (GET /faracart/v1/templates) is the source of truth for
  * which templates exist and their settings schemas; this registry only
  * supplies the rendering components, keyed by the same stable ids.
  * Consumers look components up by property access (never by call

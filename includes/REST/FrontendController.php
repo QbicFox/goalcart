@@ -2,29 +2,29 @@
 /**
  * REST controller for the public frontend progress API.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Analytics\Tracker;
-use GoalCart\Cart\CartIntegration;
-use GoalCart\REST\GiftController;
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\CompletionService;
-use GoalCart\Goals\ConflictResolver;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Goals\MessageEngine;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Rewards\Reward;
-use GoalCart\Rewards\RewardEngine;
-use GoalCart\Recommendations\ProductRecommendationEngine;
-use GoalCart\Rewards\RewardResult;
-use GoalCart\Settings\Settings;
-use GoalCart\Templates\TemplateEngine;
+use FaraCart\Analytics\Tracker;
+use FaraCart\Cart\CartIntegration;
+use FaraCart\REST\GiftController;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\CompletionService;
+use FaraCart\Goals\ConflictResolver;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Goals\MessageEngine;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Rewards\Reward;
+use FaraCart\Rewards\RewardEngine;
+use FaraCart\Recommendations\ProductRecommendationEngine;
+use FaraCart\Rewards\RewardResult;
+use FaraCart\Settings\Settings;
+use FaraCart\Templates\TemplateEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Phase 7 (REST API / AJAX Layer) frontend endpoint:
  *
- *  - `GET /goalcart/v1/progress` — the current cart's goal progress,
+ *  - `GET /faracart/v1/progress` — the current cart's goal progress,
  *    exposing only the minimum necessary data (P07-T03):
  *
  *    ```text
@@ -180,7 +180,7 @@ class FrontendController extends BaseController {
 	 */
 	protected function templates() {
 		if ( null === $this->templates ) {
-			$this->templates = \GoalCart\Plugin::instance()->container()->get( TemplateEngine::class );
+			$this->templates = \FaraCart\Plugin::instance()->container()->get( TemplateEngine::class );
 		}
 
 		return $this->templates;
@@ -297,8 +297,8 @@ class FrontendController extends BaseController {
 				// campaign template (e.g. the milestone chain) instead of
 				// per-goal cards.
 				'campaigns' => $this->campaign_groups( $goals ),
-				'currency' => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
-				// Self-healing tracking nonce: a freshly minted goalcart_track
+				'currency' => $this->settings->currency(),
+				// Self-healing tracking nonce: a freshly minted faracart_track
 				// nonce rides on every progress response so the storefront JS
 				// can adopt it before reporting events — a cached page serving
 				// an expired or another user's nonce self-heals within one
@@ -336,12 +336,12 @@ class FrontendController extends BaseController {
 	 *
 	 * The tracking nonce baked into a cached page expires after its
 	 * 12-hour tick and can be bound to another user's session, which turns
-	 * every subsequent `/track` report into `goalcart_invalid_nonce` (403).
+	 * every subsequent `/track` report into `faracart_invalid_nonce` (403).
 	 * The progress payload therefore mints a fresh nonce on every poll and
 	 * frontend.js adopts it before the next event report.
 	 *
 	 * The gate mirrors the master toggles of Tracker::tracking_enabled()
-	 * (which additionally applies the goalcart_tracking_enabled filter —
+	 * (which additionally applies the faracart_tracking_enabled filter —
 	 * not re-applied here; the /track handler enforces it anyway, so a
 	 * disabled-by-filter store simply drops events). Keep the two gates in
 	 * sync if a third toggle is ever added.
@@ -548,7 +548,7 @@ class FrontendController extends BaseController {
 		// identity is part of the cache key).
 		$identity = null !== $this->completions ? $this->completions->context_identity( $context ) : array();
 
-		return 'goalcart_progress_' . md5(
+		return 'faracart_progress_' . md5(
 			wp_json_encode(
 				array(
 					'ctx'         => array(
@@ -703,14 +703,14 @@ class FrontendController extends BaseController {
 	 *
 	 * Phase 18 (Settings → Performance → suggestions): an opt-out for
 	 * stores that want the goals without the upsell list. Filterable via
-	 * goalcart_suggestions_enabled (the Phase 28 developer API hook).
+	 * faracart_suggestions_enabled (the Phase 28 developer API hook).
 	 *
 	 * @return bool
 	 */
 	protected function suggestions_on() {
 		$on = (bool) $this->settings->get( 'performance_suggestions', true );
 
-		return (bool) apply_filters( 'goalcart_suggestions_enabled', $on );
+		return (bool) apply_filters( 'faracart_suggestions_enabled', $on );
 	}
 
 	/**
@@ -809,13 +809,13 @@ class FrontendController extends BaseController {
 	/**
 	 * The goal's reward summary for the frontend.
 	 *
-	 * P22 hardening: the PUBLIC `/goalcart/v1/progress` payload carries only
+	 * P22 hardening: the PUBLIC `/faracart/v1/progress` payload carries only
 	 * the reward offer the widget needs to render (type, value, max_value).
 	 * The full configuration — including configured coupon codes, the
 	 * deterministic generated-coupon code, gift product ids, eligible /
 	 * excluded product and category lists, and shipping restrictions — is
 	 * deliberately NOT exposed: any visitor could otherwise harvest those
-	 * secrets at `wp-json/goalcart/v1/progress` without authentication and
+	 * secrets at `wp-json/faracart/v1/progress` without authentication and
 	 * redeem a coupon reward before its goal is completed.
 	 *
 	 * The admin PreviewController shapes the same goal but may pass
@@ -893,7 +893,7 @@ class FrontendController extends BaseController {
 				'image'      => $image_id ? (string) wp_get_attachment_image_url( $image_id, 'woocommerce_thumbnail' ) : '',
 				'price'      => '' !== $price ? (float) $price : null,
 				'price_html' => '' !== $price && function_exists( 'wc_price' )
-					? html_entity_decode( wp_strip_all_tags( wc_price( (float) $price ) ), ENT_QUOTES, 'UTF-8' )
+					? html_entity_decode( wp_strip_all_tags( wc_price( (float) $price, array( 'currency' => $this->settings->currency() ) ) ), ENT_QUOTES, 'UTF-8' )
 					: '',
 			);
 		}
@@ -913,7 +913,7 @@ class FrontendController extends BaseController {
 		}
 
 		foreach ( WC()->cart->get_cart() as $item ) {
-			if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
+			if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id ) {
 				return true;
 			}
 		}

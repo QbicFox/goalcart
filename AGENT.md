@@ -657,7 +657,7 @@ Three free-gift defects were fixed in the reward engine (`RewardEngine`,
   duplicates, and losing eligibility revokes the chosen gift (the picker
   re-prompts on the next completion).
 - **Removal permission is now per mode.** The gift add-mode is stamped on
-  every gift line (`goalcart_gift_mode`, self-healed on kept legacy
+  every gift line (`faracart_gift_mode`, self-healed on kept legacy
   lines); the remove link is hidden only for mandatory (automatic) gifts
   — selectable (choose-mode) gifts keep theirs (their removal is
   respected server-side; mandatory removal is rejected by re-adding
@@ -683,7 +683,7 @@ normalize to `automatic` at the `Reward` model boundary
 (`Reward::__construct`), so the value can never surface in the UI, the
 REST payloads, or the engine again and their gifts behave as mandatory
 until re-configured. Cart lines already stamped
-`goalcart_gift_mode = 'optional'` keep their per-mode remove-link policy
+`faracart_gift_mode = 'optional'` keep their per-mode remove-link policy
 (removable) until the engine re-adds them. No engine behavior changed
 for `automatic` / `choose`. The POT/JED were regenerated and the five
 template-UI strings the committed POT was missing now carry Persian
@@ -1032,7 +1032,7 @@ no reload, no polling. Root cause found: the classic jQuery events
 apply/remove and cart-emptied were not, and WooCommerce Blocks cart
 mutations (Store API) never fired a classic jQuery event at all, so the
 widget froze until a reload on block-driven pages. `assets/js/frontend.js`
-now funnels every mechanism into one `goalcart:cart-changed` bridge on
+now funnels every mechanism into one `faracart:cart-changed` bridge on
 `document.body`: the classic events (incl. `applied_coupon` /
 `removed_coupon` / `wc_cart_emptied`), the Blocks `wc-blocks_*` DOM
 events, and a `wp.data.subscribe` subscription to the `wc/store/cart`
@@ -1040,7 +1040,7 @@ store (fingerprint = cartHash + totals, so coupon/shipping-driven total
 changes are caught too). Refreshes are trailing-debounced (150 ms) with
 one 700 ms follow-up after the session write lands; a supersede guard
 (epoch + abort of the in-flight XHR) stops a stale response from
-overwriting fresher progress; a subtle `goalcart-widget--updating` dim
+overwriting fresher progress; a subtle `faracart-widget--updating` dim
 (never a blank/flash) shows while a cart-change refresh is in flight.
 Purely presentational wiring — no change to goal/reward calculation,
 REST, or caching (`performance_caching` was already keyed by the cart
@@ -1069,7 +1069,7 @@ renamed), translated `label` + `description`, a `scope` (goal | campaign
 | both), a settings `schema` (field type, default, validation rules,
 label, group) and a `version`. Templates register through
 `TemplateRegistry` (lazy, filterable via the
-`goalcart_template_classes` class map — the same convention as
+`faracart_template_classes` class map — the same convention as
 `GoalEvaluatorRegistry` / `RewardApplicatorRegistry`), so adding a fifth
 Goal template or a second Campaign template is one class + one filter
 entry — no changes to the Settings UI, the builders, the REST layer or
@@ -1080,7 +1080,7 @@ originals below are the built-in Goal templates; `milestone_chain` is
 the first Campaign template (the campaign renders as a connected
 milestone ladder instead of per-goal cards). The backend is the source
 of truth for which templates exist and their schemas (`GET
-/goalcart/v1/templates`); the React app only supplies the rendering
+/faracart/v1/templates`); the React app only supplies the rendering
 components, keyed by the same ids
 (`admin-app/src/templates/registry.tsx`).
 
@@ -1149,7 +1149,7 @@ Purely presentational: the Appearance screen's two-card layout (image-radio
 picker + one accordion per template) was replaced by a Goal/Campaign tab
 bar with a single per-tab template dropdown. Each tab lists only that
 scope's registered templates by name (sourced from the same
-`GET /goalcart/v1/templates` payload), defaults to the scope's current
+`GET /faracart/v1/templates` payload), defaults to the scope's current
 default template, and mounts only the selected template's live preview +
 schema-driven appearance panel (the Goal/Campaign Builder override
 screens already used the equivalent dropdown + panel pattern). No change
@@ -1538,7 +1538,7 @@ All four areas were audited and verified end-to-end by the new
   SQL parameterization (every repository query `$wpdb->prepare`-bound),
   safe serialization (`wp_json_encode` only). The track handler now clamps
   `percentage` (0–100) and `cart_value` (≥ 0) on top of the arg schema.
-- **P22-T02 REST** — every `goalcart/v1` route carries a permission
+- **P22-T02 REST** — every `faracart/v1` route carries a permission
   callback; arg-schema validation on the full request surface; per-user
   (admin) and per-IP (public) rate limiting verified to 429 past the
   budget; the public `/progress` payload redacts `reward_meta` (coupon
@@ -1788,19 +1788,19 @@ The plugin is translation-ready end to end. Implemented and verified in
 `tests/i18n-test.php` (44 checks), documented in `docs/i18n.md`:
 
 - **WordPress translation functions** — every PHP string uses `__()` /
-  `_e()` / `esc_html__()` / `_x()` / `sprintf()` with the `goalcart`
+  `_e()` / `esc_html__()` / `_x()` / `sprintf()` with the `faracart`
   domain; the React admin imports `@wordpress/i18n` (aliased to the
   `wp-i18n.ts` shim delegating to WP core's `wp.i18n`, with the
   `wp-i18n` script dependency and `wp_set_script_translations` wired).
-- **text domain** — `goalcart`, declared in the plugin header
+- **text domain** — `faracart`, declared in the plugin header
   (`Text Domain`, `Domain Path: /languages`) and loaded on `init` via
   `load_plugin_textdomain`.
 - **POT generation** — `bin/extract-pot.php` scans the PHP layer and
-  the admin TS/TSX (same `__( '…', 'goalcart' )` syntax) into a
-  deterministic `languages/goalcart.pot` (445 entries) with `--check`
-  freshness guard; `bin/build-i18n.php` compiles `goalcart-<locale>.po`
+  the admin TS/TSX (same `__( '…', 'faracart' )` syntax) into a
+  deterministic `languages/faracart.pot` (445 entries) with `--check`
+  freshness guard; `bin/build-i18n.php` compiles `faracart-<locale>.po`
   into gettext `.mo` + the JED JSON the admin loads
-  (`goalcart-<locale>-goalcart-admin.json`); `admin-app/package.json`
+  (`faracart-<locale>-faracart-admin.json`); `admin-app/package.json`
   mirrors the reference's `makepot` / `i18n:extract` / `i18n:build` /
   `i18n:verify` / `i18n:all` scripts — no wp-cli required.
 - **React translations following the reference plugin** — the shim +
@@ -1979,14 +1979,14 @@ moments, richer campaign presentation and smarter suggestions.
 ## Implementation Notes
 
 **Free gift selection** — `Reward::gift_products()` + `GIFT_CHOOSE` mode;
-the storefront widget renders a gift picker (`goalcart-gift-picker`) that
+the storefront widget renders a gift picker (`faracart-gift-picker`) that
 claims the chosen gift through the new public `POST
-/goalcart/v1/gift` endpoint (`GiftController`, nonce-guarded like
+/faracart/v1/gift` endpoint (`GiftController`, nonce-guarded like
 `TrackController`); `RewardEngine` reconciles the chosen gift like the
 automatic one. Builder: RewardFields multi-product picker for choose mode.
 
 **Gift picker 400 bug fix (Phase 32/Phase 6)** — claiming a chosen gift
-returned `goalcart_gift_empty_cart` ("Your cart is empty.") for every
+returned `faracart_gift_empty_cart` ("Your cart is empty.") for every
 shopper. Root cause: WooCommerce does not initialize the cart for custom
 REST routes, and `GiftController::handle()` checked a bare `WC()->cart`
 (always null on REST), so the endpoint rejected every claim before the
@@ -2002,7 +2002,7 @@ and pre-init states) plus container-wiring guards in
 
 **Countdown** — goals and campaign groups ship a `countdown_end` ISO
 timestamp; the storefront runs a single global ticker that rewrites
-`[data-goalcart-end]` readouts every second (locale-aware digits). Gated
+`[data-faracart-end]` readouts every second (locale-aware digits). Gated
 by the `frontend_countdown` setting; the sticky bar has its own
 `sticky_countdown` toggle.
 

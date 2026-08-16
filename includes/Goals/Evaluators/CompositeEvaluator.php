@@ -2,17 +2,17 @@
 /**
  * Composite goal evaluator.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals\Evaluators;
+namespace FaraCart\Goals\Evaluators;
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalEvaluator;
-use GoalCart\Goals\GoalEvaluatorRegistry;
-use GoalCart\Goals\GoalResult;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalEvaluator;
+use FaraCart\Goals\GoalEvaluatorRegistry;
+use FaraCart\Goals\GoalResult;
 
 defined( 'ABSPATH' ) || exit;
 

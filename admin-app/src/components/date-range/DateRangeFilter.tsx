@@ -64,7 +64,7 @@ export default function DateRangeFilter() {
         onClick={(event) => setAnchorEl(event.currentTarget)}
         aria-haspopup="true"
         aria-expanded={open}
-        aria-label={__('Date range filter', 'goalcart')}
+        aria-label={__('Date range filter', 'faracart')}
         sx={{ textTransform: 'none', borderColor: 'divider', color: 'text.primary', height: 40 }}
       >
         {formatRangeLabel(range)}
@@ -79,7 +79,7 @@ export default function DateRangeFilter() {
         slotProps={{ paper: { sx: { width: 320, p: 1.5 } } }}
       >
         <Typography variant="subtitle2" sx={{ px: 1, mb: 0.5 }}>
-          {__('Date range', 'goalcart')}
+          {__('Date range', 'faracart')}
         </Typography>
 
         <MenuList dense disablePadding>
@@ -109,7 +109,7 @@ export default function DateRangeFilter() {
             <Box sx={{ minWidth: 28 }}>
               {range.preset === 'custom' && <CheckIcon fontSize="small" color="primary" />}
             </Box>
-            <ListItemText>{__('Custom range…', 'goalcart')}</ListItemText>
+            <ListItemText>{__('Custom range…', 'faracart')}</ListItemText>
           </MenuItem>
         </MenuList>
 
@@ -127,7 +127,7 @@ export default function DateRangeFilter() {
           sx={{ display: 'block', mt: 1.5, px: 1 }}
         >
           {sprintf(
-            __('Compared with previous period (%1$s – %2$s).', 'goalcart'),
+            __('Compared with previous period (%1$s – %2$s).', 'faracart'),
             formatDay(comparison.from),
             formatDay(comparison.to)
           )}

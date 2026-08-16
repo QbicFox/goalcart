@@ -39,11 +39,11 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Goals\ProgressCalculator;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Goals\ProgressCalculator;
 
 $failures = 0;
 $checks   = 0;

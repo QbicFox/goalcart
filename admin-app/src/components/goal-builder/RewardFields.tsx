@@ -20,27 +20,27 @@ interface RewardFieldsProps {
 }
 
 const REWARD_OPTIONS: Array<{ value: RewardType; label: string }> = [
-  { value: null, label: __('No reward', 'goalcart') },
-  { value: 'free_shipping', label: __('Free shipping', 'goalcart') },
-  { value: 'percent_discount', label: __('Percentage discount', 'goalcart') },
-  { value: 'fixed_discount', label: __('Fixed discount', 'goalcart') },
-  { value: 'free_gift', label: __('Free gift', 'goalcart') },
-  { value: 'coupon', label: __('Coupon', 'goalcart') },
+  { value: null, label: __('No reward', 'faracart') },
+  { value: 'free_shipping', label: __('Free shipping', 'faracart') },
+  { value: 'percent_discount', label: __('Percentage discount', 'faracart') },
+  { value: 'fixed_discount', label: __('Fixed discount', 'faracart') },
+  { value: 'free_gift', label: __('Free gift', 'faracart') },
+  { value: 'coupon', label: __('Coupon', 'faracart') },
 ];
 
 const STACKING_OPTIONS = [
-  { value: 'none', label: __('No (exclusive)', 'goalcart') },
-  { value: 'stack', label: __('Yes (stack with other rewards)', 'goalcart') },
+  { value: 'none', label: __('No (exclusive)', 'faracart') },
+  { value: 'stack', label: __('Yes (stack with other rewards)', 'faracart') },
 ];
 
 const GIFT_MODE_OPTIONS = [
-  { value: 'automatic', label: __('Add automatically', 'goalcart') },
-  { value: 'choose', label: __('Customer picks from a list', 'goalcart') },
+  { value: 'automatic', label: __('Add automatically', 'faracart') },
+  { value: 'choose', label: __('Customer picks from a list', 'faracart') },
 ];
 
 const COUPON_TYPE_OPTIONS = [
-  { value: 'percent', label: __('Percentage off', 'goalcart') },
-  { value: 'fixed_cart', label: __('Fixed amount off', 'goalcart') },
+  { value: 'percent', label: __('Percentage off', 'faracart') },
+  { value: 'fixed_cart', label: __('Fixed amount off', 'faracart') },
 ];
 
 /** Reward-specific shape used by the coupon picker (code-based). */
@@ -101,7 +101,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
       <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
         <TextField
           select
-          label={__('Reward type', 'goalcart')}
+          label={__('Reward type', 'faracart')}
           fullWidth
           value={type ?? ''}
           onChange={(event) => changeType((event.target.value || null) as RewardType)}
@@ -122,8 +122,8 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                 <TextField
                   label={
                     type === 'percent_discount'
-                      ? __('Discount percentage', 'goalcart')
-                      : __('Discount amount', 'goalcart')
+                      ? __('Discount percentage', 'faracart')
+                      : __('Discount amount', 'faracart')
                   }
                   type="number"
                   fullWidth
@@ -131,8 +131,8 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                   placeholder={type === 'percent_discount' ? '10' : '100000'}
                   helperText={
                     type === 'percent_discount'
-                      ? __('% off the eligible cart value', 'goalcart')
-                      : __('Fixed amount off', 'goalcart')
+                      ? __('% off the eligible cart value', 'faracart')
+                      : __('Fixed amount off', 'faracart')
                   }
                   onChange={(event) => patch({ reward_value: Number(event.target.value) || null })}
                 />
@@ -141,12 +141,12 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
               {type === 'percent_discount' && (
                 <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                   <TextField
-                    label={__('Maximum discount', 'goalcart')}
+                    label={__('Maximum discount', 'faracart')}
                     type="number"
                     fullWidth
                     value={values.reward_max_value ?? ''}
-                    placeholder={__('Optional cap', 'goalcart')}
-                    helperText={__('Cap the discount at this amount.', 'goalcart')}
+                    placeholder={__('Optional cap', 'faracart')}
+                    helperText={__('Cap the discount at this amount.', 'faracart')}
                     onChange={(event) =>
                       patch({ reward_max_value: Number(event.target.value) || null })
                     }
@@ -159,29 +159,29 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                   sx={{ display: 'grid', gap: 2, gridTemplateColumns: { sm: 'repeat(2, 1fr)' } }}
                 >
                   <EntityAutocomplete
-                    label={__('Eligible products (optional)', 'goalcart')}
+                    label={__('Eligible products (optional)', 'faracart')}
                     value={meta.eligible_products ?? []}
                     onChange={(eligible_products) => patchMeta({ eligible_products })}
                     search={searchProducts}
-                    helperText={__('Leave empty to apply to the whole cart.', 'goalcart')}
+                    helperText={__('Leave empty to apply to the whole cart.', 'faracart')}
                   />
                   <EntityAutocomplete
-                    label={__('Eligible categories (optional)', 'goalcart')}
+                    label={__('Eligible categories (optional)', 'faracart')}
                     value={meta.eligible_categories ?? []}
                     onChange={(eligible_categories) => patchMeta({ eligible_categories })}
                     search={searchCategories}
-                    helperText={__('Leave empty to apply to the whole cart.', 'goalcart')}
+                    helperText={__('Leave empty to apply to the whole cart.', 'faracart')}
                   />
                 </Box>
               </Grid>
 
               <Grid size={12}>
                 <EntityAutocomplete
-                  label={__('Excluded products (optional)', 'goalcart')}
+                  label={__('Excluded products (optional)', 'faracart')}
                   value={meta.excluded_products ?? []}
                   onChange={(excluded_products) => patchMeta({ excluded_products })}
                   search={searchProducts}
-                  helperText={__('The discount never applies to these products.', 'goalcart')}
+                  helperText={__('The discount never applies to these products.', 'faracart')}
                 />
               </Grid>
             </>
@@ -192,7 +192,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
               <Typography variant="body2" color="text.secondary">
                 {__(
                   'Makes every shipping rate free once the goal is reached. Zone/method-specific rules are configured in a later phase.',
-                  'goalcart'
+                  'faracart'
                 )}
               </Typography>
             </Grid>
@@ -206,7 +206,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                     <Alert severity="warning" variant="outlined">
                       {__(
                         'Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront.',
-                        'goalcart'
+                        'faracart'
                       )}
                     </Alert>
                   </Grid>
@@ -214,7 +214,7 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
               {meta.gift_add_mode === 'choose' ? (
                 <Grid size={12}>
                   <EntityAutocomplete
-                    label={__('Gift products (customer picks one)', 'goalcart')}
+                    label={__('Gift products (customer picks one)', 'faracart')}
                     value={meta.gift_products ?? []}
                     onChange={(gift_products) => {
                       const first = gift_products[0] ?? 0;
@@ -224,26 +224,26 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
                     multiple
                     helperText={__(
                       'The customer chooses one free gift from this list once the goal is reached. The first product is the storefront default.',
-                      'goalcart'
+                      'faracart'
                     )}
                   />
                 </Grid>
               ) : (
                 <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                   <EntityAutocomplete
-                    label={__('Gift product', 'goalcart')}
+                    label={__('Gift product', 'faracart')}
                     value={meta.gift_product_id ? [meta.gift_product_id] : []}
                     onChange={(ids) => patchMeta({ gift_product_id: ids[0] ?? 0 })}
                     search={searchProducts}
                     multiple={false}
-                    helperText={__('The product added to the cart as a gift.', 'goalcart')}
+                    helperText={__('The product added to the cart as a gift.', 'faracart')}
                   />
                 </Grid>
               )}
               <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
                 <TextField
                   select
-                  label={__('Gift mode', 'goalcart')}
+                  label={__('Gift mode', 'faracart')}
                   fullWidth
                   // A goal saved before the 'optional' mode was removed may
                   // still store it — render it as 'automatic' so the select
@@ -277,11 +277,11 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
 
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TextField
-              label={__('Reward label', 'goalcart')}
+              label={__('Reward label', 'faracart')}
               fullWidth
               value={meta.label ?? ''}
-              placeholder={__('e.g. Summer free shipping', 'goalcart')}
-              helperText={__('Shown to the customer (fee/coupon name).', 'goalcart')}
+              placeholder={__('e.g. Summer free shipping', 'faracart')}
+              helperText={__('Shown to the customer (fee/coupon name).', 'faracart')}
               onChange={(event) => patchMeta({ label: event.target.value })}
             />
           </Grid>
@@ -289,11 +289,11 @@ export default function RewardFields({ values, onValueChange }: RewardFieldsProp
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TextField
               select
-              label={__('Stack with other rewards?', 'goalcart')}
+              label={__('Stack with other rewards?', 'faracart')}
               fullWidth
               value={stacking}
               onChange={(event) => patchMeta({ stacking: event.target.value as 'none' | 'stack' })}
-              helperText={__('Exclusive rewards never combine.', 'goalcart')}
+              helperText={__('Exclusive rewards never combine.', 'faracart')}
             >
               {STACKING_OPTIONS.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
@@ -354,10 +354,10 @@ function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
           label={
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {__('Generate a coupon from these rules', 'goalcart')}
+                {__('Generate a coupon from these rules', 'faracart')}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {__('A deterministic coupon is created per customer.', 'goalcart')}
+                {__('A deterministic coupon is created per customer.', 'faracart')}
               </Typography>
             </Box>
           }
@@ -369,7 +369,7 @@ function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TextField
               select
-              label={__('Coupon discount type', 'goalcart')}
+              label={__('Coupon discount type', 'faracart')}
               fullWidth
               value={meta.coupon_discount_type ?? 'percent'}
               onChange={(event) =>
@@ -385,7 +385,7 @@ function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TextField
-              label={__('Coupon value', 'goalcart')}
+              label={__('Coupon value', 'faracart')}
               type="number"
               fullWidth
               value={values.reward_value ?? ''}
@@ -395,11 +395,11 @@ function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
           </Grid>
           <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
             <TextField
-              label={__('Coupon cap (optional)', 'goalcart')}
+              label={__('Coupon cap (optional)', 'faracart')}
               type="number"
               fullWidth
               value={values.reward_max_value ?? ''}
-              placeholder={__('Optional cap', 'goalcart')}
+              placeholder={__('Optional cap', 'faracart')}
               onChange={(event) => patch({ reward_max_value: Number(event.target.value) || null })}
             />
           </Grid>
@@ -431,8 +431,8 @@ function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
             renderInput={(params) => (
               <TextField
                 {...params}
-                label={__('Existing coupon code', 'goalcart')}
-                helperText={__('Type or pick an existing coupon.', 'goalcart')}
+                label={__('Existing coupon code', 'faracart')}
+                helperText={__('Type or pick an existing coupon.', 'faracart')}
               />
             )}
           />

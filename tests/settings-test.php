@@ -57,17 +57,17 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Admin\AssetLoader;
-use GoalCart\Analytics\Tracker;
-use GoalCart\Cart\CartIntegration;
-use GoalCart\Frontend\ProgressUI;
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\REST\FrontendController;
-use GoalCart\REST\SettingsController;
-use GoalCart\Settings\Settings;
-use GoalCart\Utils\Logger;
+use FaraCart\Admin\AssetLoader;
+use FaraCart\Analytics\Tracker;
+use FaraCart\Cart\CartIntegration;
+use FaraCart\Frontend\ProgressUI;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\REST\FrontendController;
+use FaraCart\REST\SettingsController;
+use FaraCart\Settings\Settings;
+use FaraCart\Utils\Logger;
 
 $failures = 0;
 $checks   = 0;
@@ -130,7 +130,7 @@ function make_product( $name, $price ) {
 	return (int) $id;
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $settings    = $container->get( Settings::class );
 $settings_ctrl = $container->get( SettingsController::class );
@@ -155,10 +155,11 @@ $option_before = get_option( Settings::OPTION_NAME, null );
 echo "\n== 1. Defaults & wiring ==\n";
 
 check( 'settings resolves from container', $settings instanceof Settings );
-check( 'settings filter registered', false !== has_filter( 'goalcart_default_calculation_mode', array( $settings, 'apply_default_calculation_mode' ) ) );
+check( 'settings filter registered', false !== has_filter( 'faracart_default_calculation_mode', array( $settings, 'apply_default_calculation_mode' ) ) );
 
 $d = $settings->defaults();
 
+check( 'currency defaults to empty (store currency)', '' === $d['currency'] );
 check( 'currency_display defaults to symbol', 'symbol' === $d['currency_display'] );
 check( 'default_goal_behavior defaults to all', 'all' === $d['default_goal_behavior'] );
 check( 'conflict_resolution defaults to cumulative', 'cumulative' === $d['conflict_resolution'] );
@@ -200,6 +201,10 @@ check( 'currency_display schema enum', isset( $save['currency_display']['enum'] 
 check( 'invalid currency_display rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['currency_display'], 'currency_display' ) ) );
 check( 'valid currency_display accepted', true === rest_validate_value_from_schema( 'name', $save['currency_display'], 'currency_display' ) );
 
+check( 'currency schema is a string', 'string' === $save['currency']['type'] );
+check( 'currency accepts a 3-letter code', true === rest_validate_value_from_schema( 'IRR', $save['currency'], 'currency' ) );
+check( 'currency rejects a number', is_wp_error( rest_validate_value_from_schema( 123, $save['currency'], 'currency' ) ) );
+
 check( 'default_goal_behavior schema enum', isset( $save['default_goal_behavior']['enum'] ) );
 check( 'invalid behavior rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['default_goal_behavior'], 'default_goal_behavior' ) ) );
 check( 'valid behavior accepted', true === rest_validate_value_from_schema( 'closest', $save['default_goal_behavior'], 'default_goal_behavior' ) );
@@ -233,8 +238,10 @@ $wpdb = $GLOBALS['wpdb'];
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/settings' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
 	$req->set_param( 'currency_display', 'bogus' );
+	$req->set_param( 'currency', 'irt' );
+	$req->set_param( 'currency_invalid', 'bogus!' );
 	$req->set_param( 'default_goal_behavior', 'bogus' );
 	$req->set_param( 'conflict_resolution', 'bogus' );
 	$req->set_param( 'calculation_mode', 'bogus' );
@@ -255,6 +262,14 @@ try {
 
 	$resp = $settings_ctrl->handle_save( $req );
 	$data = $resp->get_data()['data'];
+
+	check( 'lowercase currency normalized to uppercase', 'IRT' === $data['currency'] );
+
+	// A malformed currency code falls back to '' (store currency).
+	$req2 = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
+	$req2->set_param( 'currency', 'bogus!' );
+	$resp2 = $settings_ctrl->handle_save( $req2 );
+	check( 'invalid currency code falls back to store currency', '' === $resp2->get_data()['data']['currency'] );
 
 	check( 'invalid currency falls back to symbol', 'symbol' === $data['currency_display'] );
 	check( 'invalid behavior falls back to all', 'all' === $data['default_goal_behavior'] );
@@ -427,11 +442,11 @@ $settings->set( 'frontend_locations', array( 'cart', 'checkout' ) );
 check( 'locations follow the setting', array( 'cart', 'checkout' ) === $ui->locations() );
 check( 'sticky gated off with location', false === in_array( 'sticky', $ui->locations(), true ) );
 
-add_filter( 'goalcart_frontend_locations', function () {
+add_filter( 'faracart_frontend_locations', function () {
 	return array( 'shop' );
 } );
 check( 'locations filter overrides', array( 'shop' ) === $ui->locations() );
-remove_all_filters( 'goalcart_frontend_locations' );
+remove_all_filters( 'faracart_frontend_locations' );
 
 $settings->set( 'frontend_locations', array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ) );
 check( 'sticky location back on', true === in_array( 'sticky', $ui->locations(), true ) );	// Deterministic baseline: the stored option may already hold non-default
@@ -455,12 +470,33 @@ check( 'admin boot currencyDisplay follows setting', 'code' === ( new AssetLoade
 check( 'mobile follows setting', 'hide' === $config['mobile'] );
 $settings->set_many( $all_before );
 
+// The resolved display currency (Settings::currency()) is the single
+// source of truth: '' follows the store currency, a configured code
+// overrides it everywhere — boot data, frontend config and payloads.
+$store_currency = function_exists( 'get_woocommerce_currency' ) ? (string) get_woocommerce_currency() : 'USD';
+$settings->set( 'currency', '' );
+check( 'currency resolver follows the store currency', $store_currency === $settings->currency() );
+
+add_filter( 'faracart_currency', function () {
+	return 'XYZ';
+} );
+check( 'currency filter can pin the display unit', 'XYZ' === $settings->currency() );
+remove_all_filters( 'faracart_currency' );
+
+$settings->set( 'currency', 'irt' );
+check( 'currency resolver uppercases the override', 'IRT' === $settings->currency() );
+check( 'boot currency follows the override', 'IRT' === ( new AssetLoader( $settings ) )->boot_data()['currency'] );
+check( 'frontend config currency follows the override', 'IRT' === $ui->frontend_config()['currency'] );
+
+$settings->set( 'currency', '' );
+check( 'boot currency follows the store currency again', $store_currency === ( new AssetLoader( $settings ) )->boot_data()['currency'] );
+
 // ---------------------------------------------------------------------------
 // 5. Goal behavior + progress caching (P18-T01 / P18-T04)
 // ---------------------------------------------------------------------------
 echo "\n== 5. Goal behavior & caching (rolled back) ==\n";
 
-$goals_table = \GoalCart\Database\Schema::table( 'goals' );
+$goals_table = \FaraCart\Database\Schema::table( 'goals' );
 $goals_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
 $wpdb->query( 'START TRANSACTION' );
 
@@ -510,7 +546,7 @@ try {
 	$cart = WC()->cart;
 	$cart->cart_contents['st1'] = cart_line( 'st1', 0, 0, 2, 200.0, 200.0 );
 
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/progress' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/progress' );
 
 	// 'all' (default): both goals in the payload.
 	$settings->set( 'default_goal_behavior', 'all' );
@@ -551,8 +587,8 @@ try {
 	// another shopper's counts (the container's CompletionService resolves
 	// the same anonymous session the controller reads).
 	$context = $ci->context( $cart );
-	$identity = $container->get( \GoalCart\Goals\CompletionService::class )->context_identity( $context );
-	$cache_key = 'goalcart_progress_' . md5( wp_json_encode( array(
+	$identity = $container->get( \FaraCart\Goals\CompletionService::class )->context_identity( $context );
+	$cache_key = 'faracart_progress_' . md5( wp_json_encode( array(
 		'ctx'         => array(
 			$context->subtotal(),
 			$context->total(),
@@ -652,13 +688,13 @@ $wpdb->query( 'START TRANSACTION' );	try {
 	$shaped = $frontend->shape_goal( $goal, $result, $ctx );
 	check( 'suggestions gated off by setting', array() === $shaped['suggestions'] );
 
-	add_filter( 'goalcart_suggestions_enabled', '__return_true' );
+	add_filter( 'faracart_suggestions_enabled', '__return_true' );
 	$shaped = $frontend->shape_goal( $goal, $result, $ctx );
 	$suggestion_ids = array_map( function ( $item ) {
 		return (int) $item['id'];
 	}, $shaped['suggestions'] );
 	check( 'suggestions filter overrides the setting', ! empty( $suggestion_ids ) && $product_id === $suggestion_ids[0] );
-	remove_all_filters( 'goalcart_suggestions_enabled' );
+	remove_all_filters( 'faracart_suggestions_enabled' );
 
 	$settings->set( 'performance_suggestions', true );
 } finally {
@@ -678,17 +714,17 @@ $settings->set_many( $all_before );
 // ---------------------------------------------------------------------------
 echo "\n== 7. Developer hooks meta ==\n";
 
-$resp = $settings_ctrl->handle_get( new \WP_REST_Request( 'GET', '/goalcart/v1/settings' ) );
+$resp = $settings_ctrl->handle_get( new \WP_REST_Request( 'GET', '/faracart/v1/settings' ) );
 $data = $resp->get_data();
 
 check( 'GET meta carries hooks', isset( $data['meta']['hooks'] ) && is_array( $data['meta']['hooks'] ) );
 check( 'hooks reference is non-empty', count( $data['meta']['hooks'] ) > 0 );
 
 $hooks = array_column( $data['meta']['hooks'], 'hook' );
-check( 'suggestions_enabled hook documented', in_array( 'goalcart_suggestions_enabled', $hooks, true ) );
-check( 'default_calculation_mode hook documented', in_array( 'goalcart_default_calculation_mode', $hooks, true ) );
-check( 'frontend_mobile hook documented', in_array( 'goalcart_frontend_mobile', $hooks, true ) );
-check( 'settings_saved action documented', in_array( 'goalcart_settings_saved', $hooks, true ) );
+check( 'suggestions_enabled hook documented', in_array( 'faracart_suggestions_enabled', $hooks, true ) );
+check( 'default_calculation_mode hook documented', in_array( 'faracart_default_calculation_mode', $hooks, true ) );
+check( 'frontend_mobile hook documented', in_array( 'faracart_frontend_mobile', $hooks, true ) );
+check( 'settings_saved action documented', in_array( 'faracart_settings_saved', $hooks, true ) );
 check( 'log path absent when logging off', ! isset( $data['meta']['log_path'] ) );
 
 // ---------------------------------------------------------------------------
@@ -730,8 +766,8 @@ $content = (string) file_get_contents( $log );
 check( 'debug level written with debug mode', false !== strpos( $content, 'settings-test-debug2' ) );
 
 // Log path is surfaced in the settings meta while logging is on.
-$resp = $settings_ctrl->handle_get( new \WP_REST_Request( 'GET', '/goalcart/v1/settings' ) );
-check( 'log path in meta when logging on', isset( $resp->get_data()['meta']['log_path'] ) && false !== strpos( $resp->get_data()['meta']['log_path'], 'goalcart-debug.log' ) );
+$resp = $settings_ctrl->handle_get( new \WP_REST_Request( 'GET', '/faracart/v1/settings' ) );
+check( 'log path in meta when logging on', isset( $resp->get_data()['meta']['log_path'] ) && false !== strpos( $resp->get_data()['meta']['log_path'], 'faracart-debug.log' ) );
 
 // Restore the option to its top-of-test state and remove the log file;
 // drop the caches again so the restored value is visible.

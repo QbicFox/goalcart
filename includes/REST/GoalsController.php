@@ -2,16 +2,16 @@
 /**
  * REST controller for goal management.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Rewards\Reward;
-use GoalCart\Templates\TemplateEngine;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Rewards\Reward;
+use FaraCart\Templates\TemplateEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,13 +19,13 @@ defined( 'ABSPATH' ) || exit;
  * Class GoalsController
  *	 * Phase 7 (REST API / AJAX Layer) admin endpoints for goals:
 	 *
-	 *  - `GET    /goalcart/v1/goals`                 — paginated list (status
+	 *  - `GET    /faracart/v1/goals`                 — paginated list (status
 	 *    filter + name search)
-	 *  - `GET    /goalcart/v1/goals/{id}`            — goal details
-	 *  - `POST   /goalcart/v1/goals`                 — create a goal
-	 *  - `PUT    /goalcart/v1/goals/{id}`            — update a goal
-	 *  - `DELETE /goalcart/v1/goals/{id}`            — delete a goal
-	 *  - `POST   /goalcart/v1/goals/{id}/duplicate`  — duplicate a goal
+	 *  - `GET    /faracart/v1/goals/{id}`            — goal details
+	 *  - `POST   /faracart/v1/goals`                 — create a goal
+	 *  - `PUT    /faracart/v1/goals/{id}`            — update a goal
+	 *  - `DELETE /faracart/v1/goals/{id}`            — delete a goal
+	 *  - `POST   /faracart/v1/goals/{id}/duplicate`  — duplicate a goal
 	 *
 	 * Every route is admin-only (manage_options, P07-T04) and every input is
  * validated/sanitized through the REST arg schemas before the repository
@@ -68,7 +68,7 @@ class GoalsController extends BaseController {
 	 */
 	protected function templates() {
 		if ( null === $this->templates ) {
-			$this->templates = \GoalCart\Plugin::instance()->container()->get( TemplateEngine::class );
+			$this->templates = \FaraCart\Plugin::instance()->container()->get( TemplateEngine::class );
 		}
 
 		return $this->templates;
@@ -198,8 +198,8 @@ class GoalsController extends BaseController {
 
 		if ( null === $row ) {
 			return $this->error(
-				'goalcart_goal_not_found',
-				__( 'The goal could not be found.', 'goalcart' ),
+				'faracart_goal_not_found',
+				__( 'The goal could not be found.', 'faracart' ),
 				404
 			);
 		}
@@ -218,8 +218,8 @@ class GoalsController extends BaseController {
 
 		if ( ! $goal_id ) {
 			return $this->error(
-				'goalcart_goal_create_failed',
-				__( 'The goal could not be created.', 'goalcart' ),
+				'faracart_goal_create_failed',
+				__( 'The goal could not be created.', 'faracart' ),
 				500
 			);
 		}
@@ -239,16 +239,16 @@ class GoalsController extends BaseController {
 
 		if ( null === $row ) {
 			return $this->error(
-				'goalcart_goal_not_found',
-				__( 'The goal could not be found.', 'goalcart' ),
+				'faracart_goal_not_found',
+				__( 'The goal could not be found.', 'faracart' ),
 				404
 			);
 		}
 
 		if ( ! $this->goals->update( $goal_id, $request->get_params() ) ) {
 			return $this->error(
-				'goalcart_goal_update_failed',
-				__( 'The goal could not be updated.', 'goalcart' ),
+				'faracart_goal_update_failed',
+				__( 'The goal could not be updated.', 'faracart' ),
 				500
 			);
 		}
@@ -267,16 +267,16 @@ class GoalsController extends BaseController {
 
 		if ( null === $this->goals->get( $goal_id ) ) {
 			return $this->error(
-				'goalcart_goal_not_found',
-				__( 'The goal could not be found.', 'goalcart' ),
+				'faracart_goal_not_found',
+				__( 'The goal could not be found.', 'faracart' ),
 				404
 			);
 		}
 
 		if ( ! $this->goals->delete( $goal_id ) ) {
 			return $this->error(
-				'goalcart_goal_delete_failed',
-				__( 'The goal could not be deleted.', 'goalcart' ),
+				'faracart_goal_delete_failed',
+				__( 'The goal could not be deleted.', 'faracart' ),
 				500
 			);
 		}
@@ -300,8 +300,8 @@ class GoalsController extends BaseController {
 
 		if ( null === $this->goals->get( $goal_id ) ) {
 			return $this->error(
-				'goalcart_goal_not_found',
-				__( 'The goal could not be found.', 'goalcart' ),
+				'faracart_goal_not_found',
+				__( 'The goal could not be found.', 'faracart' ),
 				404
 			);
 		}
@@ -310,8 +310,8 @@ class GoalsController extends BaseController {
 
 		if ( ! $copy_id ) {
 			return $this->error(
-				'goalcart_goal_duplicate_failed',
-				__( 'The goal could not be duplicated.', 'goalcart' ),
+				'faracart_goal_duplicate_failed',
+				__( 'The goal could not be duplicated.', 'faracart' ),
 				500
 			);
 		}
@@ -689,7 +689,7 @@ class GoalsController extends BaseController {
 
 		global $wpdb;
 
-		$table = \GoalCart\Database\Schema::table( 'campaigns' );
+		$table = \FaraCart\Database\Schema::table( 'campaigns' );
 
 		$exists = $wpdb->get_var(
 			$wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE id = %d", $campaign_id )

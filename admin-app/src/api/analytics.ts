@@ -1,7 +1,7 @@
 import { apiFetch } from './client';
 import type { AnalyticsPayload } from '../types';
 
-/** Filters accepted by `GET /goalcart/v1/analytics` (Phase 17). */
+/** Filters accepted by `GET /faracart/v1/analytics` (Phase 17). */
 export interface AnalyticsParams {
   from?: string;
   to?: string;
@@ -13,7 +13,7 @@ export interface AnalyticsParams {
 }
 
 /**
- * Fetch the analytics dashboard payload from `GET /goalcart/v1/analytics`.
+ * Fetch the analytics dashboard payload from `GET /faracart/v1/analytics`.
  *
  * Sends the active date range plus any campaign / goal / reward / product
  * filters; the backend responds with the summary KPIs, the daily trend

@@ -2,10 +2,10 @@
 /**
  * Environment compatibility checks for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart;
+namespace FaraCart;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -131,7 +131,7 @@ class Compatibility {
 		if ( ! self::is_wordpress_compatible() ) {
 			$problems[] = sprintf(
 				/* translators: 1: required WordPress version, 2: current WordPress version. */
-				__( 'WordPress %1$s or newer is required (current: %2$s).', 'goalcart' ),
+				__( 'WordPress %1$s or newer is required (current: %2$s).', 'faracart' ),
 				self::REQUIRED_WP,
 				isset( $GLOBALS['wp_version'] ) ? $GLOBALS['wp_version'] : '?'
 			);
@@ -140,18 +140,18 @@ class Compatibility {
 		if ( ! self::is_php_compatible() ) {
 			$problems[] = sprintf(
 				/* translators: 1: required PHP version, 2: current PHP version. */
-				__( 'PHP %1$s or newer is required (current: %2$s).', 'goalcart' ),
+				__( 'PHP %1$s or newer is required (current: %2$s).', 'faracart' ),
 				self::REQUIRED_PHP,
 				PHP_VERSION
 			);
 		}
 
 		if ( ! self::is_woocommerce_active() ) {
-			$problems[] = __( 'WooCommerce must be installed and activated.', 'goalcart' );
+			$problems[] = __( 'WooCommerce must be installed and activated.', 'faracart' );
 		} elseif ( ! self::is_woocommerce_compatible() ) {
 			$problems[] = sprintf(
 				/* translators: 1: required WooCommerce version, 2: current WooCommerce version. */
-				__( 'WooCommerce %1$s or newer is required (current: %2$s).', 'goalcart' ),
+				__( 'WooCommerce %1$s or newer is required (current: %2$s).', 'faracart' ),
 				self::REQUIRED_WC,
 				defined( 'WC_VERSION' ) ? WC_VERSION : '?'
 			);
@@ -168,8 +168,8 @@ class Compatibility {
 		}
 
 		printf(
-			'<div class="notice notice-error goalcart-compat-notice"><p><strong>%1$s</strong></p><ul>%2$s</ul></div>',
-			esc_html__( 'FaraCart is inactive because the site does not meet its requirements:', 'goalcart' ),
+			'<div class="notice notice-error faracart-compat-notice"><p><strong>%1$s</strong></p><ul>%2$s</ul></div>',
+			esc_html__( 'FaraCart is inactive because the site does not meet its requirements:', 'faracart' ),
 			$list // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each item is escaped above.
 		);
 	}

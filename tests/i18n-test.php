@@ -6,14 +6,14 @@
  *
  *  - plugin header contract (Text Domain + Domain Path) and the text
  *    domain loaded on `init` via load_plugin_textdomain
- *  - the POT pipeline: languages/goalcart.pot exists, carries the
+ *  - the POT pipeline: languages/faracart.pot exists, carries the
  *    standard headers, contains sampled PHP + admin React strings, and
  *    is in sync with the source (`php bin/extract-pot.php --check`)
  *  - no hard-coded Persian/Arabic characters anywhere in PHP/TS/JS
  *    source (Persian is supported through locale-aware formatting and
  *    translation files, never through hard-coded strings)
  *  - every WordPress translation call in PHP and the admin React app
- *    passes the `goalcart` text domain
+ *    passes the `faracart` text domain
  *  - the storefront config carries the site locale and isRtl, and the
  *    storefront JS formats with the site locale via Intl (Persian
  *    digits for fa_IR)
@@ -24,7 +24,7 @@
  *    admin handle
  *  - the PO → MO + JED build pipeline (bin/build-i18n.php) produces a
  *    valid gettext MO (magic bytes) and a JED JSON for the admin handle
- *  - the shipped languages/goalcart-fa_IR.po covers the key storefront
+ *  - the shipped languages/faracart-fa_IR.po covers the key storefront
  *    strings AND every admin-dashboard string referenced from the POT
  *    (admin-app/src), the compiled .mo/.json artifacts exist, and the
  *    strings resolve to Persian end-to-end through WP's just-in-time
@@ -60,8 +60,8 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Frontend\ProgressUI;
-use GoalCart\Settings\Settings;
+use FaraCart\Frontend\ProgressUI;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -121,15 +121,15 @@ function admin_sources( $root ) {
 echo "\n== 1. Text domain ==\n";
 
 $header = read_source( $root . '/ravis-faracart.php' );
-check( 'plugin header declares Text Domain: goalcart', false !== strpos( $header, 'Text Domain:       goalcart' ) );
+check( 'plugin header declares Text Domain: faracart', false !== strpos( $header, 'Text Domain:       faracart' ) );
 check( 'plugin header declares Domain Path: /languages', false !== strpos( $header, 'Domain Path:       /languages' ) );
 check( 'languages directory exists', is_dir( $root . '/languages' ) );
-check( 'load_textdomain hooked on init', false !== has_action( 'init', array( GoalCart\Plugin::instance(), 'load_textdomain' ) ) );
+check( 'load_textdomain hooked on init', false !== has_action( 'init', array( FaraCart\Plugin::instance(), 'load_textdomain' ) ) );
 
 $plugin_src = read_source( $root . '/includes/Plugin.php' );
 check(
 	'load_plugin_textdomain uses the languages path',
-	false !== strpos( $plugin_src, "load_plugin_textdomain( 'goalcart', false, dirname( GOALCART_BASENAME ) . '/languages' )" )
+	false !== strpos( $plugin_src, "load_plugin_textdomain( 'faracart', false, dirname( FARACART_BASENAME ) . '/languages' )" )
 );
 
 // ---------------------------------------------------------------------------
@@ -137,8 +137,8 @@ check(
 // ---------------------------------------------------------------------------
 echo "\n== 1b. fa_IR storefront translation ==\n";
 
-$fa_po       = read_source( $root . '/languages/goalcart-fa_IR.po' );
-$fa_jed      = read_source( $root . '/languages/goalcart-fa_IR-goalcart-admin.json' );
+$fa_po       = read_source( $root . '/languages/faracart-fa_IR.po' );
+$fa_jed      = read_source( $root . '/languages/faracart-fa_IR-faracart-admin.json' );
 $fa_expected = array(
 	'Free shipping'                            => 'ارسال رایگان',
 	'Percentage discount'                      => 'تخفیف درصدی',
@@ -150,7 +150,7 @@ $fa_expected = array(
 	'Only {remaining} left to reach your goal' => 'تنها {remaining} تا رسیدن به هدف شما باقی مانده است',
 );
 
-check( 'fa_IR .po exists', is_file( $root . '/languages/goalcart-fa_IR.po' ) );
+check( 'fa_IR .po exists', is_file( $root . '/languages/faracart-fa_IR.po' ) );
 
 $fa_in_po = 0;
 foreach ( $fa_expected as $msgid => $msgstr ) {
@@ -160,8 +160,8 @@ foreach ( $fa_expected as $msgid => $msgstr ) {
 }
 check( 'fa_IR .po carries all key storefront translations', count( $fa_expected ) === $fa_in_po );
 
-check( 'fa_IR .mo built artifact exists', is_file( $root . '/languages/goalcart-fa_IR.mo' ) );
-check( 'fa_IR admin JED exists for the admin handle', is_file( $root . '/languages/goalcart-fa_IR-goalcart-admin.json' ) );
+check( 'fa_IR .mo built artifact exists', is_file( $root . '/languages/faracart-fa_IR.mo' ) );
+check( 'fa_IR admin JED exists for the admin handle', is_file( $root . '/languages/faracart-fa_IR-faracart-admin.json' ) );
 check( 'fa_IR admin JED carries Persian translations', false !== strpos( $fa_jed, 'ارسال رایگان' ) );
 
 // End-to-end: switch to fa_IR, re-register the custom path exactly as `init`
@@ -169,13 +169,13 @@ check( 'fa_IR admin JED carries Persian translations', false !== strpos( $fa_jed
 // NOTE: do not call unload_textdomain() first -- since WP 6.5 the JIT loader
 // permanently short-circuits for domains marked unloaded ($l10n_unloaded).
 // Defensively clear the flag so this section stays order-independent.
-unset( $GLOBALS['l10n_unloaded']['goalcart'] );
+unset( $GLOBALS['l10n_unloaded']['faracart'] );
 switch_to_locale( 'fa_IR' );
-GoalCart\Plugin::instance()->load_textdomain();
+FaraCart\Plugin::instance()->load_textdomain();
 
 $fa_jit_fail = 0;
 foreach ( $fa_expected as $msgid => $msgstr ) {
-	if ( __( $msgid, 'goalcart' ) !== $msgstr ) {
+	if ( __( $msgid, 'faracart' ) !== $msgstr ) {
 		$fa_jit_fail++;
 	}
 }
@@ -185,7 +185,7 @@ restore_previous_locale();
 
 // Every admin-dashboard string in the POT must carry a non-empty Persian
 // translation, and the .po must never hold duplicate msgids.
-$pot_all      = read_source( $root . '/languages/goalcart.pot' );
+$pot_all      = read_source( $root . '/languages/faracart.pot' );
 $po_msgstr    = array();
 $po_msgid_raw = array();
 
@@ -232,11 +232,11 @@ check( 'fa_IR admin JED carries dashboard labels', false !== strpos( $fa_jed, '�
 // ---------------------------------------------------------------------------
 echo "\n== 2. POT generation ==\n";
 
-$pot = read_source( $root . '/languages/goalcart.pot' );
-check( 'POT file exists', is_file( $root . '/languages/goalcart.pot' ) );
+$pot = read_source( $root . '/languages/faracart.pot' );
+check( 'POT file exists', is_file( $root . '/languages/faracart.pot' ) );
 check( 'POT declares Content-Type charset UTF-8', false !== strpos( $pot, 'Content-Type: text/plain; charset=UTF-8' ) );
 check( 'POT declares Plural-Forms', false !== strpos( $pot, 'Plural-Forms: nplurals=2; plural=(n != 1);' ) );
-check( 'POT declares X-Domain goalcart', false !== strpos( $pot, 'X-Domain: goalcart' ) );
+check( 'POT declares X-Domain faracart', false !== strpos( $pot, 'X-Domain: faracart' ) );
 
 foreach ( array(
 	'PHP string sampled'       => 'The goal could not be found.',
@@ -283,7 +283,7 @@ foreach ( $scan_paths as $path ) {
 check( 'no Persian/Arabic characters in PHP/TS/JS source', empty( $persian_hits ) );
 
 // ---------------------------------------------------------------------------
-// 4. Every translation call carries the goalcart domain
+// 4. Every translation call carries the faracart domain
 // ---------------------------------------------------------------------------
 echo "\n== 4. Translation calls use the text domain ==\n";
 
@@ -300,7 +300,7 @@ foreach ( array_merge( php_files( $root ), admin_sources( $root ) ) as $path ) {
 	foreach ( $matches[0] as $match ) {
 		$tail = substr( $source, $match[1], 400 );
 
-		if ( false === strpos( $tail, "'goalcart'" ) && false === strpos( $tail, '"goalcart"' ) ) {
+		if ( false === strpos( $tail, "'faracart'" ) && false === strpos( $tail, '"faracart"' ) ) {
 			$line = substr_count( substr( $source, 0, $match[1] ), "\n" ) + 1;
 			$domainless[] = str_replace( $root, '', $path ) . ':' . $line;
 		}
@@ -361,7 +361,7 @@ $analytics_src = read_source( $root . '/admin-app/src/routes/Analytics.tsx' );
 check( 'analytics formats via Intl.DateTimeFormat', false !== strpos( $analytics_src, 'Intl.DateTimeFormat' ) && false !== strpos( $analytics_src, 'boot.locale' ) );
 
 $asset_src = read_source( $root . '/includes/Admin/AssetLoader.php' );
-check( 'wp_set_script_translations wired for the admin handle', false !== strpos( $asset_src, 'wp_set_script_translations' ) && false !== strpos( $asset_src, "'goalcart-admin'" ) );
+check( 'wp_set_script_translations wired for the admin handle', false !== strpos( $asset_src, 'wp_set_script_translations' ) && false !== strpos( $asset_src, "'faracart-admin'" ) );
 check( 'admin script depends on wp-i18n', false !== strpos( $asset_src, "'wp-i18n'" ) );
 
 $shim_src = read_source( $root . '/admin-app/src/lib/wp-i18n.ts' );
@@ -372,14 +372,14 @@ check( 'admin i18n shim delegates to window.wp.i18n', false !== strpos( $shim_sr
 // ---------------------------------------------------------------------------
 echo "\n== 8. Translation build pipeline ==\n";
 
-$tmp_dir = sys_get_temp_dir() . '/goalcart-i18n-' . getmypid();	try {
+$tmp_dir = sys_get_temp_dir() . '/faracart-i18n-' . getmypid();	try {
 	mkdir( $tmp_dir, 0755, true );
 
 	$po = "msgid \"\"\n"
 		. "msgstr \"\"\n"
 		. "\"Project-Id-Version: FaraCart 0.1.0\\n\"\n"
 		. "\"Plural-Forms: nplurals=2; plural=(n > 1);\\n\"\n"
-		. "\"X-Domain: goalcart\\n\"\n"
+		. "\"X-Domain: faracart\\n\"\n"
 		. "\n"
 		. "msgid \"Dashboard\"\n"
 		. "msgstr \"داشبورد\"\n"
@@ -387,14 +387,14 @@ $tmp_dir = sys_get_temp_dir() . '/goalcart-i18n-' . getmypid();	try {
 		. "msgid \"Free shipping\"\n"
 		. "msgstr \"ارسال رایگان\"\n";
 
-	file_put_contents( $tmp_dir . '/goalcart-fa_IR.po', $po );
+	file_put_contents( $tmp_dir . '/faracart-fa_IR.po', $po );
 
 	if ( function_exists( 'exec' ) ) {
 		exec( 'cd ' . escapeshellarg( $root ) . ' && php bin/build-i18n.php --dir ' . escapeshellarg( $tmp_dir ) . ' 2>&1', $build_out, $build_code );
 		check( 'build-i18n exits cleanly', 0 === $build_code );
 
-		$mo_path = $tmp_dir . '/goalcart-fa_IR.mo';
-		$jed_path = $tmp_dir . '/goalcart-fa_IR-goalcart-admin.json';
+		$mo_path = $tmp_dir . '/faracart-fa_IR.mo';
+		$jed_path = $tmp_dir . '/faracart-fa_IR-faracart-admin.json';
 
 		check( 'MO file produced', is_file( $mo_path ) );
 
@@ -403,11 +403,11 @@ $tmp_dir = sys_get_temp_dir() . '/goalcart-i18n-' . getmypid();	try {
 		check( 'MO has the gettext magic bytes', isset( $head['magic'] ) && 0x950412de === $head['magic'] );
 		check( 'MO carries header + 2 strings', isset( $head['n'] ) && 3 === $head['n'] );
 
-		check( 'JED JSON produced for the admin handle', is_file( $jed_path ) && 'goalcart-fa_IR-goalcart-admin.json' === basename( $jed_path ) );
+		check( 'JED JSON produced for the admin handle', is_file( $jed_path ) && 'faracart-fa_IR-faracart-admin.json' === basename( $jed_path ) );
 
 		$jed = json_decode( read_source( $jed_path ), true );
-		check( 'JED domain is goalcart', is_array( $jed ) && 'goalcart' === ( $jed['domain'] ?? '' ) );
-		check( 'JED carries the locale data', is_array( $jed ) && isset( $jed['locale_data']['goalcart']['Dashboard'][0] ) && 'داشبورد' === $jed['locale_data']['goalcart']['Dashboard'][0] );
+		check( 'JED domain is faracart', is_array( $jed ) && 'faracart' === ( $jed['domain'] ?? '' ) );
+		check( 'JED carries the locale data', is_array( $jed ) && isset( $jed['locale_data']['faracart']['Dashboard'][0] ) && 'داشبورد' === $jed['locale_data']['faracart']['Dashboard'][0] );
 
 		exec( 'cd ' . escapeshellarg( $root ) . ' && php bin/build-i18n.php --dir ' . escapeshellarg( $tmp_dir ) . ' --check 2>&1', $check_out, $check_code );
 		check( 'build-i18n --check passes after build', 0 === $check_code );

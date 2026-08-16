@@ -1,25 +1,25 @@
 /**
  * FaraCart storefront progress widgets (Phase 11).
  *
- * Scoped under .goalcart-widget / #goalcart-sticky so styles never leak
+ * Scoped under .faracart-widget / #faracart-sticky so styles never leak
  * into the theme. RTL-aware (logical properties), responsive, and
  * themeable through a small set of CSS custom properties (Phase 12
  * Appearance overrides the same tokens).
  *
  * Tokens:
- *   --goalcart-accent        primary bar/reward color
- *   --goalcart-bg            widget surface
- *   --goalcart-border        hairline borders
- *   --goalcart-text          primary text
- *   --goalcart-text-muted    secondary text
- *   --goalcart-radius        corner radius
- *   --goalcart-shadow        card elevation
- *   --goalcart-bar-height    progress bar thickness
+ *   --faracart-accent        primary bar/reward color
+ *   --faracart-bg            widget surface
+ *   --faracart-border        hairline borders
+ *   --faracart-text          primary text
+ *   --faracart-text-muted    secondary text
+ *   --faracart-radius        corner radius
+ *   --faracart-shadow        card elevation
+ *   --faracart-bar-height    progress bar thickness
  *
  * The six design templates (template-1 … template-6): the goal body
- * renders per the active template variant via .goalcart-template--*
- * classes, the bar reads --goalcart-bar-height, and
- * .goalcart-widget--no-anim / .goalcart-no-anim disable the fill
+ * renders per the active template variant via .faracart-template--*
+ * classes, the bar reads --faracart-bar-height, and
+ * .faracart-widget--no-anim / .faracart-no-anim disable the fill
  * transition. The Appearance settings override every token through an
  * inline style block printed by ProgressUI::appearance_css().
  *
@@ -28,46 +28,46 @@
  * the storefront JS (applyTemplateSettings) — a goal pinned to a
  * template with its own accent/bar height renders exactly that.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-.goalcart-widget,
-#goalcart-sticky {
-	--goalcart-accent: #2271b1;
-	--goalcart-bg: #ffffff;
-	--goalcart-border: #dcdcde;
-	--goalcart-text: #1d2327;
-	--goalcart-text-muted: #646970;
-	--goalcart-radius: 2px;
-	--goalcart-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-	--goalcart-track: #f0f0f1;
-	--goalcart-percent-color: #2271b1;
-	--goalcart-percent-size: 1.75rem;
-	--goalcart-dot-color: #dcdcde;
-	--goalcart-done-color: #00a32a;
-	--goalcart-connector-color: #dcdcde;
+.faracart-widget,
+#faracart-sticky {
+	--faracart-accent: #2271b1;
+	--faracart-bg: #ffffff;
+	--faracart-border: #dcdcde;
+	--faracart-text: #1d2327;
+	--faracart-text-muted: #646970;
+	--faracart-radius: 2px;
+	--faracart-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+	--faracart-track: #f0f0f1;
+	--faracart-percent-color: #2271b1;
+	--faracart-percent-size: 1.75rem;
+	--faracart-dot-color: #dcdcde;
+	--faracart-done-color: #00a32a;
+	--faracart-connector-color: #dcdcde;
 	/* Design-template tokens (the six progress templates). */
-	--goalcart-progress-color: #f97316;
-	--goalcart-button-bg: #f97316;
-	--goalcart-button-text: #ffffff;
-	--goalcart-button-radius: 8px;
-	--goalcart-icon-bg: #ffedd5;
-	--goalcart-icon-color: #f97316;
-	--goalcart-header-bg: #2563eb;
-	--goalcart-ring-size: 100px;
-	--goalcart-ring-stroke: 8px;
-	--goalcart-product-image: 40px;
-	--goalcart-shadow-intensity: 16px;
+	--faracart-progress-color: #f97316;
+	--faracart-button-bg: #f97316;
+	--faracart-button-text: #ffffff;
+	--faracart-button-radius: 8px;
+	--faracart-icon-bg: #ffedd5;
+	--faracart-icon-color: #f97316;
+	--faracart-header-bg: #2563eb;
+	--faracart-ring-size: 100px;
+	--faracart-ring-stroke: 8px;
+	--faracart-product-image: 40px;
+	--faracart-shadow-intensity: 16px;
 
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 	font-family: inherit;
 	font-size: 14px;
 	line-height: 1.5;
 	box-sizing: border-box;
 }
 
-.goalcart-widget *,
-#goalcart-sticky * {
+.faracart-widget *,
+#faracart-sticky * {
 	box-sizing: border-box;
 }
 
@@ -75,42 +75,42 @@
  * GoalContainer
  * ------------------------------------------------------------------ */
 
-.goalcart-widget {
+.faracart-widget {
 	width: 100%;
 	max-width: 640px;
 	margin: 0 auto;
 }
 
-.goalcart-widget--full {
+.faracart-widget--full {
 	margin-block: 1.5rem;
 }
 
-.goalcart-widget--compact {
+.faracart-widget--compact {
 	margin-block: 0.75rem;
 }
 
 /* The stacked goal-card list: every eligible goal renders as its own
  * card, one under the other, instead of one featured card + a ladder. */
 
-.goalcart-widget__goals {
+.faracart-widget__goals {
 	display: flex;
 	flex-direction: column;
 	gap: 1rem;
 }
 
-.goalcart-widget--compact .goalcart-widget__goals {
+.faracart-widget--compact .faracart-widget__goals {
 	gap: 0.625rem;
 }
 
-.goalcart-card {
-	background: var(--goalcart-bg);
-	border: 1px solid var(--goalcart-border);
-	border-radius: var(--goalcart-radius);
-	box-shadow: var(--goalcart-shadow);
+.faracart-card {
+	background: var(--faracart-bg);
+	border: 1px solid var(--faracart-border);
+	border-radius: var(--faracart-radius);
+	box-shadow: var(--faracart-shadow);
 	padding: 1rem 1.125rem;
 }
 
-.goalcart-widget--empty {
+.faracart-widget--empty {
 	display: none;
 }
 
@@ -118,19 +118,19 @@
  * payload after an AJAX cart mutation they dim subtly (never blank or
  * flash). The sticky bar uses the same class on its container. */
 
-.goalcart-widget--updating .goalcart-widget__goals,
-#goalcart-sticky.goalcart-widget--updating .goalcart-sticky__inner {
+.faracart-widget--updating .faracart-widget__goals,
+#faracart-sticky.faracart-widget--updating .faracart-sticky__inner {
 	opacity: 0.7;
 	transition: opacity 0.15s ease;
 }
 
 /* Phase 18 (Settings → Frontend → mobile behavior = hide). */
 
-.goalcart-widget--mobile-hidden {
+.faracart-widget--mobile-hidden {
 	display: none;
 }
 
-.goalcart-card__head {
+.faracart-card__head {
 	display: flex;
 	justify-content: flex-end;
 	margin-block-end: 0.5rem;
@@ -140,26 +140,26 @@
  * ProgressBar
  * ------------------------------------------------------------------ */
 
-.goalcart-progress {
+.faracart-progress {
 	position: relative;
-	height: var(--goalcart-bar-height, 10px);
-	background: var(--goalcart-track);
+	height: var(--faracart-bar-height, 10px);
+	background: var(--faracart-track);
 	border-radius: 999px;
 	overflow: hidden;
 }
 
-.goalcart-progress__fill {
+.faracart-progress__fill {
 	position: absolute;
 	inset-inline-start: 0;
 	inset-block-start: 0;
 	height: 100%;
 	width: 0;
-	background: var(--goalcart-accent);
+	background: var(--faracart-accent);
 	border-radius: inherit;
 	transition: width 0.45s ease;
 }
 
-.goalcart-progress--complete .goalcart-progress__fill {
+.faracart-progress--complete .faracart-progress__fill {
 	background: #00a32a;
 }
 
@@ -170,7 +170,7 @@
 /* The shared icon glyph inside template bodies (goal emoji/dashicon
  * text, or the template fallback). */
 
-.goalcart-tpl-icon {
+.faracart-tpl-icon {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -180,13 +180,13 @@
 
 /* The shared CTA anchor — full-width, styled per template below. */
 
-.goalcart-cta {
+.faracart-cta {
 	display: block;
 	width: 100%;
 	box-sizing: border-box;
 	margin-block-start: 0.75rem;
 	padding: 0.625rem 1rem;
-	border-radius: var(--goalcart-button-radius, 8px);
+	border-radius: var(--faracart-button-radius, 8px);
 	font-size: 14px;
 	font-weight: 700;
 	text-align: center;
@@ -194,8 +194,8 @@
 	transition: opacity 0.2s ease;
 }
 
-.goalcart-cta:hover,
-.goalcart-cta:focus-visible {
+.faracart-cta:hover,
+.faracart-cta:focus-visible {
 	opacity: 0.9;
 }
 
@@ -203,7 +203,7 @@
  * Template 1 — Classic Progress Card (Concept 01)
  * ------------------------------------------------------------------ */
 
-.goalcart-t1__head {
+.faracart-t1__head {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
@@ -211,44 +211,44 @@
 	margin-block-end: 0.75rem;
 }
 
-.goalcart-t1__head-main {
+.faracart-t1__head-main {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
 	min-width: 0;
 }
 
-.goalcart-t1__head-main .goalcart-tpl-icon {
+.faracart-t1__head-main .faracart-tpl-icon {
 	width: 36px;
 	height: 36px;
 	border-radius: 50%;
-	background: var(--goalcart-icon-bg, #ffedd5);
-	color: var(--goalcart-icon-color, var(--goalcart-accent));
+	background: var(--faracart-icon-bg, #ffedd5);
+	color: var(--faracart-icon-color, var(--faracart-accent));
 	font-size: 14px;
 }
 
-.goalcart-t1__head-text {
+.faracart-t1__head-text {
 	display: flex;
 	flex-direction: column;
 	min-width: 0;
 }
 
-.goalcart-t1__label {
+.faracart-t1__label {
 	font-size: 12px;
 	font-weight: 500;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-t1__title {
+.faracart-t1__title {
 	font-size: 14px;
 	font-weight: 700;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.goalcart-t1__percent {
+.faracart-t1__percent {
 	display: inline-flex;
 	align-items: center;
 	flex-shrink: 0;
@@ -257,16 +257,16 @@
 	font-size: 12px;
 	font-weight: 700;
 	font-variant-numeric: tabular-nums;
-	color: var(--goalcart-accent);
-	background: color-mix( in srgb, var(--goalcart-accent) 8%, transparent );
-	border: 1px solid color-mix( in srgb, var(--goalcart-accent) 15%, transparent );
+	color: var(--faracart-accent);
+	background: color-mix( in srgb, var(--faracart-accent) 8%, transparent );
+	border: 1px solid color-mix( in srgb, var(--faracart-accent) 15%, transparent );
 }
 
-.goalcart-template--template-1 .goalcart-progress {
+.faracart-template--template-1 .faracart-progress {
 	margin-block-start: 0;
 }
 
-.goalcart-t1__amounts {
+.faracart-t1__amounts {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -275,38 +275,38 @@
 	font-size: 12px;
 }
 
-.goalcart-t1__current {
-	color: var(--goalcart-text-muted);
+.faracart-t1__current {
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-t1__remaining {
+.faracart-t1__remaining {
 	font-weight: 600;
-	color: var(--goalcart-accent);
+	color: var(--faracart-accent);
 	white-space: nowrap;
 }
 
-.goalcart-t1__cta {
-	background: var(--goalcart-button-bg, var(--goalcart-accent));
-	color: var(--goalcart-button-text, #ffffff);
+.faracart-t1__cta {
+	background: var(--faracart-button-bg, var(--faracart-accent));
+	color: var(--faracart-button-text, #ffffff);
 }
 
 /* Completed state: green success card with a check. */
 
-.goalcart-t1--done .goalcart-t1__done {
+.faracart-t1--done .faracart-t1__done {
 	padding: 0.75rem 1rem;
 	border-radius: 0.75rem;
 	background: #f0fdf4;
 	border: 1px solid #bbf7d0;
 }
 
-.goalcart-t1__done-row {
+.faracart-t1__done-row {
 	display: flex;
 	align-items: center;
 	gap: 0.625rem;
 	margin-block-end: 0.5rem;
 }
 
-.goalcart-t1--done .goalcart-tpl-icon {
+.faracart-t1--done .faracart-tpl-icon {
 	width: 36px;
 	height: 36px;
 	border-radius: 50%;
@@ -315,41 +315,41 @@
 	font-size: 14px;
 }
 
-.goalcart-t1__done-info {
+.faracart-t1__done-info {
 	display: flex;
 	flex-direction: column;
 }
 
-.goalcart-t1__done-label {
+.faracart-t1__done-label {
 	font-size: 12px;
 	font-weight: 500;
 	color: #16a34a;
 }
 
-.goalcart-t1__done-title {
+.faracart-t1__done-title {
 	font-size: 14px;
 	font-weight: 700;
 	color: #166534;
 }
 
-.goalcart-t1--done .goalcart-progress {
-	--goalcart-accent: #16a34a;
-	--goalcart-track: #bbf7d0;
+.faracart-t1--done .faracart-progress {
+	--faracart-accent: #16a34a;
+	--faracart-track: #bbf7d0;
 }
 
 /* Expired state: muted clock row. */
 
-.goalcart-t1--expired {
+.faracart-t1--expired {
 	opacity: 0.75;
 }
 
-.goalcart-t1__expired {
+.faracart-t1__expired {
 	display: flex;
 	align-items: center;
 	gap: 0.625rem;
 }
 
-.goalcart-t1__expired .goalcart-tpl-icon {
+.faracart-t1__expired .faracart-tpl-icon {
 	width: 36px;
 	height: 36px;
 	border-radius: 50%;
@@ -358,31 +358,31 @@
 	font-size: 14px;
 }
 
-.goalcart-t1__expired-info {
+.faracart-t1__expired-info {
 	display: flex;
 	flex-direction: column;
 	flex: 1 1 auto;
 	min-width: 0;
 }
 
-.goalcart-t1__expired-label {
+.faracart-t1__expired-label {
 	font-size: 12px;
 	font-weight: 500;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-t1__expired-title {
+.faracart-t1__expired-title {
 	font-size: 14px;
 	font-weight: 700;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-t1__expired-chip {
+.faracart-t1__expired-chip {
 	flex-shrink: 0;
 	padding: 0.125rem 0.5rem;
 	border-radius: 999px;
 	font-size: 12px;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 	background: #e5e7eb;
 }
 
@@ -392,27 +392,27 @@
 
 /* The card itself is the compact strip — keep its height small. */
 
-.goalcart-template--template-2 {
+.faracart-template--template-2 {
 	padding: 0.625rem 0.875rem;
 }
 
-.goalcart-t2 {
+.faracart-t2 {
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
 }
 
-.goalcart-t2 .goalcart-tpl-icon {
+.faracart-t2 .faracart-tpl-icon {
 	font-size: 14px;
-	color: var(--goalcart-accent);
+	color: var(--faracart-accent);
 }
 
-.goalcart-t2__body {
+.faracart-t2__body {
 	flex: 1 1 auto;
 	min-width: 0;
 }
 
-.goalcart-t2__row {
+.faracart-t2__row {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -421,69 +421,69 @@
 	font-size: 12px;
 }
 
-.goalcart-t2__title {
+.faracart-t2__title {
 	font-weight: 600;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.goalcart-t2__remaining {
+.faracart-t2__remaining {
 	font-weight: 700;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 	white-space: nowrap;
 }
 
-.goalcart-t2__done {
+.faracart-t2__done {
 	font-weight: 700;
 	color: #16a34a;
 	white-space: nowrap;
 }
 
-.goalcart-t2__cta {
+.faracart-t2__cta {
 	flex-shrink: 0;
 	margin-block-start: 0;
 	padding: 0.375rem 0.625rem;
 	font-size: 12px;
 	font-weight: 600;
-	border-radius: var(--goalcart-button-radius, 8px);
-	background: var(--goalcart-button-bg, var(--goalcart-accent));
-	color: var(--goalcart-button-text, #ffffff);
+	border-radius: var(--faracart-button-radius, 8px);
+	background: var(--faracart-button-bg, var(--faracart-accent));
+	color: var(--faracart-button-text, #ffffff);
 }
 
 /* ------------------------------------------------------------------ *
  * Template 3 — Circular Progress (Concept 03)
  * ------------------------------------------------------------------ */
 
-.goalcart-t3__row {
+.faracart-t3__row {
 	display: flex;
 	align-items: center;
 	gap: 1.25rem;
 }
 
-.goalcart-t3__ring {
+.faracart-t3__ring {
 	position: relative;
 	flex-shrink: 0;
 	max-inline-size: 100%;
 }
 
-.goalcart-t3__svg {
+.faracart-t3__svg {
 	display: block;
 	max-inline-size: 100%;
 	height: auto;
 }
 
-.goalcart-t3__fill {
+.faracart-t3__fill {
 	transition: stroke-dashoffset 0.6s ease;
 }
 
-.goalcart-widget--no-anim .goalcart-t3__fill,
-.goalcart-no-anim .goalcart-t3__fill {
+.faracart-widget--no-anim .faracart-t3__fill,
+.faracart-no-anim .faracart-t3__fill {
 	transition: none;
 }
 
-.goalcart-t3__readout {
+.faracart-t3__readout {
 	position: absolute;
 	inset: 0;
 	display: flex;
@@ -493,66 +493,66 @@
 	pointer-events: none;
 }
 
-.goalcart-t3__percent {
-	font-size: calc( var(--goalcart-ring-size, 100px) * 0.19 );
+.faracart-t3__percent {
+	font-size: calc( var(--faracart-ring-size, 100px) * 0.19 );
 	font-weight: 900;
 	line-height: 1;
 	font-variant-numeric: tabular-nums;
-	color: var(--goalcart-accent);
+	color: var(--faracart-accent);
 }
 
-.goalcart-t3__progress-label {
+.faracart-t3__progress-label {
 	margin-block-start: 0.125rem;
-	font-size: calc( var(--goalcart-ring-size, 100px) * 0.085 );
+	font-size: calc( var(--faracart-ring-size, 100px) * 0.085 );
 	font-weight: 500;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-t3__check {
+.faracart-t3__check {
 	position: absolute;
 	inset: 0;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	font-size: calc( var(--goalcart-ring-size, 100px) * 0.28 );
+	font-size: calc( var(--faracart-ring-size, 100px) * 0.28 );
 	font-weight: 900;
 	color: #059669;
 	pointer-events: none;
 }
 
-.goalcart-t3__info {
+.faracart-t3__info {
 	flex: 1 1 auto;
 	min-width: 0;
 }
 
-.goalcart-t3__title-row {
+.faracart-t3__title-row {
 	display: flex;
 	align-items: center;
 	gap: 0.375rem;
 	margin-block-end: 0.25rem;
 }
 
-.goalcart-t3__title-row .goalcart-tpl-icon {
+.faracart-t3__title-row .faracart-tpl-icon {
 	font-size: 14px;
-	color: var(--goalcart-accent);
+	color: var(--faracart-accent);
 }
 
-.goalcart-t3__title {
+.faracart-t3__title {
 	font-size: 14px;
 	font-weight: 700;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.goalcart-t3__desc {
+.faracart-t3__desc {
 	margin: 0 0 0.625rem;
 	font-size: 12px;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-t3__amount {
+.faracart-t3__amount {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -560,49 +560,49 @@
 	font-size: 12px;
 }
 
-.goalcart-t3__amount + .goalcart-t3__amount {
+.faracart-t3__amount + .faracart-t3__amount {
 	margin-block-start: 0.25rem;
 }
 
-.goalcart-t3__amount-label {
-	color: var(--goalcart-text-muted);
+.faracart-t3__amount-label {
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-t3__amount-value {
+.faracart-t3__amount-value {
 	font-weight: 700;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 }
 
-.goalcart-t3__amount-value--accent {
-	color: var(--goalcart-accent);
+.faracart-t3__amount-value--accent {
+	color: var(--faracart-accent);
 }
 
-.goalcart-t3__cta {
+.faracart-t3__cta {
 	background: transparent;
-	border: 1px solid var(--goalcart-button-bg, var(--goalcart-accent));
-	color: var(--goalcart-button-text, var(--goalcart-accent));
+	border: 1px solid var(--faracart-button-bg, var(--faracart-accent));
+	color: var(--faracart-button-text, var(--faracart-accent));
 }
 
 /* Completed circular state. */
 
-.goalcart-t3__done-row {
+.faracart-t3__done-row {
 	display: flex;
 	align-items: center;
 	gap: 1rem;
 }
 
-.goalcart-t3__done-info {
+.faracart-t3__done-info {
 	display: flex;
 	flex-direction: column;
 }
 
-.goalcart-t3__done-title {
+.faracart-t3__done-title {
 	font-size: 14px;
 	font-weight: 800;
 	color: #166534;
 }
 
-.goalcart-t3__done-sub {
+.faracart-t3__done-sub {
 	font-size: 12px;
 	color: #15803d;
 }
@@ -613,17 +613,17 @@
 
 /* Flush header: the card surface is the template's own (no card padding). */
 
-.goalcart-template--template-4 {
+.faracart-template--template-4 {
 	padding: 0;
 	overflow: hidden;
 }
 
-.goalcart-t4__header {
+.faracart-t4__header {
 	padding: 0.875rem 1rem;
 	color: #ffffff;
 }
 
-.goalcart-t4__header-row {
+.faracart-t4__header-row {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -631,7 +631,7 @@
 	margin-block-end: 0.5rem;
 }
 
-.goalcart-t4__title {
+.faracart-t4__title {
 	font-size: 12px;
 	font-weight: 700;
 	opacity: 0.9;
@@ -640,7 +640,7 @@
 	white-space: nowrap;
 }
 
-.goalcart-t4__chip {
+.faracart-t4__chip {
 	flex-shrink: 0;
 	padding: 0.125rem 0.5rem;
 	border-radius: 999px;
@@ -650,114 +650,114 @@
 	background: rgba(255, 255, 255, 0.2);
 }
 
-.goalcart-t4__header .goalcart-progress {
-	--goalcart-track: rgba(255, 255, 255, 0.25);
+.faracart-t4__header .faracart-progress {
+	--faracart-track: rgba(255, 255, 255, 0.25);
 }
 
-.goalcart-t4__header .goalcart-progress__fill {
+.faracart-t4__header .faracart-progress__fill {
 	background: #ffffff;
 }
 
-.goalcart-t4__header .goalcart-progress--complete .goalcart-progress__fill {
+.faracart-t4__header .faracart-progress--complete .faracart-progress__fill {
 	background: #ffffff;
 }
 
-.goalcart-t4__body {
+.faracart-t4__body {
 	padding: 1rem 1.125rem;
 }
 
-.goalcart-t4__heading {
+.faracart-t4__heading {
 	display: flex;
 	align-items: center;
 	gap: 0.25rem;
 	margin: 0 0 0.75rem;
 	font-size: 12px;
 	font-weight: 700;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 }
 
-.goalcart-t4__heading-icon {
+.faracart-t4__heading-icon {
 	font-size: 14px;
 	color: #eab308;
 }
 
-.goalcart-t4__empty {
+.faracart-t4__empty {
 	margin: 0;
 	font-size: 12px;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
 /* One recommended product row. */
 
-.goalcart-recommend {
+.faracart-recommend {
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
 	padding: 0.5rem 0.625rem;
 	border-radius: 0.625rem;
-	border: 1px solid var(--goalcart-border);
+	border: 1px solid var(--faracart-border);
 	transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-.goalcart-recommend + .goalcart-recommend {
+.faracart-recommend + .faracart-recommend {
 	margin-block-start: 0.375rem;
 }
 
-.goalcart-recommend:hover {
-	border-color: var(--goalcart-accent);
-	box-shadow: 0 0 0 2px color-mix( in srgb, var(--goalcart-accent) 15%, transparent );
+.faracart-recommend:hover {
+	border-color: var(--faracart-accent);
+	box-shadow: 0 0 0 2px color-mix( in srgb, var(--faracart-accent) 15%, transparent );
 	transform: translateY(-1px);
 }
 
-.goalcart-recommend__image {
-	width: var(--goalcart-product-image, 40px);
-	height: var(--goalcart-product-image, 40px);
+.faracart-recommend__image {
+	width: var(--faracart-product-image, 40px);
+	height: var(--faracart-product-image, 40px);
 	flex-shrink: 0;
 	border-radius: 0.5rem;
 	object-fit: cover;
 	background: #f3f4f6;
 }
 
-.goalcart-recommend__image--placeholder {
+.faracart-recommend__image--placeholder {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	font-size: 16px;
 }
 
-.goalcart-recommend__info {
+.faracart-recommend__info {
 	flex: 1 1 auto;
 	min-width: 0;
 	display: flex;
 	flex-direction: column;
 }
 
-.goalcart-recommend__name {
+.faracart-recommend__name {
 	font-size: 12px;
 	font-weight: 700;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 	text-decoration: none;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.goalcart-recommend__name:hover {
-	color: var(--goalcart-accent);
+.faracart-recommend__name:hover {
+	color: var(--faracart-accent);
 }
 
-.goalcart-recommend__price {
+.faracart-recommend__price {
 	font-size: 10px;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-recommend__add {
+.faracart-recommend__add {
 	flex-shrink: 0;
 	padding: 0.25rem 0.5rem;
 	border: 0;
-	border-radius: var(--goalcart-button-radius, 8px);
-	background: var(--goalcart-button-bg, var(--goalcart-accent));
-	color: var(--goalcart-button-text, #ffffff);
+	border-radius: var(--faracart-button-radius, 8px);
+	background: var(--faracart-button-bg, var(--faracart-accent));
+	color: var(--faracart-button-text, #ffffff);
 	font-size: 11px;
 	font-weight: 700;
 	line-height: 1.4;
@@ -765,12 +765,12 @@
 	transition: opacity 0.2s ease;
 }
 
-.goalcart-recommend__add:hover,
-.goalcart-recommend__add:focus-visible {
+.faracart-recommend__add:hover,
+.faracart-recommend__add:focus-visible {
 	opacity: 0.9;
 }
 
-.goalcart-recommend__add:disabled {
+.faracart-recommend__add:disabled {
 	opacity: 0.65;
 	cursor: default;
 }
@@ -779,18 +779,18 @@
  * Template 5 — Compact Floating / Sticky Goal (Concept 08)
  * ------------------------------------------------------------------ */
 
-.goalcart-t5 {
+.faracart-t5 {
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
 	padding: 0.75rem 1rem;
-	border-radius: var(--goalcart-radius);
-	border: 1px solid var(--goalcart-border);
-	background: linear-gradient( 135deg, var(--goalcart-bg), color-mix( in srgb, var(--goalcart-bg) 85%, #0f172a ) );
-	box-shadow: 0 var(--goalcart-shadow-intensity, 16px) calc( var(--goalcart-shadow-intensity, 16px) * 2 ) rgba(0, 0, 0, 0.35);
+	border-radius: var(--faracart-radius);
+	border: 1px solid var(--faracart-border);
+	background: linear-gradient( 135deg, var(--faracart-bg), color-mix( in srgb, var(--faracart-bg) 85%, #0f172a ) );
+	box-shadow: 0 var(--faracart-shadow-intensity, 16px) calc( var(--faracart-shadow-intensity, 16px) * 2 ) rgba(0, 0, 0, 0.35);
 }
 
-.goalcart-t5__badge {
+.faracart-t5__badge {
 	width: 28px;
 	height: 28px;
 	flex-shrink: 0;
@@ -798,18 +798,18 @@
 	align-items: center;
 	justify-content: center;
 	border-radius: 50%;
-	background: color-mix( in srgb, var(--goalcart-accent) 20%, transparent );
-	color: var(--goalcart-accent);
+	background: color-mix( in srgb, var(--faracart-accent) 20%, transparent );
+	color: var(--faracart-accent);
 	font-size: 13px;
 	line-height: 1;
 }
 
-.goalcart-t5__body {
+.faracart-t5__body {
 	flex: 1 1 auto;
 	min-width: 0;
 }
 
-.goalcart-t5__row {
+.faracart-t5__row {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -818,64 +818,64 @@
 	font-size: 12px;
 }
 
-.goalcart-t5__title {
+.faracart-t5__title {
 	font-weight: 600;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.goalcart-t5__remaining {
-	color: var(--goalcart-text-muted);
+.faracart-t5__remaining {
+	color: var(--faracart-text-muted);
 	white-space: nowrap;
 }
 
-.goalcart-t5__done {
+.faracart-t5__done {
 	font-weight: 700;
-	color: var(--goalcart-accent);
+	color: var(--faracart-accent);
 	white-space: nowrap;
 }
 
-.goalcart-t5__cta {
+.faracart-t5__cta {
 	flex-shrink: 0;
 	margin-block-start: 0;
 	padding: 0.375rem 0.625rem;
 	font-size: 11px;
 	font-weight: 800;
-	border-radius: var(--goalcart-button-radius, 8px);
-	background: var(--goalcart-button-bg, var(--goalcart-accent));
-	color: var(--goalcart-button-text, #0f172a);
+	border-radius: var(--faracart-button-radius, 8px);
+	background: var(--faracart-button-bg, var(--faracart-accent));
+	color: var(--faracart-button-text, #0f172a);
 }
 
 /* ------------------------------------------------------------------ *
  * Template 6 — Premium / Elegant E-commerce Style (Concept 09)
  * ------------------------------------------------------------------ */
 
-.goalcart-t6__header {
+.faracart-t6__header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	gap: 0.75rem;
 	padding-block-end: 0.625rem;
 	margin-block-end: 0.625rem;
-	border-block-end: 1px solid var(--goalcart-border);
+	border-block-end: 1px solid var(--faracart-border);
 }
 
-.goalcart-t6__header-main {
+.faracart-t6__header-main {
 	display: flex;
 	align-items: center;
 	gap: 0.5rem;
 }
 
-.goalcart-t6__rail {
+.faracart-t6__rail {
 	width: 4px;
 	height: 24px;
 	border-radius: 999px;
-	background: linear-gradient( to bottom, var(--goalcart-accent), color-mix( in srgb, var(--goalcart-accent) 60%, #000 ) );
+	background: linear-gradient( to bottom, var(--faracart-accent), color-mix( in srgb, var(--faracart-accent) 60%, #000 ) );
 }
 
-.goalcart-t6__eyebrow {
+.faracart-t6__eyebrow {
 	font-size: 11px;
 	font-weight: 700;
 	letter-spacing: 0.2em;
@@ -883,55 +883,55 @@
 	color: #9ca3af;
 }
 
-.goalcart-t6__header-icon {
+.faracart-t6__header-icon {
 	font-size: 16px;
-	color: var(--goalcart-border);
+	color: var(--faracart-border);
 }
 
-.goalcart-t6__title {
+.faracart-t6__title {
 	margin: 0 0 0.125rem;
 	font-size: 20px;
 	font-weight: 900;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 }
 
-.goalcart-t6__desc {
+.faracart-t6__desc {
 	margin: 0 0 0.75rem;
 	font-size: 12px;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-t6__progress {
+.faracart-t6__progress {
 	position: relative;
 	margin-block-end: 0.75rem;
 }
 
-.goalcart-t6__progress .goalcart-progress {
-	--goalcart-track: #f3f4f6;
+.faracart-t6__progress .faracart-progress {
+	--faracart-track: #f3f4f6;
 }
 
-.goalcart-t6__progress .goalcart-progress__fill {
-	background: var(--goalcart-progress-color, var(--goalcart-accent));
+.faracart-t6__progress .faracart-progress__fill {
+	background: var(--faracart-progress-color, var(--faracart-accent));
 }
 
-.goalcart-t6__progress .goalcart-progress--complete .goalcart-progress__fill {
+.faracart-t6__progress .faracart-progress--complete .faracart-progress__fill {
 	background: #00a32a;
 }
 
-.goalcart-t6__dot {
+.faracart-t6__dot {
 	position: absolute;
 	inset-block-start: 50%;
-	inset-inline-start: calc( var(--goalcart-t6-dot, 0%) );
+	inset-inline-start: calc( var(--faracart-t6-dot, 0%) );
 	transform: translate(-50%, -50%);
 	width: 12px;
 	height: 12px;
 	border-radius: 50%;
-	background: var(--goalcart-bg);
-	border: 2px solid var(--goalcart-progress-color, var(--goalcart-accent));
+	background: var(--faracart-bg);
+	border: 2px solid var(--faracart-progress-color, var(--faracart-accent));
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
-.goalcart-t6__amounts {
+.faracart-t6__amounts {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-between;
@@ -939,40 +939,40 @@
 	margin-block-end: 0.75rem;
 }
 
-.goalcart-t6__amount {
+.faracart-t6__amount {
 	display: flex;
 	flex-direction: column;
 }
 
-.goalcart-t6__amount--end {
+.faracart-t6__amount--end {
 	text-align: end;
 }
 
-.goalcart-t6__amount-label {
+.faracart-t6__amount-label {
 	font-size: 11px;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-t6__amount-value {
+.faracart-t6__amount-value {
 	font-size: 13px;
 	font-weight: 700;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 }
 
-.goalcart-t6__amount-value--gold {
-	color: color-mix( in srgb, var(--goalcart-accent) 80%, #000 );
+.faracart-t6__amount-value--gold {
+	color: color-mix( in srgb, var(--faracart-accent) 80%, #000 );
 }
 
-.goalcart-t6__cta {
+.faracart-t6__cta {
 	background: transparent;
-	border: 1px solid var(--goalcart-button-bg, var(--goalcart-accent));
-	color: var(--goalcart-button-text, var(--goalcart-accent));
+	border: 1px solid var(--faracart-button-bg, var(--faracart-accent));
+	color: var(--faracart-button-text, var(--faracart-accent));
 	letter-spacing: 0.06em;
 }
 
 /* Almost-completed callout. */
 
-.goalcart-t6__callout {
+.faracart-t6__callout {
 	display: flex;
 	align-items: center;
 	gap: 0.75rem;
@@ -983,41 +983,41 @@
 	border: 1px solid #fde68a;
 }
 
-.goalcart-t6__callout-icon {
+.faracart-t6__callout-icon {
 	font-size: 18px;
 	color: #f59e0b;
 	flex-shrink: 0;
 }
 
-.goalcart-t6__callout-text {
+.faracart-t6__callout-text {
 	display: flex;
 	flex-direction: column;
 }
 
-.goalcart-t6__callout-title {
+.faracart-t6__callout-title {
 	font-size: 12px;
 	font-weight: 800;
 	color: #78350f;
 }
 
-.goalcart-t6__callout-sub {
+.faracart-t6__callout-sub {
 	font-size: 10px;
 	color: #92400e;
 }
 
 /* Message states (Phase 13): the payload `state` lands as a card class.
    The completed fill color is already handled by
-   .goalcart-progress--complete, so the state classes only refine copy. */
+   .faracart-progress--complete, so the state classes only refine copy. */
 
-.goalcart-state--nearly_complete .goalcart-message {
-	color: var(--goalcart-accent);
+.faracart-state--nearly_complete .faracart-message {
+	color: var(--faracart-accent);
 	font-weight: 600;
 }
 
 /* Animation off: the fill snaps instead of sliding. */
 
-.goalcart-widget--no-anim .goalcart-progress__fill,
-.goalcart-no-anim .goalcart-progress__fill {
+.faracart-widget--no-anim .faracart-progress__fill,
+.faracart-no-anim .faracart-progress__fill {
 	transition: none;
 }
 
@@ -1025,13 +1025,13 @@
  * GoalMessage
  * ------------------------------------------------------------------ */
 
-.goalcart-message {
+.faracart-message {
 	margin: 0.625rem 0 0;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 	font-weight: 500;
 }
 
-.goalcart-message:first-child {
+.faracart-message:first-child {
 	margin-block-start: 0;
 }
 
@@ -1039,7 +1039,7 @@
  * RewardStatus
  * ------------------------------------------------------------------ */
 
-.goalcart-reward {
+.faracart-reward {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.4rem;
@@ -1050,17 +1050,17 @@
 	line-height: 1.6;
 }
 
-.goalcart-reward--locked {
-	background: var(--goalcart-track);
-	color: var(--goalcart-text-muted);
+.faracart-reward--locked {
+	background: var(--faracart-track);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-reward--unlocked {
+.faracart-reward--unlocked {
 	background: rgba(0, 163, 42, 0.12);
 	color: #007017;
 }
 
-.goalcart-reward__icon {
+.faracart-reward__icon {
 	font-size: 13px;
 	line-height: 1;
 }
@@ -1073,20 +1073,20 @@
  * with optional labels / targets / rewards per step and an overall
  * progress bar underneath. */
 
-.goalcart-chain {
-	background: var(--goalcart-bg);
-	border: 1px solid var(--goalcart-border);
-	border-radius: var(--goalcart-radius);
-	box-shadow: var(--goalcart-shadow);
+.faracart-chain {
+	background: var(--faracart-bg);
+	border: 1px solid var(--faracart-border);
+	border-radius: var(--faracart-radius);
+	box-shadow: var(--faracart-shadow);
 	padding: 1rem 1.125rem;
 }
 
-.goalcart-chain__title {
+.faracart-chain__title {
 	margin-block-end: 0.75rem;
 	font-weight: 700;
 }
 
-.goalcart-chain__steps {
+.faracart-chain__steps {
 	display: flex;
 	align-items: flex-start;
 	margin: 0 0 0.875rem;
@@ -1094,7 +1094,7 @@
 	list-style: none;
 }
 
-.goalcart-chain__step {
+.faracart-chain__step {
 	position: relative;
 	flex: 1 1 0;
 	display: flex;
@@ -1108,47 +1108,47 @@
 /* The connector line runs behind the dots (logical inline-start → end,
  * so it mirrors automatically in RTL). */
 
-.goalcart-chain__step:not(:first-child)::before {
+.faracart-chain__step:not(:first-child)::before {
 	content: '';
 	position: absolute;
 	inset-inline-start: -50%;
 	inset-inline-end: 50%;
 	inset-block-start: 5px;
 	height: 2px;
-	background: var(--goalcart-connector-color, var(--goalcart-border));
+	background: var(--faracart-connector-color, var(--faracart-border));
 	z-index: 0;
 }
 
-.goalcart-chain__dot {
+.faracart-chain__dot {
 	position: relative;
 	z-index: 1;
 	width: 12px;
 	height: 12px;
 	border-radius: 50%;
-	background: var(--goalcart-dot-color, var(--goalcart-border));
+	background: var(--faracart-dot-color, var(--faracart-border));
 	transition: background 0.3s ease;
 }
 
-.goalcart-chain__step--done .goalcart-chain__dot {
-	background: var(--goalcart-done-color, var(--goalcart-accent));
+.faracart-chain__step--done .faracart-chain__dot {
+	background: var(--faracart-done-color, var(--faracart-accent));
 }
 
-.goalcart-chain__label,
-.goalcart-chain__target {
+.faracart-chain__label,
+.faracart-chain__target {
 	font-size: 12px;
 	line-height: 1.3;
 }
 
-.goalcart-chain__label {
+.faracart-chain__label {
 	font-weight: 600;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 }
 
-.goalcart-chain__target {
-	color: var(--goalcart-text-muted);
+.faracart-chain__target {
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-chain__reward {
+.faracart-chain__reward {
 	display: inline-flex;
 	align-items: center;
 	margin-block-start: 0.125rem;
@@ -1156,16 +1156,16 @@
 	border-radius: 999px;
 	font-size: 11px;
 	font-weight: 600;
-	background: var(--goalcart-track);
-	color: var(--goalcart-text-muted);
+	background: var(--faracart-track);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-chain__step--done .goalcart-chain__reward {
+.faracart-chain__step--done .faracart-chain__reward {
 	background: rgba(0, 163, 42, 0.12);
 	color: #007017;
 }
 
-.goalcart-chain .goalcart-progress {
+.faracart-chain .faracart-progress {
 	margin-block-start: 0.25rem;
 }
 
@@ -1173,7 +1173,7 @@
  * StickyGoalBar
  * ------------------------------------------------------------------ */
 
-.goalcart-sticky {
+.faracart-sticky {
 	position: fixed;
 	inset-inline: 0;
 	inset-block-end: 0;
@@ -1184,12 +1184,12 @@
 	transition: transform 0.35s ease;
 }
 
-.goalcart-sticky--visible {
+.faracart-sticky--visible {
 	transform: translateY(0);
 	pointer-events: auto;
 }
 
-.goalcart-sticky__inner {
+.faracart-sticky__inner {
 	position: relative;
 	display: flex;
 	align-items: center;
@@ -1197,31 +1197,31 @@
 	max-width: 640px;
 	margin-inline: auto;
 	padding: 0.75rem 1rem;
-	background: var(--goalcart-bg);
-	border: 1px solid var(--goalcart-border);
-	border-radius: var(--goalcart-radius);
-	box-shadow: var(--goalcart-shadow);
+	background: var(--faracart-bg);
+	border: 1px solid var(--faracart-border);
+	border-radius: var(--faracart-radius);
+	box-shadow: var(--faracart-shadow);
 }
 
-.goalcart-sticky__content {
+.faracart-sticky__content {
 	flex: 1 1 auto;
 	min-width: 0;
 }
 
-.goalcart-sticky__content .goalcart-progress {
-	height: min(var(--goalcart-bar-height, 10px), 8px);
+.faracart-sticky__content .faracart-progress {
+	height: min(var(--faracart-bar-height, 10px), 8px);
 }
 
-.goalcart-sticky__content .goalcart-message {
+.faracart-sticky__content .faracart-message {
 	margin-block-start: 0.375rem;
 	font-size: 13px;
 }
 
-.goalcart-sticky__content .goalcart-reward {
+.faracart-sticky__content .faracart-reward {
 	margin-block-start: 0.375rem;
 }
 
-.goalcart-sticky__close {
+.faracart-sticky__close {
 	flex: 0 0 auto;
 	width: 28px;
 	height: 28px;
@@ -1229,61 +1229,61 @@
 	border: 0;
 	border-radius: 50%;
 	background: transparent;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 	font-size: 20px;
 	line-height: 1;
 	cursor: pointer;
 	transition: background 0.2s ease, color 0.2s ease;
 }
 
-.goalcart-sticky__close:hover {
-	background: var(--goalcart-track);
-	color: var(--goalcart-text);
+.faracart-sticky__close:hover {
+	background: var(--faracart-track);
+	color: var(--faracart-text);
 }
 
 /* ------------------------------------------------------------------ *
  * Countdown (Phase 32)
  * ------------------------------------------------------------------ */
 
-.goalcart-countdown {
+.faracart-countdown {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.4rem;
 	margin-block-start: 0.75rem;
 	padding: 0.25rem 0.625rem;
 	border-radius: 999px;
-	background: var(--goalcart-track);
-	color: var(--goalcart-text);
+	background: var(--faracart-track);
+	color: var(--faracart-text);
 	font-size: 12px;
 	font-weight: 600;
 	font-variant-numeric: tabular-nums;
 }
 
-.goalcart-countdown__label {
-	color: var(--goalcart-text-muted);
+.faracart-countdown__label {
+	color: var(--faracart-text-muted);
 	font-weight: 500;
 }
 
-.goalcart-countdown__time {
-	color: var(--goalcart-accent);
+.faracart-countdown__time {
+	color: var(--faracart-accent);
 }
 
 /* ------------------------------------------------------------------ *
  * Free gift picker (Phase 32)
  * ------------------------------------------------------------------ */
 
-.goalcart-gift-picker {
+.faracart-gift-picker {
 	margin-block-start: 0.875rem;
 	padding-block-start: 0.75rem;
-	border-top: 1px dashed var(--goalcart-border);
+	border-top: 1px dashed var(--faracart-border);
 }
 
-.goalcart-gift-picker__title {
+.faracart-gift-picker__title {
 	margin-block-end: 0.5rem;
 	font-weight: 700;
 }
 
-.goalcart-gift-picker__list {
+.faracart-gift-picker__list {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.625rem;
@@ -1292,58 +1292,58 @@
 	list-style: none;
 }
 
-.goalcart-gift-picker__item {
+.faracart-gift-picker__item {
 	flex: 1 1 150px;
 	min-width: 0;
 }
 
-.goalcart-gift-picker__button {
+.faracart-gift-picker__button {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	gap: 0.25rem;
 	width: 100%;
 	padding: 0.5rem;
-	border: 1px solid var(--goalcart-border);
-	border-radius: calc( var(--goalcart-radius) * 0.6 );
-	background: var(--goalcart-bg);
-	color: var(--goalcart-text);
+	border: 1px solid var(--faracart-border);
+	border-radius: calc( var(--faracart-radius) * 0.6 );
+	background: var(--faracart-bg);
+	color: var(--faracart-text);
 	text-align: start;
 	cursor: pointer;
 	transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-.goalcart-gift-picker__button:hover,
-.goalcart-gift-picker__button:focus-visible {
-	border-color: var(--goalcart-accent);
-	box-shadow: 0 0 0 2px color-mix( in srgb, var(--goalcart-accent) 20%, transparent );
+.faracart-gift-picker__button:hover,
+.faracart-gift-picker__button:focus-visible {
+	border-color: var(--faracart-accent);
+	box-shadow: 0 0 0 2px color-mix( in srgb, var(--faracart-accent) 20%, transparent );
 	transform: translateY(-1px);
 }
 
-.goalcart-gift-picker__button--pending {
+.faracart-gift-picker__button--pending {
 	opacity: 0.6;
 	pointer-events: none;
 }
 
-.goalcart-gift-picker__image {
+.faracart-gift-picker__image {
 	width: 100%;
 	aspect-ratio: 1 / 1;
 	object-fit: cover;
-	border-radius: calc( var(--goalcart-radius) * 0.4 );
-	background: var(--goalcart-track);
+	border-radius: calc( var(--faracart-radius) * 0.4 );
+	background: var(--faracart-track);
 }
 
-.goalcart-gift-picker__name {
+.faracart-gift-picker__name {
 	font-size: 12px;
 	font-weight: 600;
 }
 
-.goalcart-gift-picker__price {
+.faracart-gift-picker__price {
 	font-size: 12px;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-gift-picker--done .goalcart-gift-picker__done {
+.faracart-gift-picker--done .faracart-gift-picker__done {
 	margin: 0;
 	color: #007017;
 	font-weight: 600;
@@ -1353,11 +1353,11 @@
  * Celebration (Phase 32)
  * ------------------------------------------------------------------ */
 
-.goalcart-card--celebrate {
-	animation: goalcart-pulse 0.6s ease;
+.faracart-card--celebrate {
+	animation: faracart-pulse 0.6s ease;
 }
 
-@keyframes goalcart-pulse {
+@keyframes faracart-pulse {
 	0% {
 		transform: scale(1);
 	}
@@ -1369,30 +1369,30 @@
 	}
 }
 
-.goalcart-confetti {
+.faracart-confetti {
 	position: relative;
 	height: 0;
 	overflow: visible;
 }
 
-.goalcart-confetti__piece {
+.faracart-confetti__piece {
 	position: absolute;
 	inset-block-start: 0;
 	width: 8px;
 	height: 12px;
 	border-radius: 2px;
 	opacity: 0;
-	animation: goalcart-confetti-fall 1.6s ease-out forwards;
+	animation: faracart-confetti-fall 1.6s ease-out forwards;
 }
 
-@keyframes goalcart-confetti-fall {
+@keyframes faracart-confetti-fall {
 	0% {
 		opacity: 1;
 		transform: translate3d( 0, 0, 0 ) rotate(0deg);
 	}
 	100% {
 		opacity: 0;
-		transform: translate3d( var(--goalcart-confetti-x, 0px), 120px, 0 ) rotate(360deg);
+		transform: translate3d( var(--faracart-confetti-x, 0px), 120px, 0 ) rotate(360deg);
 	}
 }
 
@@ -1400,137 +1400,137 @@
  * Campaign progress template (Phase 32, campaign scope)
  * ------------------------------------------------------------------ */
 
-.goalcart-campaign {
-	background: var(--goalcart-bg);
-	border: 1px solid var(--goalcart-border);
-	border-radius: var(--goalcart-radius);
-	box-shadow: var(--goalcart-shadow);
+.faracart-campaign {
+	background: var(--faracart-bg);
+	border: 1px solid var(--faracart-border);
+	border-radius: var(--faracart-radius);
+	box-shadow: var(--faracart-shadow);
 	padding: 1rem 1.125rem;
 }
 
-.goalcart-campaign__title {
+.faracart-campaign__title {
 	margin-block-end: 0.375rem;
 	font-weight: 700;
 }
 
-.goalcart-campaign__counter {
+.faracart-campaign__counter {
 	margin-block-end: 0.75rem;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 	font-size: 13px;
 	font-weight: 600;
 }
 
-.goalcart-campaign__rewards {
+.faracart-campaign__rewards {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.375rem;
 	margin-block-start: 0.75rem;
 }
 
-.goalcart-campaign__reward {
+.faracart-campaign__reward {
 	display: inline-flex;
 	align-items: center;
 	padding: 0.2rem 0.6rem;
 	border-radius: 999px;
 	font-size: 11px;
 	font-weight: 600;
-	background: var(--goalcart-track);
-	color: var(--goalcart-text-muted);
+	background: var(--faracart-track);
+	color: var(--faracart-text-muted);
 }
 
 /* ------------------------------------------------------------------ *
  * Advanced sticky bar (Phase 32)
  * ------------------------------------------------------------------ */
 
-.goalcart-sticky--top {
+.faracart-sticky--top {
 	inset-block-end: auto;
 	inset-block-start: 0;
 	transform: translateY(-110%);
 }
 
-.goalcart-sticky--top.goalcart-sticky--visible {
+.faracart-sticky--top.faracart-sticky--visible {
 	transform: translateY(0);
 }
 
-.goalcart-sticky__suggestion {
+.faracart-sticky__suggestion {
 	display: inline-flex;
 	align-items: center;
 	gap: 0.5rem;
 	margin-block-start: 0.375rem;
 	padding: 0.25rem 0.625rem;
 	border-radius: 999px;
-	background: var(--goalcart-track);
-	color: var(--goalcart-text);
+	background: var(--faracart-track);
+	color: var(--faracart-text);
 	text-decoration: none;
 	font-size: 12px;
 	font-weight: 600;
 	transition: background 0.2s ease;
 }
 
-.goalcart-sticky__suggestion:hover {
-	background: color-mix( in srgb, var(--goalcart-track) 60%, var(--goalcart-accent) );
+.faracart-sticky__suggestion:hover {
+	background: color-mix( in srgb, var(--faracart-track) 60%, var(--faracart-accent) );
 }
 
-.goalcart-sticky__suggestion-price {
-	color: var(--goalcart-text-muted);
+.faracart-sticky__suggestion-price {
+	color: var(--faracart-text-muted);
 }
 
 /* ------------------------------------------------------------------ *
  * UnifiedRecommendations (Suggestions + Upsells consolidation)
  * ------------------------------------------------------------------ */
 
-.goalcart-upsells {
+.faracart-upsells {
 	margin-block-start: 0.875rem;
 	padding-block-start: 0.75rem;
-	border-top: 1px dashed var(--goalcart-border);
+	border-top: 1px dashed var(--faracart-border);
 }
 
-.goalcart-upsells__title {
+.faracart-upsells__title {
 	margin-block-end: 0.5rem;
 	font-size: 12px;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
-	color: var(--goalcart-text-muted);
+	color: var(--faracart-text-muted);
 }
 
-.goalcart-upsells__list {
+.faracart-upsells__list {
 	display: grid;
 	grid-template-columns: repeat( auto-fill, minmax( 130px, 1fr ) );
 	gap: 0.625rem;
 }
 
-.goalcart-upsell {
+.faracart-upsell {
 	display: flex;
 	flex-direction: column;
 	gap: 0.3rem;
 	min-width: 0;
 	padding: 0.5rem;
-	border: 1px solid var(--goalcart-border);
-	border-radius: calc( var(--goalcart-radius) * 0.6 );
-	background: var(--goalcart-bg);
+	border: 1px solid var(--faracart-border);
+	border-radius: calc( var(--faracart-radius) * 0.6 );
+	background: var(--faracart-bg);
 	transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-.goalcart-upsell:hover {
-	border-color: var(--goalcart-accent);
-	box-shadow: 0 0 0 2px color-mix( in srgb, var(--goalcart-accent) 15%, transparent );
+.faracart-upsell:hover {
+	border-color: var(--faracart-accent);
+	box-shadow: 0 0 0 2px color-mix( in srgb, var(--faracart-accent) 15%, transparent );
 	transform: translateY(-1px);
 }
 
-.goalcart-upsell__image {
+.faracart-upsell__image {
 	width: 100%;
 	aspect-ratio: 1 / 1;
 	object-fit: cover;
-	border-radius: calc( var(--goalcart-radius) * 0.4 );
-	background: var(--goalcart-track);
+	border-radius: calc( var(--faracart-radius) * 0.4 );
+	background: var(--faracart-track);
 }
 
-.goalcart-upsell__name {
+.faracart-upsell__name {
 	font-size: 13px;
 	font-weight: 600;
 	line-height: 1.35;
-	color: var(--goalcart-text);
+	color: var(--faracart-text);
 	text-decoration: none;
 	display: -webkit-box;
 	-webkit-line-clamp: 2;
@@ -1538,24 +1538,24 @@
 	overflow: hidden;
 }
 
-.goalcart-upsell__name:hover {
-	color: var(--goalcart-accent);
+.faracart-upsell__name:hover {
+	color: var(--faracart-accent);
 	text-decoration: underline;
 }
 
-.goalcart-upsell__price {
+.faracart-upsell__price {
 	font-size: 13px;
 	font-weight: 700;
-	color: var(--goalcart-accent);
+	color: var(--faracart-accent);
 }
 
-.goalcart-upsell__add {
+.faracart-upsell__add {
 	margin-block-start: auto;
 	padding: 0.375rem 0.625rem;
-	border: 1px solid var(--goalcart-accent);
+	border: 1px solid var(--faracart-accent);
 	border-radius: 999px;
-	background: var(--goalcart-accent);
-	color: var(--goalcart-bg);
+	background: var(--faracart-accent);
+	color: var(--faracart-bg);
 	font-size: 12px;
 	font-weight: 600;
 	line-height: 1.2;
@@ -1563,23 +1563,23 @@
 	transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
 }
 
-.goalcart-upsell__add:hover,
-.goalcart-upsell__add:focus-visible {
-	background: color-mix( in srgb, var(--goalcart-accent) 85%, #000 );
+.faracart-upsell__add:hover,
+.faracart-upsell__add:focus-visible {
+	background: color-mix( in srgb, var(--faracart-accent) 85%, #000 );
 }
 
-.goalcart-upsell__add:disabled {
+.faracart-upsell__add:disabled {
 	opacity: 0.65;
 	cursor: default;
 }
 
-.goalcart-upsells__loading {
-	color: var(--goalcart-text-muted);
+.faracart-upsells__loading {
+	color: var(--faracart-text-muted);
 	font-size: 13px;
 }
 
-.goalcart-upsells__empty {
-	color: var(--goalcart-text-muted);
+.faracart-upsells__empty {
+	color: var(--faracart-text-muted);
 	font-size: 13px;
 }
 
@@ -1589,7 +1589,7 @@
  * stretching the widget.
  */
 @media ( max-width: 600px ) {
-	.goalcart-upsells__list {
+	.faracart-upsells__list {
 		display: flex;
 		overflow-x: auto;
 		scroll-snap-type: x proximity;
@@ -1600,7 +1600,7 @@
 		scrollbar-width: thin;
 	}
 
-	.goalcart-upsell {
+	.faracart-upsell {
 		flex: 0 0 132px;
 		scroll-snap-align: start;
 	}
@@ -1611,16 +1611,16 @@
  * ------------------------------------------------------------------ */
 
 @media ( prefers-reduced-motion: reduce ) {
-	.goalcart-progress__fill,
-	.goalcart-t3__fill,
-	.goalcart-cta,
-	.goalcart-recommend,
-	.goalcart-recommend__add,
-	.goalcart-sticky,
-	.goalcart-card--celebrate,
-	.goalcart-confetti__piece,
-	.goalcart-widget--updating .goalcart-widget__goals,
-	#goalcart-sticky.goalcart-widget--updating .goalcart-sticky__inner {
+	.faracart-progress__fill,
+	.faracart-t3__fill,
+	.faracart-cta,
+	.faracart-recommend,
+	.faracart-recommend__add,
+	.faracart-sticky,
+	.faracart-card--celebrate,
+	.faracart-confetti__piece,
+	.faracart-widget--updating .faracart-widget__goals,
+	#faracart-sticky.faracart-widget--updating .faracart-sticky__inner {
 		transition: none;
 		animation: none;
 	}

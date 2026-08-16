@@ -2,12 +2,12 @@
 /**
  * Percentage discount reward applicator.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards\Applicators;
+namespace FaraCart\Rewards\Applicators;
 
-use GoalCart\Rewards\Reward;
+use FaraCart\Rewards\Reward;
 
 defined( 'ABSPATH' ) || exit;
 

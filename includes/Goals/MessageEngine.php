@@ -2,10 +2,10 @@
 /**
  * Dynamic message template engine for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals;
+namespace FaraCart\Goals;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -35,6 +35,29 @@ defined( 'ABSPATH' ) || exit;
  * every progress message through this service.
  */
 final class MessageEngine {
+
+	/**
+	 * Display currency unit override ('' = the WooCommerce store currency).
+	 *
+	 * Resolved by Settings::currency() and injected by the container, so
+	 * server-rendered message amounts (e.g. "Only {remaining} left") are
+	 * labelled with the same currency the storefront widgets and the admin
+	 * dashboard use. Empty keeps wc_price's store-currency behavior, so
+	 * bare constructions (tests) and stores without a configured override
+	 * render exactly as before.
+	 *
+	 * @var string
+	 */
+	protected $currency;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $currency Display currency code ('' = store currency).
+	 */
+	public function __construct( $currency = '' ) {
+		$this->currency = strtoupper( trim( (string) $currency ) );
+	}
 
 	/**
 	 * Message states.
@@ -159,10 +182,10 @@ final class MessageEngine {
 
 		switch ( $state ) {
 			case self::STATE_INACTIVE:
-				return __( 'This offer is not active right now.', 'goalcart' );
+				return __( 'This offer is not active right now.', 'faracart' );
 
 			case self::STATE_UNAVAILABLE:
-				return __( 'This offer is not available for your cart.', 'goalcart' );
+				return __( 'This offer is not available for your cart.', 'faracart' );
 
 			// Phase 36 (per-user completion limit): the shopper already
 			// completed this goal the configured maximum number of times —
@@ -171,12 +194,12 @@ final class MessageEngine {
 			// `completed_message` override deliberately does NOT apply here:
 			// it celebrates a fresh completion, which this is not.
 			case self::STATE_COMPLETION_LIMIT:
-				return __( 'You have already completed this goal.', 'goalcart' );
+				return __( 'You have already completed this goal.', 'faracart' );
 
 			case self::STATE_NEARLY_COMPLETE:
 				return '' !== $message
 					? $message
-					: __( 'Almost there! Only {remaining} left', 'goalcart' );
+					: __( 'Almost there! Only {remaining} left', 'faracart' );
 
 			case self::STATE_COMPLETED:
 			case self::STATE_REWARD_ACTIVATED:
@@ -185,16 +208,16 @@ final class MessageEngine {
 				}
 
 				if ( self::STATE_REWARD_ACTIVATED === $state ) {
-					return __( 'Reward unlocked: {reward}', 'goalcart' );
+					return __( 'Reward unlocked: {reward}', 'faracart' );
 				}
 
-				return __( 'You reached your goal!', 'goalcart' );
+				return __( 'You reached your goal!', 'faracart' );
 
 			case self::STATE_PROGRESSING:
 			default:
 				return '' !== $message
 					? $message
-					: __( 'Only {remaining} left to reach your goal', 'goalcart' );
+					: __( 'Only {remaining} left to reach your goal', 'faracart' );
 		}
 	}
 
@@ -300,33 +323,33 @@ final class MessageEngine {
 
 		switch ( $type ) {
 			case 'free_shipping':
-				return __( 'Free shipping', 'goalcart' );
+				return __( 'Free shipping', 'faracart' );
 
 			case 'percent_discount':
 				return null === $value
-					? __( 'Percentage discount', 'goalcart' )
+					? __( 'Percentage discount', 'faracart' )
 					: sprintf(
 						/* translators: %d: discount percentage. */
-						__( '%d%% discount', 'goalcart' ),
+						__( '%d%% discount', 'faracart' ),
 						(int) round( (float) $value )
 					);
 
 			case 'fixed_discount':
 				if ( null === $value ) {
-					return __( 'Fixed discount', 'goalcart' );
+					return __( 'Fixed discount', 'faracart' );
 				}
 
 				return sprintf(
 					/* translators: %s: formatted discount amount. */
-					__( 'Fixed %s off', 'goalcart' ),
+					__( 'Fixed %s off', 'faracart' ),
 					$this->format_number( (float) $value, true )
 				);
 
 			case 'free_gift':
-				return __( 'Free gift', 'goalcart' );
+				return __( 'Free gift', 'faracart' );
 
 			case 'coupon':
-				return __( 'Coupon', 'goalcart' );
+				return __( 'Coupon', 'faracart' );
 
 			default:
 				return '';
@@ -364,8 +387,17 @@ final class MessageEngine {
 	 */
 	protected function format_number( $value, $is_money ) {
 		if ( $is_money && function_exists( 'wc_price' ) ) {
+			$args = array();
+
+			// The configured display currency overrides the store currency
+			// for this single wc_price call (never a global change): wc_price
+			// falls back to get_woocommerce_currency() when empty.
+			if ( '' !== $this->currency ) {
+				$args['currency'] = $this->currency;
+			}
+
 			return html_entity_decode(
-				wp_strip_all_tags( wc_price( (float) $value ) ),
+				wp_strip_all_tags( wc_price( (float) $value, $args ) ),
 				ENT_QUOTES,
 				'UTF-8'
 			);

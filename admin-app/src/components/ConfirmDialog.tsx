@@ -46,9 +46,9 @@ export default function ConfirmDialog({
       maxWidth="xs"
       fullWidth
       role="alertdialog"
-      aria-labelledby="goalcart-confirm-title"
+      aria-labelledby="faracart-confirm-title"
     >
-      <DialogTitle id="goalcart-confirm-title">{title}</DialogTitle>
+      <DialogTitle id="faracart-confirm-title">{title}</DialogTitle>
       {description !== undefined && (
         <DialogContent>
           <DialogContentText>{description}</DialogContentText>
@@ -56,7 +56,7 @@ export default function ConfirmDialog({
       )}
       <DialogActions>
         <Button onClick={onCancel} disabled={busy}>
-          {cancelLabel ?? __('Cancel', 'goalcart')}
+          {cancelLabel ?? __('Cancel', 'faracart')}
         </Button>
         <Button
           onClick={onConfirm}
@@ -64,7 +64,7 @@ export default function ConfirmDialog({
           variant="contained"
           disabled={busy}
         >
-          {confirmLabel ?? __('Confirm', 'goalcart')}
+          {confirmLabel ?? __('Confirm', 'faracart')}
         </Button>
       </DialogActions>
     </Dialog>

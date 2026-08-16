@@ -62,10 +62,10 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
     <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
       <Grid size={{ xs: 12, sm: 6 }}>
         <TextField
-          label={__('Title', 'goalcart')}
+          label={__('Title', 'faracart')}
           fullWidth
           value={display.title ?? ''}
-          placeholder={__('Free shipping unlocked', 'goalcart')}
+          placeholder={__('Free shipping unlocked', 'faracart')}
           onChange={(event) => patchDisplay({ title: event.target.value })}
         />
       </Grid>
@@ -73,13 +73,13 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
       <Grid size={{ xs: 12, sm: 6 }}>
         <TextField
           select
-          label={__('Template', 'goalcart')}
+          label={__('Template', 'faracart')}
           fullWidth
           value={templateId}
           onChange={(event) => chooseTemplate(event.target.value)}
         >
           <MenuItem value="">
-            <em>{__('Default (goal templates)', 'goalcart')}</em>
+            <em>{__('Default (goal templates)', 'faracart')}</em>
           </MenuItem>
           {(templates?.goal ?? []).map((template) => (
             <MenuItem key={template.id} value={template.id}>
@@ -122,7 +122,7 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
                 startIcon={<RestartAltIcon />}
                 onClick={() => chooseTemplate('')}
               >
-                {__('Use global default', 'goalcart')}
+                {__('Use global default', 'faracart')}
               </Button>
             </Box>
             <SchemaForm
@@ -136,15 +136,15 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
 
       <Grid size={12}>
         <TextField
-          label={__('Message (in progress)', 'goalcart')}
+          label={__('Message (in progress)', 'faracart')}
           fullWidth
           multiline
           minRows={2}
           value={display.message ?? ''}
-          placeholder={__('Only {remaining} left to unlock {reward}!', 'goalcart')}
+          placeholder={__('Only {remaining} left to unlock {reward}!', 'faracart')}
           helperText={__(
             'Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {goal_name}.',
-            'goalcart'
+            'faracart'
           )}
           onChange={(event) => patchDisplay({ message: event.target.value })}
         />
@@ -152,23 +152,23 @@ export default function DisplayFields({ values, onValueChange }: DisplayFieldsPr
 
       <Grid size={12}>
         <TextField
-          label={__('Completed message', 'goalcart')}
+          label={__('Completed message', 'faracart')}
           fullWidth
           multiline
           minRows={2}
           value={display.completed_message ?? ''}
-          placeholder={__('Goal reached — your reward is unlocked!', 'goalcart')}
+          placeholder={__('Goal reached — your reward is unlocked!', 'faracart')}
           onChange={(event) => patchDisplay({ completed_message: event.target.value })}
         />
       </Grid>
 
       <Grid size={{ xs: 12, sm: 6 }}>
         <TextField
-          label={__('Icon', 'goalcart')}
+          label={__('Icon', 'faracart')}
           fullWidth
           value={display.icon ?? ''}
-          placeholder={__('e.g. 🎁 or a dashicon name', 'goalcart')}
-          helperText={__('Optional icon shown next to the progress bar.', 'goalcart')}
+          placeholder={__('e.g. 🎁 or a dashicon name', 'faracart')}
+          helperText={__('Optional icon shown next to the progress bar.', 'faracart')}
           onChange={(event) => patchDisplay({ icon: event.target.value })}
         />
       </Grid>

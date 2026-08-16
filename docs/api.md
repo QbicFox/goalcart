@@ -4,7 +4,7 @@ The plugin exposes a clean API for the React admin app and the frontend
 progress widgets through a single REST namespace:
 
 ```text
-goalcart/v1
+faracart/v1
 ```
 
 All conventions mirror the reference plugin (`wooinsights`): a shared
@@ -37,7 +37,7 @@ Every failure returns a structured `WP_Error`, serialized by WP core as:
 
 ```json
 {
-  "code": "goalcart_goal_not_found",
+  "code": "faracart_goal_not_found",
   "message": "The goal could not be found.",
   "data": { "status": 404 }
 }
@@ -48,23 +48,23 @@ status codes are always set. The common codes:
 
 | Code | Status | Meaning |
 |---|---:|---|
-| `goalcart_forbidden` | 403 | Missing capability |
-| `goalcart_rate_limited` | 429 | Rate limit exceeded (`retry_after` in data) |
-| `goalcart_goal_not_found` / `goalcart_campaign_not_found` | 404 | Resource missing |
-| `goalcart_preview_target_required` | 400 | Neither / both of `goal_id` + `campaign_id` given |
-| `goalcart_preview_not_found` | 404 | Preview target (goal/campaign) missing |
-| `goalcart_invalid_nonce` | 403 | Invalid tracking nonce (`/track`) |
-| `goalcart_tracking_disabled` | 403 | Tracking master toggle off (`/track`) |
-| `goalcart_invalid_event_type` | 400 | Unknown event type (`/track`, direct handler) |
-| `goalcart_track_failed` | 500 | Event insert failed (`/track`) |
-| `goalcart_settings_empty` | 400 | No known settings keys in the payload |
+| `faracart_forbidden` | 403 | Missing capability |
+| `faracart_rate_limited` | 429 | Rate limit exceeded (`retry_after` in data) |
+| `faracart_goal_not_found` / `faracart_campaign_not_found` | 404 | Resource missing |
+| `faracart_preview_target_required` | 400 | Neither / both of `goal_id` + `campaign_id` given |
+| `faracart_preview_not_found` | 404 | Preview target (goal/campaign) missing |
+| `faracart_invalid_nonce` | 403 | Invalid tracking nonce (`/track`) |
+| `faracart_tracking_disabled` | 403 | Tracking master toggle off (`/track`) |
+| `faracart_invalid_event_type` | 400 | Unknown event type (`/track`, direct handler) |
+| `faracart_track_failed` | 500 | Event insert failed (`/track`) |
+| `faracart_settings_empty` | 400 | No known settings keys in the payload |
 | `rest_invalid_param` | 400 | Arg-schema validation failure |
-| `goalcart_*_create/update/delete_failed` | 500 | Persistence failure |
+| `faracart_*_create/update/delete_failed` | 500 | Persistence failure |
 
 ### 1.3 Authentication & capability
 
 - **Admin endpoints** require the `manage_options` capability (filterable
-  via `goalcart_rest_capability`). Logged-in admin requests are
+  via `faracart_rest_capability`). Logged-in admin requests are
   authenticated by WP core cookie auth, which also validates the
   `X-WP-Nonce` header (the admin app sends the `wp_rest` nonce from its
   boot data). Anonymous access is rejected with 403.
@@ -83,7 +83,7 @@ on every cart refresh).
 ## 2. Admin API
 
 All admin endpoints are `manage_options`-gated. Base URL:
-`https://site/wp-json/goalcart/v1`.
+`https://site/wp-json/faracart/v1`.
 
 ### 2.1 Goals
 
@@ -103,7 +103,7 @@ below).
 
 #### `GET /goals/{id}`
 
-Single goal object, or `goalcart_goal_not_found` (404).
+Single goal object, or `faracart_goal_not_found` (404).
 
 #### `POST /goals`
 
@@ -217,15 +217,15 @@ category/product/composite goals evaluate correctly.
   },
   "meta": {
     "hooks": [
-      { "type": "filter", "hook": "goalcart_suggestions_enabled", "description": "..." }
+      { "type": "filter", "hook": "faracart_suggestions_enabled", "description": "..." }
     ],
-    "log_path": "/path/to/wp-content/goalcart-debug.log"
+    "log_path": "/path/to/wp-content/faracart-debug.log"
   }
 }
 ```
 
 `meta.hooks` (Phase 18 Advanced → developer hooks) carries the public
-`goalcart_*` hooks reference rendered by the Settings page;
+`faracart_*` hooks reference rendered by the Settings page;
 `meta.log_path` is present only while `logging_enabled` is on.
 
 #### `POST /settings`
@@ -233,7 +233,7 @@ category/product/composite goals evaluate correctly.
 Saves a partial or full settings object. Only known keys are applied
 (unknown keys are ignored), so saving the whole object never clobbers
 keys the client does not know about. Returns the persisted settings, or
-`goalcart_settings_empty` (400) when no known keys are present.
+`faracart_settings_empty` (400) when no known keys are present.
 
 Every key is validated by the route arg schema and normalized by the
 sanitizer (direct handler saves included). The full Phase 18 surface:
@@ -261,7 +261,7 @@ sanitizer (direct handler saves included). The full Phase 18 surface:
 | `debug_mode` / `logging_enabled` / `developer_hooks` | boolean | cast |
 
 Saving identical settings is a successful no-op (an unchanged option is
-not a failure). A successful save fires the `goalcart_settings_saved`
+not a failure). A successful save fires the `faracart_settings_saved`
 action and logs a debug entry when logging is enabled.
 
 ### 2.3 Search (goal builder)
@@ -286,7 +286,7 @@ Campaign CRUD + milestone ordering (Phase 10 — Campaign Builder):
 
 - `GET /campaigns` — all campaigns, each with `goal_count`.
 - `GET /campaigns/{id}` — one campaign (with its ordered `goals`), or
-  `goalcart_campaign_not_found` (404).
+  `faracart_campaign_not_found` (404).
 - `POST /campaigns` — create. `name` is required.
 - `PUT /campaigns/{id}` — partial update.
 - `DELETE /campaigns/{id}` — delete; the campaign's goals are detached
@@ -346,8 +346,8 @@ Body args:
 | `simulated.quantity` | number ≥ 0 | 0 | Simulated item quantity (count goals) |
 
 Exactly one of `goal_id` / `campaign_id` is required — neither or both
-returns `goalcart_preview_target_required` (400); a missing target
-returns `goalcart_preview_not_found` (404). Unknown keys inside
+returns `faracart_preview_target_required` (400); a missing target
+returns `faracart_preview_not_found` (404). Unknown keys inside
 `simulated` are rejected by the arg schema.
 
 ```json
@@ -464,7 +464,7 @@ Semantics:
   `wp_posts` for product names.
 - `meta.applied` echoes the exact filters that produced the payload.
 
-Errors: `goalcart_forbidden` (403, anonymous).
+Errors: `faracart_forbidden` (403, anonymous).
 
 ### 2.7 Templates (pluggable template engine)
 
@@ -551,7 +551,7 @@ exposes only the minimum data the widgets need:
       }
     ],
     "currency": "IRR",
-    "tracking_nonce": "<fresh goalcart_track nonce — see below>"
+    "tracking_nonce": "<fresh faracart_track nonce — see below>"
   },
   "meta": { "total_goals": 1 }
 }
@@ -579,7 +579,7 @@ Notes:
   (shares a cart category +1), WC-endorsed sources (+0.5) and, for money
   goals, price proximity to `remaining` — products in the 0.6–1.4× band
   score +2 (the spec's "prefer 150K–220K when 180K is left"). The final
-  list is filterable via the `goalcart_suggestions` filter.
+  list is filterable via the `faracart_suggestions` filter.
 - `is_money` tells the widgets whether to format the goal's numbers as
   currency (amount/category/product/composite) or as plain numbers
   (quantity / distinct-quantity / weight) — it drives the milestone
@@ -643,18 +643,18 @@ Notes:
   cache-busts each poll with a `?_=<timestamp>` parameter (both are
   asserted by `tests/frontend-test.php`).
 - **Self-healing tracking nonce** — every response carries
-  `tracking_nonce`, a freshly minted `goalcart_track` nonce (the same
+  `tracking_nonce`, a freshly minted `faracart_track` nonce (the same
   action the page config prints). The storefront JS adopts it on each
   poll before reporting events, so a cached page serving an expired or
   another user's nonce — or a tab left open past the nonce's ~12 h
   lifetime — self-heals within one poll instead of producing a stream of
-  `goalcart_invalid_nonce` (403) log lines. The nonce is withheld while
+  `faracart_invalid_nonce` (403) log lines. The nonce is withheld while
   `analytics_enabled` is off (the same gate as the config print) and is
   never stored in the optional progress cache.
 - The Phase 11 progress widgets poll this endpoint and re-render on every
   WooCommerce cart event (`added_to_cart`, `updated_cart_totals`,
   `wc_fragments_refreshed`, …), driven by the config object printed by
-  `GoalCart\Frontend\ProgressUI` (`window.goalcartFrontend`). The config
+  `FaraCart\Frontend\ProgressUI` (`window.faracartFrontend`). The config
   also carries the Phase 12 template variant, the animation flag and the
   resolved appearance tokens (`template`, `animation`, `appearance`), so
   the widgets render the configured storefront template without another
@@ -664,8 +664,8 @@ Notes:
 
 The storefront JS reports analytics events to this endpoint. It is public
 (guests are the analytics population) but protected by the plugin's own
-tracking nonce (from the `window.goalcartTracking` config printed by
-`GoalCart\Analytics\Tracker`) instead of an admin capability, plus a
+tracking nonce (from the `window.faracartTracking` config printed by
+`FaraCart\Analytics\Tracker`) instead of an admin capability, plus a
 generous per-IP rate limit (300/min — the widgets fire events on every
 cart refresh).
 
@@ -680,7 +680,7 @@ Body args (all typed in the route arg schema):
 | `cart_value` | number ≥ 0 | 0 | Cart money value at event time |
 | `percentage` | number 0–100 | 0 | Progress percentage (goal_progress), stored in `meta` |
 | `session_id` | string | cookie | Anonymous session id; the request cookie is the fallback |
-| `nonce` | string (required) | — | `goalcart_track` nonce from the tracking config |
+| `nonce` | string (required) | — | `faracart_track` nonce from the tracking config |
 
 Event types (whitelist): `goal_impression`, `goal_progress`,
 `goal_completed`, `reward_activated`, `suggestion_impression`,
@@ -695,14 +695,14 @@ and the `suggested_product_added` conversion is server-verified; treat
 the dashboard metrics accordingly.
 
 The nonce is **self-healing**: `GET /progress` mints a fresh
-`goalcart_track` nonce per response and the storefront JS adopts it
+`faracart_track` nonce per response and the storefront JS adopts it
 before the next event report, so cached pages and long-lived tabs
-recover within one poll instead of logging `goalcart_invalid_nonce`
+recover within one poll instead of logging `faracart_invalid_nonce`
 (403).
 
-Response: `{ "data": { "id": 42 } }`. Errors: `goalcart_invalid_nonce`
-(403), `goalcart_tracking_disabled` (403), `rest_invalid_param` (400,
-bad event type or field), `goalcart_track_failed` (500).
+Response: `{ "data": { "id": 42 } }`. Errors: `faracart_invalid_nonce`
+(403), `faracart_tracking_disabled` (403), `rest_invalid_param` (400,
+bad event type or field), `faracart_track_failed` (500).
 
 ---
 
@@ -714,7 +714,7 @@ using the same convention as the goal evaluators and reward
 applicators:
 
 ```php
-add_filter( 'goalcart_template_classes', function ( $classes ) {
+add_filter( 'faracart_template_classes', function ( $classes ) {
     $classes['countdown'] = My_Countdown_Template::class;
     return $classes;
 } );
@@ -728,8 +728,8 @@ templates), so hook it from your plugin's main file or a
 ### The contract
 
 A template is any class implementing
-`GoalCart\Templates\Template` — extending
-`GoalCart\Templates\AbstractTemplate` gives you `default_settings()`
+`FaraCart\Templates\Template` — extending
+`FaraCart\Templates\AbstractTemplate` gives you `default_settings()`
 for free. Minimum surface:
 
 | Method | Returns |
@@ -745,7 +745,7 @@ for free. Minimum surface:
 ```php
 <?php
 // my-countdown-template.php — namespace + autoload per your plugin.
-use GoalCart\Templates\AbstractTemplate;
+use FaraCart\Templates\AbstractTemplate;
 
 class My_Countdown_Template extends AbstractTemplate {
 
@@ -866,7 +866,7 @@ template with those settings applied.
 - the event-type whitelist (all seven types, nothing else)
 - recording: rows carry goal/campaign/product ids, cart value, session,
   scalar-only meta; guest `user_id` stays NULL
-- privacy: the events table has no PII columns; the `goalcart_tracking_enabled`
+- privacy: the events table has no PII columns; the `faracart_tracking_enabled`
   filter and the master toggle both gate recording
 - the public `/track` route: arg-schema whitelist, bad nonce → 403, valid
   dispatch records end-to-end
@@ -916,7 +916,7 @@ no-matching-items ineligibility), weight and composite (AND) goals
 `tests/settings-test.php` (119 checks, `php tests/settings-test.php`):
 
 - defaults for every Phase 18 key (each preserving the pre-Phase-18
-  behavior) + the `goalcart_default_calculation_mode` filter wiring
+  behavior) + the `faracart_default_calculation_mode` filter wiring
 - the store-wide calculation mode: amount/category goals follow it,
   quantity-style goals keep their type defaults
 - REST schema coverage (enums for currency display / goal behavior /
@@ -935,7 +935,7 @@ no-matching-items ineligibility), weight and composite (AND) goals
   written, sentinel payload served verbatim on read)
 - performance toggles: `analytics_enabled` gates the tracker and
   `performance_suggestions` empties the suggestion list (with the
-  `goalcart_suggestions_enabled` filter override)
+  `faracart_suggestions_enabled` filter override)
 - advanced: the GET settings meta carries the developer-hooks reference,
   and the Logger respects `logging_enabled` + `debug_mode` (error vs
   debug levels, log path in meta, cleanup)

@@ -36,13 +36,13 @@ function buildQuery({ q, ids, per_page }: SearchParams): string {
   return qs ? `?${qs}` : '';
 }
 
-/** Search products/variations via `GET /goalcart/v1/search/products`. */
+/** Search products/variations via `GET /faracart/v1/search/products`. */
 export async function searchProducts(params: SearchParams = {}): Promise<SearchProduct[]> {
   const data = await apiFetch<SearchList<SearchProduct>>(`/search/products${buildQuery(params)}`);
   return data.items;
 }
 
-/** Search product categories via `GET /goalcart/v1/search/categories`. */
+/** Search product categories via `GET /faracart/v1/search/categories`. */
 export async function searchCategories(params: SearchParams = {}): Promise<SearchCategory[]> {
   const data = await apiFetch<SearchList<SearchCategory>>(
     `/search/categories${buildQuery(params)}`
@@ -50,20 +50,20 @@ export async function searchCategories(params: SearchParams = {}): Promise<Searc
   return data.items;
 }
 
-/** Search coupons via `GET /goalcart/v1/search/coupons`. */
+/** Search coupons via `GET /faracart/v1/search/coupons`. */
 export async function searchCoupons(params: SearchParams = {}): Promise<SearchCoupon[]> {
   const data = await apiFetch<SearchList<SearchCoupon>>(`/search/coupons${buildQuery(params)}`);
   return data.items;
 }
 
-/** Search product tags via `GET /goalcart/v1/search/tags` (Phase 32). */
+/** Search product tags via `GET /faracart/v1/search/tags` (Phase 32). */
 export async function searchTags(params: SearchParams = {}): Promise<SearchTag[]> {
   const data = await apiFetch<SearchList<SearchTag>>(`/search/tags${buildQuery(params)}`);
   return data.items;
 }
 
 /**
- * List global attribute taxonomies via `GET /goalcart/v1/search/attributes`
+ * List global attribute taxonomies via `GET /faracart/v1/search/attributes`
  * (Phase 32). `ids` is not applicable — the query uses `q` only.
  */
 export async function searchAttributes(params: SearchParams = {}): Promise<SearchAttribute[]> {
@@ -80,7 +80,7 @@ export async function searchAttributes(params: SearchParams = {}): Promise<Searc
   return data.items;
 }
 
-/** List shipping zones via `GET /goalcart/v1/search/zones` (Phase 32). */
+/** List shipping zones via `GET /faracart/v1/search/zones` (Phase 32). */
 export async function searchZones(params: SearchParams = {}): Promise<SearchZone[]> {
   const data = await apiFetch<SearchList<SearchZone>>(`/search/zones${buildQuery(params)}`);
   return data.items;

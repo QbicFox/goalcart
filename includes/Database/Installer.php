@@ -2,10 +2,10 @@
 /**
  * Database installer and migrator for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Database;
+namespace FaraCart\Database;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,7 +28,7 @@ class Installer {
 	 *
 	 * @var string
 	 */
-	const DB_VERSION_OPTION = 'goalcart_db_version';
+	const DB_VERSION_OPTION = 'faracart_db_version';
 
 	/**
 	 * Run on plugin activation: create all tables and schedule crons.
@@ -38,7 +38,7 @@ class Installer {
 	public static function activate() {
 		self::maybe_create_tables();
 		self::maybe_schedule_events();
-		update_option( self::DB_VERSION_OPTION, GOALCART_DB_VERSION, false );
+		update_option( self::DB_VERSION_OPTION, FARACART_DB_VERSION, false );
 	}
 
 	/**
@@ -61,7 +61,7 @@ class Installer {
 				continue;
 			}
 
-			$interval = isset( $intervals[ $event ] ) ? $intervals[ $event ] : 'goalcart_weekly';
+			$interval = isset( $intervals[ $event ] ) ? $intervals[ $event ] : 'faracart_weekly';
 
 			wp_schedule_event( time() + HOUR_IN_SECONDS, $interval, $event );
 		}
@@ -95,8 +95,8 @@ class Installer {
 	 */
 	public static function cron_events() {
 		return array(
-			\GoalCart\Analytics\RevenueTracker::CLEANUP_EVENT,
-			\GoalCart\Analytics\DailyAggregator::AGGREGATE_EVENT,
+			\FaraCart\Analytics\RevenueTracker::CLEANUP_EVENT,
+			\FaraCart\Analytics\DailyAggregator::AGGREGATE_EVENT,
 		);
 	}
 
@@ -107,8 +107,8 @@ class Installer {
 	 */
 	public static function cron_intervals() {
 		return array(
-			\GoalCart\Analytics\RevenueTracker::CLEANUP_EVENT  => 'goalcart_weekly',
-			\GoalCart\Analytics\DailyAggregator::AGGREGATE_EVENT => 'daily',
+			\FaraCart\Analytics\RevenueTracker::CLEANUP_EVENT  => 'faracart_weekly',
+			\FaraCart\Analytics\DailyAggregator::AGGREGATE_EVENT => 'daily',
 		);
 	}
 
@@ -124,7 +124,7 @@ class Installer {
 	public static function maybe_upgrade() {
 		$installed = get_option( self::DB_VERSION_OPTION, '0.0.0' );
 
-		if ( version_compare( $installed, GOALCART_DB_VERSION, '>=' ) ) {
+		if ( version_compare( $installed, FARACART_DB_VERSION, '>=' ) ) {
 			// Even on an up-to-date install, make sure the plugin's cron
 			// events are scheduled (they may have been cleared by an
 			// interrupted deactivate, or a manual wp-cron cleanup). The
@@ -135,7 +135,7 @@ class Installer {
 
 		self::maybe_create_tables();
 		self::maybe_schedule_events();
-		update_option( self::DB_VERSION_OPTION, GOALCART_DB_VERSION, false );
+		update_option( self::DB_VERSION_OPTION, FARACART_DB_VERSION, false );
 	}
 
 	/**
@@ -149,9 +149,9 @@ class Installer {
 	 * @return array<string, array<string, mixed>>
 	 */
 	public static function cron_schedules( $schedules ) {
-		$schedules['goalcart_weekly'] = array(
+		$schedules['faracart_weekly'] = array(
 			'interval' => WEEK_IN_SECONDS,
-			'display'  => __( 'Once Weekly', 'goalcart' ),
+			'display'  => __( 'Once Weekly', 'faracart' ),
 		);
 
 		return $schedules;
@@ -331,7 +331,7 @@ class Installer {
 	 * @return void
 	 */
 	protected static function cleanup_generated_coupons() {
-		$generated = get_option( 'goalcart_generated_coupons', array() );
+		$generated = get_option( 'faracart_generated_coupons', array() );
 		$generated = is_array( $generated ) ? $generated : array();
 
 		if ( class_exists( 'WC_Coupon' ) && function_exists( 'wc_get_coupon_id_by_code' ) ) {
@@ -344,6 +344,6 @@ class Installer {
 			}
 		}
 
-		delete_option( 'goalcart_generated_coupons' );
+		delete_option( 'faracart_generated_coupons' );
 	}
 }

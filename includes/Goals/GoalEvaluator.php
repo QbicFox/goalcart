@@ -2,10 +2,10 @@
 /**
  * Goal evaluator interface.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals;
+namespace FaraCart\Goals;
 
 defined( 'ABSPATH' ) || exit;
 

@@ -9,7 +9,7 @@ import { comparisonRange, isFixedPreset, isYmd, normalizeBounds, presetRange } f
 import type { DateRange, FixedRangePreset } from './types';
 
 /** localStorage key holding the persisted range JSON. */
-const STORAGE_KEY = 'goalcart:dateRange';
+const STORAGE_KEY = 'faracart:dateRange';
 
 /** Fallback selection when nothing is persisted and no URL params exist. */
 const DEFAULT_PRESET: FixedRangePreset = 'last30';

@@ -35,23 +35,23 @@ import type { CostCoveragePayload, GoalRecommendationsPayload, RecommendationCan
  */
 function confidenceTier(confidence: number): { label: string; color: 'success' | 'warning' | 'default'; icon: ReactElement } {
   if (confidence >= 75) {
-    return { label: __('High', 'goalcart'), color: 'success', icon: <CheckCircleOutlineOutlinedIcon fontSize="small" /> };
+    return { label: __('High', 'faracart'), color: 'success', icon: <CheckCircleOutlineOutlinedIcon fontSize="small" /> };
   }
   if (confidence >= 60) {
-    return { label: __('Medium', 'goalcart'), color: 'warning', icon: <InfoOutlinedIcon fontSize="small" /> };
+    return { label: __('Medium', 'faracart'), color: 'warning', icon: <InfoOutlinedIcon fontSize="small" /> };
   }
-  return { label: __('Low', 'goalcart'), color: 'default', icon: <InfoOutlinedIcon fontSize="small" /> };
+  return { label: __('Low', 'faracart'), color: 'default', icon: <InfoOutlinedIcon fontSize="small" /> };
 }
 
 /** Data-sufficiency tier translated to business language (§45). */
 function sufficiencyLabel(status: string): string {
   if (status === 'high_confidence') {
-    return __('Good data', 'goalcart');
+    return __('Good data', 'faracart');
   }
   if (status === 'reliable') {
-    return __('Moderate data', 'goalcart');
+    return __('Moderate data', 'faracart');
   }
-  return __('Limited data', 'goalcart');
+  return __('Limited data', 'faracart');
 }
 
 /** Small caption/value stat (optional progress bar) used in the cards. */
@@ -109,7 +109,7 @@ function AdvancedDetails({ candidate }: { candidate: RecommendationCandidate }) 
   return (
     <Stack spacing={1.5}>
       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-        {__('Advanced details', 'goalcart')}
+        {__('Advanced details', 'faracart')}
       </Typography>
 
       <Box
@@ -119,28 +119,28 @@ function AdvancedDetails({ candidate }: { candidate: RecommendationCandidate }) 
           gap: 1.5,
         }}
       >
-        <StatBox label={__('Score', 'goalcart')} value={`${formatNumber(candidate.score)} / 100`} bar={candidate.score} />
+        <StatBox label={__('Score', 'faracart')} value={`${formatNumber(candidate.score)} / 100`} bar={candidate.score} />
         <StatBox
-          label={__('Confidence', 'goalcart')}
+          label={__('Confidence', 'faracart')}
           value={formatPercentValue(candidate.confidence)}
           bar={candidate.confidence}
         />
         <StatBox
-          label={__('Expected completion', 'goalcart')}
+          label={__('Expected completion', 'faracart')}
           value={formatPercent(candidate.expected_completion_rate)}
         />
         <StatBox
-          label={__('Reachable orders', 'goalcart')}
+          label={__('Reachable orders', 'faracart')}
           value={formatPercentValue(candidate.reachable_orders_pct)}
         />
         {candidate.reward_cost !== null && (
-          <StatBox label={__('Estimated reward cost', 'goalcart')} value={formatCurrency(candidate.reward_cost)} />
+          <StatBox label={__('Estimated reward cost', 'faracart')} value={formatCurrency(candidate.reward_cost)} />
         )}
       </Box>
 
       <Box>
         <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
-          {__('Scoring factors', 'goalcart')}
+          {__('Scoring factors', 'faracart')}
         </Typography>
         <Box
           sx={{
@@ -150,24 +150,24 @@ function AdvancedDetails({ candidate }: { candidate: RecommendationCandidate }) 
             mt: 0.75,
           }}
         >
-          <StatBox label={__('Reachability', 'goalcart')} value={formatNumber(factors.reachability_score)} />
-          <StatBox label={__('Distance', 'goalcart')} value={formatNumber(factors.distance_score)} />
-          <StatBox label={__('Economics', 'goalcart')} value={formatNumber(factors.economics_score)} />
-          <StatBox label={__('History', 'goalcart')} value={formatNumber(factors.history_score)} />
+          <StatBox label={__('Reachability', 'faracart')} value={formatNumber(factors.reachability_score)} />
+          <StatBox label={__('Distance', 'faracart')} value={formatNumber(factors.distance_score)} />
+          <StatBox label={__('Economics', 'faracart')} value={formatNumber(factors.economics_score)} />
+          <StatBox label={__('History', 'faracart')} value={formatNumber(factors.history_score)} />
         </Box>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mt: 1 }}>
           {factors.aov_ratio !== null && (
-            <Factor label={__('AOV ratio', 'goalcart')} value={`${formatNumber(factors.aov_ratio)}×`} />
+            <Factor label={__('AOV ratio', 'faracart')} value={`${formatNumber(factors.aov_ratio)}×`} />
           )}
           {factors.median_ratio !== null && (
-            <Factor label={__('Median ratio', 'goalcart')} value={`${formatNumber(factors.median_ratio)}×`} />
+            <Factor label={__('Median ratio', 'faracart')} value={`${formatNumber(factors.median_ratio)}×`} />
           )}
-          <Factor label={__('Reach share', 'goalcart')} value={formatPercent(factors.reach_share)} />
-          <Factor label={__('Already at share', 'goalcart')} value={formatPercent(factors.already_at_share)} />
+          <Factor label={__('Reach share', 'faracart')} value={formatPercent(factors.reach_share)} />
+          <Factor label={__('Already at share', 'faracart')} value={formatPercent(factors.already_at_share)} />
           {/* margin_pct is a 0–1 rate (e.g. 0.6 = 60%) — formatPercent
               multiplies by 100; formatPercentValue would print "0.6%". */}
           {factors.margin_pct !== null && (
-            <Factor label={__('Margin', 'goalcart')} value={formatPercent(factors.margin_pct)} />
+            <Factor label={__('Margin', 'faracart')} value={formatPercent(factors.margin_pct)} />
           )}
         </Box>
       </Box>
@@ -188,31 +188,31 @@ function CurrentGoalBlock({ history }: { history: RecommendationGoalHistory | nu
   const profitValue =
     history.profit_available && history.estimated_profit !== null
       ? formatCurrency(history.estimated_profit)
-      : __('Not available', 'goalcart');
+      : __('Not available', 'faracart');
 
   return (
     <Box sx={{ mb: 2 }}>
       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-        {__('Current goal', 'goalcart')}
+        {__('Current goal', 'faracart')}
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 1.5, mt: 1 }}>
-        <StatBox label={__('Current target', 'goalcart')} value={formatCurrency(history.current_target)} />
+        <StatBox label={__('Current target', 'faracart')} value={formatCurrency(history.current_target)} />
         <StatBox
-          label={__('Reward', 'goalcart')}
-          value={history.reward_type ? (REWARD_LABELS[history.reward_type] ?? history.reward_type) : __('None', 'goalcart')}
+          label={__('Reward', 'faracart')}
+          value={history.reward_type ? (REWARD_LABELS[history.reward_type] ?? history.reward_type) : __('None', 'faracart')}
         />
         <StatBox
-          label={__('Completion rate', 'goalcart')}
+          label={__('Completion rate', 'faracart')}
           value={history.completion_rate === null ? '—' : formatPercent(history.completion_rate)}
         />
         <StatBox
-          label={__('Purchase rate', 'goalcart')}
+          label={__('Purchase rate', 'faracart')}
           value={history.purchase_rate === null ? '—' : formatPercent(history.purchase_rate)}
         />
-        <StatBox label={__('Attributed sales', 'goalcart')} value={formatCurrency(history.attributed_sales)} />
-        <StatBox label={__('Estimated profit', 'goalcart')} value={profitValue} />
+        <StatBox label={__('Attributed sales', 'faracart')} value={formatCurrency(history.attributed_sales)} />
+        <StatBox label={__('Estimated profit', 'faracart')} value={profitValue} />
         <StatBox
-          label={__('Upsell-assisted completions', 'goalcart')}
+          label={__('Upsell-assisted completions', 'faracart')}
           value={formatNumber(history.upsell_assisted)}
         />
       </Box>
@@ -250,7 +250,7 @@ function TopRecommendationCard({
         size="small"
         color="primary"
         icon={<TipsAndUpdatesIcon />}
-        label={__('Top recommendation', 'goalcart')}
+        label={__('Top recommendation', 'faracart')}
         sx={{ position: 'absolute', top: -12, insetInlineStart: 16 }}
       />
       {goalName && (
@@ -266,7 +266,7 @@ function TopRecommendationCard({
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'flex-end' }}>
         <Box sx={{ minWidth: 190 }}>
           <Typography variant="caption" color="text.secondary">
-            {__('Recommended Goal Target', 'goalcart')}
+            {__('Recommended Goal Target', 'faracart')}
           </Typography>
           <Typography variant="h4" component="p" sx={{ m: 0, fontWeight: 700 }}>
             {formatCurrency(candidate.threshold)}
@@ -279,32 +279,32 @@ function TopRecommendationCard({
             variant="outlined"
             color={tier.color}
             icon={tier.icon}
-            label={`${__('Confidence', 'goalcart')}: ${tier.label}`}
+            label={`${__('Confidence', 'faracart')}: ${tier.label}`}
           />
         </Box>
 
         <Box>
           <Typography variant="caption" color="text.secondary">
-            {__('Expected impact', 'goalcart')}
+            {__('Expected impact', 'faracart')}
           </Typography>
           <Typography variant="h6" component="p" sx={{ m: 0 }}>
             +{formatPercentValue(candidate.expected_aov_impact.low)} – +{formatPercentValue(candidate.expected_aov_impact.high)}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {__('average basket value', 'goalcart')}
+            {__('average basket value', 'faracart')}
           </Typography>
         </Box>
 
         <Box>
           <Typography variant="caption" color="text.secondary">
-            {__('Expected profit', 'goalcart')}
+            {__('Expected profit', 'faracart')}
           </Typography>
           <Typography variant="h6" component="p" sx={{ m: 0 }}>
-            {profitAvailable ? formatCurrency(candidate.expected_profit as number) : __('Not available', 'goalcart')}
+            {profitAvailable ? formatCurrency(candidate.expected_profit as number) : __('Not available', 'faracart')}
           </Typography>
           {!profitAvailable && (
             <Typography variant="caption" color="text.secondary">
-              {__('Add product cost data to estimate profitability.', 'goalcart')}
+              {__('Add product cost data to estimate profitability.', 'faracart')}
             </Typography>
           )}
         </Box>
@@ -313,7 +313,7 @@ function TopRecommendationCard({
       {/* Why? — the plain-English reasons belong on the primary view (§33). */}
       <Box sx={{ mt: 2 }}>
         <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {__('Why?', 'goalcart')}
+          {__('Why?', 'faracart')}
         </Typography>
         <Stack spacing={0.5} sx={{ mt: 0.5 }}>
           {candidate.reasons.map((reason, index) => (
@@ -340,13 +340,13 @@ function TopRecommendationCard({
           disabled={goalId < 1}
           onClick={() => onApply(candidate)}
         >
-          {__('Apply recommendation', 'goalcart')}
+          {__('Apply recommendation', 'faracart')}
         </Button>
         <Button variant="outlined" onClick={onToggleDetails} aria-expanded={detailsOpen}>
-          {detailsOpen ? __('Hide details', 'goalcart') : __('View details', 'goalcart')}
+          {detailsOpen ? __('Hide details', 'faracart') : __('View details', 'faracart')}
         </Button>
         <Button variant="text" color="inherit" onClick={onDismiss}>
-          {__('Dismiss', 'goalcart')}
+          {__('Dismiss', 'faracart')}
         </Button>
       </Stack>
     </Paper>
@@ -366,13 +366,13 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center', mb: 1.5 }}>
         <InfoOutlinedIcon fontSize="small" color="action" />
         <Typography variant="h6" component="h3" sx={{ mb: 0 }}>
-          {__('Analyzed store data', 'goalcart')}
+          {__('Analyzed store data', 'faracart')}
         </Typography>
       </Stack>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
         <Stack spacing={0.5}>
           <Typography variant="caption" color="text.secondary">
-            {__('Average order value', 'goalcart')}
+            {__('Average order value', 'faracart')}
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 600 }}>
             {formatCurrency(data.aov)}
@@ -380,7 +380,7 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
         </Stack>
         <Stack spacing={0.5}>
           <Typography variant="caption" color="text.secondary">
-            {__('Median order value', 'goalcart')}
+            {__('Median order value', 'faracart')}
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 600 }}>
             {formatCurrency(data.median)}
@@ -388,7 +388,7 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
         </Stack>
         <Stack spacing={0.5}>
           <Typography variant="caption" color="text.secondary">
-            {__('Orders analyzed', 'goalcart')}
+            {__('Orders analyzed', 'faracart')}
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 600 }}>
             {formatNumber(payload.orders)}
@@ -396,12 +396,12 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
         </Stack>
         <Stack spacing={0.5}>
           <Typography variant="caption" color="text.secondary">
-            {__('Window', 'goalcart')}
+            {__('Window', 'faracart')}
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 600 }}>
             {sprintf(
               /* translators: 1: days. */
-              __('%d days', 'goalcart'),
+              __('%d days', 'faracart'),
               payload.window_days
             )}
           </Typography>
@@ -409,7 +409,7 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
         {data.shipping.available && (
           <Stack spacing={0.5}>
             <Typography variant="caption" color="text.secondary">
-              {__('Avg. shipping', 'goalcart')}
+              {__('Avg. shipping', 'faracart')}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
               {formatCurrency(data.shipping.average_shipping ?? 0)}
@@ -419,7 +419,7 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
         {data.margin && data.margin.available && (
           <Stack spacing={0.5}>
             <Typography variant="caption" color="text.secondary">
-              {__('Avg. margin', 'goalcart')}
+              {__('Avg. margin', 'faracart')}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 600 }}>
               {/* average_margin_pct is a 0–1 rate; the formatter renders
@@ -430,7 +430,7 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
         )}
         <Stack spacing={0.5}>
           <Typography variant="caption" color="text.secondary">
-            {__('Data sufficiency', 'goalcart')}
+            {__('Data sufficiency', 'faracart')}
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 600 }}>
             {sufficiencyLabel(payload.status)}
@@ -443,7 +443,7 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
           the share as a real percentage (never NaN on a 0-denominator). */}
       <Box sx={{ mt: 2 }}>
         <Typography variant="caption" color="text.secondary">
-          {__('Order value distribution (share of orders)', 'goalcart')}
+          {__('Order value distribution (share of orders)', 'faracart')}
         </Typography>
         <Stack spacing={0.75} sx={{ mt: 1 }}>
           {data.distribution.map((bucket) => (
@@ -472,7 +472,7 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
  * UICHANGES.md §40 label).
  *
  * The admin-facing surface that answers "what Goal configuration should
- * I use?" — the `GET /goalcart/v1/revenue/goal-recommendations` payload:
+ * I use?" — the `GET /faracart/v1/revenue/goal-recommendations` payload:
  * analyzed store data plus the single best recommendation. The backend
  * engine generates and ranks every eligible candidate deterministically
  * (score desc, ties → lower threshold) and returns the best one as
@@ -569,13 +569,13 @@ export default function Recommendations() {
   const applyMutation = useMutation({
     mutationFn: async (target: number) => {
       if (goalId < 1) {
-        throw new Error(__('Select a goal to apply the recommendation to.', 'goalcart'));
+        throw new Error(__('Select a goal to apply the recommendation to.', 'faracart'));
       }
 
       await applyGoalRecommendation(goalId, target);
     },
     onSuccess: () => {
-      notify(__('Goal target updated.', 'goalcart'));
+      notify(__('Goal target updated.', 'faracart'));
       setApplyTarget(null);
       queryClient.invalidateQueries({ queryKey: ['goals'] });
       queryClient.invalidateQueries({ queryKey: ['revenue'] });
@@ -592,17 +592,17 @@ export default function Recommendations() {
 
   return (
     <PageContainer
-      title={__('Recommendations', 'goalcart')}
+      title={__('Recommendations', 'faracart')}
       description={__(
         'Improve your Goals using store performance data — which target and reward configuration to use, and why.',
-        'goalcart'
+        'faracart'
       )}
     >
       {/* §39: the one-line distinction that removes the conceptual confusion. */}
       <Alert severity="info" variant="outlined" icon={<TipsAndUpdatesIcon fontSize="small" />}>
         {__(
           'Recommendations helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells.',
-          'goalcart'
+          'faracart'
         )}
       </Alert>
 
@@ -611,23 +611,23 @@ export default function Recommendations() {
       {goalId < 1 ? (
         <EmptyState
           icon={<TipsAndUpdatesIcon fontSize="large" />}
-          title={__('Select a goal', 'goalcart')}
+          title={__('Select a goal', 'faracart')}
           description={__(
             'To see the best optimization recommendation for a goal, first choose one of your store goals.',
-            'goalcart'
+            'faracart'
           )}
         />
       ) : goalMissing ? (
         <EmptyState
           icon={<TipsAndUpdatesIcon fontSize="large" />}
-          title={__('The selected goal could not be found', 'goalcart')}
-          description={__('Please select another goal.', 'goalcart')}
+          title={__('The selected goal could not be found', 'faracart')}
+          description={__('Please select another goal.', 'faracart')}
         />
       ) : query.isError ? (
         <Alert severity="error" variant="outlined">
           {query.error instanceof Error
             ? query.error.message
-            : __('Could not load recommendations.', 'goalcart')}
+            : __('Could not load recommendations.', 'faracart')}
         </Alert>
       ) : query.isLoading ? (
         <Stack spacing={2}>
@@ -637,8 +637,8 @@ export default function Recommendations() {
       ) : !payload ? null : !payload.available || !ownsGoal ? (
         <EmptyState
           icon={<TipsAndUpdatesIcon fontSize="large" />}
-          title={__('No recommendation available', 'goalcart')}
-          description={payload.insufficient_reason ?? __('Not enough data for a reliable recommendation.', 'goalcart')}
+          title={__('No recommendation available', 'faracart')}
+          description={payload.insufficient_reason ?? __('Not enough data for a reliable recommendation.', 'faracart')}
         />
       ) : payload.data ? (
         <>
@@ -670,28 +670,28 @@ export default function Recommendations() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  {__('Manage product costs', 'goalcart')}
+                  {__('Manage product costs', 'faracart')}
                 </Button>
               }
             >
               {coverage.product_coverage.coverage_pct !== null
                 ? sprintf(
                     /* translators: 1: products with cost, 2: total products, 3: coverage percentage. */
-                    __('Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Goal economics.', 'goalcart'),
+                    __('Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Goal economics.', 'faracart'),
                     formatNumber(coverage.product_coverage.products_with_cost),
                     formatNumber(coverage.product_coverage.total_products),
                     // coverage_pct is already a 0–100 percentage point value
                     // (never divide by 100 and print as a 0–1 rate).
                     formatPercentValue(coverage.product_coverage.coverage_pct)
                   )
-                : __('Profit estimates need product cost data. Add product costs on your products to enable Goal economics.', 'goalcart')}
+                : __('Profit estimates need product cost data. Add product costs on your products to enable Goal economics.', 'faracart')}
             </Alert>
           )}
 
           {/* Restore the dismissed top recommendation. */}
           {top && topDismissed && (
             <Button size="small" variant="text" startIcon={<TipsAndUpdatesIcon />} onClick={() => setTopDismissed(false)}>
-              {__('Show the top recommendation again', 'goalcart')}
+              {__('Show the top recommendation again', 'faracart')}
             </Button>
           )}
 
@@ -703,7 +703,7 @@ export default function Recommendations() {
 
       <ConfirmDialog
         open={applyTarget !== null}
-        title={__('Apply recommendation?', 'goalcart')}
+        title={__('Apply recommendation?', 'faracart')}
         description={
           applyTarget ? (
             <>
@@ -711,27 +711,27 @@ export default function Recommendations() {
                 <>
                   {sprintf(
                     /* translators: 1: current target. */
-                    __('Current target: %1$s', 'goalcart'),
+                    __('Current target: %1$s', 'faracart'),
                     formatCurrency(goalHistory.current_target)
                   )}{' '}
                   {sprintf(
                     /* translators: 1: recommended target. */
-                    __('→ %1$s', 'goalcart'),
+                    __('→ %1$s', 'faracart'),
                     formatCurrency(applyTarget.threshold)
                   )}
                 </>
               ) : (
                 sprintf(
                   /* translators: 1: threshold. */
-                  __('Set the goal target to %s?', 'goalcart'),
+                  __('Set the goal target to %s?', 'faracart'),
                   formatCurrency(applyTarget.threshold)
                 )
               )}{' '}
-              {__('This changes a production goal — the action is not reversible from here.', 'goalcart')}
+              {__('This changes a production goal — the action is not reversible from here.', 'faracart')}
             </>
           ) : undefined
         }
-        confirmLabel={__('Apply', 'goalcart')}
+        confirmLabel={__('Apply', 'faracart')}
         busy={applyMutation.isPending}
         onConfirm={() => {
           if (applyTarget) {

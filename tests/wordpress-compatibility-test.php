@@ -44,10 +44,10 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Compatibility;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\REST\BaseController;
+use FaraCart\Compatibility;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\REST\BaseController;
 
 $failures = 0;
 $checks   = 0;
@@ -91,7 +91,7 @@ echo "\n== 2. Plugin header ==\n";
 require_once ABSPATH . 'wp-admin/includes/plugin.php';
 
 $header = get_file_data(
-	GOALCART_FILE,
+	FARACART_FILE,
 	array(
 		'requires_wp'   => 'Requires at least',
 		'requires_php'  => 'Requires PHP',
@@ -103,7 +103,7 @@ $header = get_file_data(
 
 check( 'header requires WordPress >= ' . Compatibility::REQUIRED_WP, version_compare( (string) $header['requires_wp'], Compatibility::REQUIRED_WP, '>=' ) );
 check( 'header declares Requires PHP >= 7.4', version_compare( (string) $header['requires_php'], Compatibility::REQUIRED_PHP, '>=' ) );
-check( 'header text domain matches', 'goalcart' === $header['text_domain'] );
+check( 'header text domain matches', 'faracart' === $header['text_domain'] );
 check( 'header domain path set', '/languages' === $header['domain_path'] );
 check(
 	'header WC version gate matches the Compatibility constant',
@@ -117,11 +117,11 @@ echo "\n== 3. Activation & deactivation ==\n";
 
 check(
 	'activation hook registered',
-	false !== has_action( 'activate_' . GOALCART_BASENAME, array( Installer::class, 'activate' ) )
+	false !== has_action( 'activate_' . FARACART_BASENAME, array( Installer::class, 'activate' ) )
 );
 check(
 	'deactivation hook registered',
-	false !== has_action( 'deactivate_' . GOALCART_BASENAME, array( Installer::class, 'deactivate' ) )
+	false !== has_action( 'deactivate_' . FARACART_BASENAME, array( Installer::class, 'deactivate' ) )
 );
 check(
 	'plugins_loaded compatibility gate wired',
@@ -144,12 +144,12 @@ echo "\n== 4. Multisite behavior ==\n";
 global $wpdb;
 
 check( 'Schema::table uses the per-site $wpdb->prefix', false !== strpos( Schema::table( 'goals' ), $wpdb->prefix ) );
-check( 'table includes the plugin prefix', false !== strpos( Schema::table( 'goals' ), 'goalcart_goals' ) );
+check( 'table includes the plugin prefix', false !== strpos( Schema::table( 'goals' ), 'faracart_goals' ) );
 check( 'SQLite option-suffixed tables not used (options path is per-site)', function_exists( 'add_option' ) );
 
 // Options are per-site by default in WordPress; the plugin stores its
 // schema version + settings in options (auto-loaded per site).
-check( 'db-version option key is plugin-scoped', 0 === strpos( Installer::DB_VERSION_OPTION, 'goalcart_' ) );
+check( 'db-version option key is plugin-scoped', 0 === strpos( Installer::DB_VERSION_OPTION, 'faracart_' ) );
 
 // ---------------------------------------------------------------------------
 // 5. Localization
@@ -158,14 +158,14 @@ echo "\n== 5. Localization ==\n";
 
 check(
 	'plugin text domain loads on init',
-	false !== has_action( 'init', array( GoalCart\Plugin::instance(), 'load_textdomain' ) )
+	false !== has_action( 'init', array( FaraCart\Plugin::instance(), 'load_textdomain' ) )
 );
-// load_textdomain() calls load_plugin_textdomain( 'goalcart', false,
-// dirname( GOALCART_BASENAME ) . '/languages' ) — the relative path must
+// load_textdomain() calls load_plugin_textdomain( 'faracart', false,
+// dirname( FARACART_BASENAME ) . '/languages' ) — the relative path must
 // resolve to <plugin>/languages from the plugins dir.
 check(
 	'text domain path resolves to <plugin>/languages',
-	'goalcart/languages' === dirname( GOALCART_BASENAME ) . '/languages'
+	'faracart/languages' === dirname( FARACART_BASENAME ) . '/languages'
 );
 
 // All strings are translatable via WP functions.
@@ -178,13 +178,13 @@ echo "\n== 6. RTL ==\n";
 
 // Admin dashboard sets the dir attribute for RTL locales.
 ob_start();
-GoalCart\Plugin::instance()->admin()->render_dashboard();
+FaraCart\Plugin::instance()->admin()->render_dashboard();
 $dashboard_output = ob_get_clean();
 
 check( 'admin dashboard carries an LTR/RTL dir', false !== strpos( $dashboard_output, 'dir="' ) );
 
 // Frontend config exposes isRtl to the storefront widgets.
-$config = GoalCart\Plugin::instance()->container()->get( \GoalCart\Frontend\ProgressUI::class )->frontend_config();
+$config = FaraCart\Plugin::instance()->container()->get( \FaraCart\Frontend\ProgressUI::class )->frontend_config();
 check( 'frontend config is RTL-aware', array_key_exists( 'isRtl', $config ) );
 
 // ---------------------------------------------------------------------------
@@ -193,16 +193,16 @@ check( 'frontend config is RTL-aware', array_key_exists( 'isRtl', $config ) );
 echo "\n== 7. Admin capabilities ==\n";
 
 check(
-	'admin menu capability filterable (goalcart_admin_capability)',
-	is_string( apply_filters( 'goalcart_admin_capability', 'manage_options' ) )
+	'admin menu capability filterable (faracart_admin_capability)',
+	is_string( apply_filters( 'faracart_admin_capability', 'manage_options' ) )
 );
 check(
 	'REST endpoints use the shared capability',
 	'manage_options' === BaseController::CAPABILITY
 );
 check(
-	'REST capability filterable (goalcart_rest_capability)',
-	is_array( apply_filters( 'goalcart_rest_capability', 'manage_options' ) ) || is_string( apply_filters( 'goalcart_rest_capability', 'manage_options' ) )
+	'REST capability filterable (faracart_rest_capability)',
+	is_array( apply_filters( 'faracart_rest_capability', 'manage_options' ) ) || is_string( apply_filters( 'faracart_rest_capability', 'manage_options' ) )
 );
 
 // ---------------------------------------------------------------------------

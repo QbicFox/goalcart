@@ -2,13 +2,13 @@
 /**
  * Settings management for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Settings;
+namespace FaraCart\Settings;
 
-use GoalCart\Goals\Goal;
-use GoalCart\Hooks\HookManager;
+use FaraCart\Goals\Goal;
+use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -33,7 +33,7 @@ class Settings {
 	 *
 	 * @var string
 	 */
-	const OPTION_NAME = 'goalcart_settings';
+	const OPTION_NAME = 'faracart_settings';
 
 	/**
 	 * The storefront goal template ids the frontend_template setting
@@ -62,6 +62,11 @@ class Settings {
 		// General (P18-T01).
 		'enabled'               => true,
 		'fullscreen_dashboard'  => true,
+		// Display currency unit override: '' = follow the WooCommerce store
+		// currency (get_woocommerce_currency). A 3-letter ISO code overrides
+		// it for every FaraCart-rendered amount (admin dashboard, storefront
+		// widgets, previews, server-rendered messages) — see currency().
+		'currency'              => '',
 		'currency_display'      => 'symbol',           // symbol | code | name
 		'default_goal_behavior' => 'all',              // all | first | closest
 		'conflict_resolution'   => 'cumulative',       // cumulative | best | first (Phase 26)
@@ -147,7 +152,7 @@ class Settings {
  *
  * Phase 18 wires the settings into behavior here: the store-wide default
  * money basis (calculation_mode) applies to any goal that does not pin
- * its own mode, through the goalcart_default_calculation_mode filter
+ * its own mode, through the faracart_default_calculation_mode filter
  * (Goal::default_calculation_mode). The remaining settings are read
  * directly by their consumers (ProgressUI, FrontendController,
  * CartIntegration, Tracker) through the same service instance.
@@ -157,7 +162,7 @@ class Settings {
  */
 	public function register( HookManager $hooks ) {
 		$hooks->add_filter(
-			'goalcart_default_calculation_mode',
+			'faracart_default_calculation_mode',
 			array( $this, 'apply_default_calculation_mode' ),
 			10,
 			2
@@ -303,5 +308,36 @@ class Settings {
 	 */
 	public function defaults() {
 		return $this->defaults;
+	}
+
+	/**
+	 * Resolve the display currency unit.
+	 *
+	 * Single source of truth for the currency every FaraCart-rendered
+	 * amount is labelled with (admin dashboard, storefront widgets,
+	 * previews and server-rendered messages). An empty `currency` setting
+	 * follows the WooCommerce store currency; a configured 3-letter ISO
+	 * code overrides it. Filterable via `faracart_currency` so
+	 * integrations can pin the display unit without touching the option.
+	 *
+	 * @return string Uppercase ISO-4217 code.
+	 */
+	public function currency() {
+		$configured = strtoupper( trim( (string) $this->get( 'currency', '' ) ) );
+
+		if ( '' !== $configured ) {
+			$configured = (string) apply_filters( 'faracart_currency', $configured );
+
+			return '' !== $configured ? $configured : 'USD';
+		}
+
+		$store = function_exists( 'get_woocommerce_currency' ) ? (string) get_woocommerce_currency() : 'USD';
+
+		/**
+		 * Filter the resolved display currency.
+		 *
+		 * @param string $currency Uppercase ISO-4217 code.
+		 */
+		return (string) apply_filters( 'faracart_currency', $store );
 	}
 }

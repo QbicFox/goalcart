@@ -2,20 +2,20 @@
 /**
  * REST controller for the smart upsell ranking + historical tracking.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Analytics\Session;
-use GoalCart\Analytics\UpsellRanker;
-use GoalCart\Cart\CartIntegration;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Hooks\HookManager;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Analytics\Session;
+use FaraCart\Analytics\UpsellRanker;
+use FaraCart\Cart\CartIntegration;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -25,14 +25,14 @@ defined( 'ABSPATH' ) || exit;
  * Phase 33.5 (Smart Upsell) — the endpoints behind the ranking engine and
  * its historical learning loop:
  *
- *  - `POST /goalcart/v1/upsell/track` — public, nonce-guarded (the same
+ *  - `POST /faracart/v1/upsell/track` — public, nonce-guarded (the same
  *    tracking nonce the storefront already holds): the frontend reports
  *    upsell_impression / upsell_clicked / upsell_added events into the
  *    Phase 33.1 upsell_events log. Server-side attribution of upsell_order
  *    events happens on order payment (UpsellRanker hooks), so a client
  *    can never self-report a purchase. Rate limited per IP.
  *
- *  - `GET /goalcart/v1/upsell/rank` — public, per-IP rate limited (Phase
+ *  - `GET /faracart/v1/upsell/rank` — public, per-IP rate limited (Phase
  *    33.7 Frontend Upsell Integration): ranked products that help the
  *    shopper close the live goal gap. The server resolves the goal
  *    (explicit goal_id, or the featured active money goal), computes the
@@ -44,7 +44,7 @@ defined( 'ABSPATH' ) || exit;
  *    image, reasons) with no PII or secrets — the same privacy posture
  *    as the public /progress endpoint.
  *
- *  - `GET /goalcart/v1/revenue/upsells` — admin-only. Two modes:
+ *  - `GET /faracart/v1/revenue/upsells` — admin-only. Two modes:
  *      - context mode (default): ranked upsell products for a simulated
  *        cart + goal (goal_id, cart_value, remaining, cart, limit) — the
  *        engine's full payload with per-product score breakdowns,
@@ -54,7 +54,7 @@ defined( 'ABSPATH' ) || exit;
  *        revenue / estimated profit / upsell score) over the requested
  *        window — the Phase 33.6 Upsell Analytics page's data source.
  *
- *  - `GET /goalcart/v1/revenue/upsells/{product_id}` — admin-only: one
+ *  - `GET /faracart/v1/revenue/upsells/{product_id}` — admin-only: one
  *    product's upsell score breakdown + historical stats, scored in the
  *    given context (or standalone when no context args are passed).
  *
@@ -207,10 +207,10 @@ class UpsellController extends BaseController {
 	 * @return true|\WP_Error
 	 */
 	public function permission_callback( $request ) {
-		if ( ! wp_verify_nonce( (string) $request->get_param( 'nonce' ), \GoalCart\Analytics\Tracker::TRACK_NONCE_ACTION ) ) {
+		if ( ! wp_verify_nonce( (string) $request->get_param( 'nonce' ), \FaraCart\Analytics\Tracker::TRACK_NONCE_ACTION ) ) {
 			return $this->error(
-				'goalcart_invalid_nonce',
-				__( 'Invalid tracking nonce.', 'goalcart' ),
+				'faracart_invalid_nonce',
+				__( 'Invalid tracking nonce.', 'faracart' ),
 				403
 			);
 		}
@@ -238,8 +238,8 @@ class UpsellController extends BaseController {
 	public function handle_track( $request ) {
 		if ( ! class_exists( RevenueTracker::class ) ) {
 			return $this->error(
-				'goalcart_tracking_disabled',
-				__( 'Tracking is disabled.', 'goalcart' ),
+				'faracart_tracking_disabled',
+				__( 'Tracking is disabled.', 'faracart' ),
 				403
 			);
 		}
@@ -248,20 +248,20 @@ class UpsellController extends BaseController {
 
 		if ( ! in_array( $event_type, array( RevenueTracker::EVENT_UPSELL_IMPRESSION, RevenueTracker::EVENT_UPSELL_CLICKED, RevenueTracker::EVENT_UPSELL_ADDED ), true ) ) {
 			return $this->error(
-				'goalcart_invalid_event_type',
-				__( 'Unknown upsell event type.', 'goalcart' ),
+				'faracart_invalid_event_type',
+				__( 'Unknown upsell event type.', 'faracart' ),
 				400
 			);
 		}
 
 		$session_id = (string) $request->get_param( 'session_id' );
 
-		$tracker = \GoalCart\Plugin::instance()->container()->get( RevenueTracker::class );
+		$tracker = \FaraCart\Plugin::instance()->container()->get( RevenueTracker::class );
 
 		if ( ! $tracker->tracking_enabled() ) {
 			return $this->error(
-				'goalcart_tracking_disabled',
-				__( 'Tracking is disabled.', 'goalcart' ),
+				'faracart_tracking_disabled',
+				__( 'Tracking is disabled.', 'faracart' ),
 				403
 			);
 		}
@@ -291,8 +291,8 @@ class UpsellController extends BaseController {
 			// action. Only gate/whitelist failures are surfaced.
 			if ( ! $tracker->tracking_enabled() ) {
 				return $this->error(
-					'goalcart_tracking_disabled',
-					__( 'Tracking is disabled.', 'goalcart' ),
+					'faracart_tracking_disabled',
+					__( 'Tracking is disabled.', 'faracart' ),
 					403
 				);
 			}
@@ -543,8 +543,8 @@ class UpsellController extends BaseController {
 
 		if ( $product_id < 1 ) {
 			return $this->error(
-				'goalcart_invalid_product',
-				__( 'Invalid product id.', 'goalcart' ),
+				'faracart_invalid_product',
+				__( 'Invalid product id.', 'faracart' ),
 				400
 			);
 		}
@@ -560,8 +560,8 @@ class UpsellController extends BaseController {
 
 		if ( null === $detail ) {
 			return $this->error(
-				'goalcart_product_not_found',
-				__( 'The product could not be found.', 'goalcart' ),
+				'faracart_product_not_found',
+				__( 'The product could not be found.', 'faracart' ),
 				404
 			);
 		}

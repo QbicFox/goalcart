@@ -2,12 +2,12 @@
 /**
  * Debug log utility for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Utils;
+namespace FaraCart\Utils;
 
-use GoalCart\Settings\Settings;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  *  - `debug_mode`      — when off, only `error`-level entries are written;
  *                        when on, `debug`-level entries are written too.
  *
- * Entries are appended to a single `goalcart-debug.log` file in
+ * Entries are appended to a single `faracart-debug.log` file in
  * WP_CONTENT_DIR, one line per entry, UTC-timestamped. The path is
  * surfaced in the admin Settings page when logging is enabled.
  *
@@ -37,7 +37,7 @@ class Logger {
 	 *
 	 * @var string
 	 */
-	const LOG_FILE = 'goalcart-debug.log';
+	const LOG_FILE = 'faracart-debug.log';
 
 	/**
 	 * Absolute path of the debug log file.

@@ -2,10 +2,10 @@
 /**
  * Template contract for the FaraCart template engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Templates;
+namespace FaraCart\Templates;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,7 +28,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Built-in templates live in `includes/Templates/Goal/` and
  * `includes/Templates/Campaign/` and are registered on plugin bootstrap
- * through the filterable `goalcart_template_classes` class map (the same
+ * through the filterable `faracart_template_classes` class map (the same
  * lazy registry convention as GoalEvaluatorRegistry / RewardApplicatorRegistry).
  *
  * @see TemplateRegistry

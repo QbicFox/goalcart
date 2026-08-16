@@ -17,7 +17,7 @@
  *    type, every item stays source 'suggestion' and is scored on the
  *    unified 0–100 scale through the ranker's normalized scorer
  *  - upsell-only pool: a candidate injected via the existing
- *    goalcart_upsell_candidates filter (outside every suggestion source)
+ *    faracart_upsell_candidates filter (outside every suggestion source)
  *    surfaces with source 'upsell' — the merged list never fabricates a
  *    suggestion label for it
  *  - merged score for a 'both' product equals the ranker's composite
@@ -25,9 +25,9 @@
  *  - deterministic ranking, cart-item exclusion, out-of-stock exclusion,
  *    cap at the configured limit, no padding to fill slots
  *  - item shape (id === product_id, name/permalink/price_html/source/score)
- *  - the goalcart_suggestions developer filter still applies
+ *  - the faracart_suggestions developer filter still applies
  *
- * The ranking sections pin `goalcart_upsell_weights` to relevance-only
+ * The ranking sections pin `faracart_upsell_weights` to relevance-only
  * (the ranker's own developer filter) so fixture goal products always
  * outrank the LIVE catalog's best sellers — the same live-DB robustness
  * the other suites rely on.
@@ -59,14 +59,14 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\UpsellRanker;
-use GoalCart\Database\Installer;
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Recommendations\ProductRecommendationEngine;
-use GoalCart\Settings\Settings;
-use GoalCart\Suggestions\SuggestionEngine;
+use FaraCart\Analytics\UpsellRanker;
+use FaraCart\Database\Installer;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Recommendations\ProductRecommendationEngine;
+use FaraCart\Settings\Settings;
+use FaraCart\Suggestions\SuggestionEngine;
 
 // The Phase 33 tables back the ranker's per-product stats (created by
 // Installer::maybe_upgrade(), which never fires in CLI after wp-load).
@@ -164,7 +164,7 @@ function item_ids( array $items ) {
  * @return void
  */
 function pin_relevance_weights() {
-	add_filter( 'goalcart_upsell_weights', function () {
+	add_filter( 'faracart_upsell_weights', function () {
 		return array(
 			'price_gap'  => 0,
 			'relevance'  => 1,
@@ -176,7 +176,7 @@ function pin_relevance_weights() {
 	} );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $engine   = $container->get( ProductRecommendationEngine::class );
 $ranker   = $container->get( UpsellRanker::class );
@@ -187,7 +187,7 @@ $settings = $container->get( Settings::class );
 // strategies always participate.
 $settings->set( 'enabled', true );
 $settings->set( 'analytics_enabled', true );
-add_filter( 'goalcart_upsells_enabled', '__return_true' );
+add_filter( 'faracart_upsells_enabled', '__return_true' );
 
 // ---------------------------------------------------------------------------
 // 1. Service wiring
@@ -267,7 +267,7 @@ try {
 
 	// The upsell-only injection target: no category, no links, sales 0 —
 	// outside the top-10 best sellers, so no suggestion source collects
-	// it. The goalcart_upsell_candidates filter (section 5) pushes it
+	// it. The faracart_upsell_candidates filter (section 5) pushes it
 	// through the ranker alone.
 	$p_t = make_product( 'Target', 55, array(), 'instock', 0 );
 	$created[] = $p_t;
@@ -380,11 +380,11 @@ try {
 	// weights — price-gap etc. — and a wide limit so the target is
 	// guaranteed a slot), while the suggestion half contributes its own
 	// items. The target must surface once, tagged 'upsell'.
-	remove_all_filters( 'goalcart_upsell_weights' );
-	add_filter( 'goalcart_upsell_candidates', function ( $candidates ) use ( $p_t ) {
+	remove_all_filters( 'faracart_upsell_weights' );
+	add_filter( 'faracart_upsell_candidates', function ( $candidates ) use ( $p_t ) {
 		return array( $p_t => UpsellRanker::SOURCE_POPULAR );
 	} );
-	add_filter( 'goalcart_frontend_upsell_limit', function () {
+	add_filter( 'faracart_frontend_upsell_limit', function () {
 		return 10;
 	} );
 
@@ -398,8 +398,8 @@ try {
 	check( 'ranker-only candidate keeps source upsell', 1 === count( $target_items ) && 'upsell' === $target_items[0]['source'] );
 	check( 'ranker-only candidate is scored on the 0–100 scale', 1 === count( $target_items ) && is_numeric( $target_items[0]['score'] ) && (float) $target_items[0]['score'] >= 0 && (float) $target_items[0]['score'] <= 100 );
 
-	remove_all_filters( 'goalcart_upsell_candidates' );
-	remove_all_filters( 'goalcart_frontend_upsell_limit' );
+	remove_all_filters( 'faracart_upsell_candidates' );
+	remove_all_filters( 'faracart_frontend_upsell_limit' );
 
 	// -----------------------------------------------------------------------
 	// 6. Configurable limit + developer filter.
@@ -408,25 +408,25 @@ try {
 
 	pin_relevance_weights();
 
-	add_filter( 'goalcart_frontend_upsell_limit', function () {
+	add_filter( 'faracart_frontend_upsell_limit', function () {
 		return 5;
 	} );
 	$wide_items = $engine->recommend( $goal, $result, $cart );
 	check( 'configured limit (5) respected without padding', 4 === count( $wide_items ) );
-	remove_all_filters( 'goalcart_frontend_upsell_limit' );
+	remove_all_filters( 'faracart_frontend_upsell_limit' );
 
-	add_filter( 'goalcart_suggestions', function ( $items ) {
+	add_filter( 'faracart_suggestions', function ( $items ) {
 		return array_slice( $items, 0, 1 ); // keep only the top recommendation
 	} );
 	$filtered = $engine->recommend( $goal, $result, $cart );
-	check( 'goalcart_suggestions developer filter still applies to the merged list', 1 === count( $filtered ) );
-	remove_all_filters( 'goalcart_suggestions' );
-	remove_all_filters( 'goalcart_upsell_weights' );
+	check( 'faracart_suggestions developer filter still applies to the merged list', 1 === count( $filtered ) );
+	remove_all_filters( 'faracart_suggestions' );
+	remove_all_filters( 'faracart_upsell_weights' );
 } finally {
 	$wpdb->query( 'ROLLBACK' );
 }
 
-remove_all_filters( 'goalcart_upsells_enabled' );
+remove_all_filters( 'faracart_upsells_enabled' );
 
 // ---------------------------------------------------------------------------
 // 7. Rollback hygiene: no residue, caches flushed.

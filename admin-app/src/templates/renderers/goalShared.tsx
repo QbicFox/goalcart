@@ -27,7 +27,7 @@ export function isExpiredGoal(goal: ProgressGoal): boolean {
 export function remainingLabel(goal: ProgressGoal, currency: string): string {
   return sprintf(
     /* translators: %s: formatted remaining amount. */
-    __('%s left', 'goalcart'),
+    __('%s left', 'faracart'),
     formatGoalAmount(goal, goal.remaining, currency)
   );
 }
@@ -36,7 +36,7 @@ export function remainingLabel(goal: ProgressGoal, currency: string): string {
 export function addMoreLabel(goal: ProgressGoal, currency: string): string {
   return sprintf(
     /* translators: %s: formatted remaining amount. */
-    __('Add %s more', 'goalcart'),
+    __('Add %s more', 'faracart'),
     formatGoalAmount(goal, goal.remaining, currency)
   );
 }
@@ -291,7 +291,7 @@ export function RecommendedProductItem({
         <Typography sx={{ fontSize: 11, color: 'text.secondary' }}>
           {sprintf(
             /* translators: %s: formatted price. */
-            __('Only %s', 'goalcart'),
+            __('Only %s', 'faracart'),
             item.price !== null && item.price !== undefined
               ? formatCurrency(item.price, currency)
               : item.price_html
@@ -314,7 +314,7 @@ export function RecommendedProductItem({
           '&:hover': { background: accent, filter: 'brightness(0.95)' },
         }}
       >
-        {__('Add', 'goalcart')}
+        {__('Add', 'faracart')}
       </Button>
     </Box>
   );

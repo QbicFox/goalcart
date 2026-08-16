@@ -1,8 +1,8 @@
-import type { GoalCartBootData } from './types';
+import type { FaraCartBootData } from './types';
 
 declare global {
   interface Window {
-    goalcart?: GoalCartBootData;
+    faracart?: FaraCartBootData;
   }
 }
 

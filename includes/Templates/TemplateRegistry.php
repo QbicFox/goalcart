@@ -2,19 +2,19 @@
 /**
  * Progress template registry.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Templates;
+namespace FaraCart\Templates;
 
-use GoalCart\Templates\Campaign\CampaignProgressTemplate;
-use GoalCart\Templates\Campaign\MilestoneChainTemplate;
-use GoalCart\Templates\Goal\Template1;
-use GoalCart\Templates\Goal\Template2;
-use GoalCart\Templates\Goal\Template3;
-use GoalCart\Templates\Goal\Template4;
-use GoalCart\Templates\Goal\Template5;
-use GoalCart\Templates\Goal\Template6;
+use FaraCart\Templates\Campaign\CampaignProgressTemplate;
+use FaraCart\Templates\Campaign\MilestoneChainTemplate;
+use FaraCart\Templates\Goal\Template1;
+use FaraCart\Templates\Goal\Template2;
+use FaraCart\Templates\Goal\Template3;
+use FaraCart\Templates\Goal\Template4;
+use FaraCart\Templates\Goal\Template5;
+use FaraCart\Templates\Goal\Template6;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * Maps template ids to template classes and resolves them lazily — the
  * same convention as GoalEvaluatorRegistry (Phase 4) and
  * RewardApplicatorRegistry (Phase 5). The class map is filterable through
- * `goalcart_template_classes`, so a future template (including third-party
+ * `faracart_template_classes`, so a future template (including third-party
  * templates from the Phase 28 developer API) registers by adding an entry
  * to the map — no changes to the registry core, the Settings UI, the
  * builders, the REST layer or the preview system.
@@ -93,14 +93,14 @@ class TemplateRegistry {
 			 *
 			 * Add a template by mapping its stable id to a Template class:
 			 *
-			 * add_filter( 'goalcart_template_classes', function ( $classes ) {
+			 * add_filter( 'faracart_template_classes', function ( $classes ) {
 			 *     $classes['countdown'] = My_Countdown_Template::class;
 			 *     return $classes;
 			 * } );
 			 *
 			 * @param array<string, string> $classes Template id => Template class.
 			 */
-			$classes = apply_filters( 'goalcart_template_classes', $classes );
+			$classes = apply_filters( 'faracart_template_classes', $classes );
 		}
 
 		foreach ( $classes as $id => $class ) {

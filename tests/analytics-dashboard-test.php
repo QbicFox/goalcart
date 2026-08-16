@@ -54,11 +54,11 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\AnalyticsRepository;
-use GoalCart\Analytics\Tracker;
-use GoalCart\REST\AnalyticsController;
-use GoalCart\REST\CampaignsController;
-use GoalCart\REST\GoalsController;
+use FaraCart\Analytics\AnalyticsRepository;
+use FaraCart\Analytics\Tracker;
+use FaraCart\REST\AnalyticsController;
+use FaraCart\REST\CampaignsController;
+use FaraCart\REST\GoalsController;
 
 $failures = 0;
 $checks   = 0;
@@ -89,12 +89,12 @@ function sum_of( array $rows, $key ) {
 }
 
 // Fire REST route registration once (rest_api_init never fires in CLI).
-if ( ! did_action( 'goalcart_rest_test_ready' ) ) {
+if ( ! did_action( 'faracart_rest_test_ready' ) ) {
 	do_action( 'rest_api_init' );
-	do_action( 'goalcart_rest_test_ready' );
+	do_action( 'faracart_rest_test_ready' );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $repo           = $container->get( AnalyticsRepository::class );
 $tracker        = $container->get( Tracker::class );
@@ -112,9 +112,9 @@ $wpdb   = $GLOBALS['wpdb'];
 echo "\n== 1. Service wiring ==\n";
 
 check( 'AnalyticsController resolves from container', $analytics_ctrl instanceof AnalyticsController );
-check( '/analytics registered', isset( $routes['/goalcart/v1/analytics'] ) );
+check( '/analytics registered', isset( $routes['/faracart/v1/analytics'] ) );
 
-$route = $routes['/goalcart/v1/analytics'][0];
+$route = $routes['/faracart/v1/analytics'][0];
 check( 'analytics route readable (GET)', isset( $route['methods']['GET'] ) );
 check( 'analytics route is read-only', ! isset( $route['methods']['POST'] ) );
 check( 'analytics route has permission callback', is_callable( $route['permission_callback'] ) );
@@ -145,7 +145,7 @@ check( 'limit above max rejected', is_wp_error( rest_validate_value_from_schema(
 // ---------------------------------------------------------------------------
 echo "\n== 3. Dashboard payload, filters, permissions (rolled back) ==\n";
 
-$events_table = \GoalCart\Database\Schema::table( 'analytics_events' );
+$events_table = \FaraCart\Database\Schema::table( 'analytics_events' );
 $events_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$events_table}" );
 
 $wpdb->query( 'START TRANSACTION' );
@@ -153,13 +153,13 @@ $wpdb->query( 'START TRANSACTION' );
 try {
 	// 3.1 Seed: campaign X with goal A (free_shipping reward), standalone
 	// goal B (coupon reward), and two suggested products.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/campaigns' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/campaigns' );
 	$req->set_param( 'name', 'Analytics Campaign X' );
 	$req->set_param( 'status', 'active' );
 	$resp = $campaigns_ctrl->handle_create( $req );
 	$campaign_x = (int) $resp->get_data()['data']['id'];
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Analytics Goal A' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 500 );
@@ -168,7 +168,7 @@ try {
 	$resp = $goals_ctrl->handle_create( $req );
 	$goal_a = (int) $resp->get_data()['data']['id'];
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Analytics Goal B' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 100 );
@@ -287,7 +287,7 @@ try {
 	check( 'seed events recorded', $seed_a_impressions[0] > 0 && $goal_b_completion > 0 );
 
 	// 3.3 Summary KPIs (P17-T01) over the default 30-day window.
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$data = $resp->get_data();
 
@@ -329,7 +329,7 @@ try {
 	$today  = current_time( 'Y-m-d' );
 	$from30 = date( 'Y-m-d', strtotime( $today ) - 29 * DAY_IN_SECONDS );
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'from', $from30 );
 	$req->set_param( 'to', $today );
 	$resp = $analytics_ctrl->handle_get( $req );
@@ -350,7 +350,7 @@ try {
 	check( 'trend buckets both days', true === $has_yesterday );
 
 	// 3.5 Top lists (P17-T01).
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$data = $resp->get_data();
 
@@ -380,7 +380,7 @@ try {
 	check( 'unconverted product rates are 0', isset( $top_products[1] ) && 0.0 === (float) $top_products[1]['ctr'] );
 
 	// 3.6 Filters (P17-T02).
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'campaign_id', $campaign_x );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
@@ -388,33 +388,33 @@ try {
 	check( 'campaign filter completions', 2 === (int) $summary['completions'] );
 	check( 'campaign filter revenue', near( 700, $summary['revenue_influenced'] ) );
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'goal_id', $goal_b );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
 	check( 'goal filter impressions', 2 === (int) $summary['impressions'] );
 	check( 'goal filter completions', 1 === (int) $summary['completions'] );
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'goal_ids', array( $goal_a, $goal_b ) );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
 	check( 'goal_ids filter impressions', 5 === (int) $summary['impressions'] );
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'reward', 'free_shipping' );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
 	check( 'reward filter (free_shipping) impressions', 3 === (int) $summary['impressions'] );
 	check( 'reward filter (free_shipping) completions', 2 === (int) $summary['completions'] );
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'reward', 'coupon' );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
 	check( 'reward filter (coupon) impressions', 2 === (int) $summary['impressions'] );
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'product_id', 900007 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
@@ -430,7 +430,7 @@ try {
 	// goal filter narrows them to that goal, an unmatched filter yields
 	// no rows, and a product filter cannot be expressed in attribution
 	// (null, never a fabricated list).
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'goal_id', $goal_b );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$comparison = $resp->get_data()['data']['goal_comparison'];
@@ -445,12 +445,12 @@ try {
 			&& array_key_exists( 'conversion_rate', $comparison[0] )
 	);
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'goal_id', 999999 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	check( 'unmatched goal → empty goal_comparison', array() === $resp->get_data()['data']['goal_comparison'] );
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'product_id', 900007 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$data = $resp->get_data();
@@ -459,7 +459,7 @@ try {
 
 	// A goal filter that resolves to no goals yields an honest empty
 	// purchase summary — never store-wide data for the wrong filter.
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'goal_id', 999999 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
@@ -476,7 +476,7 @@ try {
 	// live storefront events recorded on the same day (the suite otherwise
 	// assumes a clean table), and every one of them is excluded by the bug.
 	$today = current_time( 'Y-m-d' );
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'from', $today );
 	$req->set_param( 'to', $today );
 	$resp = $analytics_ctrl->handle_get( $req );
@@ -486,7 +486,7 @@ try {
 	check( 'today range trend covers one day', 1 === count( $resp->get_data()['data']['trend'] ) );
 
 	$tomorrow = date( 'Y-m-d', strtotime( current_time( 'mysql' ) ) + DAY_IN_SECONDS );
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'from', $tomorrow );
 	$req->set_param( 'to', $tomorrow );
 	$resp = $analytics_ctrl->handle_get( $req );
@@ -494,7 +494,7 @@ try {
 	check( 'future window impressions are 0', 0 === (int) $data['data']['summary']['impressions'] );
 	check( 'future window trend is all zeros', 0.0 === sum_of( $data['data']['trend'], 'impressions' ) );
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'limit', 1 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$data = $resp->get_data();
@@ -504,20 +504,20 @@ try {
 
 	// 3.7 Permissions: anonymous 403, authenticated administrator 200.
 	wp_set_current_user( 0 );
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$resp = $server->dispatch( $req );
 	check( 'anonymous rejected on analytics (403)', 403 === $resp->get_status() );
 
 	$admin_id = wp_insert_user( array(
-		'user_login' => 'goalcart_admin_test_' . wp_rand( 1000, 9999 ),
+		'user_login' => 'faracart_admin_test_' . wp_rand( 1000, 9999 ),
 		'user_pass'  => 'test-pass',
-		'user_email' => 'goalcart-admin-' . wp_rand( 1000, 9999 ) . '@example.test',
+		'user_email' => 'faracart-admin-' . wp_rand( 1000, 9999 ) . '@example.test',
 		'role'       => 'administrator',
 	) );
 	check( 'admin user created', ! is_wp_error( $admin_id ) && $admin_id > 0 );
 
 	wp_set_current_user( (int) $admin_id );
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$resp = $server->dispatch( $req );
 	check( 'authenticated analytics dispatch → 200', 200 === $resp->get_status() );
 	$dispatch_data = $resp->get_data();
@@ -543,11 +543,11 @@ $posts_table = $wpdb->posts;
 $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$posts_table} WHERE post_name = %s", 'suggested-900007' ) );
 check( 'seeded products rolled back', 0 === $count );
 
-$goals_table = \GoalCart\Database\Schema::table( 'goals' );
+$goals_table = \FaraCart\Database\Schema::table( 'goals' );
 $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE name = %s", 'Analytics Goal A' ) );
 check( 'seeded goal rolled back', 0 === $count );
 
-$campaigns_table = \GoalCart\Database\Schema::table( 'campaigns' );
+$campaigns_table = \FaraCart\Database\Schema::table( 'campaigns' );
 $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$campaigns_table} WHERE name = %s", 'Analytics Campaign X' ) );
 check( 'seeded campaign rolled back', 0 === $count );
 

@@ -2,10 +2,10 @@
 /**
  * Action and filter hook management for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Hooks;
+namespace FaraCart\Hooks;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -79,7 +79,7 @@ class HookManager {
 	 * The plugin's public developer hooks (Phase 18 → Advanced → developer
 	 * hooks).
 	 *
-	 * A reference list of the documented goalcart_* actions and filters
+	 * A reference list of the documented faracart_* actions and filters
 	 * surfaced in the admin Settings page (and served in the settings REST
 	 * meta) so theme/plugin developers can see the extension surface
 	 * without digging through the source.
@@ -88,47 +88,48 @@ class HookManager {
 	 */
 	public static function documented_hooks() {
 		return array(
-			array( 'type' => 'action', 'hook' => 'goalcart_loaded', 'description' => 'Fires after the plugin has fully bootstrapped.' ),
-			array( 'type' => 'action', 'hook' => 'goalcart_settings_saved', 'description' => 'Fires after settings are persisted through the REST API.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_rest_capability', 'description' => 'Capability required for the admin REST endpoints.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_admin_capability', 'description' => 'Capability required for the admin menu page.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_enabled', 'description' => 'Master storefront widget toggle.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_locations', 'description' => 'Enabled widget display locations.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_position', 'description' => 'Page widget position (top|bottom).' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_template', 'description' => 'Store-wide widget template variant.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_animation', 'description' => 'Storefront progress-bar animation flag.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_mobile', 'description' => 'Storefront mobile behavior (show|hide).' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_currency_display', 'description' => 'Storefront currency display style (symbol|code|name).' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_frontend_refresh_interval', 'description' => 'Widget poll interval in seconds.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_tracking_enabled', 'description' => 'Analytics tracking consent for the current request.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_suggestions_enabled', 'description' => 'Whether product suggestions render on the storefront.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_default_calculation_mode', 'description' => 'Store-wide default money calculation basis.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_suggestions', 'description' => 'The shaped suggestion items for a goal.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_template_classes', 'description' => 'The progress template class map (id => Template class). Register a new Goal or Campaign template here.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_tracking_enabled', 'description' => 'Whether the Phase 33 revenue event pipeline records events.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_retention_days', 'description' => 'Retention window (days) for the revenue/upsell event logs before the weekly cleanup purges them.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_enabled', 'description' => 'Whether Phase 33.2 revenue attribution (order association) is on.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_product_cost', 'description' => 'Product cost used by the Phase 33.2 reward-cost / profit estimation (null = no cost data).' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_order_cost_snapshot', 'description' => 'The order-item unit-cost snapshot written at checkout (UPSELL_REFACTOR §21) — return a float to stamp it, null to leave the line without a snapshot.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_metric_rows', 'description' => 'Row cap for the bounded Phase 33.2 metric reads.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_attribution_order_scan_pages', 'description' => 'Page cap for the Phase 33.2 store-wide order scans (AOV, shipping).' ),
-			array( 'type' => 'action', 'hook' => 'goalcart_goals_changed', 'description' => 'Fires after a goal is created, updated or deleted (cache invalidation).' ),
-			array( 'type' => 'action', 'hook' => 'goalcart_revenue_aggregated', 'description' => 'Fires after the Phase 33.3 daily aggregation run completes.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_aggregate_max_days', 'description' => 'Max days the Phase 33.3 aggregation job processes per run.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_aggregate_lookback_days', 'description' => 'Lookback floor for the Phase 33.3 aggregation catch-up window.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_cache_enabled', 'description' => 'Whether the Phase 33.3 revenue summary cache is on.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_revenue_cache_ttl', 'description' => 'TTL (seconds) for the Phase 33.3 revenue summary transients.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_recommendations_enabled', 'description' => 'Whether Phase 33.4 smart goal recommendations are on.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_min_orders', 'description' => 'Minimum order count before Phase 33.4 recommendations are generated.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_candidates', 'description' => 'The candidate thresholds generated for Phase 33.4 scoring.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_weights', 'description' => 'The Phase 33.4 composite scoring weights (reachability/distance/economics/history).' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_margin_products', 'description' => 'Product sample size for the Phase 33.4 margin analyzer.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_recommendations', 'description' => 'The full Phase 33.4 recommendation payload before it is served.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_recommendation_cache_ttl', 'description' => 'TTL (seconds) for the Phase 33.4 recommendation cache.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_upsells_enabled', 'description' => 'Whether Phase 33.5 smart upsell ranking is on.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_upsell_candidates', 'description' => 'The candidate product ids collected for Phase 33.5 upsell scoring.' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_upsell_weights', 'description' => 'The Phase 33.5 composite scoring weights (price_gap/relevance/popularity/inventory/margin/conversion).' ),
-			array( 'type' => 'filter', 'hook' => 'goalcart_upsells', 'description' => 'The full Phase 33.5 upsell ranking payload before it is served.' ),
+			array( 'type' => 'action', 'hook' => 'faracart_loaded', 'description' => 'Fires after the plugin has fully bootstrapped.' ),
+			array( 'type' => 'action', 'hook' => 'faracart_settings_saved', 'description' => 'Fires after settings are persisted through the REST API.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_rest_capability', 'description' => 'Capability required for the admin REST endpoints.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_admin_capability', 'description' => 'Capability required for the admin menu page.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_frontend_enabled', 'description' => 'Master storefront widget toggle.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_frontend_locations', 'description' => 'Enabled widget display locations.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_frontend_position', 'description' => 'Page widget position (top|bottom).' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_frontend_template', 'description' => 'Store-wide widget template variant.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_frontend_animation', 'description' => 'Storefront progress-bar animation flag.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_frontend_mobile', 'description' => 'Storefront mobile behavior (show|hide).' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_currency', 'description' => 'Resolved display currency unit (uppercase ISO-4217 code) — the currency every FaraCart amount is labelled with.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_currency_display', 'description' => 'Storefront currency display style (symbol|code|name).' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_frontend_refresh_interval', 'description' => 'Widget poll interval in seconds.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_tracking_enabled', 'description' => 'Analytics tracking consent for the current request.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_suggestions_enabled', 'description' => 'Whether product suggestions render on the storefront.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_default_calculation_mode', 'description' => 'Store-wide default money calculation basis.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_suggestions', 'description' => 'The shaped suggestion items for a goal.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_template_classes', 'description' => 'The progress template class map (id => Template class). Register a new Goal or Campaign template here.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_revenue_tracking_enabled', 'description' => 'Whether the Phase 33 revenue event pipeline records events.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_revenue_retention_days', 'description' => 'Retention window (days) for the revenue/upsell event logs before the weekly cleanup purges them.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_attribution_enabled', 'description' => 'Whether Phase 33.2 revenue attribution (order association) is on.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_product_cost', 'description' => 'Product cost used by the Phase 33.2 reward-cost / profit estimation (null = no cost data).' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_order_cost_snapshot', 'description' => 'The order-item unit-cost snapshot written at checkout (UPSELL_REFACTOR §21) — return a float to stamp it, null to leave the line without a snapshot.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_attribution_metric_rows', 'description' => 'Row cap for the bounded Phase 33.2 metric reads.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_attribution_order_scan_pages', 'description' => 'Page cap for the Phase 33.2 store-wide order scans (AOV, shipping).' ),
+			array( 'type' => 'action', 'hook' => 'faracart_goals_changed', 'description' => 'Fires after a goal is created, updated or deleted (cache invalidation).' ),
+			array( 'type' => 'action', 'hook' => 'faracart_revenue_aggregated', 'description' => 'Fires after the Phase 33.3 daily aggregation run completes.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_aggregate_max_days', 'description' => 'Max days the Phase 33.3 aggregation job processes per run.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_aggregate_lookback_days', 'description' => 'Lookback floor for the Phase 33.3 aggregation catch-up window.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_revenue_cache_enabled', 'description' => 'Whether the Phase 33.3 revenue summary cache is on.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_revenue_cache_ttl', 'description' => 'TTL (seconds) for the Phase 33.3 revenue summary transients.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_recommendations_enabled', 'description' => 'Whether Phase 33.4 smart goal recommendations are on.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_recommendation_min_orders', 'description' => 'Minimum order count before Phase 33.4 recommendations are generated.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_recommendation_candidates', 'description' => 'The candidate thresholds generated for Phase 33.4 scoring.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_recommendation_weights', 'description' => 'The Phase 33.4 composite scoring weights (reachability/distance/economics/history).' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_recommendation_margin_products', 'description' => 'Product sample size for the Phase 33.4 margin analyzer.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_recommendations', 'description' => 'The full Phase 33.4 recommendation payload before it is served.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_recommendation_cache_ttl', 'description' => 'TTL (seconds) for the Phase 33.4 recommendation cache.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_upsells_enabled', 'description' => 'Whether Phase 33.5 smart upsell ranking is on.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_upsell_candidates', 'description' => 'The candidate product ids collected for Phase 33.5 upsell scoring.' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_upsell_weights', 'description' => 'The Phase 33.5 composite scoring weights (price_gap/relevance/popularity/inventory/margin/conversion).' ),
+			array( 'type' => 'filter', 'hook' => 'faracart_upsells', 'description' => 'The full Phase 33.5 upsell ranking payload before it is served.' ),
 		);
 	}
 

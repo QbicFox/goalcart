@@ -65,53 +65,53 @@ interface Column {
 }
 
 const COLUMNS: Column[] = [
-  { key: 'name', label: __('Goal', 'goalcart'), align: 'left' },
-  { key: 'views', label: __('Viewed', 'goalcart'), align: 'right' },
-  { key: 'progressed', label: __('Progressed', 'goalcart'), align: 'right' },
-  { key: 'completed', label: __('Completed', 'goalcart'), align: 'right' },
+  { key: 'name', label: __('Goal', 'faracart'), align: 'left' },
+  { key: 'views', label: __('Viewed', 'faracart'), align: 'right' },
+  { key: 'progressed', label: __('Progressed', 'faracart'), align: 'right' },
+  { key: 'completed', label: __('Completed', 'faracart'), align: 'right' },
   {
     key: 'converted',
-    label: __('Purchased', 'goalcart'),
+    label: __('Purchased', 'faracart'),
     align: 'right',
     tooltip: __(
       'A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion.',
-      'goalcart'
+      'faracart'
     ),
   },
   {
     key: 'conversion_rate',
-    label: __('Purchase Rate', 'goalcart'),
+    label: __('Purchase Rate', 'faracart'),
     align: 'right',
     tooltip: __(
       'Percentage of completed goals that were followed by an attributed purchase.',
-      'goalcart'
+      'faracart'
     ),
   },
   {
     key: 'upsell_assisted',
-    label: __('Upsell-assisted', 'goalcart'),
+    label: __('Upsell-assisted', 'faracart'),
     align: 'right',
     tooltip: __(
       'Completions where the customer also saw a product recommendation for this goal in the same session (UPSELL_REFACTOR §30).',
-      'goalcart'
+      'faracart'
     ),
   },
   {
     key: 'attributed_revenue',
-    label: __('Sales', 'goalcart'),
+    label: __('Sales', 'faracart'),
     align: 'right',
     tooltip: __(
       'Sales attributed to FaraCart — the incremental order value driven by this goal.',
-      'goalcart'
+      'faracart'
     ),
   },
   {
     key: 'profit_impact',
-    label: __('Estimated Profit', 'goalcart'),
+    label: __('Estimated Profit', 'faracart'),
     align: 'right',
     tooltip: __(
       'Estimated, not guaranteed — based on available product cost, reward and shipping data.',
-      'goalcart'
+      'faracart'
     ),
   },
 ];
@@ -119,16 +119,16 @@ const COLUMNS: Column[] = [
 /** Data-sufficiency states translated into business language (§45). */
 const SUFFICIENCY: Record<'low' | 'medium' | 'high', { label: string; hint: string }> = {
   low: {
-    label: __('Limited data', 'goalcart'),
-    hint: __('More customer activity is needed for a more reliable analysis.', 'goalcart'),
+    label: __('Limited data', 'faracart'),
+    hint: __('More customer activity is needed for a more reliable analysis.', 'faracart'),
   },
   medium: {
-    label: __('Moderate data', 'goalcart'),
-    hint: __('Analysis is based on a moderate number of customer sessions.', 'goalcart'),
+    label: __('Moderate data', 'faracart'),
+    hint: __('Analysis is based on a moderate number of customer sessions.', 'faracart'),
   },
   high: {
-    label: __('Good data', 'goalcart'),
-    hint: __('Analysis is based on a healthy number of customer sessions.', 'goalcart'),
+    label: __('Good data', 'faracart'),
+    hint: __('Analysis is based on a healthy number of customer sessions.', 'faracart'),
   },
 };
 
@@ -149,12 +149,12 @@ function sortValue(row: GoalPerformanceRow, key: SortKey): number | string {
 /** Business-friendly confidence label (High ≥ 75, Medium ≥ 60, else Low). */
 function confidenceLabel(confidence: number): string {
   if (confidence >= 75) {
-    return __('High', 'goalcart');
+    return __('High', 'faracart');
   }
   if (confidence >= 60) {
-    return __('Medium', 'goalcart');
+    return __('Medium', 'faracart');
   }
-  return __('Low', 'goalcart');
+  return __('Low', 'faracart');
 }
 
 /** Signed percentage (e.g. +8.7% / -3.1%) — for the basket-increase read. */
@@ -222,7 +222,7 @@ function GoalOptimizationSection({
       await applyGoalRecommendation(goalId, threshold);
     },
     onSuccess: () => {
-      notify(__('Goal target updated.', 'goalcart'));
+      notify(__('Goal target updated.', 'faracart'));
       setApplyTarget(null);
       queryClient.invalidateQueries({ queryKey: ['goals'] });
       queryClient.invalidateQueries({ queryKey: ['revenue'] });
@@ -237,9 +237,9 @@ function GoalOptimizationSection({
 
   return (
     <Box>
-      <SectionTitle>{__('Recommendations', 'goalcart')}</SectionTitle>
+      <SectionTitle>{__('Recommendations', 'faracart')}</SectionTitle>
       <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.25 }}>
-        {__('What target should this goal use — based on real store data.', 'goalcart')}
+        {__('What target should this goal use — based on real store data.', 'faracart')}
       </Typography>
 
       {recQuery.isLoading ? (
@@ -247,17 +247,17 @@ function GoalOptimizationSection({
       ) : !recQuery.data?.available || !top ? (
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           {recQuery.data?.insufficient_reason ??
-            __('No recommendation is available for this goal yet.', 'goalcart')}
+            __('No recommendation is available for this goal yet.', 'faracart')}
         </Typography>
       ) : (
         <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5 }}>
             <StatCell
-              label={__('Current target', 'goalcart')}
+              label={__('Current target', 'faracart')}
               value={formatCurrency(currentTarget)}
             />
             <StatCell
-              label={__('Recommended target', 'goalcart')}
+              label={__('Recommended target', 'faracart')}
               value={formatCurrency(top.threshold)}
             />
           </Box>
@@ -270,7 +270,7 @@ function GoalOptimizationSection({
               }
               label={sprintf(
                 /* translators: 1: confidence label. */
-                __('Confidence: %1$s', 'goalcart'),
+                __('Confidence: %1$s', 'faracart'),
                 confidenceLabel(top.confidence)
               )}
             />
@@ -278,7 +278,7 @@ function GoalOptimizationSection({
           {top.reasons.length > 0 && (
             <Box>
               <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {__('Why?', 'goalcart')}
+                {__('Why?', 'faracart')}
               </Typography>
               <Stack spacing={0.25} sx={{ mt: 0.25 }}>
                 {top.reasons.slice(0, 3).map((reason, index) => (
@@ -296,7 +296,7 @@ function GoalOptimizationSection({
               onClick={() => setApplyTarget(top)}
               sx={{ mt: 0.5 }}
             >
-              {__('Apply recommendation', 'goalcart')}
+              {__('Apply recommendation', 'faracart')}
             </Button>
           </Box>
         </Box>
@@ -304,7 +304,7 @@ function GoalOptimizationSection({
 
       <ConfirmDialog
         open={applyTarget !== null}
-        title={__('Apply recommendation?', 'goalcart')}
+        title={__('Apply recommendation?', 'faracart')}
         description={
           applyTarget ? (
             <>
@@ -312,7 +312,7 @@ function GoalOptimizationSection({
                 /* translators: 1: current target, 2: recommended target. */
                 __(
                   'Current target %1$s → recommended target %2$s? This changes a production goal — the action is not reversible from here.',
-                  'goalcart'
+                  'faracart'
                 ),
                 formatCurrency(currentTarget),
                 formatCurrency(applyTarget.threshold)
@@ -320,7 +320,7 @@ function GoalOptimizationSection({
             </>
           ) : undefined
         }
-        confirmLabel={__('Apply', 'goalcart')}
+        confirmLabel={__('Apply', 'faracart')}
         busy={applyMutation.isPending}
         onConfirm={() => {
           if (applyTarget) {
@@ -355,14 +355,14 @@ function GoalDetailDrawer({
     row && row.profit_available && row.profit_impact !== null
       ? formatCurrency(row.profit_impact)
       : row && row.profit_reason_code === 'missing_product_cost'
-        ? __('Not available', 'goalcart')
+        ? __('Not available', 'faracart')
         : '—';
 
   const profitHint =
     row && row.profit_available && row.profit_impact !== null
-      ? __('Estimated, not guaranteed', 'goalcart')
+      ? __('Estimated, not guaranteed', 'faracart')
       : row && row.profit_reason_code === 'missing_product_cost'
-        ? __('Add product cost data to estimate profit.', 'goalcart')
+        ? __('Add product cost data to estimate profit.', 'faracart')
         : undefined;
 
   const sufficiency = row ? SUFFICIENCY[row.data_sufficiency] : SUFFICIENCY.low;
@@ -374,7 +374,7 @@ function GoalDetailDrawer({
       {row && (
         <Box
           role="dialog"
-          aria-label={__('Goal performance details', 'goalcart')}
+          aria-label={__('Goal performance details', 'faracart')}
           sx={{
             width: { xs: '100vw', sm: 500 },
             maxWidth: '100vw',
@@ -402,7 +402,7 @@ function GoalDetailDrawer({
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               {sprintf(
                 /* translators: %s: formatted goal target. */
-                __('Target: %s', 'goalcart'),
+                __('Target: %s', 'faracart'),
                 formatNumber(row.target)
               )}
             </Typography>
@@ -412,7 +412,7 @@ function GoalDetailDrawer({
 
           {/* Performance summary (§20). */}
           <Box>
-            <SectionTitle>{__('Performance Summary', 'goalcart')}</SectionTitle>
+            <SectionTitle>{__('Performance Summary', 'faracart')}</SectionTitle>
             <Box
               sx={{
                 display: 'grid',
@@ -421,20 +421,20 @@ function GoalDetailDrawer({
                 mt: 1,
               }}
             >
-              <StatCell label={__('Viewed', 'goalcart')} value={formatNumber(row.views)} />
-              <StatCell label={__('Progressed', 'goalcart')} value={formatNumber(row.progressed)} />
-              <StatCell label={__('Completed', 'goalcart')} value={formatNumber(row.completed)} />
+              <StatCell label={__('Viewed', 'faracart')} value={formatNumber(row.views)} />
+              <StatCell label={__('Progressed', 'faracart')} value={formatNumber(row.progressed)} />
+              <StatCell label={__('Completed', 'faracart')} value={formatNumber(row.completed)} />
               <StatCell
-                label={__('Purchased', 'goalcart')}
+                label={__('Purchased', 'faracart')}
                 value={formatNumber(row.converted)}
-                hint={__('after FaraCart interaction', 'goalcart')}
+                hint={__('after FaraCart interaction', 'faracart')}
               />
               <StatCell
-                label={__('Attributed Sales', 'goalcart')}
+                label={__('Attributed Sales', 'faracart')}
                 value={formatCurrency(row.attributed_revenue)}
               />
               <StatCell
-                label={__('Estimated Profit', 'goalcart')}
+                label={__('Estimated Profit', 'faracart')}
                 value={profitValue}
                 hint={profitHint}
               />
@@ -443,7 +443,7 @@ function GoalDetailDrawer({
 
           {/* Customer journey — the detailed funnel with drop-off (§20/§23). */}
           <Box>
-            <SectionTitle>{__('Customer Journey', 'goalcart')}</SectionTitle>
+            <SectionTitle>{__('Customer Journey', 'faracart')}</SectionTitle>
             <Box sx={{ mt: 1 }}>
               <FunnelVisual
                 showTransitions
@@ -460,7 +460,7 @@ function GoalDetailDrawer({
             <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
               {__(
                 'A completion means the customer reached the goal target. A purchase means a qualifying order was actually associated with the goal.',
-                'goalcart'
+                'faracart'
               )}
             </Typography>
           </Box>
@@ -470,7 +470,7 @@ function GoalDetailDrawer({
           {/* Costs — reward cost, shipping cost and estimated profit in every
               data state (reuses the shared EstimatedProfitCard). */}
           <Box>
-            <SectionTitle>{__('Costs', 'goalcart')}</SectionTitle>
+            <SectionTitle>{__('Costs', 'faracart')}</SectionTitle>
             <Box sx={{ mt: 1 }}>
               <EstimatedProfitCard
                 profitImpact={row.profit_impact}
@@ -493,40 +493,40 @@ function GoalDetailDrawer({
               the Upsells page reads. The section title uses the canonical
               §40 label (Upsells), matching the navigation. */}
           <Box>
-            <SectionTitle>{__('Upsells', 'goalcart')}</SectionTitle>
+            <SectionTitle>{__('Upsells', 'faracart')}</SectionTitle>
             <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 0.25 }}>
               {__(
                 'Products recommended to customers who were working toward this goal.',
-                'goalcart'
+                'faracart'
               )}
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1.5, mt: 1 }}>
               <StatCell
-                label={__('Impressions', 'goalcart')}
+                label={__('Impressions', 'faracart')}
                 value={formatNumber(row.upsell_funnel.impressions)}
               />
               <StatCell
-                label={__('Clicks', 'goalcart')}
+                label={__('Clicks', 'faracart')}
                 value={formatNumber(row.upsell_funnel.clicks)}
               />
               <StatCell
-                label={__('Added to cart', 'goalcart')}
+                label={__('Added to cart', 'faracart')}
                 value={formatNumber(row.upsell_funnel.adds)}
               />
               <StatCell
-                label={__('Purchased', 'goalcart')}
+                label={__('Purchased', 'faracart')}
                 value={formatNumber(row.upsell_funnel.orders)}
               />
               <StatCell
-                label={__('Assisted completions', 'goalcart')}
+                label={__('Assisted completions', 'faracart')}
                 value={formatNumber(row.upsell_assisted)}
               />
               <StatCell
-                label={__('Assisted rate', 'goalcart')}
+                label={__('Assisted rate', 'faracart')}
                 value={
                   row.upsell_assisted_rate === null ? '—' : formatPercent(row.upsell_assisted_rate)
                 }
-                hint={__('of completions that saw a recommendation', 'goalcart')}
+                hint={__('of completions that saw a recommendation', 'faracart')}
               />
             </Box>
           </Box>
@@ -546,46 +546,46 @@ function GoalDetailDrawer({
             sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <SectionTitle>{__('Advanced attribution details', 'goalcart')}</SectionTitle>
+              <SectionTitle>{__('Advanced attribution details', 'faracart')}</SectionTitle>
             </AccordionSummary>
             <AccordionDetails sx={{ pt: 0 }}>
               <Stack spacing={1}>
                 <StatRow
-                  label={__('Direct revenue', 'goalcart')}
+                  label={__('Direct revenue', 'faracart')}
                   value={formatCurrency(row.attributed_revenue)}
                   explanation={__(
                     'The incremental order value from orders where customers progressed or completed this goal before ordering.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
                 <StatRow
-                  label={__('Assisted revenue', 'goalcart')}
+                  label={__('Assisted revenue', 'faracart')}
                   value={formatCurrency(row.assisted_revenue)}
                   explanation={__(
                     'Order totals from orders that were only exposed to this goal, never progressed.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
                 <StatRow
-                  label={__('Influenced sales', 'goalcart')}
+                  label={__('Influenced sales', 'faracart')}
                   value={formatCurrency(row.influenced_revenue)}
                   explanation={__(
                     'Order totals of every order associated with this goal — distinct orders, never double counted.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
                 <StatRow
-                  label={__('Incremental cart value', 'goalcart')}
+                  label={__('Incremental cart value', 'faracart')}
                   value={formatCurrency(row.incremental_cart_value)}
                   explanation={__(
                     'Average cart value after goal exposure minus the value at first exposure, per session.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
                 <Typography variant="caption" color="text.secondary" component="p">
                   {__(
                     'Direct revenue is the incremental amount this goal moved — it is a slice of the influenced total, not an extra value on top of it.',
-                    'goalcart'
+                    'faracart'
                   )}
                 </Typography>
               </Stack>
@@ -599,45 +599,45 @@ function GoalDetailDrawer({
             sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <SectionTitle>{__('Advanced', 'goalcart')}</SectionTitle>
+              <SectionTitle>{__('Advanced', 'faracart')}</SectionTitle>
             </AccordionSummary>
             <AccordionDetails sx={{ pt: 0 }}>
               <Stack spacing={1}>
                 <StatRow
-                  label={__('Attribution model', 'goalcart')}
-                  value={__('Direct & assisted', 'goalcart')}
+                  label={__('Attribution model', 'faracart')}
+                  value={__('Direct & assisted', 'faracart')}
                   explanation={__(
                     'Customers who progressed or completed the goal before ordering are direct; exposure-only sessions are assisted.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
                 <StatRow
-                  label={__('Attribution window', 'goalcart')}
+                  label={__('Attribution window', 'faracart')}
                   value={sprintf(
                     /* translators: %d: number of days. */
-                    __('%d days before the order', 'goalcart'),
+                    __('%d days before the order', 'faracart'),
                     row.attribution_window_days
                   )}
                 />
                 <StatRow
-                  label={__('Data sufficiency', 'goalcart')}
+                  label={__('Data sufficiency', 'faracart')}
                   value={sufficiency.label}
                   explanation={sufficiency.hint}
                 />
                 <StatRow
-                  label={__('Average basket increase', 'goalcart')}
+                  label={__('Average basket increase', 'faracart')}
                   value={aovImpact !== null ? formatSignedPercent(aovImpact) : '—'}
                   explanation={__(
                     'Observed impact — incremental cart value relative to the baseline. It does not prove that FaraCart caused the difference.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
                 <StatRow
-                  label={__('Attributed orders', 'goalcart')}
+                  label={__('Attributed orders', 'faracart')}
                   value={formatNumber(row.converted)}
                   explanation={__(
                     'Distinct orders associated with this goal in the selected period.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
               </Stack>
@@ -652,7 +652,7 @@ function GoalDetailDrawer({
 /**
  * Goal Performance (Phase 5 redesign).
  *
- * Per-goal commercial outcomes from `GET /goalcart/v1/revenue/goals`:
+ * Per-goal commercial outcomes from `GET /faracart/v1/revenue/goals`:
  * the funnel counts (viewed → progressed → completed → purchased), the
  * purchase rate (purchased / completed — never confused with completion
  * rate, §17/§28), sales attributed to FaraCart and estimated profit.
@@ -723,10 +723,10 @@ export default function GoalPerformance() {
 
   return (
     <PageContainer
-      title={__('Goal Performance', 'goalcart')}
+      title={__('Goal Performance', 'faracart')}
       description={__(
         'Which goals generated purchases, sales and profit? Completion is not the same as purchase.',
-        'goalcart'
+        'faracart'
       )}
     >
       <RevenueToolbar goalId={goalId} onGoalChange={setGoalId} />
@@ -735,7 +735,7 @@ export default function GoalPerformance() {
         <Alert severity="error" variant="outlined">
           {query.error instanceof Error
             ? query.error.message
-            : __('Could not load goal performance.', 'goalcart')}
+            : __('Could not load goal performance.', 'faracart')}
         </Alert>
       )}
 
@@ -747,10 +747,10 @@ export default function GoalPerformance() {
       ) : !query.isError && sorted.length === 0 ? (
         <EmptyState
           icon={<LeaderboardIcon fontSize="large" />}
-          title={__('No goal performance yet', 'goalcart')}
+          title={__('No goal performance yet', 'faracart')}
           description={__(
             'Once customers start interacting with your goals, FaraCart will show purchases, sales and profit per goal here.',
-            'goalcart'
+            'faracart'
           )}
         />
       ) : (
@@ -811,7 +811,7 @@ export default function GoalPerformance() {
                     }}
                     aria-label={sprintf(
                       /* translators: %s: goal name. */
-                      __('Open performance details for %s', 'goalcart'),
+                      __('Open performance details for %s', 'faracart'),
                       row.name
                     )}
                   >
@@ -832,13 +832,13 @@ export default function GoalPerformance() {
                         <Tooltip
                           title={
                             row.profit_reason_code === 'missing_product_cost'
-                              ? __('Add product cost data to estimate profit.', 'goalcart')
+                              ? __('Add product cost data to estimate profit.', 'faracart')
                               : row.profit_reason_code === 'incomplete_product_cost'
                                 ? __(
                                     'Some orders do not have complete cost information.',
-                                    'goalcart'
+                                    'faracart'
                                   )
-                                : __('Not enough attributed order data yet.', 'goalcart')
+                                : __('Not enough attributed order data yet.', 'faracart')
                           }
                           arrow
                         >

@@ -15,7 +15,7 @@
  *  - cart items never suggested back
  *  - ranking: goal eligibility + price proximity to the remaining amount
  *  - cap at MAX_SUGGESTIONS, dedupe across sources, ghost ids skipped
- *  - the goalcart_suggestions filter
+ *  - the faracart_suggestions filter
  *
  * Run: php tests/suggestion-test.php   (from the plugin directory)
  */
@@ -44,10 +44,10 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Suggestions\SuggestionEngine;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Suggestions\SuggestionEngine;
 
 $failures = 0;
 $checks   = 0;
@@ -126,7 +126,7 @@ function make_product( $name, $price, $categories = array(), $stock = 'instock',
 	return (int) $id;
 }
 
-$engine = \GoalCart\Plugin::instance()->container()->get( SuggestionEngine::class );
+$engine = \FaraCart\Plugin::instance()->container()->get( SuggestionEngine::class );
 
 // ---------------------------------------------------------------------------
 // 1. Service wiring + gates
@@ -263,17 +263,17 @@ $wpdb->query( 'START TRANSACTION' );	try {
 	check( 'quantity goal suggests without price banding', is_array( $qty_items ) && ! empty( $qty_items ) );
 
 	// -----------------------------------------------------------------------
-	// 6. goalcart_suggestions filter.
+	// 6. faracart_suggestions filter.
 	// -----------------------------------------------------------------------
 	echo "\n== 6. Filter ==\n";
 
-	add_filter( 'goalcart_suggestions', function ( $items, $filter_goal, $filter_result, $filter_context ) {
+	add_filter( 'faracart_suggestions', function ( $items, $filter_goal, $filter_result, $filter_context ) {
 		return array_slice( $items, 0, 1 ); // keep only the top suggestion
 	}, 10, 4 );
 
 	$filtered = $engine->suggest( $goal, $result, $cart );
-	check( 'goalcart_suggestions filter applied', 1 === count( $filtered ) );
-	remove_all_filters( 'goalcart_suggestions' );
+	check( 'faracart_suggestions filter applied', 1 === count( $filtered ) );
+	remove_all_filters( 'faracart_suggestions' );
 } finally {
 	$wpdb->query( 'ROLLBACK' );
 }

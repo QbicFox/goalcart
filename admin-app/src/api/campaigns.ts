@@ -5,17 +5,17 @@ export interface CampaignsResult {
   items: Campaign[];
 }
 
-/** Fetch all campaigns via `GET /goalcart/v1/campaigns`. */
+/** Fetch all campaigns via `GET /faracart/v1/campaigns`. */
 export async function fetchCampaigns(): Promise<CampaignsResult> {
   return apiFetch<CampaignsResult>('/campaigns');
 }
 
-/** Fetch a single campaign via `GET /goalcart/v1/campaigns/{id}`. */
+/** Fetch a single campaign via `GET /faracart/v1/campaigns/{id}`. */
 export async function fetchCampaign(id: number): Promise<Campaign> {
   return apiFetch<Campaign>(`/campaigns/${id}`);
 }
 
-/** Create a campaign via `POST /goalcart/v1/campaigns`. */
+/** Create a campaign via `POST /faracart/v1/campaigns`. */
 export async function createCampaign(input: CampaignInput): Promise<Campaign> {
   return apiFetch<Campaign>('/campaigns', {
     method: 'POST',
@@ -23,7 +23,7 @@ export async function createCampaign(input: CampaignInput): Promise<Campaign> {
   });
 }
 
-/** Update a campaign (partial) via `PUT /goalcart/v1/campaigns/{id}`. */
+/** Update a campaign (partial) via `PUT /faracart/v1/campaigns/{id}`. */
 export async function updateCampaign(id: number, input: Partial<CampaignInput>): Promise<Campaign> {
   return apiFetch<Campaign>(`/campaigns/${id}`, {
     method: 'PUT',
@@ -31,12 +31,12 @@ export async function updateCampaign(id: number, input: Partial<CampaignInput>):
   });
 }
 
-/** Delete a campaign via `DELETE /goalcart/v1/campaigns/{id}`. */
+/** Delete a campaign via `DELETE /faracart/v1/campaigns/{id}`. */
 export async function deleteCampaign(id: number): Promise<void> {
   await apiFetch<{ deleted: boolean }>(`/campaigns/${id}`, { method: 'DELETE' });
 }
 
-/** Duplicate a campaign via `POST /goalcart/v1/campaigns/{id}/duplicate`. */
+/** Duplicate a campaign via `POST /faracart/v1/campaigns/{id}/duplicate`. */
 export async function duplicateCampaign(id: number): Promise<Campaign> {
   return apiFetch<Campaign>(`/campaigns/${id}/duplicate`, { method: 'POST' });
 }

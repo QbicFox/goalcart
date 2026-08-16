@@ -2,14 +2,14 @@
 /**
  * REST controller for frontend analytics event tracking.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Analytics\Session;
-use GoalCart\Analytics\Tracker;
-use GoalCart\Hooks\HookManager;
+use FaraCart\Analytics\Session;
+use FaraCart\Analytics\Tracker;
+use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * Class TrackController
  *
  * Phase 16 (Analytics Foundation — Events): registers and handles
- * `POST /goalcart/v1/track`, the public endpoint the storefront JS uses
+ * `POST /faracart/v1/track`, the public endpoint the storefront JS uses
  * to report analytics events (goal_impression, goal_progress,
  * goal_completed, reward_activated, suggestion_impression,
  * suggestion_clicked).
@@ -144,7 +144,7 @@ class TrackController extends BaseController {
 							return true;
 						}
 
-						return \GoalCart\Analytics\Session::is_valid( $value );
+						return \FaraCart\Analytics\Session::is_valid( $value );
 					},
 					'sanitize_callback' => 'sanitize_text_field',
 				),
@@ -170,8 +170,8 @@ class TrackController extends BaseController {
 	public function permission_callback( $request ) {
 		if ( ! wp_verify_nonce( (string) $request->get_param( 'nonce' ), Tracker::TRACK_NONCE_ACTION ) ) {
 			return $this->error(
-				'goalcart_invalid_nonce',
-				__( 'Invalid tracking nonce.', 'goalcart' ),
+				'faracart_invalid_nonce',
+				__( 'Invalid tracking nonce.', 'faracart' ),
 				403
 			);
 		}
@@ -194,8 +194,8 @@ class TrackController extends BaseController {
 	public function handle( $request ) {
 		if ( ! $this->tracker->tracking_enabled() ) {
 			return $this->error(
-				'goalcart_tracking_disabled',
-				__( 'Tracking is disabled.', 'goalcart' ),
+				'faracart_tracking_disabled',
+				__( 'Tracking is disabled.', 'faracart' ),
 				403
 			);
 		}
@@ -206,8 +206,8 @@ class TrackController extends BaseController {
 		// whitelist check is repeated here for direct-handler callers.
 		if ( ! Tracker::is_event_type( $event_type ) ) {
 			return $this->error(
-				'goalcart_invalid_event_type',
-				__( 'Unknown event type.', 'goalcart' ),
+				'faracart_invalid_event_type',
+				__( 'Unknown event type.', 'faracart' ),
 				400
 			);
 		}
@@ -249,8 +249,8 @@ class TrackController extends BaseController {
 
 		if ( $id < 1 ) {
 			return $this->error(
-				'goalcart_track_failed',
-				__( 'Could not record the event.', 'goalcart' ),
+				'faracart_track_failed',
+				__( 'Could not record the event.', 'faracart' ),
 				500
 			);
 		}

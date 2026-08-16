@@ -62,7 +62,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
               textTransform: 'uppercase',
             }}
           >
-            {__('Shopping goal', 'goalcart')}
+            {__('Shopping goal', 'faracart')}
           </Typography>
         </Box>
         <LocalShippingIcon sx={{ fontSize: 16, color: border }} aria-hidden />
@@ -75,7 +75,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
       <Typography sx={{ fontSize: 12, color: muted, mb: 1.5 }}>
         {sprintf(
           /* translators: %s: formatted target amount. */
-          __('With a purchase of %s', 'goalcart'),
+          __('With a purchase of %s', 'faracart'),
           formatGoalAmount(goal, goal.target, currency)
         )}
       </Typography>
@@ -113,7 +113,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, mb: 1.5 }}>
           <Box>
             <Typography sx={{ fontSize: 11, color: muted, mb: 0.25 }}>
-              {__('Paid', 'goalcart')}
+              {__('Paid', 'faracart')}
             </Typography>
             <Typography sx={{ fontSize: 13, fontWeight: 700, color: text }}>
               {formatGoalAmount(goal, goal.current, currency)}
@@ -121,7 +121,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
           </Box>
           <Box sx={{ textAlign: 'end' }}>
             <Typography sx={{ fontSize: 11, color: muted, mb: 0.25 }}>
-              {__('Remaining', 'goalcart')}
+              {__('Remaining', 'faracart')}
             </Typography>
             <Typography sx={{ fontSize: 13, fontWeight: 700, color: outlineColor }}>
               {formatGoalAmount(goal, goal.remaining, currency)}
@@ -152,7 +152,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
             '&:hover': { background: 'transparent', opacity: 0.85 },
           }}
         >
-          {__('View products', 'goalcart')}
+          {__('View products', 'faracart')}
         </Button>
       )}
 
@@ -176,12 +176,12 @@ export default function Template6Renderer({ goal, currency, settings, animation 
             <Typography sx={{ fontSize: 12, fontWeight: 800, color: '#78350f' }}>
               {sprintf(
                 /* translators: %s: formatted remaining amount. */
-                __('Almost there! Only %s left', 'goalcart'),
+                __('Almost there! Only %s left', 'faracart'),
                 formatGoalAmount(goal, goal.remaining, currency)
               )}
             </Typography>
             <Typography sx={{ fontSize: 10, color: '#92400e' }}>
-              {__('Finish today — your reward is waiting', 'goalcart')}
+              {__('Finish today — your reward is waiting', 'faracart')}
             </Typography>
           </Box>
         </Box>

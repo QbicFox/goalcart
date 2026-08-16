@@ -14,14 +14,14 @@ interface FullscreenContextValue {
 const FullscreenContext = createContext<FullscreenContextValue | null>(null);
 
 /** body class the full-screen CSS (assets/css/admin-fullscreen.css) keys on. */
-const FULLSCREEN_CLASS = 'goalcart-fullscreen';
+const FULLSCREEN_CLASS = 'faracart-fullscreen';
 
 /**
  * Full-screen dashboard mode (Settings → General toggle).
  *
  * When enabled, the app hides the WordPress admin chrome and owns the
  * whole viewport (fixed header + sidebar, scrollable content). The WP
- * admin chrome visibility is controlled by the `goalcart-fullscreen`
+ * admin chrome visibility is controlled by the `faracart-fullscreen`
  * body class — PHP adds it on first load (Admin::admin_body_class) so
  * there is no flash, and this provider owns it from then on so saving
  * the Settings toggle switches modes instantly without a page reload.

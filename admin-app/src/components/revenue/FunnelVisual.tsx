@@ -20,10 +20,10 @@ interface FunnelStage {
  * from goal completion (Improvement.md §17/§32).
  */
 const STAGES: FunnelStage[] = [
-  { key: 'views', label: __('Views', 'goalcart'), color: '#72aee6' },
-  { key: 'progressed', label: __('Progressed', 'goalcart'), color: '#2271b1' },
-  { key: 'completed', label: __('Completed', 'goalcart'), color: '#00a32a' },
-  { key: 'converted', label: __('Purchased', 'goalcart'), color: '#996800' },
+  { key: 'views', label: __('Views', 'faracart'), color: '#72aee6' },
+  { key: 'progressed', label: __('Progressed', 'faracart'), color: '#2271b1' },
+  { key: 'completed', label: __('Completed', 'faracart'), color: '#00a32a' },
+  { key: 'converted', label: __('Purchased', 'faracart'), color: '#996800' },
 ];
 
 /** Format a 0–1 rate as a percentage ('' when no data). */
@@ -60,7 +60,7 @@ export default function FunnelVisual({ funnel, compact = false, showTransitions 
   const max = Math.max(1, funnel.views);
 
   return (
-    <Box role="img" aria-label={__('Goal funnel: views, progressed, completed, purchased', 'goalcart')}>
+    <Box role="img" aria-label={__('Goal funnel: views, progressed, completed, purchased', 'faracart')}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
         {STAGES.map((stage, index) => {
           const count = funnel[stage.key];
@@ -75,7 +75,7 @@ export default function FunnelVisual({ funnel, compact = false, showTransitions 
                   role="img"
                   aria-label={sprintf(
                     /* translators: 1: stage label, 2: percentage. */
-                    __('%1$s carries %2$s of the previous stage', 'goalcart'),
+                    __('%1$s carries %2$s of the previous stage', 'faracart'),
                     stage.label,
                     pct === null ? '—' : `${pct.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`
                   )}
@@ -124,10 +124,10 @@ export default function FunnelVisual({ funnel, compact = false, showTransitions 
 
       <Box sx={{ display: 'flex', gap: 2.5, mt: 1 }}>
         <Typography variant="caption" color="text.secondary">
-          {__('Completion', 'goalcart')}: {formatRate(funnel.completion_rate)}
+          {__('Completion', 'faracart')}: {formatRate(funnel.completion_rate)}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          {__('Purchase rate', 'goalcart')}: {formatRate(funnel.conversion_rate)}
+          {__('Purchase rate', 'faracart')}: {formatRate(funnel.conversion_rate)}
         </Typography>
       </Box>
     </Box>

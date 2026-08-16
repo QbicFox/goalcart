@@ -22,7 +22,7 @@
  *  - campaign resolution: campaign display_rules drive a campaign-scoped
  *    template; none configured means per-goal cards ('' template id)
  *  - extensibility: a custom template registers through the
- *    goalcart_template_classes filter and resolves through the engine
+ *    faracart_template_classes filter and resolves through the engine
  *  - settings REST: the save schema carries template_defaults /
  *    template_settings with server-side validation, the sanitizer drops
  *    unknown scopes/templates and cleans values against each schema, and
@@ -62,16 +62,16 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\REST\FrontendController;
-use GoalCart\REST\SettingsController;
-use GoalCart\REST\TemplatesController;
-use GoalCart\Settings\Settings;
-use GoalCart\Templates\AbstractTemplate;
-use GoalCart\Templates\Template;
-use GoalCart\Templates\TemplateEngine;
-use GoalCart\Templates\TemplateRegistry;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
+use FaraCart\REST\FrontendController;
+use FaraCart\REST\SettingsController;
+use FaraCart\REST\TemplatesController;
+use FaraCart\Settings\Settings;
+use FaraCart\Templates\AbstractTemplate;
+use FaraCart\Templates\Template;
+use FaraCart\Templates\TemplateEngine;
+use FaraCart\Templates\TemplateRegistry;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
 
 $failures = 0;
 $checks   = 0;
@@ -88,7 +88,7 @@ function check( $label, $cond ) {
 }
 
 function goal_display( array $display ) {
-	return new \GoalCart\Goals\Goal( array(
+	return new \FaraCart\Goals\Goal( array(
 		'id'               => 1,
 		'name'             => 'Template Test Goal',
 		'status'           => 'active',
@@ -99,7 +99,7 @@ function goal_display( array $display ) {
 	) );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $engine        = $container->get( TemplateEngine::class );
 $registry      = $container->get( TemplateRegistry::class );
@@ -372,11 +372,11 @@ check( 'goal template rejected in campaign scope', '' === $engine->normalize_tem
 $settings->set_many( $all_before );
 
 // ---------------------------------------------------------------------------
-// 5. Extensibility: a custom template via goalcart_template_classes
+// 5. Extensibility: a custom template via faracart_template_classes
 // ---------------------------------------------------------------------------
 echo "\n== 5. Extensibility (custom template) ==\n";
 
-class GoalCart_Test_Template extends AbstractTemplate {
+class FaraCart_Test_Template extends AbstractTemplate {
 	public function id() {
 		return 'test_custom';
 	}
@@ -406,9 +406,9 @@ class GoalCart_Test_Template extends AbstractTemplate {
 }
 
 add_filter(
-	'goalcart_template_classes',
+	'faracart_template_classes',
 	function ( $classes ) {
-		$classes['test_custom'] = 'GoalCart_Test_Template';
+		$classes['test_custom'] = 'FaraCart_Test_Template';
 
 		return $classes;
 	}
@@ -424,7 +424,7 @@ check( 'custom template usable in goal scope', $custom_engine->is_registered( Te
 $resolved = $custom_engine->resolve_goal( goal_display( array( 'template_id' => 'test_custom' ) ) );
 check( 'custom template resolves with its schema defaults', 'test_custom' === $resolved['template_id'] && '#112233' === $resolved['settings']['glowColor'] );
 
-remove_all_filters( 'goalcart_template_classes' );
+remove_all_filters( 'faracart_template_classes' );
 
 // ---------------------------------------------------------------------------
 // 6. Persisted old ids never map (no migration step needed)
@@ -504,7 +504,7 @@ check( 'sanitizer drops unknown scopes', ! isset( $sanitized['bad_scope'] ) );
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/settings' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
 	$req->set_param( 'template_defaults', array( 'goal' => 'template-2', 'campaign' => 'milestone_chain' ) );
 	$req->set_param( 'template_settings', array( 'goal' => array(), 'campaign' => array() ) );
 	$resp = $settings_ctrl->handle_save( $req );
@@ -523,7 +523,7 @@ try {
 
 	// The legacy picker no longer drives the scope default — the two are
 	// independent settings (see the sync comment above).
-	$req2 = new \WP_REST_Request( 'POST', '/goalcart/v1/settings' );
+	$req2 = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
 	$req2->set_param( 'frontend_template', 'template-1' );
 	$resp2 = $settings_ctrl->handle_save( $req2 );
 	$data2 = $resp2->get_data()['data'];
@@ -532,7 +532,7 @@ try {
 	check( 'template_defaults.goal not overwritten by legacy picker', 'template-2' === $data2['template_defaults']['goal'] );
 
 	// template_settings are sanitized through the full save path.
-	$req3 = new \WP_REST_Request( 'POST', '/goalcart/v1/settings' );
+	$req3 = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
 	$req3->set_param(
 		'template_settings',
 		array(
@@ -559,7 +559,7 @@ $settings->set_many( $all_before );
 // ---------------------------------------------------------------------------
 echo "\n== 8. TemplatesController payload ==\n";
 
-$resp = $templates_ctrl->handle_index( new \WP_REST_Request( 'GET', '/goalcart/v1/templates' ) );
+$resp = $templates_ctrl->handle_index( new \WP_REST_Request( 'GET', '/faracart/v1/templates' ) );
 $data = $resp->get_data()['data'];
 
 check( 'payload lists the two scopes', array( 'goal', 'campaign' ) === $data['scopes'] );
@@ -610,7 +610,7 @@ check( 'versions map per scope', isset( $data['versions']['goal']['template-1'],
 echo "\n== 9. Frontend payload integration ==\n";
 
 // shape_goal carries the resolved template + settings.
-$goal = new \GoalCart\Goals\Goal( array(
+$goal = new \FaraCart\Goals\Goal( array(
 	'id'               => 1,
 	'name'             => 'Payload Goal',
 	'status'           => 'active',
@@ -620,8 +620,8 @@ $goal = new \GoalCart\Goals\Goal( array(
 	'display_settings' => array( 'template_id' => 'template-4', 'template_settings' => array( 'radius' => 4 ) ),
 ) );
 
-$ctx    = new \GoalCart\Goals\CartContext( array( 'subtotal' => 40, 'total' => 40, 'items' => array() ) );
-$result = $container->get( \GoalCart\Goals\GoalEngine::class )->evaluate( $goal, $ctx );
+$ctx    = new \FaraCart\Goals\CartContext( array( 'subtotal' => 40, 'total' => 40, 'items' => array() ) );
+$result = $container->get( \FaraCart\Goals\GoalEngine::class )->evaluate( $goal, $ctx );
 $shaped = $frontend->shape_goal( $goal, $result, $ctx );
 
 check( 'shape_goal carries the resolved template', 'template-4' === $shaped['template'] );
@@ -699,7 +699,7 @@ try {
 		'line_tax'          => 0.0,
 	);
 
-	$resp = $frontend->handle_progress( new \WP_REST_Request( 'GET', '/goalcart/v1/progress' ), $cart );
+	$resp = $frontend->handle_progress( new \WP_REST_Request( 'GET', '/faracart/v1/progress' ), $cart );
 	$payload = $resp->get_data()['data'];
 
 	check( 'progress payload carries campaign groups', isset( $payload['campaigns'] ) );

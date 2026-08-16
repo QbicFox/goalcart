@@ -2,16 +2,16 @@
 /**
  * REST controller for the smart goal recommendations.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Rewards\Reward;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Rewards\Reward;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,13 +21,13 @@ defined( 'ABSPATH' ) || exit;
  * Phase 33.4 (Smart Goal Recommendation) — the endpoints behind the
  * admin-facing Goal Optimization surface:
  *
- *  - `GET /goalcart/v1/revenue/goal-recommendations` — the full
+ *  - `GET /faracart/v1/revenue/goal-recommendations` — the full
  *    recommendation payload: analyzed store data (AOV, median, order
  *    distribution, shipping, margin, current goal history), every ranked
  *    candidate threshold with its score, confidence, expected impact and
  *    plain-English reasons, plus the top recommendation.
  *
- *  - `POST /goalcart/v1/revenue/goal-recommendations/apply` — the only
+ *  - `POST /faracart/v1/revenue/goal-recommendations/apply` — the only
  *    write path (UPSELL_REFACTOR §10/§41): applies a chosen threshold to
  *    an existing goal with explicit confirmation from the admin UI,
  *    records the recommendation_applied feedback-loop event (goal changed
@@ -145,16 +145,16 @@ class RecommendationsController extends BaseController {
 
 		if ( null === $goal ) {
 			return $this->error(
-				'goalcart_goal_not_found',
-				__( 'The goal could not be found.', 'goalcart' ),
+				'faracart_goal_not_found',
+				__( 'The goal could not be found.', 'faracart' ),
 				404
 			);
 		}
 
 		if ( $threshold <= 0 ) {
 			return $this->error(
-				'goalcart_invalid_threshold',
-				__( 'The recommended target must be greater than zero.', 'goalcart' ),
+				'faracart_invalid_threshold',
+				__( 'The recommended target must be greater than zero.', 'faracart' ),
 				400
 			);
 		}
@@ -177,7 +177,7 @@ class RecommendationsController extends BaseController {
 
 		$this->goals->update( $goal_id, array( 'target' => $threshold ) );
 
-		// The goal update fires goalcart_goals_changed → revenue cache
+		// The goal update fires faracart_goals_changed → revenue cache
 		// invalidation; bump explicitly too in case that wiring is filtered
 		// away on a store.
 		$this->repository->invalidate();

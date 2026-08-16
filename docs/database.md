@@ -10,7 +10,7 @@
 
 ### 1.1 Goal
 
-A target the customer can reach (see `docs/PRODUCT_SPEC.md` §2.1). Stored in the `goalcart_goals` table.
+A target the customer can reach (see `docs/PRODUCT_SPEC.md` §2.1). Stored in the `faracart_goals` table.
 
 | Domain field | Column | Notes |
 |---|---|---|
@@ -35,7 +35,7 @@ A target the customer can reach (see `docs/PRODUCT_SPEC.md` §2.1). Stored in th
 ### 1.2 Campaign
 
 A collection of goals active under specific conditions and schedules (`docs/PRODUCT_SPEC.md` §2.3).
-Stored in the `goalcart_campaigns` table.
+Stored in the `faracart_campaigns` table.
 
 | Domain field | Column | Notes |
 |---|---|---|
@@ -50,7 +50,7 @@ Stored in the `goalcart_campaigns` table.
 
 ### 1.3 Analytics Event
 
-Append-only event log (`docs/PRODUCT_SPEC.md` §5.5 / Phase 16). Stored in `goalcart_analytics_events`.
+Append-only event log (`docs/PRODUCT_SPEC.md` §5.5 / Phase 16). Stored in `faracart_analytics_events`.
 
 | Domain field | Column | Notes |
 |---|---|---|
@@ -62,8 +62,8 @@ Append-only event log (`docs/PRODUCT_SPEC.md` §5.5 / Phase 16). Stored in `goal
 | value | `cart_value` + `meta` | `meta` JSON carries event-specific payload (e.g. `percentage`) |
 | timestamp | `created_at` | `datetime`, site timezone |
 
-**Write path (Phase 16):** six events are recorded by `GoalCart\Analytics\Tracker`
-when the storefront JS reports them to the public `POST /goalcart/v1/track`
+**Write path (Phase 16):** six events are recorded by `FaraCart\Analytics\Tracker`
+when the storefront JS reports them to the public `POST /faracart/v1/track`
 endpoint (nonce-guarded); `suggested_product_added` is attributed
 server-side on `woocommerce_add_to_cart` (only when the session saw a
 `suggestion_impression` for that product within 24h). Rows carry only
@@ -75,8 +75,8 @@ dropped.
 
 ### 1.4 Revenue Event (Phase 33.1)
 
-Raw attribution-funnel log (P33.1). Stored in `goalcart_revenue_events` and written by
-`GoalCart\Analytics\RevenueTracker` — deliberately separate from `analytics_events`: those rows
+Raw attribution-funnel log (P33.1). Stored in `faracart_revenue_events` and written by
+`FaraCart\Analytics\RevenueTracker` — deliberately separate from `analytics_events`: those rows
 are the lightweight Phase 16 dashboard counters, while `revenue_events` carries the attribution
 fields (`goal_target`, `incremental_value`) plus order ids and feeds Phase 33.2 attribution.
 
@@ -95,7 +95,7 @@ fields (`goal_target`, `incremental_value`) plus order ids and feeds Phase 33.2 
 
 ### 1.5 Upsell Event (Phase 33.1)
 
-Raw upsell-interaction log (P33.1), stored in `goalcart_upsell_events` — the historical-conversion
+Raw upsell-interaction log (P33.1), stored in `faracart_upsell_events` — the historical-conversion
 input for the Phase 33.5 Smart Upsell ranking.
 
 | Domain field | Column | Notes |
@@ -114,14 +114,14 @@ idempotent dedup — views/completions/impressions/clicks dedup per session+goal
 order. The `order_dedup` unique key on `(event_type, order_id)` backs the per-order contract at the
 database level (concurrent double-reports fail the INSERT). Events reported after their goal was
 deleted are retried once without the FK ids so they are never silently dropped (the FK's `SET NULL`
-semantics for a deleted parent). A weekly `goalcart_revenue_cleanup` cron purges rows past the
+semantics for a deleted parent). A weekly `faracart_revenue_cleanup` cron purges rows past the
 retention window (`RevenueTracker::RETENTION_DAYS`, filterable via
-`goalcart_revenue_retention_days`) in bounded batches and sweeps orphan `upsell_stats` rows.
+`faracart_revenue_retention_days`) in bounded batches and sweeps orphan `upsell_stats` rows.
 
 ### 1.6 Daily Revenue Aggregate (Phase 33.3)
 
-One row per goal per day in `goalcart_revenue_daily`, pre-computed by
-`GoalCart\Analytics\DailyAggregator` on the `daily` cron interval so the dashboard reads an
+One row per goal per day in `faracart_revenue_daily`, pre-computed by
+`FaraCart\Analytics\DailyAggregator` on the `daily` cron interval so the dashboard reads an
 aggregated table instead of scanning the raw event log on every admin request.
 
 | Domain field | Column | Notes |
@@ -139,13 +139,13 @@ aggregated table instead of scanning the raw event log on every admin request.
 `AttributionEngine::daily_metrics()` — the same funnel + summary + reward-cost + profit code the
 live dashboard reads, so the aggregate and the live view can never drift. Only goals with activity
 that day get rows; rows are delete-then-inserted per date, making re-runs idempotent. Catch-up is
-bounded: the job starts the day after `goalcart_revenue_last_aggregated` (or the
-`goalcart_aggregate_lookback_days` floor, aligned with the retention window) and processes at most
-`goalcart_aggregate_max_days` per tick, so a backlog drains over several runs.
+bounded: the job starts the day after `faracart_revenue_last_aggregated` (or the
+`faracart_aggregate_lookback_days` floor, aligned with the retention window) and processes at most
+`faracart_aggregate_max_days` per tick, so a backlog drains over several runs.
 
 ### 1.7 Product Upsell Stats (Phase 33.3)
 
-One row per product in `goalcart_upsell_stats`, rebuilt wholesale by `DailyAggregator::aggregate_upsells()`
+One row per product in `faracart_upsell_stats`, rebuilt wholesale by `DailyAggregator::aggregate_upsells()`
 with a single grouped INSERT...SELECT over the raw `upsell_events` log — the historical conversion
 signal the Phase 33.5 Smart Upsell ranking reads.
 
@@ -156,16 +156,16 @@ signal the Phase 33.5 Smart Upsell ranking reads.
 | revenue | `revenue` `decimal(19,4)` | sum of order cart values |
 | timestamp | `updated_at` | `datetime`, site timezone |
 
-**Read path (P33.3):** `GoalCart\Analytics\RevenueRepository` serves the cached summaries
+**Read path (P33.3):** `FaraCart\Analytics\RevenueRepository` serves the cached summaries
 (`overview`, `goal_performance`, `daily_trend`, `product_stats`) with generation-versioned
-transients (`goalcart_revenue_cache_version`) and invalidates them on order payment/status
-changes, goal CRUD (`goalcart_goals_changed`), product saves and the aggregation run
-(`goalcart_revenue_aggregated`).
+transients (`faracart_revenue_cache_version`) and invalidates them on order payment/status
+changes, goal CRUD (`faracart_goals_changed`), product saves and the aggregation run
+(`faracart_revenue_aggregated`).
 
 ### 1.8 Goal Completion (Phase 36)
 
 Server-side completion history — the authoritative record backing the per-user completion limit.
-Stored in `goalcart_goal_completions`, written by `GoalCart\Goals\CompletionService` when a paid
+Stored in `faracart_goal_completions`, written by `FaraCart\Goals\CompletionService` when a paid
 order meets a goal (one row per goal per order per identity). Deliberately separate from the
 analytics/revenue event logs: those are client-reported or analytics-gated + deduped, so they can
 never back an enforcement limit.
@@ -182,7 +182,7 @@ never back an enforcement limit.
 | timestamp | `created_at` | `datetime`, site timezone |
 
 **Write path (Phase 36):** `woocommerce_checkout_create_order` stamps the anonymous session id
-on the order (`_goalcart_session`); `woocommerce_payment_complete` + `woocommerce_order_status_completed`
+on the order (`_faracart_session`); `woocommerce_payment_complete` + `woocommerce_order_status_completed`
 record one completion per met goal for the order's identity (idempotent — the `order_goal` unique
 key makes replays no-ops). For a limited goal the count + insert run inside a transaction with a
 row lock on the goal (`SELECT ... FOR UPDATE`), so concurrent requests cannot exceed the limit.
@@ -197,15 +197,15 @@ never touch this table.
 
 | Table | Purpose | Key indexes |
 |---|---|---|
-| `{prefix}goalcart_goals` | Goal entities | `status`, `type`, `campaign_id`, `priority`, `starts_at`, `ends_at` |
-| `{prefix}goalcart_campaigns` | Campaign entities | `status`, `starts_at`, `ends_at` |
-| `{prefix}goalcart_analytics_events` | Analytics event log (Phase 16) | `goal_id`, `campaign_id`, `event_type`, `session_id`, `product_id`, `order_id`, `created_at` |
-| `{prefix}goalcart_revenue_events` | Revenue attribution log (Phase 33.1) | `event_type`, `goal_id`, `campaign_id`, `product_id`, `order_id`, `session_id`, `user_id`, `created_at` + composite `goal_event` / `order_event` + unique `order_dedup` |
-| `{prefix}goalcart_revenue_daily` | Daily revenue aggregates (Phase 33.1, fed by Phase 33.3) | `goal_id`, `report_date` + composite `goal_date` |
-| `{prefix}goalcart_goal_attribution` | Per-order goal attribution (Phase 33.1) | `order_id`, `goal_id`, `session_id`, `model`, `created_at` + unique `order_goal_model` |
-| `{prefix}goalcart_upsell_events` | Upsell interaction log (Phase 33.1) | `event_type`, `goal_id`, `product_id`, `order_id`, `session_id`, `created_at` + composite `product_event` + unique `order_dedup` |
-| `{prefix}goalcart_upsell_stats` | Per-product upsell aggregates (Phase 33.1) | unique `product_id` |
-| `{prefix}goalcart_goal_completions` | Per-user completion history (Phase 36) | `goal_id`, `user_id`, `session_id`, `order_id`, `created_at` + composite `goal_user` / `goal_session` + unique `order_goal` |
+| `{prefix}faracart_goals` | Goal entities | `status`, `type`, `campaign_id`, `priority`, `starts_at`, `ends_at` |
+| `{prefix}faracart_campaigns` | Campaign entities | `status`, `starts_at`, `ends_at` |
+| `{prefix}faracart_analytics_events` | Analytics event log (Phase 16) | `goal_id`, `campaign_id`, `event_type`, `session_id`, `product_id`, `order_id`, `created_at` |
+| `{prefix}faracart_revenue_events` | Revenue attribution log (Phase 33.1) | `event_type`, `goal_id`, `campaign_id`, `product_id`, `order_id`, `session_id`, `user_id`, `created_at` + composite `goal_event` / `order_event` + unique `order_dedup` |
+| `{prefix}faracart_revenue_daily` | Daily revenue aggregates (Phase 33.1, fed by Phase 33.3) | `goal_id`, `report_date` + composite `goal_date` |
+| `{prefix}faracart_goal_attribution` | Per-order goal attribution (Phase 33.1) | `order_id`, `goal_id`, `session_id`, `model`, `created_at` + unique `order_goal_model` |
+| `{prefix}faracart_upsell_events` | Upsell interaction log (Phase 33.1) | `event_type`, `goal_id`, `product_id`, `order_id`, `session_id`, `created_at` + composite `product_event` + unique `order_dedup` |
+| `{prefix}faracart_upsell_stats` | Per-product upsell aggregates (Phase 33.1) | unique `product_id` |
+| `{prefix}faracart_goal_completions` | Per-user completion history (Phase 36) | `goal_id`, `user_id`, `session_id`, `order_id`, `created_at` + composite `goal_user` / `goal_session` + unique `order_goal` |
 
 All tables: InnoDB, `$wpdb->get_charset_collate()`, `bigint(20) unsigned AUTO_INCREMENT` PKs,
 `decimal(19,4)` for money, `datetime` in the **site timezone** (`current_time()`), `longtext` for
@@ -215,15 +215,15 @@ structured JSON. This mirrors the reference plugin's conventions exactly.
 
 | Name | Column | References | On delete |
 |---|---|---|---|
-| `fk_goalcart_goals_campaign` | `goals.campaign_id` | `campaigns.id` | `SET NULL` |
-| `fk_goalcart_analytics_goal` | `analytics_events.goal_id` | `goals.id` | `SET NULL` |
-| `fk_goalcart_analytics_campaign` | `analytics_events.campaign_id` | `campaigns.id` | `SET NULL` |
-| `fk_goalcart_revenue_goal` | `revenue_events.goal_id` | `goals.id` | `SET NULL` |
-| `fk_goalcart_revenue_campaign` | `revenue_events.campaign_id` | `campaigns.id` | `SET NULL` |
-| `fk_goalcart_daily_goal` | `revenue_daily.goal_id` | `goals.id` | `SET NULL` |
-| `fk_goalcart_attribution_goal` | `goal_attribution.goal_id` | `goals.id` | `SET NULL` |
-| `fk_goalcart_upsell_goal` | `upsell_events.goal_id` | `goals.id` | `SET NULL` |
-| `fk_goalcart_completions_goal` | `goal_completions.goal_id` | `goals.id` | `SET NULL` |
+| `fk_faracart_goals_campaign` | `goals.campaign_id` | `campaigns.id` | `SET NULL` |
+| `fk_faracart_analytics_goal` | `analytics_events.goal_id` | `goals.id` | `SET NULL` |
+| `fk_faracart_analytics_campaign` | `analytics_events.campaign_id` | `campaigns.id` | `SET NULL` |
+| `fk_faracart_revenue_goal` | `revenue_events.goal_id` | `goals.id` | `SET NULL` |
+| `fk_faracart_revenue_campaign` | `revenue_events.campaign_id` | `campaigns.id` | `SET NULL` |
+| `fk_faracart_daily_goal` | `revenue_daily.goal_id` | `goals.id` | `SET NULL` |
+| `fk_faracart_attribution_goal` | `goal_attribution.goal_id` | `goals.id` | `SET NULL` |
+| `fk_faracart_upsell_goal` | `upsell_events.goal_id` | `goals.id` | `SET NULL` |
+| `fk_faracart_completions_goal` | `goal_completions.goal_id` | `goals.id` | `SET NULL` |
 
 `SET NULL` preserves analytics history and standalone goals when a parent is deleted.
 
@@ -243,10 +243,10 @@ reference plugin's convention.
 
 ## 3. Database rules applied (P03-T03)
 
-1. **Reference migration strategy** — version-driven: `GOALCART_DB_VERSION` (now `0.6.0` —
+1. **Reference migration strategy** — version-driven: `FARACART_DB_VERSION` (now `0.6.0` —
    Phase 36's `goals.max_completions_per_user` column + `goal_completions` table on top of
    Phase 33.1's five revenue/upsell tables, the Phase 12 template engine migration and Phase 26's
-   `goals.exclusive`) vs the `goalcart_db_version` option; `Installer::maybe_upgrade()`
+   `goals.exclusive`) vs the `faracart_db_version` option; `Installer::maybe_upgrade()`
    runs on `plugins_loaded` + `admin_init`; schema recreated idempotently via `dbDelta`; foreign
    keys added with `INFORMATION_SCHEMA`-guarded `ALTER TABLE` (safe to re-run; failures logged,
    never fatal).
@@ -270,7 +270,7 @@ reference plugin's convention.
 6. **Safe, repeatable upgrades** — all migrations are idempotent and additive; `uninstall()`
    drops only plugin tables + options; deactivation preserves data.
 7. **Settings via option, not table** — the reference declares an unused settings *table* while its
-   service uses an option; FaraCart keeps a single `goalcart_settings` option (no duplicated storage).
+   service uses an option; FaraCart keeps a single `faracart_settings` option (no duplicated storage).
 
 ## 4. Design decisions & deviations
 

@@ -14,7 +14,7 @@ bars, rewards, milestones, and smart product suggestions that close the gap to t
 ## Development Setup
 
 ```bash
-composer install        # Generate the PSR-4 autoloader (GoalCart\ => includes/)
+composer install        # Generate the PSR-4 autoloader (FaraCart\ => includes/)
 ```
 
 ## Admin App (React)
@@ -37,13 +37,13 @@ npm run typecheck  # TypeScript (no emit)
 1. Start the Vite dev server: `cd admin-app && npm run dev` (default `http://localhost:5173`).
 2. Load the **FaraCart** admin page while WordPress runs with an environment type of `local` or
    `development` — the plugin auto-detects the dev server and enqueues the app straight from it.
-3. If your dev server is not on `localhost:5173`, define the `GOALCART_DEV_SERVER_URL` constant.
+3. If your dev server is not on `localhost:5173`, define the `FARACART_DEV_SERVER_URL` constant.
 
 **Production:** `npm run build` emits a hashed bundle plus a Vite manifest
 (`admin-app/dist/.vite/manifest.json`) that the PHP asset loader (`includes/Admin/AssetLoader.php`)
 reads to enqueue the correct files.
 
-**Boot data:** the PHP side localizes `window.goalcart` (REST nonce, API base, current user, caps,
+**Boot data:** the PHP side localizes `window.faracart` (REST nonce, API base, current user, caps,
 locale) so the app can authenticate REST calls via the `X-WP-Nonce` header.
 
 ## Directory Structure
@@ -52,7 +52,7 @@ locale) so the app can authenticate REST calls via the `X-WP-Nonce` header.
 ravis-faracart/
 ├── ravis-faracart.php    # Main plugin file (bootstrap)
 ├── composer.json         # Composer config + PSR-4 autoloader
-├── includes/             # Core plugin classes (GoalCart\ namespace)
+├── includes/             # Core plugin classes (FaraCart\ namespace)
 │   ├── Plugin.php        # Singleton bootstrap + DI wiring
 │   ├── Container.php     # Dependency injection container
 │   ├── Compatibility.php # WP/PHP/WC environment gate

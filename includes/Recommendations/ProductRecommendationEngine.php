@@ -2,16 +2,16 @@
 /**
  * Unified product recommendation engine for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Recommendations;
+namespace FaraCart\Recommendations;
 
-use GoalCart\Analytics\UpsellRanker;
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Suggestions\SuggestionEngine;
+use FaraCart\Analytics\UpsellRanker;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Suggestions\SuggestionEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -48,7 +48,7 @@ defined( 'ABSPATH' ) || exit;
  *  4. Rank — score desc; ties → lower price, then product id
  *     (deterministic, mirrors the ranker).
  *  5. Limit — the same configurable limit the storefront upsell panel
- *     uses (goalcart_frontend_upsell_limit, 1–6, default 3). Weak
+ *     uses (faracart_frontend_upsell_limit, 1–6, default 3). Weak
  *     candidates are never invented to fill slots: fewer strong
  *     candidates → fewer items.
  *  6. Shape — customer-facing fields plus `source` (suggestion | upsell |
@@ -64,7 +64,7 @@ defined( 'ABSPATH' ) || exit;
  * recommendation request.
  *
  * Extensibility: the final list is filterable via the existing
- * `goalcart_suggestions` developer API (same signature the Phase 14
+ * `faracart_suggestions` developer API (same signature the Phase 14
  * engine exposes), so stores keep their custom shaping rules.
  */
 final class ProductRecommendationEngine {
@@ -283,7 +283,7 @@ final class ProductRecommendationEngine {
 		 * @param GoalResult  $result  Evaluation result.
 		 * @param CartContext $context Cart snapshot.
 		 */
-		return (array) apply_filters( 'goalcart_suggestions', $items, $goal, $result, $context );
+		return (array) apply_filters( 'faracart_suggestions', $items, $goal, $result, $context );
 	}
 
 	/**
@@ -291,7 +291,7 @@ final class ProductRecommendationEngine {
 	 *
 	 * Only money goals with a positive remaining gap produce upsell
 	 * candidates; the ranker's own gate (master enabled + analytics +
-	 * goalcart_upsells_enabled) is respected, so a store that disabled
+	 * faracart_upsells_enabled) is respected, so a store that disabled
 	 * smart upsells simply gets the suggestion half.
 	 *
 	 * @param Goal        $goal    Goal.
@@ -368,7 +368,7 @@ final class ProductRecommendationEngine {
 	 * @return int
 	 */
 	protected function limit() {
-		$limit = (int) apply_filters( 'goalcart_frontend_upsell_limit', self::DEFAULT_LIMIT );
+		$limit = (int) apply_filters( 'faracart_frontend_upsell_limit', self::DEFAULT_LIMIT );
 
 		return max( self::MIN_LIMIT, min( self::MAX_LIMIT, $limit ) );
 	}

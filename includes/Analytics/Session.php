@@ -2,10 +2,10 @@
 /**
  * Anonymous session management for FaraCart analytics.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -25,7 +25,7 @@ defined( 'ABSPATH' ) || exit;
  * event rows group by this ID only.
  *
  * Mirrors the reference plugin (WooInsights\Tracker\Session) — the
- * goalcart variant keeps the same cookie mechanics without the
+ * faracart variant keeps the same cookie mechanics without the
  * search-specific conversion markers.
  */
 class Session {
@@ -35,7 +35,7 @@ class Session {
 	 *
 	 * @var string
 	 */
-	const COOKIE = 'goalcart_session';
+	const COOKIE = 'faracart_session';
 
 	/**
 	 * Accepted session ID format (32 lowercase hex chars).

@@ -5,11 +5,11 @@ import type { ProgressReward } from '../types';
 
 /** Reward-type base labels (mirrors ProgressUI::reward_labels()). */
 export const REWARD_LABELS: Record<string, string> = {
-  free_shipping: __('Free shipping', 'goalcart'),
-  percent_discount: __('% discount', 'goalcart'),
-  fixed_discount: __('Fixed discount', 'goalcart'),
-  free_gift: __('Free gift', 'goalcart'),
-  coupon: __('Coupon', 'goalcart'),
+  free_shipping: __('Free shipping', 'faracart'),
+  percent_discount: __('% discount', 'faracart'),
+  fixed_discount: __('Fixed discount', 'faracart'),
+  free_gift: __('Free gift', 'faracart'),
+  coupon: __('Coupon', 'faracart'),
 };
 
 /** Value-aware reward label (mirrors MessageEngine::reward_label). */
@@ -19,7 +19,7 @@ export function rewardLabel(reward: ProgressReward): string {
   if (reward.type === 'percent_discount' && reward.value !== null) {
     return sprintf(
       /* translators: %d: discount percentage. */
-      __('%d%% discount', 'goalcart'),
+      __('%d%% discount', 'faracart'),
       Math.round(reward.value)
     );
   }
@@ -27,7 +27,7 @@ export function rewardLabel(reward: ProgressReward): string {
   if (reward.type === 'fixed_discount' && reward.value !== null) {
     return sprintf(
       /* translators: %s: formatted discount amount. */
-      __('Fixed %s off', 'goalcart'),
+      __('Fixed %s off', 'faracart'),
       formatCurrency(reward.value)
     );
   }

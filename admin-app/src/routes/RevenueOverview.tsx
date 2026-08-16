@@ -77,10 +77,10 @@ function buildInsights(summary: RevenueSummary, aov: AovAnalysis): Insight[] {
   if (summary.orders > 0) {
     insights.push({
       icon: <TrendingUpIcon fontSize="small" />,
-      title: __('Good performance', 'goalcart'),
+      title: __('Good performance', 'faracart'),
       body: sprintf(
         /* translators: 1: number of purchased orders. */
-        __('FaraCart influenced %1$s purchases during this period.', 'goalcart'),
+        __('FaraCart influenced %1$s purchases during this period.', 'faracart'),
         formatNumber(summary.orders)
       ),
     });
@@ -92,17 +92,17 @@ function buildInsights(summary: RevenueSummary, aov: AovAnalysis): Insight[] {
 
     insights.push({
       icon: <PercentIcon fontSize="small" />,
-      title: __('Average basket', 'goalcart'),
+      title: __('Average basket', 'faracart'),
       body:
         aov.percentage_change >= 0
           ? sprintf(
               /* translators: 1: signed percentage. */
-              __('Customers interacting with FaraCart spent %1$s more per order on average (observed impact).', 'goalcart'),
+              __('Customers interacting with FaraCart spent %1$s more per order on average (observed impact).', 'faracart'),
               change
             )
           : sprintf(
               /* translators: 1: percentage. */
-              __('Customers interacting with FaraCart spent %1$s less per order on average (observed impact).', 'goalcart'),
+              __('Customers interacting with FaraCart spent %1$s less per order on average (observed impact).', 'faracart'),
               magnitude
             ),
     });
@@ -112,20 +112,20 @@ function buildInsights(summary: RevenueSummary, aov: AovAnalysis): Insight[] {
     if (funnel.conversion_rate < 0.3) {
       insights.push({
         icon: <InsightsIcon fontSize="small" />,
-        title: __('Optimization opportunity', 'goalcart'),
+        title: __('Optimization opportunity', 'faracart'),
         body: sprintf(
           /* translators: 1: purchase rate percentage. */
-          __('Only %1$s of completed goals were followed by an attributed purchase.', 'goalcart'),
+          __('Only %1$s of completed goals were followed by an attributed purchase.', 'faracart'),
           formatPercent(funnel.conversion_rate)
         ),
       });
     } else {
       insights.push({
         icon: <InsightsIcon fontSize="small" />,
-        title: __('Purchases', 'goalcart'),
+        title: __('Purchases', 'faracart'),
         body: sprintf(
           /* translators: 1: purchase rate percentage. */
-          __('%1$s of completed goals were followed by an attributed purchase.', 'goalcart'),
+          __('%1$s of completed goals were followed by an attributed purchase.', 'faracart'),
           formatPercent(funnel.conversion_rate)
         ),
       });
@@ -135,18 +135,18 @@ function buildInsights(summary: RevenueSummary, aov: AovAnalysis): Insight[] {
   if (summary.profit_available && summary.profit_impact !== null) {
     insights.push({
       icon: <PaymentsIcon fontSize="small" />,
-      title: __('Estimated profit', 'goalcart'),
+      title: __('Estimated profit', 'faracart'),
       body: sprintf(
         /* translators: 1: estimated profit currency value. */
-        __('FaraCart generated an estimated profit of %1$s after reward and shipping costs.', 'goalcart'),
+        __('FaraCart generated an estimated profit of %1$s after reward and shipping costs.', 'faracart'),
         formatCurrency(summary.profit_impact)
       ),
     });
   } else if (summary.orders > 0 && summary.profit_reason_code === 'missing_product_cost') {
     insights.push({
       icon: <PaymentsIcon fontSize="small" />,
-      title: __('Profit not estimated yet', 'goalcart'),
-      body: __('Add product cost data to see the estimated profit of FaraCart.', 'goalcart'),
+      title: __('Profit not estimated yet', 'faracart'),
+      body: __('Add product cost data to see the estimated profit of FaraCart.', 'faracart'),
     });
   }
 
@@ -163,9 +163,9 @@ interface Insight {
 type TrendMetric = 'sales' | 'orders' | 'completions' | 'incremental';
 
 const TREND_PRIMARY: Array<{ value: TrendMetric; label: string }> = [
-  { value: 'sales', label: __('Attributed Sales', 'goalcart') },
-  { value: 'orders', label: __('Purchased Orders', 'goalcart') },
-  { value: 'completions', label: __('Goal Completions', 'goalcart') },
+  { value: 'sales', label: __('Attributed Sales', 'faracart') },
+  { value: 'orders', label: __('Purchased Orders', 'faracart') },
+  { value: 'completions', label: __('Goal Completions', 'faracart') },
 ];
 
 /**
@@ -180,7 +180,7 @@ function CustomerJourneyFunnel({ funnel }: { funnel: RevenueSummary['funnel'] })
     <Card variant="outlined">
       <CardContent>
         <Typography variant="h6" component="h3" gutterBottom>
-          {__('Customer Journey', 'goalcart')}
+          {__('Customer Journey', 'faracart')}
         </Typography>
         <FunnelVisual
           showTransitions
@@ -196,7 +196,7 @@ function CustomerJourneyFunnel({ funnel }: { funnel: RevenueSummary['funnel'] })
         <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
           {__(
             'A completion means the customer reached the goal target. A purchase means a qualifying order was actually associated with the goal.',
-            'goalcart'
+            'faracart'
           )}
         </Typography>
       </CardContent>
@@ -212,7 +212,7 @@ function CustomerJourneyFunnel({ funnel }: { funnel: RevenueSummary['funnel'] })
  * four business KPI cards (Improvement.md §5–§13), a simplified trend
  * (§14), deterministic insight cards (§15) and the technical attribution
  * detail moved behind an expandable drawer (§30). Same payload, same
- * route: `GET /goalcart/v1/revenue/overview` sliced by the shared date
+ * route: `GET /faracart/v1/revenue/overview` sliced by the shared date
  * range + goal filter.
  */
 export default function RevenueOverview() {
@@ -281,10 +281,10 @@ export default function RevenueOverview() {
 
   return (
     <PageContainer
-      title={__('Sales Performance', 'goalcart')}
+      title={__('Sales Performance', 'faracart')}
       description={__(
         'How did FaraCart perform? Sales attributed, purchased orders, average basket and estimated profit.',
-        'goalcart'
+        'faracart'
       )}
     >
       <RevenueToolbar goalId={goalId} onGoalChange={setGoalId} />
@@ -293,7 +293,7 @@ export default function RevenueOverview() {
         <Alert severity="error" variant="outlined">
           {query.error instanceof Error
             ? query.error.message
-            : __('Could not load the sales overview.', 'goalcart')}
+            : __('Could not load the sales overview.', 'faracart')}
         </Alert>
       )}
 
@@ -316,19 +316,19 @@ export default function RevenueOverview() {
       ) : isEmpty ? (
         <EmptyState
           icon={<TrendingUpIcon fontSize="large" />}
-          title={__('No sales data yet', 'goalcart')}
+          title={__('No sales data yet', 'faracart')}
           description={__(
             'Once customers start interacting with your goals, FaraCart will show sales, purchases and profit insights here.',
-            'goalcart'
+            'faracart'
           )}
         />
       ) : hasNoPurchases ? (
         <EmptyState
           icon={<ShoppingCartCheckoutIcon fontSize="large" />}
-          title={__('No purchases yet', 'goalcart')}
+          title={__('No purchases yet', 'faracart')}
           description={__(
             'Customers are interacting with your goals, but no attributed purchases have been recorded for this period.',
-            'goalcart'
+            'faracart'
           )}
         />
       ) : data && summary ? (
@@ -342,13 +342,13 @@ export default function RevenueOverview() {
             }}
           >
             <KpiCard
-              label={__('Sales Attributed to FaraCart', 'goalcart')}
+              label={__('Sales Attributed to FaraCart', 'faracart')}
               value={formatCurrency(summary.goal_driven_revenue)}
               icon={<PaymentsIcon fontSize="small" />}
               trend={{ change: percentChange(previous?.goal_driven_revenue, summary.goal_driven_revenue) }}
               hint={sprintf(
                 /* translators: 1: purchased orders. */
-                __('%1$s purchased orders', 'goalcart'),
+                __('%1$s purchased orders', 'faracart'),
                 formatNumber(summary.orders)
               )}
             >
@@ -356,14 +356,14 @@ export default function RevenueOverview() {
             </KpiCard>
 
             <KpiCard
-              label={__('Average Basket Increase', 'goalcart')}
+              label={__('Average Basket Increase', 'faracart')}
               value={
                 data.aov.comparison_available
                   ? formatSignedPercent(data.aov.percentage_change)
                   : '—'
               }
               icon={<PercentIcon fontSize="small" />}
-              hint={__('Observed impact', 'goalcart')}
+              hint={__('Observed impact', 'faracart')}
               accent={
                 data.aov.comparison_available
                   ? data.aov.percentage_change >= 0
@@ -376,11 +376,11 @@ export default function RevenueOverview() {
             </KpiCard>
 
             <KpiCard
-              label={__('Purchased Orders', 'goalcart')}
+              label={__('Purchased Orders', 'faracart')}
               value={formatNumber(summary.orders)}
               icon={<ShoppingCartCheckoutIcon fontSize="small" />}
               trend={{ change: percentChange(previous?.orders, summary.orders) }}
-              hint={__('after FaraCart interaction', 'goalcart')}
+              hint={__('after FaraCart interaction', 'faracart')}
             />
 
             <EstimatedProfitCard
@@ -418,14 +418,14 @@ export default function RevenueOverview() {
                 }}
               >
                 <Typography variant="h6" component="h3">
-                  {__('FaraCart Sales Performance', 'goalcart')}
+                  {__('FaraCart Sales Performance', 'faracart')}
                 </Typography>
                 <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
                   <ToggleButtonGroup
                     size="small"
                     value={visibleMetrics}
                     onChange={(_, next: TrendMetric[]) => next && next.length > 0 && setVisibleMetrics(next)}
-                    aria-label={__('Trend metrics', 'goalcart')}
+                    aria-label={__('Trend metrics', 'faracart')}
                   >
                     {TREND_PRIMARY.map((option) => (
                       <ToggleButton key={option.value} value={option.value}>
@@ -437,7 +437,7 @@ export default function RevenueOverview() {
                     <Chip
                       size="small"
                       variant="outlined"
-                      label={__('Advanced', 'goalcart')}
+                      label={__('Advanced', 'faracart')}
                       onClick={() => setShowAdvancedTrend((shown) => !shown)}
                     />
                     {showAdvancedTrend && (
@@ -447,7 +447,7 @@ export default function RevenueOverview() {
                         selected={visibleMetrics.includes('incremental')}
                         onChange={() => toggleMetric('incremental')}
                       >
-                        {__('Additional Sales Value', 'goalcart')}
+                        {__('Additional Sales Value', 'faracart')}
                       </ToggleButton>
                     )}
                   </Stack>
@@ -456,7 +456,7 @@ export default function RevenueOverview() {
 
               <Box
                 role="img"
-                aria-label={__('Daily attributed sales and purchased orders trend', 'goalcart')}
+                aria-label={__('Daily attributed sales and purchased orders trend', 'faracart')}
                 sx={{ width: '100%', height: 300 }}
               >
                 <ResponsiveContainer width="100%" height="100%">
@@ -497,7 +497,7 @@ export default function RevenueOverview() {
                       <Bar
                         yAxisId="count"
                         dataKey="completions"
-                        name={__('Goal Completions', 'goalcart')}
+                        name={__('Goal Completions', 'faracart')}
                         fill={COLORS.primaryLight}
                         radius={[3, 3, 0, 0]}
                       />
@@ -506,7 +506,7 @@ export default function RevenueOverview() {
                       <Line
                         yAxisId="count"
                         dataKey="conversions"
-                        name={__('Purchased Orders', 'goalcart')}
+                        name={__('Purchased Orders', 'faracart')}
                         stroke={COLORS.primary}
                         strokeWidth={2}
                         dot={false}
@@ -517,7 +517,7 @@ export default function RevenueOverview() {
                       <Line
                         yAxisId="revenue"
                         dataKey="revenue"
-                        name={__('Attributed Sales', 'goalcart')}
+                        name={__('Attributed Sales', 'faracart')}
                         stroke={COLORS.success}
                         strokeWidth={2}
                         dot={false}
@@ -528,7 +528,7 @@ export default function RevenueOverview() {
                       <Line
                         yAxisId="revenue"
                         dataKey="incremental_revenue"
-                        name={__('Additional Sales Value', 'goalcart')}
+                        name={__('Additional Sales Value', 'faracart')}
                         stroke={COLORS.warning}
                         strokeWidth={2}
                         strokeDasharray="4 3"
@@ -553,7 +553,7 @@ export default function RevenueOverview() {
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="h6" component="h3" gutterBottom>
-                  {__('What happened?', 'goalcart')}
+                  {__('What happened?', 'faracart')}
                 </Typography>
                 <Box
                   sx={{
@@ -582,46 +582,46 @@ export default function RevenueOverview() {
           <Accordion disableGutters square sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, boxShadow: 'none' }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography variant="h6" component="h3" sx={{ fontSize: '1rem' }}>
-                {__('Advanced attribution', 'goalcart')}
+                {__('Advanced attribution', 'faracart')}
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
               <Stack spacing={1.25}>
                 <StatRow
-                  label={__('Direct revenue', 'goalcart')}
+                  label={__('Direct revenue', 'faracart')}
                   value={formatCurrency(summary.goal_driven_revenue)}
                   explanation={__(
                     'Revenue from the incremental value of orders where customers progressed toward or completed a goal before ordering.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
                 <StatRow
-                  label={__('Assisted revenue', 'goalcart')}
+                  label={__('Assisted revenue', 'faracart')}
                   value={formatCurrency(summary.goal_assisted_revenue)}
                   explanation={__(
                     'Order totals from orders that were only exposed to a goal, never progressed.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
                 <StatRow
-                  label={__('Influenced sales', 'goalcart')}
+                  label={__('Influenced sales', 'faracart')}
                   value={formatCurrency(summary.goal_influenced_revenue)}
                   explanation={__(
                     'Order totals of every order associated with a goal — distinct orders, never double counted.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
                 <StatRow
-                  label={__('Incremental cart value', 'goalcart')}
+                  label={__('Incremental cart value', 'faracart')}
                   value={formatCurrency(data.incremental_cart_value.average)}
                   explanation={__(
                     'Average cart value after goal exposure minus the value at first exposure, per session.',
-                    'goalcart'
+                    'faracart'
                   )}
                 />
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 }}>
                   <Typography variant="body2" color="text.secondary">
-                    {__('Attributed orders', 'goalcart')}
+                    {__('Attributed orders', 'faracart')}
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>
                     {formatNumber(summary.orders)}
@@ -629,17 +629,17 @@ export default function RevenueOverview() {
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 2 }}>
                   <Typography variant="body2" color="text.secondary">
-                    {__('Attribution window', 'goalcart')}
+                    {__('Attribution window', 'faracart')}
                   </Typography>
                   <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {__('30 days before the order', 'goalcart')}
+                    {__('30 days before the order', 'faracart')}
                   </Typography>
                 </Box>
                 <Divider />
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', color: 'text.secondary' }}>
                   <LocalShippingIcon fontSize="small" />
                   <Typography variant="caption">
-                    {__('AOV comparisons are observed impact — they do not prove that FaraCart caused the difference.', 'goalcart')}
+                    {__('AOV comparisons are observed impact — they do not prove that FaraCart caused the difference.', 'faracart')}
                   </Typography>
                 </Box>
               </Stack>
@@ -660,26 +660,26 @@ function HowCalculated({ summary }: { summary: RevenueSummary }) {
       sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ '& .MuiAccordionSummary-content': { m: 0, py: 0.5 } }}>
-        <Typography variant="body2">{__('How is this calculated?', 'goalcart')}</Typography>
+        <Typography variant="body2">{__('How is this calculated?', 'faracart')}</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ pt: 0 }}>
         <Stack spacing={0.75}>
           <StatRow
-            label={__('Direct revenue', 'goalcart')}
+            label={__('Direct revenue', 'faracart')}
             value={formatCurrency(summary.goal_driven_revenue)}
           />
           <StatRow
-            label={__('Assisted revenue', 'goalcart')}
+            label={__('Assisted revenue', 'faracart')}
             value={formatCurrency(summary.goal_assisted_revenue)}
           />
           <StatRow
-            label={__('Influenced sales', 'goalcart')}
+            label={__('Influenced sales', 'faracart')}
             value={formatCurrency(summary.goal_influenced_revenue)}
           />
           <Typography variant="caption" color="text.secondary" component="p">
             {__(
               'Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the FaraCart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once.',
-              'goalcart'
+              'faracart'
             )}
           </Typography>
         </Stack>
@@ -697,24 +697,24 @@ function BasketCompare({ aov }: { aov: AovAnalysis }) {
       sx={{ boxShadow: 'none', border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ '& .MuiAccordionSummary-content': { m: 0, py: 0.5 } }}>
-        <Typography variant="body2">{__('Compare', 'goalcart')}</Typography>
+        <Typography variant="body2">{__('Compare', 'faracart')}</Typography>
       </AccordionSummary>
       <AccordionDetails sx={{ pt: 0 }}>
         {!aov.comparison_available ? (
           <Typography variant="body2" color="text.secondary">
-            {__('Store-wide comparison is not available in this window.', 'goalcart')}
+            {__('Store-wide comparison is not available in this window.', 'faracart')}
           </Typography>
         ) : (
           <Stack spacing={0.75}>
-            <StatRow label={__('Store average', 'goalcart')} value={formatCurrency(aov.overall_aov)} />
-            <StatRow label={__('Goal-exposed', 'goalcart')} value={formatCurrency(aov.exposed_aov)} />
-            <StatRow label={__('Difference', 'goalcart')} value={formatCurrency(aov.absolute_change)} />
+            <StatRow label={__('Store average', 'faracart')} value={formatCurrency(aov.overall_aov)} />
+            <StatRow label={__('Goal-exposed', 'faracart')} value={formatCurrency(aov.exposed_aov)} />
+            <StatRow label={__('Difference', 'faracart')} value={formatCurrency(aov.absolute_change)} />
             <StatRow
-              label={__('Percentage', 'goalcart')}
+              label={__('Percentage', 'faracart')}
               value={formatSignedPercent(aov.percentage_change)}
             />
             <Typography variant="caption" color="text.secondary" component="p">
-              {__('Observed impact — this comparison does not prove that FaraCart caused the difference.', 'goalcart')}
+              {__('Observed impact — this comparison does not prove that FaraCart caused the difference.', 'faracart')}
             </Typography>
           </Stack>
         )}

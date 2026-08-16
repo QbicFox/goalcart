@@ -41,32 +41,32 @@ export interface NavSection {
  */
 export const NAV_SECTIONS: NavSection[] = [
   {
-    title: __('FaraCart', 'goalcart'),
+    title: __('FaraCart', 'faracart'),
     items: [
-      { path: '/dashboard', label: __('Dashboard', 'goalcart'), icon: DashboardIcon },
-      { path: '/goals', label: __('Goals', 'goalcart'), icon: FlagIcon },
-      { path: '/campaigns', label: __('Campaigns', 'goalcart'), icon: CampaignIcon },
+      { path: '/dashboard', label: __('Dashboard', 'faracart'), icon: DashboardIcon },
+      { path: '/goals', label: __('Goals', 'faracart'), icon: FlagIcon },
+      { path: '/campaigns', label: __('Campaigns', 'faracart'), icon: CampaignIcon },
     ],
   },
   {
-    title: __('Sales Performance', 'goalcart'),
+    title: __('Sales Performance', 'faracart'),
     items: [
-      { path: '/revenue', label: __('Overview', 'goalcart'), icon: BarChartIcon },
-      { path: '/revenue/goals', label: __('Goal Performance', 'goalcart'), icon: LeaderboardIcon },
+      { path: '/revenue', label: __('Overview', 'faracart'), icon: BarChartIcon },
+      { path: '/revenue/goals', label: __('Goal Performance', 'faracart'), icon: LeaderboardIcon },
     ],
   },
   {
-    title: __('Optimization', 'goalcart'),
+    title: __('Optimization', 'faracart'),
     items: [
-      { path: '/optimization/goals', label: __('Recommendations', 'goalcart'), icon: TipsAndUpdatesIcon },
-      { path: '/optimization/upsells', label: __('Upsells', 'goalcart'), icon: TrendingUpIcon },
+      { path: '/optimization/goals', label: __('Recommendations', 'faracart'), icon: TipsAndUpdatesIcon },
+      { path: '/optimization/upsells', label: __('Upsells', 'faracart'), icon: TrendingUpIcon },
     ],
   },
   {
-    title: __('Configuration', 'goalcart'),
+    title: __('Configuration', 'faracart'),
     items: [
-      { path: '/appearance', label: __('Appearance', 'goalcart'), icon: PaletteIcon },
-      { path: '/settings', label: __('Settings', 'goalcart'), icon: SettingsIcon },
+      { path: '/appearance', label: __('Appearance', 'faracart'), icon: PaletteIcon },
+      { path: '/settings', label: __('Settings', 'faracart'), icon: SettingsIcon },
     ],
   },
 ];

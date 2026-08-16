@@ -62,25 +62,25 @@ require dirname( __DIR__ ) . '/ravis-faracart.php';
 // unloading the domain keeps the reason regexes stable — the same
 // convention message-test.php uses.
 switch_to_locale( 'en_US' );
-unload_textdomain( 'goalcart' );
+unload_textdomain( 'faracart' );
 
 // Hard-block the just-in-time loader (WP 6.5+): WooCommerce order
 // processing pops the locale stack back to the site locale mid-suite, and
-// without this flag the first goalcart __() call would reload the fa_IR
+// without this flag the first faracart __() call would reload the fa_IR
 // .mo and translate the reason strings the suite asserts in English.
-$GLOBALS['l10n_unloaded']['goalcart'] = true;
+$GLOBALS['l10n_unloaded']['faracart'] = true;
 
-use GoalCart\Analytics\AttributionEngine;
-use GoalCart\Analytics\GoalRecommendationEngine;
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\Goal;
-use GoalCart\Hooks\HookManager;
-use GoalCart\REST\RecommendationsController;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\AttributionEngine;
+use FaraCart\Analytics\GoalRecommendationEngine;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\Goal;
+use FaraCart\Hooks\HookManager;
+use FaraCart\REST\RecommendationsController;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -104,7 +104,7 @@ function close( $a, $b, $eps = 0.01 ) {
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $engine    = $container->get( GoalRecommendationEngine::class );
 $attrib    = $container->get( AttributionEngine::class );
@@ -130,7 +130,7 @@ check( 'RecommendationsController resolves from the container', $container->get(
 $controller = $container->get( RecommendationsController::class );
 $controller->register_routes();
 $routes = function_exists( 'rest_get_server' ) ? rest_get_server()->get_routes() : array();
-check( 'goal-recommendations REST route registered', isset( $routes['/goalcart/v1/revenue/goal-recommendations'] ) );
+check( 'goal-recommendations REST route registered', isset( $routes['/faracart/v1/revenue/goal-recommendations'] ) );
 
 // The plugin boot already registered the controller through the hook
 // manager — assert the exact callback is on rest_api_init.
@@ -352,34 +352,34 @@ try {
 	check( 'insufficient orders → not available', empty( $sparse['available'] ) );
 	check( 'insufficient reason explains the minimum', '' !== (string) $sparse['insufficient_reason'] && null === $sparse['recommendation'] );
 
-	add_filter( 'goalcart_recommendation_min_orders', function () {
+	add_filter( 'faracart_recommendation_min_orders', function () {
 		return 3;
 	} );
 	$sparse_ok = $engine->recommend( array( 'from' => '2020-07-15', 'to' => '2020-07-15', 'reward_type' => 'free_shipping' ) );
-	remove_all_filters( 'goalcart_recommendation_min_orders' );
+	remove_all_filters( 'faracart_recommendation_min_orders' );
 	check( 'min-orders filter lowers the bar', ! empty( $sparse_ok['available'] ) && 5 === (int) $sparse_ok['orders'] );
 
 	// --- Disabled feature flag. ---
-	add_filter( 'goalcart_recommendations_enabled', '__return_false' );
+	add_filter( 'faracart_recommendations_enabled', '__return_false' );
 	$disabled = $engine->recommend( $window );
-	remove_all_filters( 'goalcart_recommendations_enabled' );
+	remove_all_filters( 'faracart_recommendations_enabled' );
 	check( 'disabled flag → unavailable with reason', empty( $disabled['available'] ) && false !== strpos( (string) $disabled['insufficient_reason'], 'disabled' ) );
 
 	// --- Candidate + payload filters. ---
-	add_filter( 'goalcart_recommendation_candidates', function () {
+	add_filter( 'faracart_recommendation_candidates', function () {
 		return array( 1000000 );
 	} );
 	$single = $engine->recommend( $window );
-	remove_all_filters( 'goalcart_recommendation_candidates' );
+	remove_all_filters( 'faracart_recommendation_candidates' );
 	check( 'candidate filter pins the threshold', 1 === count( $single['candidates'] ) && close( 1000000, $single['recommendation']['threshold'] ) );
 
-	add_filter( 'goalcart_recommendations', function ( $payload ) {
+	add_filter( 'faracart_recommendations', function ( $payload ) {
 		$payload['filter_applied'] = true;
 
 		return $payload;
 	} );
 	$filtered = $engine->recommend( $window );
-	remove_all_filters( 'goalcart_recommendations' );
+	remove_all_filters( 'faracart_recommendations' );
 	check( 'payload filter can shape the result', ! empty( $filtered['filter_applied'] ) );
 
 	// --- Goal history (real funnel events + attribution). ---
@@ -465,9 +465,9 @@ try {
 	$fresh     = $repo->goal_recommendations( $cache_args );
 	check( 'fresh read recomputes on the new generation', false !== get_transient( $key_after ) && ! empty( $fresh['available'] ) );
 
-	add_filter( 'goalcart_revenue_cache_enabled', '__return_false' );
+	add_filter( 'faracart_revenue_cache_enabled', '__return_false' );
 	$bypass = $repo->goal_recommendations( $cache_args );
-	remove_all_filters( 'goalcart_revenue_cache_enabled' );
+	remove_all_filters( 'faracart_revenue_cache_enabled' );
 	check( 'cache bypass still returns the recommendation', ! empty( $bypass['available'] ) );
 } finally {
 	$wpdb->query( 'ROLLBACK' );

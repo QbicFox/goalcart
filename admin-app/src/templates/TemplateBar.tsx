@@ -12,7 +12,7 @@ interface TemplateBarProps {
 }
 
 /**
- * The percentage fill bar (mirrors .goalcart-progress markup). Reads the
+ * The percentage fill bar (mirrors .faracart-progress markup). Reads the
  * resolved template settings: `barHeight` controls the thickness and
  * `accent` the fill color — the same CSS custom properties the storefront
  * sets per card.

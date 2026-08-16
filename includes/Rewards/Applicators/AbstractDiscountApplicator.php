@@ -2,17 +2,17 @@
 /**
  * Shared discount reward applicator logic.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards\Applicators;
+namespace FaraCart\Rewards\Applicators;
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\CartItem;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Rewards\Reward;
-use GoalCart\Rewards\RewardApplicator;
-use GoalCart\Rewards\RewardResult;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\CartItem;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Rewards\Reward;
+use FaraCart\Rewards\RewardApplicator;
+use FaraCart\Rewards\RewardResult;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -180,7 +180,7 @@ abstract class AbstractDiscountApplicator implements RewardApplicator {
 		$cart->fees_api()->add_fee(
 			array(
 				'id'      => CartContext::OWN_FEE_PREFIX . (int) $goal_id,
-				'name'    => '' !== $reward->label() ? $reward->label() : __( 'Goal reward', 'goalcart' ),
+				'name'    => '' !== $reward->label() ? $reward->label() : __( 'Goal reward', 'faracart' ),
 				'amount'  => -1 * $amount,
 				'taxable' => false,
 			)

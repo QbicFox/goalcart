@@ -22,7 +22,7 @@ export interface UpsellAnalyticsParams extends RevenueWindowParams {
   limit?: number;
 }
 
-/** Params for `GET /goalcart/v1/revenue/goal-recommendations`. */
+/** Params for `GET /faracart/v1/revenue/goal-recommendations`. */
 export interface GoalRecommendationsParams {
   goal_id?: number;
   reward_type?: string;
@@ -49,7 +49,7 @@ function toQuery(params: object): string {
 }
 
 /**
- * Revenue Overview payload from `GET /goalcart/v1/revenue/overview`
+ * Revenue Overview payload from `GET /faracart/v1/revenue/overview`
  * (Phase 33.6): attribution summary + incremental cart value + AOV +
  * shipping + the daily trend series over the window.
  */
@@ -62,7 +62,7 @@ export async function fetchRevenueOverview(
 }
 
 /**
- * Attribution Dashboard payload from `GET /goalcart/v1/revenue/attribution`
+ * Attribution Dashboard payload from `GET /faracart/v1/revenue/attribution`
  * (Phase 33.6): the overview minus the trend series.
  */
 export async function fetchRevenueAttribution(
@@ -74,7 +74,7 @@ export async function fetchRevenueAttribution(
 }
 
 /**
- * Goal Performance rows from `GET /goalcart/v1/revenue/goals`
+ * Goal Performance rows from `GET /faracart/v1/revenue/goals`
  * (Phase 33.6): per-goal funnel + revenue metrics.
  */
 export async function fetchGoalPerformance(
@@ -85,7 +85,7 @@ export async function fetchGoalPerformance(
 
 /**
  * Top-products upsell analytics table from
- * `GET /goalcart/v1/revenue/upsells?analytics=1` (Phase 33.5/33.6).
+ * `GET /faracart/v1/revenue/upsells?analytics=1` (Phase 33.5/33.6).
  */
 export async function fetchUpsellAnalytics(
   params: UpsellAnalyticsParams = {}
@@ -97,7 +97,7 @@ export async function fetchUpsellAnalytics(
 
 /**
  * One product's upsell score breakdown + historical stats from
- * `GET /goalcart/v1/revenue/upsells/{product_id}` (Phase 33.5/33.6).
+ * `GET /faracart/v1/revenue/upsells/{product_id}` (Phase 33.5/33.6).
  */
 export async function fetchUpsellProduct(
   productId: number,
@@ -110,7 +110,7 @@ export async function fetchUpsellProduct(
 
 /**
  * Smart goal recommendation payload from
- * `GET /goalcart/v1/revenue/goal-recommendations` (Phase 33.4/33.6).
+ * `GET /faracart/v1/revenue/goal-recommendations` (Phase 33.4/33.6).
  */
 export async function fetchGoalRecommendations(
   params: GoalRecommendationsParams = {}
@@ -122,7 +122,7 @@ export async function fetchGoalRecommendations(
 
 /**
  * Apply a recommended threshold to a goal (UPSELL_REFACTOR §10/§41) via
- * `POST /goalcart/v1/revenue/goal-recommendations/apply`. This is the only
+ * `POST /faracart/v1/revenue/goal-recommendations/apply`. This is the only
  * write path for Recommendations — it changes only the goal's target,
  * records the feedback-loop event and invalidates the revenue caches.
  */
@@ -141,7 +141,7 @@ export async function applyGoalRecommendation(
 
 /**
  * Product-cost coverage from
- * `GET /goalcart/v1/revenue/cost-coverage` (UPSELL_REFACTOR §25/§46):
+ * `GET /faracart/v1/revenue/cost-coverage` (UPSELL_REFACTOR §25/§46):
  * how much of the catalog carries cost data, so the UI can explain why
  * profit estimates are unavailable and how to fix it.
  */

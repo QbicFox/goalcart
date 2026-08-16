@@ -2,17 +2,17 @@
 /**
  * Free gift reward applicator.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards\Applicators;
+namespace FaraCart\Rewards\Applicators;
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Rewards\Reward;
-use GoalCart\Rewards\RewardApplicator;
-use GoalCart\Rewards\RewardResult;
-use GoalCart\Rewards\RewardSafety;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Rewards\Reward;
+use FaraCart\Rewards\RewardApplicator;
+use FaraCart\Rewards\RewardResult;
+use FaraCart\Rewards\RewardSafety;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * Grants a predefined gift product when the goal is met (P05-T02).
  *
  *  - automatic mode: the gift is silently added to the cart (marked with
- *    goalcart_gift custom data) and its price is zeroed during totals
+ *    faracart_gift custom data) and its price is zeroed during totals
  *    calculation; the RewardEngine removes it again the moment the goal
  *    becomes incomplete
  *  - optional mode: the reward is made available (gift_product_id is
@@ -105,8 +105,8 @@ final class FreeGiftApplicator implements RewardApplicator {
 		// returning false here lets the reconcile pass revoke it instead of
 		// treating it as already applied.
 		foreach ( $cart->get_cart() as $item ) {
-			if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
-				$current = isset( $item['goalcart_gift_product'] ) ? (int) $item['goalcart_gift_product'] : 0;
+			if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id ) {
+				$current = isset( $item['faracart_gift_product'] ) ? (int) $item['faracart_gift_product'] : 0;
 
 				return $current === $gift_id;
 			}
@@ -118,10 +118,10 @@ final class FreeGiftApplicator implements RewardApplicator {
 			'',
 			array(),
 			array(
-				'goalcart_gift'         => true,
-				'goalcart_gift_goal'    => (int) $goal_id,
-				'goalcart_gift_product' => (int) $gift_id,
-				'goalcart_gift_mode'    => $reward->gift_add_mode(),
+				'faracart_gift'         => true,
+				'faracart_gift_goal'    => (int) $goal_id,
+				'faracart_gift_product' => (int) $gift_id,
+				'faracart_gift_mode'    => $reward->gift_add_mode(),
 			)
 		);
 

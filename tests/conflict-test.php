@@ -51,23 +51,23 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Cart\CartIntegration;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\ConflictResolver;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Goals\MessageEngine;
-use GoalCart\REST\FrontendController;
-use GoalCart\REST\SettingsController;
-use GoalCart\Rewards\Reward;
-use GoalCart\Rewards\RewardEngine;
-use GoalCart\Rewards\RewardResult;
-use GoalCart\Settings\Settings;
-use GoalCart\Suggestions\SuggestionEngine;
+use FaraCart\Cart\CartIntegration;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\ConflictResolver;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Goals\MessageEngine;
+use FaraCart\REST\FrontendController;
+use FaraCart\REST\SettingsController;
+use FaraCart\Rewards\Reward;
+use FaraCart\Rewards\RewardEngine;
+use FaraCart\Rewards\RewardResult;
+use FaraCart\Settings\Settings;
+use FaraCart\Suggestions\SuggestionEngine;
 
 $failures = 0;
 $checks   = 0;
@@ -122,14 +122,14 @@ function cart_line( $key, $product_id, $variation_id, $quantity, $subtotal, $tot
 	);
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $settings        = $container->get( Settings::class );
 $settings_ctrl   = $container->get( SettingsController::class );
 $engine          = $container->get( GoalEngine::class );
 $ci              = $container->get( CartIntegration::class );
 $messages        = $container->get( MessageEngine::class );
-$recommendations = $container->get( \GoalCart\Recommendations\ProductRecommendationEngine::class );
+$recommendations = $container->get( \FaraCart\Recommendations\ProductRecommendationEngine::class );
 $all_before      = $settings->all();
 
 $resolver = new ConflictResolver();
@@ -402,7 +402,7 @@ try {
 	$settings->set( 'conflict_resolution', ConflictResolver::MODE_FIRST );
 
 	$frontend = new FrontendController( $engine, new GoalRepository(), $ci, $messages, $recommendations, $settings, new RewardEngine( $engine, new GoalRepository(), $settings, $ci ) );
-	$req      = new \WP_REST_Request( 'GET', '/goalcart/v1/progress' );
+	$req      = new \WP_REST_Request( 'GET', '/faracart/v1/progress' );
 	$resp     = $frontend->handle_progress( $req, $cart );
 	$data     = $resp->get_data()['data'];
 

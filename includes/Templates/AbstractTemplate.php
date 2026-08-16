@@ -2,10 +2,10 @@
 /**
  * Base class for FaraCart progress templates.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Templates;
+namespace FaraCart\Templates;
 
 defined( 'ABSPATH' ) || exit;
 

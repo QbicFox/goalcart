@@ -2,13 +2,13 @@
 /**
  * Template engine for the FaraCart pluggable progress templates.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Templates;
+namespace FaraCart\Templates;
 
-use GoalCart\Goals\Goal;
-use GoalCart\Settings\Settings;
+use FaraCart\Goals\Goal;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 

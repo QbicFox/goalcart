@@ -2,16 +2,16 @@
 /**
  * Free shipping reward applicator.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards\Applicators;
+namespace FaraCart\Rewards\Applicators;
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Rewards\Reward;
-use GoalCart\Rewards\RewardApplicator;
-use GoalCart\Rewards\RewardResult;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Rewards\Reward;
+use FaraCart\Rewards\RewardApplicator;
+use FaraCart\Rewards\RewardResult;
 
 defined( 'ABSPATH' ) || exit;
 

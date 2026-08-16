@@ -5,7 +5,7 @@
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
  * exercises the storefront upsell surface end to end:
  *
- *  - route registration for the public `GET /goalcart/v1/upsell/rank`
+ *  - route registration for the public `GET /faracart/v1/upsell/rank`
  *  - the rank arg schema (goal_id / limit / cart bounds)
  *  - public access: an anonymous GET dispatches with 200 (no capability)
  *  - the payload shape (available + context + per-product score
@@ -56,20 +56,20 @@ require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 // Locale-independent reason assertions: force en_US and unload the
-// goalcart domain (the same convention message-test/upsell-test use) so
+// faracart domain (the same convention message-test/upsell-test use) so
 // the 'closed' / 'disabled' reason substrings the suite asserts stay
 // English. The hard-block keeps the just-in-time loader from reloading
 // the fa_IR .mo when the locale stack pops back mid-suite.
 switch_to_locale( 'en_US' );
-unload_textdomain( 'goalcart' );
-$GLOBALS['l10n_unloaded']['goalcart'] = true;
+unload_textdomain( 'faracart' );
+$GLOBALS['l10n_unloaded']['faracart'] = true;
 
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\UpsellRanker;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Frontend\ProgressUI;
-use GoalCart\REST\UpsellController;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\UpsellRanker;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Frontend\ProgressUI;
+use FaraCart\REST\UpsellController;
 
 $failures = 0;
 $checks   = 0;
@@ -99,18 +99,18 @@ function route_exists( $routes, $pattern ) {
 Installer::maybe_create_tables();
 
 // Fire REST route registration once (rest_api_init never fires in CLI).
-if ( ! did_action( 'goalcart_rest_test_ready' ) ) {
+if ( ! did_action( 'faracart_rest_test_ready' ) ) {
 	do_action( 'rest_api_init' );
-	do_action( 'goalcart_rest_test_ready' );
+	do_action( 'faracart_rest_test_ready' );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $controller = $container->get( UpsellController::class );
 $ranker     = $container->get( UpsellRanker::class );
 $repo       = $container->get( RevenueRepository::class );
-$settings   = $container->get( \GoalCart\Settings\Settings::class );
-$goals      = $container->get( \GoalCart\Goals\GoalRepository::class );
+$settings   = $container->get( \FaraCart\Settings\Settings::class );
+$goals      = $container->get( \FaraCart\Goals\GoalRepository::class );
 $ui         = $container->get( ProgressUI::class );
 
 $server = rest_get_server();
@@ -122,9 +122,9 @@ $wpdb   = $GLOBALS['wpdb'];
 // ---------------------------------------------------------------------------
 echo "\n== 1. Route registration ==\n";
 
-check( '/goalcart/v1/upsell/rank registered', route_exists( $routes, '/goalcart/v1/upsell/rank' ) );
-check( '/goalcart/v1/upsell/track registered', route_exists( $routes, '/goalcart/v1/upsell/track' ) );
-check( 'rank route declared READABLE', ! empty( $routes['/goalcart/v1/upsell/rank'][0]['methods'] ) );
+check( '/faracart/v1/upsell/rank registered', route_exists( $routes, '/faracart/v1/upsell/rank' ) );
+check( '/faracart/v1/upsell/track registered', route_exists( $routes, '/faracart/v1/upsell/track' ) );
+check( 'rank route declared READABLE', ! empty( $routes['/faracart/v1/upsell/rank'][0]['methods'] ) );
 
 // ---------------------------------------------------------------------------
 // 2. Arg-schema validation
@@ -147,7 +147,7 @@ check( 'rank remaining rejects negatives', is_wp_error( rest_validate_value_from
 // ---------------------------------------------------------------------------
 echo "\n== 3. Public access ==\n";
 
-$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/upsell/rank' );
+$req  = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
 $resp = $server->dispatch( $req );
 
 // No goal and no remaining → the ranker degrades gracefully, but the
@@ -163,7 +163,7 @@ check( 'rank payload exposes the score weights', is_array( $data['weights'] ?? n
 check( 'no explicit goal falls back to the featured active goal', isset( $data['context']['goal_id'] ) && (int) $data['context']['goal_id'] > 0 );
 
 // A nonexistent goal id can never produce a fabricated list.
-$ghost_req = new \WP_REST_Request( 'GET', '/goalcart/v1/upsell/rank' );
+$ghost_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
 $ghost_req->set_param( 'goal_id', 99999999 );
 $ghost_data = $server->dispatch( $ghost_req )->get_data()['data'];
 check( 'unknown goal → unavailable with a reason', empty( $ghost_data['available'] ) && '' !== (string) $ghost_data['reason'] && 0 === count( $ghost_data['recommendations'] ) );
@@ -243,7 +243,7 @@ try {
 	}
 
 	// --- Live-cart gap: the storefront sends ONLY goal_id + limit. ---
-	$live_req = new \WP_REST_Request( 'GET', '/goalcart/v1/upsell/rank' );
+	$live_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
 	$live_req->set_param( 'goal_id', (int) $goal_id );
 	$live_req->set_param( 'limit', 5 );
 	$live_resp = $controller->handle_rank( $live_req );
@@ -280,11 +280,11 @@ try {
 	$costs_product->update_meta_data( '_cost', '245000' );
 	$costs_product->save();
 
-	$costs = $container->get( \GoalCart\Analytics\RewardCostEstimator::class );
+	$costs = $container->get( \FaraCart\Analytics\RewardCostEstimator::class );
 	$margin = $costs->product_margin( $gap_product->get_id() );
 	check( 'fixture product margin is readable server-side', null !== $margin );
 
-	$public_req = new \WP_REST_Request( 'GET', '/goalcart/v1/upsell/rank' );
+	$public_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
 	$public_req->set_param( 'goal_id', (int) $goal_id );
 	$public_req->set_param( 'cart_value', 1550000 );
 	$public = $controller->handle_rank( $public_req )->get_data()['data'];
@@ -303,7 +303,7 @@ try {
 	check( 'admin detail still exposes the margin', null !== $admin_detail && ! empty( $admin_detail['profit_available'] ) && null !== $admin_detail['estimated_profit'] );
 
 	// --- Explicit context override (embedded consumers / tests). ---
-	$override_req = new \WP_REST_Request( 'GET', '/goalcart/v1/upsell/rank' );
+	$override_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
 	$override_req->set_param( 'goal_id', (int) $goal_id );
 	$override_req->set_param( 'cart_value', 1550000 );
 	$override_req->set_param( 'cart', array( $in_cart_product->get_id() ) );
@@ -313,7 +313,7 @@ try {
 	check( 'explicit cart ids echoed back', in_array( $in_cart_product->get_id(), $override['context']['cart'], true ) );
 
 	// --- Closed gap → unavailable, never a fabricated list. ---
-	$closed_req = new \WP_REST_Request( 'GET', '/goalcart/v1/upsell/rank' );
+	$closed_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
 	$closed_req->set_param( 'goal_id', (int) $goal_id );
 	$closed_req->set_param( 'cart_value', 2000000 );
 	$closed = $controller->handle_rank( $closed_req )->get_data()['data'];
@@ -322,11 +322,11 @@ try {
 	check( 'closed gap explains the reason', false !== strpos( (string) $closed['reason'], 'closed' ) );
 
 	// --- Disabled filter → unavailable. ---
-	add_filter( 'goalcart_upsells_enabled', '__return_false' );
-	$disabled_req = new \WP_REST_Request( 'GET', '/goalcart/v1/upsell/rank' );
+	add_filter( 'faracart_upsells_enabled', '__return_false' );
+	$disabled_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
 	$disabled_req->set_param( 'remaining', 450000 );
 	$disabled = $controller->handle_rank( $disabled_req )->get_data()['data'];
-	remove_all_filters( 'goalcart_upsells_enabled' );
+	remove_all_filters( 'faracart_upsells_enabled' );
 
 	check( 'disabled flag → unavailable with reason', empty( $disabled['available'] ) && false !== strpos( (string) $disabled['reason'], 'disabled' ) );
 
@@ -387,8 +387,8 @@ try {
 
 	check( 'config carries the upsell block', is_array( $upsell ) );
 	check( 'upsell block enabled by default', ! empty( $upsell['enabled'] ) );
-	check( 'upsell block has the public rank endpoint', isset( $upsell['endpoint'] ) && false !== strpos( $upsell['endpoint'], '/goalcart/v1/upsell/rank' ) );
-	check( 'upsell block has the track endpoint', isset( $upsell['trackEndpoint'] ) && false !== strpos( $upsell['trackEndpoint'], '/goalcart/v1/upsell/track' ) );
+	check( 'upsell block has the public rank endpoint', isset( $upsell['endpoint'] ) && false !== strpos( $upsell['endpoint'], '/faracart/v1/upsell/rank' ) );
+	check( 'upsell block has the track endpoint', isset( $upsell['trackEndpoint'] ) && false !== strpos( $upsell['trackEndpoint'], '/faracart/v1/upsell/track' ) );
 	check( 'upsell block limit is 1–6', isset( $upsell['limit'] ) && (int) $upsell['limit'] >= 1 && (int) $upsell['limit'] <= 6 );
 	check( 'upsell labels cover the panel strings', isset( $upsell['labels']['heading'], $upsell['labels']['add'], $upsell['labels']['adding'], $upsell['labels']['added'], $upsell['labels']['unavailable'] ) );
 
@@ -407,8 +407,8 @@ try {
 // ---------------------------------------------------------------------------
 echo "\n== 7. Frontend asset wiring ==\n";
 
-$frontend_js = (string) file_get_contents( GOALCART_PATH . 'assets/js/frontend.js' );
-$frontend_css = (string) file_get_contents( GOALCART_PATH . 'assets/css/frontend.css' );
+$frontend_js = (string) file_get_contents( FARACART_PATH . 'assets/js/frontend.js' );
+$frontend_css = (string) file_get_contents( FARACART_PATH . 'assets/css/frontend.css' );
 
 check( 'frontend JS defines the upsell panel component', false !== strpos( $frontend_js, 'function upsellPanel' ) );
 check( 'frontend JS reports upsell events to the upsell track endpoint', false !== strpos( $frontend_js, 'function sendUpsellTrack' ) && false !== strpos( $frontend_js, 'upsells.trackEndpoint' ) );
@@ -421,9 +421,9 @@ check( 'frontend JS refreshes through the cart-changed bridge after adding', fal
 check( 'frontend JS reuses the last ranking per goal:gap', false !== strpos( $frontend_js, 'upsellRankCache' ) );
 check( 'frontend JS binds the upsell panel in init', false !== strpos( $frontend_js, 'bindUpsellPanel' ) );
 
-check( 'frontend CSS styles the upsell panel', false !== strpos( $frontend_css, '.goalcart-upsells' ) );
-check( 'frontend CSS styles the add button with the accent token', false !== strpos( $frontend_css, 'var(--goalcart-accent)' ) );
-check( 'frontend CSS is theme-safe (scoped goalcart classes)', 0 === preg_match( '/\.goalcart-upsells\s*,\s*(body|html|div\b)/', $frontend_css ) );
+check( 'frontend CSS styles the upsell panel', false !== strpos( $frontend_css, '.faracart-upsells' ) );
+check( 'frontend CSS styles the add button with the accent token', false !== strpos( $frontend_css, 'var(--faracart-accent)' ) );
+check( 'frontend CSS is theme-safe (scoped faracart classes)', 0 === preg_match( '/\.faracart-upsells\s*,\s*(body|html|div\b)/', $frontend_css ) );
 check( 'frontend CSS has the mobile horizontal strip', false !== strpos( $frontend_css, 'scroll-snap-type' ) );
 
 // ---------------------------------------------------------------------------

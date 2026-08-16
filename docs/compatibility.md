@@ -15,8 +15,8 @@
 | **Cart** | `woocommerce_before_cart` → full widget | Cart Block → `render_block('woocommerce/cart')` appends the full widget |
 | **Checkout** | `woocommerce_before_checkout_form` → full widget | Checkout Block → `render_block('woocommerce/checkout')` appends the full widget |
 | **Mini Cart** | `woocommerce_after_mini_cart` → compact widget (fragment refresh re-mounts) | Mini Cart Block → `render_block('woocommerce/mini-cart')` appends a compact widget |
-| **Shop / product pages** | `woocommerce_archive_description` + `woocommerce_single_product_summary` compact widgets | Shortcode `[goalcart_progress]` works inside Gutenberg content |
-| **Sticky bar** | `wp_footer` widget (`#goalcart-sticky`) | Same footer bar (location-agnostic) |
+| **Shop / product pages** | `woocommerce_archive_description` + `woocommerce_single_product_summary` compact widgets | Shortcode `[faracart_progress]` works inside Gutenberg content |
+| **Sticky bar** | `wp_footer` widget (`#faracart-sticky`) | Same footer bar (location-agnostic) |
 
 Every display location renders **at most once per page**: the duplicate-render
 registry is shared between the classic actions and the `render_block` filter,
@@ -96,7 +96,7 @@ REST routes or storefront widgets (`Admin::register_menu()` gate).
 - **Multisite** — supported. All tables use `$wpdb->prefix` per site
   (`Schema::table()`), schema version + settings live in per-site
   WordPress options, and analytics sessions are per-site.
-- **Localization** — translatable via the `goalcart` text domain
+- **Localization** — translatable via the `faracart` text domain
   (`load_plugin_textdomain` on `init`, domain path `/languages`); every
   PHP string uses `__()`/`_e()` with the domain, the React admin is
   translated through the `wp.i18n` shim + `wp_set_script_translations`,
@@ -109,8 +109,8 @@ REST routes or storefront widgets (`Admin::register_menu()` gate).
   support includes locale-aware number/currency/date formatting
   (Persian digits via Intl) with no hard-coded non-Latin strings.
 - **Admin capabilities** — menu and REST endpoints default to
-  `manage_options`, both filterable (`goalcart_admin_capability`,
-  `goalcart_rest_capability`).
+  `manage_options`, both filterable (`faracart_admin_capability`,
+  `faracart_rest_capability`).
 - **Activation / deactivation** — `Installer::activate` /
   `Installer::deactivate` are registered on the WP hooks; upgrades run
   via `Installer::maybe_upgrade` on every load.
@@ -124,10 +124,10 @@ block registration (Phase 21).
 
 | Builder | Integration | Mechanism |
 |---|---|---|
-| **Gutenberg** | `goalcart/progress` block | Server-side `register_block_type()` (api version 2, widgets category), attributes `variant` (full/compact) + `template`; renders the same widget container as the shortcode. Assets auto-load on pages carrying the block (`has_block()` in `ProgressUI::page_needs_widget()`). |
+| **Gutenberg** | `faracart/progress` block | Server-side `register_block_type()` (api version 2, widgets category), attributes `variant` (full/compact) + `template`; renders the same widget container as the shortcode. Assets auto-load on pages carrying the block (`has_block()` in `ProgressUI::page_needs_widget()`). |
 | **WooCommerce Blocks** | Cart / Checkout / Mini Cart blocks | `render_block` filter appends the widget after `woocommerce/cart`, `woocommerce/checkout` (full) and `woocommerce/mini-cart` (compact) — Phase 19. |
-| **Elementor** | Shortcode element | Drop `[goalcart_progress variant="full"]` into any Elementor shortcode widget; Elementor renders WP shortcodes on the frontend. |
-| **Bricks** | Shortcode element | Same `[goalcart_progress ...]` shortcode works inside a Bricks shortcode element. |
+| **Elementor** | Shortcode element | Drop `[faracart_progress variant="full"]` into any Elementor shortcode widget; Elementor renders WP shortcodes on the frontend. |
+| **Bricks** | Shortcode element | Same `[faracart_progress ...]` shortcode works inside a Bricks shortcode element. |
 
 The classic WooCommerce template actions (`woocommerce_before_cart`, …)
 still cover stores that do not use a page builder; the shortcode and the

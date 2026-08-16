@@ -49,7 +49,7 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\REST\PreviewController;
+use FaraCart\REST\PreviewController;
 
 $failures = 0;
 $checks   = 0;
@@ -74,12 +74,12 @@ function route_exists( $routes, $pattern ) {
 }
 
 // Fire REST route registration once (rest_api_init never fires in CLI).
-if ( ! did_action( 'goalcart_rest_test_ready' ) ) {
+if ( ! did_action( 'faracart_rest_test_ready' ) ) {
 	do_action( 'rest_api_init' );
-	do_action( 'goalcart_rest_test_ready' );
+	do_action( 'faracart_rest_test_ready' );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $preview_ctrl = $container->get( PreviewController::class );
 
@@ -92,7 +92,7 @@ $wpdb   = $GLOBALS['wpdb'];
 // ---------------------------------------------------------------------------
 echo "\n== 1. Route registration ==\n";
 
-check( '/preview registered', route_exists( $routes, '/goalcart/v1/preview' ) );
+check( '/preview registered', route_exists( $routes, '/faracart/v1/preview' ) );
 
 // ---------------------------------------------------------------------------
 // 2. Arg-schema validation (read-only)
@@ -121,15 +121,15 @@ $wpdb->query( 'START TRANSACTION' );
 
 try {
 	// 3.1 Anonymous users are rejected on the preview route (admin-only).
-	$req  = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req  = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', 1 );
 	$resp = $server->dispatch( $req );
 	check( 'anonymous rejected on preview (403)', 403 === $resp->get_status() );
 
 	// 3.2 Create an amount goal for previewing.
-	$goals_ctrl = $container->get( \GoalCart\REST\GoalsController::class );
+	$goals_ctrl = $container->get( \FaraCart\REST\GoalsController::class );
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Preview Amount Goal' );
 	$req->set_param( 'description', 'Phase 15 preview test' );
 	$req->set_param( 'type', 'amount' );
@@ -167,7 +167,7 @@ try {
 	$cart_before = $cart->get_cart();
 
 	// 3.4 Preview state — empty cart (amount 0): 0%, not completed.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $goal_id );
 	$req->set_param( 'simulated', array( 'amount' => 0, 'quantity' => 0 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -183,7 +183,7 @@ try {
 	check( 'empty-cart message present', '' !== $goal_out['message'] );
 
 	// 3.5 Preview state — 50%: current 500, percentage 50.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $goal_id );
 	$req->set_param( 'simulated', array( 'amount' => 500, 'quantity' => 1 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -202,7 +202,7 @@ try {
 	check( 'preview meta mode goal', 'goal' === $resp->get_data()['meta']['mode'] );
 
 	// 3.6 Preview state — completed (amount = target): 100%, unlocked.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $goal_id );
 	$req->set_param( 'simulated', array( 'amount' => 1000, 'quantity' => 1 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -218,7 +218,7 @@ try {
 	check( 'live cart unchanged after previews', wp_json_encode( $cart_before ) === wp_json_encode( $cart->get_cart() ) );
 
 	// 3.8 Publish-gating bypass: an INACTIVE goal still previews as active.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Preview Draft Goal' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 100 );
@@ -227,7 +227,7 @@ try {
 	$draft_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $draft_id;
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $draft_id );
 	$req->set_param( 'simulated', array( 'amount' => 50, 'quantity' => 1 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -237,7 +237,7 @@ try {
 	check( 'inactive goal preview state not inactive', 'inactive' !== $goal_out['state'] );
 
 	// 3.9 Quantity-mode goal: the simulated quantity drives progress.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Preview Quantity Goal' );
 	$req->set_param( 'type', 'quantity' );
 	$req->set_param( 'target', 4 );
@@ -245,7 +245,7 @@ try {
 	$qty_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $qty_id;
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $qty_id );
 	$req->set_param( 'simulated', array( 'amount' => 0, 'quantity' => 2 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -256,9 +256,9 @@ try {
 
 	// 3.10 Campaign preview ("multiple milestones" state): every milestone
 	// evaluated in order against the same simulated cart.
-	$campaigns_ctrl = $container->get( \GoalCart\REST\CampaignsController::class );
+	$campaigns_ctrl = $container->get( \FaraCart\REST\CampaignsController::class );
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/campaigns' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/campaigns' );
 	$req->set_param( 'name', 'Preview Campaign' );
 	$req->set_param( 'description', 'Milestone ladder preview' );
 	$req->set_param( 'status', 'active' );
@@ -268,7 +268,7 @@ try {
 
 	$milestone_ids = array();
 	foreach ( array( 100, 200, 300 ) as $index => $target ) {
-		$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+		$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 		$req->set_param( 'name', 'Preview Milestone ' . ( $index + 1 ) );
 		$req->set_param( 'type', 'amount' );
 		$req->set_param( 'target', $target );
@@ -280,13 +280,13 @@ try {
 		$created_ids[]   = $milestone_ids[ $index ];
 	}
 
-	$req = new \WP_REST_Request( 'PUT', '/goalcart/v1/campaigns/' . $campaign_id );
+	$req = new \WP_REST_Request( 'PUT', '/faracart/v1/campaigns/' . $campaign_id );
 	$req->set_param( 'id', $campaign_id );
 	$req->set_param( 'goals', $milestone_ids );
 	$resp = $campaigns_ctrl->handle_update( $req );
 	check( 'campaign has 3 milestones', 3 === $resp->get_data()['data']['goal_count'] );
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'campaign_id', $campaign_id );
 	$req->set_param( 'simulated', array( 'amount' => 150, 'quantity' => 1 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -307,7 +307,7 @@ try {
 	// type, so each branch of simulated_context() gets exercised.
 
 	// 3.11.1 Distinct-quantity goal: simulated quantity → distinct items.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Preview Distinct Goal' );
 	$req->set_param( 'type', 'distinct_quantity' );
 	$req->set_param( 'target', 3 );
@@ -315,7 +315,7 @@ try {
 	$distinct_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $distinct_id;
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $distinct_id );
 	$req->set_param( 'simulated', array( 'amount' => 0, 'quantity' => 2 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -324,7 +324,7 @@ try {
 	check( 'distinct goal percentage ~67', near( 66.67, $goal_out['percentage'] ) );
 	check( 'distinct goal is_money false', false === $goal_out['is_money'] );
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $distinct_id );
 	$req->set_param( 'simulated', array( 'amount' => 0, 'quantity' => 0 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -333,7 +333,7 @@ try {
 
 	// 3.11.2 Category goal (quantity mode): synthetic line carries the goal's
 	// categories, so category_value() matches.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Preview Category Goal' );
 	$req->set_param( 'type', 'category' );
 	$req->set_param( 'target', 4 );
@@ -343,7 +343,7 @@ try {
 	$category_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $category_id;
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $category_id );
 	$req->set_param( 'simulated', array( 'amount' => 0, 'quantity' => 2 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -352,7 +352,7 @@ try {
 	check( 'category goal percentage 50', near( 50, $goal_out['percentage'] ) );
 
 	// 3.11.3 Category goal (money mode): simulated amount drives subtotal.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Preview Category Money Goal' );
 	$req->set_param( 'type', 'category' );
 	$req->set_param( 'target', 1000 );
@@ -362,7 +362,7 @@ try {
 	$cat_money_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $cat_money_id;
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $cat_money_id );
 	$req->set_param( 'simulated', array( 'amount' => 500, 'quantity' => 1 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -371,7 +371,7 @@ try {
 	check( 'category money goal percentage 50', near( 50, $goal_out['percentage'] ) );
 
 	// 3.11.4 Product goal: synthetic line carries the first configured product.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Preview Product Goal' );
 	$req->set_param( 'type', 'product' );
 	$req->set_param( 'target', 2 );
@@ -381,7 +381,7 @@ try {
 	$product_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $product_id;
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $product_id );
 	$req->set_param( 'simulated', array( 'amount' => 0, 'quantity' => 1 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -390,7 +390,7 @@ try {
 	check( 'product goal percentage 50', near( 50, $goal_out['percentage'] ) );
 
 	// A product goal without products is honestly ineligible in preview.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Preview Product-less Goal' );
 	$req->set_param( 'type', 'product' );
 	$req->set_param( 'target', 2 );
@@ -398,7 +398,7 @@ try {
 	$no_product_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $no_product_id;
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $no_product_id );
 	$req->set_param( 'simulated', array( 'amount' => 0, 'quantity' => 1 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -407,7 +407,7 @@ try {
 	check( 'product-less goal reason no_matching_items', 'no_matching_items' === $goal_out['reason'] );
 
 	// 3.11.5 Weight goal: simulated quantity maps to the cart weight.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Preview Weight Goal' );
 	$req->set_param( 'type', 'weight' );
 	$req->set_param( 'target', 10 );
@@ -415,7 +415,7 @@ try {
 	$weight_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $weight_id;
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $weight_id );
 	$req->set_param( 'simulated', array( 'amount' => 0, 'quantity' => 5 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -426,7 +426,7 @@ try {
 
 	// 3.11.6 Composite goal (AND of amount + quantity): one synthetic line
 	// carries both bases, so both children evaluate against it.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Preview Composite Goal' );
 	$req->set_param( 'type', 'composite' );
 	$req->set_param( 'target', 10 );
@@ -439,7 +439,7 @@ try {
 	$composite_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $composite_id;
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $composite_id );
 	$req->set_param( 'simulated', array( 'amount' => 50, 'quantity' => 2 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -448,31 +448,103 @@ try {
 	check( 'composite goal percentage 50 (weakest child)', near( 50, $goal_out['percentage'] ) );
 	check( 'composite goal not completed', false === $goal_out['completed'] );
 
+	// 3.12 Unsaved goal form payload (builder live preview): the preview
+	// reflects the form values before they are persisted — no goal row.
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
+	$req->set_param( 'goal', array(
+		'name'             => 'Unsaved Goal',
+		'type'             => 'amount',
+		'target'           => 800,
+		'calculation_mode' => 'subtotal',
+		'reward_type'      => 'fixed_discount',
+		'reward_value'     => 50,
+		'display_settings' => array(
+			'template_id' => 'template-5',
+			'icon'        => '🚀',
+		),
+	) );
+	$req->set_param( 'simulated', array( 'amount' => 400, 'quantity' => 1 ) );
+	$resp = $preview_ctrl->handle_preview( $req );
+	$data = $resp->get_data();
+	check( 'unsaved goal preview meta mode goal', 'goal' === $data['meta']['mode'] );
+	$goal_out = $data['data']['goals'][0];
+	check( 'unsaved goal name from form', 'Unsaved Goal' === $goal_out['goal_name'] );
+	check( 'unsaved goal target from form', near( 800, $goal_out['target'] ) );
+	check( 'unsaved goal current from simulated amount', near( 400, $goal_out['current'] ) );
+	check( 'unsaved goal percentage 50', near( 50, $goal_out['percentage'] ) );
+	check( 'unsaved goal template from display settings', 'template-5' === $goal_out['template'] );
+	check( 'unsaved goal icon from display settings', '🚀' === $goal_out['icon'] );
+	check( 'unsaved goal reward from form', 'fixed_discount' === $goal_out['reward']['type'] && near( 50, $goal_out['reward']['value'] ) );
+
+	// 3.13 Editing an existing goal: the form payload wins over the stored
+	// row for the edited fields (the builder previews unsaved edits).
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
+	$req->set_param( 'goal_id', $goal_id );
+	$req->set_param( 'goal', array(
+		'name'   => 'Edited Name',
+		'target' => 2000,
+	) );
+	$req->set_param( 'simulated', array( 'amount' => 1000, 'quantity' => 1 ) );
+	$resp = $preview_ctrl->handle_preview( $req );
+	$goal_out = $resp->get_data()['data']['goals'][0];
+	check( 'edited goal name from form payload', 'Edited Name' === $goal_out['goal_name'] );
+	check( 'edited goal target from form payload', near( 2000, $goal_out['target'] ) );
+	check( 'edited goal keeps stored reward below the payload', 'percent_discount' === $goal_out['reward']['type'] );
+
+	// 3.14 Unsaved campaign form payload: milestone ids + name +
+	// display_rules drive the preview, and the campaign template group is
+	// resolved from the form's rules even for a campaign with no id yet.
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
+	$req->set_param( 'campaign', array(
+		'name'          => 'Unsaved Campaign',
+		'display_rules' => array(
+			'template_id' => 'milestone_chain',
+		),
+		'goals' => $milestone_ids,
+	) );
+	$req->set_param( 'simulated', array( 'amount' => 150, 'quantity' => 1 ) );
+	$resp = $preview_ctrl->handle_preview( $req );
+	$data = $resp->get_data();
+	check( 'unsaved campaign preview meta mode campaign', 'campaign' === $data['meta']['mode'] );
+	check( 'unsaved campaign preview has 3 goals', 3 === count( $data['data']['goals'] ) );
+	check( 'unsaved campaign milestone name from stored goals', 'Preview Milestone 1' === $data['data']['goals'][0]['goal_name'] );
+	check( 'unsaved campaign group carries the template', isset( $data['data']['campaigns'][0] ) && 'milestone_chain' === $data['data']['campaigns'][0]['template'] );
+	check( 'unsaved campaign group carries the form name', 'Unsaved Campaign' === $data['data']['campaigns'][0]['name'] );
+	check( 'unsaved campaign goals joined to the group id', 3 === count( array_filter( $data['data']['goals'], function ( $g ) use ( $data ) {
+		return (int) $g['campaign_id'] === (int) $data['data']['campaigns'][0]['campaign_id'];
+	} ) ) );
+
 	// 3.15 Error paths.
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'simulated', array() );
 	$resp = $preview_ctrl->handle_preview( $req );
 	check( 'no target → 400', is_wp_error( $resp ) && 400 === $resp->get_error_data()['status'] );
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $goal_id );
 	$req->set_param( 'campaign_id', $campaign_id );
 	$resp = $preview_ctrl->handle_preview( $req );
 	check( 'both targets → 400', is_wp_error( $resp ) && 400 === $resp->get_error_data()['status'] );
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
+	$req->set_param( 'goal', array( 'name' => 'x', 'type' => 'amount', 'target' => 10 ) );
+	$req->set_param( 'campaign', array( 'name' => 'y', 'goals' => array() ) );
+	$resp = $preview_ctrl->handle_preview( $req );
+	check( 'both form payloads → 400', is_wp_error( $resp ) && 400 === $resp->get_error_data()['status'] );
+
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', 99999999 );
 	$resp = $preview_ctrl->handle_preview( $req );
 	check( 'missing goal → 404', is_wp_error( $resp ) && 404 === $resp->get_error_data()['status'] );
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'campaign_id', 99999999 );
 	$resp = $preview_ctrl->handle_preview( $req );
 	check( 'missing campaign → 404', is_wp_error( $resp ) && 404 === $resp->get_error_data()['status'] );
 
 	// 3.16 End-to-end dispatch (authenticated path would run in the admin
 	// app; the anonymous 403 dispatch above already proves the gate).
-	$req  = new \WP_REST_Request( 'POST', '/goalcart/v1/preview' );
+	$req  = new \WP_REST_Request( 'POST', '/faracart/v1/preview' );
 	$req->set_param( 'goal_id', $goal_id );
 	$req->set_param( 'simulated', array( 'amount' => 250, 'quantity' => 1 ) );
 	$resp = $preview_ctrl->handle_preview( $req );
@@ -486,14 +558,14 @@ try {
 // ---------------------------------------------------------------------------
 echo "\n== 4. Rollback verification ==\n";
 
-$goals_table = \GoalCart\Database\Schema::table( 'goals' );
+$goals_table = \FaraCart\Database\Schema::table( 'goals' );
 
 foreach ( $created_ids as $id ) {
 	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE id = %d", $id ) );
 	check( "rolled-back goal {$id} is gone", 0 === $count );
 }
 
-$campaigns_table = \GoalCart\Database\Schema::table( 'campaigns' );
+$campaigns_table = \FaraCart\Database\Schema::table( 'campaigns' );
 
 foreach ( $created_campaign_ids as $id ) {
 	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$campaigns_table} WHERE id = %d", $id ) );

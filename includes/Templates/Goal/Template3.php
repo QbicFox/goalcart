@@ -2,12 +2,12 @@
 /**
  * Circular progress goal template.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Templates\Goal;
+namespace FaraCart\Templates\Goal;
 
-use GoalCart\Templates\AbstractTemplate;
+use FaraCart\Templates\AbstractTemplate;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -35,14 +35,14 @@ class Template3 extends AbstractTemplate {
 	 * @return string
 	 */
 	public function label() {
-		return __( 'Template 3', 'goalcart' );
+		return __( 'Template 3', 'faracart' );
 	}
 
 	/**
 	 * @return string
 	 */
 	public function description() {
-		return __( 'Circular gauge — percentage ring with the goal details beside it.', 'goalcart' );
+		return __( 'Circular gauge — percentage ring with the goal details beside it.', 'faracart' );
 	}
 
 	/**
@@ -66,128 +66,128 @@ class Template3 extends AbstractTemplate {
 		return array(
 			'accent'        => array(
 				'type'    => 'color',
-				'label'   => __( 'Ring color', 'goalcart' ),
-				'group'   => __( 'Colors', 'goalcart' ),
+				'label'   => __( 'Ring color', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
 				'default' => '#6366f1',
 			),
 			'trackColor'    => array(
 				'type'    => 'color',
-				'label'   => __( 'Track color', 'goalcart' ),
-				'group'   => __( 'Colors', 'goalcart' ),
+				'label'   => __( 'Track color', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
 				'default' => '#e5e7eb',
 			),
 			'bg'            => array(
 				'type'    => 'color',
-				'label'   => __( 'Background', 'goalcart' ),
-				'group'   => __( 'Colors', 'goalcart' ),
+				'label'   => __( 'Background', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
 				'default' => '#ffffff',
 			),
 			'border'        => array(
 				'type'    => 'color',
-				'label'   => __( 'Border', 'goalcart' ),
-				'group'   => __( 'Colors', 'goalcart' ),
+				'label'   => __( 'Border', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
 				'default' => '#e5e7eb',
 			),
 			'text'          => array(
 				'type'    => 'color',
-				'label'   => __( 'Text', 'goalcart' ),
-				'group'   => __( 'Colors', 'goalcart' ),
+				'label'   => __( 'Text', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
 				'default' => '#1f2937',
 			),
 			'secondaryText' => array(
 				'type'    => 'color',
-				'label'   => __( 'Secondary text', 'goalcart' ),
-				'group'   => __( 'Colors', 'goalcart' ),
+				'label'   => __( 'Secondary text', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
 				'default' => '#6b7280',
 			),
 			'ringSize'      => array(
 				'type'    => 'number',
-				'label'   => __( 'Ring size (px)', 'goalcart' ),
-				'group'   => __( 'Ring', 'goalcart' ),
+				'label'   => __( 'Ring size (px)', 'faracart' ),
+				'group'   => __( 'Ring', 'faracart' ),
 				'default' => 100,
 				'min'     => 60,
 				'max'     => 200,
 			),
 			'strokeWidth'   => array(
 				'type'    => 'number',
-				'label'   => __( 'Ring thickness (px)', 'goalcart' ),
-				'group'   => __( 'Ring', 'goalcart' ),
+				'label'   => __( 'Ring thickness (px)', 'faracart' ),
+				'group'   => __( 'Ring', 'faracart' ),
 				'default' => 8,
 				'min'     => 4,
 				'max'     => 20,
 			),
 			'radius'        => array(
 				'type'    => 'number',
-				'label'   => __( 'Corner radius (px)', 'goalcart' ),
-				'group'   => __( 'Shape', 'goalcart' ),
+				'label'   => __( 'Corner radius (px)', 'faracart' ),
+				'group'   => __( 'Shape', 'faracart' ),
 				'default' => 2,
 				'min'     => 0,
 				'max'     => 5,
 			),
 			'buttonColor'   => array(
 				'type'    => 'color',
-				'label'   => __( 'Button color', 'goalcart' ),
-				'group'   => __( 'Button', 'goalcart' ),
+				'label'   => __( 'Button color', 'faracart' ),
+				'group'   => __( 'Button', 'faracart' ),
 				'default' => '#6366f1',
 			),
 			'buttonTextColor' => array(
 				'type'    => 'color',
-				'label'   => __( 'Button text color', 'goalcart' ),
-				'group'   => __( 'Button', 'goalcart' ),
+				'label'   => __( 'Button text color', 'faracart' ),
+				'group'   => __( 'Button', 'faracart' ),
 				'default' => '#6366f1',
 			),
 			'buttonStyle'   => array(
 				'type'    => 'select',
-				'label'   => __( 'Button style', 'goalcart' ),
-				'group'   => __( 'Button', 'goalcart' ),
+				'label'   => __( 'Button style', 'faracart' ),
+				'group'   => __( 'Button', 'faracart' ),
 				'default' => 'outline',
 				'options' => array(
-					'solid'   => __( 'Solid', 'goalcart' ),
-					'outline' => __( 'Outline', 'goalcart' ),
+					'solid'   => __( 'Solid', 'faracart' ),
+					'outline' => __( 'Outline', 'faracart' ),
 				),
 			),
 			'showPercent'   => array(
 				'type'    => 'bool',
-				'label'   => __( 'Show the percentage in the center', 'goalcart' ),
-				'group'   => __( 'Content', 'goalcart' ),
+				'label'   => __( 'Show the percentage in the center', 'faracart' ),
+				'group'   => __( 'Content', 'faracart' ),
 				'default' => true,
 			),
 			'showDescription' => array(
 				'type'    => 'bool',
-				'label'   => __( 'Show the goal description', 'goalcart' ),
-				'group'   => __( 'Content', 'goalcart' ),
+				'label'   => __( 'Show the goal description', 'faracart' ),
+				'group'   => __( 'Content', 'faracart' ),
 				'default' => true,
 			),
 			'showAmounts'   => array(
 				'type'    => 'bool',
-				'label'   => __( 'Show the amounts', 'goalcart' ),
-				'group'   => __( 'Content', 'goalcart' ),
+				'label'   => __( 'Show the amounts', 'faracart' ),
+				'group'   => __( 'Content', 'faracart' ),
 				'default' => true,
 			),
 			'showCta'       => array(
 				'type'    => 'bool',
-				'label'   => __( 'Show the call-to-action', 'goalcart' ),
-				'group'   => __( 'Content', 'goalcart' ),
+				'label'   => __( 'Show the call-to-action', 'faracart' ),
+				'group'   => __( 'Content', 'faracart' ),
 				'default' => true,
 			),
 			'animation'     => array(
 				'type'    => 'bool',
-				'label'   => __( 'Animate progress updates', 'goalcart' ),
-				'group'   => __( 'Behavior', 'goalcart' ),
+				'label'   => __( 'Animate progress updates', 'faracart' ),
+				'group'   => __( 'Behavior', 'faracart' ),
 				'default' => true,
 			),
 			'cssClass'      => array(
 				'type'    => 'text',
-				'label'   => __( 'Extra CSS class', 'goalcart' ),
-				'group'   => __( 'Advanced', 'goalcart' ),
+				'label'   => __( 'Extra CSS class', 'faracart' ),
+				'group'   => __( 'Advanced', 'faracart' ),
 				'default' => '',
 			),
 			'customCss'     => array(
 				'type'    => 'css',
-				'label'   => __( 'Custom CSS', 'goalcart' ),
-				'group'   => __( 'Advanced', 'goalcart' ),
+				'label'   => __( 'Custom CSS', 'faracart' ),
+				'group'   => __( 'Advanced', 'faracart' ),
 				'default' => '',
-				'help'    => __( 'Appended to the widget styles. Applied only while this template renders.', 'goalcart' ),
+				'help'    => __( 'Appended to the widget styles. Applied only while this template renders.', 'faracart' ),
 			),
 		);
 	}

@@ -22,10 +22,10 @@ interface CompositeChildrenEditorProps {
 }
 
 const CHILD_MODE_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: 'quantity', label: __('Quantity', 'goalcart') },
-  { value: 'subtotal', label: __('Subtotal (before discounts)', 'goalcart') },
-  { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
-  { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+  { value: 'quantity', label: __('Quantity', 'faracart') },
+  { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
+  { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
+  { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
 ];
 
 /** A child can be any simple type; composite children are not nested here. */
@@ -64,7 +64,7 @@ export default function CompositeChildrenEditor({
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
           {__(
             'No child goals yet. Add at least one condition to build the composite goal.',
-            'goalcart'
+            'faracart'
           )}
         </Typography>
       )}
@@ -78,7 +78,7 @@ export default function CompositeChildrenEditor({
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
                   select
-                  label={__('Child type', 'goalcart')}
+                  label={__('Child type', 'faracart')}
                   fullWidth
                   size="small"
                   value={childType}
@@ -99,7 +99,7 @@ export default function CompositeChildrenEditor({
 
               <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                 <TextField
-                  label={__('Target', 'goalcart')}
+                  label={__('Target', 'faracart')}
                   type="number"
                   fullWidth
                   size="small"
@@ -115,7 +115,7 @@ export default function CompositeChildrenEditor({
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                   <TextField
                     select
-                    label={__('Calculate against', 'goalcart')}
+                    label={__('Calculate against', 'faracart')}
                     fullWidth
                     size="small"
                     value={child.calculation_mode}
@@ -133,12 +133,12 @@ export default function CompositeChildrenEditor({
               )}
 
               <Grid size={{ xs: 12, sm: 'auto' }}>
-                <Tooltip title={__('Remove condition', 'goalcart')}>
+                <Tooltip title={__('Remove condition', 'faracart')}>
                   <span>
                     <IconButton
                       size="small"
                       color="error"
-                      aria-label={__('Remove condition', 'goalcart')}
+                      aria-label={__('Remove condition', 'faracart')}
                       onClick={() => removeChild(index)}
                     >
                       <CloseIcon fontSize="small" />
@@ -150,7 +150,7 @@ export default function CompositeChildrenEditor({
               {childType === 'category' && (
                 <Grid size={12}>
                   <EntityAutocomplete
-                    label={__('Categories', 'goalcart')}
+                    label={__('Categories', 'faracart')}
                     value={child.categories}
                     onChange={(categories) => updateChild(index, { categories })}
                     search={searchCategories}
@@ -161,7 +161,7 @@ export default function CompositeChildrenEditor({
               {childType === 'product' && (
                 <Grid size={12}>
                   <EntityAutocomplete
-                    label={__('Products', 'goalcart')}
+                    label={__('Products', 'faracart')}
                     value={child.products}
                     onChange={(products) => updateChild(index, { products })}
                     search={searchProducts}
@@ -174,7 +174,7 @@ export default function CompositeChildrenEditor({
       })}
 
       <Button startIcon={<AddIcon />} onClick={addChild} size="small">
-        {__('Add condition', 'goalcart')}
+        {__('Add condition', 'faracart')}
       </Button>
     </Box>
   );

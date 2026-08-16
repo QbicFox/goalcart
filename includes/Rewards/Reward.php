@@ -2,12 +2,12 @@
 /**
  * Reward value object for the FaraCart engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards;
+namespace FaraCart\Rewards;
 
-use GoalCart\Goals\Goal;
+use FaraCart\Goals\Goal;
 
 defined( 'ABSPATH' ) || exit;
 

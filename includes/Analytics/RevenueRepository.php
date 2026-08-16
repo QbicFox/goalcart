@@ -2,14 +2,14 @@
 /**
  * Cached revenue summaries for FaraCart (Phase 33.3 — Aggregation & Performance).
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
-use GoalCart\Database\Schema;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Hooks\HookManager;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -39,15 +39,15 @@ defined( 'ABSPATH' ) || exit;
  *  - upsell_product_detail() — one product's score breakdown + stats.
  *
  * Caching (P33.3): every read is memoized in a transient whose key embeds a
- * generation counter (goalcart_revenue_cache_version). invalidate() bumps the
+ * generation counter (faracart_revenue_cache_version). invalidate() bumps the
  * counter, so stale entries are never served and no key enumeration is
  * needed; old transients expire through their TTL. Invalidation is wired to
  * the events that change the underlying data — order payment/status changes,
- * goal CRUD (goalcart_goals_changed), product saves (upsell stats), and the
- * daily aggregation run (goalcart_revenue_aggregated).
+ * goal CRUD (faracart_goals_changed), product saves (upsell stats), and the
+ * daily aggregation run (faracart_revenue_aggregated).
  *
- * The whole layer is gated by goalcart_revenue_cache_enabled (default on)
- * with a filterable TTL (goalcart_revenue_cache_ttl), so stores can tune or
+ * The whole layer is gated by faracart_revenue_cache_enabled (default on)
+ * with a filterable TTL (faracart_revenue_cache_ttl), so stores can tune or
  * disable caching without changing reads.
  */
 final class RevenueRepository {
@@ -57,17 +57,17 @@ final class RevenueRepository {
 	 *
 	 * @var string
 	 */
-	const CACHE_PREFIX = 'goalcart_rev_';
+	const CACHE_PREFIX = 'faracart_rev_';
 
 	/**
 	 * Option holding the cache generation counter.
 	 *
 	 * @var string
 	 */
-	const CACHE_VERSION_OPTION = 'goalcart_revenue_cache_version';
+	const CACHE_VERSION_OPTION = 'faracart_revenue_cache_version';
 
 	/**
-	 * Default cache TTL (seconds) — filterable with goalcart_revenue_cache_ttl.
+	 * Default cache TTL (seconds) — filterable with faracart_revenue_cache_ttl.
 	 *
 	 * @var int
 	 */
@@ -82,7 +82,7 @@ final class RevenueRepository {
 
 	/**
 	 * Default TTL for goal recommendations (filterable with
-	 * goalcart_recommendation_cache_ttl).
+	 * faracart_recommendation_cache_ttl).
 	 *
 	 * @var int
 	 */
@@ -145,13 +145,13 @@ final class RevenueRepository {
 		$hooks->add_action( 'woocommerce_order_status_changed', array( $this, 'invalidate' ) );
 
 		// Goal CRUD changes reward config, funnel targets and names.
-		$hooks->add_action( 'goalcart_goals_changed', array( $this, 'invalidate' ) );
+		$hooks->add_action( 'faracart_goals_changed', array( $this, 'invalidate' ) );
 
 		// Product saves change names/prices behind the upsell stats.
 		$hooks->add_action( 'save_post_product', array( $this, 'invalidate' ) );
 
 		// The daily aggregation refreshes revenue_daily + upsell_stats.
-		$hooks->add_action( 'goalcart_revenue_aggregated', array( $this, 'invalidate' ) );
+		$hooks->add_action( 'faracart_revenue_aggregated', array( $this, 'invalidate' ) );
 	}
 
 	/**
@@ -599,7 +599,7 @@ final class RevenueRepository {
 		return $this->cached(
 			'goal_recs',
 			$args,
-			(int) apply_filters( 'goalcart_recommendation_cache_ttl', self::RECS_CACHE_TTL ),
+			(int) apply_filters( 'faracart_recommendation_cache_ttl', self::RECS_CACHE_TTL ),
 			function () use ( $args ) {
 				return $this->recommendations->recommend( $args );
 			}
@@ -674,7 +674,7 @@ final class RevenueRepository {
 	 */
 	public function upsell_ranking( array $args = array() ) {
 		if ( null === $this->upsells ) {
-			return $this->upsells_unavailable( __( 'Smart upsell ranking is not available.', 'goalcart' ) );
+			return $this->upsells_unavailable( __( 'Smart upsell ranking is not available.', 'faracart' ) );
 		}
 
 		return $this->cached(
@@ -871,7 +871,7 @@ final class RevenueRepository {
 	 * @return mixed
 	 */
 	protected function cached( $method, array $args, $ttl, callable $compute ) {
-		if ( ! (bool) apply_filters( 'goalcart_revenue_cache_enabled', true ) ) {
+		if ( ! (bool) apply_filters( 'faracart_revenue_cache_enabled', true ) ) {
 			return $compute();
 		}
 
@@ -886,7 +886,7 @@ final class RevenueRepository {
 
 		$data = $compute();
 
-		set_transient( $key, $data, (int) apply_filters( 'goalcart_revenue_cache_ttl', $ttl ) );
+		set_transient( $key, $data, (int) apply_filters( 'faracart_revenue_cache_ttl', $ttl ) );
 
 		return $data;
 	}

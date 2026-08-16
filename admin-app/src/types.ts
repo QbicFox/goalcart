@@ -1,9 +1,9 @@
-export interface GoalCartUser {
+export interface FaraCartUser {
   displayName: string;
   avatarUrl: string;
 }
 
-export interface GoalCartCaps {
+export interface FaraCartCaps {
   manageOptions: boolean;
   manageWooCommerce: boolean;
 }
@@ -12,7 +12,7 @@ export interface GoalCartCaps {
  * Boot data injected by WordPress via `wp_localize_script()` (see
  * `includes/Admin/AssetLoader.php` → `boot_data()`).
  */
-export interface GoalCartBootData {
+export interface FaraCartBootData {
   nonce: string;
   restBase: string;
   restUrl: string;
@@ -27,8 +27,8 @@ export interface GoalCartBootData {
   /** Site-local today (Y-m-d), so date math matches the backend timezone. */
   currentDate: string;
   userId: number;
-  user: GoalCartUser;
-  caps: GoalCartCaps;
+  user: FaraCartUser;
+  caps: FaraCartCaps;
   version: string;
   isPro: boolean;
   /** Whether the dashboard opens full-screen (hides the WP admin chrome). */
@@ -53,7 +53,7 @@ export interface ApiEnvelope<T> {
 export type GoalStatus = 'active' | 'inactive';
 
 export type GoalType =
-  'amount'
+  | 'amount'
   | 'quantity'
   | 'distinct_quantity'
   | 'category'
@@ -104,13 +104,7 @@ export type TemplateScope = 'goal' | 'campaign';
 
 /** Pluggable template engine: the field types a template schema accepts. */
 export type TemplateFieldType =
-  | 'color'
-  | 'text'
-  | 'textarea'
-  | 'number'
-  | 'bool'
-  | 'select'
-  | 'css';
+  'color' | 'text' | 'textarea' | 'number' | 'bool' | 'select' | 'css';
 
 /** One field of a template's settings schema (drives the dynamic form). */
 export interface TemplateField {
@@ -128,7 +122,7 @@ export interface TemplateField {
 /** A resolved template settings map (schema-conformant, server-validated). */
 export type TemplateSettingsValue = Record<string, string | number | boolean>;
 
-/** One registered template as served by `GET /goalcart/v1/templates`. */
+/** One registered template as served by `GET /faracart/v1/templates`. */
 export interface TemplateDefinition {
   id: string;
   label: string;
@@ -140,7 +134,7 @@ export interface TemplateDefinition {
   settings: TemplateSettingsValue;
 }
 
-/** The `GET /goalcart/v1/templates` payload. */
+/** The `GET /faracart/v1/templates` payload. */
 export interface TemplatesPayload {
   scopes: TemplateScope[];
   defaults: Record<TemplateScope, string>;
@@ -222,7 +216,7 @@ export interface GoalInput {
 }
 
 /**
- * A goal as served by the Phase 7 REST API (`GET /goalcart/v1/goals`).
+ * A goal as served by the Phase 7 REST API (`GET /faracart/v1/goals`).
  * Mirrors the Goal model's payload shape 1:1 (Phase 32 condition keys
  * included).
  */
@@ -350,7 +344,7 @@ export interface PreviewSimulated {
 }
 
 /**
- * The admin preview endpoint payload (`POST /goalcart/v1/preview`,
+ * The admin preview endpoint payload (`POST /faracart/v1/preview`,
  * Phase 15). Same per-goal shape as /progress, plus the simulated values
  * echoed back so the preview frame can label itself.
  */
@@ -423,7 +417,7 @@ export interface CampaignGoal {
 
 /**
  * A campaign as served by the Phase 10 REST API
- * (`GET /goalcart/v1/campaigns`). Groups goals into scheduled,
+ * (`GET /faracart/v1/campaigns`). Groups goals into scheduled,
  * prioritized milestones (Phase 3 `campaigns` table + `goals.menu_order`).
  */
 export interface Campaign {
@@ -456,21 +450,10 @@ export interface CampaignInput {
 
 /** Storefront goal template ids (the six design templates). */
 export type FrontendTemplate =
-  | 'template-1'
-  | 'template-2'
-  | 'template-3'
-  | 'template-4'
-  | 'template-5'
-  | 'template-6';
+  'template-1' | 'template-2' | 'template-3' | 'template-4' | 'template-5' | 'template-6';
 
 /** Storefront widget display locations (Phase 18, frontend_locations). */
-export type FrontendLocation =
-  | 'cart'
-  | 'mini-cart'
-  | 'checkout'
-  | 'shop'
-  | 'product'
-  | 'sticky';
+export type FrontendLocation = 'cart' | 'mini-cart' | 'checkout' | 'shop' | 'product' | 'sticky';
 
 /** Storefront currency display style (Phase 18, currency_display). */
 export type CurrencyDisplay = 'symbol' | 'code' | 'name';
@@ -496,19 +479,11 @@ export type MobileBehavior = 'show' | 'hide';
 
 /** Reward-type filter on the analytics dashboard ('' = all rewards). */
 export type AnalyticsRewardFilter =
-  | ''
-  | 'free_shipping'
-  | 'percent_discount'
-  | 'fixed_discount'
-  | 'free_gift'
-  | 'coupon';
+  '' | 'free_shipping' | 'percent_discount' | 'fixed_discount' | 'free_gift' | 'coupon';
 
 /** Stable machine-readable profit reason codes (Improvement.md §39). */
 export type ProfitReasonCode =
-  | 'available'
-  | 'missing_product_cost'
-  | 'incomplete_product_cost'
-  | 'insufficient_data';
+  'available' | 'missing_product_cost' | 'incomplete_product_cost' | 'insufficient_data';
 
 /**
  * The product-cost sources the backend estimator consults, in order
@@ -516,10 +491,10 @@ export type ProfitReasonCode =
  * translate them in the UI when explaining where cost data comes from.
  */
 export type CostSource =
-  | '_goalcart_product_cost'
+  | '_faracart_product_cost'
   | '_cost'
   | '_wc_cog_cost'
-  | 'goalcart_product_cost'
+  | 'faracart_product_cost'
   | 'variation_fallback';
 
 /**
@@ -534,7 +509,7 @@ export interface ProductCostCoverage {
   available: boolean;
 }
 
-/** The `GET /goalcart/v1/revenue/cost-coverage` payload (UPSELL_REFACTOR §46). */
+/** The `GET /faracart/v1/revenue/cost-coverage` payload (UPSELL_REFACTOR §46). */
 export interface CostCoveragePayload {
   product_coverage: ProductCostCoverage;
   store_has_cost_data: boolean;
@@ -589,7 +564,8 @@ export interface AnalyticsSummary {
   attributed_sales: number | null;
   estimated_profit: number | null;
   profit_available: boolean;
-  profit_reason: string | null;	profit_reason_code: ProfitReasonCode | null;
+  profit_reason: string | null;
+  profit_reason_code: ProfitReasonCode | null;
   cost_coverage: CostCoverage;
   // Phase 3 — UI-ready profit availability metadata (§10): which cost
   // sources are consulted and whether the store carries any cost data.
@@ -641,7 +617,7 @@ export interface AnalyticsSuggestedProduct {
 
 /**
  * The full Phase 17 dashboard payload served by
- * `GET /goalcart/v1/analytics`.
+ * `GET /faracart/v1/analytics`.
  */
 export interface AnalyticsPayload {
   summary: AnalyticsSummary;
@@ -659,16 +635,21 @@ export interface AnalyticsPayload {
 
 /**
  * The settings object persisted by the Phase 7 REST API
- * (`GET/POST /goalcart/v1/settings`). Phase 18 ships the full surface:
+ * (`GET/POST /faracart/v1/settings`). Phase 18 ships the full surface:
  * general, frontend, goal calculation, performance and advanced.
  *
  * The `frontend_*` keys are the Phase 12 progress-template + appearance
  * surface consumed by the storefront widgets and the Appearance page.
  */
-export interface GoalCartSettings {
+export interface FaraCartSettings {
   // General (P18-T01).
   enabled: boolean;
   fullscreen_dashboard: boolean;
+  /**
+   * Display currency unit override — an uppercase ISO-4217 code, or '' to
+   * follow the WooCommerce store currency (Settings::currency()).
+   */
+  currency: string;
   currency_display: CurrencyDisplay;
   default_goal_behavior: GoalBehavior;
   conflict_resolution: ConflictResolution;
@@ -826,7 +807,7 @@ export interface RevenueTrendPoint {
 }
 
 /**
- * The `GET /goalcart/v1/revenue/overview` payload — the Revenue Overview
+ * The `GET /faracart/v1/revenue/overview` payload — the Revenue Overview
  * page's data source (summary + incremental + AOV + shipping + trend).
  */
 export interface RevenueOverviewPayload {
@@ -839,12 +820,12 @@ export interface RevenueOverviewPayload {
 }
 
 /**
- * The `GET /goalcart/v1/revenue/attribution` payload — the Attribution
+ * The `GET /faracart/v1/revenue/attribution` payload — the Attribution
  * Dashboard page's data source (the overview without the trend series).
  */
 export type RevenueAttributionPayload = Omit<RevenueOverviewPayload, 'trend'>;
 
-/** One Goal Performance row (`GET /goalcart/v1/revenue/goals`). */
+/** One Goal Performance row (`GET /faracart/v1/revenue/goals`). */
 export interface GoalPerformanceRow {
   goal_id: number;
   name: string;
@@ -870,7 +851,8 @@ export interface GoalPerformanceRow {
   reward_cost_available: boolean;
   profit_impact: number | null;
   profit_available: boolean;
-  profit_reason: string | null;	profit_reason_code: ProfitReasonCode;
+  profit_reason: string | null;
+  profit_reason_code: ProfitReasonCode;
   profit_details: ProfitDetails;
   cost_coverage: CostCoverage;
   // Phase 3 — UI-ready profit availability metadata (§10).
@@ -891,12 +873,12 @@ export interface GoalPerformanceRow {
   };
 }
 
-/** The `GET /goalcart/v1/revenue/goals` payload. */
+/** The `GET /faracart/v1/revenue/goals` payload. */
 export interface GoalPerformancePayload {
   items: GoalPerformanceRow[];
 }
 
-/** One upsell analytics row (`GET /goalcart/v1/revenue/upsells?analytics=1`). */
+/** One upsell analytics row (`GET /faracart/v1/revenue/upsells?analytics=1`). */
 export interface UpsellAnalyticsRow {
   product_id: number;
   name: string;
@@ -934,7 +916,7 @@ export interface UpsellConversionStats {
   available: boolean;
 }
 
-/** One ranked upsell product (`GET /goalcart/v1/revenue/upsells`). */
+/** One ranked upsell product (`GET /faracart/v1/revenue/upsells`). */
 export interface UpsellRecommendation {
   product_id: number;
   name: string;
@@ -963,7 +945,7 @@ export interface UpsellRecommendation {
 }
 
 /**
- * The `GET /goalcart/v1/revenue/upsells` ranking payload (context mode).
+ * The `GET /faracart/v1/revenue/upsells` ranking payload (context mode).
  */
 export interface UpsellRankingPayload {
   available: boolean;
@@ -1088,7 +1070,7 @@ export interface RecommendationCandidate {
 }
 
 /**
- * The `GET /goalcart/v1/revenue/goal-recommendations` payload — the
+ * The `GET /faracart/v1/revenue/goal-recommendations` payload — the
  * Recommendations page's data source (Phase 33.4; UICHANGES.md §40
  * label).
  */
@@ -1114,7 +1096,7 @@ export interface GoalRecommendationsPayload {
 
 /** Extra settings-page meta served alongside the settings payload. */
 export interface SettingsMeta {
-  /** Public goalcart_* hooks reference (Phase 18, developer hooks). */
+  /** Public faracart_* hooks reference (Phase 18, developer hooks). */
   hooks?: DeveloperHook[];
   /** Absolute path of the debug log file (present when logging is on). */
   log_path?: string;

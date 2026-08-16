@@ -2,21 +2,21 @@
 /**
  * Goal evaluator registry.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals;
+namespace FaraCart\Goals;
 
-use GoalCart\Goals\Evaluators\AmountEvaluator;
-use GoalCart\Goals\Evaluators\AttributeEvaluator;
-use GoalCart\Goals\Evaluators\BrandEvaluator;
-use GoalCart\Goals\Evaluators\CategoryEvaluator;
-use GoalCart\Goals\Evaluators\CompositeEvaluator;
-use GoalCart\Goals\Evaluators\DistinctQuantityEvaluator;
-use GoalCart\Goals\Evaluators\ProductEvaluator;
-use GoalCart\Goals\Evaluators\QuantityEvaluator;
-use GoalCart\Goals\Evaluators\TagEvaluator;
-use GoalCart\Goals\Evaluators\WeightEvaluator;
+use FaraCart\Goals\Evaluators\AmountEvaluator;
+use FaraCart\Goals\Evaluators\AttributeEvaluator;
+use FaraCart\Goals\Evaluators\BrandEvaluator;
+use FaraCart\Goals\Evaluators\CategoryEvaluator;
+use FaraCart\Goals\Evaluators\CompositeEvaluator;
+use FaraCart\Goals\Evaluators\DistinctQuantityEvaluator;
+use FaraCart\Goals\Evaluators\ProductEvaluator;
+use FaraCart\Goals\Evaluators\QuantityEvaluator;
+use FaraCart\Goals\Evaluators\TagEvaluator;
+use FaraCart\Goals\Evaluators\WeightEvaluator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  * Class GoalEvaluatorRegistry
  *
  * Maps goal types to evaluator classes and resolves them lazily. The class
- * map is filterable through 'goalcart_goal_evaluator_classes' so stores can
+ * map is filterable through 'faracart_goal_evaluator_classes' so stores can
  * register custom goal types without touching the core.
  */
 class GoalEvaluatorRegistry {
@@ -79,7 +79,7 @@ class GoalEvaluatorRegistry {
 			 *
 			 * @param array<string, string> $classes Goal type => evaluator class.
 			 */
-			$classes = apply_filters( 'goalcart_goal_evaluator_classes', $classes );
+			$classes = apply_filters( 'faracart_goal_evaluator_classes', $classes );
 		}
 
 		foreach ( $classes as $type => $class ) {

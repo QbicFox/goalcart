@@ -42,51 +42,51 @@ import type { UpsellAnalyticsRow, UpsellComponentScores, UpsellRecommendation } 
 type SortMode = 'top' | 'lowest' | 'conversion' | 'margin';
 
 const SORT_OPTIONS: Array<{ value: SortMode; label: string }> = [
-  { value: 'top', label: __('Top performing', 'goalcart') },
-  { value: 'lowest', label: __('Lowest performing', 'goalcart') },
-  { value: 'conversion', label: __('Best conversion', 'goalcart') },
-  { value: 'margin', label: __('Highest margin', 'goalcart') },
+  { value: 'top', label: __('Top performing', 'faracart') },
+  { value: 'lowest', label: __('Lowest performing', 'faracart') },
+  { value: 'conversion', label: __('Best conversion', 'faracart') },
+  { value: 'margin', label: __('Highest margin', 'faracart') },
 ];
 
 const COMPONENT_LABELS: Array<{ key: keyof UpsellComponentScores; label: string; help: string }> = [
   {
     key: 'price_gap',
-    label: __('Price gap', 'goalcart'),
+    label: __('Price gap', 'faracart'),
     help: __(
       'Products priced close to the amount remaining until the goal usually make a better suggestion.',
-      'goalcart'
+      'faracart'
     ),
   },
   {
     key: 'relevance',
-    label: __('Relevance', 'goalcart'),
+    label: __('Relevance', 'faracart'),
     help: __(
       'How related this product is to the items already in the customer’s cart.',
-      'goalcart'
+      'faracart'
     ),
   },
   {
     key: 'popularity',
-    label: __('Popularity', 'goalcart'),
-    help: __('Products purchased more often in your store rank higher.', 'goalcart'),
+    label: __('Popularity', 'faracart'),
+    help: __('Products purchased more often in your store rank higher.', 'faracart'),
   },
   {
     key: 'inventory',
-    label: __('Inventory', 'goalcart'),
-    help: __('In-stock products are prioritized.', 'goalcart'),
+    label: __('Inventory', 'faracart'),
+    help: __('In-stock products are prioritized.', 'faracart'),
   },
   {
     key: 'margin',
-    label: __('Margin', 'goalcart'),
+    label: __('Margin', 'faracart'),
     help: __(
       'When product cost is recorded, its profit is also considered in the ranking.',
-      'goalcart'
+      'faracart'
     ),
   },
   {
     key: 'conversion',
-    label: __('Conversion', 'goalcart'),
-    help: __('How often this product has actually led to an order when suggested.', 'goalcart'),
+    label: __('Conversion', 'faracart'),
+    help: __('How often this product has actually led to an order when suggested.', 'faracart'),
   },
 ];
 
@@ -150,8 +150,8 @@ function ProductDetailDialog({
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>
         {detailQuery.isLoading
-          ? __('Loading product…', 'goalcart')
-          : (detail?.name ?? __('Product', 'goalcart'))}
+          ? __('Loading product…', 'faracart')
+          : (detail?.name ?? __('Product', 'faracart'))}
       </DialogTitle>
       <DialogContent dividers>
         {detailQuery.isLoading ? (
@@ -162,7 +162,7 @@ function ProductDetailDialog({
           </Stack>
         ) : detailQuery.isError ? (
           <Typography variant="body2" color="text.secondary">
-            {__('The product breakdown could not be loaded.', 'goalcart')}
+            {__('The product breakdown could not be loaded.', 'faracart')}
           </Typography>
         ) : detail ? (
           <Stack spacing={2}>
@@ -179,7 +179,7 @@ function ProductDetailDialog({
                     component="span"
                     sx={{ ml: 1 }}
                   >
-                    {__('upsell score', 'goalcart')}
+                    {__('upsell score', 'faracart')}
                   </Typography>
                 </Typography>
                 {detail.price !== null && (
@@ -195,7 +195,7 @@ function ProductDetailDialog({
                   color="success"
                   label={sprintf(
                     /* translators: 1: estimated per-unit profit. */
-                    __('Est. profit %1$s', 'goalcart'),
+                    __('Est. profit %1$s', 'faracart'),
                     formatCurrency(detail.estimated_profit)
                   )}
                 />
@@ -204,7 +204,7 @@ function ProductDetailDialog({
 
             <Box>
               <Typography variant="subtitle2" gutterBottom>
-                {__('Score breakdown', 'goalcart')}
+                {__('Score breakdown', 'faracart')}
               </Typography>
               <Stack spacing={1}>
                 {COMPONENT_LABELS.map(({ key, label, help }) => (
@@ -237,7 +237,7 @@ function ProductDetailDialog({
 
             <Box>
               <Typography variant="subtitle2" gutterBottom>
-                {__('Why this product', 'goalcart')}
+                {__('Why this product', 'faracart')}
               </Typography>
               <Stack spacing={0.5}>
                 {detail.reasons.map((reason) => (
@@ -251,12 +251,12 @@ function ProductDetailDialog({
             {detail.conversion.available && (
               <Box>
                 <Typography variant="subtitle2" gutterBottom>
-                  {__('Historical performance', 'goalcart')}
+                  {__('Historical performance', 'faracart')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   {sprintf(
                     /* translators: 1: impressions, 2: orders, 3: conversion rate. */
-                    __('%1$s impressions · %2$s orders · %3$s conversion', 'goalcart'),
+                    __('%1$s impressions · %2$s orders · %3$s conversion', 'faracart'),
                     formatNumber(detail.conversion.impressions),
                     formatNumber(detail.conversion.orders),
                     formatPercent(detail.conversion.conversion_rate)
@@ -267,7 +267,7 @@ function ProductDetailDialog({
           </Stack>
         ) : (
           <Typography variant="body2" color="text.secondary">
-            {__('This product could not be scored.', 'goalcart')}
+            {__('This product could not be scored.', 'faracart')}
           </Typography>
         )}
       </DialogContent>
@@ -280,7 +280,7 @@ function ProductDetailDialog({
  * §40 label).
  *
  * The customer-facing recommendation system's admin report: the
- * top-products upsell table from `GET /goalcart/v1/revenue/upsells?analytics=1`.
+ * top-products upsell table from `GET /faracart/v1/revenue/upsells?analytics=1`.
  * The first screen answers "which suggested products actually help
  * customers reach Goals and generate purchases and sales?" (§35): Product
  * / Purchased Orders / Sales / Estimated profit / Conversion are the
@@ -334,16 +334,16 @@ export default function UpsellAnalytics() {
 
   return (
     <PageContainer
-      title={__('Upsells', 'goalcart')}
+      title={__('Upsells', 'faracart')}
       description={__(
         'Upsells shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product.',
-        'goalcart'
+        'faracart'
       )}
     >
       <RevenueToolbar goalId={goalId} onGoalChange={setGoalId}>
         <TextField
           select
-          label={__('Limit', 'goalcart')}
+          label={__('Limit', 'faracart')}
           size="small"
           sx={{ minWidth: 110 }}
           value={limit}
@@ -374,7 +374,7 @@ export default function UpsellAnalytics() {
               setPage(0);
             }
           }}
-          aria-label={__('Sort products', 'goalcart')}
+          aria-label={__('Sort products', 'faracart')}
         >
           {SORT_OPTIONS.map((option) => (
             <ToggleButton key={option.value} value={option.value}>
@@ -391,8 +391,8 @@ export default function UpsellAnalytics() {
           aria-expanded={showDetails}
         >
           {showDetails
-            ? __('Hide interaction details', 'goalcart')
-            : __('Show interaction details', 'goalcart')}
+            ? __('Hide interaction details', 'faracart')
+            : __('Show interaction details', 'faracart')}
         </Button>
       </Stack>
 
@@ -400,7 +400,7 @@ export default function UpsellAnalytics() {
         <Alert severity="error" variant="outlined">
           {query.error instanceof Error
             ? query.error.message
-            : __('Could not load upsell analytics.', 'goalcart')}
+            : __('Could not load upsell analytics.', 'faracart')}
         </Alert>
       )}
 
@@ -412,10 +412,10 @@ export default function UpsellAnalytics() {
       ) : !query.isError && rows.length === 0 ? (
         <EmptyState
           icon={<TrendingUpIcon fontSize="large" />}
-          title={__('No upsell activity yet', 'goalcart')}
+          title={__('No upsell activity yet', 'faracart')}
           description={__(
             'Upsell impressions and orders are recorded once the storefront reports them. Widen the date range or check that tracking is enabled.',
-            'goalcart'
+            'faracart'
           )}
         />
       ) : (
@@ -432,7 +432,7 @@ export default function UpsellAnalytics() {
             <Card variant="outlined">
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <Typography variant="caption" color="text.secondary">
-                  {__('Products', 'goalcart')}
+                  {__('Products', 'faracart')}
                 </Typography>
                 <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 600 }}>
                   {formatNumber(summary.products)}
@@ -442,7 +442,7 @@ export default function UpsellAnalytics() {
             <Card variant="outlined">
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <Typography variant="caption" color="text.secondary">
-                  {__('Purchased Orders', 'goalcart')}
+                  {__('Purchased Orders', 'faracart')}
                 </Typography>
                 <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 600 }}>
                   {formatNumber(summary.orders)}
@@ -452,7 +452,7 @@ export default function UpsellAnalytics() {
             <Card variant="outlined">
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <Typography variant="caption" color="text.secondary">
-                  {__('Sales', 'goalcart')}
+                  {__('Sales', 'faracart')}
                 </Typography>
                 <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 600 }}>
                   {formatCurrency(summary.sales)}
@@ -462,7 +462,7 @@ export default function UpsellAnalytics() {
             <Card variant="outlined">
               <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
                 <Typography variant="caption" color="text.secondary">
-                  {__('Conversion', 'goalcart')}
+                  {__('Conversion', 'faracart')}
                 </Typography>
                 <Typography variant="h5" component="p" sx={{ m: 0, fontWeight: 600 }}>
                   {summary.conversion !== null ? formatPercent(summary.conversion) : '—'}
@@ -475,19 +475,19 @@ export default function UpsellAnalytics() {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>{__('Product', 'goalcart')}</TableCell>
-                  <TableCell align="right">{__('Orders', 'goalcart')}</TableCell>
-                  <TableCell align="right">{__('Sales', 'goalcart')}</TableCell>
-                  <TableCell align="right">{__('Estimated profit', 'goalcart')}</TableCell>
-                  <TableCell align="right">{__('Conversion', 'goalcart')}</TableCell>
+                  <TableCell>{__('Product', 'faracart')}</TableCell>
+                  <TableCell align="right">{__('Orders', 'faracart')}</TableCell>
+                  <TableCell align="right">{__('Sales', 'faracart')}</TableCell>
+                  <TableCell align="right">{__('Estimated profit', 'faracart')}</TableCell>
+                  <TableCell align="right">{__('Conversion', 'faracart')}</TableCell>
                   {showDetails && (
                     <>
-                      <TableCell align="right">{__('Impressions', 'goalcart')}</TableCell>
-                      <TableCell align="right">{__('Clicks', 'goalcart')}</TableCell>
-                      <TableCell align="right">{__('Adds', 'goalcart')}</TableCell>
-                      <TableCell align="right">{__('CTR', 'goalcart')}</TableCell>
-                      <TableCell align="right">{__('Add-to-cart', 'goalcart')}</TableCell>
-                      <TableCell align="right">{__('Score', 'goalcart')}</TableCell>
+                      <TableCell align="right">{__('Impressions', 'faracart')}</TableCell>
+                      <TableCell align="right">{__('Clicks', 'faracart')}</TableCell>
+                      <TableCell align="right">{__('Adds', 'faracart')}</TableCell>
+                      <TableCell align="right">{__('CTR', 'faracart')}</TableCell>
+                      <TableCell align="right">{__('Add-to-cart', 'faracart')}</TableCell>
+                      <TableCell align="right">{__('Score', 'faracart')}</TableCell>
                     </>
                   )}
                 </TableRow>
@@ -557,7 +557,7 @@ export default function UpsellAnalytics() {
           />
 
           <Typography variant="caption" color="text.secondary">
-            {__('Click a product row for its full score breakdown.', 'goalcart')}
+            {__('Click a product row for its full score breakdown.', 'faracart')}
           </Typography>
         </Stack>
       )}

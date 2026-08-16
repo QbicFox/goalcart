@@ -2,15 +2,15 @@
 /**
  * REST controller for campaigns.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Campaigns\CampaignRepository;
-use GoalCart\Goals\Goal;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Templates\TemplateEngine;
+use FaraCart\Campaigns\CampaignRepository;
+use FaraCart\Goals\Goal;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Templates\TemplateEngine;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,12 +19,12 @@ defined( 'ABSPATH' ) || exit;
  *
  * Campaign endpoints (Phase 10 — Campaign Builder):
  *
- *  - `GET    /goalcart/v1/campaigns`      — campaign list (goal_count each)
- *  - `GET    /goalcart/v1/campaigns/{id}` — a single campaign + milestones
- *  - `POST   /goalcart/v1/campaigns`      — create a campaign
- *  - `PUT    /goalcart/v1/campaigns/{id}` — update a campaign (partial)
- *  - `DELETE /goalcart/v1/campaigns/{id}` — delete a campaign (goals detach)
- *  - `POST   /goalcart/v1/campaigns/{id}/duplicate` — duplicate a campaign
+ *  - `GET    /faracart/v1/campaigns`      — campaign list (goal_count each)
+ *  - `GET    /faracart/v1/campaigns/{id}` — a single campaign + milestones
+ *  - `POST   /faracart/v1/campaigns`      — create a campaign
+ *  - `PUT    /faracart/v1/campaigns/{id}` — update a campaign (partial)
+ *  - `DELETE /faracart/v1/campaigns/{id}` — delete a campaign (goals detach)
+ *  - `POST   /faracart/v1/campaigns/{id}/duplicate` — duplicate a campaign
  *    (copy starts inactive; its goals are copied as new goal rows)
  *
  * The payload mirrors the campaigns table plus an ordered `goals` array
@@ -68,7 +68,7 @@ class CampaignsController extends BaseController {
 	 */
 	protected function templates() {
 		if ( null === $this->templates ) {
-			$this->templates = \GoalCart\Plugin::instance()->container()->get( TemplateEngine::class );
+			$this->templates = \FaraCart\Plugin::instance()->container()->get( TemplateEngine::class );
 		}
 
 		return $this->templates;
@@ -184,8 +184,8 @@ class CampaignsController extends BaseController {
 
 		if ( null === $campaign ) {
 			return $this->error(
-				'goalcart_campaign_not_found',
-				__( 'The campaign could not be found.', 'goalcart' ),
+				'faracart_campaign_not_found',
+				__( 'The campaign could not be found.', 'faracart' ),
 				404
 			);
 		}
@@ -204,8 +204,8 @@ class CampaignsController extends BaseController {
 
 		if ( ! $campaign_id ) {
 			return $this->error(
-				'goalcart_campaign_create_failed',
-				__( 'The campaign could not be created.', 'goalcart' ),
+				'faracart_campaign_create_failed',
+				__( 'The campaign could not be created.', 'faracart' ),
 				500
 			);
 		}
@@ -224,16 +224,16 @@ class CampaignsController extends BaseController {
 
 		if ( null === $this->campaigns->get( $campaign_id ) ) {
 			return $this->error(
-				'goalcart_campaign_not_found',
-				__( 'The campaign could not be found.', 'goalcart' ),
+				'faracart_campaign_not_found',
+				__( 'The campaign could not be found.', 'faracart' ),
 				404
 			);
 		}
 
 		if ( ! $this->campaigns->update( $campaign_id, $request->get_params() ) ) {
 			return $this->error(
-				'goalcart_campaign_update_failed',
-				__( 'The campaign could not be updated.', 'goalcart' ),
+				'faracart_campaign_update_failed',
+				__( 'The campaign could not be updated.', 'faracart' ),
 				500
 			);
 		}
@@ -252,16 +252,16 @@ class CampaignsController extends BaseController {
 
 		if ( null === $this->campaigns->get( $campaign_id ) ) {
 			return $this->error(
-				'goalcart_campaign_not_found',
-				__( 'The campaign could not be found.', 'goalcart' ),
+				'faracart_campaign_not_found',
+				__( 'The campaign could not be found.', 'faracart' ),
 				404
 			);
 		}
 
 		if ( ! $this->campaigns->delete( $campaign_id ) ) {
 			return $this->error(
-				'goalcart_campaign_delete_failed',
-				__( 'The campaign could not be deleted.', 'goalcart' ),
+				'faracart_campaign_delete_failed',
+				__( 'The campaign could not be deleted.', 'faracart' ),
 				500
 			);
 		}
@@ -285,8 +285,8 @@ class CampaignsController extends BaseController {
 
 		if ( null === $this->campaigns->get( $campaign_id ) ) {
 			return $this->error(
-				'goalcart_campaign_not_found',
-				__( 'The campaign could not be found.', 'goalcart' ),
+				'faracart_campaign_not_found',
+				__( 'The campaign could not be found.', 'faracart' ),
 				404
 			);
 		}
@@ -295,8 +295,8 @@ class CampaignsController extends BaseController {
 
 		if ( ! $copy_id ) {
 			return $this->error(
-				'goalcart_campaign_duplicate_failed',
-				__( 'The campaign could not be duplicated.', 'goalcart' ),
+				'faracart_campaign_duplicate_failed',
+				__( 'The campaign could not be duplicated.', 'faracart' ),
 				500
 			);
 		}

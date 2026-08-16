@@ -16,9 +16,9 @@
  *  - template selection: per-state defaults + display_settings
  *    message/completed_message overrides, unknown placeholders untouched
  *
- * Locale-independent: the suite forces en_US and unloads the goalcart
+ * Locale-independent: the suite forces en_US and unloads the faracart
  * domain so label/template assertions see the English source strings
- * regardless of the site locale or any shipped goalcart-<locale>.mo.
+ * regardless of the site locale or any shipped faracart-<locale>.mo.
  *
  * Read-only like the other suites: no DB writes, no products, no cart.
  *
@@ -49,9 +49,9 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Goals\MessageEngine;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Goals\MessageEngine;
 
 $failures = 0;
 $checks   = 0;
@@ -81,10 +81,10 @@ function goal( array $data ) {
 // just-in-time loader short-circuits for unloaded domains, so __() falls
 // back to the source (English) strings.
 switch_to_locale( 'en_US' );
-unload_textdomain( 'goalcart' );
+unload_textdomain( 'faracart' );
 
 $engine  = new MessageEngine();
-$version = \GoalCart\Plugin::instance()->container()->get( MessageEngine::class );
+$version = \FaraCart\Plugin::instance()->container()->get( MessageEngine::class );
 
 // ---------------------------------------------------------------------------
 // 1. Service wiring (P13-T01)

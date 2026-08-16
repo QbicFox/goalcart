@@ -80,12 +80,12 @@ const COLORS = {
 
 /** Reward filter dropdown options (matches Reward::types() + all). */
 const REWARD_OPTIONS: Array<{ value: AnalyticsRewardFilter; label: string }> = [
-  { value: '', label: __('All rewards', 'goalcart') },
-  { value: 'free_shipping', label: __('Free shipping', 'goalcart') },
-  { value: 'percent_discount', label: __('% discount', 'goalcart') },
-  { value: 'fixed_discount', label: __('Fixed discount', 'goalcart') },
-  { value: 'free_gift', label: __('Free gift', 'goalcart') },
-  { value: 'coupon', label: __('Coupon', 'goalcart') },
+  { value: '', label: __('All rewards', 'faracart') },
+  { value: 'free_shipping', label: __('Free shipping', 'faracart') },
+  { value: 'percent_discount', label: __('% discount', 'faracart') },
+  { value: 'fixed_discount', label: __('Fixed discount', 'faracart') },
+  { value: 'free_gift', label: __('Free gift', 'faracart') },
+  { value: 'coupon', label: __('Coupon', 'faracart') },
 ];
 
 /** Short day label for chart ticks (e.g. "Aug 1"). */
@@ -177,43 +177,43 @@ interface ComparisonColumn {
 }
 
 const COMPARISON_COLUMNS: ComparisonColumn[] = [
-  { key: 'name', label: __('Goal', 'goalcart'), align: 'left' },
-  { key: 'views', label: __('Views', 'goalcart'), align: 'right' },
-  { key: 'completed', label: __('Completed', 'goalcart'), align: 'right' },
+  { key: 'name', label: __('Goal', 'faracart'), align: 'left' },
+  { key: 'views', label: __('Views', 'faracart'), align: 'right' },
+  { key: 'completed', label: __('Completed', 'faracart'), align: 'right' },
   {
     key: 'converted',
-    label: __('Purchased', 'goalcart'),
+    label: __('Purchased', 'faracart'),
     align: 'right',
     tooltip: __(
       'A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion.',
-      'goalcart'
+      'faracart'
     ),
   },
   {
     key: 'conversion_rate',
-    label: __('Purchase Rate', 'goalcart'),
+    label: __('Purchase Rate', 'faracart'),
     align: 'right',
     tooltip: __(
       'Percentage of completed goals that were followed by an attributed purchase.',
-      'goalcart'
+      'faracart'
     ),
   },
   {
     key: 'attributed_revenue',
-    label: __('Sales', 'goalcart'),
+    label: __('Sales', 'faracart'),
     align: 'right',
     tooltip: __(
       'Sales attributed to FaraCart — the incremental order value driven by this goal.',
-      'goalcart'
+      'faracart'
     ),
   },
   {
     key: 'profit_impact',
-    label: __('Estimated Profit', 'goalcart'),
+    label: __('Estimated Profit', 'faracart'),
     align: 'right',
     tooltip: __(
       'Estimated, not guaranteed — based on available product cost, reward and shipping data.',
-      'goalcart'
+      'faracart'
     ),
   },
 ];
@@ -253,10 +253,10 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
     const dropOff = (funnel.views - funnel.progressed) / funnel.views;
     insights.push({
       icon: <InsightsIcon fontSize="small" />,
-      title: __('Largest drop-off', 'goalcart'),
+      title: __('Largest drop-off', 'faracart'),
       body: sprintf(
         /* translators: 1: percentage. */
-        __('%1$s of customers who viewed a goal did not progress toward it.', 'goalcart'),
+        __('%1$s of customers who viewed a goal did not progress toward it.', 'faracart'),
         formatPercent(dropOff)
       ),
     });
@@ -267,12 +267,12 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
     if (funnel.conversion_rate < 0.3) {
       insights.push({
         icon: <PercentIcon fontSize="small" />,
-        title: __('Purchase conversion', 'goalcart'),
+        title: __('Purchase conversion', 'faracart'),
         body: sprintf(
           /* translators: 1: percentage. */
           __(
             'Completion is strong, but purchase conversion is weak — only %1$s of completed goals were followed by an attributed purchase.',
-            'goalcart'
+            'faracart'
           ),
           formatPercent(funnel.conversion_rate)
         ),
@@ -280,10 +280,10 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
     } else {
       insights.push({
         icon: <PercentIcon fontSize="small" />,
-        title: __('Purchases', 'goalcart'),
+        title: __('Purchases', 'faracart'),
         body: sprintf(
           /* translators: 1: percentage. */
-          __('%1$s of completed goals were followed by an attributed purchase.', 'goalcart'),
+          __('%1$s of completed goals were followed by an attributed purchase.', 'faracart'),
           formatPercent(funnel.conversion_rate)
         ),
       });
@@ -297,10 +297,10 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
     if (best.attributed_revenue > 0) {
       insights.push({
         icon: <LeaderboardIcon fontSize="small" />,
-        title: __('Best performer', 'goalcart'),
+        title: __('Best performer', 'faracart'),
         body: sprintf(
           /* translators: 1: goal name, 2: attributed sales amount. */
-          __('%1$s generated the highest attributed sales (%2$s).', 'goalcart'),
+          __('%1$s generated the highest attributed sales (%2$s).', 'faracart'),
           best.name,
           formatCurrency(best.attributed_revenue)
         ),
@@ -312,12 +312,12 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
   if (summary.profit_available && summary.estimated_profit !== null) {
     insights.push({
       icon: <PaymentsIcon fontSize="small" />,
-      title: __('Estimated profit', 'goalcart'),
+      title: __('Estimated profit', 'faracart'),
       body: sprintf(
         /* translators: 1: estimated profit amount. */
         __(
           'FaraCart generated an estimated profit of %1$s after reward and shipping costs.',
-          'goalcart'
+          'faracart'
         ),
         formatCurrency(summary.estimated_profit)
       ),
@@ -328,8 +328,8 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
   ) {
     insights.push({
       icon: <PaymentsIcon fontSize="small" />,
-      title: __('Profit not estimated yet', 'goalcart'),
-      body: __('Add product cost data to see the estimated profit of FaraCart.', 'goalcart'),
+      title: __('Profit not estimated yet', 'faracart'),
+      body: __('Add product cost data to see the estimated profit of FaraCart.', 'faracart'),
     });
   }
 
@@ -349,7 +349,7 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
  * preserved but moved behind a "Detailed activity" accordion — nothing is
  * removed, the business outcomes lead.
  *
- * All data still comes from `GET /goalcart/v1/analytics` (same endpoint,
+ * All data still comes from `GET /faracart/v1/analytics` (same endpoint,
  * extended payload — legacy fields untouched).
  */
 export default function Analytics() {
@@ -498,10 +498,10 @@ export default function Analytics() {
 
   return (
     <PageContainer
-      title={__('Goal Conversion & Purchase Analysis', 'goalcart')}
+      title={__('Goal Conversion & Purchase Analysis', 'faracart')}
       description={__(
         'What happens after customers see and complete your goals — purchases, sales and profit.',
-        'goalcart'
+        'faracart'
       )}
     >
       {/* Filter toolbar (P17-T02, preserved) */}
@@ -515,13 +515,13 @@ export default function Analytics() {
 
         <TextField
           select
-          label={__('Campaign', 'goalcart')}
+          label={__('Campaign', 'faracart')}
           size="small"
           sx={{ minWidth: 190, flexGrow: { lg: 1 } }}
           value={campaignId}
           onChange={(event) => setCampaignId(Number(event.target.value))}
         >
-          <MenuItem value={0}>{__('All campaigns', 'goalcart')}</MenuItem>
+          <MenuItem value={0}>{__('All campaigns', 'faracart')}</MenuItem>
           {(campaignsQuery.data?.items ?? []).map((campaign) => (
             <MenuItem key={campaign.id} value={campaign.id}>
               {campaign.name}
@@ -531,13 +531,13 @@ export default function Analytics() {
 
         <TextField
           select
-          label={__('Goal', 'goalcart')}
+          label={__('Goal', 'faracart')}
           size="small"
           sx={{ minWidth: 190, flexGrow: { lg: 1 } }}
           value={goalId}
           onChange={(event) => setGoalId(Number(event.target.value))}
         >
-          <MenuItem value={0}>{__('All goals', 'goalcart')}</MenuItem>
+          <MenuItem value={0}>{__('All goals', 'faracart')}</MenuItem>
           {(goalsQuery.data?.items ?? []).map((goal) => (
             <MenuItem key={goal.id} value={goal.id}>
               {goal.name}
@@ -547,7 +547,7 @@ export default function Analytics() {
 
         <TextField
           select
-          label={__('Reward', 'goalcart')}
+          label={__('Reward', 'faracart')}
           size="small"
           sx={{ minWidth: 170 }}
           value={reward}
@@ -562,12 +562,12 @@ export default function Analytics() {
 
         <Box sx={{ minWidth: 220, maxWidth: { lg: 260 }, flexGrow: { lg: 1 } }}>
           <EntityAutocomplete
-            label={__('Product', 'goalcart')}
+            label={__('Product', 'faracart')}
             value={productId ? [productId] : []}
             onChange={(ids) => setProductId(ids[0] ?? 0)}
             search={searchProducts}
             multiple={false}
-            placeholder={__('All products', 'goalcart')}
+            placeholder={__('All products', 'faracart')}
           />
         </Box>
       </Stack>
@@ -576,7 +576,7 @@ export default function Analytics() {
       <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
         {sprintf(
           /* translators: 1: start date, 2: end date. */
-          __('Analyzing: %1$s – %2$s', 'goalcart'),
+          __('Analyzing: %1$s – %2$s', 'faracart'),
           formatAnalyzingDate(range.from),
           formatAnalyzingDate(range.to)
         )}
@@ -586,7 +586,7 @@ export default function Analytics() {
         <Alert severity="error" variant="outlined">
           {analyticsQuery.error instanceof Error
             ? analyticsQuery.error.message
-            : __('Could not load the analytics.', 'goalcart')}
+            : __('Could not load the analytics.', 'faracart')}
         </Alert>
       )}
 
@@ -610,19 +610,19 @@ export default function Analytics() {
       ) : isEmpty ? (
         <EmptyState
           icon={<InsightsIcon fontSize="large" />}
-          title={__('No sales data yet', 'goalcart')}
+          title={__('No sales data yet', 'faracart')}
           description={__(
             'Once customers start interacting with your goals, FaraCart will show purchases, sales and profit insights here.',
-            'goalcart'
+            'faracart'
           )}
         />
       ) : hasNoPurchases ? (
         <EmptyState
           icon={<ShoppingCartCheckoutIcon fontSize="large" />}
-          title={__('No purchases yet', 'goalcart')}
+          title={__('No purchases yet', 'faracart')}
           description={__(
             'Customers are interacting with your goals, but no attributed purchases have been recorded for this period.',
-            'goalcart'
+            'faracart'
           )}
         />
       ) : data && summary ? (
@@ -631,7 +631,7 @@ export default function Analytics() {
             <Alert severity="info" variant="outlined">
               {__(
                 'Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and goal comparison.',
-                'goalcart'
+                'faracart'
               )}
             </Alert>
           )}
@@ -645,34 +645,34 @@ export default function Analytics() {
             }}
           >
             <KpiCard
-              label={__('Purchased Orders', 'goalcart')}
+              label={__('Purchased Orders', 'faracart')}
               value={funnel ? formatNumber(funnel.converted) : '—'}
               icon={<ShoppingCartCheckoutIcon fontSize="small" />}
-              hint={__('after FaraCart interaction', 'goalcart')}
+              hint={__('after FaraCart interaction', 'faracart')}
               tooltip={__(
                 'Distinct orders associated with a goal — a purchase, not a goal completion.',
-                'goalcart'
+                'faracart'
               )}
             />
             <KpiCard
-              label={__('Purchase Rate', 'goalcart')}
+              label={__('Purchase Rate', 'faracart')}
               value={summary.purchase_rate === null ? '—' : formatPercent(summary.purchase_rate)}
               icon={<PercentIcon fontSize="small" />}
               tooltip={__(
                 'Percentage of completed goals that were followed by an attributed purchase.',
-                'goalcart'
+                'faracart'
               )}
             />
             <KpiCard
-              label={__('Attributed Sales', 'goalcart')}
+              label={__('Attributed Sales', 'faracart')}
               value={
                 summary.attributed_sales === null ? '—' : formatCurrency(summary.attributed_sales)
               }
               icon={<PaymentsIcon fontSize="small" />}
-              hint={__('Sales attributed to FaraCart', 'goalcart')}
+              hint={__('Sales attributed to FaraCart', 'faracart')}
               tooltip={__(
                 'The incremental order value from orders where customers interacted with a goal before purchasing.',
-                'goalcart'
+                'faracart'
               )}
             />
             <EstimatedProfitCard
@@ -696,18 +696,18 @@ export default function Analytics() {
             }}
           >
             <KpiCard
-              label={__('Goal Views', 'goalcart')}
+              label={__('Goal Views', 'faracart')}
               value={funnel ? formatNumber(funnel.views) : '—'}
               icon={<VisibilityIcon fontSize="small" />}
-              tooltip={__('How many times goal widgets were seen.', 'goalcart')}
+              tooltip={__('How many times goal widgets were seen.', 'faracart')}
             />
             <KpiCard
-              label={__('Goal Completions', 'goalcart')}
+              label={__('Goal Completions', 'faracart')}
               value={funnel ? formatNumber(funnel.completed) : '—'}
               icon={<CheckCircleOutlineOutlinedIcon fontSize="small" />}
               tooltip={__(
                 'How many times customers reached a goal target. Completion is not the same as purchase.',
-                'goalcart'
+                'faracart'
               )}
             />
           </Box>
@@ -717,7 +717,7 @@ export default function Analytics() {
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="h6" component="h3" gutterBottom>
-                  {__('Customer Journey', 'goalcart')}
+                  {__('Customer Journey', 'faracart')}
                 </Typography>
                 <FunnelVisual
                   showTransitions
@@ -733,7 +733,7 @@ export default function Analytics() {
                 <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
                   {__(
                     'A completion means the customer reached the goal target. A purchase means a qualifying order was actually associated with the goal.',
-                    'goalcart'
+                    'faracart'
                   )}
                 </Typography>
               </CardContent>
@@ -745,47 +745,47 @@ export default function Analytics() {
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="h6" component="h3" gutterBottom>
-                  {__('Purchase Analysis', 'goalcart')}
+                  {__('Purchase Analysis', 'faracart')}
                 </Typography>
                 <Stack spacing={1}>
                   <StatRow
-                    label={__('Goals Completed', 'goalcart')}
+                    label={__('Goals Completed', 'faracart')}
                     value={formatNumber(funnel.completed)}
                   />
                   <StatRow
-                    label={__('Purchased After Completion', 'goalcart')}
+                    label={__('Purchased After Completion', 'faracart')}
                     value={formatNumber(funnel.converted)}
                   />
                   <StatRow
-                    label={__('Purchase Rate', 'goalcart')}
+                    label={__('Purchase Rate', 'faracart')}
                     value={
                       funnel.conversion_rate === null ? '—' : formatPercent(funnel.conversion_rate)
                     }
-                    explanation={__('Purchased orders ÷ completed goals.', 'goalcart')}
+                    explanation={__('Purchased orders ÷ completed goals.', 'faracart')}
                   />
                   <Divider />
                   <StatRow
-                    label={__('Attributed Sales', 'goalcart')}
+                    label={__('Attributed Sales', 'faracart')}
                     value={
                       summary.attributed_sales === null
                         ? '—'
                         : formatCurrency(summary.attributed_sales)
                     }
-                    explanation={__('Sales generated after FaraCart interaction.', 'goalcart')}
+                    explanation={__('Sales generated after FaraCart interaction.', 'faracart')}
                   />
                   <StatRow
-                    label={__('Average Purchased Order', 'goalcart')}
+                    label={__('Average Purchased Order', 'faracart')}
                     value={
                       averagePurchasedOrder === null ? '—' : formatCurrency(averagePurchasedOrder)
                     }
                     explanation={__(
                       'Average order value of the attributed purchased orders.',
-                      'goalcart'
+                      'faracart'
                     )}
                   />
                   <Divider />
                   <StatRow
-                    label={__('Estimated Profit', 'goalcart')}
+                    label={__('Estimated Profit', 'faracart')}
                     value={
                       summary.profit_available && summary.estimated_profit !== null
                         ? formatCurrency(summary.estimated_profit)
@@ -793,9 +793,9 @@ export default function Analytics() {
                     }
                     explanation={
                       summary.profit_available
-                        ? __('Estimated, not guaranteed.', 'goalcart')
+                        ? __('Estimated, not guaranteed.', 'faracart')
                         : summary.profit_reason_code === 'missing_product_cost'
-                          ? __('Add product cost data to estimate profit.', 'goalcart')
+                          ? __('Add product cost data to estimate profit.', 'faracart')
                           : undefined
                     }
                   />
@@ -810,12 +810,12 @@ export default function Analytics() {
               <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
                 <Box sx={{ p: 2, pb: 1 }}>
                   <Typography variant="h6" component="h3">
-                    {__('Goal Comparison', 'goalcart')}
+                    {__('Goal Comparison', 'faracart')}
                   </Typography>
                 </Box>
                 {data.goal_comparison.length === 0 ? (
                   <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-                    {__('No goal purchase activity in this range.', 'goalcart')}
+                    {__('No goal purchase activity in this range.', 'faracart')}
                   </Typography>
                 ) : (
                   <>
@@ -894,7 +894,7 @@ export default function Analytics() {
             <Card variant="outlined">
               <CardContent>
                 <Typography variant="h6" component="h3" gutterBottom>
-                  {__('Key Insights', 'goalcart')}
+                  {__('Key Insights', 'faracart')}
                 </Typography>
                 <Box
                   sx={{
@@ -941,13 +941,13 @@ export default function Analytics() {
             >
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Typography variant="h6" component="h3" sx={{ fontSize: '1rem' }}>
-                  {__('Advanced Analytics', 'goalcart')}
+                  {__('Advanced Analytics', 'faracart')}
                 </Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Stack spacing={1.25}>
                   <StatRow
-                    label={__('Direct revenue', 'goalcart')}
+                    label={__('Direct revenue', 'faracart')}
                     value={
                       summary.attributed_sales === null
                         ? '—'
@@ -955,21 +955,21 @@ export default function Analytics() {
                     }
                     explanation={__(
                       'Revenue from the incremental value of orders where customers progressed toward or completed a goal before ordering.',
-                      'goalcart'
+                      'faracart'
                     )}
                   />
                   <StatRow
-                    label={__('Assisted revenue', 'goalcart')}
+                    label={__('Assisted revenue', 'faracart')}
                     value={
                       summary.assisted_sales === null ? '—' : formatCurrency(summary.assisted_sales)
                     }
                     explanation={__(
                       'Order totals from orders that were only exposed to a goal, never progressed.',
-                      'goalcart'
+                      'faracart'
                     )}
                   />
                   <StatRow
-                    label={__('Influenced sales', 'goalcart')}
+                    label={__('Influenced sales', 'faracart')}
                     value={
                       summary.influenced_sales === null
                         ? '—'
@@ -977,40 +977,40 @@ export default function Analytics() {
                     }
                     explanation={__(
                       'Order totals of every order associated with a goal — distinct orders, never double counted.',
-                      'goalcart'
+                      'faracart'
                     )}
                   />
                   <StatRow
-                    label={__('Attributed orders', 'goalcart')}
+                    label={__('Attributed orders', 'faracart')}
                     value={funnel ? formatNumber(funnel.converted) : '—'}
                     explanation={__(
                       'Distinct orders associated with a goal in the selected period.',
-                      'goalcart'
+                      'faracart'
                     )}
                   />
                   <StatRow
-                    label={__('Attribution window', 'goalcart')}
-                    value={__('30 days before the order', 'goalcart')}
+                    label={__('Attribution window', 'faracart')}
+                    value={__('30 days before the order', 'faracart')}
                     explanation={__(
                       'Only goal events within this window before an order are attributed to it.',
-                      'goalcart'
+                      'faracart'
                     )}
                   />
                   {summary.cost_coverage && summary.cost_coverage.available && (
                     <StatRow
-                      label={__('Cost data coverage', 'goalcart')}
+                      label={__('Cost data coverage', 'faracart')}
                       value={
                         summary.cost_coverage.coverage_pct === null
                           ? '—'
                           : sprintf(
                               /* translators: 1: percentage. */
-                              __('%1$s of eligible order value', 'goalcart'),
+                              __('%1$s of eligible order value', 'faracart'),
                               formatPercentValue(summary.cost_coverage.coverage_pct)
                             )
                       }
                       explanation={__(
                         'Estimated profit is calculated only for orders with complete cost data.',
-                        'goalcart'
+                        'faracart'
                       )}
                     />
                   )}
@@ -1022,7 +1022,7 @@ export default function Analytics() {
                     <Typography variant="caption">
                       {__(
                         'These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting.',
-                        'goalcart'
+                        'faracart'
                       )}
                     </Typography>
                   </Box>
@@ -1039,7 +1039,7 @@ export default function Analytics() {
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography variant="h6" component="h3" sx={{ fontSize: '1rem' }}>
-                {__('Detailed Activity', 'goalcart')}
+                {__('Detailed Activity', 'faracart')}
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
@@ -1048,12 +1048,12 @@ export default function Analytics() {
                   <Typography variant="body2" color="text.secondary" gutterBottom>
                     {__(
                       'Raw interaction metrics from the event log — impressions, completions, revenue and suggestions.',
-                      'goalcart'
+                      'faracart'
                     )}
                   </Typography>
                   <Box
                     role="img"
-                    aria-label={__('Daily impressions, completions and revenue trend', 'goalcart')}
+                    aria-label={__('Daily impressions, completions and revenue trend', 'faracart')}
                     sx={{ width: '100%', height: 280 }}
                   >
                     <ResponsiveContainer width="100%" height="100%">
@@ -1094,7 +1094,7 @@ export default function Analytics() {
                           formatter={(value: unknown, name: unknown) => {
                             const label = String(name);
                             const formatted =
-                              label === __('Revenue', 'goalcart')
+                              label === __('Revenue', 'faracart')
                                 ? formatCurrency(Number(value))
                                 : formatNumber(Number(value));
 
@@ -1105,21 +1105,21 @@ export default function Analytics() {
                         <Bar
                           yAxisId="count"
                           dataKey="impressions"
-                          name={__('Impressions', 'goalcart')}
+                          name={__('Impressions', 'faracart')}
                           fill={COLORS.primaryLight}
                           radius={[3, 3, 0, 0]}
                         />
                         <Bar
                           yAxisId="count"
                           dataKey="completions"
-                          name={__('Completions', 'goalcart')}
+                          name={__('Completions', 'faracart')}
                           fill={COLORS.primary}
                           radius={[3, 3, 0, 0]}
                         />
                         <Line
                           yAxisId="revenue"
                           dataKey="revenue"
-                          name={__('Revenue', 'goalcart')}
+                          name={__('Revenue', 'faracart')}
                           stroke={COLORS.success}
                           strokeWidth={2}
                           dot={false}
@@ -1140,16 +1140,16 @@ export default function Analytics() {
                 >
                   <Paper variant="outlined" sx={{ p: 2 }}>
                     <Typography variant="subtitle2" gutterBottom>
-                      {__('Top campaigns', 'goalcart')}
+                      {__('Top campaigns', 'faracart')}
                     </Typography>
                     {data.top_campaigns.length === 0 ? (
                       <Typography variant="body2" color="text.secondary">
-                        {__('No campaign activity in this range.', 'goalcart')}
+                        {__('No campaign activity in this range.', 'faracart')}
                       </Typography>
                     ) : (
                       <Box
                         role="img"
-                        aria-label={__('Top campaigns by completions', 'goalcart')}
+                        aria-label={__('Top campaigns by completions', 'faracart')}
                         sx={{ width: '100%', height: data.top_campaigns.length * 46 + 24 }}
                       >
                         <ResponsiveContainer width="100%" height="100%">
@@ -1187,7 +1187,7 @@ export default function Analytics() {
                             />
                             <Bar
                               dataKey="completions"
-                              name={__('Completions', 'goalcart')}
+                              name={__('Completions', 'faracart')}
                               fill={COLORS.primary}
                               radius={[0, 4, 4, 0]}
                             />
@@ -1199,11 +1199,11 @@ export default function Analytics() {
 
                   <Paper variant="outlined" sx={{ p: 2 }}>
                     <Typography variant="subtitle2" gutterBottom>
-                      {__('Top suggested products', 'goalcart')}
+                      {__('Top suggested products', 'faracart')}
                     </Typography>
                     {data.top_suggested_products.length === 0 ? (
                       <Typography variant="body2" color="text.secondary">
-                        {__('No suggestion activity in this range.', 'goalcart')}
+                        {__('No suggestion activity in this range.', 'faracart')}
                       </Typography>
                     ) : (
                       <>
@@ -1211,12 +1211,12 @@ export default function Analytics() {
                           <Table size="small">
                             <TableHead>
                               <TableRow>
-                                <TableCell>{__('Product', 'goalcart')}</TableCell>
-                                <TableCell align="right">{__('Impressions', 'goalcart')}</TableCell>
-                                <TableCell align="right">{__('Clicks', 'goalcart')}</TableCell>
-                                <TableCell align="right">{__('Added', 'goalcart')}</TableCell>
-                                <TableCell align="right">{__('CTR', 'goalcart')}</TableCell>
-                                <TableCell align="right">{__('Add-to-cart', 'goalcart')}</TableCell>
+                                <TableCell>{__('Product', 'faracart')}</TableCell>
+                                <TableCell align="right">{__('Impressions', 'faracart')}</TableCell>
+                                <TableCell align="right">{__('Clicks', 'faracart')}</TableCell>
+                                <TableCell align="right">{__('Added', 'faracart')}</TableCell>
+                                <TableCell align="right">{__('CTR', 'faracart')}</TableCell>
+                                <TableCell align="right">{__('Add-to-cart', 'faracart')}</TableCell>
                               </TableRow>
                             </TableHead>
                             <TableBody>

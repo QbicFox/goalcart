@@ -2,15 +2,15 @@
 /**
  * Brand goal evaluator.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals\Evaluators;
+namespace FaraCart\Goals\Evaluators;
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEvaluator;
-use GoalCart\Goals\GoalResult;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEvaluator;
+use FaraCart\Goals\GoalResult;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * Evaluates brand goals (Phase 32): the amount or quantity restricted to
  * products of a single brand — modeled as a global product attribute (the
  * conventional `pa_brand` taxonomy, configurable via the
- * `goalcart_brand_taxonomy` filter or the goal builder's attribute picker,
+ * `faracart_brand_taxonomy` filter or the goal builder's attribute picker,
  * stored as the first entry of the goal's `attributes`).
  *
  * The evaluation is the attribute evaluator's; the type stays distinct so

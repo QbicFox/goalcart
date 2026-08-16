@@ -46,7 +46,7 @@ export const PRESET_PERCENTS: Record<Exclude<PreviewPreset, 'custom'>, number> =
 };
 
 /**
- * Resolved storefront appearance tokens (mirrors the `--goalcart-*`
+ * Resolved storefront appearance tokens (mirrors the `--faracart-*`
  * custom properties in assets/css/frontend.css, sourced from the Phase 12
  * `frontend_*` settings).
  */

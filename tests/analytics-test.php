@@ -16,7 +16,7 @@
  *  - privacy (P16-T04): no PII columns are written (only aggregate
  *    numbers + ids + the anonymous session token)
  *  - tracking gates: disabled master toggle and the
- *    goalcart_tracking_enabled filter both block recording
+ *    faracart_tracking_enabled filter both block recording
  *  - the public /track route: registered, arg schema rejects unknown
  *    event types, a bad nonce is rejected 403, a valid dispatch records
  *  - suggested_product_added attribution: a cart addition becomes a
@@ -59,10 +59,10 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\AnalyticsRepository;
-use GoalCart\Analytics\Session;
-use GoalCart\Analytics\Tracker;
-use GoalCart\REST\TrackController;
+use FaraCart\Analytics\AnalyticsRepository;
+use FaraCart\Analytics\Session;
+use FaraCart\Analytics\Tracker;
+use FaraCart\REST\TrackController;
 
 $failures = 0;
 $checks   = 0;
@@ -83,18 +83,18 @@ function near( $a, $b, $eps = 0.001 ) {
 }
 
 // Fire REST route registration once (rest_api_init never fires in CLI).
-if ( ! did_action( 'goalcart_rest_test_ready' ) ) {
+if ( ! did_action( 'faracart_rest_test_ready' ) ) {
 	do_action( 'rest_api_init' );
-	do_action( 'goalcart_rest_test_ready' );
+	do_action( 'faracart_rest_test_ready' );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $tracker = $container->get( Tracker::class );
 $session = $container->get( Session::class );
 $repo    = $container->get( AnalyticsRepository::class );
 $track_ctrl = $container->get( TrackController::class );
-$settings = $container->get( \GoalCart\Settings\Settings::class );
+$settings = $container->get( \FaraCart\Settings\Settings::class );
 
 $server = rest_get_server();
 $routes = $server->get_routes();
@@ -149,7 +149,7 @@ check( 'bogus type rejected', false === Tracker::is_event_type( 'bogus_event' ) 
 // ---------------------------------------------------------------------------
 echo "\n== 4. Recording, privacy, metrics (rolled back) ==\n";
 
-$events_table = \GoalCart\Database\Schema::table( 'analytics_events' );
+$events_table = \FaraCart\Database\Schema::table( 'analytics_events' );
 $seed_session = $sid;
 
 $wpdb->query( 'START TRANSACTION' );
@@ -157,17 +157,17 @@ $wpdb->query( 'START TRANSACTION' );
 try {
 	// analytics_events carries real foreign keys to goals/campaigns, so the
 	// seeded events must reference rows that exist (mirrors production).
-	$goals_ctrl     = $container->get( \GoalCart\REST\GoalsController::class );
-	$campaigns_ctrl = $container->get( \GoalCart\REST\CampaignsController::class );
+	$goals_ctrl     = $container->get( \FaraCart\REST\GoalsController::class );
+	$campaigns_ctrl = $container->get( \FaraCart\REST\CampaignsController::class );
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 	$req->set_param( 'name', 'Analytics Test Goal' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 1000 );
 	$resp = $goals_ctrl->handle_create( $req );
 	$seed_goal_id = (int) $resp->get_data()['data']['id'];
 
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/campaigns' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/campaigns' );
 	$req->set_param( 'name', 'Analytics Test Campaign' );
 	$req->set_param( 'status', 'active' );
 	$resp = $campaigns_ctrl->handle_create( $req );
@@ -182,12 +182,12 @@ try {
 	check( 'disabled master toggle blocks add-to-cart attribution', ! $tracker->handle_add_to_cart( 'k', 5 ) );
 	$settings->set( 'enabled', true );
 
-	// 4.2 The goalcart_tracking_enabled filter blocks recording. goal_progress
+	// 4.2 The faracart_tracking_enabled filter blocks recording. goal_progress
 	// is used for the gate checks (not any metric) so the metrics seed below
 	// stays exact.
-	add_filter( 'goalcart_tracking_enabled', '__return_false' );
+	add_filter( 'faracart_tracking_enabled', '__return_false' );
 	check( 'tracking filter blocks recording', 0 === $tracker->record( Tracker::EVENT_GOAL_PROGRESS ) );
-	remove_filter( 'goalcart_tracking_enabled', '__return_false' );
+	remove_filter( 'faracart_tracking_enabled', '__return_false' );
 	check( 'filter removal restores recording', $tracker->record( Tracker::EVENT_GOAL_PROGRESS ) > 0 );
 
 	// 4.3 Unknown event type never records.
@@ -352,10 +352,10 @@ try {
 	$current_session = $session->id();
 
 	// 4.11 Public /track route.
-	check( '/track registered', isset( $routes['/goalcart/v1/track'] ) );
+	check( '/track registered', isset( $routes['/faracart/v1/track'] ) );
 
 	// Arg-schema validation via the route definition.
-	$route   = $routes['/goalcart/v1/track'][0];
+	$route   = $routes['/faracart/v1/track'][0];
 	$schema  = isset( $route['args'] ) ? $route['args'] : array();
 	check( 'track route has event_type arg', isset( $schema['event_type'] ) );
 	check( 'track route has nonce arg', isset( $schema['nonce'] ) );
@@ -365,7 +365,7 @@ try {
 	check( 'unknown event type fails schema', false === $validate( 'hack_event' ) );
 
 	// Anonymous dispatch without a valid nonce → 403.
-	$req  = new \WP_REST_Request( 'POST', '/goalcart/v1/track' );
+	$req  = new \WP_REST_Request( 'POST', '/faracart/v1/track' );
 	$req->set_param( 'event_type', 'goal_impression' );
 	$req->set_param( 'nonce', 'bogus' );
 	$resp = $server->dispatch( $req );
@@ -373,7 +373,7 @@ try {
 
 	// Valid nonce dispatch records an event end-to-end.
 	$good_nonce = wp_create_nonce( Tracker::TRACK_NONCE_ACTION );
-	$req = new \WP_REST_Request( 'POST', '/goalcart/v1/track' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/track' );
 	$req->set_param( 'event_type', 'goal_progress' );
 	$req->set_param( 'goal_id', $seed_goal_id );
 	$req->set_param( 'cart_value', 250 );
@@ -389,15 +389,15 @@ try {
 	check( 'dispatched event recorded', is_array( $row ) && Tracker::EVENT_GOAL_PROGRESS === $row['event_type'] );
 	check( 'dispatched event carries percentage meta', is_array( $row ) && false !== strpos( (string) $row['meta'], '50' ) );
 
-	// 4.12 The frontend config print (window.goalcartTracking).
+	// 4.12 The frontend config print (window.faracartTracking).
 	ob_start();
 	$tracker->output_frontend_config();
 	$config_out = ob_get_clean();
-	check( 'tracking config printed', false !== strpos( $config_out, 'window.goalcartTracking' ) );
+	check( 'tracking config printed', false !== strpos( $config_out, 'window.faracartTracking' ) );
 	// rest_url() may URL-encode the slashes on non-pretty-permalink installs
-	// (rest_route=%2Fgoalcart%2Fv1%2Ftrack), so assert on the unencoded
+	// (rest_route=%2Ffaracart%2Fv1%2Ftrack), so assert on the unencoded
 	// path and the route tail.
-	check( 'tracking config carries endpoint', false !== strpos( $config_out, 'goalcart' ) && false !== strpos( $config_out, 'track' ) );
+	check( 'tracking config carries endpoint', false !== strpos( $config_out, 'faracart' ) && false !== strpos( $config_out, 'track' ) );
 	check( 'tracking config carries a nonce', false !== strpos( $config_out, 'nonce' ) );
 	check( 'tracking config carries the session id', false !== strpos( $config_out, $current_session ) );
 } finally {

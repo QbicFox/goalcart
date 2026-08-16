@@ -2,16 +2,16 @@
 /**
  * Revenue attribution engine for FaraCart (Phase 33.2).
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
-use GoalCart\Database\Schema;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -85,7 +85,7 @@ final class AttributionEngine {
 	/**
 	 * Default cap for bounded metric reads (rows per query).
 	 *
-	 * Filterable with goalcart_attribution_metric_rows.
+	 * Filterable with faracart_attribution_metric_rows.
 	 *
 	 * @var int
 	 */
@@ -195,7 +195,7 @@ final class AttributionEngine {
 	 *
 	 * Gates on the master + analytics toggles through the RevenueTracker
 	 * (same consent chain as the event pipeline) plus the dedicated
-	 * goalcart_attribution_enabled filter.
+	 * faracart_attribution_enabled filter.
 	 *
 	 * @return bool
 	 */
@@ -210,7 +210,7 @@ final class AttributionEngine {
 		 * @param bool              $enabled Whether attribution is enabled.
 		 * @param AttributionEngine $engine  Engine instance.
 		 */
-		return (bool) apply_filters( 'goalcart_attribution_enabled', true, $this );
+		return (bool) apply_filters( 'faracart_attribution_enabled', true, $this );
 	}
 
 	/**
@@ -652,7 +652,7 @@ final class AttributionEngine {
 		global $wpdb;
 
 		$events = Schema::table( 'revenue_events' );
-		$limit  = (int) apply_filters( 'goalcart_attribution_metric_rows', self::METRIC_MAX_ROWS );
+		$limit  = (int) apply_filters( 'faracart_attribution_metric_rows', self::METRIC_MAX_ROWS );
 
 		list( $where, $params ) = $this->revenue_where( $args );
 
@@ -796,7 +796,7 @@ final class AttributionEngine {
 		if ( 0 === $profit_result['orders_total'] ) {
 			$reason_code = 'insufficient_data';
 			$profit      = array_merge( $profit, array(
-				'reason' => __( 'Not enough attributed order data to estimate profit yet.', 'goalcart' ),
+				'reason' => __( 'Not enough attributed order data to estimate profit yet.', 'faracart' ),
 			) );
 		} elseif ( ! $profit['available'] ) {
 			$reason_code = 'missing_product_cost';
@@ -1197,7 +1197,7 @@ final class AttributionEngine {
 
 			foreach ( $order->get_shipping_methods() as $method ) {
 				$title = (string) $method->get_method_title();
-				$title = '' !== $title ? $title : __( 'Unknown method', 'goalcart' );
+				$title = '' !== $title ? $title : __( 'Unknown method', 'faracart' );
 
 				if ( ! isset( $by_method[ $title ] ) ) {
 					$by_method[ $title ] = array( 'orders' => 0, 'total' => 0.0 );
@@ -1238,7 +1238,7 @@ final class AttributionEngine {
 		global $wpdb;
 
 		$attrib = Schema::table( 'goal_attribution' );
-		$limit  = (int) apply_filters( 'goalcart_attribution_metric_rows', self::METRIC_MAX_ROWS );
+		$limit  = (int) apply_filters( 'faracart_attribution_metric_rows', self::METRIC_MAX_ROWS );
 
 		list( $where, $params ) = $this->attribution_where( $args );
 
@@ -1329,7 +1329,7 @@ final class AttributionEngine {
 		global $wpdb;
 
 		$attrib = Schema::table( 'goal_attribution' );
-		$limit  = (int) apply_filters( 'goalcart_attribution_metric_rows', self::METRIC_MAX_ROWS );
+		$limit  = (int) apply_filters( 'faracart_attribution_metric_rows', self::METRIC_MAX_ROWS );
 
 		list( $where, $params ) = $this->attribution_where( $args );
 
@@ -1473,7 +1473,7 @@ final class AttributionEngine {
 			return $this->order_scan_cache[ $cache_key ];
 		}
 
-		$pages  = (int) apply_filters( 'goalcart_attribution_order_scan_pages', self::ORDER_SCAN_PAGES );
+		$pages  = (int) apply_filters( 'faracart_attribution_order_scan_pages', self::ORDER_SCAN_PAGES );
 		$orders = array();
 
 		for ( $page = 1; $page <= $pages; $page++ ) {

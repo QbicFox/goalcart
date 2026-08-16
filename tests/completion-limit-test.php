@@ -58,24 +58,24 @@ require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 // Force English assertions (the storefront strings are translated for the
 // site locale, which is fa_IR on this install) — same pattern as
-// message-test: switch to en_US and unload the goalcart domain so __()
+// message-test: switch to en_US and unload the faracart domain so __()
 // falls back to the English source strings.
 switch_to_locale( 'en_US' );
-unload_textdomain( 'goalcart' );
+unload_textdomain( 'faracart' );
 
-use GoalCart\Analytics\Session;
-use GoalCart\Cart\CartIntegration;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\CompletionService;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Goals\MessageEngine;
-use GoalCart\REST\FrontendController;
-use GoalCart\Rewards\RewardEngine;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\Session;
+use FaraCart\Cart\CartIntegration;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\CompletionService;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Goals\MessageEngine;
+use FaraCart\REST\FrontendController;
+use FaraCart\Rewards\RewardEngine;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -95,7 +95,7 @@ function fake_session( $seed = 'a' ) {
 	return str_repeat( $seed, 32 );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 $wpdb      = $GLOBALS['wpdb'];
 
 $settings  = $container->get( Settings::class );
@@ -395,7 +395,7 @@ $frontend = new FrontendController(
 	new GoalRepository(),
 	$ci,
 	$messages,
-	$container->get( \GoalCart\Recommendations\ProductRecommendationEngine::class ),
+	$container->get( \FaraCart\Recommendations\ProductRecommendationEngine::class ),
 	$settings,
 	new RewardEngine( $engine, new GoalRepository(), $settings, $ci ),
 	null,

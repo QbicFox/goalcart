@@ -158,7 +158,7 @@ export default function EntityAutocomplete({
           label={label}
           placeholder={
             placeholder ??
-            (multiple ? __('Search and select…', 'goalcart') : __('Search…', 'goalcart'))
+            (multiple ? __('Search and select…', 'faracart') : __('Search…', 'faracart'))
           }
           helperText={helperText}
           slotProps={{

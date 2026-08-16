@@ -2,16 +2,16 @@
 /**
  * REST controller for the analytics dashboard.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Analytics\AnalyticsRepository;
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Rewards\Reward;
+use FaraCart\Analytics\AnalyticsRepository;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Rewards\Reward;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  * Phase 17 (Analytics Dashboard) — the single read-only endpoint powering
  * the admin dashboard page:
  *
- *  - `GET /goalcart/v1/analytics` — summary KPIs, daily trend, and the
+ *  - `GET /faracart/v1/analytics` — summary KPIs, daily trend, and the
  *    top campaigns / top goals / top suggested products lists, all
  *    sliced by the same filter set (date range, campaign, goal, goal
  *    ids, reward type, product).

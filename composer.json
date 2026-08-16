@@ -16,12 +16,12 @@
     },
     "autoload": {
         "psr-4": {
-            "GoalCart\\": "includes/"
+            "FaraCart\\": "includes/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "GoalCart\\Tests\\": "tests/"
+            "FaraCart\\Tests\\": "tests/"
         }
     },
     "config": {

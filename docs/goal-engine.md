@@ -33,7 +33,7 @@ ProgressCalculator   shared math: remaining / percentage / completed
 | `Goals\CartContext` | Immutable cart snapshot: totals + items, with computed accessors (amount by basis, quantity, distinct products, weight, category/product-restricted values). `CartContext::from_cart()` adapts a live `WC_Cart`; the constructor accepts plain data for tests/headless use. |
 | `Goals\GoalEvaluator` | Interface (`supports()`, `evaluate()`). |
 | `Goals\Evaluators\*` | The seven goal-type evaluators (below). |
-| `Goals\GoalEvaluatorRegistry` | Maps goal type → evaluator class, resolves lazily. Filterable via `goalcart_goal_evaluator_classes` so stores can add custom goal types. |
+| `Goals\GoalEvaluatorRegistry` | Maps goal type → evaluator class, resolves lazily. Filterable via `faracart_goal_evaluator_classes` so stores can add custom goal types. |
 | `Goals\GoalEngine` | Facade: eligibility pre-checks (status, schedule, target validity, known type) then delegation to the evaluator. |
 | `Goals\GoalResult` | The 8-field result object + factories (`ineligible()`, `build()`). |
 | `Goals\ProgressCalculator` | Pure math shared by every evaluator. |
@@ -44,7 +44,7 @@ so it is safe to reuse across requests.
 ### Extension point
 
 ```php
-add_filter( 'goalcart_goal_evaluator_classes', function ( $classes ) {
+add_filter( 'faracart_goal_evaluator_classes', function ( $classes ) {
     $classes['membership'] = My_Membership_Evaluator::class;
     return $classes;
 } );
@@ -134,7 +134,7 @@ args always win over the settings:
 `CartItem` carries the line's `line_tax` so the include-tax folding is
 exact. The store-wide default *basis* for money goals is separately
 driven by the General `calculation_mode` setting via the
-`goalcart_default_calculation_mode` filter (`Goal::default_calculation_mode()`):
+`faracart_default_calculation_mode` filter (`Goal::default_calculation_mode()`):
 amount / category / composite goals follow the store mode; quantity-style
 goals keep their type defaults.
 

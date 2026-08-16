@@ -2,12 +2,12 @@
 /**
  * Asset loader for the React admin application.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Admin;
+namespace FaraCart\Admin;
 
-use GoalCart\Settings\Settings;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * hashed entry JS/CSS with cache-busting versions.
  *
  * Development: when the Vite dev server is reachable (or the
- * `GOALCART_DEV_SERVER_URL` constant is defined), enqueues the
+ * `FARACART_DEV_SERVER_URL` constant is defined), enqueues the
  * `@vite/client` HMR runtime plus the TypeScript entry straight from the
  * dev server, so changes hot-reload inside WP admin without a build step.
  *
@@ -37,7 +37,7 @@ class AssetLoader {
 	 *
 	 * @var string
 	 */
-	const HANDLE = 'goalcart-admin';
+	const HANDLE = 'faracart-admin';
 
 	/**
 	 * Settings instance (for the boot-data fullscreen flag).
@@ -109,7 +109,7 @@ class AssetLoader {
 		if ( ! file_exists( $this->manifest_path() ) ) {
 			return sprintf(
 				/* translators: %s: built manifest path. */
-				__( 'The admin app is not built yet (%s is missing). Run npm install && npm run build inside the admin-app directory, or start npm run dev in a local/development environment for hot reload.', 'goalcart' ),
+				__( 'The admin app is not built yet (%s is missing). Run npm install && npm run build inside the admin-app directory, or start npm run dev in a local/development environment for hot reload.', 'faracart' ),
 				esc_html( $this->relative_path( $this->manifest_path() ) )
 			);
 		}
@@ -120,7 +120,7 @@ class AssetLoader {
 	/**
 	 * Get the Vite dev server URL when it should be used.
 	 *
-	 * Priority: the `GOALCART_DEV_SERVER_URL` constant, then automatic
+	 * Priority: the `FARACART_DEV_SERVER_URL` constant, then automatic
 	 * detection when the WordPress environment type is local/development.
 	 * When the admin is served over HTTPS, the https variant is tried first
 	 * because browsers block mixed http content on https pages.
@@ -128,8 +128,8 @@ class AssetLoader {
 	 * @return string Dev server origin, or '' when unavailable.
 	 */
 	public function dev_server_url() {
-		if ( defined( 'GOALCART_DEV_SERVER_URL' ) && GOALCART_DEV_SERVER_URL ) {
-			return untrailingslashit( (string) GOALCART_DEV_SERVER_URL );
+		if ( defined( 'FARACART_DEV_SERVER_URL' ) && FARACART_DEV_SERVER_URL ) {
+			return untrailingslashit( (string) FARACART_DEV_SERVER_URL );
 		}
 
 		$env = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
@@ -189,12 +189,12 @@ class AssetLoader {
 			return;
 		}
 
-		$base_url = GOALCART_URL . self::BUILD_DIR . '/';
-		$base_dir = GOALCART_PATH . self::BUILD_DIR . '/';
+		$base_url = FARACART_URL . self::BUILD_DIR . '/';
+		$base_dir = FARACART_PATH . self::BUILD_DIR . '/';
 
 		$version = file_exists( $base_dir . $entry['file'] )
 			? (string) filemtime( $base_dir . $entry['file'] )
-			: GOALCART_VERSION;
+			: FARACART_VERSION;
 
 		wp_enqueue_script(
 			self::HANDLE,
@@ -218,34 +218,34 @@ class AssetLoader {
 	 * @return void
 	 */
 	protected function finish_enqueue( $handle ) {
-		wp_localize_script( $handle, 'goalcart', $this->boot_data() );
-		wp_set_script_translations( $handle, 'goalcart', GOALCART_PATH . 'languages' );
+		wp_localize_script( $handle, 'faracart', $this->boot_data() );
+		wp_set_script_translations( $handle, 'faracart', FARACART_PATH . 'languages' );
 	}
 
 	/**
 	 * Boot data passed to the React app via wp_localize_script().
 	 *
 	 * Nonce, REST base URLs, current user, capabilities, locale and site
-	 * info. Extensible via the 'goalcart_admin_boot_data' filter.
+	 * info. Extensible via the 'faracart_admin_boot_data' filter.
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function boot_data() {
 		$user = wp_get_current_user();
 
-		$currency_display = apply_filters( 'goalcart_currency_display', $this->settings->get( 'currency_display', 'symbol' ) );
+		$currency_display = apply_filters( 'faracart_currency_display', $this->settings->get( 'currency_display', 'symbol' ) );
 		$currency_display = in_array( $currency_display, array( 'symbol', 'code', 'name' ), true ) ? $currency_display : 'symbol';
 
 		$data = array(
 			'nonce'    => wp_create_nonce( 'wp_rest' ),
-			'restBase' => esc_url_raw( rest_url( 'goalcart/v1' ) ),
+			'restBase' => esc_url_raw( rest_url( 'faracart/v1' ) ),
 			'restUrl'  => esc_url_raw( rest_url() ),
 			'adminUrl' => admin_url(),
 			'homeUrl'  => home_url( '/' ),
 			'siteName' => get_bloginfo( 'name' ),
 			'locale'       => get_locale(),
 			'isRtl'        => is_rtl(),
-			'currency'     => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : 'USD',
+			'currency'     => $this->settings->currency(),
 			'currencyDisplay' => $currency_display,
 			'currentDate'  => current_time( 'Y-m-d' ),
 			'userId'   => (int) $user->ID,
@@ -257,7 +257,7 @@ class AssetLoader {
 				'manageOptions'     => current_user_can( 'manage_options' ),
 				'manageWooCommerce' => current_user_can( 'manage_woocommerce' ),
 			),
-			'version'  => GOALCART_VERSION,
+			'version'  => FARACART_VERSION,
 			'isPro'    => false,
 			// Whether the dashboard should open in full-screen mode (hides
 			// the WP admin chrome). The React shell initializes from this
@@ -270,7 +270,7 @@ class AssetLoader {
 		 *
 		 * @param array<string, mixed> $data Boot data.
 		 */
-		return apply_filters( 'goalcart_admin_boot_data', $data );
+		return apply_filters( 'faracart_admin_boot_data', $data );
 	}
 
 	/**
@@ -327,7 +327,7 @@ class AssetLoader {
 	 * @return bool
 	 */
 	protected function is_dev_server_up( $url ) {
-		$cache_key = 'goalcart_dev_' . md5( $url );
+		$cache_key = 'faracart_dev_' . md5( $url );
 		$cached    = get_transient( $cache_key );
 
 		if ( false !== $cached ) {
@@ -355,7 +355,7 @@ class AssetLoader {
 	 * @return string
 	 */
 	protected function manifest_path() {
-		return GOALCART_PATH . self::MANIFEST_PATH;
+		return FARACART_PATH . self::MANIFEST_PATH;
 	}
 
 	/**
@@ -406,6 +406,6 @@ class AssetLoader {
 	 * @return string
 	 */
 	protected function relative_path( $path ) {
-		return ltrim( str_replace( GOALCART_PATH, '', $path ), '/' );
+		return ltrim( str_replace( FARACART_PATH, '', $path ), '/' );
 	}
 }

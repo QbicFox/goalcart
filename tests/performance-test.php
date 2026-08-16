@@ -55,12 +55,12 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Cart\CartIntegration;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\REST\FrontendController;
-use GoalCart\REST\GoalsController;
-use GoalCart\REST\SearchController;
-use GoalCart\Settings\Settings;
+use FaraCart\Cart\CartIntegration;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\REST\FrontendController;
+use FaraCart\REST\GoalsController;
+use FaraCart\REST\SearchController;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -77,12 +77,12 @@ function check( $label, $cond ) {
 }
 
 // Fire REST route registration once (rest_api_init never fires in CLI).
-if ( ! did_action( 'goalcart_performance_test_ready' ) ) {
+if ( ! did_action( 'faracart_performance_test_ready' ) ) {
 	do_action( 'rest_api_init' );
-	do_action( 'goalcart_performance_test_ready' );
+	do_action( 'faracart_performance_test_ready' );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $goals_ctrl   = $container->get( GoalsController::class );
 $frontend_ctrl = $container->get( FrontendController::class );
@@ -141,7 +141,7 @@ $context_a   = $integration->context( $cart );
 $context_b   = $integration->context( $cart );
 
 check( 'cart context memoized (same instance)', $context_a === $context_b );
-check( 'memoized context is a CartContext', $context_a instanceof \GoalCart\Goals\CartContext );
+check( 'memoized context is a CartContext', $context_a instanceof \FaraCart\Goals\CartContext );
 
 // ---------------------------------------------------------------------------
 // 3. P23-T02 WooCommerce frontend: progress transient cache + JS fragments
@@ -157,12 +157,12 @@ try {
 	// Caching on: a repeat widget poll is served from the transient.
 	$settings->set( 'performance_caching', true );
 
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/progress' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/progress' );
 	$resp = $frontend_ctrl->handle_progress( $req, $cart );
 	check( 'progress endpoint responds with caching on', ! is_wp_error( $resp ) );
 
 	$transients = $wpdb->get_col(
-		"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_goalcart_progress_%'"
+		"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_faracart_progress_%'"
 	);
 	check( 'progress payload written to a transient', count( $transients ) > 0 );
 
@@ -189,7 +189,7 @@ check( 'frontend JS still renders via textContent', false !== strpos( $frontend_
 // ---------------------------------------------------------------------------
 echo "\n== 4. Server-side list behavior (P23-T03) ==\n";
 
-$goals_table = \GoalCart\Database\Schema::table( 'goals' );
+$goals_table = \FaraCart\Database\Schema::table( 'goals' );
 $created_ids = array();
 
 $wpdb->query( 'START TRANSACTION' );
@@ -203,7 +203,7 @@ try {
 	);
 
 	foreach ( $seed as $row ) {
-		$req = new \WP_REST_Request( 'POST', '/goalcart/v1/goals' );
+		$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
 		$req->set_param( 'name', $row['name'] );
 		$req->set_param( 'type', 'amount' );
 		$req->set_param( 'target', 100 );
@@ -214,7 +214,7 @@ try {
 	}
 
 	// 4.1 Pagination: per_page=2 → two items on page 1, correct envelope.
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/goals' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
 	$req->set_param( 'page', 1 );
 	$req->set_param( 'per_page', 2 );
 	$resp = $goals_ctrl->handle_index( $req );
@@ -225,7 +225,7 @@ try {
 	check( 'pagination envelope carries total_pages', isset( $data['pagination']['total_pages'] ) && (int) $data['pagination']['total_pages'] >= 2 );
 
 	// 4.2 Server-side search narrows the result set.
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/goals' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
 	$req->set_param( 'search', 'Alpha' );
 	$req->set_param( 'per_page', 50 );
 	$resp = $goals_ctrl->handle_index( $req );
@@ -239,7 +239,7 @@ try {
 	check( 'server-side search returns only matches', 1 === (int) $data['pagination']['total'] && in_array( 'Perf Test Alpha Goal', $names, true ) );
 
 	// 4.3 Server-side status filtering.
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/goals' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
 	$req->set_param( 'status', 'inactive' );
 	$req->set_param( 'per_page', 50 );
 	$resp = $goals_ctrl->handle_index( $req );
@@ -256,7 +256,7 @@ try {
 	check( 'status filter isolates the inactive goal', 1 === (int) $data['pagination']['total'] );
 
 	// 4.4 The list endpoint clamps per_page (never thousands at once).
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/goals' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
 	$req->set_param( 'per_page', 5000 );
 	$resp = $goals_ctrl->handle_index( $req );
 	$data = $resp->get_data();
@@ -268,13 +268,13 @@ try {
 	// thousands of products at once): the arg schema declares the cap
 	// and the handler clamps regardless of the requested value.
 	$schema = array();
-	foreach ( $routes['/goalcart/v1/search/products'] as $handler ) {
+	foreach ( $routes['/faracart/v1/search/products'] as $handler ) {
 		$schema = $handler['args'];
 	}
 
 	check( 'search per_page schema maximum declared', isset( $schema['per_page']['maximum'] ) && 50 === (int) $schema['per_page']['maximum'] );
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/search/products' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/search/products' );
 	$req->set_param( 'q', 'Perf Test Alpha Goal' );
 	$req->set_param( 'per_page', 5000 );
 	$resp = $search_ctrl->handle_products( $req );
@@ -299,7 +299,7 @@ $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_tab
 check( 'no perf-test goals remain by name', 0 === $count );
 
 $transients = $wpdb->get_col(
-	"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_goalcart_progress_%'"
+	"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_faracart_progress_%'"
 );
 check( 'no progress-cache transients remain', 0 === count( $transients ) );
 

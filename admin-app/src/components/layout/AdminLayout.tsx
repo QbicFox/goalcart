@@ -37,7 +37,7 @@ import { NAV_SECTIONS, type NavItem } from "./navigation";
 export const DRAWER_WIDTH = 260;
 
 /** localStorage key holding which sidebar groups are expanded. */
-const NAV_EXPANDED_KEY = "goalcart:navExpanded";
+const NAV_EXPANDED_KEY = "faracart:navExpanded";
 
 /**
  * Thin, theme-aware scrollbar shared by the sidebar nav area and the
@@ -180,7 +180,7 @@ export default function AdminLayout() {
 				<List
 					component="nav"
 					sx={{ p: 0 }}
-					aria-label={__("Main navigation", "goalcart")}
+					aria-label={__("Main navigation", "faracart")}
 				>
 					{NAV_SECTIONS.map((section) => (
 						<Accordion
@@ -287,8 +287,8 @@ export default function AdminLayout() {
 					}}
 				>
 					{anyExpanded
-						? __("Collapse all", "goalcart")
-						: __("Expand all", "goalcart")}
+						? __("Collapse all", "faracart")
+						: __("Expand all", "faracart")}
 				</Button>
 				<Chip label={`v${boot.version}`} size="small" variant="outlined" />
 			</Box>
@@ -341,7 +341,7 @@ export default function AdminLayout() {
 						edge="start"
 						onClick={() => setMobileOpen(true)}
 						sx={{ mr: 2, display: { md: "none" } }}
-						aria-label={__("Open navigation", "goalcart")}
+						aria-label={__("Open navigation", "faracart")}
 					>
 						<MenuIcon />
 					</IconButton>
@@ -351,18 +351,18 @@ export default function AdminLayout() {
 						component="h1"
 						sx={{ flexGrow: 1, fontWeight: 600, fontSize: "1.05rem" }}
 					>
-						{__('FaraCart', 'goalcart')}
+						{__('FaraCart', 'faracart')}
 					</Typography>
 
 					{fullscreen && (
 						<>
-							<Tooltip title={__("View store", "goalcart")}>
+							<Tooltip title={__("View store", "faracart")}>
 								<IconButton
 									component="a"
 									href={boot.homeUrl}
 									target="_blank"
 									rel="noreferrer"
-									aria-label={__("View store", "goalcart")}
+									aria-label={__("View store", "faracart")}
 								>
 									<StorefrontIcon fontSize="small" />
 								</IconButton>
@@ -370,7 +370,7 @@ export default function AdminLayout() {
 
 							<IconButton
 								onClick={(event) => setUserMenuAnchor(event.currentTarget)}
-								aria-label={__("User menu", "goalcart")}
+								aria-label={__("User menu", "faracart")}
 								sx={{ ml: 1 }}
 							>
 								<Avatar
@@ -407,14 +407,14 @@ export default function AdminLayout() {
 									href={boot.adminUrl}
 									onClick={() => setUserMenuAnchor(null)}
 								>
-									{__("Back to WordPress Admin", "goalcart")}
+									{__("Back to WordPress Admin", "faracart")}
 								</MenuItem>
 								<MenuItem
 									component="a"
 									href={`${boot.adminUrl}profile.php`}
 									onClick={() => setUserMenuAnchor(null)}
 								>
-									{__("Edit profile", "goalcart")}
+									{__("Edit profile", "faracart")}
 								</MenuItem>
 							</Menu>
 						</>
@@ -442,7 +442,7 @@ export default function AdminLayout() {
 						flexShrink: { md: 0 },
 						display: { xs: "none", md: "block" },
 					}}
-					aria-label={__("Sidebar", "goalcart")}
+					aria-label={__("Sidebar", "faracart")}
 				>
 					<Drawer
 						variant="permanent"

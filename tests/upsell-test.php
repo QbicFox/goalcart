@@ -59,26 +59,26 @@ require dirname( __DIR__ ) . '/ravis-faracart.php';
 // install), so switching to en_US and unloading the domain keeps the
 // reason regexes stable — the same convention message-test.php uses.
 switch_to_locale( 'en_US' );
-unload_textdomain( 'goalcart' );
+unload_textdomain( 'faracart' );
 
 // Hard-block the just-in-time loader (WP 6.5+): WooCommerce order
 // processing pops the locale stack back to the site locale mid-suite, and
-// without this flag the first goalcart __() call would reload the fa_IR
+// without this flag the first faracart __() call would reload the fa_IR
 // .mo and translate the reason strings the suite asserts in English.
-$GLOBALS['l10n_unloaded']['goalcart'] = true;
+$GLOBALS['l10n_unloaded']['faracart'] = true;
 
-use GoalCart\Analytics\DailyAggregator;
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Analytics\Session;
-use GoalCart\Analytics\UpsellRanker;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\REST\UpsellController;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\DailyAggregator;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Analytics\Session;
+use FaraCart\Analytics\UpsellRanker;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\REST\UpsellController;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -102,7 +102,7 @@ function close( $a, $b, $eps = 0.01 ) {
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $ranker  = $container->get( UpsellRanker::class );
 $repo    = $container->get( RevenueRepository::class );
@@ -129,9 +129,9 @@ check( 'UpsellController resolves from the container', $container->get( UpsellCo
 $controller = $container->get( UpsellController::class );
 $controller->register_routes();
 $routes = function_exists( 'rest_get_server' ) ? rest_get_server()->get_routes() : array();
-check( 'upsell track REST route registered', isset( $routes['/goalcart/v1/upsell/track'] ) );
-check( 'revenue upsells REST route registered', isset( $routes['/goalcart/v1/revenue/upsells'] ) );
-check( 'revenue upsells per-product REST route registered', isset( $routes['/goalcart/v1/revenue/upsells/(?P<product_id>[\d]+)'] ) );
+check( 'upsell track REST route registered', isset( $routes['/faracart/v1/upsell/track'] ) );
+check( 'revenue upsells REST route registered', isset( $routes['/faracart/v1/revenue/upsells'] ) );
+check( 'revenue upsells per-product REST route registered', isset( $routes['/faracart/v1/revenue/upsells/(?P<product_id>[\d]+)'] ) );
 check( 'upsell controller registered on rest_api_init', has_action( 'rest_api_init', array( $controller, 'register_routes' ) ) );
 
 // ---------------------------------------------------------------------------
@@ -279,11 +279,11 @@ check( 'default price-gap weight is 0.25', close( 0.25, $weights['price_gap'] ) 
 check( 'default relevance weight is 0.25', close( 0.25, $weights['relevance'] ) );
 check( 'default conversion weight is 0.10', close( 0.10, $weights['conversion'] ) );
 
-add_filter( 'goalcart_upsell_weights', function () {
+add_filter( 'faracart_upsell_weights', function () {
 	return array( 'price_gap' => 50, 'relevance' => 50 );
 } );
 $filtered = $invoke( 'score_weights', array() );
-remove_all_filters( 'goalcart_upsell_weights' );
+remove_all_filters( 'faracart_upsell_weights' );
 check( 'partial weight filter falls back per key', close( 0.5, $filtered['price_gap'] ) && close( 0.5, $filtered['relevance'] ) && close( 0.1, $filtered['conversion'] ) );
 
 // ---------------------------------------------------------------------------
@@ -374,9 +374,9 @@ try {
 	check( 'closed gap → unavailable', empty( $closed['available'] ) && false !== strpos( (string) $closed['reason'], 'closed' ) );
 
 	// Disabled flag → unavailable with a reason.
-	add_filter( 'goalcart_upsells_enabled', '__return_false' );
+	add_filter( 'faracart_upsells_enabled', '__return_false' );
 	$disabled = $ranker->rank( array( 'remaining' => 450000 ) );
-	remove_all_filters( 'goalcart_upsells_enabled' );
+	remove_all_filters( 'faracart_upsells_enabled' );
 	check( 'disabled flag → unavailable with reason', empty( $disabled['available'] ) && false !== strpos( (string) $disabled['reason'], 'disabled' ) );
 
 	// Margin-aware profit: give the gap product a cost.
@@ -413,21 +413,21 @@ try {
 	check( 'no margin data → reason explains the exclusion', null !== $ok_nomargin && 1 === preg_match( '/margin data is not available/', implode( ' ', $ok_nomargin['reasons'] ) ) );
 
 	// Candidate filter.
-	add_filter( 'goalcart_upsell_candidates', function () use ( $candidate_ids ) {
+	add_filter( 'faracart_upsell_candidates', function () use ( $candidate_ids ) {
 		return array_combine( array_slice( $candidate_ids, 0, 2 ), array_fill( 0, 2, 'manual' ) );
 	} );
 	$pinned = $ranker->rank( array( 'remaining' => 450000, 'goal_id' => $goal_id, 'limit' => 5 ) );
-	remove_all_filters( 'goalcart_upsell_candidates' );
+	remove_all_filters( 'faracart_upsell_candidates' );
 	check( 'candidate filter pins the candidate set', (int) $pinned['candidates'] >= 2 && count( $pinned['recommendations'] ) >= 2 );
 
 	// Payload filter.
-	add_filter( 'goalcart_upsells', function ( $payload ) {
+	add_filter( 'faracart_upsells', function ( $payload ) {
 		$payload['filter_applied'] = true;
 
 		return $payload;
 	} );
 	$filtered_payload = $ranker->rank( array( 'remaining' => 450000, 'goal_id' => $goal_id ) );
-	remove_all_filters( 'goalcart_upsells' );
+	remove_all_filters( 'faracart_upsells' );
 	check( 'payload filter can shape the result', ! empty( $filtered_payload['filter_applied'] ) );
 
 	// -----------------------------------------------------------------------
@@ -492,7 +492,7 @@ try {
 	$order->set_total( 2040000 );
 	$order->set_date_created( current_time( 'mysql' ) );
 	$order->set_status( 'completed' );
-	$order->add_meta_data( '_goalcart_upsell_test', '1' );
+	$order->add_meta_data( '_faracart_upsell_test', '1' );
 	$order->save();
 	$order_id = (int) $order->get_id();
 
@@ -525,7 +525,7 @@ try {
 	$order2        = wc_create_order();
 	$order2->set_total( 1000 );
 	$order2->set_status( 'completed' );
-	$order2->add_meta_data( '_goalcart_upsell_test', '1' );
+	$order2->add_meta_data( '_faracart_upsell_test', '1' );
 	$order2->save();
 	$order2_id = (int) $order2->get_id();
 
@@ -583,9 +583,9 @@ try {
 	$fresh     = $repo->upsell_ranking( $cache_args );
 	check( 'fresh read recomputes on the new generation', false !== get_transient( $key_after ) && ! empty( $fresh['available'] ) );
 
-	add_filter( 'goalcart_revenue_cache_enabled', '__return_false' );
+	add_filter( 'faracart_revenue_cache_enabled', '__return_false' );
 	$bypass = $repo->upsell_ranking( $cache_args );
-	remove_all_filters( 'goalcart_revenue_cache_enabled' );
+	remove_all_filters( 'faracart_revenue_cache_enabled' );
 	check( 'cache bypass still returns the ranking', ! empty( $bypass['available'] ) );
 
 	// Analytics table. upsell_order rows inherit the goal from the funnel
@@ -645,7 +645,7 @@ check( 'no P33.5 fixture products remain', 0 === count( $leftover_products ) );
 $leftover_orders = wc_get_orders( array(
 	'limit'        => 100,
 	'return'       => 'objects',
-	'meta_key'     => '_goalcart_upsell_test', // phpcs:ignore WordPress.DB.SlowDBQuery -- test fixture marker.
+	'meta_key'     => '_faracart_upsell_test', // phpcs:ignore WordPress.DB.SlowDBQuery -- test fixture marker.
 	'meta_value'   => '1',
 ) );
 check( 'no fixture orders remain after rollback', 0 === count( $leftover_orders ) );

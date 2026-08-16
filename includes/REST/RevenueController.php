@@ -2,14 +2,14 @@
 /**
  * REST controller for the revenue optimization admin pages.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Hooks\HookManager;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -21,20 +21,20 @@ defined( 'ABSPATH' ) || exit;
  * 33.3 cached repository layer, so repeated admin renders never recompute
  * the summaries:
  *
- *  - `GET /goalcart/v1/revenue/overview` — the Revenue Overview page's
+ *  - `GET /faracart/v1/revenue/overview` — the Revenue Overview page's
  *    data source: the attribution summary (goal-driven / assisted /
  *    influenced revenue, orders, reward cost, profit impact, funnel),
  *    incremental cart value, AOV analysis, shipping stats and the daily
  *    trend series (revenue_daily + today's live bucket) over the window.
- *  - `GET /goalcart/v1/revenue/attribution` — the Attribution Dashboard
+ *  - `GET /faracart/v1/revenue/attribution` — the Attribution Dashboard
  *    page's data source: the same overview payload (funnel + direct vs
  *    assisted models + incremental cart value + profit), without the
  *    trend series.
- *  - `GET /goalcart/v1/revenue/goals` — the Goal Performance page's data
+ *  - `GET /faracart/v1/revenue/goals` — the Goal Performance page's data
  *    source: per-goal metrics rows (funnel counts, completion/conversion
  *    rates, average + incremental cart value, attributed + assisted
  *    revenue, reward cost, profit impact) for every goal or one goal.
- *  - `GET /goalcart/v1/revenue/cost-coverage` — Product Cost coverage
+ *  - `GET /faracart/v1/revenue/cost-coverage` — Product Cost coverage
  *    (UPSELL_REFACTOR §25/§46): how much of the catalog carries cost
  *    data, so the Goal Optimization UI can show "842 / 1,000 products"
  *    and explain why profit estimates may be unavailable.

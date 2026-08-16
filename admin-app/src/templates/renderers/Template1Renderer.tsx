@@ -46,10 +46,10 @@ export default function Template1Renderer({ goal, currency, settings, animation 
           />
           <Box sx={{ flex: '1 1 auto', minWidth: 0 }}>
             <Typography sx={{ fontSize: 12, fontWeight: 500, color: muted }}>
-              {__('Expired', 'goalcart')}
+              {__('Expired', 'faracart')}
             </Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 700, color: muted }}>
-              {__('This goal has ended', 'goalcart')}
+              {__('This goal has ended', 'faracart')}
             </Typography>
           </Box>
           <Box
@@ -64,7 +64,7 @@ export default function Template1Renderer({ goal, currency, settings, animation 
               whiteSpace: 'nowrap',
             }}
           >
-            {__('Expired', 'goalcart')}
+            {__('Expired', 'faracart')}
           </Box>
         </Box>
       </Box>
@@ -91,7 +91,7 @@ export default function Template1Renderer({ goal, currency, settings, animation 
           />
           <Box>
             <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#16a34a' }}>
-              {__('Goal completed', 'goalcart')} 🎉
+              {__('Goal completed', 'faracart')} 🎉
             </Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#166534' }}>
               {goal.goal_name}
@@ -126,7 +126,7 @@ export default function Template1Renderer({ goal, currency, settings, animation 
           )}
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontSize: 12, fontWeight: 500, color: muted }}>
-              {__('Shopping goal', 'goalcart')}
+              {__('Shopping goal', 'faracart')}
             </Typography>
             <Typography
               sx={{ fontSize: 14, fontWeight: 700, color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}

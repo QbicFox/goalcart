@@ -11,13 +11,13 @@ export default function NotFound() {
     <Box sx={{ py: 6 }}>
       <Paper variant="outlined" sx={{ p: 5, textAlign: 'center' }}>
         <Typography variant="h5" component="h2" gutterBottom>
-          {__('Page not found', 'goalcart')}
+          {__('Page not found', 'faracart')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2.5 }}>
-          {__('The page you are looking for does not exist.', 'goalcart')}
+          {__('The page you are looking for does not exist.', 'faracart')}
         </Typography>
         <Button component={RouterLink} to="/dashboard" variant="contained">
-          {__('Back to Dashboard', 'goalcart')}
+          {__('Back to Dashboard', 'faracart')}
         </Button>
       </Paper>
     </Box>

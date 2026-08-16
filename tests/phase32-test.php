@@ -52,13 +52,13 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Rewards\Reward;
-use GoalCart\Settings\Settings;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Rewards\Reward;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -274,8 +274,8 @@ check( 'midnight window blocks midday', ! $r->eligible() );
 echo "\n== 6. Campaign folding ==\n";
 
 $wpdb = $GLOBALS['wpdb'];
-$campaigns = \GoalCart\Database\Schema::table( 'campaigns' );
-$goals_table = \GoalCart\Database\Schema::table( 'goals' );
+$campaigns = \FaraCart\Database\Schema::table( 'campaigns' );
+$goals_table = \FaraCart\Database\Schema::table( 'goals' );
 $goals_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
 
 $wpdb->query( 'START TRANSACTION' );
@@ -363,7 +363,7 @@ check( 'gift blocked outside the list', ! $reward->is_gift_allowed( 99 ) );
 // ---------------------------------------------------------------------------
 echo "\n== 8. Settings ==\n";
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 $settings = $container->get( Settings::class );
 $all_before = $settings->all();
 

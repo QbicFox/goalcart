@@ -4,6 +4,7 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid';
 import MenuItem from '@mui/material/MenuItem';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
@@ -19,11 +20,14 @@ import CompositeChildrenEditor from '../components/goal-builder/CompositeChildre
 import ConditionFields from '../components/goal-builder/ConditionFields';
 import DisplayFields from '../components/goal-builder/DisplayFields';
 import GoalTypePicker from '../components/goal-builder/GoalTypePicker';
+import PreviewPanel from '../components/preview/PreviewPanel';
+import { usePreview } from '../components/preview/usePreview';
 import RewardFields from '../components/goal-builder/RewardFields';
 import SectionCard from '../components/goal-builder/SectionCard';
 import TargetFields from '../components/goal-builder/TargetFields';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { useStickyBarActions } from '../providers/ActionBarProvider';
+import { useFullscreen } from '../providers/FullscreenProvider';
 import PageContainer from '../components/PageContainer';
 import type { Goal, GoalChildInput, GoalInput, GoalType } from '../types';
 
@@ -121,12 +125,37 @@ function goalToInput(goal: Goal): GoalInput {
   };
 }
 
+/** Whether a goal form measures money (mirrors Goal::is_money_goal). */
+function isMoneyGoal(values: GoalInput): boolean {
+  const countTypes = ['quantity', 'distinct_quantity', 'weight'];
+
+  return !countTypes.includes(values.type) && values.calculation_mode !== 'quantity';
+}
+
+/** Amount/quantity a state preset fraction should simulate for the form. */
+function presetTargets(values: GoalInput, fraction: number): { amount: number; quantity: number } {
+  const target = Number(values.target) || 0;
+  const value = target * fraction;
+
+  // Composite goals drive both bases so their children all move.
+  if (values.type === 'composite') {
+    return { amount: value, quantity: value };
+  }
+
+  return isMoneyGoal(values) ? { amount: value, quantity: 0 } : { amount: 0, quantity: value };
+}
+
 /**
  * Goal Builder (Phase 9: Goal Management UI). A seven-section form for
  * creating and editing goals — Basic Information, Goal Type, Target,
  * Reward, Conditions, Display and Priority — wired to the Phase 7 REST
  * CRUD endpoints. New goals use `/goals/new`, existing ones
  * `/goals/:id/edit`; both render this page.
+ *
+ * The page is a two-column layout: the form on the right (RTL) and a
+ * sticky live preview on the left, driven by the current form values
+ * through the shared Phase 15 preview system (POST /preview accepts the
+ * unsaved form payload).
  */
 export default function GoalBuilder() {
   const { id } = useParams();
@@ -134,6 +163,7 @@ export default function GoalBuilder() {
   const navigate = useNavigate();
   const { notify } = useSnackbar();
   const queryClient = useQueryClient();
+  const { fullscreen } = useFullscreen();
 
   const [values, setValues] = useState<GoalInput>(emptyGoal);
 
@@ -157,7 +187,7 @@ export default function GoalBuilder() {
     mutationFn: (input: GoalInput) => (editId ? updateGoal(editId, input) : createGoal(input)),
     onSuccess: () => {
       notify(
-        editId ? __('The goal was updated.', 'goalcart') : __('The goal was created.', 'goalcart')
+        editId ? __('The goal was updated.', 'faracart') : __('The goal was created.', 'faracart')
       );
       void queryClient.invalidateQueries({ queryKey: ['goals'] });
       // The detail cache must not serve the pre-save goal when the
@@ -188,6 +218,28 @@ export default function GoalBuilder() {
     }));
   };
 
+  // Live preview: the target key includes the (possibly unsaved) form
+  // values, so the preview refetches whenever the form changes (debounced
+  // inside usePreview). The backend merges the form payload over the
+  // stored row when editing, so the preview always reflects the current
+  // form state.
+  const previewTarget = useMemo(() => ({ id: editId ?? 0, values }), [editId, values]);
+
+  const preview = usePreview({
+    target: previewTarget,
+    derive: (current) => ({
+      templateDefault: '',
+      targetsFor: (fraction) => presetTargets(current.values, fraction),
+      paramsFor: () => ({ goalId: editId ?? undefined, goal: current.values }),
+      payloadKey: `goal:${current.id}:${JSON.stringify(current.values)}`,
+    }),
+  });
+
+  // The sticky preview column sticks below the WP admin bar in embedded
+  // mode (32px) and flush in full-screen mode where the app's own header
+  // is fixed and the content area scrolls internally.
+  const stickyTop = fullscreen ? 8 : 40;
+
   const canSave = useMemo(() => values.name.trim().length > 0, [values.name]); // Sticky bottom bar: Save / Create + Cancel (moved out of the page
   // body into the dashboard's bottom action bar). Hidden while an edited
   // goal is still loading so it never saves the empty seed form. `values`
@@ -202,13 +254,13 @@ export default function GoalBuilder() {
           onClick={() => saveMutation.mutate(values)}
         >
           {saveMutation.isPending
-            ? __('Saving…', 'goalcart')
+            ? __('Saving…', 'faracart')
             : editId
-              ? __('Save changes', 'goalcart')
-              : __('Create goal', 'goalcart')}
+              ? __('Save changes', 'faracart')
+              : __('Create goal', 'faracart')}
         </Button>
         <Button variant="outlined" onClick={() => navigate('/goals')}>
-          {__('Cancel', 'goalcart')}
+          {__('Cancel', 'faracart')}
         </Button>
       </>
     )
@@ -217,8 +269,8 @@ export default function GoalBuilder() {
   if (editId && goalQuery.isLoading) {
     return (
       <PageContainer
-        title={__('Edit goal', 'goalcart')}
-        description={__('Loading the goal…', 'goalcart')}
+        title={__('Edit goal', 'faracart')}
+        description={__('Loading the goal…', 'faracart')}
       >
         <Stack spacing={2}>
           <Skeleton variant="rounded" height={120} />
@@ -232,13 +284,13 @@ export default function GoalBuilder() {
   if (goalQuery.isError) {
     return (
       <PageContainer
-        title={__('Edit goal', 'goalcart')}
-        description={__('Goal editor', 'goalcart')}
+        title={__('Edit goal', 'faracart')}
+        description={__('Goal editor', 'faracart')}
       >
         <Alert severity="error" variant="outlined">
           {goalQuery.error instanceof Error
             ? goalQuery.error.message
-            : __('Could not load the goal.', 'goalcart')}
+            : __('Could not load the goal.', 'faracart')}
         </Alert>
       </PageContainer>
     );
@@ -246,246 +298,261 @@ export default function GoalBuilder() {
 
   return (
     <PageContainer
-      title={editId ? __('Edit goal', 'goalcart') : __('Add goal', 'goalcart')}
+      title={editId ? __('Edit goal', 'faracart') : __('Add goal', 'faracart')}
       description={__(
         'Define what shoppers need to reach and what they earn for getting there.',
-        'goalcart'
+        'faracart'
       )}
       actions={
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/goals')}>
-          {__('Back to goals', 'goalcart')}
+          {__('Back to goals', 'faracart')}
         </Button>
       }
     >
-      <Stack spacing={3}>
-        {/* 1. Basic information */}
-        <SectionCard
-          title={__('Basic information', 'goalcart')}
-          description={__('The internal identity of the goal.', 'goalcart')}
-        >
-          <Stack spacing={2}>
-            <TextField
-              label={__('Name', 'goalcart')}
-              required
-              fullWidth
-              value={values.name}
-              placeholder={__('e.g. Free shipping over 500K', 'goalcart')}
-              error={values.name.trim().length === 0}
-              helperText={
-                values.name.trim().length === 0
-                  ? __('Give the goal a name.', 'goalcart')
-                  : __('Internal name shown in the admin.', 'goalcart')
-              }
-              onChange={(event) => patch({ name: event.target.value })}
-            />
-            <TextField
-              label={__('Description', 'goalcart')}
-              fullWidth
-              multiline
-              minRows={2}
-              value={values.description}
-              placeholder={__('Internal notes about this goal.', 'goalcart')}
-              onChange={(event) => patch({ description: event.target.value })}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={values.status === 'active'}
-                  onChange={(event) =>
-                    patch({ status: event.target.checked ? 'active' : 'inactive' })
+      <Grid container spacing={3}>
+        {/* Right column (RTL): the edit form. */}
+        <Grid size={{ xs: 12, md: 7, lg: 8 }}>
+          <Stack spacing={3}>
+            {/* 1. Basic information */}
+            <SectionCard
+              title={__('Basic information', 'faracart')}
+              description={__('The internal identity of the goal.', 'faracart')}
+            >
+              <Stack spacing={2}>
+                <TextField
+                  label={__('Name', 'faracart')}
+                  required
+                  fullWidth
+                  value={values.name}
+                  placeholder={__('e.g. Free shipping over 500K', 'faracart')}
+                  error={values.name.trim().length === 0}
+                  helperText={
+                    values.name.trim().length === 0
+                      ? __('Give the goal a name.', 'faracart')
+                      : __('Internal name shown in the admin.', 'faracart')
+                  }
+                  onChange={(event) => patch({ name: event.target.value })}
+                />
+                <TextField
+                  label={__('Description', 'faracart')}
+                  fullWidth
+                  multiline
+                  minRows={2}
+                  value={values.description}
+                  placeholder={__('Internal notes about this goal.', 'faracart')}
+                  onChange={(event) => patch({ description: event.target.value })}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={values.status === 'active'}
+                      onChange={(event) =>
+                        patch({ status: event.target.checked ? 'active' : 'inactive' })
+                      }
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {__('Active', 'faracart')}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {__('Inactive goals never evaluate on the storefront.', 'faracart')}
+                      </Typography>
+                    </Box>
                   }
                 />
-              }
-              label={
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {__('Active', 'goalcart')}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {__('Inactive goals never evaluate on the storefront.', 'goalcart')}
-                  </Typography>
-                </Box>
-              }
-            />
-          </Stack>
-        </SectionCard>
+              </Stack>
+            </SectionCard>
 
-        {/* 2. Goal type */}
-        <SectionCard
-          title={__('Goal type', 'goalcart')}
-          description={__('What the goal measures.', 'goalcart')}
-        >
-          <GoalTypePicker value={values.type} onChange={changeType} />
-        </SectionCard>
+            {/* 2. Goal type */}
+            <SectionCard
+              title={__('Goal type', 'faracart')}
+              description={__('What the goal measures.', 'faracart')}
+            >
+              <GoalTypePicker value={values.type} onChange={changeType} />
+            </SectionCard>
 
-        {/* 3. Target */}
-        <SectionCard
-          title={__('Target', 'goalcart')}
-          description={__('The threshold shoppers need to reach.', 'goalcart')}
-        >
-          <TargetFields values={values} onValueChange={patch} />
-        </SectionCard>
+            {/* 3. Target */}
+            <SectionCard
+              title={__('Target', 'faracart')}
+              description={__('The threshold shoppers need to reach.', 'faracart')}
+            >
+              <TargetFields values={values} onValueChange={patch} />
+            </SectionCard>
 
-        {/* 3b. Composite operator + children */}
-        {values.type === 'composite' && (
-          <SectionCard
-            title={__('Composite conditions', 'goalcart')}
-            description={__(
-              'Children are evaluated against the same cart. AND requires every child, OR completes at the best child.',
-              'goalcart'
-            )}
-            action={
-              <TextField
-                select
-                label={__('Operator', 'goalcart')}
-                size="small"
-                sx={{ minWidth: 140 }}
-                value={values.operator}
-                onChange={(event) => patch({ operator: event.target.value as 'and' | 'or' })}
-              >
-                <MenuItem value="and">{__('AND (all children required)', 'goalcart')}</MenuItem>
-                <MenuItem value="or">{__('OR (any child completes)', 'goalcart')}</MenuItem>
-              </TextField>
-            }
-          >
-            <CompositeChildrenEditor
-              children={values.children}
-              onChange={(children) => patch({ children })}
-            />
-          </SectionCard>
-        )}
-
-        {/* 4. Reward */}
-        <SectionCard
-          title={__('Reward', 'goalcart')}
-          description={__('What the customer earns when the goal is reached.', 'goalcart')}
-        >
-          <RewardFields values={values} onValueChange={patch} />
-        </SectionCard>
-
-        {/* 5. Conditions */}
-        <SectionCard
-          title={__('Conditions', 'goalcart')}
-          description={__('Restrictions and schedule for this goal.', 'goalcart')}
-        >
-          <ConditionFields values={values} onValueChange={patch} />
-        </SectionCard>
-
-        {/* 6. Display */}
-        <SectionCard
-          title={__('Display', 'goalcart')}
-          description={__('Customer-facing copy and template for the progress widget.', 'goalcart')}
-        >
-          <DisplayFields values={values} onValueChange={patch} />
-        </SectionCard>
-
-        {/* 7. Per-user completion limit (Phase 36) */}
-        <SectionCard
-          title={__('Completion limit', 'goalcart')}
-          description={__(
-            'How many times the same shopper may complete this goal. Each completion cycle grants the reward once; after the limit is reached the goal no longer appears as completable for that shopper.',
-            'goalcart'
-          )}
-        >
-          <Stack spacing={2}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={values.max_completions_per_user === null}
-                  onChange={(event) =>
-                    patch({
-                      max_completions_per_user: event.target.checked
-                        ? null
-                        : Math.max(1, values.max_completions_per_user ?? 1),
-                    })
-                  }
-                />
-              }
-              label={
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {__('Unlimited', 'goalcart')}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {__(
-                      'The shopper may complete this goal as many times as they want (default for existing goals).',
-                      'goalcart'
-                    )}
-                  </Typography>
-                </Box>
-              }
-            />
-            {values.max_completions_per_user !== null && (
-              <TextField
-                label={__('Times each user can complete', 'goalcart')}
-                type="number"
-                fullWidth
-                sx={{ maxWidth: 220 }}
-                slotProps={{ htmlInput: { min: 1, step: 1 } }}
-                value={values.max_completions_per_user}
-                helperText={__(
-                  'A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side.',
-                  'goalcart'
+            {/* 3b. Composite operator + children */}
+            {values.type === 'composite' && (
+              <SectionCard
+                title={__('Composite conditions', 'faracart')}
+                description={__(
+                  'Children are evaluated against the same cart. AND requires every child, OR completes at the best child.',
+                  'faracart'
                 )}
-                onChange={(event) => {
-                  const raw = event.target.value;
-                  // Only positive integers are valid (reject negatives,
-                  // decimals and empty) — empty keeps the previous value so
-                  // the field never locks the goal to zero.
-                  const parsed = /^[1-9]\d*$/.test(raw) ? Number(raw) : null;
-                  patch({
-                    max_completions_per_user: parsed ?? values.max_completions_per_user,
-                  });
-                }}
-              />
-            )}
-          </Stack>
-        </SectionCard>
-
-        {/* 8. Priority & conflicts (Phase 26) */}
-        <SectionCard
-          title={__('Priority & conflicts', 'goalcart')}
-          description={__(
-            'How this goal competes when several goals are active. Lower priority numbers win first; a goal inside a campaign is also ordered by its campaign priority.',
-            'goalcart'
-          )}
-        >
-          <Stack spacing={2}>
-            <TextField
-              label={__('Priority', 'goalcart')}
-              type="number"
-              fullWidth
-              sx={{ maxWidth: 220 }}
-              value={values.priority}
-              helperText={__('Lower numbers win conflicts.', 'goalcart')}
-              onChange={(event) =>
-                patch({ priority: Math.max(0, Number(event.target.value) || 0) })
-              }
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={values.exclusive}
-                  onChange={(event) => patch({ exclusive: event.target.checked })}
+                action={
+                  <TextField
+                    select
+                    label={__('Operator', 'faracart')}
+                    size="small"
+                    sx={{ minWidth: 140 }}
+                    value={values.operator}
+                    onChange={(event) => patch({ operator: event.target.value as 'and' | 'or' })}
+                  >
+                    <MenuItem value="and">{__('AND (all children required)', 'faracart')}</MenuItem>
+                    <MenuItem value="or">{__('OR (any child completes)', 'faracart')}</MenuItem>
+                  </TextField>
+                }
+              >
+                <CompositeChildrenEditor
+                  children={values.children}
+                  onChange={(children) => patch({ children })}
                 />
-              }
-              label={
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {__('Exclusive (mutually exclusive)', 'goalcart')}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {__(
-                      'When this goal is reached, every lower-priority goal is skipped and never grants its reward. Higher-priority goals are unaffected.',
-                      'goalcart'
+              </SectionCard>
+            )}
+
+            {/* 4. Reward */}
+            <SectionCard
+              title={__('Reward', 'faracart')}
+              description={__('What the customer earns when the goal is reached.', 'faracart')}
+            >
+              <RewardFields values={values} onValueChange={patch} />
+            </SectionCard>
+
+            {/* 5. Conditions */}
+            <SectionCard
+              title={__('Conditions', 'faracart')}
+              description={__('Restrictions and schedule for this goal.', 'faracart')}
+            >
+              <ConditionFields values={values} onValueChange={patch} />
+            </SectionCard>
+
+            {/* 6. Display */}
+            <SectionCard
+              title={__('Display', 'faracart')}
+              description={__(
+                'Customer-facing copy and template for the progress widget.',
+                'faracart'
+              )}
+            >
+              <DisplayFields values={values} onValueChange={patch} />
+            </SectionCard>
+
+            {/* 7. Per-user completion limit (Phase 36) */}
+            <SectionCard
+              title={__('Completion limit', 'faracart')}
+              description={__(
+                'How many times the same shopper may complete this goal. Each completion cycle grants the reward once; after the limit is reached the goal no longer appears as completable for that shopper.',
+                'faracart'
+              )}
+            >
+              <Stack spacing={2}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={values.max_completions_per_user === null}
+                      onChange={(event) =>
+                        patch({
+                          max_completions_per_user: event.target.checked
+                            ? null
+                            : Math.max(1, values.max_completions_per_user ?? 1),
+                        })
+                      }
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {__('Unlimited', 'faracart')}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {__(
+                          'The shopper may complete this goal as many times as they want (default for existing goals).',
+                          'faracart'
+                        )}
+                      </Typography>
+                    </Box>
+                  }
+                />
+                {values.max_completions_per_user !== null && (
+                  <TextField
+                    label={__('Times each user can complete', 'faracart')}
+                    type="number"
+                    fullWidth
+                    sx={{ maxWidth: 220 }}
+                    slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                    value={values.max_completions_per_user}
+                    helperText={__(
+                      'A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side.',
+                      'faracart'
                     )}
-                  </Typography>
-                </Box>
-              }
-            />
+                    onChange={(event) => {
+                      const raw = event.target.value;
+                      // Only positive integers are valid (reject negatives,
+                      // decimals and empty) — empty keeps the previous value so
+                      // the field never locks the goal to zero.
+                      const parsed = /^[1-9]\d*$/.test(raw) ? Number(raw) : null;
+                      patch({
+                        max_completions_per_user: parsed ?? values.max_completions_per_user,
+                      });
+                    }}
+                  />
+                )}
+              </Stack>
+            </SectionCard>
+
+            {/* 8. Priority & conflicts (Phase 26) */}
+            <SectionCard
+              title={__('Priority & conflicts', 'faracart')}
+              description={__(
+                'How this goal competes when several goals are active. Lower priority numbers win first; a goal inside a campaign is also ordered by its campaign priority.',
+                'faracart'
+              )}
+            >
+              <Stack spacing={2}>
+                <TextField
+                  label={__('Priority', 'faracart')}
+                  type="number"
+                  fullWidth
+                  sx={{ maxWidth: 220 }}
+                  value={values.priority}
+                  helperText={__('Lower numbers win conflicts.', 'faracart')}
+                  onChange={(event) =>
+                    patch({ priority: Math.max(0, Number(event.target.value) || 0) })
+                  }
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={values.exclusive}
+                      onChange={(event) => patch({ exclusive: event.target.checked })}
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {__('Exclusive (mutually exclusive)', 'faracart')}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {__(
+                          'When this goal is reached, every lower-priority goal is skipped and never grants its reward. Higher-priority goals are unaffected.',
+                          'faracart'
+                        )}
+                      </Typography>
+                    </Box>
+                  }
+                />
+              </Stack>
+            </SectionCard>
           </Stack>
-        </SectionCard>
-      </Stack>
+        </Grid>
+
+        {/* Left column (RTL): the sticky live preview. */}
+        <Grid size={{ xs: 12, md: 5, lg: 4 }}>
+          <Box sx={{ position: 'sticky', top: stickyTop }}>
+            <PreviewPanel scope="goal" preview={preview} />
+          </Box>
+        </Grid>
+      </Grid>
     </PageContainer>
   );
 }

@@ -2,14 +2,14 @@
 /**
  * Admin-facing functionality for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Admin;
+namespace FaraCart\Admin;
 
-use GoalCart\Compatibility;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Compatibility;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -29,7 +29,7 @@ class Admin {
 	 *
 	 * @var string
 	 */
-	const MENU_SLUG = 'goalcart';
+	const MENU_SLUG = 'faracart';
 
 	/**
 	 * Settings instance.
@@ -107,11 +107,11 @@ class Admin {
 			return;
 		}
 
-		$capability = apply_filters( 'goalcart_admin_capability', 'manage_options' );
+		$capability = apply_filters( 'faracart_admin_capability', 'manage_options' );
 
 		add_menu_page(
-			__( 'FaraCart', 'goalcart' ),
-			__( 'FaraCart', 'goalcart' ),
+			__( 'FaraCart', 'faracart' ),
+			__( 'FaraCart', 'faracart' ),
 			$capability,
 			self::MENU_SLUG,
 			array( $this, 'render_dashboard' ),
@@ -133,12 +133,12 @@ class Admin {
 
 		// Page CSS: drops the admin toolbar's #wpbody padding in both
 		// display modes and hides the WP admin chrome when the
-		// `goalcart-fullscreen` body class is present (admin_body_class()).
+		// `faracart-fullscreen` body class is present (admin_body_class()).
 		wp_enqueue_style(
-			'goalcart-admin-fullscreen',
-			GOALCART_URL . 'assets/css/admin-fullscreen.css',
+			'faracart-admin-fullscreen',
+			FARACART_URL . 'assets/css/admin-fullscreen.css',
 			array(),
-			GOALCART_VERSION
+			FARACART_VERSION
 		);
 
 		$this->assets->enqueue();
@@ -147,8 +147,8 @@ class Admin {
 	/**
 	 * Add page body classes on the FaraCart admin screen.
 	 *
-	 * `goalcart-admin-page` is always added so admin-fullscreen.css can
-	 * target the screen in both display modes. `goalcart-fullscreen` is
+	 * `faracart-admin-page` is always added so admin-fullscreen.css can
+	 * target the screen in both display modes. `faracart-fullscreen` is
 	 * added only when the full-screen setting is on; it hides the
 	 * WordPress admin bar, left admin menu and notices so the React
 	 * dashboard fills the entire browser viewport.
@@ -157,11 +157,11 @@ class Admin {
 	 * @return string
 	 */
 	public function admin_body_class( $classes ) {
-		if ( $this->is_goalcart_screen() ) {
-			$classes .= ' goalcart-admin-page';
+		if ( $this->is_faracart_screen() ) {
+			$classes .= ' faracart-admin-page';
 
 			if ( $this->settings->get( 'fullscreen_dashboard', true ) ) {
-				$classes .= ' goalcart-fullscreen';
+				$classes .= ' faracart-fullscreen';
 			}
 		}
 
@@ -173,7 +173,7 @@ class Admin {
 	 *
 	 * @return bool
 	 */
-	protected function is_goalcart_screen() {
+	protected function is_faracart_screen() {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 
 		if ( $screen && 'toplevel_page_' . self::MENU_SLUG === $screen->id ) {
@@ -181,7 +181,7 @@ class Admin {
 		}
 
 		// Fallback for early contexts where the screen object is not set
-		// yet: the menu page is reached via admin.php?page=goalcart.
+		// yet: the menu page is reached via admin.php?page=faracart.
 		return isset( $_GET['page'] ) && self::MENU_SLUG === wp_unslash( (string) $_GET['page'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
@@ -206,11 +206,11 @@ class Admin {
 			return;
 		}
 
-		// The extra `goalcart-build-notice` class keeps this visible in
+		// The extra `faracart-build-notice` class keeps this visible in
 		// full-screen mode (admin-fullscreen.css hides generic notices).
 		printf(
-			'<div class="notice notice-warning is-dismissible goalcart-build-notice"><p><strong>%1$s</strong> %2$s</p></div>',
-			esc_html__( 'FaraCart:', 'goalcart' ),
+			'<div class="notice notice-warning is-dismissible faracart-build-notice"><p><strong>%1$s</strong> %2$s</p></div>',
+			esc_html__( 'FaraCart:', 'faracart' ),
 			wp_kses_post( $hint )
 		);
 	}
@@ -218,7 +218,7 @@ class Admin {
 	/**
 	 * Render the main dashboard page (React mount point).
 	 *
-	 * The React app boots inside #goalcart-admin and replaces the loading
+	 * The React app boots inside #faracart-admin and replaces the loading
 	 * placeholder once mounted. The `dir` attribute is set explicitly so
 	 * the app mirrors itself for RTL locales even before the React shell
 	 * mounts.
@@ -229,8 +229,8 @@ class Admin {
 		$dir = is_rtl() ? 'rtl' : 'ltr';
 
 		echo '<div class="wrap">';
-		echo '<div id="goalcart-admin" dir="' . esc_attr( $dir ) . '" class="goalcart-admin-root">';
-		echo '<div class="goalcart-admin-loading">' . esc_html__( 'Loading FaraCart…', 'goalcart' ) . '</div>';
+		echo '<div id="faracart-admin" dir="' . esc_attr( $dir ) . '" class="faracart-admin-root">';
+		echo '<div class="faracart-admin-loading">' . esc_html__( 'Loading FaraCart…', 'faracart' ) . '</div>';
 		echo '</div>';
 		echo '</div>';
 	}

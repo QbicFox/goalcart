@@ -10,7 +10,7 @@
  *  - shortcode registration, unique container ids, markup shape
  *  - the duplicate-render guard (a location renders exactly once)
  *  - the frontend config payload (endpoint, currency, reward labels)
- *  - the master enabled gate (settings toggle + goalcart_frontend_enabled)
+ *  - the master enabled gate (settings toggle + faracart_frontend_enabled)
  *  - page gating: the shortcode in a post content enables assets
  *  - progress templates & appearance (Phase 12): config template/
  *    animation/appearance keys, per-widget shortcode template override,
@@ -46,7 +46,7 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Frontend\ProgressUI;
+use FaraCart\Frontend\ProgressUI;
 
 $failures = 0;
 $checks   = 0;
@@ -91,9 +91,9 @@ function hook_priority( $tag, $callback ) {
 	return false;
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 $ui        = $container->get( ProgressUI::class );
-$settings  = $container->get( \GoalCart\Settings\Settings::class );
+$settings  = $container->get( \FaraCart\Settings\Settings::class );
 
 // ---------------------------------------------------------------------------
 // 1. Service wiring (P11-T01)
@@ -137,24 +137,24 @@ $ui->register_shortcode();
 
 check( 'shortcode registered', shortcode_exists( ProgressUI::SHORTCODE ) );
 
-$out = do_shortcode( '[goalcart_progress]' );
-check( 'shortcode renders a container', false !== strpos( $out, 'data-goalcart-widget' ) );
-check( 'shortcode container has unique id', false !== strpos( $out, 'id="goalcart-shortcode-1"' ) );
-check( 'shortcode defaults to full variant', false !== strpos( $out, 'data-goalcart-variant="full"' ) );
+$out = do_shortcode( '[faracart_progress]' );
+check( 'shortcode renders a container', false !== strpos( $out, 'data-faracart-widget' ) );
+check( 'shortcode container has unique id', false !== strpos( $out, 'id="faracart-shortcode-1"' ) );
+check( 'shortcode defaults to full variant', false !== strpos( $out, 'data-faracart-variant="full"' ) );
 
-$out = do_shortcode( '[goalcart_progress variant="compact"]' );
-check( 'shortcode accepts compact variant', false !== strpos( $out, 'data-goalcart-variant="compact"' ) );
+$out = do_shortcode( '[faracart_progress variant="compact"]' );
+check( 'shortcode accepts compact variant', false !== strpos( $out, 'data-faracart-variant="compact"' ) );
 
-$out_a = do_shortcode( '[goalcart_progress]' );
-$out_b = do_shortcode( '[goalcart_progress]' );
+$out_a = do_shortcode( '[faracart_progress]' );
+$out_b = do_shortcode( '[faracart_progress]' );
 
-preg_match( '/id="(goalcart-shortcode-\d+)"/', $out_a, $m_a );
-preg_match( '/id="(goalcart-shortcode-\d+)"/', $out_b, $m_b );
+preg_match( '/id="(faracart-shortcode-\d+)"/', $out_a, $m_a );
+preg_match( '/id="(faracart-shortcode-\d+)"/', $out_b, $m_b );
 check( 'repeated shortcode ids stay unique', isset( $m_a[1], $m_b[1] ) && $m_a[1] !== $m_b[1] );
 
-$markup = $ui->widget_container( 'goalcart-test', 'full' );
+$markup = $ui->widget_container( 'faracart-test', 'full' );
 check( 'widget container carries aria-live', false !== strpos( $markup, 'aria-live="polite"' ) );
-check( 'bogus variant normalizes to full', false !== strpos( $ui->widget_container( 'goalcart-x', 'banana' ), 'data-goalcart-variant="full"' ) );
+check( 'bogus variant normalizes to full', false !== strpos( $ui->widget_container( 'faracart-x', 'banana' ), 'data-faracart-variant="full"' ) );
 
 // ---------------------------------------------------------------------------
 // 4. Duplicate-render guard (P11 — no double injection)
@@ -170,7 +170,7 @@ $ui->render_cart_widget();
 $ui->render_cart_widget(); // second call must be suppressed
 $cart_out = ob_get_clean();
 
-check( 'cart location renders once', 1 === substr_count( $cart_out, 'id="goalcart-cart"' ) );
+check( 'cart location renders once', 1 === substr_count( $cart_out, 'id="faracart-cart"' ) );
 check( 'cart widget markup is escaped/safe', false === strpos( $cart_out, '<script' ) );
 
 $bottom_ui = new ProgressUI( $settings );
@@ -182,7 +182,7 @@ ob_start();
 $bottom_ui->render_cart_widget_bottom();
 $bottom_rendered = ob_get_clean();
 check( 'top cart hook is suppressed for bottom position', '' === $top_suppressed );
-check( 'bottom cart hook renders for bottom position', false !== strpos( $bottom_rendered, 'id="goalcart-cart"' ) );
+check( 'bottom cart hook renders for bottom position', false !== strpos( $bottom_rendered, 'id="faracart-cart"' ) );
 $settings->set( 'frontend_position', 'top' );
 
 // ---------------------------------------------------------------------------
@@ -192,7 +192,7 @@ echo "\n== 5. Frontend config ==\n";
 
 $config = $ui->frontend_config();
 check( 'config has a progress endpoint', isset( $config['endpoint'] ) && '' !== $config['endpoint'] );
-check( 'config endpoint points at /progress', false !== strpos( $config['endpoint'], '/goalcart/v1/progress' ) );
+check( 'config endpoint points at /progress', false !== strpos( $config['endpoint'], '/faracart/v1/progress' ) );
 check( 'config has a currency key', array_key_exists( 'currency', $config ) );
 check( 'config has a page position key', array_key_exists( 'position', $config ) );
 check( 'config is RTL-aware', array_key_exists( 'isRtl', $config ) );
@@ -203,8 +203,8 @@ check( 'config labels cover reward types', isset( $config['labels']['free_shippi
 // endpoint, limit and localized panel labels.
 $upsell_config = $config['upsells'] ?? null;
 check( 'config carries the upsell block', is_array( $upsell_config ) && ! empty( $upsell_config['enabled'] ) );
-check( 'upsell endpoint points at the public rank route', false !== strpos( $upsell_config['endpoint'] ?? '', '/goalcart/v1/upsell/rank' ) );
-check( 'upsell track endpoint points at the upsell track route', false !== strpos( $upsell_config['trackEndpoint'] ?? '', '/goalcart/v1/upsell/track' ) );
+check( 'upsell endpoint points at the public rank route', false !== strpos( $upsell_config['endpoint'] ?? '', '/faracart/v1/upsell/rank' ) );
+check( 'upsell track endpoint points at the upsell track route', false !== strpos( $upsell_config['trackEndpoint'] ?? '', '/faracart/v1/upsell/track' ) );
 check( 'upsell limit is bounded', isset( $upsell_config['limit'] ) && (int) $upsell_config['limit'] >= 1 && (int) $upsell_config['limit'] <= 6 );
 check( 'upsell labels cover the panel strings', isset( $upsell_config['labels']['heading'], $upsell_config['labels']['add'], $upsell_config['labels']['adding'], $upsell_config['labels']['added'], $upsell_config['labels']['unavailable'] ) );
 
@@ -213,13 +213,13 @@ check( 'upsell labels cover the panel strings', isset( $upsell_config['labels'][
 // response would keep showing the previous cart's progress after the
 // shopper adds/removes items. The endpoint stamps Cache-Control:
 // no-store and the storefront JS cache-busts every poll.
-$progress_resp = $container->get( \GoalCart\REST\FrontendController::class )
-	->handle_progress( new \WP_REST_Request( 'GET', '/goalcart/v1/progress' ) );
+$progress_resp = $container->get( \FaraCart\REST\FrontendController::class )
+	->handle_progress( new \WP_REST_Request( 'GET', '/faracart/v1/progress' ) );
 $progress_headers = $progress_resp->get_headers();
 $progress_cc      = isset( $progress_headers['Cache-Control'] ) ? (string) $progress_headers['Cache-Control'] : '';
 check( 'progress response forbids caching (no-store)', false !== strpos( $progress_cc, 'no-store' ) );
 
-$frontend_js = (string) file_get_contents( GOALCART_PATH . 'assets/js/frontend.js' );
+$frontend_js = (string) file_get_contents( FARACART_PATH . 'assets/js/frontend.js' );
 check( 'frontend JS cache-busts the progress poll', false !== strpos( $frontend_js, "'_='" ) && false !== strpos( $frontend_js, 'Date.now()' ) );
 
 check( 'frontend JS adopts the payload tracking nonce', false !== strpos( $frontend_js, 'tracking_nonce' ) && false !== strpos( $frontend_js, 'tracking.nonce' ) );
@@ -229,7 +229,7 @@ check( 'frontend JS adopts the payload tracking nonce', false !== strpos( $front
 // ladder. The stack wrapper, the per-goal loop and the ineligible skip
 // are all asserted on the source so a regression back to the
 // featured-only render cannot slip through.
-check( 'frontend JS stacks one card per eligible goal', false !== strpos( $frontend_js, 'goalcart-widget__goals' ) && false !== strpos( $frontend_js, 'for ( var i = 0; i < goals.length; i++ )' ) );
+check( 'frontend JS stacks one card per eligible goal', false !== strpos( $frontend_js, 'faracart-widget__goals' ) && false !== strpos( $frontend_js, 'for ( var i = 0; i < goals.length; i++ )' ) );
 check( 'frontend JS skips ineligible goals when rendering', false !== strpos( $frontend_js, 'goal.eligible === false' ) && false !== strpos( $frontend_js, 'continue;' ) );
 check( 'frontend JS renders each goal card with its own template', false !== strpos( $frontend_js, 'goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) )' ) );
 check( 'frontend JS keeps the sticky bar featured-only', false !== strpos( $frontend_js, 'var goal = featuredGoal( goals );' ) );
@@ -243,17 +243,17 @@ check( 'sticky suggestions work in compact layout', false !== strpos( $frontend_
 // DOM events and the wc/store/cart data store — with a supersede guard
 // so a stale in-flight response can never overwrite fresher progress.
 check( 'frontend JS binds the coupon/emptied classic cart events', false !== strpos( $frontend_js, "'applied_coupon'" ) && false !== strpos( $frontend_js, "'removed_coupon'" ) && false !== strpos( $frontend_js, "'wc_cart_emptied'" ) );
-check( 'frontend JS normalizes every signal through one cart-changed bridge', false !== strpos( $frontend_js, 'goalcart:cart-changed' ) && false !== strpos( $frontend_js, 'emitCartChanged' ) );
+check( 'frontend JS normalizes every signal through one cart-changed bridge', false !== strpos( $frontend_js, 'faracart:cart-changed' ) && false !== strpos( $frontend_js, 'emitCartChanged' ) );
 check( 'frontend JS subscribes to the Blocks cart data store', false !== strpos( $frontend_js, 'wc/store/cart' ) && false !== strpos( $frontend_js, 'wpData.subscribe' ) );
 check( 'frontend JS folds cart totals into the Blocks store fingerprint', false !== strpos( $frontend_js, "totals.total_price" ) );
 check( 'frontend JS clears the updating state on any request end', false !== strpos( $frontend_js, 'request.onloadend' ) );
 check( 'frontend JS binds the Blocks add/remove DOM events', false !== strpos( $frontend_js, 'wc-blocks_added_to_cart' ) && false !== strpos( $frontend_js, 'wc-blocks_removed_from_cart' ) );
 check( 'frontend JS supersedes stale refresh responses', false !== strpos( $frontend_js, 'fetchEpoch' ) && false !== strpos( $frontend_js, 'activeFetch' ) );
 check( 'frontend JS debounces cart-change refreshes', false !== strpos( $frontend_js, 'cartFollowUpTimer' ) && false !== strpos( $frontend_js, 'refresh( { updating: true } )' ) );
-check( 'frontend JS shows a subtle updating state while refreshing', false !== strpos( $frontend_js, 'goalcart-widget--updating' ) );
+check( 'frontend JS shows a subtle updating state while refreshing', false !== strpos( $frontend_js, 'faracart-widget--updating' ) );
 
 // Self-healing tracking nonce (Phase 28): every /progress response mints
-// a fresh goalcart_track nonce so frontend.js can adopt it after a
+// a fresh faracart_track nonce so frontend.js can adopt it after a
 // cached page served an expired or foreign one. The toggles are pinned
 // on (deterministic baseline — the stored option may hold non-default
 // values) so the assertions are environment-independent.
@@ -263,17 +263,17 @@ $settings->set( 'analytics_enabled', true );
 $settings->set( 'enabled', true );
 
 try {
-	$pinned_resp = $container->get( \GoalCart\REST\FrontendController::class )
-		->handle_progress( new \WP_REST_Request( 'GET', '/goalcart/v1/progress' ) );
+	$pinned_resp = $container->get( \FaraCart\REST\FrontendController::class )
+		->handle_progress( new \WP_REST_Request( 'GET', '/faracart/v1/progress' ) );
 	$pinned_data = $pinned_resp->get_data();
 	$tracking_nonce = isset( $pinned_data['data']['tracking_nonce'] ) ? (string) $pinned_data['data']['tracking_nonce'] : '';
 	check( 'progress payload carries a tracking nonce', '' !== $tracking_nonce );
-	check( 'tracking nonce verifies for the track action', false !== wp_verify_nonce( $tracking_nonce, \GoalCart\Analytics\Tracker::TRACK_NONCE_ACTION ) );
+	check( 'tracking nonce verifies for the track action', false !== wp_verify_nonce( $tracking_nonce, \FaraCart\Analytics\Tracker::TRACK_NONCE_ACTION ) );
 
 	// The nonce is withheld while analytics are off (mirrors the config print).
 	$settings->set( 'analytics_enabled', false );
-	$off_resp = $container->get( \GoalCart\REST\FrontendController::class )
-		->handle_progress( new \WP_REST_Request( 'GET', '/goalcart/v1/progress' ) );
+	$off_resp = $container->get( \FaraCart\REST\FrontendController::class )
+		->handle_progress( new \WP_REST_Request( 'GET', '/faracart/v1/progress' ) );
 	$off_data = $off_resp->get_data();
 	check( 'analytics off withholds the tracking nonce', empty( $off_data['data']['tracking_nonce'] ) );
 } finally {
@@ -290,7 +290,7 @@ $enabled_before = $settings->get( 'enabled', true );
 
 $settings->set( 'enabled', false );
 check( 'disabled setting turns the UI off', false === $ui->is_enabled() );
-check( 'disabled shortcode renders nothing', '' === do_shortcode( '[goalcart_progress]' ) );
+check( 'disabled shortcode renders nothing', '' === do_shortcode( '[faracart_progress]' ) );
 
 ob_start();
 $ui->render_cart_widget();
@@ -299,9 +299,9 @@ check( 'disabled widget locations render nothing', '' === $off_out );
 
 $settings->set( 'enabled', true );
 
-add_filter( 'goalcart_frontend_enabled', '__return_false' );
-check( 'goalcart_frontend_enabled filter overrides', false === $ui->is_enabled() );
-remove_filter( 'goalcart_frontend_enabled', '__return_false' );
+add_filter( 'faracart_frontend_enabled', '__return_false' );
+check( 'faracart_frontend_enabled filter overrides', false === $ui->is_enabled() );
+remove_filter( 'faracart_frontend_enabled', '__return_false' );
 check( 'filter removal restores enabled', true === $ui->is_enabled() );
 
 // Shopper-facing widgets are hidden from logged-in site admins browsing
@@ -318,9 +318,9 @@ $admin_id = null;
 
 try {
 	$admin_id = wp_insert_user( array(
-		'user_login' => 'goalcart_admin_visibility_test',
+		'user_login' => 'faracart_admin_visibility_test',
 		'user_pass'  => wp_generate_password(),
-		'user_email' => 'goalcart-admin-visibility@example.test',
+		'user_email' => 'faracart-admin-visibility@example.test',
 		'role'       => 'administrator',
 	) );
 
@@ -331,9 +331,9 @@ try {
 		wp_set_current_user( (int) $admin_id );
 
 		check( 'logged-in admin does not see the UI', false === $ui->is_enabled() );
-		check( 'admin shortcode renders nothing', '' === do_shortcode( '[goalcart_progress]' ) );
+		check( 'admin shortcode renders nothing', '' === do_shortcode( '[faracart_progress]' ) );
 
-		$fresh_ui = new \GoalCart\Frontend\ProgressUI( $settings );
+		$fresh_ui = new \FaraCart\Frontend\ProgressUI( $settings );
 		ob_start();
 		$fresh_ui->render_cart_widget();
 		$admin_out = ob_get_clean();
@@ -341,9 +341,9 @@ try {
 
 		// The visibility decision is filterable (e.g. hide for every
 		// logged-in user, or for shop managers too).
-		add_filter( 'goalcart_frontend_visible_to_user', '__return_true' );
+		add_filter( 'faracart_frontend_visible_to_user', '__return_true' );
 		check( 'visibility filter forces the UI back on', true === $ui->is_enabled() );
-		remove_filter( 'goalcart_frontend_visible_to_user', '__return_true' );
+		remove_filter( 'faracart_frontend_visible_to_user', '__return_true' );
 
 		wp_set_current_user( $previous_user );
 	}
@@ -386,7 +386,7 @@ try {
 		'post_type'    => 'post',
 		'post_status'  => 'publish',
 		'post_title'   => 'FaraCart frontend test',
-		'post_content' => '[goalcart_progress]',
+		'post_content' => '[faracart_progress]',
 	), true );
 
 	check( 'shortcode post inserted', ! is_wp_error( $post_id ) && $post_id > 0 );
@@ -398,7 +398,7 @@ try {
 
 	// Assets must be versioned by filemtime so the storefront never
 	// serves a stale cached frontend.js/css after an edit — the static
-	// GOALCART_VERSION only changes between releases, which would leave
+	// FARACART_VERSION only changes between releases, which would leave
 	// every browser on the old bundle (and every template looking the
 	// same).
 	$ui->enqueue_assets();
@@ -407,8 +407,8 @@ try {
 	$styles  = isset( wp_styles()->registered[ ProgressUI::HANDLE ] ) ? wp_styles()->registered[ ProgressUI::HANDLE ] : null;
 
 	check( 'frontend js enqueued', null !== $scripts && isset( $scripts->src ) && false !== strpos( $scripts->src, 'assets/js/frontend.js' ) );
-	check( 'frontend js versioned by filemtime', isset( $scripts->ver ) && (string) filemtime( GOALCART_PATH . 'assets/js/frontend.js' ) === (string) $scripts->ver );
-	check( 'frontend css versioned by filemtime', isset( $styles->ver ) && (string) filemtime( GOALCART_PATH . 'assets/css/frontend.css' ) === (string) $styles->ver );
+	check( 'frontend js versioned by filemtime', isset( $scripts->ver ) && (string) filemtime( FARACART_PATH . 'assets/js/frontend.js' ) === (string) $scripts->ver );
+	check( 'frontend css versioned by filemtime', isset( $styles->ver ) && (string) filemtime( FARACART_PATH . 'assets/css/frontend.css' ) === (string) $styles->ver );
 
 	$GLOBALS['post'] = $previous_post;
 } finally {
@@ -432,18 +432,18 @@ echo "\n== 8. Templates & appearance ==\n";
 // renders: the merchant would see three plain basic goal cards instead
 // of the campaign readout. Source-scanned so that regression cannot
 // slip through silently.
-$appearance_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/Appearance.tsx' );
+$appearance_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/routes/Appearance.tsx' );
 check( 'Appearance campaign preview stamps the sample campaign id on milestones', false !== strpos( $appearance_tsx, 'campaign_id: campaign.campaign_id' ) );
 
-// The Campaign preview dialog forces a campaign template by synthesizing
-// the campaign group (id + name + template + settings) instead of
-// passing it as a goal-card template override — PreviewWidget only
-// applies that override to standalone goal cards, so without the
+// The Campaign builder preview panel forces a campaign template by
+// synthesizing the campaign group (id + name + template + settings)
+// instead of passing it as a goal-card template override — PreviewWidget
+// only applies that override to standalone goal cards, so without the
 // synthesized group a forced "Milestone chain" would render plain
 // template-1 milestone cards. Source-scanned so that regression cannot
 // slip through silently.
-$campaign_dialog_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/components/CampaignPreviewDialog.tsx' );
-check( 'Campaign preview dialog synthesizes the forced campaign group', false !== strpos( $campaign_dialog_tsx, 'template: forcedTemplate.id' ) && false !== strpos( $campaign_dialog_tsx, 'campaign_id: campaign.id' ) );
+$preview_panel_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/components/preview/PreviewPanel.tsx' );
+check( 'Campaign preview panel synthesizes the forced campaign group', false !== strpos( $preview_panel_tsx, 'template: forcedTemplate.id' ) && false !== strpos( $preview_panel_tsx, 'campaign_id: payloadGroup?.campaign_id ?? -1' ) );
 
 $config = $ui->frontend_config();
 check( 'config carries the template', isset( $config['template'] ) && 'template-1' === $config['template'] );
@@ -453,33 +453,33 @@ check( 'config appearance has radius', isset( $config['appearance']['radius'] ) 
 check( 'config appearance has bar height', isset( $config['appearance']['barHeight'] ) && 10 === $config['appearance']['barHeight'] );
 
 // Shortcode template override lands on the container (per-widget template).
-$out = do_shortcode( '[goalcart_progress template="template-2"]' );
-check( 'shortcode template override', false !== strpos( $out, 'data-goalcart-template="template-2"' ) );
-$out = do_shortcode( '[goalcart_progress template="bogus"]' );
-check( 'bogus shortcode template ignored', false === strpos( $out, 'data-goalcart-template' ) );
+$out = do_shortcode( '[faracart_progress template="template-2"]' );
+check( 'shortcode template override', false !== strpos( $out, 'data-faracart-template="template-2"' ) );
+$out = do_shortcode( '[faracart_progress template="bogus"]' );
+check( 'bogus shortcode template ignored', false === strpos( $out, 'data-faracart-template' ) );
 
 // Settings drive the config, the container class and the inline CSS.
 $settings->set( 'frontend_template', 'template-3' );
 $settings->set( 'frontend_css_class', 'fancy-store' );
-$settings->set( 'frontend_custom_css', '.goalcart-card { padding: 2rem; }' );
+$settings->set( 'frontend_custom_css', '.faracart-card { padding: 2rem; }' );
 $settings->set( 'frontend_accent', 'nonsense' );
 
 check( 'config template follows settings', 'template-3' === $ui->frontend_config()['template'] );
 check( 'invalid color falls back in config', '#2271b1' === $ui->frontend_config()['appearance']['accent'] );
 
-$markup = $ui->widget_container( 'goalcart-test', 'full' );
+$markup = $ui->widget_container( 'faracart-test', 'full' );
 check( 'custom css class on container', false !== strpos( $markup, 'fancy-store' ) );
 
 $css = $ui->appearance_css();
-check( 'token css sets accent', false !== strpos( $css, '--goalcart-accent:#2271b1' ) );
-check( 'token css sets bar height', false !== strpos( $css, '--goalcart-bar-height:10px' ) );
+check( 'token css sets accent', false !== strpos( $css, '--faracart-accent:#2271b1' ) );
+check( 'token css sets bar height', false !== strpos( $css, '--faracart-bar-height:10px' ) );
 check( 'custom css appended', false !== strpos( $css, 'padding: 2rem' ) );
 
-add_filter( 'goalcart_frontend_template', function () {
+add_filter( 'faracart_frontend_template', function () {
 	return 'template-4';
 } );
 check( 'template filter overrides', 'template-4' === $ui->template() );
-remove_all_filters( 'goalcart_frontend_template' );
+remove_all_filters( 'faracart_frontend_template' );
 
 // Restore the Phase 11-visible defaults.
 $settings->set( 'frontend_template', 'template-1' );
@@ -495,22 +495,22 @@ echo "\n== 9. WooCommerce Blocks compatibility ==\n";
 // A fresh instance: earlier sections already rendered the classic cart
 // widget (and the plugin's duplicate guard is location-scoped per
 // instance), so block tests run against an untouched widget registry.
-$block_ui = new \GoalCart\Frontend\ProgressUI( $settings );
+$block_ui = new \FaraCart\Frontend\ProgressUI( $settings );
 
 // The render_block filter is registered on the booted shared instance.
 check( 'render_block filter wired', false !== has_filter( 'render_block', array( $ui, 'render_block_widget' ) ) );
 
 // Block widget appends after the block markup; unrelated blocks pass through.
 $out = $block_ui->render_block_widget( '<figure>cart block</figure>', array( 'blockName' => 'woocommerce/cart' ) );
-check( 'cart block gains the full widget container', false !== strpos( $out, 'id="goalcart-cart"' ) );
-check( 'cart block widget is the full variant', false !== strpos( $out, 'data-goalcart-variant="full"' ) );
+check( 'cart block gains the full widget container', false !== strpos( $out, 'id="faracart-cart"' ) );
+check( 'cart block widget is the full variant', false !== strpos( $out, 'data-faracart-variant="full"' ) );
 check( 'cart block content preserved', false !== strpos( $out, '<figure>cart block</figure>' ) );
 
 $out = $block_ui->render_block_widget( '<div>checkout</div>', array( 'blockName' => 'woocommerce/checkout' ) );
-check( 'checkout block gains the widget container', false !== strpos( $out, 'id="goalcart-checkout"' ) );
+check( 'checkout block gains the widget container', false !== strpos( $out, 'id="faracart-checkout"' ) );
 
 $out = $block_ui->render_block_widget( '<div>mini cart</div>', array( 'blockName' => 'woocommerce/mini-cart' ) );
-check( 'mini-cart block gains a compact widget', false !== strpos( $out, 'id="goalcart-mini-cart"' ) && false !== strpos( $out, 'data-goalcart-variant="compact"' ) );
+check( 'mini-cart block gains a compact widget', false !== strpos( $out, 'id="faracart-mini-cart"' ) && false !== strpos( $out, 'data-faracart-variant="compact"' ) );
 
 $out = $block_ui->render_block_widget( '<p>plain</p>', array( 'blockName' => 'core/paragraph' ) );
 check( 'non-woocommerce block untouched', '<p>plain</p>' === $out );
@@ -518,18 +518,18 @@ check( 'non-woocommerce block untouched', '<p>plain</p>' === $out );
 // Duplicate-guard across the two render paths: a fresh instance renders
 // the classic mini-cart action once, then a second injection through the
 // block path is suppressed (one widget per page location).
-$guard_ui = new \GoalCart\Frontend\ProgressUI( $settings );
+$guard_ui = new \FaraCart\Frontend\ProgressUI( $settings );
 
 ob_start();
 $guard_ui->render_mini_cart_widget();
 $mini_out = ob_get_clean();
-check( 'mini-cart widget renders exactly once through the classic action', 1 === substr_count( $mini_out, 'id="goalcart-mini-cart"' ) );
+check( 'mini-cart widget renders exactly once through the classic action', 1 === substr_count( $mini_out, 'id="faracart-mini-cart"' ) );
 
 $out = $guard_ui->render_block_widget( '<p>late</p>', array( 'blockName' => 'woocommerce/mini-cart' ) );
 check( 'duplicate-guard suppresses the second mini-cart widget', '<p>late</p>' === $out );
 
 // ---------------------------------------------------------------------------
-// 10. Gutenberg block (P21 — goalcart/progress)
+// 10. Gutenberg block (P21 — faracart/progress)
 // ---------------------------------------------------------------------------
 echo "\n== 10. Gutenberg block ==\n";
 
@@ -537,24 +537,24 @@ $ui->register_block();
 
 check(
 	'block type registered',
-	class_exists( 'WP_Block_Type_Registry' ) && \WP_Block_Type_Registry::get_instance()->is_registered( \GoalCart\Frontend\ProgressUI::BLOCK )
+	class_exists( 'WP_Block_Type_Registry' ) && \WP_Block_Type_Registry::get_instance()->is_registered( \FaraCart\Frontend\ProgressUI::BLOCK )
 );
 
-$block_type = class_exists( 'WP_Block_Type_Registry' ) ? \WP_Block_Type_Registry::get_instance()->get_registered( \GoalCart\Frontend\ProgressUI::BLOCK ) : null;
+$block_type = class_exists( 'WP_Block_Type_Registry' ) ? \WP_Block_Type_Registry::get_instance()->get_registered( \FaraCart\Frontend\ProgressUI::BLOCK ) : null;
 
 if ( $block_type ) {
 	check( 'block has a render callback', is_callable( $block_type->render_callback ) );
 	check( 'block api version 2', isset( $block_type->api_version ) && 2 === (int) $block_type->api_version );
 
 	$block_out = call_user_func( $block_type->render_callback, array( 'variant' => 'compact' ), '' );
-	check( 'block renders a widget container', false !== strpos( $block_out, 'data-goalcart-widget' ) );
-	check( 'block container is compact', false !== strpos( $block_out, 'data-goalcart-variant="compact"' ) );
-	check( 'block container id is unique', preg_match( '/id="goalcart-block-\d+"/', $block_out ) === 1 );
-	check( 'block template attr passes through', false === strpos( $block_out, 'data-goalcart-template' ) );
+	check( 'block renders a widget container', false !== strpos( $block_out, 'data-faracart-widget' ) );
+	check( 'block container is compact', false !== strpos( $block_out, 'data-faracart-variant="compact"' ) );
+	check( 'block container id is unique', preg_match( '/id="faracart-block-\d+"/', $block_out ) === 1 );
+	check( 'block template attr passes through', false === strpos( $block_out, 'data-faracart-template' ) );
 
 	$block_out = call_user_func( $block_type->render_callback, array( 'variant' => 'full', 'template' => 'template-2' ), '' );
-	check( 'block template override lands on container', false !== strpos( $block_out, 'data-goalcart-template="template-2"' ) );
-	check( 'repeated block ids stay unique', preg_match( '/id="goalcart-block-(\d+)"/', $block_out, $m ) === 1 && $m[1] !== '1' );
+	check( 'block template override lands on container', false !== strpos( $block_out, 'data-faracart-template="template-2"' ) );
+	check( 'repeated block ids stay unique', preg_match( '/id="faracart-block-(\d+)"/', $block_out, $m ) === 1 && $m[1] !== '1' );
 
 	// A page carrying the block needs the storefront assets.
 	$ref_block = new \ReflectionMethod( $ui, 'page_needs_widget' );
@@ -568,7 +568,7 @@ if ( $block_type ) {
 			'post_type'    => 'post',
 			'post_status'  => 'publish',
 			'post_title'   => 'FaraCart block test',
-			'post_content' => '<!-- wp:goalcart/progress {"variant":"compact"} /-->',
+			'post_content' => '<!-- wp:faracart/progress {"variant":"compact"} /-->',
 		), true );
 
 		check( 'block post inserted', ! is_wp_error( $post_id ) && $post_id > 0 );
@@ -602,14 +602,14 @@ echo "\n== 11. Recommendations presentation ==\n";
 // and moves the raw scoring details (score, component scores, ratios)
 // behind the Advanced details expander. Source-scanned so a regression
 // back to the raw numeric-first layout cannot slip through silently.
-$recommendations_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/Recommendations.tsx' );
+$recommendations_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/routes/Recommendations.tsx' );
 check( 'recommendations page composes a business confidence label', false !== strpos( $recommendations_tsx, 'confidenceTier(' ) && false !== strpos( $recommendations_tsx, ': ${tier.label}' ) );
-check( 'recommendations page labels expected impact in business terms', false !== strpos( $recommendations_tsx, "__('Expected impact', 'goalcart')" ) && false !== strpos( $recommendations_tsx, "__('average basket value', 'goalcart')" ) );
-check( 'recommendations page shows the Why? reasons on the primary card', false !== strpos( $recommendations_tsx, "__('Why?', 'goalcart')" ) && false !== strpos( $recommendations_tsx, 'candidate.reasons.map' ) );
-check( 'recommendations page explains unavailable expected profit (§34)', false !== strpos( $recommendations_tsx, "__('Add product cost data to estimate profitability.', 'goalcart')" ) );
-check( 'recommendations page hides raw scoring behind Advanced details', false !== strpos( $recommendations_tsx, "__('Advanced details', 'goalcart')" ) && false !== strpos( $recommendations_tsx, 'Scoring factors' ) );
+check( 'recommendations page labels expected impact in business terms', false !== strpos( $recommendations_tsx, "__('Expected impact', 'faracart')" ) && false !== strpos( $recommendations_tsx, "__('average basket value', 'faracart')" ) );
+check( 'recommendations page shows the Why? reasons on the primary card', false !== strpos( $recommendations_tsx, "__('Why?', 'faracart')" ) && false !== strpos( $recommendations_tsx, 'candidate.reasons.map' ) );
+check( 'recommendations page explains unavailable expected profit (§34)', false !== strpos( $recommendations_tsx, "__('Add product cost data to estimate profitability.', 'faracart')" ) );
+check( 'recommendations page hides raw scoring behind Advanced details', false !== strpos( $recommendations_tsx, "__('Advanced details', 'faracart')" ) && false !== strpos( $recommendations_tsx, 'Scoring factors' ) );
 check( 'recommendations page no longer leads with the raw confidence percent', false === strpos( $recommendations_tsx, 'formatPercent(top.confidence / 100)' ) && false === strpos( $recommendations_tsx, 'formatPercent(candidate.confidence / 100)' ) );
-check( 'recommendations page keeps the explicit apply + dismiss flow', false !== strpos( $recommendations_tsx, "__('Apply recommendation', 'goalcart')" ) && false !== strpos( $recommendations_tsx, "__('Dismiss', 'goalcart')" ) && false !== strpos( $recommendations_tsx, 'ConfirmDialog' ) );
+check( 'recommendations page keeps the explicit apply + dismiss flow', false !== strpos( $recommendations_tsx, "__('Apply recommendation', 'faracart')" ) && false !== strpos( $recommendations_tsx, "__('Dismiss', 'faracart')" ) && false !== strpos( $recommendations_tsx, 'ConfirmDialog' ) );
 
 // UICHANGES.md Best-Recommendation UX: the page renders ONLY the single
 // backend-ranked best recommendation (`payload.recommendation`), never the
@@ -620,14 +620,14 @@ check( 'recommendations page keeps the explicit apply + dismiss flow', false !==
 check( 'recommendations page renders the top recommendation card', false !== strpos( $recommendations_tsx, '<TopRecommendationCard' ) );
 check( 'recommendations page never renders the ranked-candidate list', false === strpos( $recommendations_tsx, 'Ranked candidates' ) && false === strpos( $recommendations_tsx, 'candidates.map' ) && false === strpos( $recommendations_tsx, 'CandidateRow' ) );
 check( 'recommendations page relies on the backend best (payload.recommendation)', false !== strpos( $recommendations_tsx, 'const top = payload?.recommendation' ) );
-check( 'recommendations page keeps an empty state when no recommendation exists', false !== strpos( $recommendations_tsx, "__('No recommendation available', 'goalcart')" ) );
+check( 'recommendations page keeps an empty state when no recommendation exists', false !== strpos( $recommendations_tsx, "__('No recommendation available', 'faracart')" ) );
 
 // Percentage safety in the analyzed-store-data section: the order-value
 // distribution is an array of buckets with a 0-1 share each (formatted
 // with formatPercent), never a Record<string, number> that renders
 // NaN%. The margin factor (a 0-1 rate) and coverage (0-100 points) use
 // the correct formatters — no division-by-100, no object arithmetic.
-$format_src = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/lib/format.ts' );
+$format_src = (string) file_get_contents( FARACART_PATH . 'admin-app/src/lib/format.ts' );
 check( 'formatPercent guards non-finite/missing values with an em dash', false !== strpos( $format_src, '!Number.isFinite(value)' ) && false !== strpos( $format_src, "return '—'" ) );
 check( 'formatPercentValue guards non-finite/missing values too', false !== strpos( $format_src, 'export function formatPercentValue(value: number | null | undefined)' ) );
 check( 'distribution renders each bucket label + share, not Object.entries', false !== strpos( $recommendations_tsx, 'data.distribution.map((bucket)' ) && false === strpos( $recommendations_tsx, 'Object.entries(data.distribution)' ) && false === strpos( $recommendations_tsx, 'formatBucket' ) );
@@ -647,12 +647,12 @@ echo "\n== 12. Upsell Analytics presentation ==\n";
 // interaction details" toggle; a summary strip answers the first-screen
 // question at a glance. Source-scanned so the commercial-first layout
 // cannot silently regress to a score/metrics-first table.
-$upsell_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/UpsellAnalytics.tsx' );
-check( 'upsell table leads with the commercial columns', false !== strpos( $upsell_tsx, "__('Orders', 'goalcart')" ) && false !== strpos( $upsell_tsx, "__('Estimated profit', 'goalcart')" ) && false !== strpos( $upsell_tsx, "__('Conversion', 'goalcart')" ) );
-check( 'upsell orders column comes before the interaction funnel', strpos( $upsell_tsx, "__('Orders', 'goalcart')" ) < strpos( $upsell_tsx, "__('Impressions', 'goalcart')" ) );
-check( 'upsell interaction details sit behind the show-details toggle', false !== strpos( $upsell_tsx, "__('Show interaction details', 'goalcart')" ) && false !== strpos( $upsell_tsx, 'showDetails && (' ) );
-check( 'upsell score is inside the interaction-details block', strpos( $upsell_tsx, "__('Score', 'goalcart')" ) > strpos( $upsell_tsx, 'showDetails && (' ) );
-check( 'upsell page shows a commercial summary strip', false !== strpos( $upsell_tsx, "__('Purchased Orders', 'goalcart')" ) && false !== strpos( $upsell_tsx, "__('Sales', 'goalcart')" ) );
+$upsell_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/routes/UpsellAnalytics.tsx' );
+check( 'upsell table leads with the commercial columns', false !== strpos( $upsell_tsx, "__('Orders', 'faracart')" ) && false !== strpos( $upsell_tsx, "__('Estimated profit', 'faracart')" ) && false !== strpos( $upsell_tsx, "__('Conversion', 'faracart')" ) );
+check( 'upsell orders column comes before the interaction funnel', strpos( $upsell_tsx, "__('Orders', 'faracart')" ) < strpos( $upsell_tsx, "__('Impressions', 'faracart')" ) );
+check( 'upsell interaction details sit behind the show-details toggle', false !== strpos( $upsell_tsx, "__('Show interaction details', 'faracart')" ) && false !== strpos( $upsell_tsx, 'showDetails && (' ) );
+check( 'upsell score is inside the interaction-details block', strpos( $upsell_tsx, "__('Score', 'faracart')" ) > strpos( $upsell_tsx, 'showDetails && (' ) );
+check( 'upsell page shows a commercial summary strip', false !== strpos( $upsell_tsx, "__('Purchased Orders', 'faracart')" ) && false !== strpos( $upsell_tsx, "__('Sales', 'faracart')" ) );
 check( 'upsell funnel rates never fabricate a denominator', false !== strpos( $upsell_tsx, 'denominator > 0 ? formatPercent' ) && false !== strpos( $upsell_tsx, '\'—\'' ) );
 check( 'upsell top-performing view sorts by purchases then sales', false !== strpos( $upsell_tsx, 'b.orders - a.orders || b.revenue - a.revenue' ) );
 check( 'upsell per-product score breakdown stays available', false !== strpos( $upsell_tsx, 'ProductDetailDialog' ) && false !== strpos( $upsell_tsx, 'Score breakdown' ) );
@@ -664,14 +664,14 @@ echo "\n== 13. UX polish states ==\n";
 // §44 — the two empty states are distinct: no interactions at all vs
 // interactions without any attributed purchase. Source-scanned so they
 // cannot silently merge back into a single "no data" message.
-$revenue_tsx  = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/RevenueOverview.tsx' );
-$analytics_tsx = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/routes/Analytics.tsx' );
-$profit_card   = (string) file_get_contents( GOALCART_PATH . 'admin-app/src/components/revenue/EstimatedProfitCard.tsx' );
-check( 'overview offers the no-sales-data empty state', false !== strpos( $revenue_tsx, "__('No sales data yet', 'goalcart')" ) );
-check( 'overview offers the distinct no-purchases-yet empty state', false !== strpos( $revenue_tsx, "__('No purchases yet', 'goalcart')" ) );
+$revenue_tsx  = (string) file_get_contents( FARACART_PATH . 'admin-app/src/routes/RevenueOverview.tsx' );
+$analytics_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/routes/Analytics.tsx' );
+$profit_card   = (string) file_get_contents( FARACART_PATH . 'admin-app/src/components/revenue/EstimatedProfitCard.tsx' );
+check( 'overview offers the no-sales-data empty state', false !== strpos( $revenue_tsx, "__('No sales data yet', 'faracart')" ) );
+check( 'overview offers the distinct no-purchases-yet empty state', false !== strpos( $revenue_tsx, "__('No purchases yet', 'faracart')" ) );
 check( 'overview no-purchases-yet only fires with activity but zero orders', false !== strpos( $revenue_tsx, 'summary.funnel.views > 0 && summary.orders === 0' ) );
-check( 'analytics offers the no-sales-data empty state', false !== strpos( $analytics_tsx, "__('No sales data yet', 'goalcart')" ) );
-check( 'analytics offers the distinct no-purchases-yet empty state', false !== strpos( $analytics_tsx, "__('No purchases yet', 'goalcart')" ) );
+check( 'analytics offers the no-sales-data empty state', false !== strpos( $analytics_tsx, "__('No sales data yet', 'faracart')" ) );
+check( 'analytics offers the distinct no-purchases-yet empty state', false !== strpos( $analytics_tsx, "__('No purchases yet', 'faracart')" ) );
 check( 'analytics no-purchases-yet only fires with funnel views and zero purchases', false !== strpos( $analytics_tsx, 'funnel.views > 0 &&' ) && false !== strpos( $analytics_tsx, 'funnel.converted === 0' ) );
 check( 'the no-purchases-yet copy follows section 44', false !== strpos( $revenue_tsx, 'but no attributed purchases have been recorded for this period' ) && false !== strpos( $analytics_tsx, 'but no attributed purchases have been recorded for this period' ) );
 
@@ -680,8 +680,8 @@ check( 'the no-purchases-yet copy follows section 44', false !== strpos( $revenu
 // stays subtle instead of legal-style.
 check( 'pages render loading skeletons', false !== strpos( $revenue_tsx, 'Skeleton' ) && false !== strpos( $analytics_tsx, 'Skeleton' ) );
 check( 'pages surface query errors instead of blank cards', false !== strpos( $revenue_tsx, 'query.isError' ) && false !== strpos( $analytics_tsx, 'analyticsQuery.isError' ) );
-check( 'profit card keeps the unavailable state', false !== strpos( $profit_card, "__('Not available', 'goalcart')" ) );
-check( 'observed-impact disclaimer stays subtle and present', false !== strpos( $revenue_tsx, "__('Observed impact', 'goalcart')" ) && false !== strpos( $revenue_tsx, 'AOV comparisons are observed impact' ) );
+check( 'profit card keeps the unavailable state', false !== strpos( $profit_card, "__('Not available', 'faracart')" ) );
+check( 'observed-impact disclaimer stays subtle and present', false !== strpos( $revenue_tsx, "__('Observed impact', 'faracart')" ) && false !== strpos( $revenue_tsx, 'AOV comparisons are observed impact' ) );
 
 // ---------------------------------------------------------------------------
 // Summary

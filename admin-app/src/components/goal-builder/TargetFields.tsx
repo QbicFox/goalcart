@@ -19,52 +19,52 @@ interface TargetFieldsProps {
 /** Calculation bases offered per goal type (engine-validated enums). */
 const MODE_OPTIONS: Record<string, Array<{ value: string; label: string }>> = {
   amount: [
-    { value: 'subtotal', label: __('Subtotal (before discounts)', 'goalcart') },
-    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
-    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+    { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
+    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
+    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
   ],
   category: [
-    { value: 'quantity', label: __('Quantity', 'goalcart') },
-    { value: 'subtotal', label: __('Subtotal (before discounts)', 'goalcart') },
-    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
-    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+    { value: 'quantity', label: __('Quantity', 'faracart') },
+    { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
+    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
+    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
   ],
   product: [
-    { value: 'quantity', label: __('Quantity', 'goalcart') },
-    { value: 'subtotal', label: __('Subtotal (before discounts)', 'goalcart') },
-    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
-    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+    { value: 'quantity', label: __('Quantity', 'faracart') },
+    { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
+    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
+    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
   ],
   // Phase 32 (brand/tag/attribute conditions): the category family.
   tag: [
-    { value: 'quantity', label: __('Quantity', 'goalcart') },
-    { value: 'subtotal', label: __('Subtotal (before discounts)', 'goalcart') },
-    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
-    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+    { value: 'quantity', label: __('Quantity', 'faracart') },
+    { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
+    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
+    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
   ],
   attribute: [
-    { value: 'quantity', label: __('Quantity', 'goalcart') },
-    { value: 'subtotal', label: __('Subtotal (before discounts)', 'goalcart') },
-    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
-    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+    { value: 'quantity', label: __('Quantity', 'faracart') },
+    { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
+    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
+    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
   ],
   brand: [
-    { value: 'quantity', label: __('Quantity', 'goalcart') },
-    { value: 'subtotal', label: __('Subtotal (before discounts)', 'goalcart') },
-    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'goalcart') },
-    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'goalcart') },
+    { value: 'quantity', label: __('Quantity', 'faracart') },
+    { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
+    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
+    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
   ],
 };
 
 /** The units a goal type measures, for the target field suffix. */
 function targetSuffix(type: GoalType, mode: string): string {
   if (type === 'weight') {
-    return __('(weight units)', 'goalcart');
+    return __('(weight units)', 'faracart');
   }
   if (type === 'quantity' || type === 'distinct_quantity' || mode === 'quantity') {
-    return __('(items)', 'goalcart');
+    return __('(items)', 'faracart');
   }
-  return __('(amount)', 'goalcart');
+  return __('(amount)', 'faracart');
 }
 
 /**
@@ -76,18 +76,18 @@ function targetExample(type: GoalType, mode: string): string {
   if (type === 'weight') {
     return __(
       'Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there.',
-      'goalcart'
+      'faracart'
     );
   }
   if (type === 'quantity' || type === 'distinct_quantity' || mode === 'quantity') {
     return __(
       'Example: if the target is 10 items, a cart with 7 items is 70% of the way there.',
-      'goalcart'
+      'faracart'
     );
   }
   return __(
     'Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there.',
-    'goalcart'
+    'faracart'
   );
 }
 
@@ -119,12 +119,12 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
     <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
       <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
         <TextField
-          label={__('Target', 'goalcart')}
+          label={__('Target', 'faracart')}
           type="number"
           fullWidth
           value={values.target === 0 ? '' : values.target}
           placeholder="0"
-          helperText={__('The threshold shoppers need to reach', 'goalcart')}
+          helperText={__('The threshold shoppers need to reach', 'faracart')}
           onChange={(event) => patch({ target: Number(event.target.value) || 0 })}
         />
       </Grid>
@@ -133,7 +133,7 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <TextField
             select
-            label={__('Calculate against', 'goalcart')}
+            label={__('Calculate against', 'faracart')}
             fullWidth
             value={mode}
             onChange={(event) => patch({ calculation_mode: event.target.value })}
@@ -151,13 +151,13 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       {type === 'category' && (
         <Grid size={12}>
           <EntityAutocomplete
-            label={__('Categories', 'goalcart')}
+            label={__('Categories', 'faracart')}
             value={values.categories}
             onChange={(categories) => patch({ categories })}
             search={searchCategories}
             helperText={__(
               'Only products in these categories count toward the target.',
-              'goalcart'
+              'faracart'
             )}
           />
         </Grid>
@@ -166,13 +166,13 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       {type === 'product' && (
         <Grid size={12}>
           <EntityAutocomplete
-            label={__('Products', 'goalcart')}
+            label={__('Products', 'faracart')}
             value={values.products}
             onChange={(products) => patch({ products })}
             search={searchProducts}
             helperText={__(
               'Only these products count toward the target. Variations are matched by their parent product.',
-              'goalcart'
+              'faracart'
             )}
           />
         </Grid>
@@ -181,13 +181,13 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       {type === 'tag' && (
         <Grid size={12}>
           <EntityAutocomplete
-            label={__('Tags', 'goalcart')}
+            label={__('Tags', 'faracart')}
             value={values.tags}
             onChange={(tags) => patch({ tags })}
             search={searchTags}
             helperText={__(
               'Only products carrying any of these tags count toward the target.',
-              'goalcart'
+              'faracart'
             )}
           />
         </Grid>
@@ -196,13 +196,13 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       {type === 'attribute' && (
         <Grid size={12}>
           <TaxonomyAutocomplete
-            label={__('Attributes', 'goalcart')}
+            label={__('Attributes', 'faracart')}
             value={values.attributes}
             multiple
             onChange={(attributes) => patch({ attributes })}
             helperText={__(
               'Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target.',
-              'goalcart'
+              'faracart'
             )}
           />
         </Grid>
@@ -211,13 +211,13 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
       {type === 'brand' && (
         <Grid size={{ xs: 12, sm: 8, lg: 6 }}>
           <TaxonomyAutocomplete
-            label={__('Brand attribute', 'goalcart')}
+            label={__('Brand attribute', 'faracart')}
             value={values.attributes.length > 0 ? [values.attributes[0]] : []}
             multiple={false}
             onChange={(attributes) => patch({ attributes })}
             helperText={__(
               'The product attribute that identifies the brand (typically pa_brand).',
-              'goalcart'
+              'faracart'
             )}
           />
         </Grid>
@@ -322,7 +322,7 @@ function TaxonomyAutocomplete({
         <TextField
           {...params}
           label={label}
-          placeholder={__('Search attributes…', 'goalcart')}
+          placeholder={__('Search attributes…', 'faracart')}
           helperText={helperText}
           slotProps={{
             ...params.slotProps,

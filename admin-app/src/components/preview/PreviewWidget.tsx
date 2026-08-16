@@ -40,15 +40,15 @@ interface PreviewWidgetProps {
 function conflictReasonLabel(reason: string): string {
   switch (reason) {
     case 'exclusive':
-      return __('Blocked by an exclusive goal', 'goalcart');
+      return __('Blocked by an exclusive goal', 'faracart');
     case 'not_first':
-      return __('Skipped — a higher-priority goal wins', 'goalcart');
+      return __('Skipped — a higher-priority goal wins', 'faracart');
     case 'not_best':
-      return __('Skipped — another reward is better', 'goalcart');
+      return __('Skipped — another reward is better', 'faracart');
     case 'lower_priority':
-      return __('Skipped — lower priority', 'goalcart');
+      return __('Skipped — lower priority', 'faracart');
     default:
-      return __('Skipped by a conflict', 'goalcart');
+      return __('Skipped by a conflict', 'faracart');
   }
 }
 
@@ -82,7 +82,7 @@ function effectiveSettings(
   return { ...base, ...own };
 }
 
-/** The reward chip — locked or unlocked (mirrors .goalcart-reward). */
+/** The reward chip — locked or unlocked (mirrors .faracart-reward). */
 function RewardChip({ label, state }: { label: string; state: 'locked' | 'unlocked' }) {
   const unlocked = state === 'unlocked';
 

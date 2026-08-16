@@ -61,7 +61,7 @@ function MetricCard({
  *
  * The revenue funnel (views → progressed → completed → converted), the
  * direct vs assisted attribution model split, incremental cart value and
- * profit impact — from `GET /goalcart/v1/revenue/attribution`.
+ * profit impact — from `GET /faracart/v1/revenue/attribution`.
  */
 export default function AttributionDashboard() {
   const { range } = useDateRange();
@@ -84,10 +84,10 @@ export default function AttributionDashboard() {
 
   return (
     <PageContainer
-      title={__('Revenue Attribution', 'goalcart')}
+      title={__('Revenue Attribution', 'faracart')}
       description={__(
         'The funnel and the direct vs assisted models behind FaraCart’s attributed revenue.',
-        'goalcart'
+        'faracart'
       )}
     >
       <RevenueToolbar goalId={goalId} onGoalChange={setGoalId} />
@@ -96,7 +96,7 @@ export default function AttributionDashboard() {
         <Alert severity="error" variant="outlined">
           {query.error instanceof Error
             ? query.error.message
-            : __('Could not load the attribution dashboard.', 'goalcart')}
+            : __('Could not load the attribution dashboard.', 'faracart')}
         </Alert>
       )}
 
@@ -112,10 +112,10 @@ export default function AttributionDashboard() {
       ) : isEmpty ? (
         <EmptyState
           icon={<CallSplitIcon fontSize="large" />}
-          title={__('No attributed orders yet', 'goalcart')}
+          title={__('No attributed orders yet', 'faracart')}
           description={__(
             'Orders are attributed once they reach a revenue-producing status. No goal-influenced orders were found in this range.',
-            'goalcart'
+            'faracart'
           )}
         />
       ) : data && summary ? (
@@ -126,24 +126,24 @@ export default function AttributionDashboard() {
                 (the same labels the Sales Performance advanced section and
                 the Goal Detail drawer use). Never the internal field names. */}
             <MetricCard
-              label={__('Direct revenue', 'goalcart')}
+              label={__('Direct revenue', 'faracart')}
               value={formatCurrency(summary.goal_driven_revenue)}
               icon={<PaymentsIcon fontSize="small" />}
-              hint={__('Direct incremental value', 'goalcart')}
+              hint={__('Direct incremental value', 'faracart')}
             />
             <MetricCard
-              label={__('Assisted revenue', 'goalcart')}
+              label={__('Assisted revenue', 'faracart')}
               value={formatCurrency(summary.goal_assisted_revenue)}
               icon={<AccountTreeIcon fontSize="small" />}
-              hint={__('Pure-assisted order totals', 'goalcart')}
+              hint={__('Pure-assisted order totals', 'faracart')}
             />
             <MetricCard
-              label={__('Influenced sales', 'goalcart')}
+              label={__('Influenced sales', 'faracart')}
               value={formatCurrency(summary.goal_influenced_revenue)}
               icon={<CallSplitIcon fontSize="small" />}
               hint={sprintf(
                 /* translators: 1: attributed orders. */
-                __('%1$s distinct orders', 'goalcart'),
+                __('%1$s distinct orders', 'faracart'),
                 formatNumber(summary.orders)
               )}
             />
@@ -152,19 +152,19 @@ export default function AttributionDashboard() {
           <Box sx={{ display: 'grid', gridTemplateColumns: { md: 'repeat(2, 1fr)' }, gap: 2, alignItems: 'stretch' }}>
             <Paper variant="outlined" sx={{ p: 2 }}>
               <Typography variant="h6" component="h3" gutterBottom>
-                {__('Funnel', 'goalcart')}
+                {__('Funnel', 'faracart')}
               </Typography>
               <FunnelVisual funnel={summary.funnel} />
             </Paper>
 
             <Paper variant="outlined" sx={{ p: 2 }}>
               <Typography variant="h6" component="h3" gutterBottom>
-                {__('Incremental cart value', 'goalcart')}
+                {__('Incremental cart value', 'faracart')}
               </Typography>
               <Stack spacing={1.25}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <Typography variant="body2" color="text.secondary">
-                    {__('Average lift per session', 'goalcart')}
+                    {__('Average lift per session', 'faracart')}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
                     {formatCurrency(data.incremental_cart_value.average)}
@@ -172,7 +172,7 @@ export default function AttributionDashboard() {
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <Typography variant="body2" color="text.secondary">
-                    {__('Total lift', 'goalcart')}
+                    {__('Total lift', 'faracart')}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
                     {formatCurrency(data.incremental_cart_value.total)}
@@ -180,7 +180,7 @@ export default function AttributionDashboard() {
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
                   <Typography variant="body2" color="text.secondary">
-                    {__('Average baseline', 'goalcart')}
+                    {__('Average baseline', 'faracart')}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
                     {formatCurrency(data.incremental_cart_value.average_baseline)}
@@ -188,7 +188,7 @@ export default function AttributionDashboard() {
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="body2" color="text.secondary">
-                    {__('Sessions', 'goalcart')}
+                    {__('Sessions', 'faracart')}
                   </Typography>
                   <Typography variant="body1" sx={{ fontWeight: 600 }}>
                     {formatNumber(data.incremental_cart_value.sessions)}
@@ -196,7 +196,7 @@ export default function AttributionDashboard() {
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Typography variant="body2" color="text.secondary">
-                    {__('Data sufficiency', 'goalcart')}
+                    {__('Data sufficiency', 'faracart')}
                   </Typography>
                   <Chip
                     size="small"
@@ -217,7 +217,7 @@ export default function AttributionDashboard() {
 
           <Paper variant="outlined" sx={{ p: 2 }}>
             <Typography variant="h6" component="h3" gutterBottom>
-              {__('Estimated profit impact', 'goalcart')}
+              {__('Estimated profit impact', 'faracart')}
             </Typography>
             {summary.profit_available && summary.profit_impact !== null ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -227,7 +227,7 @@ export default function AttributionDashboard() {
                 <Typography variant="body2" color="text.secondary">
                   {sprintf(
                     /* translators: 1: reward cost. */
-                    __('after %1$s estimated reward cost', 'goalcart'),
+                    __('after %1$s estimated reward cost', 'faracart'),
                     formatCurrency(summary.reward_cost)
                   )}
                 </Typography>
@@ -235,8 +235,8 @@ export default function AttributionDashboard() {
             ) : (
               <Typography variant="body2" color="text.secondary">
                 {summary.profit_reason ??
-                  __('Profit impact is unavailable because product cost data is not available.', 'goalcart')}{' '}
-                {__('Revenue-only analytics continue to work.', 'goalcart')}
+                  __('Profit impact is unavailable because product cost data is not available.', 'faracart')}{' '}
+                {__('Revenue-only analytics continue to work.', 'faracart')}
               </Typography>
             )}
           </Paper>

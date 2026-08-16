@@ -1423,11 +1423,11 @@ Inspect the existing database architecture before creating tables.
 If dedicated tables are required, consider:
 
 ```text
-wp_goalcart_revenue_events
-wp_goalcart_revenue_daily
-wp_goalcart_goal_attribution
-wp_goalcart_upsell_events
-wp_goalcart_upsell_stats
+wp_faracart_revenue_events
+wp_faracart_revenue_daily
+wp_faracart_goal_attribution
+wp_faracart_upsell_events
+wp_faracart_upsell_stats
 ```
 
 Potential event fields:
@@ -1484,7 +1484,7 @@ At minimum support daily aggregates.
 Example:
 
 ```text
-wp_goalcart_revenue_daily
+wp_faracart_revenue_daily
 ```
 
 Fields:
@@ -1965,11 +1965,11 @@ Implementation notes (see `tests/revenue-foundation-test.php`, 66 checks):
   cookie; rows store only anonymous session ids, numeric aggregates and
   plugin/WC ids (no emails, IPs, addresses or payment data); logged-in
   `user_id` is an id, not personal data.
-- **Event cleanup** — weekly `goalcart_revenue_cleanup` cron (scheduled
+- **Event cleanup** — weekly `faracart_revenue_cleanup` cron (scheduled
   through `Installer::cron_events()` + the new
   `Installer::maybe_schedule_events()`; cleared on deactivation) purges
   rows older than `RETENTION_DAYS` (filterable via
-  `goalcart_revenue_retention_days`) in bounded batches and sweeps orphan
+  `faracart_revenue_retention_days`) in bounded batches and sweeps orphan
   upsell_stats rows.
 
 ---
@@ -2024,8 +2024,8 @@ Implementation notes (see `tests/attribution-test.php`, 71 checks):
   (store-wide vs goal-exposed, labeled *observed* impact, never
   causality) and `shipping_stats()` (average shipping, per-method, free
   share — feeds the Phase 33.4 shipping-aware recommendations). Reads are
-  capped by `goalcart_attribution_metric_rows` /
-  `goalcart_attribution_order_scan_pages`.
+  capped by `faracart_attribution_metric_rows` /
+  `faracart_attribution_order_scan_pages`.
 - **Reward cost** — `RewardCostEstimator` maps every reward type to a
   deterministic cost model: percent (order total × % capped at max),
   fixed (amount), coupon (percent/fixed per coupon settings), free
@@ -2033,13 +2033,13 @@ Implementation notes (see `tests/attribution-test.php`, 71 checks):
   Models needing data the store lacks (shipping total, gift cost) return
   `available: false` with the reason — never a guessed number.
 - **Margin & profit impact** — product cost is read from the store's
-  `_cost` / `_wc_cog_cost` fields through the `goalcart_product_cost`
+  `_cost` / `_wc_cog_cost` fields through the `faracart_product_cost`
   filter (never modified); `estimated_profit = incremental_revenue ×
   margin% − reward_cost − shipping_cost`. Without margin data the profit
   is reported unavailable with a reason (revenue-only analytics).
 - **Feature flags** — attribution gates on the master + analytics toggles
   through the tracker's consent chain plus the
-  `goalcart_attribution_enabled` filter (documented in the hooks list).
+  `faracart_attribution_enabled` filter (documented in the hooks list).
 - **Graceful degradation** — no margin data → profit unavailable but all
   revenue metrics still compute; no WooCommerce order data → AOV/shipping
   comparisons mark `comparison_available: false`; refunded/zero-total
@@ -2086,10 +2086,10 @@ Implementation notes (see `tests/aggregation-test.php`, 73 checks):
   `cron_events()`; per-event intervals are mapped in the new
   `cron_intervals()` (cleanup weekly, aggregation daily).
 - **Bounded catch-up (large datasets)** — `aggregate_revenue()` starts the
-  day after the last aggregated date (`goalcart_revenue_last_aggregated`
-  option) or the lookback floor (`goalcart_aggregate_lookback_days`, 90 =
+  day after the last aggregated date (`faracart_revenue_last_aggregated`
+  option) or the lookback floor (`faracart_aggregate_lookback_days`, 90 =
   aligned with retention), processes at most
-  `goalcart_aggregate_max_days` (default 7) days per tick and advances the
+  `faracart_aggregate_max_days` (default 7) days per tick and advances the
   option — a backlog drains over several runs instead of one unbounded pass.
 - **Revenue summaries (cached)** — `RevenueRepository` (new) serves the
   KPI payloads: `overview()` (attribution summary + incremental cart value
@@ -2098,15 +2098,15 @@ Implementation notes (see `tests/aggregation-test.php`, 73 checks):
   over the window, merging today's still-live bucket from the engine until
   the next tick) and `product_stats()` (reads `upsell_stats`). Every read
   is memoized in a generation-versioned transient
-  (`goalcart_revenue_cache_version`) with a filterable TTL
-  (`goalcart_revenue_cache_ttl`) and a master bypass filter
-  (`goalcart_revenue_cache_enabled`).
+  (`faracart_revenue_cache_version`) with a filterable TTL
+  (`faracart_revenue_cache_ttl`) and a master bypass filter
+  (`faracart_revenue_cache_enabled`).
 - **Cache invalidation** — `invalidate()` bumps the generation counter
   (stale keys expire through their TTL, no key enumeration); wired to the
   events that change the data: order payment/status changes, goal CRUD
-  (new `goalcart_goals_changed` action fired by `GoalRepository`
+  (new `faracart_goals_changed` action fired by `GoalRepository`
   create/update/delete), product saves (`save_post_product`) and the
-  aggregation run itself (`goalcart_revenue_aggregated`).
+  aggregation run itself (`faracart_revenue_aggregated`).
 
 ---
 
@@ -2146,15 +2146,15 @@ Implementation notes (see `tests/recommendation-test.php`, 90 checks):
   full-table load); order distribution in AOV-relative buckets
   (`<0.5×` → `>1.5×`); shipping via `shipping_stats()` (average + free
   share); margin by sampling the newest catalog products through the
-  existing `goalcart_product_cost` read path — unavailable when the
+  existing `faracart_product_cost` read path — unavailable when the
   store stores no costs, never invented; current goal performance via
   the attribution funnel when a `goal_id` is supplied.
 - **Candidate generation (P33-22)** — AOV × {0.9, 1.0, 1.1, 1.2, 1.3,
   1.4, 1.5} plus shipping-aware additions (AOV + average shipping,
   median + average shipping) for free-shipping goals; the list is
-  filterable (`goalcart_recommendation_candidates`) before scoring.
+  filterable (`faracart_recommendation_candidates`) before scoring.
 - **Deterministic scoring (P33-22)** — four normalized components,
-  filterable weights (`goalcart_recommendation_weights`): reachability
+  filterable weights (`faracart_recommendation_weights`): reachability
   30% (share of orders within 30% below the threshold, triangular peak),
   distance 25% (stretch above median + AOV — too easy / too far both
   score low), economics 30% (reward cost vs incremental margin at the
@@ -2164,7 +2164,7 @@ Implementation notes (see `tests/recommendation-test.php`, 90 checks):
   `reasons` list (P33-24/59) — the UI can always explain *why*.
 - **Confidence (P33-23/52)** — data-volume tier (50/200/1000 orders →
   basic/reliable/high-confidence, default 50 minimum filterable via
-  `goalcart_recommendation_min_orders`) adjusted by order-value
+  `faracart_recommendation_min_orders`) adjusted by order-value
   consistency (CV), margin/shipping availability, goal-history depth and
   economics data availability; clamped 40–95 so heuristics are never
   presented as certainty.
@@ -2174,18 +2174,18 @@ Implementation notes (see `tests/recommendation-test.php`, 90 checks):
   model — profit excluded (never invented) without margin data.
 - **Graceful degradation (P33-51/52)** — fewer than the minimum orders →
   no recommendation, only an `insufficient_reason`; no WooCommerce order
-  data → unavailable; disabled via `goalcart_recommendations_enabled` →
+  data → unavailable; disabled via `faracart_recommendations_enabled` →
   unavailable; the payload is filterable end-to-end
-  (`goalcart_recommendations`).
+  (`faracart_recommendations`).
 - **Safety (P33-53)** — the engine never changes a goal; applying a
   recommendation is an explicit admin action through the existing
   GoalsController.
-- **API + caching** — new admin-only `GET /goalcart/v1/revenue/goal-recommendations`
+- **API + caching** — new admin-only `GET /faracart/v1/revenue/goal-recommendations`
   (`RecommendationsController`, args: goal_id, reward_type whitelist,
   reward_value/max/`reward_meta`, window_days 7–180, from/to), served
   through the Phase 33.3 generation-versioned transient layer
   (`RevenueRepository::goal_recommendations`, TTL filterable via
-  `goalcart_recommendation_cache_ttl`) — the existing order/goal/product
+  `faracart_recommendation_cache_ttl`) — the existing order/goal/product
   invalidation already covers every event that changes a recommendation.
 
 ---
@@ -2229,7 +2229,7 @@ Implementation notes (see `tests/upsell-test.php`, 81 checks):
   best sellers (`popular`). Out-of-stock / private / draft /
   already-in-cart / goal-excluded products never reach scoring.
 - **Six normalized 0–100 components (P33-27→32)** with filterable
-  weights (`goalcart_upsell_weights`, defaults per P33-33): price gap
+  weights (`faracart_upsell_weights`, defaults per P33-33): price gap
   25% (sweet band [0.75×, 1.30×] → 100, small overshoots tolerated per
   P33-27/36, hard decay to 0 at 3×, neutral 50 without a price/gap),
   relevance 25% (goal manual +55 / counts-toward-goal +35, category
@@ -2248,7 +2248,7 @@ Implementation notes (see `tests/upsell-test.php`, 81 checks):
   computed numbers — the admin UI can always show *why* a product was
   chosen.
 - **Historical learning (P33-35)** — the storefront reports upsell
-  interactions through the public `POST /goalcart/v1/upsell/track`
+  interactions through the public `POST /faracart/v1/upsell/track`
   (`UpsellController`) into the Phase 33.1 `upsell_events` log
   (impression/clicked/add deduped per session+goal+product within 24h;
   `upsell_order` once per order). On a paid order
@@ -2261,21 +2261,21 @@ Implementation notes (see `tests/upsell-test.php`, 81 checks):
   deterministic historical scoring, no black-box model.
 - **Graceful degradation (P33-51)** — no goal / no remaining gap →
   unavailable with a reason (a closed gap is explicit, never a
-  fabricated list); disabled via `goalcart_upsells_enabled` → unavailable;
+  fabricated list); disabled via `faracart_upsells_enabled` → unavailable;
   no margin data → margin neutral 50 and profit excluded (`profit_available:
   false`, `estimated_profit: null`) while the product still ranks; no
   historical data → conversion neutral 50; no candidates → unavailable.
-- **API + caching** — new admin-only `GET /goalcart/v1/revenue/upsells`
+- **API + caching** — new admin-only `GET /faracart/v1/revenue/upsells`
   (ranked products for a cart + goal context: goal_id, cart_value,
   remaining, cart, limit, exclude) and
-  `GET /goalcart/v1/revenue/upsells/{product_id}` (one product's score
+  `GET /faracart/v1/revenue/upsells/{product_id}` (one product's score
   breakdown + historical stats), served through
   `RevenueRepository::upsell_ranking()` / `upsell_product_detail()` on the
   same Phase 33.3 generation-versioned transient layer (the existing
   order/goal/product/aggregation invalidation keeps rankings fresh).
   `RevenueRepository::upsell_analytics()` powers the admin top-products
   table over a window (impressions/clicks/adds/orders/revenue/profit/score).
-  `goalcart_upsell_candidates` and `goalcart_upsells` filters let callers
+  `faracart_upsell_candidates` and `faracart_upsells` filters let callers
   pin the candidate set and shape the payload.
 - **Hooks** — `UpsellRanker` registers the server-side `upsell_order`
   attribution on `woocommerce_payment_complete` +
@@ -2384,7 +2384,7 @@ Progress:
 
 Implementation notes (see `tests/upsell-frontend-test.php`, 63 checks):
 
-- **Public rank endpoint** — new `GET /goalcart/v1/upsell/rank`
+- **Public rank endpoint** — new `GET /faracart/v1/upsell/rank`
   (`UpsellController`), public like `/progress` (no capability, per-IP
   rate limited, catalog data only — no PII or secrets). The storefront
   sends only `goal_id` + `limit`.
@@ -2413,7 +2413,7 @@ Implementation notes (see `tests/upsell-frontend-test.php`, 63 checks):
   heading, ranked product rows (image, name, server-formatted price,
   add-to-cart button) fetched through `ProgressUI::frontend_config()`
   (`cfg.upsells` — rank endpoint, track endpoint, limit, localized
-  labels; gated by the same `goalcart_upsells_enabled` gate as the
+  labels; gated by the same `faracart_upsells_enabled` gate as the
   ranker). Results are cached per goal:gap so cart-change re-renders
   reuse them; network failures drop the panel entirely.
 - **Add-to-cart integration** — the panel adds through WooCommerce's own
@@ -2421,17 +2421,17 @@ Implementation notes (see `tests/upsell-frontend-test.php`, 63 checks):
   buttons use — theme-compatible by construction), falls back to the
   classic `?add-to-cart=` redirect without it, and sends variation-requiring
   products to their product page. On success it funnels into the
-  centralized `goalcart:cart-changed` bridge, so the widgets re-poll and
+  centralized `faracart:cart-changed` bridge, so the widgets re-poll and
   the gap closes live.
 - **Conversion tracking** — the panel reports `upsell_impression` (once
   per goal+product per session), `upsell_clicked` (product link + add
   button) and `upsell_added` (after a successful add) through the
-  Phase 33.5 public `POST /goalcart/v1/upsell/track` route, reusing the
+  Phase 33.5 public `POST /faracart/v1/upsell/track` route, reusing the
   Phase 16 tracking nonce/session — feeding the historical learning
   loop (P33-35) exactly as the admin analytics expect.
 - **Mobile optimization + theme compatibility** — the panel is a grid on
   desktop and a swipeable horizontal snap-strip on small screens, styled
-  exclusively through the scoped `goalcart-*` classes and the existing
+  exclusively through the scoped `faracart-*` classes and the existing
   CSS custom-property tokens (accent/bg/border/text/radius), so it can
   never leak into or break a store theme.
 

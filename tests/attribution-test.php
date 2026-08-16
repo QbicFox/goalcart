@@ -12,7 +12,7 @@
  *    "unavailable" degradation when the store lacks the data (gift cost,
  *    shipping cost)
  *  - product margin: cost data is read from the store's product fields
- *    (or the goalcart_product_cost filter) — never invented; order margin
+ *    (or the faracart_product_cost filter) — never invented; order margin
  *    requires every line to have cost data (graceful)
  *  - profit impact: incremental × margin − reward cost − shipping; without
  *    margin data the profit is unavailable (revenue-only analytics)
@@ -60,15 +60,15 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\AttributionEngine;
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Analytics\Session;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\Goal;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\AttributionEngine;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Analytics\Session;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\Goal;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -94,7 +94,7 @@ function close( $a, $b, $eps = 0.01 ) {
 // real tables, exactly as the plugin would create them.
 Installer::maybe_create_tables();
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $engine   = $container->get( AttributionEngine::class );
 $tracker  = $container->get( RevenueTracker::class );

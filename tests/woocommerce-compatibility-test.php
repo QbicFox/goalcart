@@ -55,10 +55,10 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Rewards\Applicators\FreeShippingApplicator;
-use GoalCart\Rewards\Reward;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Rewards\Applicators\FreeShippingApplicator;
+use FaraCart\Rewards\Reward;
 
 $failures = 0;
 $checks   = 0;
@@ -110,10 +110,10 @@ if ( ! class_exists( 'WooCommerce' ) || ! defined( 'WC_VERSION' ) ) {
 	exit( 0 );
 }
 
-check( 'plugin declares WooCommerce active in this environment', \GoalCart\Compatibility::is_woocommerce_active() );
+check( 'plugin declares WooCommerce active in this environment', \FaraCart\Compatibility::is_woocommerce_active() );
 check(
 	'installed WC version meets the plugin minimum (8.0)',
-	\GoalCart\Compatibility::is_woocommerce_compatible()
+	\FaraCart\Compatibility::is_woocommerce_compatible()
 );
 echo "  (WC_VERSION=" . WC_VERSION . ")\n";
 
@@ -122,14 +122,14 @@ echo "  (WC_VERSION=" . WC_VERSION . ")\n";
 // ---------------------------------------------------------------------------
 echo "\n== 1. Cart (classic + block) ==\n";
 
-$ui = \GoalCart\Plugin::instance()->container()->get( \GoalCart\Frontend\ProgressUI::class );
+$ui = \FaraCart\Plugin::instance()->container()->get( \FaraCart\Frontend\ProgressUI::class );
 
 check( 'classic cart: woocommerce_before_cart wired', false !== has_action( 'woocommerce_before_cart', array( $ui, 'render_cart_widget' ) ) );
 check( 'block cart: render_block filter wired', false !== has_filter( 'render_block', array( $ui, 'render_block_widget' ) ) );
 
 $block_cart = $ui->render_block_widget( 'CART-BLOCK', array( 'blockName' => 'woocommerce/cart' ) );
 check( 'block cart: block content preserved', false !== strpos( $block_cart, 'CART-BLOCK' ) );
-check( 'block cart: full widget injected', false !== strpos( $block_cart, 'id="goalcart-cart"' ) && false !== strpos( $block_cart, 'data-goalcart-variant="full"' ) );
+check( 'block cart: full widget injected', false !== strpos( $block_cart, 'id="faracart-cart"' ) && false !== strpos( $block_cart, 'data-faracart-variant="full"' ) );
 
 // ---------------------------------------------------------------------------
 echo "\n== 2. Checkout (classic + block) ==\n";
@@ -137,7 +137,7 @@ echo "\n== 2. Checkout (classic + block) ==\n";
 check( 'classic checkout: woocommerce_before_checkout_form wired', false !== has_action( 'woocommerce_before_checkout_form', array( $ui, 'render_checkout_widget' ) ) );
 
 $block_checkout = $ui->render_block_widget( 'CHECKOUT-BLOCK', array( 'blockName' => 'woocommerce/checkout' ) );
-check( 'block checkout: widget injected (full)', false !== strpos( $block_checkout, 'id="goalcart-checkout"' ) && false !== strpos( $block_checkout, 'data-goalcart-variant="full"' ) );
+check( 'block checkout: widget injected (full)', false !== strpos( $block_checkout, 'id="faracart-checkout"' ) && false !== strpos( $block_checkout, 'data-faracart-variant="full"' ) );
 
 // ---------------------------------------------------------------------------
 echo "\n== 3. Mini Cart (classic + block) ==\n";
@@ -145,7 +145,7 @@ echo "\n== 3. Mini Cart (classic + block) ==\n";
 check( 'mini cart: woocommerce_after_mini_cart hooked', false !== has_action( 'woocommerce_after_mini_cart', array( $ui, 'render_mini_cart_widget' ) ) );
 
 $block_mini = $ui->render_block_widget( 'MINI-BLOCK', array( 'blockName' => 'woocommerce/mini-cart' ) );
-check( 'mini-cart block: widget injected (compact)', false !== strpos( $block_mini, 'id="goalcart-mini-cart"' ) && false !== strpos( $block_mini, 'data-goalcart-variant="compact"' ) );
+check( 'mini-cart block: widget injected (compact)', false !== strpos( $block_mini, 'id="faracart-mini-cart"' ) && false !== strpos( $block_mini, 'data-faracart-variant="compact"' ) );
 
 $foreign = $ui->render_block_widget( 'PLAIN', array( 'blockName' => 'core/paragraph' ) );
 check( 'non-woocommerce block untouched', 'PLAIN' === $foreign );
@@ -176,7 +176,7 @@ if ( class_exists( 'WC_Cart' ) ) {
 // ---------------------------------------------------------------------------
 echo "\n== 5. Coupons ==\n";
 
-$ci = \GoalCart\Plugin::instance()->cart_integration();
+$ci = \FaraCart\Plugin::instance()->cart_integration();
 foreach ( array( 'woocommerce_applied_coupon', 'woocommerce_removed_coupon' ) as $hook ) {
 	check( "{$hook} invalidates the context", 10 === has_action( $hook, array( $ci, 'invalidate' ) ) );
 }
@@ -280,7 +280,7 @@ if ( $features_api ) {
 		}
 	}
 }
-check( 'goalcart declared compatible with custom_order_tables (HPOS)', $declared );
+check( 'faracart declared compatible with custom_order_tables (HPOS)', $declared );
 
 // ---------------------------------------------------------------------------
 // Summary

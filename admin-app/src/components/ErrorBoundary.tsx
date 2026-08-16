@@ -45,7 +45,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     return (
       <Box sx={{ py: 4 }}>
         <Alert severity="error" variant="outlined">
-          <AlertTitle>{__('Something went wrong', 'goalcart')}</AlertTitle>
+          <AlertTitle>{__('Something went wrong', 'faracart')}</AlertTitle>
           <Box component="pre" sx={{ m: 0, mb: 1.5, whiteSpace: 'pre-wrap', fontSize: 13 }}>
             {this.state.error.message}
           </Box>
@@ -55,7 +55,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
             startIcon={<RefreshIcon />}
             onClick={this.handleRetry}
           >
-            {__('Try again', 'goalcart')}
+            {__('Try again', 'faracart')}
           </Button>
         </Alert>
       </Box>

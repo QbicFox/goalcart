@@ -2,21 +2,21 @@
 /**
  * REST controller for the shopper's free-gift selection.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Cart\CartIntegration;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Rewards\RewardEngine;
+use FaraCart\Cart\CartIntegration;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Rewards\RewardEngine;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Class GiftController
  *
- * Phase 32 (free gift selection): `POST /goalcart/v1/gift` — the storefront
+ * Phase 32 (free gift selection): `POST /faracart/v1/gift` — the storefront
  * gift picker calls this when the shopper picks one of the candidate gifts
  * of a completed goal configured in "choose" mode. The reward engine
  * validates the goal is currently completed and the product is in the
@@ -43,7 +43,7 @@ class GiftController extends BaseController {
 	 *
 	 * @var string
 	 */
-	const GIFT_NONCE_ACTION = 'goalcart_gift_nonce';
+	const GIFT_NONCE_ACTION = 'faracart_gift_nonce';
 
 	/**
 	 * Reward engine (validates the goal + adds the chosen gift).
@@ -125,8 +125,8 @@ class GiftController extends BaseController {
 	public function permission_callback( $request ) {
 		if ( ! wp_verify_nonce( (string) $request->get_param( 'nonce' ), self::GIFT_NONCE_ACTION ) ) {
 			return $this->error(
-				'goalcart_invalid_nonce',
-				__( 'Invalid gift nonce.', 'goalcart' ),
+				'faracart_invalid_nonce',
+				__( 'Invalid gift nonce.', 'faracart' ),
 				403
 			);
 		}
@@ -155,8 +155,8 @@ class GiftController extends BaseController {
 
 		if ( null === $cart || empty( $cart->get_cart() ) ) {
 			return $this->error(
-				'goalcart_gift_empty_cart',
-				__( 'Your cart is empty.', 'goalcart' ),
+				'faracart_gift_empty_cart',
+				__( 'Your cart is empty.', 'faracart' ),
 				400
 			);
 		}
@@ -166,8 +166,8 @@ class GiftController extends BaseController {
 
 		if ( ! $this->rewards->add_chosen_gift( $goal_id, $product_id, $cart ) ) {
 			return $this->error(
-				'goalcart_gift_unavailable',
-				__( 'This gift is no longer available for the goal.', 'goalcart' ),
+				'faracart_gift_unavailable',
+				__( 'This gift is no longer available for the goal.', 'faracart' ),
 				400
 			);
 		}

@@ -26,7 +26,7 @@
  *   - revenue_daily + upsell_stats aggregation, then cache invalidation
  *
  * Reversibility: every row is marked (goal/campaign name prefix "[Demo]",
- * order/product meta `_goalcart_demo_seed`, event meta `demo_seed`), so
+ * order/product meta `_faracart_demo_seed`, event meta `demo_seed`), so
  * `--clean` deletes exactly the demo rows and never touches existing
  * store data. Run from the plugin directory.
  */
@@ -54,22 +54,22 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\AttributionEngine;
-use GoalCart\Analytics\DailyAggregator;
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Campaigns\CampaignRepository;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\AttributionEngine;
+use FaraCart\Analytics\DailyAggregator;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Campaigns\CampaignRepository;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Settings\Settings;
 
 // ---------------------------------------------------------------------------
 // Bootstrap services (mirrors the test suites).
 // ---------------------------------------------------------------------------
 Installer::maybe_create_tables();
 
-$container     = \GoalCart\Plugin::instance()->container();
+$container     = \FaraCart\Plugin::instance()->container();
 $engine        = $container->get( AttributionEngine::class );
 $tracker       = $container->get( RevenueTracker::class );
 $settings      = $container->get( Settings::class );
@@ -96,10 +96,10 @@ if ( $clean ) {
 	$goal_ids = array_map( 'intval', (array) $wpdb->get_col( "SELECT id FROM {$goals_table} WHERE name LIKE '[Demo]%'" ) );
 	$campaign_ids = array_map( 'intval', (array) $wpdb->get_col( "SELECT id FROM {$campaigns_table} WHERE name LIKE '[Demo]%'" ) );
 	$product_ids = array_map( 'intval', (array) $wpdb->get_col(
-		"SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_goalcart_demo_seed'"
+		"SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_faracart_demo_seed'"
 	) );
 	$order_ids = array_map( 'intval', (array) $wpdb->get_col(
-		"SELECT DISTINCT p.ID FROM {$wpdb->posts} p INNER JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_goalcart_demo_seed' WHERE p.post_type IN ('shop_order','shop_order_placehold')"
+		"SELECT DISTINCT p.ID FROM {$wpdb->posts} p INNER JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_faracart_demo_seed' WHERE p.post_type IN ('shop_order','shop_order_placehold')"
 	) );
 
 	$goal_in   = $goal_ids ? implode( ',', $goal_ids ) : '0';
@@ -234,7 +234,7 @@ foreach ( $PRODUCT_SPECS as $index => $spec ) {
 	$product = wc_get_product( $post_id );
 	$product->set_regular_price( (string) $spec['price'] );
 	$product->update_meta_data( '_cost', (string) $spec['cost'] );
-	$product->update_meta_data( '_goalcart_demo_seed', '1' );
+	$product->update_meta_data( '_faracart_demo_seed', '1' );
 	$product->save();
 
 	$product_ids[ $index ] = (int) $post_id;
@@ -344,7 +344,7 @@ for ( $i = 1; $i <= $order_total; $i++ ) {
 		$order->set_date_created( wc_string_to_datetime( $date_mysql ) );
 	}
 	$order->set_status( 'completed' );
-	$order->update_meta_data( '_goalcart_demo_seed', '1' );
+	$order->update_meta_data( '_faracart_demo_seed', '1' );
 	$order->save();
 	$order_id = (int) $order->get_id();
 
@@ -506,7 +506,7 @@ $settings->set( 'analytics_enabled', $prev_analytics );
 // ---------------------------------------------------------------------------
 // Report.
 // ---------------------------------------------------------------------------
-$event_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table} WHERE meta LIKE '%demo_seed%' OR order_id IN (SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_goalcart_demo_seed')" );
+$event_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table} WHERE meta LIKE '%demo_seed%' OR order_id IN (SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_faracart_demo_seed')" );
 
 printf(
 	"Seeded %s demo dataset: %d goals, %d campaigns, %d products, %d orders, %d revenue events.\n",

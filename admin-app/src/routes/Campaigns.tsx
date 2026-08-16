@@ -3,7 +3,6 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import VisibilityIcon from '@mui/icons-material/Visibility';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
@@ -33,7 +32,6 @@ import {
   updateCampaign,
 } from '../api/campaigns';
 import type { Campaign } from '../types';
-import CampaignPreviewDialog from '../components/CampaignPreviewDialog';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
 import NumberPagination from '../components/NumberPagination';
@@ -43,9 +41,9 @@ import { formatSchedule } from '../lib/format';
 
 function statusChip(campaign: Campaign) {
   return campaign.status === 'active' ? (
-    <Chip label={__('Active', 'goalcart')} size="small" color="success" variant="outlined" />
+    <Chip label={__('Active', 'faracart')} size="small" color="success" variant="outlined" />
   ) : (
-    <Chip label={__('Inactive', 'goalcart')} size="small" color="default" variant="outlined" />
+    <Chip label={__('Inactive', 'faracart')} size="small" color="default" variant="outlined" />
   );
 }
 
@@ -61,7 +59,6 @@ export default function Campaigns() {
   const navigate = useNavigate();
 
   const [pendingDelete, setPendingDelete] = useState<Campaign | null>(null);
-  const [previewCampaign, setPreviewCampaign] = useState<Campaign | null>(null);
   const [page, setPage] = useState(0);
 
   const campaignsQuery = useQuery({
@@ -80,7 +77,7 @@ export default function Campaigns() {
   const deleteMutation = useMutation({
     mutationFn: (id: number) => deleteCampaign(id),
     onSuccess: () => {
-      notify(__('The campaign was deleted.', 'goalcart'));
+      notify(__('The campaign was deleted.', 'faracart'));
       setPendingDelete(null);
       invalidate();
     },
@@ -93,7 +90,7 @@ export default function Campaigns() {
   const duplicateMutation = useMutation({
     mutationFn: (id: number) => duplicateCampaign(id),
     onSuccess: (copy) => {
-      notify(sprintf(__('Duplicated “%s”.', 'goalcart'), copy.name));
+      notify(sprintf(__('Duplicated “%s”.', 'faracart'), copy.name));
       invalidate();
     },
     onError: (error: Error) => notify(error.message, 'error'),
@@ -103,7 +100,7 @@ export default function Campaigns() {
     mutationFn: ({ id, status }: { id: number; status: 'active' | 'inactive' }) =>
       updateCampaign(id, { status }),
     onSuccess: () => {
-      notify(__('The campaign status was updated.', 'goalcart'));
+      notify(__('The campaign status was updated.', 'faracart'));
       invalidate();
     },
     onError: (error: Error) => notify(error.message, 'error'),
@@ -117,10 +114,10 @@ export default function Campaigns() {
 
   return (
     <PageContainer
-      title={__('Campaigns', 'goalcart')}
+      title={__('Campaigns', 'faracart')}
       description={__(
         'Group goals into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M.',
-        'goalcart'
+        'faracart'
       )}
       actions={
         <Button
@@ -128,7 +125,7 @@ export default function Campaigns() {
           startIcon={<AddIcon />}
           onClick={() => navigate('/campaigns/new')}
         >
-          {__('Add campaign', 'goalcart')}
+          {__('Add campaign', 'faracart')}
         </Button>
       }
     >
@@ -136,7 +133,7 @@ export default function Campaigns() {
         <Alert severity="error" variant="outlined">
           {campaignsQuery.error instanceof Error
             ? campaignsQuery.error.message
-            : __('Could not load the campaigns.', 'goalcart')}
+            : __('Could not load the campaigns.', 'faracart')}
         </Alert>
       )}
 
@@ -148,10 +145,10 @@ export default function Campaigns() {
       ) : !campaignsQuery.isError && campaigns.length === 0 ? (
         <EmptyState
           icon={<CampaignIcon fontSize="large" />}
-          title={__('No campaigns yet', 'goalcart')}
+          title={__('No campaigns yet', 'faracart')}
           description={__(
             'Campaigns bundle multiple goals into scheduled, prioritized milestones. Create your first campaign to group goals around an event or season.',
-            'goalcart'
+            'faracart'
           )}
           action={
             <Button
@@ -159,7 +156,7 @@ export default function Campaigns() {
               startIcon={<AddIcon />}
               onClick={() => navigate('/campaigns/new')}
             >
-              {__('Add your first campaign', 'goalcart')}
+              {__('Add your first campaign', 'faracart')}
             </Button>
           }
         />
@@ -169,12 +166,12 @@ export default function Campaigns() {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>{__('Name', 'goalcart')}</TableCell>
-                  <TableCell align="right">{__('Milestones', 'goalcart')}</TableCell>
-                  <TableCell>{__('Status', 'goalcart')}</TableCell>
-                  <TableCell align="right">{__('Priority', 'goalcart')}</TableCell>
-                  <TableCell>{__('Schedule', 'goalcart')}</TableCell>
-                  <TableCell align="right">{__('Actions', 'goalcart')}</TableCell>
+                  <TableCell>{__('Name', 'faracart')}</TableCell>
+                  <TableCell align="right">{__('Milestones', 'faracart')}</TableCell>
+                  <TableCell>{__('Status', 'faracart')}</TableCell>
+                  <TableCell align="right">{__('Priority', 'faracart')}</TableCell>
+                  <TableCell>{__('Schedule', 'faracart')}</TableCell>
+                  <TableCell align="right">{__('Actions', 'faracart')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -201,8 +198,8 @@ export default function Campaigns() {
                         <Tooltip
                           title={
                             campaign.status === 'active'
-                              ? __('Disable', 'goalcart')
-                              : __('Enable', 'goalcart')
+                              ? __('Disable', 'faracart')
+                              : __('Enable', 'faracart')
                           }
                         >
                           <Switch
@@ -218,7 +215,7 @@ export default function Campaigns() {
                               input: {
                                 'aria-label': sprintf(
                                   /* translators: %s: campaign name. */
-                                  __('Toggle %s', 'goalcart'),
+                                  __('Toggle %s', 'faracart'),
                                   campaign.name
                                 ),
                               },
@@ -237,39 +234,30 @@ export default function Campaigns() {
                     </TableCell>
                     <TableCell align="right">
                       <Stack direction="row" spacing={0.5} sx={{ justifyContent: 'flex-end' }}>
-                        <Tooltip title={__('Preview', 'goalcart')}>
+                        <Tooltip title={__('Edit', 'faracart')}>
                           <IconButton
                             size="small"
-                            aria-label={sprintf(__('Preview %s', 'goalcart'), campaign.name)}
-                            onClick={() => setPreviewCampaign(campaign)}
-                          >
-                            <VisibilityIcon fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title={__('Edit', 'goalcart')}>
-                          <IconButton
-                            size="small"
-                            aria-label={sprintf(__('Edit %s', 'goalcart'), campaign.name)}
+                            aria-label={sprintf(__('Edit %s', 'faracart'), campaign.name)}
                             onClick={() => navigate(`/campaigns/${campaign.id}/edit`)}
                           >
                             <EditIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title={__('Duplicate', 'goalcart')}>
+                        <Tooltip title={__('Duplicate', 'faracart')}>
                           <IconButton
                             size="small"
-                            aria-label={sprintf(__('Duplicate %s', 'goalcart'), campaign.name)}
+                            aria-label={sprintf(__('Duplicate %s', 'faracart'), campaign.name)}
                             disabled={duplicateMutation.isPending}
                             onClick={() => duplicateMutation.mutate(campaign.id)}
                           >
                             <ContentCopyIcon fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title={__('Delete', 'goalcart')}>
+                        <Tooltip title={__('Delete', 'faracart')}>
                           <IconButton
                             size="small"
                             color="error"
-                            aria-label={sprintf(__('Delete %s', 'goalcart'), campaign.name)}
+                            aria-label={sprintf(__('Delete %s', 'faracart'), campaign.name)}
                             onClick={() => setPendingDelete(campaign)}
                           >
                             <DeleteIcon fontSize="small" />
@@ -294,20 +282,20 @@ export default function Campaigns() {
 
       <ConfirmDialog
         open={pendingDelete !== null}
-        title={__('Delete this campaign?', 'goalcart')}
+        title={__('Delete this campaign?', 'faracart')}
         description={
           pendingDelete
             ? sprintf(
                 /* translators: %s: campaign name. */
                 __(
                   '“%s” will be permanently deleted. Its goals are kept and detached — they can be reused by other campaigns.',
-                  'goalcart'
+                  'faracart'
                 ),
                 pendingDelete.name
               )
             : undefined
         }
-        confirmLabel={__('Delete', 'goalcart')}
+        confirmLabel={__('Delete', 'faracart')}
         destructive
         busy={deleteMutation.isPending}
         onConfirm={() => {
@@ -317,8 +305,6 @@ export default function Campaigns() {
         }}
         onCancel={() => setPendingDelete(null)}
       />
-
-      <CampaignPreviewDialog campaign={previewCampaign} onClose={() => setPreviewCampaign(null)} />
     </PageContainer>
   );
 }

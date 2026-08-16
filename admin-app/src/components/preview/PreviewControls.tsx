@@ -27,17 +27,17 @@ interface PreviewControlsProps {
 }
 
 const PRESETS: Array<{ value: PreviewPreset; label: string }> = [
-  { value: 'empty', label: __('Empty cart', 'goalcart') },
+  { value: 'empty', label: __('Empty cart', 'faracart') },
   { value: '25', label: '25%' },
   { value: '50', label: '50%' },
   { value: '75', label: '75%' },
-  { value: '100', label: __('Complete', 'goalcart') },
+  { value: '100', label: __('Complete', 'faracart') },
 ];
 
 const DEVICES: Array<{ value: PreviewControlsValue['deviceWidth']; label: string }> = [
-  { value: 'mobile', label: __('Mobile', 'goalcart') },
-  { value: 'tablet', label: __('Tablet', 'goalcart') },
-  { value: 'desktop', label: __('Desktop', 'goalcart') },
+  { value: 'mobile', label: __('Mobile', 'faracart') },
+  { value: 'tablet', label: __('Tablet', 'faracart') },
+  { value: 'desktop', label: __('Desktop', 'faracart') },
 ];
 
 /**
@@ -57,7 +57,7 @@ export default function PreviewControls({
       {/* Preview states */}
       <Box>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          {__('Preview state', 'goalcart')}
+          {__('Preview state', 'faracart')}
         </Typography>
         <ToggleButtonGroup
           size="small"
@@ -69,7 +69,7 @@ export default function PreviewControls({
               onApplyPreset(next as PreviewPreset);
             }
           }}
-          aria-label={__('Preview state', 'goalcart')}
+          aria-label={__('Preview state', 'faracart')}
         >
           {PRESETS.map((preset) => (
             <ToggleButton key={preset.value} value={preset.value} sx={{ flex: 1 }}>
@@ -81,18 +81,18 @@ export default function PreviewControls({
 
       {/* Simulated cart amount */}
       <TextField
-        label={__('Simulated cart amount', 'goalcart')}
+        label={__('Simulated cart amount', 'faracart')}
         type="number"
         size="small"
         fullWidth
         value={Number.isFinite(value.amount) ? value.amount : 0}
         onChange={(event) => onPatch({ preset: 'custom', amount: Number(event.target.value) || 0 })}
-        helperText={__('Drives money-based goals (subtotal / total).', 'goalcart')}
+        helperText={__('Drives money-based goals (subtotal / total).', 'faracart')}
       />
 
       {/* Simulated quantity */}
       <TextField
-        label={__('Simulated quantity', 'goalcart')}
+        label={__('Simulated quantity', 'faracart')}
         type="number"
         size="small"
         fullWidth
@@ -100,13 +100,13 @@ export default function PreviewControls({
         onChange={(event) =>
           onPatch({ preset: 'custom', quantity: Number(event.target.value) || 0 })
         }
-        helperText={__('Drives quantity, distinct-quantity and weight goals.', 'goalcart')}
+        helperText={__('Drives quantity, distinct-quantity and weight goals.', 'faracart')}
       />
 
       {/* Simulated reward */}
       <Box>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          {__('Simulated reward', 'goalcart')}
+          {__('Simulated reward', 'faracart')}
         </Typography>
         <ToggleButtonGroup
           size="small"
@@ -118,16 +118,16 @@ export default function PreviewControls({
               onPatch({ rewardState: next as PreviewControlsValue['rewardState'] });
             }
           }}
-          aria-label={__('Simulated reward', 'goalcart')}
+          aria-label={__('Simulated reward', 'faracart')}
         >
           <ToggleButton value="auto" sx={{ flex: 1 }}>
-            {__('Auto', 'goalcart')}
+            {__('Auto', 'faracart')}
           </ToggleButton>
           <ToggleButton value="locked" sx={{ flex: 1 }}>
-            {__('Locked', 'goalcart')}
+            {__('Locked', 'faracart')}
           </ToggleButton>
           <ToggleButton value="unlocked" sx={{ flex: 1 }}>
-            {__('Unlocked', 'goalcart')}
+            {__('Unlocked', 'faracart')}
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
@@ -135,7 +135,7 @@ export default function PreviewControls({
       {/* Device width */}
       <Box>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          {__('Device width', 'goalcart')}
+          {__('Device width', 'faracart')}
         </Typography>
         <ToggleButtonGroup
           size="small"
@@ -147,7 +147,7 @@ export default function PreviewControls({
               onPatch({ deviceWidth: next as PreviewControlsValue['deviceWidth'] });
             }
           }}
-          aria-label={__('Device width', 'goalcart')}
+          aria-label={__('Device width', 'faracart')}
         >
           {DEVICES.map((device) => (
             <ToggleButton key={device.value} value={device.value} sx={{ flex: 1 }}>
@@ -157,15 +157,15 @@ export default function PreviewControls({
         </ToggleButtonGroup>
       </Box>	      {/* Template override (pluggable template engine) */}
       <FormControl size="small" fullWidth>
-        <InputLabel id="preview-template-label">{__('Template', 'goalcart')}</InputLabel>
+        <InputLabel id="preview-template-label">{__('Template', 'faracart')}</InputLabel>
         <Select
           labelId="preview-template-label"
-          label={__('Template', 'goalcart')}
+          label={__('Template', 'faracart')}
           value={value.template}
           onChange={(event) => onPatch({ template: String(event.target.value) })}
         >
           <MenuItem value="">
-            <em>{__('Auto (goal/campaign)', 'goalcart')}</em>
+            <em>{__('Auto (goal/campaign)', 'faracart')}</em>
           </MenuItem>
           {templates.map((template) => (
             <MenuItem key={template.id} value={template.id}>

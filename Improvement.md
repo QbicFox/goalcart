@@ -43,7 +43,7 @@ Phase 10: ████████████████████ 100%   Te
 | --- | --- | --- |
 | 1 — Codebase Audit | [x] 100% | `REVENUE_ANALYTICS_AUDIT.md` (no code modified) |
 | 2 — Backend / Data Layer | [x] 100% | purchase/profit metrics on the legacy `/analytics` summary, profit reason codes + cost coverage + profit details, goal filter resolution, `tests/purchase-metrics-test.php` |
-| 3 — Profit Availability | [x] 100% | cost sources verified (`_cost` / `_wc_cog_cost` / variation fallback / `goalcart_product_cost`), `cost_sources` + `store_has_cost_data` metadata, `tests/profit-availability-test.php` |
+| 3 — Profit Availability | [x] 100% | cost sources verified (`_cost` / `_wc_cog_cost` / variation fallback / `faracart_product_cost`), `cost_sources` + `store_has_cost_data` metadata, `tests/profit-availability-test.php` |
 | 4 — Revenue Overview Redesign | [x] 100% | Sales Performance page: 4 KPI cards, profit states + details, simplified trend with toggles, insight cards, advanced attribution drawer, nav rename |
 | 5 — Goal Performance Redesign | [x] 100% | commercial-outcomes Goal table (Viewed/Progressed/Completed/Purchased/Purchase Rate/Sales/Estimated Profit, sortable), per-goal detail drawer (performance summary, funnel with drop-off, costs via the shared profit card, advanced attribution + advanced accordions), additive `goal_metrics()` fields, `tests/revenue-admin-test.php` (56 checks) |
 | 6 — Analytics Redesign | [x] 100% | Analytics page → Goal Conversion & Purchase Analysis: purchase KPI row + secondary views/completions, customer-journey funnel with drop-off, completion-vs-purchase analysis, sortable goal comparison table, deterministic drop-off insights, advanced attribution accordion, legacy activity metrics preserved behind an accordion; additive `goal_comparison`/`funnel`/assisted/influenced payload fields |
@@ -379,7 +379,7 @@ Use the existing product cost sources documented by the project:
 * WooCommerce `_cost`
 * WooCommerce `_wc_cog_cost`
 * variation fallback to parent where currently supported
-* `goalcart_product_cost` filter
+* `faracart_product_cost` filter
 
 Do not modify product cost data.
 
@@ -1888,7 +1888,7 @@ Update API tests.
 * `AttributionEngine` — the summary gained `profit_reason_code`, `cost_coverage` (attributed orders vs orders with cost data + coverage %, §11) and `profit_details` (incremental revenue, margin %, reward cost, shipping cost — §12 building blocks); `goal_metrics()` passes the same metadata through; all reads accept a `goal_ids` IN-clause for campaign/reward-filtered purchase metrics; fixed the regression where the pre-computed reward cost was zeroed inside the profit model (estimated profit now matches `incremental × margin − reward − shipping`).
 * `GoalRepository` — `ids_by_campaign()` / `ids_by_reward_type()` resolve the campaign/reward filters onto the attribution dimension.
 * `RevenueRepository::purchase_summary()` — cached attribution summary mapped from the legacy `/analytics` filters (from/to, goal_id, goal_ids, campaign_id, reward_type); `product_id` is unsupported in attribution and returns `null` (never a fabricated number); an unmatched filter returns an honest zeroed summary (`insufficient_data`), never store-wide fallback.
-* `AnalyticsController` (`GET /goalcart/v1/analytics`) — the existing summary is **extended** (never modified) with `progressed`, `purchased_orders`, `purchase_rate`, `attributed_sales`, `estimated_profit`, `profit_available`, `profit_reason`, `profit_reason_code`, `cost_coverage`, `profit_details` (§37/§38). Legacy fields stay byte-for-byte intact.
+* `AnalyticsController` (`GET /faracart/v1/analytics`) — the existing summary is **extended** (never modified) with `progressed`, `purchased_orders`, `purchase_rate`, `attributed_sales`, `estimated_profit`, `profit_available`, `profit_reason`, `profit_reason_code`, `cost_coverage`, `profit_details` (§37/§38). Legacy fields stay byte-for-byte intact.
 * `admin-app/src/types.ts` — `AnalyticsSummary`, revenue summary and goal-performance row types extended with the new fields (typed `ProfitReasonCode`, `CostCoverage`, `ProfitDetails`).
 * `tests/purchase-metrics-test.php` — 107 checks covering funnel/purchase states, profit states (available / missing cost / incomplete cost / zero / negative), reward cost regression, cost coverage, reason codes, date + goal/campaign/reward/product filtering, distinct-order counting and rollback residue.
 * Existing suites remain green: `attribution` (72), `aggregation` (74), `phase33` (99), `revenue-admin` (53) — the legacy `analytics-dashboard` suite's 31 failures are pre-existing dev-DB drift (32 failures reproduce on unmodified code); the Phase 2 additions to it all pass.
@@ -1906,7 +1906,7 @@ Test:
 * `_cost`
 * `_wc_cog_cost`
 * variation fallback
-* `goalcart_product_cost`
+* `faracart_product_cost`
 * reward cost
 * shipping cost
 
@@ -1919,13 +1919,13 @@ Do not invent costs.
 **Deliverables:**
 
 * `RewardCostEstimator` — `COST_SOURCES` constant (stable source keys:
-  `_cost`, `_wc_cog_cost`, `goalcart_product_cost`, `variation_fallback`)
+  `_cost`, `_wc_cog_cost`, `faracart_product_cost`, `variation_fallback`)
   and `store_has_cost_data()` (one cheap indexed postmeta scan, LIMIT 1,
   memoized per request — tells the UI whether any product carries cost
   data, so "set up product costs" and "partial coverage" are distinct
   states).
 * **Variation fallback fix** — a variation inheriting its parent's cost
-  now runs the parent through the `goalcart_product_cost` filter too
+  now runs the parent through the `faracart_product_cost` filter too
   (previously raw meta only), so filter-based cost sources are honored
   for variations.
 * **Safety consistency** — a stored cost of zero/negative is treated as
@@ -2009,7 +2009,7 @@ already supplied every value):
   Performance**; the Attribution Dashboard is removed from primary
   navigation (§3) while the `/revenue/attribution` route stays for
   backward compatibility.
-* `languages/goalcart.pot` regenerated (816 strings) so translators see
+* `languages/faracart.pot` regenerated (816 strings) so translators see
   the new labels.
 * Verification: `tsc --noEmit`, ESLint and `vite build` all clean.
 
@@ -2071,7 +2071,7 @@ Add advanced attribution section.
   "Converted" (§32).
 * `admin-app/src/types.ts` — `GoalPerformanceRow` extended with
   `influenced_revenue`, `attribution_window_days`, `data_sufficiency`.
-* `languages/goalcart.pot` regenerated (847 strings) so translators see
+* `languages/faracart.pot` regenerated (847 strings) so translators see
   the new labels.
 * Tests: `tests/revenue-admin-test.php` extended with the new goal-row
   field checks (56 checks, 0 failures); every regression suite stays
@@ -2112,7 +2112,7 @@ Do not remove existing Analytics API compatibility.
   per-goal loop, and `goal_comparison()` serves the per-goal comparison
   rows over the same filters (null for product_id — never a fabricated
   list; empty for a filter that resolves to no goals).
-* `AnalyticsController` (`GET /goalcart/v1/analytics`) — the existing
+* `AnalyticsController` (`GET /faracart/v1/analytics`) — the existing
   payload is **extended** (never modified): the summary now carries the
   full attribution `funnel` (views → progressed → completed → purchased,
   §23/§25), `assisted_sales` and `influenced_sales` (§30) and a new
@@ -2153,7 +2153,7 @@ Do not remove existing Analytics API compatibility.
 * `admin-app/src/types.ts` — `AnalyticsSummary` gains `funnel`,
   `assisted_sales`, `influenced_sales`, `profit_details`;
   `AnalyticsPayload` gains `goal_comparison`.
-* `languages/goalcart.pot` regenerated (868 strings).
+* `languages/faracart.pot` regenerated (868 strings).
 * Tests: `tests/analytics-dashboard-test.php` extended with the Phase 6
   checks (funnel shape, assisted/influenced fields, goal_comparison
   presence + goal/unmatched/product filter behavior — all pass); the
@@ -2210,7 +2210,7 @@ supplied every value; no backend change needed):
   scores, ratios, reach shares, reward-cost availability, margin %);
   `RecommendationData.margin` gains the sample counts (`sampled` /
   `with_cost`).
-* i18n — the POT is regenerated (887 strings) and `goalcart-fa_IR.po`
+* i18n — the POT is regenerated (887 strings) and `faracart-fa_IR.po`
   gains 159 translations (the Phase 7 labels plus the Phase 4–6
   coverage gap: profit/data-state labels, purchase terminology,
   insight/empty-state strings, tooltips) so `tests/i18n-test.php` is
@@ -2297,7 +2297,7 @@ shipped UI and the gaps were fixed.
 * **responsive** — KPI grids collapse to 2 columns on small screens;
   tables scroll horizontally; no horizontal overflow. Verified.
 * **RTL / i18n** — all labels go through `__()`/`sprintf()` with the
-  `goalcart` domain; new Phase 9 strings translated to fa_IR, JED/MO
+  `faracart` domain; new Phase 9 strings translated to fa_IR, JED/MO
   rebuilt (POT 893 strings, i18n 53/53).
 * **accessibility** — charts expose `role="img"` + aria-label
   summaries, expandables carry `aria-expanded`, toolbars/buttons carry

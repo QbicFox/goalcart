@@ -4,22 +4,22 @@
  *
  * Phase 27 (Internationalization): scans the PHP layer (ravis-faracart.php,
  * includes/) and the admin React app (admin-app/src) for WordPress
- * translation-function calls and emits `languages/goalcart.pot` — the
+ * translation-function calls and emits `languages/faracart.pot` — the
  * English source template translators work from. Output is deterministic
  * (sorted, deduped, with source references) so CI can verify freshness
  * with `--check`.
  *
  * The same extraction pattern covers PHP and TS/TSX because both call
- * `__( 'text', 'goalcart' )` with the same syntax. Mirrors the reference
+ * `__( 'text', 'faracart' )` with the same syntax. Mirrors the reference
  * plugin's `makepot` / `i18n:extract` npm scripts; a self-contained PHP
  * implementation so no wp-cli is required.
  *
  * Usage:
- *   php bin/extract-pot.php             # write languages/goalcart.pot
+ *   php bin/extract-pot.php             # write languages/faracart.pot
  *   php bin/extract-pot.php --check     # exit 1 when the POT is stale
  *   php bin/extract-pot.php --out /path/to.pot
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
 if ( PHP_SAPI !== 'cli' ) {
@@ -27,7 +27,7 @@ if ( PHP_SAPI !== 'cli' ) {
 }
 
 $root  = dirname( __DIR__ );
-$out   = $root . '/languages/goalcart.pot';
+$out   = $root . '/languages/faracart.pot';
 $check = false;
 
 for ( $i = 1; $i < $argc; $i++ ) {
@@ -117,13 +117,13 @@ function gc_i18n_extract_file( $path, $root ) {
 	$q = "'(?:[^'\\\\]|\\\\.)*'|\"(?:[^\"\\\\]|\\\\.)*\"";
 
 	$patterns = array(
-		// __( 'text', 'goalcart' ) / _e / esc_html__ / esc_attr__ / esc_html_e.
+		// __( 'text', 'faracart' ) / _e / esc_html__ / esc_attr__ / esc_html_e.
 		'/\\b(?:__|_e|esc_html__|esc_attr__|esc_html_e|esc_attr_e)\\(\\s*(' . $q . ')(?:\\s*,\\s*(' . $q . '))?\\s*\\)/s' => array( 'msgid' => 1, 'domain' => 2 ),
-		// _x( 'text', 'context', 'goalcart' ) / _ex / esc_html_x / esc_attr_x.
+		// _x( 'text', 'context', 'faracart' ) / _ex / esc_html_x / esc_attr_x.
 		'/\\b(?:_x|_ex|esc_html_x|esc_attr_x)\\(\\s*(' . $q . ')\\s*,\\s*(' . $q . ')(?:\\s*,\\s*(' . $q . '))?\\s*\\)/s' => array( 'msgid' => 1, 'msgctxt' => 2, 'domain' => 3 ),
-		// _n( 'single', 'plural', $count, 'goalcart' ).
+		// _n( 'single', 'plural', $count, 'faracart' ).
 		'/\\b_n\\(\\s*(' . $q . ')\\s*,\\s*(' . $q . ')\\s*,\\s*[^,)]+\\s*,\\s*(' . $q . ')\\s*\\)/s' => array( 'msgid' => 1, 'msgid_plural' => 2, 'domain' => 3 ),
-		// _nx( 'single', 'plural', $count, 'context', 'goalcart' ).
+		// _nx( 'single', 'plural', $count, 'context', 'faracart' ).
 		'/\\b_nx\\(\\s*(' . $q . ')\\s*,\\s*(' . $q . ')\\s*,\\s*[^,)]+\\s*,\\s*(' . $q . ')\\s*,\\s*(' . $q . ')\\s*\\)/s' => array( 'msgid' => 1, 'msgid_plural' => 2, 'msgctxt' => 3, 'domain' => 4 ),
 	);
 
@@ -207,7 +207,7 @@ function gc_i18n_render_pot( array $entries, $version ) {
 	$lines[] = '"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"';
 	$lines[] = '"Language-Team: LANGUAGE <LL@li.org>\\n"';
 	$lines[] = '"Plural-Forms: nplurals=2; plural=(n != 1);\\n"';
-	$lines[] = '"X-Domain: goalcart\\n"';
+	$lines[] = '"X-Domain: faracart\\n"';
 	$lines[] = '';
 
 	$sorted = $entries;

@@ -2,21 +2,21 @@
 /**
  * Reward engine facade for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards;
+namespace FaraCart\Rewards;
 
-use GoalCart\Cart\CartIntegration;
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\CompletionService;
-use GoalCart\Goals\ConflictResolver;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Cart\CartIntegration;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\CompletionService;
+use FaraCart\Goals\ConflictResolver;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -87,8 +87,8 @@ final class RewardEngine {
 	/**
 	 * Session keys owned by the engine.
 	 */
-	const SESSION_COUPONS = 'goalcart_applied_coupons';
-	const SESSION_GIFTS   = 'goalcart_gift_goals';
+	const SESSION_COUPONS = 'faracart_applied_coupons';
+	const SESSION_GIFTS   = 'faracart_gift_goals';
 
 	/**
 	 * Goal engine used to evaluate goals against the cart.
@@ -485,7 +485,7 @@ final class RewardEngine {
 	 * @return bool
 	 */
 	public function store_api_gift_quantity_editable( $editable, $product, $cart_item ) {
-		return ( is_array( $cart_item ) && ! empty( $cart_item['goalcart_gift'] ) ) ? false : $editable;
+		return ( is_array( $cart_item ) && ! empty( $cart_item['faracart_gift'] ) ) ? false : $editable;
 	}
 
 	/**
@@ -507,7 +507,7 @@ final class RewardEngine {
 	 */
 	public function clamp_gift_quantities( \WC_Cart $cart ) {
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( empty( $item['goalcart_gift'] ) ) {
+			if ( empty( $item['faracart_gift'] ) ) {
 				continue;
 			}
 
@@ -529,7 +529,7 @@ final class RewardEngine {
 	 */
 	public function zero_gift_prices( \WC_Cart $cart ) {
 		foreach ( $cart->get_cart() as $item ) {
-			if ( ! empty( $item['goalcart_gift'] ) && isset( $item['data'] ) && $item['data'] instanceof \WC_Product ) {
+			if ( ! empty( $item['faracart_gift'] ) && isset( $item['data'] ) && $item['data'] instanceof \WC_Product ) {
 				$item['data']->set_price( 0 );
 			}
 		}
@@ -727,8 +727,8 @@ final class RewardEngine {
 
 			if ( $chosen <= 0 ) {
 				foreach ( $cart->get_cart() as $item ) {
-					if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
-						$chosen = isset( $item['goalcart_gift_product'] ) ? (int) $item['goalcart_gift_product'] : 0;
+					if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id ) {
+						$chosen = isset( $item['faracart_gift_product'] ) ? (int) $item['faracart_gift_product'] : 0;
 						break;
 					}
 				}
@@ -745,14 +745,14 @@ final class RewardEngine {
 		// lookup and the line no longer looks mandatory by default.
 		foreach ( $desired as $goal_id => $product_id ) {
 			foreach ( $cart->get_cart() as $key => $item ) {
-				if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id && ! isset( $item['goalcart_gift_mode'] ) ) {
+				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id && ! isset( $item['faracart_gift_mode'] ) ) {
 					$mode = Reward::GIFT_AUTOMATIC;
 
 					if ( isset( $results[ (int) $goal_id ] ) && $results[ (int) $goal_id ]->reward() instanceof Reward ) {
 						$mode = $results[ (int) $goal_id ]->reward()->gift_add_mode();
 					}
 
-					$cart->cart_contents[ $key ]['goalcart_gift_mode'] = $mode;
+					$cart->cart_contents[ $key ]['faracart_gift_mode'] = $mode;
 					break;
 				}
 			}
@@ -792,12 +792,12 @@ final class RewardEngine {
 		}
 
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( empty( $item['goalcart_gift_goal'] ) || ! isset( $considered[ (int) $item['goalcart_gift_goal'] ] ) ) {
+			if ( empty( $item['faracart_gift_goal'] ) || ! isset( $considered[ (int) $item['faracart_gift_goal'] ] ) ) {
 				continue;
 			}
 
-			$gift_goal    = (int) $item['goalcart_gift_goal'];
-			$gift_product = isset( $item['goalcart_gift_product'] ) ? (int) $item['goalcart_gift_product'] : 0;
+			$gift_goal    = (int) $item['faracart_gift_goal'];
+			$gift_product = isset( $item['faracart_gift_product'] ) ? (int) $item['faracart_gift_product'] : 0;
 
 			if ( ! isset( $desired_by_goal[ $gift_goal ] ) || $desired_by_goal[ $gift_goal ] !== $gift_product ) {
 				$this->remove_gift_line( $cart, $gift_goal );
@@ -812,7 +812,7 @@ final class RewardEngine {
 	 *
 	 * Called by the public gift endpoint. The goal must currently be
 	 * completed AND grant a free-gift reward whose gift list allows the
-	 * chosen product; the gift is added free (goalcart markers) and
+	 * chosen product; the gift is added free (faracart markers) and
 	 * session-tracked so a goal that stops qualifying revokes it.
 	 *
 	 * @param int       $goal_id    Goal id.
@@ -866,11 +866,11 @@ final class RewardEngine {
 		// of stacking a second gift. The engine-removal flag suppresses the
 		// restore handler so the stale line stays gone.
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( empty( $item['goalcart_gift_goal'] ) || (int) $item['goalcart_gift_goal'] !== $goal_id ) {
+			if ( empty( $item['faracart_gift_goal'] ) || (int) $item['faracart_gift_goal'] !== $goal_id ) {
 				continue;
 			}
 
-			$current = isset( $item['goalcart_gift_product'] ) ? (int) $item['goalcart_gift_product'] : 0;
+			$current = isset( $item['faracart_gift_product'] ) ? (int) $item['faracart_gift_product'] : 0;
 
 			if ( $current !== $product_id ) {
 				$this->remove_gift_line( $cart, $goal_id );
@@ -954,7 +954,7 @@ final class RewardEngine {
 
 		try {
 			foreach ( $cart->get_cart() as $key => $item ) {
-				if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
+				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id ) {
 					$cart->remove_cart_item( $key );
 				}
 			}
@@ -985,7 +985,7 @@ final class RewardEngine {
 	 * Whether a gift line is mandatory (automatic gift-add mode).
 	 *
 	 * The add mode is stamped on the line at add time
-	 * ('goalcart_gift_mode'); legacy lines without the stamp fall back to
+	 * ('faracart_gift_mode'); legacy lines without the stamp fall back to
 	 * a repository lookup of the granting goal, then to the conservative
 	 * automatic default (an unrecognised gift line stays shopper-proof
 	 * until the engine re-adds it with a stamped mode).
@@ -1000,16 +1000,16 @@ final class RewardEngine {
 
 		$item = WC()->cart->get_cart_item( (string) $cart_item_key );
 
-		if ( ! is_array( $item ) || empty( $item['goalcart_gift'] ) ) {
+		if ( ! is_array( $item ) || empty( $item['faracart_gift'] ) ) {
 			return false;
 		}
 
-		if ( isset( $item['goalcart_gift_mode'] ) && '' !== $item['goalcart_gift_mode'] ) {
-			return Reward::GIFT_AUTOMATIC === $item['goalcart_gift_mode'];
+		if ( isset( $item['faracart_gift_mode'] ) && '' !== $item['faracart_gift_mode'] ) {
+			return Reward::GIFT_AUTOMATIC === $item['faracart_gift_mode'];
 		}
 
-		if ( ! empty( $item['goalcart_gift_goal'] ) && null !== $this->repository ) {
-			$goal = $this->repository->find( (int) $item['goalcart_gift_goal'] );
+		if ( ! empty( $item['faracart_gift_goal'] ) && null !== $this->repository ) {
+			$goal = $this->repository->find( (int) $item['faracart_gift_goal'] );
 
 			if ( $goal ) {
 				return Reward::from_goal( $goal )->is_gift_automatic();
@@ -1033,9 +1033,9 @@ final class RewardEngine {
 	 * @return mixed
 	 */
 	public function lock_gift_quantity( $quantity, $cart_item_key, $cart_item ) {
-		if ( is_array( $cart_item ) && ! empty( $cart_item['goalcart_gift'] ) ) {
+		if ( is_array( $cart_item ) && ! empty( $cart_item['faracart_gift'] ) ) {
 			return sprintf(
-				'<div class="quantity goalcart-gift-quantity"><input type="hidden" name="cart[%1$s][qty]" value="1" />1</div>',
+				'<div class="quantity faracart-gift-quantity"><input type="hidden" name="cart[%1$s][qty]" value="1" />1</div>',
 				esc_attr( (string) $cart_item_key )
 			);
 		}
@@ -1068,7 +1068,7 @@ final class RewardEngine {
 			? $cart->removed_cart_contents[ $cart_item_key ]
 			: null;
 
-		if ( ! is_array( $removed ) || empty( $removed['goalcart_gift'] ) || empty( $removed['goalcart_gift_goal'] ) ) {
+		if ( ! is_array( $removed ) || empty( $removed['faracart_gift'] ) || empty( $removed['faracart_gift_goal'] ) ) {
 			return;
 		}
 
@@ -1076,7 +1076,7 @@ final class RewardEngine {
 			return;
 		}
 
-		$goal_id = (int) $removed['goalcart_gift_goal'];
+		$goal_id = (int) $removed['faracart_gift_goal'];
 		$goal    = $this->repository->find( $goal_id );
 
 		if ( ! $goal || ! $goal->is_active() ) {
@@ -1089,10 +1089,10 @@ final class RewardEngine {
 		// path sync_cart uses) to confirm the shopper still qualifies.
 		$context = null !== $this->cart_integration
 			? $this->cart_integration->context( $cart )
-			: \GoalCart\Goals\CartContext::from_cart( $cart );
+			: \FaraCart\Goals\CartContext::from_cart( $cart );
 		$result  = $this->engine->evaluate( $goal, $context );
 
-		if ( ! $result->eligible() || \GoalCart\Goals\GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+		if ( ! $result->eligible() || \FaraCart\Goals\GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
 			return;
 		}
 

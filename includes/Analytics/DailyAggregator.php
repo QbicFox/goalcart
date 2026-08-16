@@ -2,13 +2,13 @@
 /**
  * Daily revenue aggregation for FaraCart (Phase 33.3 — Aggregation & Performance).
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
-use GoalCart\Database\Schema;
-use GoalCart\Hooks\HookManager;
+use FaraCart\Database\Schema;
+use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -35,9 +35,9 @@ defined( 'ABSPATH' ) || exit;
  * revenue-tracking consent chain as the event pipeline (RevenueTracker).
  *
  * Bounded catch-up (large datasets): run() aggregates at most
- * goalcart_aggregate_max_days (default 7) days per tick, starting the day
- * after the last aggregated date (goalcart_revenue_last_aggregated option) or
- * the lookback floor (goalcart_aggregate_lookback_days, default 90 — aligned
+ * faracart_aggregate_max_days (default 7) days per tick, starting the day
+ * after the last aggregated date (faracart_revenue_last_aggregated option) or
+ * the lookback floor (faracart_aggregate_lookback_days, default 90 — aligned
  * with the retention window so a stale option can never re-process purged
  * rows). A backlog drains over several runs instead of one unbounded pass.
  *
@@ -45,7 +45,7 @@ defined( 'ABSPATH' ) || exit;
  * rewritten, and upsell_stats is a full delete+rebuild, so re-running the job
  * (cron replays, manual triggers) never duplicates data.
  *
- * After a successful run the goalcart_revenue_aggregated action fires, which
+ * After a successful run the faracart_revenue_aggregated action fires, which
  * the RevenueRepository listens to for cache invalidation.
  */
 final class DailyAggregator {
@@ -55,14 +55,14 @@ final class DailyAggregator {
 	 *
 	 * @var string
 	 */
-	const AGGREGATE_EVENT = 'goalcart_revenue_aggregate';
+	const AGGREGATE_EVENT = 'faracart_revenue_aggregate';
 
 	/**
 	 * Option storing the last date aggregated into revenue_daily ('Y-m-d').
 	 *
 	 * @var string
 	 */
-	const LAST_AGGREGATED_OPTION = 'goalcart_revenue_last_aggregated';
+	const LAST_AGGREGATED_OPTION = 'faracart_revenue_last_aggregated';
 
 	/**
 	 * Default maximum days aggregated per cron tick (filterable).
@@ -118,7 +118,7 @@ final class DailyAggregator {
 	 *
 	 * Gated on the revenue tracking consent chain (no events are recorded
 	 * when tracking is off, so there is nothing to aggregate). Fires the
-	 * goalcart_revenue_aggregated action afterwards for cache invalidation.
+	 * faracart_revenue_aggregated action afterwards for cache invalidation.
 	 *
 	 * @return int Number of days aggregated (0 when gated off / nothing pending).
 	 */
@@ -136,7 +136,7 @@ final class DailyAggregator {
 		 * @param int $days     Number of days aggregated into revenue_daily.
 		 * @param int $products Number of products rebuilt in upsell_stats.
 		 */
-		do_action( 'goalcart_revenue_aggregated', $days, $products );
+		do_action( 'faracart_revenue_aggregated', $days, $products );
 
 		return $days;
 	}
@@ -144,7 +144,7 @@ final class DailyAggregator {
 	/**
 	 * Aggregate revenue_events + goal_attribution into revenue_daily.
 	 *
-	 * Processes at most goalcart_aggregate_max_days days per call, from the
+	 * Processes at most faracart_aggregate_max_days days per call, from the
 	 * day after the last aggregated date (or the lookback floor on the first
 	 * run) through yesterday — today's data is read live by the repository
 	 * until tomorrow's tick captures it.
@@ -152,10 +152,10 @@ final class DailyAggregator {
 	 * @return int Number of days aggregated.
 	 */
 	public function aggregate_revenue() {
-		$max_days = (int) apply_filters( 'goalcart_aggregate_max_days', self::DEFAULT_MAX_DAYS );
+		$max_days = (int) apply_filters( 'faracart_aggregate_max_days', self::DEFAULT_MAX_DAYS );
 		$max_days = max( 1, min( 90, $max_days ) );
 
-		$lookback = (int) apply_filters( 'goalcart_aggregate_lookback_days', self::DEFAULT_LOOKBACK_DAYS );
+		$lookback = (int) apply_filters( 'faracart_aggregate_lookback_days', self::DEFAULT_LOOKBACK_DAYS );
 		$lookback = max( 1, min( 730, $lookback ) );
 
 		$today = date( 'Y-m-d', current_time( 'timestamp' ) );
@@ -307,7 +307,7 @@ final class DailyAggregator {
 		$added      = RevenueTracker::EVENT_UPSELL_ADDED;
 		$order      = RevenueTracker::EVENT_UPSELL_ORDER;
 
-		$wpdb->query( 'SAVEPOINT goalcart_upsell_rebuild' );
+		$wpdb->query( 'SAVEPOINT faracart_upsell_rebuild' );
 
 		$deleted = $wpdb->query( "DELETE FROM {$stats}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name is a plugin constant.
 
@@ -336,13 +336,13 @@ final class DailyAggregator {
 
 		if ( false === $deleted || false === $rebuilt ) {
 			// Restore the previous stats state on any failure.
-			$wpdb->query( 'ROLLBACK TO SAVEPOINT goalcart_upsell_rebuild' );
-			$wpdb->query( 'RELEASE SAVEPOINT goalcart_upsell_rebuild' );
+			$wpdb->query( 'ROLLBACK TO SAVEPOINT faracart_upsell_rebuild' );
+			$wpdb->query( 'RELEASE SAVEPOINT faracart_upsell_rebuild' );
 
 			return 0;
 		}
 
-		$wpdb->query( 'RELEASE SAVEPOINT goalcart_upsell_rebuild' );
+		$wpdb->query( 'RELEASE SAVEPOINT faracart_upsell_rebuild' );
 
 		return max( 0, (int) $rebuilt );
 	}

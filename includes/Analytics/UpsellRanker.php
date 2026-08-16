@@ -2,16 +2,16 @@
 /**
  * Smart upsell ranking engine for FaraCart (Phase 33.5).
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
-use GoalCart\Database\Schema;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -34,7 +34,7 @@ defined( 'ABSPATH' ) || exit;
  *     recommended for the goal. Out-of-stock / private / draft /
  *     already-in-cart / goal-excluded products never reach scoring.
  *  2. Six normalized (0–100) component scores with filterable weights
- *     (`goalcart_upsell_weights`, defaults per P33-33):
+ *     (`faracart_upsell_weights`, defaults per P33-33):
  *
  *       price_gap  25% — how well the price fits the remaining gap
  *                         (tolerates small overshoots, P33-27/36)
@@ -54,7 +54,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Historical learning (P33-35): upsell impressions/clicks/adds are
  * reported by the storefront through the public
- * `POST /goalcart/v1/upsell/track` endpoint (UpsellController) into the
+ * `POST /faracart/v1/upsell/track` endpoint (UpsellController) into the
  * Phase 33.1 upsell_events log; `upsell_order` events are attributed
  * server-side when a paid order completes (a product that was shown /
  * clicked / added in the ordering session gets the order's upsell_order
@@ -76,7 +76,7 @@ final class UpsellRanker {
 
 	/**
 	 * Composite scoring weights (P33-33 defaults). Filterable per call
-	 * through goalcart_upsell_weights.
+	 * through faracart_upsell_weights.
 	 *
 	 * @var array<string, float>
 	 */
@@ -243,7 +243,7 @@ final class UpsellRanker {
 		 * @param bool         $enabled Whether smart upsells are enabled.
 		 * @param UpsellRanker $ranker  Ranker instance.
 		 */
-		return (bool) apply_filters( 'goalcart_upsells_enabled', true, $this );
+		return (bool) apply_filters( 'faracart_upsells_enabled', true, $this );
 	}
 
 	/**
@@ -274,7 +274,7 @@ final class UpsellRanker {
 		};
 
 		if ( ! $this->enabled() ) {
-			return $unavailable( __( 'Smart upsells are disabled.', 'goalcart' ) );
+			return $unavailable( __( 'Smart upsells are disabled.', 'faracart' ) );
 		}
 
 		// Prefer an already-loaded goal (the unified engine hands its
@@ -290,8 +290,8 @@ final class UpsellRanker {
 		if ( null === $remaining || $remaining <= 0 ) {
 			return $unavailable(
 				null === $remaining
-					? __( 'A goal target or an explicit remaining amount is required to rank upsells.', 'goalcart' )
-					: __( 'The goal gap is already closed — no upsells needed.', 'goalcart' )
+					? __( 'A goal target or an explicit remaining amount is required to rank upsells.', 'faracart' )
+					: __( 'The goal gap is already closed — no upsells needed.', 'faracart' )
 			);
 		}
 
@@ -308,10 +308,10 @@ final class UpsellRanker {
 		 * @param array<string, mixed> $args       Original request args.
 		 * @param UpsellRanker       $ranker     Ranker instance.
 		 */
-		$candidates = (array) apply_filters( 'goalcart_upsell_candidates', $candidates, $args, $this );
+		$candidates = (array) apply_filters( 'faracart_upsell_candidates', $candidates, $args, $this );
 
 		if ( empty( $candidates ) ) {
-			return $unavailable( __( 'No candidate products could be collected for this cart and goal.', 'goalcart' ) );
+			return $unavailable( __( 'No candidate products could be collected for this cart and goal.', 'faracart' ) );
 		}
 
 		// 2. Score every candidate.
@@ -365,7 +365,7 @@ final class UpsellRanker {
 		 * @param array<string, mixed> $args    Original request args.
 		 * @param UpsellRanker         $ranker  Ranker instance.
 		 */
-		return (array) apply_filters( 'goalcart_upsells', $payload, $args, $this );
+		return (array) apply_filters( 'faracart_upsells', $payload, $args, $this );
 	}
 
 	/**
@@ -398,7 +398,7 @@ final class UpsellRanker {
 
 		$weights = $this->score_weights();
 
-		// Clamp to 0–100: a partial goalcart_upsell_weights filter
+		// Clamp to 0–100: a partial faracart_upsell_weights filter
 		// normalizes only its provided keys (defaults keep their values),
 		// so the weight sum can exceed 1 — the exposed score must stay a
 		// bounded percentage regardless of the filter.
@@ -1159,64 +1159,64 @@ final class UpsellRanker {
 		if ( null !== $price && null !== $remaining && $remaining > 0 ) {
 			$reasons[] = sprintf(
 				/* translators: 1: product price, 2: remaining gap amount, 3: how well the price fits. */
-				__( 'Price %s fits the remaining %s %s.', 'goalcart' ),
+				__( 'Price %s fits the remaining %s %s.', 'faracart' ),
 				$this->fmt_amount( $price ),
 				$this->fmt_amount( (float) $remaining ),
-				$price_gap >= 90.0 ? __( 'almost exactly', 'goalcart' ) : __( 'partially', 'goalcart' )
+				$price_gap >= 90.0 ? __( 'almost exactly', 'faracart' ) : __( 'partially', 'faracart' )
 			);
 		}
 
 		$source_label = $this->source_label( $source );
 
 		if ( '' !== $source_label ) {
-			$reasons[] = sprintf( /* translators: 1: product source description. */ __( 'Source: %s.', 'goalcart' ), $source_label );
+			$reasons[] = sprintf( /* translators: 1: product source description. */ __( 'Source: %s.', 'faracart' ), $source_label );
 		}
 
 		if ( $relevance >= 80.0 ) {
-			$reasons[] = __( 'Highly relevant to the goal and the current cart contents.', 'goalcart' );
+			$reasons[] = __( 'Highly relevant to the goal and the current cart contents.', 'faracart' );
 		} elseif ( $relevance >= 40.0 ) {
-			$reasons[] = __( 'Relevant to the goal or the current cart contents.', 'goalcart' );
+			$reasons[] = __( 'Relevant to the goal or the current cart contents.', 'faracart' );
 		}
 
 		if ( (float) $product->get_total_sales() > 0 ) {
 			$reasons[] = sprintf(
 				/* translators: 1: units sold, 2: average rating. */
-				__( 'Popular product (%d units sold, %s rating).', 'goalcart' ),
+				__( 'Popular product (%d units sold, %s rating).', 'faracart' ),
 				(int) $product->get_total_sales(),
 				$this->fmt_amount( method_exists( $product, 'get_average_rating' ) ? (float) $product->get_average_rating() : 0.0 )
 			);
 		}
 
 		if ( $inventory >= 70.0 ) {
-			$reasons[] = __( 'Healthy stock levels.', 'goalcart' );
+			$reasons[] = __( 'Healthy stock levels.', 'faracart' );
 		} elseif ( $inventory < 50.0 ) {
-			$reasons[] = __( 'Limited stock remaining.', 'goalcart' );
+			$reasons[] = __( 'Limited stock remaining.', 'faracart' );
 		}
 
 		if ( null !== $margin ) {
 			$reasons[] = sprintf(
 				/* translators: 1: estimated margin percentage. */
-				__( 'Estimated margin %s%% on the product price.', 'goalcart' ),
+				__( 'Estimated margin %s%% on the product price.', 'faracart' ),
 				$this->fmt_pct( (float) $margin['margin_pct'] * 100.0 )
 			);
 		} else {
-			$reasons[] = __( 'Product margin data is not available — profitability scored neutral.', 'goalcart' );
+			$reasons[] = __( 'Product margin data is not available — profitability scored neutral.', 'faracart' );
 		}
 
 		if ( (int) $stats['impressions'] > 0 ) {
 			$reasons[] = sprintf(
 				/* translators: 1: impressions, 2: orders, 3: conversion rate. */
-				__( 'Historical upsell performance: %d impressions, %d orders (%s conversion).', 'goalcart' ),
+				__( 'Historical upsell performance: %d impressions, %d orders (%s conversion).', 'faracart' ),
 				(int) $stats['impressions'],
 				(int) $stats['orders'],
 				$this->fmt_pct( (float) $this->conversion_payload( $stats )['conversion_rate'] * 100.0 )
 			);
 		} else {
-			$reasons[] = __( 'No historical upsell performance data yet — conversion scored neutral.', 'goalcart' );
+			$reasons[] = __( 'No historical upsell performance data yet — conversion scored neutral.', 'faracart' );
 		}
 
 		if ( empty( $cart ) ) {
-			$reasons[] = __( 'No cart contents provided — relevance scored from the goal only.', 'goalcart' );
+			$reasons[] = __( 'No cart contents provided — relevance scored from the goal only.', 'faracart' );
 		}
 
 		return $reasons;
@@ -1230,15 +1230,15 @@ final class UpsellRanker {
 	 */
 	protected function source_label( $source ) {
 		$labels = array(
-			self::SOURCE_MANUAL         => __( 'manually selected for this goal', 'goalcart' ),
-			self::SOURCE_HISTORICAL     => __( 'previously recommended for this goal', 'goalcart' ),
-			self::SOURCE_CATEGORY       => __( "inside the goal's categories", 'goalcart' ),
-			self::SOURCE_UPSELL         => __( 'WooCommerce upsell of a cart item', 'goalcart' ),
-			self::SOURCE_CROSS_SELL     => __( 'WooCommerce cross-sell of a cart item', 'goalcart' ),
-			self::SOURCE_RELATED        => __( 'related to a cart item', 'goalcart' ),
-			self::SOURCE_CATEGORY_MATCH => __( 'shares a category with the cart', 'goalcart' ),
-			self::SOURCE_TAG_MATCH      => __( 'shares a tag with the cart', 'goalcart' ),
-			self::SOURCE_POPULAR        => __( 'best seller', 'goalcart' ),
+			self::SOURCE_MANUAL         => __( 'manually selected for this goal', 'faracart' ),
+			self::SOURCE_HISTORICAL     => __( 'previously recommended for this goal', 'faracart' ),
+			self::SOURCE_CATEGORY       => __( "inside the goal's categories", 'faracart' ),
+			self::SOURCE_UPSELL         => __( 'WooCommerce upsell of a cart item', 'faracart' ),
+			self::SOURCE_CROSS_SELL     => __( 'WooCommerce cross-sell of a cart item', 'faracart' ),
+			self::SOURCE_RELATED        => __( 'related to a cart item', 'faracart' ),
+			self::SOURCE_CATEGORY_MATCH => __( 'shares a category with the cart', 'faracart' ),
+			self::SOURCE_TAG_MATCH      => __( 'shares a tag with the cart', 'faracart' ),
+			self::SOURCE_POPULAR        => __( 'best seller', 'faracart' ),
 		);
 
 		return isset( $labels[ $source ] ) ? $labels[ $source ] : '';
@@ -1307,7 +1307,7 @@ final class UpsellRanker {
 	 * @return array<string, float>
 	 */
 	protected function score_weights() {
-		$weights = (array) apply_filters( 'goalcart_upsell_weights', self::SCORE_WEIGHTS );
+		$weights = (array) apply_filters( 'faracart_upsell_weights', self::SCORE_WEIGHTS );
 
 		// Fall back per key so a partial filter cannot zero a component:
 		// keys the filter omitted keep their defaults unchanged, while the
@@ -1565,7 +1565,7 @@ final class UpsellRanker {
 		}
 
 		return html_entity_decode(
-			wp_strip_all_tags( wc_price( (float) $price ) ),
+			wp_strip_all_tags( wc_price( (float) $price, array( 'currency' => $this->settings ? $this->settings->currency() : '' ) ) ),
 			ENT_QUOTES,
 			'UTF-8'
 		);

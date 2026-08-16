@@ -89,7 +89,7 @@ flow into the `RewardResult` (`blocked` state) and the progress/preview payload'
 | `exclusive` | A completed exclusive goal suppressed this goal |
 | `stacking` | A same-type non-stacking reward lost to stacking safety (display mirrors the cart grant exactly) |
 
-The public `GET /goalcart/v1/progress` payload and the admin `POST /goalcart/v1/preview`
+The public `GET /faracart/v1/progress` payload and the admin `POST /faracart/v1/preview`
 payload carry per goal:
 
 ```json

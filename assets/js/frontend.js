@@ -4,7 +4,7 @@
  * Vanilla JS, no build step — mirrors the reference plugin's frontend
  * convention (assets/js + a single inline window config + a
  * must-never-throw contract). The PHP side prints an empty container per
- * display location and this library fills them from `GET /goalcart/v1/progress`.
+ * display location and this library fills them from `GET /faracart/v1/progress`.
  *
  * Components (P11):
  *   GoalContainer    wrapper that hosts one goal's UI (full / compact)
@@ -20,7 +20,7 @@
  *   StickyGoalBar    fixed bottom bar (cart/checkout progress at a glance)
  *
  * Every eligible goal renders as its own card, stacked in a shared
- * wrapper (`.goalcart-widget__goals`) — a campaign's milestones each get
+ * wrapper (`.faracart-widget__goals`) — a campaign's milestones each get
  * a full card instead of one featured card + a tiny ladder. Each card
  * sees only itself.
  *
@@ -30,13 +30,13 @@
  * (product recommendation + goal), template-5 (compact floating / sticky
  * goal) or template-6 (premium / elegant e-commerce style) — driven by
  * the goal's resolved `template` (item override → scope default →
- * legacy → fallback) or a per-container `data-goalcart-template`
+ * legacy → fallback) or a per-container `data-faracart-template`
  * override. Appearance tokens (colors, radius, bar height) come from
  * the resolved `template_settings`; the animation toggle adds a
  * no-transition class when disabled.
  *
  * Contracts:
- *   - config comes from `window.goalcartFrontend` (printed early in
+ *   - config comes from `window.faracartFrontend` (printed early in
  *     wp_footer before this script)
  *   - nothing here ever throws: every handler is guarded, so a failure
  *     can never break the storefront
@@ -44,12 +44,12 @@
  *     location that re-renders (mini-cart fragment refresh) re-mounts
  *     after the DOM swap
  *
- * @package GoalCart
+ * @package FaraCart
  */
 ( function () {
 	'use strict';
 
-	var cfg = window.goalcartFrontend || null;
+	var cfg = window.faracartFrontend || null;
 
 	// No config = plugin disabled or assets loaded on a widget-less page.
 	if ( ! cfg || ! cfg.endpoint ) {
@@ -62,14 +62,14 @@
 	// the browser default, preserving the pre-Phase-27 behavior.
 	var uiLocale = ( cfg && cfg.locale ) ? String( cfg.locale ).replace( '_', '-' ) : undefined;
 
-	var WIDGET_SELECTOR = '[data-goalcart-widget]';
-	var STICKY_ID = 'goalcart-sticky';
+	var WIDGET_SELECTOR = '[data-faracart-widget]';
+	var STICKY_ID = 'faracart-sticky';
 	var stickyDismissed = false;
 
-	// Phase 16 analytics: window.goalcartTracking (printed by the Tracker)
+	// Phase 16 analytics: window.faracartTracking (printed by the Tracker)
 	// carries the track endpoint, the nonce and the session id. Absent =
 	// tracking disabled — every tracker call is a guarded no-op.
-	var tracking = window.goalcartTracking || null;
+	var tracking = window.faracartTracking || null;
 
 	// Per-session dedup: impressions / completions / suggestion impressions
 	// are reported once per goal (or goal+product); progress only when the
@@ -217,7 +217,7 @@
 				var payload = JSON.parse( request.responseText );
 				if ( payload && payload.data ) {
 					// Self-healing tracking nonce: every /progress response
-					// carries a freshly minted goalcart_track nonce. Adopt it
+					// carries a freshly minted faracart_track nonce. Adopt it
 					// before the next event report so a cached page's expired
 					// or foreign nonce can never block analytics for the rest
 					// of the session.
@@ -307,7 +307,7 @@
 	 * 33.7).
 	 *
 	 * The smart upsell funnel (impression / clicked / added) posts to the
-	 * public `POST /goalcart/v1/upsell/track` route — NOT the Phase 16
+	 * public `POST /faracart/v1/upsell/track` route — NOT the Phase 16
 	 * track endpoint, which only whitelists the goal/reward events. The
 	 * route reuses the same tracking nonce + session id the Phase 16
 	 * tracker already holds, so no second nonce is needed. Fire-and-forget
@@ -692,12 +692,12 @@
 			return null;
 		}
 
-		var wrap = el( 'div', 'goalcart-countdown' );
+		var wrap = el( 'div', 'faracart-countdown' );
 
-		wrap.appendChild( el( 'span', 'goalcart-countdown__label', uiLabel( 'countdown', 'Ends in' ) ) );
+		wrap.appendChild( el( 'span', 'faracart-countdown__label', uiLabel( 'countdown', 'Ends in' ) ) );
 
-		var time = el( 'span', 'goalcart-countdown__time' );
-		time.setAttribute( 'data-goalcart-end', String( entry.countdown_end ) );
+		var time = el( 'span', 'faracart-countdown__time' );
+		time.setAttribute( 'data-faracart-end', String( entry.countdown_end ) );
 		time.textContent = countdownText( entry.countdown_end );
 		wrap.appendChild( time );
 
@@ -756,14 +756,14 @@
 	 * @return {HTMLElement}
 	 */
 	function progressBar( goal ) {
-		var track = el( 'div', 'goalcart-progress' );
-		var fill = el( 'div', 'goalcart-progress__fill' );
+		var track = el( 'div', 'faracart-progress' );
+		var fill = el( 'div', 'faracart-progress__fill' );
 		var percent = Math.max( 0, Math.min( 100, Number( goal.percentage ) || 0 ) );
 
 		fill.style.width = percent + '%';
 
 		if ( goal.completed ) {
-			track.classList.add( 'goalcart-progress--complete' );
+			track.classList.add( 'faracart-progress--complete' );
 		}
 
 		track.appendChild( fill );
@@ -778,7 +778,7 @@
 	 * @return {HTMLElement}
 	 */
 	function goalMessage( goal ) {
-		return el( 'p', 'goalcart-message', String( goal.message || '' ) );
+		return el( 'p', 'faracart-message', String( goal.message || '' ) );
 	}
 
 	/**
@@ -811,16 +811,16 @@
 		var blocked = rewardBlocked( goal );
 		var unlocked = goal.completed && ! blocked;
 		var label = ( cfg.labels && cfg.labels[ reward.type ] ) || reward.type;
-		var chip = el( 'span', 'goalcart-reward' );
+		var chip = el( 'span', 'faracart-reward' );
 
-		chip.classList.add( unlocked ? 'goalcart-reward--unlocked' : 'goalcart-reward--locked' );
+		chip.classList.add( unlocked ? 'faracart-reward--unlocked' : 'faracart-reward--locked' );
 
 		if ( blocked && goal.conflict && goal.conflict.reason ) {
 			chip.setAttribute( 'title', String( goal.conflict.reason ) );
 		}
 
-		chip.appendChild( el( 'span', 'goalcart-reward__icon', unlocked ? '\u2713' : '\uD83D\uDD12' ) );
-		chip.appendChild( el( 'span', 'goalcart-reward__label', label ) );
+		chip.appendChild( el( 'span', 'faracart-reward__icon', unlocked ? '\u2713' : '\uD83D\uDD12' ) );
+		chip.appendChild( el( 'span', 'faracart-reward__label', label ) );
 
 		return chip;
 	}
@@ -875,37 +875,37 @@
 	 * @return {HTMLElement}
 	 */
 	function upsellRow( item, goal ) {
-		var row = el( 'div', 'goalcart-upsell' );
+		var row = el( 'div', 'faracart-upsell' );
 
-		row.setAttribute( 'data-goalcart-upsell-product', String( item.product_id || item.id || 0 ) );
-		row.setAttribute( 'data-goalcart-upsell-goal', String( goal.goal_id || 0 ) );
-		row.setAttribute( 'data-goalcart-upsell-permalink', String( item.permalink || '' ) );
-		row.setAttribute( 'data-goalcart-upsell-value', String( Number( goal.current ) || 0 ) );
+		row.setAttribute( 'data-faracart-upsell-product', String( item.product_id || item.id || 0 ) );
+		row.setAttribute( 'data-faracart-upsell-goal', String( goal.goal_id || 0 ) );
+		row.setAttribute( 'data-faracart-upsell-permalink', String( item.permalink || '' ) );
+		row.setAttribute( 'data-faracart-upsell-value', String( Number( goal.current ) || 0 ) );
 		// Source attribution rides on the row so the delegated handlers can
 		// keep the suggestion and upsell funnels separate after unification.
-		row.setAttribute( 'data-goalcart-upsell-source', recommendationSource( item ) );
+		row.setAttribute( 'data-faracart-upsell-source', recommendationSource( item ) );
 
 		if ( item.image ) {
-			var img = el( 'img', 'goalcart-upsell__image' );
+			var img = el( 'img', 'faracart-upsell__image' );
 			img.setAttribute( 'src', String( item.image ) );
 			img.setAttribute( 'alt', '' );
 			img.setAttribute( 'loading', 'lazy' );
 			row.appendChild( img );
 		}
 
-		var link = el( 'a', 'goalcart-upsell__name' );
+		var link = el( 'a', 'faracart-upsell__name' );
 		link.setAttribute( 'href', isSafeUrl( item.permalink ) ? String( item.permalink ) : '#' );
-		link.setAttribute( 'data-goalcart-upsell-id', String( item.product_id || item.id || 0 ) );
-		link.setAttribute( 'data-goalcart-upsell-goal', String( goal.goal_id || 0 ) );
-		link.setAttribute( 'data-goalcart-upsell-source', recommendationSource( item ) );
+		link.setAttribute( 'data-faracart-upsell-id', String( item.product_id || item.id || 0 ) );
+		link.setAttribute( 'data-faracart-upsell-goal', String( goal.goal_id || 0 ) );
+		link.setAttribute( 'data-faracart-upsell-source', recommendationSource( item ) );
 		link.textContent = String( item.name || '' );
 		row.appendChild( link );
 
 		// Prefer the raw amount so the configured currency display style is
 		// applied consistently; price_html remains a safe legacy fallback.
-		row.appendChild( el( 'span', 'goalcart-upsell__price', formatProductPrice( item ) ) );
+		row.appendChild( el( 'span', 'faracart-upsell__price', formatProductPrice( item ) ) );
 
-		var button = el( 'button', 'goalcart-upsell__add' );
+		var button = el( 'button', 'faracart-upsell__add' );
 		button.type = 'button';
 		button.textContent = upsellLabel( 'add', 'Add to cart' );
 		row.appendChild( button );
@@ -958,10 +958,10 @@
 			return null;
 		}
 
-		var panel = el( 'div', 'goalcart-upsells' );
-		panel.appendChild( el( 'div', 'goalcart-upsells__title', upsellLabel( 'heading', 'Products suggested for you' ) ) );
+		var panel = el( 'div', 'faracart-upsells' );
+		panel.appendChild( el( 'div', 'faracart-upsells__title', upsellLabel( 'heading', 'Products suggested for you' ) ) );
 
-		var list = el( 'div', 'goalcart-upsells__list' );
+		var list = el( 'div', 'faracart-upsells__list' );
 		panel.appendChild( list );
 
 		var cacheKey = goalId + ':' + Math.round( remaining );
@@ -971,7 +971,7 @@
 			list.replaceChildren();
 
 			if ( ! rows.length ) {
-				list.appendChild( el( 'div', 'goalcart-upsells__empty', upsellLabel( 'unavailable', 'No recommendations available right now.' ) ) );
+				list.appendChild( el( 'div', 'faracart-upsells__empty', upsellLabel( 'unavailable', 'No recommendations available right now.' ) ) );
 				return;
 			}
 
@@ -1034,7 +1034,7 @@
 		}
 
 		// Loading state: a subtle placeholder; the fetch fills the list.
-		list.appendChild( el( 'div', 'goalcart-upsells__loading', '…' ) );
+		list.appendChild( el( 'div', 'faracart-upsells__loading', '…' ) );
 
 		fetchUpsells( goalId, function ( payload ) {
 			upsellRankCache[ cacheKey ] = payload;
@@ -1077,17 +1077,17 @@
 	function upsellAdd( button ) {
 		// The unified upsell rows AND the template-4 recommend rows share
 		// the same data attributes, so one handler serves both.
-		var row = button.closest ? button.closest( '.goalcart-upsell, .goalcart-recommend' ) : null;
+		var row = button.closest ? button.closest( '.faracart-upsell, .faracart-recommend' ) : null;
 
 		if ( ! row ) {
 			return;
 		}
 
-		var productId = row.getAttribute( 'data-goalcart-upsell-product' ) || '';
-		var goalId = row.getAttribute( 'data-goalcart-upsell-goal' ) || '';
-		var permalink = row.getAttribute( 'data-goalcart-upsell-permalink' ) || '';
-		var cartValue = Number( row.getAttribute( 'data-goalcart-upsell-value' ) || 0 );
-		var src = row.getAttribute( 'data-goalcart-upsell-source' ) || '';
+		var productId = row.getAttribute( 'data-faracart-upsell-product' ) || '';
+		var goalId = row.getAttribute( 'data-faracart-upsell-goal' ) || '';
+		var permalink = row.getAttribute( 'data-faracart-upsell-permalink' ) || '';
+		var cartValue = Number( row.getAttribute( 'data-faracart-upsell-value' ) || 0 );
+		var src = row.getAttribute( 'data-faracart-upsell-source' ) || '';
 
 		if ( ! productId ) {
 			return;
@@ -1211,40 +1211,40 @@
 			return null;
 		}
 
-		var picker = el( 'div', 'goalcart-gift-picker' );
+		var picker = el( 'div', 'faracart-gift-picker' );
 
 		if ( reward.gift_chosen ) {
-			picker.classList.add( 'goalcart-gift-picker--done' );
-			picker.appendChild( el( 'p', 'goalcart-gift-picker__done', uiLabel( 'gift_chosen', 'Gift added to your cart' ) ) );
+			picker.classList.add( 'faracart-gift-picker--done' );
+			picker.appendChild( el( 'p', 'faracart-gift-picker__done', uiLabel( 'gift_chosen', 'Gift added to your cart' ) ) );
 			return picker;
 		}
 
-		picker.appendChild( el( 'div', 'goalcart-gift-picker__title', uiLabel( 'gift_picker', 'Pick your free gift' ) ) );
+		picker.appendChild( el( 'div', 'faracart-gift-picker__title', uiLabel( 'gift_picker', 'Pick your free gift' ) ) );
 
-		var list = el( 'ul', 'goalcart-gift-picker__list' );
+		var list = el( 'ul', 'faracart-gift-picker__list' );
 
 		for ( var i = 0; i < reward.gift.length; i++ ) {
 			var item = reward.gift[ i ];
-			var li = el( 'li', 'goalcart-gift-picker__item' );
-			var button = el( 'button', 'goalcart-gift-picker__button' );
+			var li = el( 'li', 'faracart-gift-picker__item' );
+			var button = el( 'button', 'faracart-gift-picker__button' );
 
 			button.type = 'button';
-			button.setAttribute( 'data-goalcart-gift-product', String( item.id || 0 ) );
-			button.setAttribute( 'data-goalcart-gift-goal', String( goal.goal_id || 0 ) );
+			button.setAttribute( 'data-faracart-gift-product', String( item.id || 0 ) );
+			button.setAttribute( 'data-faracart-gift-goal', String( goal.goal_id || 0 ) );
 
 			if ( item.image ) {
-				var img = el( 'img', 'goalcart-gift-picker__image' );
+				var img = el( 'img', 'faracart-gift-picker__image' );
 				img.src = String( item.image );
 				img.alt = '';
 				button.appendChild( img );
 			}
 
-			button.appendChild( el( 'span', 'goalcart-gift-picker__name', String( item.name || '' ) ) );
+			button.appendChild( el( 'span', 'faracart-gift-picker__name', String( item.name || '' ) ) );
 
 			if ( item.price !== null && item.price !== undefined && item.price !== '' ) {
-				button.appendChild( el( 'span', 'goalcart-gift-picker__price', formatMoney( item.price, cfg.currency ) ) );
+				button.appendChild( el( 'span', 'faracart-gift-picker__price', formatMoney( item.price, cfg.currency ) ) );
 			} else if ( item.price_html ) {
-				button.appendChild( el( 'span', 'goalcart-gift-picker__price', String( item.price_html ) ) );
+				button.appendChild( el( 'span', 'faracart-gift-picker__price', String( item.price_html ) ) );
 			}
 
 			li.appendChild( button );
@@ -1263,15 +1263,15 @@
 	 * @return {void}
 	 */
 	function claimGift( button ) {
-		var goalId = button.getAttribute( 'data-goalcart-gift-goal' ) || '0';
-		var productId = button.getAttribute( 'data-goalcart-gift-product' ) || '0';
+		var goalId = button.getAttribute( 'data-faracart-gift-goal' ) || '0';
+		var productId = button.getAttribute( 'data-faracart-gift-product' ) || '0';
 
 		if ( ! goalId || ! productId || button.disabled ) {
 			return;
 		}
 
 		button.disabled = true;
-		button.classList.add( 'goalcart-gift-picker__button--pending' );
+		button.classList.add( 'faracart-gift-picker__button--pending' );
 
 		var body;
 		try {
@@ -1282,7 +1282,7 @@
 			} );
 		} catch ( error ) {
 			button.disabled = false;
-			button.classList.remove( 'goalcart-gift-picker__button--pending' );
+			button.classList.remove( 'faracart-gift-picker__button--pending' );
 			return;
 		}
 
@@ -1301,16 +1301,16 @@
 			// A failed claim (nonce, stock) re-enables the button so the
 			// shopper can retry after the next poll adopts a fresh nonce.
 			button.disabled = false;
-			button.classList.remove( 'goalcart-gift-picker__button--pending' );
+			button.classList.remove( 'faracart-gift-picker__button--pending' );
 		};
 
 		request.onerror = function () {
 			button.disabled = false;
-			button.classList.remove( 'goalcart-gift-picker__button--pending' );
+			button.classList.remove( 'faracart-gift-picker__button--pending' );
 		};
 		request.ontimeout = function () {
 			button.disabled = false;
-			button.classList.remove( 'goalcart-gift-picker__button--pending' );
+			button.classList.remove( 'faracart-gift-picker__button--pending' );
 		};
 		request.send( body );
 	}
@@ -1324,7 +1324,7 @@
 	 * @return {string}
 	 */
 	function widgetTemplate( container, goal ) {
-		var override = container.getAttribute( 'data-goalcart-template' );
+		var override = container.getAttribute( 'data-faracart-template' );
 		var names = [ 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6', 'milestone_chain', 'campaign_progress' ];
 
 		if ( override && names.indexOf( override ) !== -1 ) {
@@ -1350,7 +1350,7 @@
 	 *
 	 * The backend resolves each goal's effective template settings (item
 	 * override → scope default → legacy → fallback) and ships them in the
-	 * payload; the stylesheet reads the same --goalcart-* custom
+	 * payload; the stylesheet reads the same --faracart-* custom
 	 * properties the global Appearance settings override, so a per-goal
 	 * (or per-campaign) template styles exactly what its settings say.
 	 *
@@ -1364,30 +1364,30 @@
 		}
 
 		var map = {
-			accent: '--goalcart-accent',
-			bg: '--goalcart-bg',
-			border: '--goalcart-border',
-			text: '--goalcart-text',
-			secondaryText: '--goalcart-text-muted',
-			radius: '--goalcart-radius',
-			barHeight: '--goalcart-bar-height',
-			trackColor: '--goalcart-track',
-			progressColor: '--goalcart-progress-color',
-			buttonColor: '--goalcart-button-bg',
-			buttonTextColor: '--goalcart-button-text',
-			buttonRadius: '--goalcart-button-radius',
-			iconBg: '--goalcart-icon-bg',
-			iconColor: '--goalcart-icon-color',
-			headerBg: '--goalcart-header-bg',
-			ringSize: '--goalcart-ring-size',
-			strokeWidth: '--goalcart-ring-stroke',
-			productImageSize: '--goalcart-product-image',
-			shadow: '--goalcart-shadow-intensity',
-			percentColor: '--goalcart-percent-color',
-			percentSize: '--goalcart-percent-size',
-			dotColor: '--goalcart-dot-color',
-			doneColor: '--goalcart-done-color',
-			connectorColor: '--goalcart-connector-color'
+			accent: '--faracart-accent',
+			bg: '--faracart-bg',
+			border: '--faracart-border',
+			text: '--faracart-text',
+			secondaryText: '--faracart-text-muted',
+			radius: '--faracart-radius',
+			barHeight: '--faracart-bar-height',
+			trackColor: '--faracart-track',
+			progressColor: '--faracart-progress-color',
+			buttonColor: '--faracart-button-bg',
+			buttonTextColor: '--faracart-button-text',
+			buttonRadius: '--faracart-button-radius',
+			iconBg: '--faracart-icon-bg',
+			iconColor: '--faracart-icon-color',
+			headerBg: '--faracart-header-bg',
+			ringSize: '--faracart-ring-size',
+			strokeWidth: '--faracart-ring-stroke',
+			productImageSize: '--faracart-product-image',
+			shadow: '--faracart-shadow-intensity',
+			percentColor: '--faracart-percent-color',
+			percentSize: '--faracart-percent-size',
+			dotColor: '--faracart-dot-color',
+			doneColor: '--faracart-done-color',
+			connectorColor: '--faracart-connector-color'
 		};
 
 		for ( var key in map ) {
@@ -1423,7 +1423,7 @@
 			return;
 		}
 
-		var styleId = 'goalcart-template-css-' + hashString( css );
+		var styleId = 'faracart-template-css-' + hashString( css );
 
 		if ( document.getElementById( styleId ) ) {
 			return;
@@ -1472,7 +1472,7 @@
 	function tplIcon( goal, fallback ) {
 		var icon = String( goal.icon || '' ).trim();
 
-		return el( 'span', 'goalcart-tpl-icon', icon || fallback );
+		return el( 'span', 'faracart-tpl-icon', icon || fallback );
 	}
 
 	/**
@@ -1493,7 +1493,7 @@
 		}
 
 		var item = items[ 0 ];
-		var cta = el( 'a', 'goalcart-cta' + ( klass ? ' ' + klass : '' ) );
+		var cta = el( 'a', 'faracart-cta' + ( klass ? ' ' + klass : '' ) );
 
 		if ( item.permalink && isSafeUrl( item.permalink ) ) {
 			cta.href = String( item.permalink );
@@ -1552,7 +1552,7 @@
 		var radius = ( size - stroke ) / 2;
 		var circumference = 2 * Math.PI * radius;
 		var NS = 'http://www.w3.org/2000/svg';
-		var wrap = el( 'div', 'goalcart-t3__ring' );
+		var wrap = el( 'div', 'faracart-t3__ring' );
 
 		wrap.style.width = size + 'px';
 		wrap.style.height = size + 'px';
@@ -1565,9 +1565,9 @@
 		svg.setAttribute( 'width', String( size ) );
 		svg.setAttribute( 'height', String( size ) );
 		svg.setAttribute( 'role', 'img' );
-		svg.setAttribute( 'class', 'goalcart-t3__svg' );
+		svg.setAttribute( 'class', 'faracart-t3__svg' );
 
-		track.setAttribute( 'class', 'goalcart-t3__track' );
+		track.setAttribute( 'class', 'faracart-t3__track' );
 		track.setAttribute( 'cx', String( size / 2 ) );
 		track.setAttribute( 'cy', String( size / 2 ) );
 		track.setAttribute( 'r', String( radius ) );
@@ -1575,7 +1575,7 @@
 		track.setAttribute( 'stroke', trackColor );
 		track.setAttribute( 'stroke-width', String( stroke ) );
 
-		fill.setAttribute( 'class', 'goalcart-t3__fill' );
+		fill.setAttribute( 'class', 'faracart-t3__fill' );
 		fill.setAttribute( 'cx', String( size / 2 ) );
 		fill.setAttribute( 'cy', String( size / 2 ) );
 		fill.setAttribute( 'r', String( radius ) );
@@ -1592,11 +1592,11 @@
 		wrap.appendChild( svg );
 
 		if ( 'check' === inner ) {
-			wrap.appendChild( el( 'span', 'goalcart-t3__check', '\u2713' ) );
+			wrap.appendChild( el( 'span', 'faracart-t3__check', '\u2713' ) );
 		} else if ( 'percent' === inner ) {
-			var readout = el( 'div', 'goalcart-t3__readout' );
-			readout.appendChild( el( 'span', 'goalcart-t3__percent', formatNumber( Math.round( percent ) ) + '%' ) );
-			readout.appendChild( el( 'span', 'goalcart-t3__progress-label', uiLabel( 'progress', 'Progress' ) ) );
+			var readout = el( 'div', 'faracart-t3__readout' );
+			readout.appendChild( el( 'span', 'faracart-t3__percent', formatNumber( Math.round( percent ) ) + '%' ) );
+			readout.appendChild( el( 'span', 'faracart-t3__progress-label', uiLabel( 'progress', 'Progress' ) ) );
 			wrap.appendChild( readout );
 		}
 
@@ -1615,28 +1615,28 @@
 	 * @return {HTMLElement}
 	 */
 	function recommendRow( item, goal ) {
-		var row = el( 'div', 'goalcart-recommend' );
+		var row = el( 'div', 'faracart-recommend' );
 		var productId = String( item.id || item.product_id || 0 );
 
-		row.setAttribute( 'data-goalcart-upsell-product', productId );
-		row.setAttribute( 'data-goalcart-upsell-goal', String( goal.goal_id || 0 ) );
-		row.setAttribute( 'data-goalcart-upsell-permalink', String( item.permalink || '' ) );
-		row.setAttribute( 'data-goalcart-upsell-value', String( Number( goal.current ) || 0 ) );
-		row.setAttribute( 'data-goalcart-upsell-source', 'suggestion' );
+		row.setAttribute( 'data-faracart-upsell-product', productId );
+		row.setAttribute( 'data-faracart-upsell-goal', String( goal.goal_id || 0 ) );
+		row.setAttribute( 'data-faracart-upsell-permalink', String( item.permalink || '' ) );
+		row.setAttribute( 'data-faracart-upsell-value', String( Number( goal.current ) || 0 ) );
+		row.setAttribute( 'data-faracart-upsell-source', 'suggestion' );
 
 		var image;
 		if ( item.image ) {
-			image = el( 'img', 'goalcart-recommend__image' );
+			image = el( 'img', 'faracart-recommend__image' );
 			image.setAttribute( 'src', String( item.image ) );
 			image.setAttribute( 'alt', String( item.name || '' ) );
 			image.setAttribute( 'loading', 'lazy' );
 		} else {
-			image = el( 'span', 'goalcart-recommend__image goalcart-recommend__image--placeholder', '\uD83D\uDECD' );
+			image = el( 'span', 'faracart-recommend__image faracart-recommend__image--placeholder', '\uD83D\uDECD' );
 		}
 		row.appendChild( image );
 
-		var info = el( 'div', 'goalcart-recommend__info' );
-		var link = el( 'a', 'goalcart-recommend__name' );
+		var info = el( 'div', 'faracart-recommend__info' );
+		var link = el( 'a', 'faracart-recommend__name' );
 
 		if ( item.permalink && isSafeUrl( item.permalink ) ) {
 			link.href = String( item.permalink );
@@ -1644,10 +1644,10 @@
 
 		link.textContent = String( item.name || '' );
 		info.appendChild( link );
-		info.appendChild( el( 'span', 'goalcart-recommend__price', uiLabel( 'only_price', 'Only %s' ).replace( '%s', formatProductPrice( item ) ) ) );
+		info.appendChild( el( 'span', 'faracart-recommend__price', uiLabel( 'only_price', 'Only %s' ).replace( '%s', formatProductPrice( item ) ) ) );
 		row.appendChild( info );
 
-		var button = el( 'button', 'goalcart-recommend__add' );
+		var button = el( 'button', 'faracart-recommend__add' );
 		button.type = 'button';
 		button.textContent = uiLabel( 'add', 'Add' );
 		row.appendChild( button );
@@ -1671,31 +1671,31 @@
 		var accent = settings.accent || '#f97316';
 		var muted = settings.secondaryText || '#9ca3af';
 		var text = settings.text || '#1f2937';
-		var panel = el( 'div', 'goalcart-t1' );
+		var panel = el( 'div', 'faracart-t1' );
 
 		// Expired / ended: muted clock row.
 		if ( goal.eligible === false || goal.state === 'inactive' || goal.state === 'unavailable' ) {
-			panel.classList.add( 'goalcart-t1--expired' );
-			var expiredRow = el( 'div', 'goalcart-t1__expired' );
+			panel.classList.add( 'faracart-t1--expired' );
+			var expiredRow = el( 'div', 'faracart-t1__expired' );
 			expiredRow.appendChild( tplIcon( goal, '\u23F0' ) );
-			var expiredInfo = el( 'div', 'goalcart-t1__expired-info' );
-			expiredInfo.appendChild( el( 'span', 'goalcart-t1__expired-label', uiLabel( 'expired', 'Expired' ) ) );
-			expiredInfo.appendChild( el( 'span', 'goalcart-t1__expired-title', uiLabel( 'goal_ended', 'This goal has ended' ) ) );
+			var expiredInfo = el( 'div', 'faracart-t1__expired-info' );
+			expiredInfo.appendChild( el( 'span', 'faracart-t1__expired-label', uiLabel( 'expired', 'Expired' ) ) );
+			expiredInfo.appendChild( el( 'span', 'faracart-t1__expired-title', uiLabel( 'goal_ended', 'This goal has ended' ) ) );
 			expiredRow.appendChild( expiredInfo );
-			expiredRow.appendChild( el( 'span', 'goalcart-t1__expired-chip', uiLabel( 'expired', 'Expired' ) ) );
+			expiredRow.appendChild( el( 'span', 'faracart-t1__expired-chip', uiLabel( 'expired', 'Expired' ) ) );
 			panel.appendChild( expiredRow );
 			return panel;
 		}
 
 		// Completed: green card with a check + full bar.
 		if ( goal.completed ) {
-			panel.classList.add( 'goalcart-t1--done' );
-			var done = el( 'div', 'goalcart-t1__done' );
-			var doneRow = el( 'div', 'goalcart-t1__done-row' );
+			panel.classList.add( 'faracart-t1--done' );
+			var done = el( 'div', 'faracart-t1__done' );
+			var doneRow = el( 'div', 'faracart-t1__done-row' );
 			doneRow.appendChild( tplIcon( goal, '\u2705' ) );
-			var doneInfo = el( 'div', 'goalcart-t1__done-info' );
-			doneInfo.appendChild( el( 'span', 'goalcart-t1__done-label', uiLabel( 'goal_reached', 'Goal completed' ) + ' \uD83C\uDF89' ) );
-			doneInfo.appendChild( el( 'span', 'goalcart-t1__done-title', String( goal.goal_name || '' ) ) );
+			var doneInfo = el( 'div', 'faracart-t1__done-info' );
+			doneInfo.appendChild( el( 'span', 'faracart-t1__done-label', uiLabel( 'goal_reached', 'Goal completed' ) + ' \uD83C\uDF89' ) );
+			doneInfo.appendChild( el( 'span', 'faracart-t1__done-title', String( goal.goal_name || '' ) ) );
 			doneRow.appendChild( doneInfo );
 			done.appendChild( doneRow );
 			done.appendChild( progressBar( goal ) );
@@ -1704,39 +1704,39 @@
 		}
 
 		// Head: icon + label/title + percent chip.
-		var head = el( 'div', 'goalcart-t1__head' );
-		var headMain = el( 'div', 'goalcart-t1__head-main' );
+		var head = el( 'div', 'faracart-t1__head' );
+		var headMain = el( 'div', 'faracart-t1__head-main' );
 
 		if ( settings.showIcon !== false ) {
 			headMain.appendChild( tplIcon( goal, '\uD83D\uDE9A' ) );
 		}
 
-		var headText = el( 'div', 'goalcart-t1__head-text' );
-		headText.appendChild( el( 'span', 'goalcart-t1__label', uiLabel( 'shopping_goal', 'Shopping goal' ) ) );
-		headText.appendChild( el( 'span', 'goalcart-t1__title', String( goal.goal_name || '' ) ) );
+		var headText = el( 'div', 'faracart-t1__head-text' );
+		headText.appendChild( el( 'span', 'faracart-t1__label', uiLabel( 'shopping_goal', 'Shopping goal' ) ) );
+		headText.appendChild( el( 'span', 'faracart-t1__title', String( goal.goal_name || '' ) ) );
 		headMain.appendChild( headText );
 		head.appendChild( headMain );
 
 		if ( settings.showPercent !== false ) {
-			head.appendChild( el( 'span', 'goalcart-t1__percent', Math.round( percent ) + '%' ) );
+			head.appendChild( el( 'span', 'faracart-t1__percent', Math.round( percent ) + '%' ) );
 		}
 
 		panel.appendChild( head );
 		panel.appendChild( progressBar( goal ) );
 
 		if ( settings.showAmounts !== false ) {
-			var amounts = el( 'div', 'goalcart-t1__amounts' );
-			amounts.appendChild( el( 'span', 'goalcart-t1__current', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
+			var amounts = el( 'div', 'faracart-t1__amounts' );
+			amounts.appendChild( el( 'span', 'faracart-t1__current', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
 
 			if ( settings.showRemaining !== false ) {
-				amounts.appendChild( el( 'span', 'goalcart-t1__remaining', remainingLabel( goal, currency ) ) );
+				amounts.appendChild( el( 'span', 'faracart-t1__remaining', remainingLabel( goal, currency ) ) );
 			}
 
 			panel.appendChild( amounts );
 		}
 
 		if ( settings.showCta !== false ) {
-			var cta = tplCta( goal, currency, addMoreLabel( goal, currency ), 'goalcart-t1__cta' );
+			var cta = tplCta( goal, currency, addMoreLabel( goal, currency ), 'faracart-t1__cta' );
 
 			if ( cta ) {
 				panel.appendChild( cta );
@@ -1757,23 +1757,23 @@
 	 */
 	function t2Panel( goal, currency ) {
 		var settings = goal.template_settings || {};
-		var panel = el( 'div', 'goalcart-t2' );
+		var panel = el( 'div', 'faracart-t2' );
 
 		if ( settings.showIcon !== false ) {
 			panel.appendChild( tplIcon( goal, '\uD83D\uDE9A' ) );
 		}
 
-		var body = el( 'div', 'goalcart-t2__body' );
-		var row = el( 'div', 'goalcart-t2__row' );
+		var body = el( 'div', 'faracart-t2__body' );
+		var row = el( 'div', 'faracart-t2__row' );
 
 		if ( settings.showTitle !== false ) {
-			row.appendChild( el( 'span', 'goalcart-t2__title', String( goal.goal_name || '' ) ) );
+			row.appendChild( el( 'span', 'faracart-t2__title', String( goal.goal_name || '' ) ) );
 		}
 
 		if ( goal.completed ) {
-			row.appendChild( el( 'span', 'goalcart-t2__done', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
+			row.appendChild( el( 'span', 'faracart-t2__done', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
 		} else if ( settings.showRemaining !== false ) {
-			row.appendChild( el( 'span', 'goalcart-t2__remaining', remainingLabel( goal, currency ) ) );
+			row.appendChild( el( 'span', 'faracart-t2__remaining', remainingLabel( goal, currency ) ) );
 		}
 
 		body.appendChild( row );
@@ -1781,7 +1781,7 @@
 		panel.appendChild( body );
 
 		if ( settings.showCta !== false && ! goal.completed ) {
-			var cta = tplCta( goal, currency, uiLabel( 'add', 'Add' ), 'goalcart-t2__cta' );
+			var cta = tplCta( goal, currency, uiLabel( 'add', 'Add' ), 'faracart-t2__cta' );
 
 			if ( cta ) {
 				panel.appendChild( cta );
@@ -1810,41 +1810,41 @@
 		var text = settings.text || '#1f2937';
 		var size = Number( settings.ringSize ) || 100;
 		var stroke = Number( settings.strokeWidth ) || 8;
-		var panel = el( 'div', 'goalcart-t3' );
+		var panel = el( 'div', 'faracart-t3' );
 
 		if ( goal.completed ) {
-			var doneRow = el( 'div', 'goalcart-t3__done-row' );
+			var doneRow = el( 'div', 'faracart-t3__done-row' );
 			doneRow.appendChild( circularSvg( 100, Math.round( size * 0.8 ), stroke, trackColor, '#10b981', 'check' ) );
-			var doneInfo = el( 'div', 'goalcart-t3__done-info' );
-			doneInfo.appendChild( el( 'span', 'goalcart-t3__done-title', uiLabel( 'congrats', 'Congratulations!' ) + ' \uD83C\uDF89' ) );
-			doneInfo.appendChild( el( 'span', 'goalcart-t3__done-sub', String( goal.goal_name || '' ) ) );
+			var doneInfo = el( 'div', 'faracart-t3__done-info' );
+			doneInfo.appendChild( el( 'span', 'faracart-t3__done-title', uiLabel( 'congrats', 'Congratulations!' ) + ' \uD83C\uDF89' ) );
+			doneInfo.appendChild( el( 'span', 'faracart-t3__done-sub', String( goal.goal_name || '' ) ) );
 			doneRow.appendChild( doneInfo );
 			panel.appendChild( doneRow );
 			return panel;
 		}
 
-		var row = el( 'div', 'goalcart-t3__row' );
+		var row = el( 'div', 'faracart-t3__row' );
 		row.appendChild( circularSvg( percent, size, stroke, trackColor, accent, settings.showPercent === false ? '' : 'percent' ) );
 
-		var info = el( 'div', 'goalcart-t3__info' );
-		var titleRow = el( 'div', 'goalcart-t3__title-row' );
+		var info = el( 'div', 'faracart-t3__info' );
+		var titleRow = el( 'div', 'faracart-t3__title-row' );
 		titleRow.appendChild( tplIcon( goal, '\uD83D\uDE9A' ) );
-		titleRow.appendChild( el( 'span', 'goalcart-t3__title', String( goal.goal_name || '' ) ) );
+		titleRow.appendChild( el( 'span', 'faracart-t3__title', String( goal.goal_name || '' ) ) );
 		info.appendChild( titleRow );
 
 		if ( settings.showDescription !== false ) {
-			info.appendChild( el( 'p', 'goalcart-t3__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( goal.is_money ? formatMoney( goal.target, currency ) : formatNumber( goal.target ) ) ) );
+			info.appendChild( el( 'p', 'faracart-t3__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( goal.is_money ? formatMoney( goal.target, currency ) : formatNumber( goal.target ) ) ) );
 		}
 
 		if ( settings.showAmounts !== false ) {
-			var paid = el( 'div', 'goalcart-t3__amount' );
-			paid.appendChild( el( 'span', 'goalcart-t3__amount-label', uiLabel( 'paid', 'Paid' ) ) );
-			paid.appendChild( el( 'span', 'goalcart-t3__amount-value', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
+			var paid = el( 'div', 'faracart-t3__amount' );
+			paid.appendChild( el( 'span', 'faracart-t3__amount-label', uiLabel( 'paid', 'Paid' ) ) );
+			paid.appendChild( el( 'span', 'faracart-t3__amount-value', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
 			info.appendChild( paid );
 
-			var left = el( 'div', 'goalcart-t3__amount' );
-			left.appendChild( el( 'span', 'goalcart-t3__amount-label', uiLabel( 'remaining', 'Remaining' ) ) );
-			left.appendChild( el( 'span', 'goalcart-t3__amount-value goalcart-t3__amount-value--accent', goal.is_money ? formatMoney( goal.remaining, currency ) : formatNumber( goal.remaining ) ) );
+			var left = el( 'div', 'faracart-t3__amount' );
+			left.appendChild( el( 'span', 'faracart-t3__amount-label', uiLabel( 'remaining', 'Remaining' ) ) );
+			left.appendChild( el( 'span', 'faracart-t3__amount-value faracart-t3__amount-value--accent', goal.is_money ? formatMoney( goal.remaining, currency ) : formatNumber( goal.remaining ) ) );
 			info.appendChild( left );
 		}
 
@@ -1852,7 +1852,7 @@
 		panel.appendChild( row );
 
 		if ( settings.showCta !== false ) {
-			var cta = tplCta( goal, currency, uiLabel( 'view_products', 'View products' ), 'goalcart-t3__cta' );
+			var cta = tplCta( goal, currency, uiLabel( 'view_products', 'View products' ), 'faracart-t3__cta' );
 
 			if ( cta ) {
 				panel.appendChild( cta );
@@ -1879,18 +1879,18 @@
 		var muted = settings.secondaryText || '#6b7280';
 		var text = settings.text || '#1f2937';
 		var products = ( goal.suggestions && goal.suggestions.length ) ? goal.suggestions : [];
-		var panel = el( 'div', 'goalcart-t4' );
+		var panel = el( 'div', 'faracart-t4' );
 
 		// Gradient progress header.
-		var header = el( 'div', 'goalcart-t4__header' );
+		var header = el( 'div', 'faracart-t4__header' );
 		header.style.background = 'linear-gradient(135deg, ' + headerBg + ', ' + headerBg + 'cc)';
-		var headerRow = el( 'div', 'goalcart-t4__header-row' );
-		headerRow.appendChild( el( 'span', 'goalcart-t4__title', String( goal.goal_name || '' ) ) );
+		var headerRow = el( 'div', 'faracart-t4__header-row' );
+		headerRow.appendChild( el( 'span', 'faracart-t4__title', String( goal.goal_name || '' ) ) );
 
 		if ( goal.completed ) {
-			headerRow.appendChild( el( 'span', 'goalcart-t4__chip', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
+			headerRow.appendChild( el( 'span', 'faracart-t4__chip', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
 		} else if ( settings.showRemaining !== false ) {
-			headerRow.appendChild( el( 'span', 'goalcart-t4__chip', remainingLabel( goal, currency ) ) );
+			headerRow.appendChild( el( 'span', 'faracart-t4__chip', remainingLabel( goal, currency ) ) );
 		}
 
 		header.appendChild( headerRow );
@@ -1898,17 +1898,17 @@
 		panel.appendChild( header );
 
 		// Recommended products.
-		var body = el( 'div', 'goalcart-t4__body' );
+		var body = el( 'div', 'faracart-t4__body' );
 
 		if ( settings.showHeading !== false ) {
-			var heading = el( 'p', 'goalcart-t4__heading' );
-			heading.appendChild( el( 'span', 'goalcart-t4__heading-icon', '\uD83D\uDCA1' ) );
+			var heading = el( 'p', 'faracart-t4__heading' );
+			heading.appendChild( el( 'span', 'faracart-t4__heading-icon', '\uD83D\uDCA1' ) );
 			heading.appendChild( document.createTextNode( ' ' + uiLabel( 'recommend_heading', 'Add these products to reach your goal faster:' ) ) );
 			body.appendChild( heading );
 		}
 
 		if ( ! products.length ) {
-			body.appendChild( el( 'p', 'goalcart-t4__empty', uiLabel( 'unavailable', 'No recommendations available right now.' ) ) );
+			body.appendChild( el( 'p', 'faracart-t4__empty', uiLabel( 'unavailable', 'No recommendations available right now.' ) ) );
 		} else {
 			for ( var i = 0; i < products.length; i++ ) {
 				body.appendChild( recommendRow( products[ i ], goal ) );
@@ -1931,21 +1931,21 @@
 	function t5Panel( goal, currency ) {
 		var settings = goal.template_settings || {};
 		var accent = settings.accent || '#4ade80';
-		var panel = el( 'div', 'goalcart-t5' );
+		var panel = el( 'div', 'faracart-t5' );
 
 		if ( settings.showIcon !== false ) {
-			var badge = el( 'span', 'goalcart-t5__badge', String( goal.icon || '' ).trim() || '\uD83D\uDE9A' );
+			var badge = el( 'span', 'faracart-t5__badge', String( goal.icon || '' ).trim() || '\uD83D\uDE9A' );
 			panel.appendChild( badge );
 		}
 
-		var body = el( 'div', 'goalcart-t5__body' );
-		var row = el( 'div', 'goalcart-t5__row' );
-		row.appendChild( el( 'span', 'goalcart-t5__title', String( goal.goal_name || '' ) ) );
+		var body = el( 'div', 'faracart-t5__body' );
+		var row = el( 'div', 'faracart-t5__row' );
+		row.appendChild( el( 'span', 'faracart-t5__title', String( goal.goal_name || '' ) ) );
 
 		if ( goal.completed ) {
-			row.appendChild( el( 'span', 'goalcart-t5__done', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
+			row.appendChild( el( 'span', 'faracart-t5__done', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
 		} else if ( settings.showRemaining !== false ) {
-			row.appendChild( el( 'span', 'goalcart-t5__remaining', remainingLabel( goal, currency ) ) );
+			row.appendChild( el( 'span', 'faracart-t5__remaining', remainingLabel( goal, currency ) ) );
 		}
 
 		body.appendChild( row );
@@ -1953,7 +1953,7 @@
 		panel.appendChild( body );
 
 		if ( settings.showCta !== false && ! goal.completed ) {
-			var cta = tplCta( goal, currency, uiLabel( 'add', 'Add' ), 'goalcart-t5__cta' );
+			var cta = tplCta( goal, currency, uiLabel( 'add', 'Add' ), 'faracart-t5__cta' );
 
 			if ( cta ) {
 				panel.appendChild( cta );
@@ -1982,48 +1982,48 @@
 		var muted = settings.secondaryText || '#9ca3af';
 		var text = settings.text || '#111827';
 		var outlineColor = settings.buttonTextColor || '#b8922a';
-		var panel = el( 'div', 'goalcart-t6' );
+		var panel = el( 'div', 'faracart-t6' );
 
 		// Slim header with a gold rail.
-		var header = el( 'div', 'goalcart-t6__header' );
-		var headerMain = el( 'div', 'goalcart-t6__header-main' );
-		headerMain.appendChild( el( 'span', 'goalcart-t6__rail' ) );
-		headerMain.appendChild( el( 'span', 'goalcart-t6__eyebrow', uiLabel( 'shopping_goal', 'Shopping goal' ) ) );
+		var header = el( 'div', 'faracart-t6__header' );
+		var headerMain = el( 'div', 'faracart-t6__header-main' );
+		headerMain.appendChild( el( 'span', 'faracart-t6__rail' ) );
+		headerMain.appendChild( el( 'span', 'faracart-t6__eyebrow', uiLabel( 'shopping_goal', 'Shopping goal' ) ) );
 		header.appendChild( headerMain );
-		header.appendChild( el( 'span', 'goalcart-t6__header-icon', '\uD83D\uDE9A' ) );
+		header.appendChild( el( 'span', 'faracart-t6__header-icon', '\uD83D\uDE9A' ) );
 		panel.appendChild( header );
 
-		panel.appendChild( el( 'h4', 'goalcart-t6__title', String( goal.goal_name || '' ) ) );
-		panel.appendChild( el( 'p', 'goalcart-t6__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( goal.is_money ? formatMoney( goal.target, currency ) : formatNumber( goal.target ) ) ) );
+		panel.appendChild( el( 'h4', 'faracart-t6__title', String( goal.goal_name || '' ) ) );
+		panel.appendChild( el( 'p', 'faracart-t6__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( goal.is_money ? formatMoney( goal.target, currency ) : formatNumber( goal.target ) ) ) );
 
 		// Elegant progress with a marker dot at the end.
-		var progress = el( 'div', 'goalcart-t6__progress' );
+		var progress = el( 'div', 'faracart-t6__progress' );
 		progress.appendChild( progressBar( goal ) );
 
 		if ( ! goal.completed && percent > 0 && percent < 100 ) {
-			var dot = el( 'span', 'goalcart-t6__dot' );
-			dot.style.setProperty( '--goalcart-t6-dot', percent + '%' );
+			var dot = el( 'span', 'faracart-t6__dot' );
+			dot.style.setProperty( '--faracart-t6-dot', percent + '%' );
 			progress.appendChild( dot );
 		}
 
 		panel.appendChild( progress );
 
 		if ( settings.showAmounts !== false ) {
-			var amounts = el( 'div', 'goalcart-t6__amounts' );
-			var paid = el( 'div', 'goalcart-t6__amount' );
-			paid.appendChild( el( 'span', 'goalcart-t6__amount-label', uiLabel( 'paid', 'Paid' ) ) );
-			paid.appendChild( el( 'span', 'goalcart-t6__amount-value', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
+			var amounts = el( 'div', 'faracart-t6__amounts' );
+			var paid = el( 'div', 'faracart-t6__amount' );
+			paid.appendChild( el( 'span', 'faracart-t6__amount-label', uiLabel( 'paid', 'Paid' ) ) );
+			paid.appendChild( el( 'span', 'faracart-t6__amount-value', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
 			amounts.appendChild( paid );
 
-			var left = el( 'div', 'goalcart-t6__amount goalcart-t6__amount--end' );
-			left.appendChild( el( 'span', 'goalcart-t6__amount-label', uiLabel( 'remaining', 'Remaining' ) ) );
-			left.appendChild( el( 'span', 'goalcart-t6__amount-value goalcart-t6__amount-value--gold', goal.is_money ? formatMoney( goal.remaining, currency ) : formatNumber( goal.remaining ) ) );
+			var left = el( 'div', 'faracart-t6__amount faracart-t6__amount--end' );
+			left.appendChild( el( 'span', 'faracart-t6__amount-label', uiLabel( 'remaining', 'Remaining' ) ) );
+			left.appendChild( el( 'span', 'faracart-t6__amount-value faracart-t6__amount-value--gold', goal.is_money ? formatMoney( goal.remaining, currency ) : formatNumber( goal.remaining ) ) );
 			amounts.appendChild( left );
 			panel.appendChild( amounts );
 		}
 
 		if ( settings.showCta !== false ) {
-			var cta = tplCta( goal, currency, uiLabel( 'view_products', 'View products' ), 'goalcart-t6__cta' );
+			var cta = tplCta( goal, currency, uiLabel( 'view_products', 'View products' ), 'faracart-t6__cta' );
 
 			if ( cta ) {
 				panel.appendChild( cta );
@@ -2032,11 +2032,11 @@
 
 		// Almost-completed callout.
 		if ( goal.state === 'nearly_complete' && ! goal.completed ) {
-			var callout = el( 'div', 'goalcart-t6__callout' );
-			callout.appendChild( el( 'span', 'goalcart-t6__callout-icon', '\uD83D\uDD25' ) );
-			var calloutText = el( 'div', 'goalcart-t6__callout-text' );
-			calloutText.appendChild( el( 'span', 'goalcart-t6__callout-title', uiLabel( 'almost_done', 'Almost there!' ) + ' — ' + remainingLabel( goal, currency ) ) );
-			calloutText.appendChild( el( 'span', 'goalcart-t6__callout-sub', uiLabel( 'finish_today', 'Finish today — your reward is waiting' ) ) );
+			var callout = el( 'div', 'faracart-t6__callout' );
+			callout.appendChild( el( 'span', 'faracart-t6__callout-icon', '\uD83D\uDD25' ) );
+			var calloutText = el( 'div', 'faracart-t6__callout-text' );
+			calloutText.appendChild( el( 'span', 'faracart-t6__callout-title', uiLabel( 'almost_done', 'Almost there!' ) + ' — ' + remainingLabel( goal, currency ) ) );
+			calloutText.appendChild( el( 'span', 'faracart-t6__callout-sub', uiLabel( 'finish_today', 'Finish today — your reward is waiting' ) ) );
 			callout.appendChild( calloutText );
 			panel.appendChild( callout );
 		}
@@ -2090,8 +2090,8 @@
 		// The Phase 13 message state (inactive / unavailable / progressing /
 		// nearly_complete / completed / reward_activated) lands as a modifier
 		// class so the stylesheet can highlight near-completion etc.
-		var stateClass = goal.state ? ' goalcart-state--' + goal.state : '';
-		var card = el( 'div', 'goalcart-card goalcart-template--' + template + stateClass );
+		var stateClass = goal.state ? ' faracart-state--' + goal.state : '';
+		var card = el( 'div', 'faracart-card faracart-template--' + template + stateClass );
 		var settings = goal.template_settings || {};
 
 		// The resolved template settings drive this card's appearance
@@ -2122,7 +2122,7 @@
 			return card;
 		}
 
-		var head = el( 'div', 'goalcart-card__head' );
+		var head = el( 'div', 'faracart-card__head' );
 		if ( reward && showReward ) {
 			head.appendChild( reward );
 		}
@@ -2179,17 +2179,17 @@
 	function celebrate( card, goal ) {
 		celebrated[ String( goal.goal_id || 0 ) ] = true;
 
-		card.classList.add( 'goalcart-card--celebrate' );
+		card.classList.add( 'faracart-card--celebrate' );
 
-		var confetti = el( 'div', 'goalcart-confetti' );
+		var confetti = el( 'div', 'faracart-confetti' );
 		confetti.setAttribute( 'aria-hidden', 'true' );
 
 		for ( var i = 0; i < 18; i++ ) {
-			var piece = el( 'span', 'goalcart-confetti__piece' );
+			var piece = el( 'span', 'faracart-confetti__piece' );
 			piece.style.left = ( Math.random() * 100 ) + '%';
 			piece.style.background = CONFETTI_COLORS[ i % CONFETTI_COLORS.length ];
 			piece.style.animationDelay = ( Math.random() * 0.35 ) + 's';
-			piece.style.setProperty( '--goalcart-confetti-x', ( ( Math.random() * 160 ) - 80 ) + 'px' );
+			piece.style.setProperty( '--faracart-confetti-x', ( ( Math.random() * 160 ) - 80 ) + 'px' );
 			confetti.appendChild( piece );
 		}
 
@@ -2218,7 +2218,7 @@
 	 */
 	function campaignChain( goals, campaign, currency ) {
 		var settings = campaign.settings || {};
-		var panel = el( 'div', 'goalcart-chain goalcart-template--' + campaign.template );
+		var panel = el( 'div', 'faracart-chain faracart-template--' + campaign.template );
 
 		applyTemplateSettings( panel, settings );
 		applyTemplateCss( settings.customCss );
@@ -2228,31 +2228,31 @@
 		}
 
 		if ( campaign.name ) {
-			panel.appendChild( el( 'div', 'goalcart-chain__title', String( campaign.name ) ) );
+			panel.appendChild( el( 'div', 'faracart-chain__title', String( campaign.name ) ) );
 		}
 
-		var rung = el( 'ol', 'goalcart-chain__steps' );
+		var rung = el( 'ol', 'faracart-chain__steps' );
 
 		for ( var i = 0; i < goals.length; i++ ) {
 			var goal = goals[ i ];
-			var step = el( 'li', 'goalcart-chain__step' );
+			var step = el( 'li', 'faracart-chain__step' );
 
-			step.classList.add( goal.completed ? 'goalcart-chain__step--done' : 'goalcart-chain__step--pending' );
-			step.appendChild( el( 'span', 'goalcart-chain__dot' ) );
+			step.classList.add( goal.completed ? 'faracart-chain__step--done' : 'faracart-chain__step--pending' );
+			step.appendChild( el( 'span', 'faracart-chain__dot' ) );
 
 			if ( settings.showLabels !== false ) {
-				step.appendChild( el( 'span', 'goalcart-chain__label', String( goal.goal_name || '' ) ) );
+				step.appendChild( el( 'span', 'faracart-chain__label', String( goal.goal_name || '' ) ) );
 			}
 
 			if ( settings.showTargets !== false ) {
 				var target = goal.is_money
 					? formatMoney( goal.target, currency )
 					: formatNumber( goal.target );
-				step.appendChild( el( 'span', 'goalcart-chain__target', target ) );
+				step.appendChild( el( 'span', 'faracart-chain__target', target ) );
 			}
 
 			if ( settings.showRewards !== false && goal.reward && goal.reward.type ) {
-				step.appendChild( el( 'span', 'goalcart-chain__reward', ( cfg.labels && cfg.labels[ goal.reward.type ] ) || goal.reward.type ) );
+				step.appendChild( el( 'span', 'faracart-chain__reward', ( cfg.labels && cfg.labels[ goal.reward.type ] ) || goal.reward.type ) );
 			}
 
 			rung.appendChild( step );
@@ -2292,7 +2292,7 @@
 	 */
 	function campaignProgress( goals, campaign, currency ) {
 		var settings = campaign.settings || {};
-		var panel = el( 'div', 'goalcart-campaign goalcart-template--' + campaign.template );
+		var panel = el( 'div', 'faracart-campaign faracart-template--' + campaign.template );
 
 		applyTemplateSettings( panel, settings );
 		applyTemplateCss( settings.customCss );
@@ -2302,7 +2302,7 @@
 		}
 
 		if ( settings.showTitle !== false && campaign.name ) {
-			panel.appendChild( el( 'div', 'goalcart-campaign__title', String( campaign.name ) ) );
+			panel.appendChild( el( 'div', 'faracart-campaign__title', String( campaign.name ) ) );
 		}
 
 		if ( settings.showCounter !== false ) {
@@ -2315,7 +2315,7 @@
 			}
 
 			panel.appendChild(
-				el( 'div', 'goalcart-campaign__counter', formatNumber( done ) + ' / ' + formatNumber( goals.length ) )
+				el( 'div', 'faracart-campaign__counter', formatNumber( done ) + ' / ' + formatNumber( goals.length ) )
 			);
 		}
 
@@ -2333,12 +2333,12 @@
 		}
 
 		if ( settings.showRewards !== false ) {
-			var chips = el( 'div', 'goalcart-campaign__rewards' );
+			var chips = el( 'div', 'faracart-campaign__rewards' );
 
 			for ( var k = 0; k < goals.length; k++ ) {
 				if ( goals[ k ].reward && goals[ k ].reward.type ) {
 					chips.appendChild(
-						el( 'span', 'goalcart-campaign__reward', ( cfg.labels && cfg.labels[ goals[ k ].reward.type ] ) || goals[ k ].reward.type )
+						el( 'span', 'faracart-campaign__reward', ( cfg.labels && cfg.labels[ goals[ k ].reward.type ] ) || goals[ k ].reward.type )
 					);
 				}
 			}
@@ -2381,21 +2381,21 @@
 		}
 
 		var goals = ( data && data.goals ) || [];
-		var variant = 'compact' === container.getAttribute( 'data-goalcart-variant' ) ? 'compact' : 'full';
+		var variant = 'compact' === container.getAttribute( 'data-faracart-variant' ) ? 'compact' : 'full';
 
 		// The animation toggle (Phase 12) freezes the fill transition via a
 		// class; re-render in place on every refresh so live cart updates
 		// (AJAX add-to-cart, quantity changes, fragment refreshes) always
 		// show the current progress — no mount-once freeze.
-		container.classList.toggle( 'goalcart-widget--no-anim', false === cfg.animation );
+		container.classList.toggle( 'faracart-widget--no-anim', false === cfg.animation );
 		container.replaceChildren();
 
 		// Phase 18 (mobile behavior): hide the widget on small screens.
 		if ( mobileHidden() ) {
-			container.classList.add( 'goalcart-widget--mobile-hidden' );
+			container.classList.add( 'faracart-widget--mobile-hidden' );
 			return;
 		}
-		container.classList.remove( 'goalcart-widget--mobile-hidden' );
+		container.classList.remove( 'faracart-widget--mobile-hidden' );
 
 		// Group the eligible goals by campaign so a campaign template
 		// (e.g. the milestone chain) can render the whole group as one
@@ -2432,7 +2432,7 @@
 		// group). Ineligible goals never render (they are skipped, not
 		// broken), and when nothing is left the whole widget hides.
 		var rendered = 0;
-		var stack = el( 'div', 'goalcart-widget__goals' );
+		var stack = el( 'div', 'faracart-widget__goals' );
 
 		for ( var g = 0; g < order.length; g++ ) {
 			var groupGoals = groups[ order[ g ] ];
@@ -2469,11 +2469,11 @@
 		}
 
 		if ( ! rendered ) {
-			container.classList.add( 'goalcart-widget--empty' );
+			container.classList.add( 'faracart-widget--empty' );
 			return;
 		}
 
-		container.classList.remove( 'goalcart-widget--empty' );
+		container.classList.remove( 'faracart-widget--empty' );
 		container.appendChild( stack );
 	}
 
@@ -2526,15 +2526,15 @@
 		}
 
 		if ( ! visible ) {
-			bar.classList.remove( 'goalcart-sticky--visible' );
+			bar.classList.remove( 'faracart-sticky--visible' );
 			bar.setAttribute( 'aria-hidden', 'true' );
 			bar.replaceChildren();
 			return;
 		}
 
-		bar.classList.add( 'goalcart-sticky--visible' );
-		bar.classList.toggle( 'goalcart-sticky--top', 'top' === sticky.position );
-		bar.classList.toggle( 'goalcart-no-anim', false === cfg.animation );
+		bar.classList.add( 'faracart-sticky--visible' );
+		bar.classList.toggle( 'faracart-sticky--top', 'top' === sticky.position );
+		bar.classList.toggle( 'faracart-no-anim', false === cfg.animation );
 		bar.setAttribute( 'aria-hidden', 'false' );
 
 		// Rebuild the bar content on every refresh so the fill and message
@@ -2542,9 +2542,9 @@
 		// resolved template settings drive the bar's appearance too (e.g.
 		// a template-5 goal renders the dark sticky styling), so the
 		// sticky bar follows the goal's template exactly like its card.
-		var inner = el( 'div', 'goalcart-sticky__inner' );
+		var inner = el( 'div', 'faracart-sticky__inner' );
 		applyTemplateSettings( inner, ( goal && goal.template_settings ) || {} );
-		var content = el( 'div', 'goalcart-sticky__content' );
+		var content = el( 'div', 'faracart-sticky__content' );
 		var reward = rewardStatus( goal );
 
 		content.appendChild( progressBar( goal ) );
@@ -2575,14 +2575,14 @@
 		inner.appendChild( content );
 
 		if ( sticky.behavior !== 'auto_hide' ) {
-			var close = el( 'button', 'goalcart-sticky__close' );
+			var close = el( 'button', 'faracart-sticky__close' );
 
 			close.type = 'button';
 			close.setAttribute( 'aria-label', uiLabel( 'dismiss', 'Dismiss' ) );
 			close.textContent = '\u00D7';
 			close.addEventListener( 'click', function () {
 				stickyDismissed = true;
-				bar.classList.remove( 'goalcart-sticky--visible' );
+				bar.classList.remove( 'faracart-sticky--visible' );
 				bar.setAttribute( 'aria-hidden', 'true' );
 			} );
 			inner.appendChild( close );
@@ -2605,15 +2605,15 @@
 		}
 
 		var item = items[ 0 ];
-		var link = el( 'a', 'goalcart-sticky__suggestion' );
+		var link = el( 'a', 'faracart-sticky__suggestion' );
 
 		if ( item.permalink && isSafeUrl( item.permalink ) ) {
 			link.href = String( item.permalink );
 		}
 
 		link.setAttribute( 'rel', 'noreferrer' );
-		link.appendChild( el( 'span', 'goalcart-sticky__suggestion-name', String( item.name || '' ) ) );
-		link.appendChild( el( 'span', 'goalcart-sticky__suggestion-price', formatProductPrice( item ) ) );
+		link.appendChild( el( 'span', 'faracart-sticky__suggestion-name', String( item.name || '' ) ) );
+		link.appendChild( el( 'span', 'faracart-sticky__suggestion-price', formatProductPrice( item ) ) );
 
 		return link;
 	}
@@ -2644,13 +2644,13 @@
 		var containers = document.querySelectorAll( WIDGET_SELECTOR );
 
 		for ( var i = 0; i < containers.length; i++ ) {
-			containers[ i ].classList.toggle( 'goalcart-widget--updating', !! on );
+			containers[ i ].classList.toggle( 'faracart-widget--updating', !! on );
 		}
 
 		var bar = document.getElementById( STICKY_ID );
 
 		if ( bar ) {
-			bar.classList.toggle( 'goalcart-widget--updating', !! on );
+			bar.classList.toggle( 'faracart-widget--updating', !! on );
 		}
 	}
 
@@ -2756,7 +2756,7 @@
 	 * Every WooCommerce cart-change mechanism — the classic jQuery events,
 	 * the Blocks wc-blocks_* DOM events, the Blocks wc/store/cart data
 	 * store and the gift-claim flow — is normalized into ONE custom
-	 * `goalcart:cart-changed` event on document.body. A single listener
+	 * `faracart:cart-changed` event on document.body. A single listener
 	 * runs the debounced refresh, so every widget instance reacts to
 	 * every entry point consistently and a future entry point only has to
 	 * dispatch the event.
@@ -2765,7 +2765,7 @@
 	 */
 	function emitCartChanged() {
 		try {
-			document.body.dispatchEvent( new CustomEvent( 'goalcart:cart-changed', { bubbles: true } ) );
+			document.body.dispatchEvent( new CustomEvent( 'faracart:cart-changed', { bubbles: true } ) );
 		} catch ( error ) {
 			refreshAfterCartChange();
 		}
@@ -2777,7 +2777,7 @@
 	 * @return {void}
 	 */
 	function bindCartChangedBridge() {
-		document.body.addEventListener( 'goalcart:cart-changed', refreshAfterCartChange );
+		document.body.addEventListener( 'faracart:cart-changed', refreshAfterCartChange );
 	}
 
 	/**
@@ -2826,7 +2826,7 @@
 	 * on the frontend) reflects every change — quantity steppers, item
 	 * removals, coupons and shipping inside the blocks never fire a
 	 * classic jQuery event. This subscribes to the store and normalizes
-	 * any cart-data change into the same `goalcart:cart-changed` bridge.
+	 * any cart-data change into the same `faracart:cart-changed` bridge.
 	 * The `wc-blocks_*` DOM events the blocks package translates from the
 	 * classic jQuery events (add/remove only) are bound too, so block
 	 * add-to-cart from archive/product grids is covered even before the
@@ -2926,15 +2926,15 @@
 
 			while ( target && target !== document.body ) {
 				if ( target.classList ) {
-					if ( target.classList.contains( 'goalcart-upsell__add' ) || target.classList.contains( 'goalcart-recommend__add' ) ) {
+					if ( target.classList.contains( 'faracart-upsell__add' ) || target.classList.contains( 'faracart-recommend__add' ) ) {
 						upsellAdd( target );
 						return;
 					}
 
-					if ( target.classList.contains( 'goalcart-upsell__name' ) ) {
-						var goalId = target.getAttribute( 'data-goalcart-upsell-goal' ) || '';
-						var productId = target.getAttribute( 'data-goalcart-upsell-id' ) || '';
-						var src = target.getAttribute( 'data-goalcart-upsell-source' ) || '';
+					if ( target.classList.contains( 'faracart-upsell__name' ) ) {
+						var goalId = target.getAttribute( 'data-faracart-upsell-goal' ) || '';
+						var productId = target.getAttribute( 'data-faracart-upsell-id' ) || '';
+						var src = target.getAttribute( 'data-faracart-upsell-source' ) || '';
 
 						if ( src === 'suggestion' || src === 'both' ) {
 							sendTrack( 'suggestion_clicked', {
@@ -2975,7 +2975,7 @@
 			var target = event.target;
 
 			while ( target && target !== document.body ) {
-				if ( target.classList && target.classList.contains( 'goalcart-gift-picker__button' ) ) {
+				if ( target.classList && target.classList.contains( 'faracart-gift-picker__button' ) ) {
 					claimGift( target );
 					return;
 				}
@@ -2987,7 +2987,7 @@
 	/**
 	 * Start the countdown ticker (Phase 32).
 	 *
-	 * One interval rewrites every `.goalcart-countdown__time` readout from
+	 * One interval rewrites every `.faracart-countdown__time` readout from
 	 * its data attribute every second — no widget re-render involved.
 	 *
 	 * @return {void}
@@ -2995,10 +2995,10 @@
 	function bindCountdownTicker() {
 		window.setInterval( function () {
 			safe( function () {
-				var nodes = document.querySelectorAll( '.goalcart-countdown__time' );
+				var nodes = document.querySelectorAll( '.faracart-countdown__time' );
 
 				for ( var i = 0; i < nodes.length; i++ ) {
-					var end = nodes[ i ].getAttribute( 'data-goalcart-end' );
+					var end = nodes[ i ].getAttribute( 'data-faracart-end' );
 
 				if ( end ) {
 					nodes[ i ].textContent = countdownText( end );

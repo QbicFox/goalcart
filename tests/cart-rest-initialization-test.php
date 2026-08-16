@@ -170,7 +170,7 @@ namespace {
 	}
 }
 
-namespace GoalCart\Settings {
+namespace FaraCart\Settings {
 	class Settings {
 		public function get( $key, $default = null ) {
 			return $default;
@@ -224,7 +224,7 @@ namespace {
 		'first' => cart_line( 'first', 101, 0, 1, 40 ),
 	);
 
-	$integration = new \GoalCart\Cart\CartIntegration();
+	$integration = new \FaraCart\Cart\CartIntegration();
 	$context     = $integration->context();
 
 	check( 'REST request initializes the missing WooCommerce cart', $woocommerce->cart instanceof WC_Cart );
@@ -239,13 +239,13 @@ namespace {
 	check( 'live_cart exposes the REST-initialized WC cart', $live instanceof WC_Cart );
 	check( 'gift-endpoint cart acquisition sees the session-backed item', null !== $live && 1 === count( $live->get_cart() ) );
 
-	$goal = new \GoalCart\Goals\Goal(
+	$goal = new \FaraCart\Goals\Goal(
 		array(
-			'type'   => \GoalCart\Goals\Goal::TYPE_AMOUNT,
+			'type'   => \FaraCart\Goals\Goal::TYPE_AMOUNT,
 			'target' => 100,
 		)
 	);
-	$result = ( new \GoalCart\Goals\Evaluators\AmountEvaluator() )->evaluate( $goal, $context );
+	$result = ( new \FaraCart\Goals\Evaluators\AmountEvaluator() )->evaluate( $goal, $context );
 
 	check( 'restored cart produces the expected current goal value', 40.0 === $result->current() );
 	check( 'restored cart produces non-zero progress', 40.0 === $result->percentage() );
@@ -289,7 +289,7 @@ namespace {
 		'member' => cart_line( 'member', 301, 0, 1, 55 ),
 	);
 
-	$member_integration = new \GoalCart\Cart\CartIntegration();
+	$member_integration = new \FaraCart\Cart\CartIntegration();
 	$member_context     = $member_integration->context();
 	check( 'logged-in session-backed cart restores its item', 1 === count( $member_context->items() ) );
 
@@ -301,11 +301,11 @@ namespace {
 	$actions['woocommerce_init'] = 0;
 	$woocommerce->cart           = null;
 	$load_count                  = $woocommerce->load_count;
-	$early_context               = ( new \GoalCart\Cart\CartIntegration() )->context();
+	$early_context               = ( new \FaraCart\Cart\CartIntegration() )->context();
 	check( 'REST access before WooCommerce initialization stays safe', $early_context->is_empty() );
 	check( 'REST access before WooCommerce initialization does not load the cart', $load_count === $woocommerce->load_count );
 
-	$early_live = ( new \GoalCart\Cart\CartIntegration() )->live_cart();
+	$early_live = ( new \FaraCart\Cart\CartIntegration() )->live_cart();
 	check( 'live_cart stays null before WooCommerce init (gift endpoint degrades safely)', null === $early_live );
 
 	echo "\nChecks: {$checks}  Failures: {$failures}\n";

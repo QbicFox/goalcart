@@ -4,12 +4,12 @@
  *
  * Verifies the full refactor task list (`UPSELL_REFACTOR.md`):
  *
- *  - Product Cost foundation: the `_goalcart_product_cost` field's
- *    position in the source chain (filter → `_goalcart_product_cost` →
+ *  - Product Cost foundation: the `_faracart_product_cost` field's
+ *    position in the source chain (filter → `_faracart_product_cost` →
  *    `_cost` → `_wc_cog_cost` → variation fallback), `ProductCostField`
  *    wiring, and `RewardCostEstimator::COST_SOURCES` exposing the new key
  *  - Order cost snapshots: `OrderCostSnapshot` stamps each order line
- *    item with its unit cost at checkout (`_goalcart_unit_cost`), and
+ *    item with its unit cost at checkout (`_faracart_unit_cost`), and
  *    `order_item_unit_cost()` prefers the snapshot over the live product
  *    cost — historical profit is stable when costs change later
  *  - Catalog cost coverage: `cost_coverage()` + the admin-only
@@ -58,18 +58,18 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Admin\ProductCostField;
-use GoalCart\Analytics\AttributionEngine;
-use GoalCart\Analytics\OrderCostSnapshot;
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\REST\RecommendationsController;
-use GoalCart\REST\RevenueController;
-use GoalCart\Settings\Settings;
+use FaraCart\Admin\ProductCostField;
+use FaraCart\Analytics\AttributionEngine;
+use FaraCart\Analytics\OrderCostSnapshot;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\REST\RecommendationsController;
+use FaraCart\REST\RevenueController;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -94,12 +94,12 @@ function close( $a, $b, $eps = 0.01 ) {
 Installer::maybe_create_tables();
 
 // Fire REST route registration once (rest_api_init never fires in CLI).
-if ( ! did_action( 'goalcart_rest_test_ready' ) ) {
+if ( ! did_action( 'faracart_rest_test_ready' ) ) {
 	do_action( 'rest_api_init' );
-	do_action( 'goalcart_rest_test_ready' );
+	do_action( 'faracart_rest_test_ready' );
 }
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $engine   = $container->get( AttributionEngine::class );
 $tracker  = $container->get( RevenueTracker::class );
@@ -135,16 +135,16 @@ check( 'simple product-cost field hook registered', has_action( 'woocommerce_pro
 check( 'variation product-cost field hook registered', has_action( 'woocommerce_variation_options_pricing', array( $container->get( ProductCostField::class ), 'render_variation_field' ) ) );
 
 $sources = RewardCostEstimator::COST_SOURCES;
-check( 'COST_SOURCES lists _goalcart_product_cost', in_array( '_goalcart_product_cost', $sources, true ) );
+check( 'COST_SOURCES lists _faracart_product_cost', in_array( '_faracart_product_cost', $sources, true ) );
 check( 'COST_SOURCES lists _cost', in_array( '_cost', $sources, true ) );
 check( 'COST_SOURCES lists _wc_cog_cost', in_array( '_wc_cog_cost', $sources, true ) );
-check( 'COST_SOURCES lists goalcart_product_cost', in_array( 'goalcart_product_cost', $sources, true ) );
+check( 'COST_SOURCES lists faracart_product_cost', in_array( 'faracart_product_cost', $sources, true ) );
 check( 'COST_SOURCES lists variation_fallback', in_array( 'variation_fallback', $sources, true ) );
-check( '_goalcart_product_cost precedes _cost', array_search( '_goalcart_product_cost', $sources, true ) < array_search( '_cost', $sources, true ) );
+check( '_faracart_product_cost precedes _cost', array_search( '_faracart_product_cost', $sources, true ) < array_search( '_cost', $sources, true ) );
 
-check( 'apply route registered', route_exists( $routes, '/goalcart/v1/revenue/goal-recommendations/apply' ) );
-check( 'cost-coverage route registered', route_exists( $routes, '/goalcart/v1/revenue/cost-coverage' ) );
-check( 'recommendation route still registered', route_exists( $routes, '/goalcart/v1/revenue/goal-recommendations' ) );
+check( 'apply route registered', route_exists( $routes, '/faracart/v1/revenue/goal-recommendations/apply' ) );
+check( 'cost-coverage route registered', route_exists( $routes, '/faracart/v1/revenue/cost-coverage' ) );
+check( 'recommendation route still registered', route_exists( $routes, '/faracart/v1/revenue/goal-recommendations' ) );
 
 check( 'recommendation_applied is a revenue event', RevenueTracker::is_revenue_event( RevenueTracker::EVENT_RECOMMENDATION_APPLIED ) );
 check( 'upsell funnel events are upsell events', RevenueTracker::is_upsell_event( RevenueTracker::EVENT_UPSELL_IMPRESSION ) && RevenueTracker::is_upsell_event( RevenueTracker::EVENT_UPSELL_CLICKED ) && RevenueTracker::is_upsell_event( RevenueTracker::EVENT_UPSELL_ADDED ) && RevenueTracker::is_upsell_event( RevenueTracker::EVENT_UPSELL_ORDER ) );
@@ -166,7 +166,7 @@ $attrib_before         = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$attrib_ta
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	// --- Cost-source precedence: `_goalcart_product_cost` wins. ---
+	// --- Cost-source precedence: `_faracart_product_cost` wins. ---
 	$post_id = wp_insert_post( array(
 		'post_type'   => 'product',
 		'post_title'  => 'R7 source precedence',
@@ -183,18 +183,18 @@ try {
 
 	// Now save FaraCart's own field on top — it must take precedence.
 	update_post_meta( (int) $post_id, RewardCostEstimator::PRODUCT_COST_META, '250' );
-	check( '_goalcart_product_cost beats _cost', close( 250, $costs->product_cost( (int) $post_id ) ) );
+	check( '_faracart_product_cost beats _cost', close( 250, $costs->product_cost( (int) $post_id ) ) );
 
 	// Zero/negative in FaraCart's field is "no data" → falls through.
 	update_post_meta( (int) $post_id, RewardCostEstimator::PRODUCT_COST_META, '0' );
-	check( 'zero _goalcart_product_cost treated as missing (falls back to _cost)', close( 400, $costs->product_cost( (int) $post_id ) ) );
+	check( 'zero _faracart_product_cost treated as missing (falls back to _cost)', close( 400, $costs->product_cost( (int) $post_id ) ) );
 
 	// The filter still outranks the stored field.
-	add_filter( 'goalcart_product_cost', function ( $cost, $product ) use ( $post_id ) {
+	add_filter( 'faracart_product_cost', function ( $cost, $product ) use ( $post_id ) {
 		return (int) $product->get_id() === (int) $post_id ? 550.0 : $cost;
 	}, 10, 2 );
-	check( 'goalcart_product_cost filter beats _goalcart_product_cost', close( 550, $costs->product_cost( (int) $post_id ) ) );
-	remove_all_filters( 'goalcart_product_cost' );
+	check( 'faracart_product_cost filter beats _faracart_product_cost', close( 550, $costs->product_cost( (int) $post_id ) ) );
+	remove_all_filters( 'faracart_product_cost' );
 
 	// ProductCostField::save_cost_meta — invalid/empty deletes, valid saves
 	// (exercised via reflection, matching the other suites' protected-method
@@ -221,7 +221,7 @@ try {
 	$orders[] = $order_id;
 
 	$snapshot->snapshot_line_item( $item, '', array(), $order );
-	check( 'snapshot stamps _goalcart_unit_cost', close( 320.5, (float) $item->get_meta( RewardCostEstimator::ORDER_COST_META ) ) );
+	check( 'snapshot stamps _faracart_unit_cost', close( 320.5, (float) $item->get_meta( RewardCostEstimator::ORDER_COST_META ) ) );
 	check( 'item_snapshot_cost reads the stamped value', close( 320.5, OrderCostSnapshot::item_snapshot_cost( $item ) ) );
 	check( 'order_item_unit_cost prefers the snapshot', close( 320.5, $costs->order_item_unit_cost( $item, (int) $post_id ) ) );
 
@@ -246,12 +246,12 @@ try {
 	check( 'coverage_pct is a percentage when available', ! $coverage['available'] || ( $coverage['coverage_pct'] >= 0 && $coverage['coverage_pct'] <= 100 ) );
 
 	// --- REST: cost-coverage endpoint shape + anonymous rejection. ---
-	$req  = new \WP_REST_Request( 'GET', '/goalcart/v1/revenue/cost-coverage' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/revenue/cost-coverage' );
 	$resp = $server->dispatch( $req );
 	check( 'anonymous rejected on cost-coverage (403)', 403 === $resp->get_status() );
 
 	$revenue_ctrl = $container->get( RevenueController::class );
-	$coverage_payload = $revenue_ctrl->handle_cost_coverage( new \WP_REST_Request( 'GET', '/goalcart/v1/revenue/cost-coverage' ) )->get_data()['data'];
+	$coverage_payload = $revenue_ctrl->handle_cost_coverage( new \WP_REST_Request( 'GET', '/faracart/v1/revenue/cost-coverage' ) )->get_data()['data'];
 	check( 'cost-coverage payload has product_coverage', isset( $coverage_payload['product_coverage'] ) );
 	check( 'cost-coverage payload has store_has_cost_data', isset( $coverage_payload['store_has_cost_data'] ) && is_bool( $coverage_payload['store_has_cost_data'] ) );
 	check( 'cost-coverage payload has cost_sources', isset( $coverage_payload['cost_sources'] ) && $coverage_payload['cost_sources'] === RewardCostEstimator::COST_SOURCES );
@@ -295,12 +295,12 @@ try {
 	// --- Apply endpoint: behavior + feedback loop. ---
 	$rec_ctrl = $container->get( RecommendationsController::class );
 
-	$anon = new \WP_REST_Request( 'POST', '/goalcart/v1/revenue/goal-recommendations/apply' );
+	$anon = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/goal-recommendations/apply' );
 	$anon->set_param( 'goal_id', (int) $goal_id );
 	$anon->set_param( 'threshold', 4000000 );
 	check( 'anonymous rejected on apply (403)', 403 === $server->dispatch( $anon )->get_status() );
 
-	$apply = new \WP_REST_Request( 'POST', '/goalcart/v1/revenue/goal-recommendations/apply' );
+	$apply = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/goal-recommendations/apply' );
 	$apply->set_param( 'goal_id', (int) $goal_id );
 	$apply->set_param( 'threshold', 4000000 );
 	$applied = $rec_ctrl->handle_apply( $apply );
@@ -335,7 +335,7 @@ try {
 	check( 'event meta carries the previous target', isset( $meta['previous_target'] ) && close( 5000000, (float) $meta['previous_target'] ) );
 
 	// Re-applying within the daily window dedups the event (still one row).
-	$apply2 = new \WP_REST_Request( 'POST', '/goalcart/v1/revenue/goal-recommendations/apply' );
+	$apply2 = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/goal-recommendations/apply' );
 	$apply2->set_param( 'goal_id', (int) $goal_id );
 	$apply2->set_param( 'threshold', 4200000 );
 	$rec_ctrl->handle_apply( $apply2 );
@@ -349,13 +349,13 @@ try {
 	check( 'daily dedup keeps one recommendation_applied row', 1 === $applied_events2 );
 
 	// Errors: unknown goal → 404; non-positive threshold → 400.
-	$missing = new \WP_REST_Request( 'POST', '/goalcart/v1/revenue/goal-recommendations/apply' );
+	$missing = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/goal-recommendations/apply' );
 	$missing->set_param( 'goal_id', 999999 );
 	$missing->set_param( 'threshold', 100 );
 	$missing_resp = $rec_ctrl->handle_apply( $missing );
 	check( 'unknown goal → 404', is_wp_error( $missing_resp ) && 404 === (int) $missing_resp->get_error_data()['status'] );
 
-	$bad = new \WP_REST_Request( 'POST', '/goalcart/v1/revenue/goal-recommendations/apply' );
+	$bad = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/goal-recommendations/apply' );
 	$bad->set_param( 'goal_id', (int) $goal_id );
 	$bad->set_param( 'threshold', 0 );
 	$bad_resp = $rec_ctrl->handle_apply( $bad );
@@ -381,28 +381,28 @@ $goals_tsx    = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src
 $overview_tsx = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/RevenueOverview.tsx' );
 $analytics_tsx = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/Analytics.tsx' );
 
-check( 'navigation uses Recommendations', false !== strpos( $navigation, "label: __('Recommendations', 'goalcart')" ) );
-check( 'navigation uses Upsells', false !== strpos( $navigation, "label: __('Upsells', 'goalcart')" ) );
+check( 'navigation uses Recommendations', false !== strpos( $navigation, "label: __('Recommendations', 'faracart')" ) );
+check( 'navigation uses Upsells', false !== strpos( $navigation, "label: __('Upsells', 'faracart')" ) );
 check( 'navigation drops the old Goal Optimization label', false === strpos( $navigation, 'Goal Optimization' ) );
 check( 'navigation drops the old Upsell Performance label', false === strpos( $navigation, 'Upsell Performance' ) );
 check( 'navigation drops Smart Recommendations label', false === strpos( $navigation, 'Smart Recommendations' ) );
 check( 'navigation drops Upsell Analytics label', false === strpos( $navigation, 'Upsell Analytics' ) );
 check( 'App redirects old recommendations route', false !== strpos( $app_tsx, "path: '/revenue/recommendations'" ) && false !== strpos( $app_tsx, '/optimization/goals' ) );
 check( 'App redirects old upsells route', false !== strpos( $app_tsx, "path: '/revenue/upsells'" ) && false !== strpos( $app_tsx, '/optimization/upsells' ) );
-check( 'Recommendations page titled Recommendations', false !== strpos( $reco_tsx, "title={__('Recommendations', 'goalcart')}" ) );
+check( 'Recommendations page titled Recommendations', false !== strpos( $reco_tsx, "title={__('Recommendations', 'faracart')}" ) );
 check( 'Recommendations page drops Smart Recommendations title', false === strpos( $reco_tsx, "Smart Recommendations" ) );
-check( 'Upsell Analytics page titled Upsells', false !== strpos( $upsell_tsx, "title={__('Upsells', 'goalcart')}" ) );
-check( 'Upsell Analytics page drops old title', false === strpos( $upsell_tsx, "title={__('Upsell Analytics', 'goalcart')}" ) );
+check( 'Upsell Analytics page titled Upsells', false !== strpos( $upsell_tsx, "title={__('Upsells', 'faracart')}" ) );
+check( 'Upsell Analytics page drops old title', false === strpos( $upsell_tsx, "title={__('Upsell Analytics', 'faracart')}" ) );
 check( 'Goal Performance reads upsell_assisted', false !== strpos( $goals_tsx, 'upsell_assisted' ) );
-check( 'Goal Performance drawer uses the Recommendations section', false !== strpos( $goals_tsx, "SectionTitle>{__('Recommendations', 'goalcart')}" ) );
-check( 'Goal Performance drawer uses the Upsells section', false !== strpos( $goals_tsx, "SectionTitle>{__('Upsells', 'goalcart')}" ) );
-check( 'Goal Performance drawer drops Smart Upsells label', false === strpos( $goals_tsx, "__('Smart Upsells', 'goalcart')" ) );
-check( 'Revenue Overview labels Influenced sales', false !== strpos( $overview_tsx, "label={__('Influenced sales', 'goalcart')}" ) );
-check( 'Revenue Overview drops Influenced revenue', false === strpos( $overview_tsx, "label={__('Influenced revenue', 'goalcart')}" ) );
-check( 'Revenue Overview labels the trend series Additional Sales Value', false !== strpos( $overview_tsx, "__('Additional Sales Value', 'goalcart')" ) );
-check( 'Revenue Overview drops Incremental Revenue label', false === strpos( $overview_tsx, "__('Incremental Revenue', 'goalcart')" ) );
-check( 'Analytics labels Influenced sales', false !== strpos( $analytics_tsx, "label={__('Influenced sales', 'goalcart')}" ) );
-check( 'Analytics drops Influenced revenue', false === strpos( $analytics_tsx, "label={__('Influenced revenue', 'goalcart')}" ) );
+check( 'Goal Performance drawer uses the Recommendations section', false !== strpos( $goals_tsx, "SectionTitle>{__('Recommendations', 'faracart')}" ) );
+check( 'Goal Performance drawer uses the Upsells section', false !== strpos( $goals_tsx, "SectionTitle>{__('Upsells', 'faracart')}" ) );
+check( 'Goal Performance drawer drops Smart Upsells label', false === strpos( $goals_tsx, "__('Smart Upsells', 'faracart')" ) );
+check( 'Revenue Overview labels Influenced sales', false !== strpos( $overview_tsx, "label={__('Influenced sales', 'faracart')}" ) );
+check( 'Revenue Overview drops Influenced revenue', false === strpos( $overview_tsx, "label={__('Influenced revenue', 'faracart')}" ) );
+check( 'Revenue Overview labels the trend series Additional Sales Value', false !== strpos( $overview_tsx, "__('Additional Sales Value', 'faracart')" ) );
+check( 'Revenue Overview drops Incremental Revenue label', false === strpos( $overview_tsx, "__('Incremental Revenue', 'faracart')" ) );
+check( 'Analytics labels Influenced sales', false !== strpos( $analytics_tsx, "label={__('Influenced sales', 'faracart')}" ) );
+check( 'Analytics drops Influenced revenue', false === strpos( $analytics_tsx, "label={__('Influenced revenue', 'faracart')}" ) );
 
 // ---------------------------------------------------------------------------
 // 4. Rollback verification

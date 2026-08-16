@@ -561,7 +561,7 @@ Do not overload unrelated WooCommerce fields.
 Use a clearly namespaced internal key, such as:
 
 ```text
-_goalcart_product_cost
+_faracart_product_cost
 ```
 
 Use the project's actual naming conventions if an existing field already exists.

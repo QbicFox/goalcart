@@ -2,14 +2,14 @@
 /**
  * Campaign repository for the FaraCart REST layer.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Campaigns;
+namespace FaraCart\Campaigns;
 
-use GoalCart\Database\Schema;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalRepository;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
  *  - reads carry `goal_count` (list page) and `goals` (detail/builder)
  *
  * Deleting a campaign detaches its goals (explicitly, and via the
- * `fk_goalcart_goals_campaign` ON DELETE SET NULL foreign key), so goal
+ * `fk_faracart_goals_campaign` ON DELETE SET NULL foreign key), so goal
  * definitions survive and can be reused by other campaigns.
  */
 final class CampaignRepository {
@@ -221,7 +221,7 @@ final class CampaignRepository {
 		$data = array(
 			'name'          => sprintf(
 				/* translators: %s: original campaign name. */
-				__( '%s (copy)', 'goalcart' ),
+				__( '%s (copy)', 'faracart' ),
 				$campaign['name']
 			),
 			'description'   => $campaign['description'],

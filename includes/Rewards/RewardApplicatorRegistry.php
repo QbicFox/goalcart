@@ -2,16 +2,16 @@
 /**
  * Reward applicator registry.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards;
+namespace FaraCart\Rewards;
 
-use GoalCart\Rewards\Applicators\CouponApplicator;
-use GoalCart\Rewards\Applicators\FixedDiscountApplicator;
-use GoalCart\Rewards\Applicators\FreeGiftApplicator;
-use GoalCart\Rewards\Applicators\FreeShippingApplicator;
-use GoalCart\Rewards\Applicators\PercentageDiscountApplicator;
+use FaraCart\Rewards\Applicators\CouponApplicator;
+use FaraCart\Rewards\Applicators\FixedDiscountApplicator;
+use FaraCart\Rewards\Applicators\FreeGiftApplicator;
+use FaraCart\Rewards\Applicators\FreeShippingApplicator;
+use FaraCart\Rewards\Applicators\PercentageDiscountApplicator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
  * Class RewardApplicatorRegistry
  *
  * Maps reward types to applicator classes and resolves them lazily. The
- * class map is filterable through 'goalcart_reward_applicator_classes' so
+ * class map is filterable through 'faracart_reward_applicator_classes' so
  * stores can register custom reward types without touching the core —
  * mirroring the GoalEvaluatorRegistry pattern from Phase 4.
  */
@@ -68,7 +68,7 @@ class RewardApplicatorRegistry {
 			 *
 			 * @param array<string, string> $classes Reward type => applicator class.
 			 */
-			$classes = apply_filters( 'goalcart_reward_applicator_classes', $classes );
+			$classes = apply_filters( 'faracart_reward_applicator_classes', $classes );
 		}
 
 		foreach ( $classes as $type => $class ) {

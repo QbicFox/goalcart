@@ -2,10 +2,10 @@
 /**
  * Database schema definitions for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Database;
+namespace FaraCart\Database;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Class Schema
  *
  * Central definition of every database table used by the plugin.
- * Table names are prefixed with `{$wpdb->prefix}goalcart_` so they work
+ * Table names are prefixed with `{$wpdb->prefix}faracart_` so they work
  * with any WordPress table prefix.
  *
  * Mirrors the reference plugin (WooInsights\Database\Schema): tables are
@@ -38,7 +38,7 @@ defined( 'ABSPATH' ) || exit;
  *                         events) feeding the analytics phases (16–17).
  *
  * Settings intentionally live in a single WordPress option
- * (`goalcart_settings`, see Settings) rather than a table: the reference
+ * (`faracart_settings`, see Settings) rather than a table: the reference
  * plugin declares a settings table that its Settings service never uses,
  * so the option-only pattern was adopted to avoid duplicated storage.
  */
@@ -49,7 +49,7 @@ class Schema {
 	 *
 	 * @var string
 	 */
-	const TABLE_PREFIX = 'goalcart_';
+	const TABLE_PREFIX = 'faracart_';
 
 	/**
 	 * Get the fully qualified table name for a plugin table.
@@ -194,7 +194,7 @@ class Schema {
 			// incremental_value) plus order ids and is only written when the
 			// revenue tracking gate passes (RevenueTracker::tracking_enabled
 			// — master + analytics toggles plus the
-			// goalcart_revenue_tracking_enabled filter).
+			// faracart_revenue_tracking_enabled filter).
 			$revenue_events => "CREATE TABLE {$revenue_events} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 				event_type varchar(40) NOT NULL,
@@ -526,7 +526,7 @@ class Schema {
 		return array(
 			array(
 				'table'             => $goals,
-				'name'              => 'fk_goalcart_goals_campaign',
+				'name'              => 'fk_faracart_goals_campaign',
 				'column'            => 'campaign_id',
 				'references'        => $campaigns,
 				'referenced_column' => 'id',
@@ -534,7 +534,7 @@ class Schema {
 			),
 			array(
 				'table'             => $events,
-				'name'              => 'fk_goalcart_analytics_goal',
+				'name'              => 'fk_faracart_analytics_goal',
 				'column'            => 'goal_id',
 				'references'        => $goals,
 				'referenced_column' => 'id',
@@ -542,7 +542,7 @@ class Schema {
 			),
 			array(
 				'table'             => $events,
-				'name'              => 'fk_goalcart_analytics_campaign',
+				'name'              => 'fk_faracart_analytics_campaign',
 				'column'            => 'campaign_id',
 				'references'        => $campaigns,
 				'referenced_column' => 'id',
@@ -554,7 +554,7 @@ class Schema {
 			// cascades away its attribution history.
 			array(
 				'table'             => $revenue_events,
-				'name'              => 'fk_goalcart_revenue_goal',
+				'name'              => 'fk_faracart_revenue_goal',
 				'column'            => 'goal_id',
 				'references'        => $goals,
 				'referenced_column' => 'id',
@@ -562,7 +562,7 @@ class Schema {
 			),
 			array(
 				'table'             => $revenue_events,
-				'name'              => 'fk_goalcart_revenue_campaign',
+				'name'              => 'fk_faracart_revenue_campaign',
 				'column'            => 'campaign_id',
 				'references'        => $campaigns,
 				'referenced_column' => 'id',
@@ -570,7 +570,7 @@ class Schema {
 			),
 			array(
 				'table'             => $revenue_daily,
-				'name'              => 'fk_goalcart_daily_goal',
+				'name'              => 'fk_faracart_daily_goal',
 				'column'            => 'goal_id',
 				'references'        => $goals,
 				'referenced_column' => 'id',
@@ -578,7 +578,7 @@ class Schema {
 			),
 			array(
 				'table'             => $goal_attrib,
-				'name'              => 'fk_goalcart_attribution_goal',
+				'name'              => 'fk_faracart_attribution_goal',
 				'column'            => 'goal_id',
 				'references'        => $goals,
 				'referenced_column' => 'id',
@@ -586,7 +586,7 @@ class Schema {
 			),
 			array(
 				'table'             => $upsell_events,
-				'name'              => 'fk_goalcart_upsell_goal',
+				'name'              => 'fk_faracart_upsell_goal',
 				'column'            => 'goal_id',
 				'references'        => $goals,
 				'referenced_column' => 'id',
@@ -599,7 +599,7 @@ class Schema {
 			// analytics event log convention).
 			array(
 				'table'             => $completions,
-				'name'              => 'fk_goalcart_completions_goal',
+				'name'              => 'fk_faracart_completions_goal',
 				'column'            => 'goal_id',
 				'references'        => $goals,
 				'referenced_column' => 'id',

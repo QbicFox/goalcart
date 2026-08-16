@@ -10,11 +10,11 @@ This document covers both frontends:
 
 # Storefront Progress UI (Phase 11)
 
-The customer-facing widget layer turns the public `GET /goalcart/v1/progress`
+The customer-facing widget layer turns the public `GET /faracart/v1/progress`
 endpoint into live progress widgets on the storefront. It follows the
 reference plugin's frontend convention exactly: **hand-written vanilla JS in
-`assets/js/` (no build step)**, enqueued with `GOALCART_VERSION` + `in_footer`,
-a single inline config object (`window.goalcartFrontend`) printed early in
+`assets/js/` (no build step)**, enqueued with `FARACART_VERSION` + `in_footer`,
+a single inline config object (`window.faracartFrontend`) printed early in
 `wp_footer`, and a **must-never-throw contract** in the JS.
 
 ## Architecture
@@ -23,7 +23,7 @@ a single inline config object (`window.goalcartFrontend`) printed early in
 includes/Frontend/ProgressUI.php        server-side widget service
 assets/js/frontend.js                   vanilla JS widget library
 assets/css/frontend.css                 RTL-aware widget styles
-GET /goalcart/v1/progress               public progress payload (Phase 7)
+GET /faracart/v1/progress               public progress payload (Phase 7)
 ```
 
 The PHP side never renders progress markup. It prints empty widget
@@ -40,19 +40,19 @@ own JS events without a page reload.
 | Checkout | `woocommerce_before_checkout_form` | `woocommerce_after_checkout_form` | full |
 | Shop / archives | `woocommerce_archive_description` | `woocommerce_after_shop_loop` | compact |
 | Product page | `woocommerce_single_product_summary` (prio 45) | `woocommerce_after_single_product_summary` (prio 20) | compact |
-| Anywhere | `[goalcart_progress variant="full|compact"]` shortcode | full/compact |
+| Anywhere | `[faracart_progress variant="full|compact"]` shortcode | full/compact |
 | Sticky bar | `wp_footer` | fixed bottom bar |
 
 Every location renders **at most once per request** (a rendered-location
 registry in `ProgressUI`) and each container has a unique id; the JS
-mounts each container exactly once (`data-goalcart-mounted`), so a page
+mounts each container exactly once (`data-faracart-mounted`), so a page
 can never end up with two widgets in the same spot — including after
 mini-cart fragment refreshes.
 
 ## Components (`assets/js/frontend.js`)
 
 Each widget renders **every eligible goal as its own card**, stacked in a
-shared `.goalcart-widget__goals` wrapper — a campaign's milestones each
+shared `.faracart-widget__goals` wrapper — a campaign's milestones each
 get a full card instead of one featured card + a tiny ladder:
 
 - **GoalContainer** — one goal's card; `full` = reward chip + progress +
@@ -77,7 +77,7 @@ get a full card instead of one featured card + a tiny ladder:
 There is no cross-goal ladder anymore: every goal is its own card, each
 rendering through its resolved design template. Ineligible goals never
 render a card, and when no goals are eligible the container is hidden
-(`goalcart-widget--empty`) instead of showing a broken bar.
+(`faracart-widget--empty`) instead of showing a broken bar.
 
 ## Refresh & events
 
@@ -86,7 +86,7 @@ The library refetches on every WooCommerce cart event (`added_to_cart`,
 `wc_fragments_refreshed`, `wc_fragments_loaded`) — bound through jQuery
 when present (WooCommerce fires these as jQuery events) with a native
 `CustomEvent` fallback — plus an optional poll interval from the config
-(`goalcart_frontend_refresh_interval` filter, seconds).
+(`faracart_frontend_refresh_interval` filter, seconds).
 
 Cart events poll **twice: immediately, and once more after 600 ms**
 (`refreshAfterCartChange()`). The AJAX request that fired the event only
@@ -112,20 +112,20 @@ layers are asserted by `tests/frontend-test.php`.
 ## Gate & configuration
 
 - **Master toggle:** the `enabled` setting (filter
-  `goalcart_frontend_enabled`) — the staff-visibility gate below applies
+  `faracart_frontend_enabled`) — the staff-visibility gate below applies
   on top of it, so the filter alone cannot reveal widgets to a logged-in
   admin.
 - **Staff visibility:** logged-in site admins browsing the storefront do
   not see the shopper-facing widgets by default
   (`ProgressUI::is_visible_to_user()` — "admin" means the
-  `goalcart_admin_capability` capability, default `manage_options`, so
+  `faracart_admin_capability` capability, default `manage_options`, so
   whoever can administer the plugin is treated as staff). The whole
-  decision is filterable via `goalcart_frontend_visible_to_user` — e.g.
+  decision is filterable via `faracart_frontend_visible_to_user` — e.g.
   hide the widgets from every logged-in user, or from shop managers too.
 - **Locations:** the `frontend_locations` setting (Phase 18) drives where
   the widgets mount — the cart / mini-cart / checkout / shop / product
   containers plus the sticky bar are all gated on the configured set
-  (filter `goalcart_frontend_locations`); dropping `sticky` from the list
+  (filter `faracart_frontend_locations`); dropping `sticky` from the list
   disables the sticky bar entirely.
 - **Page position:** the `frontend_position` setting (`top` | `bottom`)
   selects the top or bottom hook for all regular page widgets. The sticky
@@ -133,16 +133,16 @@ layers are asserted by `tests/frontend-test.php`.
   remain registered and the selected one renders the container, so the
   setting is normalized and applied on every request.
 - **Mobile behavior:** the `frontend_mobile` setting (`show` | `hide`,
-  Phase 18) — when `hide`, the JS adds a `goalcart-mobile-hidden` class
+  Phase 18) — when `hide`, the JS adds a `faracart-mobile-hidden` class
   to every container and the CSS hides the widgets under 600 px.
 - **Template:** the `frontend_template` setting, overridable per widget
   with the shortcode `template` attribute and globally with the
-  `goalcart_frontend_template` filter.
+  `faracart_frontend_template` filter.
 - **Animation:** the `frontend_animation` setting, filterable via
-  `goalcart_frontend_animation` (offs add the no-transition classes).
+  `faracart_frontend_animation` (offs add the no-transition classes).
 - **Config payload** (`frontend_config()`): `endpoint`, `refresh`,
   `currency`, `locale`, `isRtl`, `labels` — printed as
-  `window.goalcartFrontend` at `wp_footer` priority 5, before the
+  `window.faracartFrontend` at `wp_footer` priority 5, before the
   enqueued footer script. Phase 12 adds `template` (active variant),
   `animation` and `appearance` (resolved tokens); Phase 18 adds
   `currencyDisplay` (`symbol` | `code` | `name` — the widget's amount
@@ -150,7 +150,7 @@ layers are asserted by `tests/frontend-test.php`.
   `locale` (`get_locale()`), which the JS passes to `Intl.NumberFormat`
   so amounts and numbers render with the site locale's digits and
   grouping (Persian digits for `fa_IR` — see `docs/i18n.md`). The Phase
-  16 Tracker prints a second object, `window.goalcartTracking`, at
+  16 Tracker prints a second object, `window.faracartTracking`, at
   priority 4 (see “Analytics Events”).
 - Assets load only on pages that can render a widget (cart / checkout /
   shop / product / a page containing the shortcode) via
@@ -162,9 +162,9 @@ layers are asserted by `tests/frontend-test.php`.
 
 Every progress message — the widget's `GoalMessage`, the sticky bar copy,
 the milestone labels — is rendered server-side by
-`GoalCart\Goals\MessageEngine` (`includes/Goals/MessageEngine.php`), a
+`FaraCart\Goals\MessageEngine` (`includes/Goals/MessageEngine.php`), a
 stateless, database-free template engine fed a `Goal` + `GoalResult`.
-The `GET /goalcart/v1/progress` payload exposes the result as `message`
+The `GET /faracart/v1/progress` payload exposes the result as `message`
 plus the raw `state` for styling.
 
 ## States
@@ -211,8 +211,8 @@ Only {remaining} left until {reward}
 ```
 
 renders as “Only $38.00 left until Free shipping”. The payload `state`
-lands as a `goalcart-state--{state}` class on the widget card, so themes
-can highlight near-completion (`goalcart-state--nearly_complete`) etc.
+lands as a `faracart-state--{state}` class on the widget card, so themes
+can highlight near-completion (`faracart-state--nearly_complete`) etc.
 
 ---
 
@@ -280,7 +280,7 @@ such as `card`, or a removed template) falls back to the scope default
 instead of failing — old template ids are never mapped to a current
 template. The Phase 15 admin preview resolves through the same engine,
 so what the merchant previews is what customers see. The per-widget
-shortcode `template` attribute and the `goalcart_frontend_template`
+shortcode `template` attribute and the `faracart_frontend_template`
 filter still override the store-wide variant (`ProgressUI::template()`).
 
 ## Customization
@@ -292,8 +292,8 @@ Goal Builder and Campaign Builder all render the settings form
 **generically from the schema** (`admin-app/src/templates/SchemaForm.tsx`),
 so a new template automatically gets a working settings UI. The
 storefront applies each goal's resolved settings as per-card CSS custom
-properties (`--goalcart-accent`, `--goalcart-bg`, `--goalcart-border`,
-`--goalcart-text`, `--goalcart-radius`, `--goalcart-bar-height`, …) via
+properties (`--faracart-accent`, `--faracart-bg`, `--faracart-border`,
+`--faracart-text`, `--faracart-radius`, `--faracart-bar-height`, …) via
 `style.setProperty()` and appends any custom CSS per card. Every value
 is validated server-side against the schema (colors, ranges, tag-free
 CSS, unknown keys dropped). The legacy `frontend_*` surface remains the
@@ -303,12 +303,12 @@ CSS-class / animation settings still apply through
 
 ## Styling
 
-The stylesheet is scoped under `.goalcart-widget` / `#goalcart-sticky`,
+The stylesheet is scoped under `.faracart-widget` / `#faracart-sticky`,
 responsive, motion-safe (respects `prefers-reduced-motion`), and
-**themeable through CSS custom properties** (`--goalcart-accent`,
-`--goalcart-bg`, `--goalcart-border`, `--goalcart-text`,
-`--goalcart-text-muted`, `--goalcart-radius`, `--goalcart-shadow`,
-`--goalcart-bar-height`, …) — the Phase 12 Appearance controls override
+**themeable through CSS custom properties** (`--faracart-accent`,
+`--faracart-bg`, `--faracart-border`, `--faracart-text`,
+`--faracart-text-muted`, `--faracart-radius`, `--faracart-shadow`,
+`--faracart-bar-height`, …) — the Phase 12 Appearance controls override
 the same tokens, and the `frontend_custom_css` setting appends custom CSS
 to the same inline style block (`ProgressUI::appearance_css()`).
 
@@ -317,15 +317,15 @@ to the same inline style block (`ProgressUI::appearance_css()`).
 # Analytics Events (Phase 16)
 
 The storefront widgets report goal-cart analytics events to
-`POST /goalcart/v1/track` (see `docs/api.md` §3). Tracking is baked into
+`POST /faracart/v1/track` (see `docs/api.md` §3). Tracking is baked into
 `assets/js/frontend.js` — no separate tracker file — with the same
 must-never-throw contract as the widgets: a failed or missing report can
 never disturb the storefront.
 
 ## Config
 
-`GoalCart\Analytics\Tracker` prints a second small inline config object,
-`window.goalcartTracking`, at `wp_footer` priority 4 (before the widget
+`FaraCart\Analytics\Tracker` prints a second small inline config object,
+`window.faracartTracking`, at `wp_footer` priority 4 (before the widget
 config at 5):
 
 ```js
@@ -337,12 +337,12 @@ anonymous session cookie (32-hex, HttpOnly, SameSite=Lax — never an IP or
 any PII) that groups all of one visitor's events.
 
 The nonce is **self-healing**: every `/progress` response carries a
-freshly minted `tracking_nonce` (the same `goalcart_track` action) and
+freshly minted `tracking_nonce` (the same `faracart_track` action) and
 the widget JS adopts it before reporting the next event. The page's own
 nonce is baked into the HTML and expires after its 12-hour tick — or is
 bound to another user's session on a cached page — so without the
 refresh those conditions would turn every subsequent `/track` report
-into a `goalcart_invalid_nonce` (403).
+into a `faracart_invalid_nonce` (403).
 
 ## Events reported
 
@@ -358,7 +358,7 @@ into a `goalcart_invalid_nonce` (403).
 `cart_value` is the first money goal's current value at event time;
 `goal_progress` carries the rounded `percentage` in `meta`. Suggestion
 clicks are reported through a delegated `document.body` click listener
-using the `data-goalcart-suggestion-id` / `data-goalcart-goal-id`
+using the `data-faracart-suggestion-id` / `data-faracart-goal-id`
 attributes the widget puts on each suggestion link.
 
 `goal_impression` is deliberately gated on an *eligible* goal rendering —
@@ -369,7 +369,7 @@ per page session so cart updates don't spam the funnel.
 
 ## Server-side attribution
 
-`suggested_product_added` is **not** client-reported: `GoalCart\Analytics\Tracker`
+`suggested_product_added` is **not** client-reported: `FaraCart\Analytics\Tracker`
 hooks `woocommerce_add_to_cart` and records the event only when the
 session saw a `suggestion_impression` for that product within the last
 24 hours — so a suggestion conversion can never be self-reported, and an
@@ -378,7 +378,7 @@ add-to-cart from anywhere else is simply not attributed.
 ## Gate
 
 Tracking respects the master `enabled` setting plus the
-`goalcart_tracking_enabled` filter (default on). Phase 18 adds a
+`faracart_tracking_enabled` filter (default on). Phase 18 adds a
 first-class settings toggle; until then the filter is the privacy switch.
 
 ---
@@ -386,7 +386,7 @@ first-class settings toggle; until then the filter is the privacy switch.
 # Unified Recommendations (Suggestions + Upsells)
 
 The widget's **UnifiedRecommendations** panel is served by
-`GoalCart\Recommendations\ProductRecommendationEngine`
+`FaraCart\Recommendations\ProductRecommendationEngine`
 (`includes/Recommendations/ProductRecommendationEngine.php`) — the
 single customer-facing recommendation layer that merges the Phase 14
 SuggestionEngine and the Phase 33.5 UpsellRanker into ONE ranked,
@@ -428,11 +428,11 @@ Never recommended: out-of-stock, unpublished or unpriced products, the
 cart's own items, `excluded_products`, and ghost/missing ids. Completed
 or ineligible goals — or a closed gap — return no recommendations.
 Weak candidates that score 0 under the merged weights are dropped, so
-the panel never pads to the configured limit (`goalcart_frontend_upsell_limit`, 1–6, default 3):
+the panel never pads to the configured limit (`faracart_frontend_upsell_limit`, 1–6, default 3):
 fewer strong candidates → fewer items. Money goals with an open gap
-fall back to the public rank endpoint (`/goalcart/v1/upsell/rank`) when
+fall back to the public rank endpoint (`/faracart/v1/upsell/rank`) when
 the payload carried nothing; the list is filterable via the existing
-`goalcart_suggestions` filter (4 args: items, goal, result, context).
+`faracart_suggestions` filter (4 args: items, goal, result, context).
 
 ---
 
@@ -446,8 +446,8 @@ always based on the live cart.
 ## Contract
 
 ```text
-includes/REST/UpsellController.php      GET /goalcart/v1/upsell/rank (public)
-                                        POST /goalcart/v1/upsell/track (nonce)
+includes/REST/UpsellController.php      GET /faracart/v1/upsell/rank (public)
+                                        POST /faracart/v1/upsell/track (nonce)
 includes/Frontend/ProgressUI.php        cfg.upsells (endpoint/track/limit/labels)
 assets/js/frontend.js                   upsellPanel component + add-to-cart
 assets/css/frontend.css                 scoped panel styles (mobile strip)
@@ -477,7 +477,7 @@ keeps them behind manage_options).
 - Renders for money goals with `remaining > 0` that are not completed;
   hidden entirely when the plugin/analytics toggles are off (the
   `cfg.upsells.enabled` gate mirrors the ranker's
-  `goalcart_upsells_enabled` gate).
+  `faracart_upsells_enabled` gate).
 - Results are cached client-side per `goal:remaining`, so a cart-change
   re-render with an unchanged gap reuses the last ranking; a network
   failure drops the panel entirely (never a broken half-render).
@@ -486,13 +486,13 @@ keeps them behind manage_options).
   theme-compatible by construction), falls back to the classic
   `?add-to-cart=` redirect without it, and sends variation-requiring
   items to their product page. On success the panel reports
-  `upsell_added` and funnels into the centralized `goalcart:cart-changed`
+  `upsell_added` and funnels into the centralized `faracart:cart-changed`
   bridge, so the widgets re-poll and the gap closes live.
 
 ## Conversion tracking
 
 The panel reports through the Phase 33.5 public
-`POST /goalcart/v1/upsell/track` route (reusing the Phase 16 tracking
+`POST /faracart/v1/upsell/track` route (reusing the Phase 16 tracking
 nonce + session id): `upsell_impression` once per goal+product per
 session, `upsell_clicked` on the product link and the add button, and
 `upsell_added` after a successful add. These feed `upsell_events` → the
@@ -503,9 +503,9 @@ session, `upsell_clicked` on the product link and the add button, and
 
 The panel is a responsive grid on desktop and a swipeable horizontal
 scroll-snap strip on small screens (`@media (max-width: 600px)`). Every
-style is scoped under `.goalcart-*` and driven by the existing CSS
-custom-property tokens (`--goalcart-accent`, `--goalcart-bg`,
-`--goalcart-border`, `--goalcart-text`, `--goalcart-radius`), so it
+style is scoped under `.faracart-*` and driven by the existing CSS
+custom-property tokens (`--faracart-accent`, `--faracart-bg`,
+`--faracart-border`, `--faracart-text`, `--faracart-radius`), so it
 inherits the store's Appearance settings and never leaks into or breaks
 a theme.
 
@@ -519,9 +519,9 @@ dialog that evaluates the real engine against a **simulated cart** and
 renders the real storefront widget (React mirror of `assets/js/frontend.js`)
 at the chosen device width.
 
-## Backend — `POST /goalcart/v1/preview` (admin-only)
+## Backend — `POST /faracart/v1/preview` (admin-only)
 
-`GoalCart\REST\PreviewController` (`includes/REST/PreviewController.php`)
+`FaraCart\REST\PreviewController` (`includes/REST/PreviewController.php`)
 accepts `goal_id` XOR `campaign_id` plus a `simulated` object
 (`{ amount, quantity }`), builds a **synthetic `CartContext`** (one
 simulated cart line carrying the amount / quantity / weight / categories /
@@ -568,7 +568,7 @@ appearance tokens, so what the admin sees matches the storefront 1:1.
 # FaraCart React Admin App (Phase 8)
 
 The admin dashboard is a React + TypeScript SPA (Vite + MUI) mounted
-inside the WordPress admin at `#goalcart-admin` (see
+inside the WordPress admin at `#faracart-admin` (see
 `includes/Admin/Admin.php`). Phase 8 builds the complete admin shell —
 providers, routing, layout, shared components and the six admin pages —
 following the reference plugin's React architecture exactly.
@@ -577,13 +577,13 @@ following the reference plugin's React architecture exactly.
 admin-app/src/
 ├── main.tsx                     entry: createRoot + AppProviders + App
 ├── App.tsx                      createHashRouter (data router) + lazy routes
-├── boot.ts                      getBootData() — window.goalcart
+├── boot.ts                      getBootData() — window.faracart
 ├── types.ts                     boot data + Goal / Settings / envelope types
 ├── theme/index.ts               WP-admin MUI theme (RTL-aware)
 ├── providers/
 │   ├── AppProviders.tsx         theme + Emotion cache + TanStack Query +
 │   │                            Fullscreen + Snackbar providers
-│   ├── FullscreenProvider.tsx   owns the goalcart-fullscreen body class
+│   ├── FullscreenProvider.tsx   owns the faracart-fullscreen body class
 │   └── (SnackbarProvider lives in components/notifications/)
 ├── date-range/
 │   ├── types.ts                 DateRange / preset types
@@ -645,15 +645,15 @@ admin-app/src/
 
 - **MUI theme** — `createAppTheme()` (WP-admin palette: blue #2271b1,
   canvas #f0f0f1, ink #1d2327; `direction` flips for RTL locales).
-- **Dedicated Emotion cache** — key `goalcart`, RTL-flipped via the
+- **Dedicated Emotion cache** — key `faracart`, RTL-flipped via the
   stylis RTL plugin when the site locale is RTL, so styles never collide
   with other admin plugins and the whole dashboard mirrors for RTL sites.
   No `CssBaseline` (its global resets would leak into the WP admin);
-  scoped resets live in `styles.css` under `#goalcart-admin`.
+  scoped resets live in `styles.css` under `#faracart-admin`.
 - **TanStack Query** — retry 1, 60s staleTime, no refetch on window
   focus.
 - **FullscreenProvider** — initialized from boot data (no layout flash),
-  owns the `goalcart-fullscreen` body class that
+  owns the `faracart-fullscreen` body class that
   `assets/css/admin-fullscreen.css` keys on.
 - **SnackbarProvider** — `useSnackbar().notify(message, severity)` from
   any page or mutation.
@@ -711,9 +711,9 @@ it.
 ## Settings Page (Phase 18)
 
 The `/settings` page is now the full five-tab settings surface
-(`GoalCart\REST\SettingsController`, see `docs/api.md` §2.2), built with
+(`FaraCart\REST\SettingsController`, see `docs/api.md` §2.2), built with
 react-hook-form + zod-less schema validation and saved through `POST
-/goalcart/v1/settings`:
+/faracart/v1/settings`:
 
 - **General** — master enable/disable, full-screen dashboard, currency
   display (`symbol` | `code` | `name`), default goal behavior (`all` |
@@ -730,7 +730,7 @@ react-hook-form + zod-less schema validation and saved through `POST
   tracking and product suggestions toggles.
 - **Advanced** — debug mode, file logging (with the live log path shown
   when enabled) and the developer-hooks switch plus the documented
-  `goalcart_*` hooks reference rendered from the settings meta.
+  `faracart_*` hooks reference rendered from the settings meta.
 
 Every change is validated by the REST schema and normalized by the
 sanitizer before persisting; saving identical settings is a successful
@@ -740,7 +740,7 @@ no-op.
 
 The `/analytics` page turns the Phase 16 event pipeline into a full
 measurement dashboard, served by the single admin endpoint
-`GET /goalcart/v1/analytics` (`GoalCart\REST\AnalyticsController`, see
+`GET /faracart/v1/analytics` (`FaraCart\REST\AnalyticsController`, see
 `docs/api.md` §2.6) so every slice renders in one request.
 
 **Filters** — the toolbar shares one date range through

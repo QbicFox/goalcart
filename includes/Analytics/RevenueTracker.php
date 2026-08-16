@@ -2,14 +2,14 @@
 /**
  * Revenue event tracker for FaraCart (Phase 33.1 — Analytics Foundation).
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
-use GoalCart\Database\Schema;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
+use FaraCart\Database\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -90,11 +90,11 @@ final class RevenueTracker {
 	 *
 	 * @var string
 	 */
-	const CLEANUP_EVENT = 'goalcart_revenue_cleanup';
+	const CLEANUP_EVENT = 'faracart_revenue_cleanup';
 
 	/**
 	 * Default retention window: event rows older than this are deleted by
-	 * the cleanup cron. Filterable with goalcart_revenue_retention_days.
+	 * the cleanup cron. Filterable with faracart_revenue_retention_days.
 	 *
 	 * @var int
 	 */
@@ -165,7 +165,7 @@ final class RevenueTracker {
 	 *
 	 * Gated by the master plugin toggle + the analytics setting (the same
 	 * base gates as Tracker::tracking_enabled()) plus the dedicated
-	 * goalcart_revenue_tracking_enabled filter, so stores can run the
+	 * faracart_revenue_tracking_enabled filter, so stores can run the
 	 * lightweight Phase 16 dashboard while switching the revenue
 	 * attribution pipeline off.
 	 *
@@ -182,7 +182,7 @@ final class RevenueTracker {
 		 * @param bool           $enabled Whether revenue tracking is on.
 		 * @param RevenueTracker $tracker Tracker instance.
 		 */
-		return (bool) apply_filters( 'goalcart_revenue_tracking_enabled', true, $this );
+		return (bool) apply_filters( 'faracart_revenue_tracking_enabled', true, $this );
 	}
 
 	/**
@@ -571,7 +571,7 @@ final class RevenueTracker {
 	 * @return int Number of deleted rows.
 	 */
 	public function run_cleanup() {
-		$retention = (int) apply_filters( 'goalcart_revenue_retention_days', self::RETENTION_DAYS );
+		$retention = (int) apply_filters( 'faracart_revenue_retention_days', self::RETENTION_DAYS );
 		$retention = max( 1, min( 730, $retention ) );
 
 		$cutoff = date( 'Y-m-d H:i:s', strtotime( current_time( 'mysql' ) ) - $retention * DAY_IN_SECONDS );

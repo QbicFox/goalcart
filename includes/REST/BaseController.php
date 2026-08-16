@@ -2,13 +2,13 @@
 /**
  * Base REST controller for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Hooks\HookManager;
-use GoalCart\Utils\Logger;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Utils\Logger;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * Foundation for every FaraCart REST endpoint (Phase 7: REST API / AJAX
  * Layer). Provides:
  *
- *  - the `goalcart/v1` namespace (created implicitly by the first
+ *  - the `faracart/v1` namespace (created implicitly by the first
  *    register_rest_route() call, per the WP REST API)
  *  - a permission callback for admin endpoints combining a capability
  *    check with per-user rate limiting
@@ -44,7 +44,7 @@ abstract class BaseController {
 	 *
 	 * @var string
 	 */
-	const NAMESPACE = 'goalcart/v1';
+	const NAMESPACE = 'faracart/v1';
 
 	/**
 	 * Capability required to access admin endpoints.
@@ -97,12 +97,12 @@ abstract class BaseController {
 	 */
 	public function get_permission_callback() {
 		return function ( $request ) {
-			$capability = apply_filters( 'goalcart_rest_capability', self::CAPABILITY );
+			$capability = apply_filters( 'faracart_rest_capability', self::CAPABILITY );
 
 			if ( ! current_user_can( $capability ) ) {
 				return $this->error(
-					'goalcart_forbidden',
-					__( 'You are not allowed to access this endpoint.', 'goalcart' ),
+					'faracart_forbidden',
+					__( 'You are not allowed to access this endpoint.', 'faracart' ),
 					403
 				);
 			}
@@ -214,7 +214,7 @@ abstract class BaseController {
 		$window = $window ?: self::RATE_LIMIT_WINDOW;
 
 		$user_id = get_current_user_id();
-		$key     = 'goalcart_rl_' . md5( $user_id . '|' . $request->get_route() );
+		$key     = 'faracart_rl_' . md5( $user_id . '|' . $request->get_route() );
 		$slot    = (int) floor( time() / $window );
 
 		$counts = get_transient( $key );
@@ -234,8 +234,8 @@ abstract class BaseController {
 
 		if ( $current >= $limit ) {
 			return $this->error(
-				'goalcart_rate_limited',
-				__( 'Too many requests. Please try again shortly.', 'goalcart' ),
+				'faracart_rate_limited',
+				__( 'Too many requests. Please try again shortly.', 'faracart' ),
 				429,
 				array( 'retry_after' => $window )
 			);
@@ -269,7 +269,7 @@ abstract class BaseController {
 		$window = $window ?: self::RATE_LIMIT_WINDOW;
 
 		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '0.0.0.0';
-		$key     = 'goalcart_rl_ip_' . md5( $ip . '|' . $request->get_route() );
+		$key     = 'faracart_rl_ip_' . md5( $ip . '|' . $request->get_route() );
 		$slot    = (int) floor( time() / $window );
 
 		$counts = get_transient( $key );
@@ -288,8 +288,8 @@ abstract class BaseController {
 
 		if ( $current >= $limit ) {
 			return $this->error(
-				'goalcart_rate_limited',
-				__( 'Too many requests. Please try again shortly.', 'goalcart' ),
+				'faracart_rate_limited',
+				__( 'Too many requests. Please try again shortly.', 'faracart' ),
 				429,
 				array( 'retry_after' => $window )
 			);

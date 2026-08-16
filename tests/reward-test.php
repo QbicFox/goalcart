@@ -36,18 +36,18 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Rewards\Applicators\FixedDiscountApplicator;
-use GoalCart\Rewards\Applicators\FreeGiftApplicator;
-use GoalCart\Rewards\Applicators\FreeShippingApplicator;
-use GoalCart\Rewards\Applicators\PercentageDiscountApplicator;
-use GoalCart\Rewards\Reward;
-use GoalCart\Rewards\RewardEngine;
-use GoalCart\Rewards\RewardResult;
-use GoalCart\Rewards\RewardSafety;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Rewards\Applicators\FixedDiscountApplicator;
+use FaraCart\Rewards\Applicators\FreeGiftApplicator;
+use FaraCart\Rewards\Applicators\FreeShippingApplicator;
+use FaraCart\Rewards\Applicators\PercentageDiscountApplicator;
+use FaraCart\Rewards\Reward;
+use FaraCart\Rewards\RewardEngine;
+use FaraCart\Rewards\RewardResult;
+use FaraCart\Rewards\RewardSafety;
 
 $failures = 0;
 $checks   = 0;
@@ -365,7 +365,7 @@ $r = $reward_engine->evaluate(
             array(
                 'target'      => 100,
                 'reward_type' => Reward::TYPE_COUPON,
-                'reward_meta' => array( 'coupon_code' => 'GOALCART_DOES_NOT_EXIST_12345' ),
+                'reward_meta' => array( 'coupon_code' => 'FARACART_DOES_NOT_EXIST_12345' ),
             )
         ),
         $full_cart
@@ -436,7 +436,7 @@ check( 'stacking none allows different type', RewardSafety::stacking_allows( $no
 check( 'stacking stack allows same type', RewardSafety::stacking_allows( $stack, array( Reward::TYPE_FREE_SHIPPING ) ) );
 
 check( 'coupon_exists false for empty code', ! RewardSafety::coupon_exists( '' ) );
-check( 'coupon_exists rejects unknown code', ! RewardSafety::coupon_exists( 'GOALCART_DOES_NOT_EXIST_12345' ) );
+check( 'coupon_exists rejects unknown code', ! RewardSafety::coupon_exists( 'FARACART_DOES_NOT_EXIST_12345' ) );
 
 check( 'gift unavailable for zero id', ! RewardSafety::gift_product_available( 0 ) );
 check( 'gift unavailable for nonexistent product', ! RewardSafety::gift_product_available( 99999999 ) );
@@ -450,7 +450,7 @@ check( 'generated coupon code differs per goal', RewardSafety::generated_coupon_
 echo "\n== 7. CartContext loop safety ==\n";
 
 $r = Reward::from_goal( goal( array( 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 30 ) ) );
-check( 'own fee prefix constant exposed on CartContext', CartContext::OWN_FEE_PREFIX === 'goalcart_reward_' );
+check( 'own fee prefix constant exposed on CartContext', CartContext::OWN_FEE_PREFIX === 'faracart_reward_' );
 
 // The pure-constructor total is used directly; own-fee exclusion is applied
 // in from_cart() (requires a live WC_Cart, not simulated here). Sanity-check
@@ -517,7 +517,7 @@ echo "\n== 9. WooCommerce integration wiring ==\n";
 // The plugin boots at file scope (ravis-faracart.php), so the RewardEngine's
 // WooCommerce hooks must be live with their declared priorities. Read-only:
 // no cart, session, or database state is touched.
-$re = \GoalCart\Plugin::instance()->reward_engine();
+$re = \FaraCart\Plugin::instance()->reward_engine();
 
 check( 'sync_cart hooked before calculate totals at 100', 100 === has_action( 'woocommerce_before_calculate_totals', array( $re, 'sync_cart' ) ) );
 check( 'zero_gift_prices hooked before calculate totals at 10', 10 === has_action( 'woocommerce_before_calculate_totals', array( $re, 'zero_gift_prices' ) ) );
@@ -565,7 +565,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 // ---------------------------------------------------------------------------
 // 11. Free gift cart protection (shoppers cannot remove an earned gift)
 //
-// The gift line is marked with goalcart_gift*, and the engine makes it
+// The gift line is marked with faracart_gift*, and the engine makes it
 // shopper-proof: zero-priced, no remove link, quantity locked to 1, and a
 // removed gift is restored while its goal still grants it. These checks
 // exercise the guard paths and filters against a non-persisted WC_Cart
@@ -574,7 +574,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 // ---------------------------------------------------------------------------
 echo "\n== 11. Free gift cart protection ==\n";
 
-$re = \GoalCart\Plugin::instance()->reward_engine();
+$re = \FaraCart\Plugin::instance()->reward_engine();
 
 check( 'gift remove-link filter wired', false !== has_filter( 'woocommerce_cart_item_remove_link', array( $re, 'hide_gift_remove_link' ) ) );
 check( 'gift quantity filter wired', false !== has_filter( 'woocommerce_cart_item_quantity', array( $re, 'lock_gift_quantity' ) ) );
@@ -598,10 +598,10 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'variation_id'        => 0,
 		'quantity'            => 1,
 		'data'                => $gift_product,
-		'goalcart_gift'       => true,
-		'goalcart_gift_goal'  => 1,
-		'goalcart_gift_product' => 42,
-		'goalcart_gift_mode'  => Reward::GIFT_AUTOMATIC,
+		'faracart_gift'       => true,
+		'faracart_gift_goal'  => 1,
+		'faracart_gift_product' => 42,
+		'faracart_gift_mode'  => Reward::GIFT_AUTOMATIC,
 		'line_subtotal'       => 50.0,
 		'line_total'          => 50.0,
 	);
@@ -623,10 +623,10 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'variation_id'        => 0,
 		'quantity'            => 1,
 		'data'                => $gift_product,
-		'goalcart_gift'       => true,
-		'goalcart_gift_goal'  => 2,
-		'goalcart_gift_product' => 42,
-		'goalcart_gift_mode'  => Reward::GIFT_CHOOSE,
+		'faracart_gift'       => true,
+		'faracart_gift_goal'  => 2,
+		'faracart_gift_product' => 42,
+		'faracart_gift_mode'  => Reward::GIFT_CHOOSE,
 		'line_subtotal'       => 50.0,
 		'line_total'          => 50.0,
 	);
@@ -638,9 +638,9 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'variation_id'        => 0,
 		'quantity'            => 1,
 		'data'                => $gift_product,
-		'goalcart_gift'       => true,
-		'goalcart_gift_goal'  => 99999999,
-		'goalcart_gift_product' => 42,
+		'faracart_gift'       => true,
+		'faracart_gift_goal'  => 99999999,
+		'faracart_gift_product' => 42,
 		'line_subtotal'       => 50.0,
 		'line_total'          => 50.0,
 	);
@@ -700,7 +700,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 	// restored (repository lookup fails before any cart mutation).
 	$cart->removed_cart_contents['gift1'] = $cart->cart_contents['gift1'];
 	unset( $cart->cart_contents['gift1'] );
-	$cart->removed_cart_contents['gift1']['goalcart_gift_goal'] = 99999999;
+	$cart->removed_cart_contents['gift1']['faracart_gift_goal'] = 99999999;
 	$re->restore_removed_gift( 'gift1', $cart );
 	check( 'orphaned goal gift not restored', ! isset( $cart->cart_contents['gift1'] ) );
 
@@ -731,10 +731,10 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 echo "\n== 12. Free gift removal restore (positive path) ==\n";
 
 if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_exists( 'WC_Session' ) ) {
-	$container  = \GoalCart\Plugin::instance()->container();
-	$goal_repo  = $container->get( \GoalCart\Goals\GoalRepository::class );
+	$container  = \FaraCart\Plugin::instance()->container();
+	$goal_repo  = $container->get( \FaraCart\Goals\GoalRepository::class );
 	$wpdb       = $GLOBALS['wpdb'];
-	$goals_table = \GoalCart\Database\Schema::table( 'goals' );
+	$goals_table = \FaraCart\Database\Schema::table( 'goals' );
 
 	$real_session = WC()->session;
 	// In-memory session so WC_Cart_Session::set_session() writes to memory
@@ -757,7 +757,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'post_status'       => 'publish',
 			'comment_status'    => 'open',
 			'ping_status'       => 'open',
-			'post_name'         => 'goalcart-gift-test-' . wp_rand( 1000, 9999 ),
+			'post_name'         => 'faracart-gift-test-' . wp_rand( 1000, 9999 ),
 			'post_modified'     => $now,
 			'post_modified_gmt' => gmdate( 'Y-m-d H:i:s' ),
 			'post_type'         => 'product',
@@ -811,9 +811,9 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'variation_id'          => 0,
 			'quantity'              => 1,
 			'data'                  => wc_get_product( $product_id ),
-			'goalcart_gift'         => true,
-			'goalcart_gift_goal'    => $goal_id,
-			'goalcart_gift_product' => $product_id,
+			'faracart_gift'         => true,
+			'faracart_gift_goal'    => $goal_id,
+			'faracart_gift_product' => $product_id,
 			'line_subtotal'         => 50.0,
 			'line_total'            => 50.0,
 		);
@@ -826,13 +826,13 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$cart->remove_cart_item( 'giftX' );
 		$restored_key = null;
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( ! empty( $item['goalcart_gift_goal'] ) && $goal_id === (int) $item['goalcart_gift_goal'] ) {
+			if ( ! empty( $item['faracart_gift_goal'] ) && $goal_id === (int) $item['faracart_gift_goal'] ) {
 				$restored_key = $key;
 				break;
 			}
 		}
 		check( 'removed gift restored by the engine', null !== $restored_key );
-		check( 'restored gift keeps the goal marker', null !== $restored_key && $goal_id === (int) $cart->cart_contents[ $restored_key ]['goalcart_gift_goal'] );
+		check( 'restored gift keeps the goal marker', null !== $restored_key && $goal_id === (int) $cart->cart_contents[ $restored_key ]['faracart_gift_goal'] );
 		check( 'restored gift is zero-priced', null !== $restored_key && isset( $cart->cart_contents[ $restored_key ]['data'] ) && $cart->cart_contents[ $restored_key ]['data'] instanceof \WC_Product && near( 0, $cart->cart_contents[ $restored_key ]['data']->get_price() ) );
 
 		// The qualifying line survived untouched.
@@ -864,9 +864,9 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'variation_id'          => 0,
 			'quantity'              => 1,
 			'data'                  => wc_get_product( $product_id ),
-			'goalcart_gift'         => true,
-			'goalcart_gift_goal'    => $goal_id,
-			'goalcart_gift_product' => $product_id,
+			'faracart_gift'         => true,
+			'faracart_gift_goal'    => $goal_id,
+			'faracart_gift_product' => $product_id,
 			'line_subtotal'         => 50.0,
 			'line_total'            => 50.0,
 		);
@@ -884,7 +884,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		// line_subtotal (the Fix 1 stale-context guard). With the qualifier
 		// at 30 × 1 = 30 and the gift line at 50 × 1 = 50, the subtotal
 		// should be 80, not the stale 200 + 50 = 250.
-		$ctx = \GoalCart\Goals\CartContext::from_cart( $cart );
+		$ctx = \FaraCart\Goals\CartContext::from_cart( $cart );
 		check( 'CartContext subtotal uses current price × quantity', near( 80.0, $ctx->subtotal() ) );
 
 		// Remove the gift line — restore_removed_gift must NOT re-add it
@@ -894,7 +894,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$still_restored = false;
 
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( ! empty( $item['goalcart_gift_goal'] ) && $goal_id === (int) $item['goalcart_gift_goal'] ) {
+			if ( ! empty( $item['faracart_gift_goal'] ) && $goal_id === (int) $item['faracart_gift_goal'] ) {
 				$still_restored = true;
 				break;
 			}
@@ -921,14 +921,14 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 //       re-selecting a candidate replaces the previous selection instead
 //       of stacking a second line (Bug C); the chosen gift stays while
 //       the goal grants it and is revoked the moment it stops qualifying;
-//   (c) the quantity clamp and the goal markers (goalcart_gift_mode)
+//   (c) the quantity clamp and the goal markers (faracart_gift_mode)
 //       hold on lines added through the real add_to_cart path.
 // ---------------------------------------------------------------------------
 echo "\n== 13. Gift reconciliation (stale removal + selectable re-selection) ==\n";
 
 if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_exists( 'WC_Session' ) ) {
 	$wpdb        = $GLOBALS['wpdb'];
-	$goals_table = \GoalCart\Database\Schema::table( 'goals' );
+	$goals_table = \FaraCart\Database\Schema::table( 'goals' );
 
 	$real_session = WC()->session;
 	// In-memory session so WC_Cart_Session writes to memory, not the DB.
@@ -936,11 +936,11 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 
 	// Force the plugin enabled + cumulative conflict mode for this block,
 	// whatever the dev database holds, and restore afterwards.
-	$previous_option = get_option( 'goalcart_settings', null );
+	$previous_option = get_option( 'faracart_settings', null );
 	$forced_settings = is_array( $previous_option ) ? $previous_option : array();
 	$forced_settings['enabled']             = true;
 	$forced_settings['conflict_resolution'] = 'cumulative';
-	update_option( 'goalcart_settings', $forced_settings );
+	update_option( 'faracart_settings', $forced_settings );
 
 	// This block drives sync_cart through a dedicated engine instance (so
 	// the seeded goals are the active ones) while the WooCommerce hooks
@@ -949,7 +949,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 	// re-add it (its own removing_gift flag is untouched) — a two-instance
 	// artifact that cannot happen in production, where the removing engine
 	// is the hooked one. Detach the restore handler for this block only.
-	$plugin_engine    = \GoalCart\Plugin::instance()->reward_engine();
+	$plugin_engine    = \FaraCart\Plugin::instance()->reward_engine();
 	$restore_hooked   = has_action( 'woocommerce_cart_item_removed', array( $plugin_engine, 'restore_removed_gift' ) );
 
 	if ( $restore_hooked ) {
@@ -975,7 +975,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 				'post_status'       => 'publish',
 				'comment_status'    => 'open',
 				'ping_status'       => 'open',
-				'post_name'         => 'goalcart-gift-test-' . wp_rand( 1000, 9999 ),
+				'post_name'         => 'faracart-gift-test-' . wp_rand( 1000, 9999 ),
 				'post_modified'     => $now,
 				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s' ),
 				'post_type'         => 'product',
@@ -1034,8 +1034,8 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 
 		// A dedicated engine + repository (fresh caches) so the seeded
 		// goals are the active ones and the forced settings are read.
-		$repo   = new \GoalCart\Goals\GoalRepository();
-		$engine = new RewardEngine( null, $repo, new \GoalCart\Settings\Settings(), null, null );
+		$repo   = new \FaraCart\Goals\GoalRepository();
+		$engine = new RewardEngine( null, $repo, new \FaraCart\Settings\Settings(), null, null );
 
 		$cart = new \WC_Cart();
 		$qual = new \WC_Product_Simple();
@@ -1056,7 +1056,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			$lines = array();
 
 			foreach ( $cart->get_cart() as $key => $item ) {
-				if ( ! empty( $item['goalcart_gift_goal'] ) && (int) $item['goalcart_gift_goal'] === (int) $goal_id ) {
+				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id ) {
 					$lines[ $key ] = $item;
 				}
 			}
@@ -1070,7 +1070,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$auto_lines = $gift_lines( $auto_goal );
 		check( 'auto gift granted on qualifying cart', 1 === count( $auto_lines ) );
 		$auto_line = reset( $auto_lines );
-		check( 'auto gift line carries the mode marker', is_array( $auto_line ) && isset( $auto_line['goalcart_gift_mode'] ) && Reward::GIFT_AUTOMATIC === $auto_line['goalcart_gift_mode'] );
+		check( 'auto gift line carries the mode marker', is_array( $auto_line ) && isset( $auto_line['faracart_gift_mode'] ) && Reward::GIFT_AUTOMATIC === $auto_line['faracart_gift_mode'] );
 		check( 'auto gift line added at quantity 1', is_array( $auto_line ) && 1 === (int) $auto_line['quantity'] );
 
 		// Bug B: the qualifying product is removed — the auto gift must go
@@ -1102,7 +1102,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		);
 		$engine->sync_cart( $cart );
 		check( 'customer line of the same product survives reconciliation', isset( $cart->cart_contents['own_a'] ) );
-		check( 'customer line never marked as a gift', empty( $cart->cart_contents['own_a']['goalcart_gift'] ) );
+		check( 'customer line never marked as a gift', empty( $cart->cart_contents['own_a']['faracart_gift'] ) );
 		check( 'auto gift re-added for the still-qualifying goal', 1 === count( $gift_lines( $auto_goal ) ) );
 
 		// Bug C: selectable mode — choosing a candidate adds exactly one
@@ -1111,15 +1111,15 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$choose_lines = $gift_lines( $choose_goal );
 		check( 'exactly one choose-mode gift line after choosing A', 1 === count( $choose_lines ) );
 		$choose_line = reset( $choose_lines );
-		check( 'chosen product A is the one added', is_array( $choose_line ) && (int) $choose_line['goalcart_gift_product'] === $gift_a );
-		check( 'choose-mode gift carries the mode marker', is_array( $choose_line ) && isset( $choose_line['goalcart_gift_mode'] ) && Reward::GIFT_CHOOSE === $choose_line['goalcart_gift_mode'] );
+		check( 'chosen product A is the one added', is_array( $choose_line ) && (int) $choose_line['faracart_gift_product'] === $gift_a );
+		check( 'choose-mode gift carries the mode marker', is_array( $choose_line ) && isset( $choose_line['faracart_gift_mode'] ) && Reward::GIFT_CHOOSE === $choose_line['faracart_gift_mode'] );
 
 		// Re-selecting a different candidate replaces, never duplicates.
 		check( 'choose-mode gift B selected', $engine->add_chosen_gift( $choose_goal, $gift_b, $cart ) );
 		$choose_lines = $gift_lines( $choose_goal );
 		check( 're-selection replaces the old gift', 1 === count( $choose_lines ) );
 		$choose_line = reset( $choose_lines );
-		check( 're-selected product B is the one added', is_array( $choose_line ) && (int) $choose_line['goalcart_gift_product'] === $gift_b );
+		check( 're-selected product B is the one added', is_array( $choose_line ) && (int) $choose_line['faracart_gift_product'] === $gift_b );
 
 		// Re-selecting the SAME candidate stays idempotent.
 		$engine->add_chosen_gift( $choose_goal, $gift_b, $cart );
@@ -1187,9 +1187,9 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		}
 
 		if ( null === $previous_option ) {
-			delete_option( 'goalcart_settings' );
+			delete_option( 'faracart_settings' );
 		} else {
-			update_option( 'goalcart_settings', $previous_option );
+			update_option( 'faracart_settings', $previous_option );
 		}
 	}
 } else {
@@ -1204,12 +1204,12 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 // custom REST routes instead of seeing a null WC()->cart). This guards
 // the container wiring — GiftController must receive CartIntegration — so
 // a future constructor change cannot silently reintroduce the
-// "goalcart_gift_empty_cart" 400 on every gift claim.
+// "faracart_gift_empty_cart" 400 on every gift claim.
 // ---------------------------------------------------------------------------
 echo "\n== 14. Gift REST controller wiring ==\n";
 
-$gift_controller = \GoalCart\Plugin::instance()->container()->get( \GoalCart\REST\GiftController::class );
-check( 'gift controller resolves from the container', $gift_controller instanceof \GoalCart\REST\GiftController );
+$gift_controller = \FaraCart\Plugin::instance()->container()->get( \FaraCart\REST\GiftController::class );
+check( 'gift controller resolves from the container', $gift_controller instanceof \FaraCart\REST\GiftController );
 check( 'gift controller uses CartIntegration::live_cart (not a bare WC()->cart check)', false !== strpos( (string) file_get_contents( dirname( __DIR__ ) . '/includes/REST/GiftController.php' ), 'cart_integration->live_cart()' ) );
 
 // ---------------------------------------------------------------------------

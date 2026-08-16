@@ -2,13 +2,13 @@
 /**
  * WooCommerce product-cost field for FaraCart (UPSELL_REFACTOR §19/§20).
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Admin;
+namespace FaraCart\Admin;
 
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Hooks\HookManager;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * UPSELL_REFACTOR §19/§20 — adds a "Product cost" field to the WooCommerce
  * product editor (simple products AND per-variation), stored under Goal
- * Cart's own namespaced meta key (`_goalcart_product_cost`) so it never
+ * Cart's own namespaced meta key (`_faracart_product_cost`) so it never
  * overloads unrelated WooCommerce fields and never duplicates an existing
  * cost source.
  *
@@ -28,7 +28,7 @@ defined( 'ABSPATH' ) || exit;
  * WooCommerce core, and this class adds an explicit guard on top.
  *
  * Reads flow through the normal RewardCostEstimator chain
- * (`_goalcart_product_cost` → `_cost` → `_wc_cog_cost`), so once a cost
+ * (`_faracart_product_cost` → `_cost` → `_wc_cog_cost`), so once a cost
  * is saved here, Estimated Profit, Goal economics and the upsell margin
  * scorer all pick it up with no further configuration.
  */
@@ -72,8 +72,8 @@ final class ProductCostField {
 		woocommerce_wp_text_input(
 			array(
 				'id'                => RewardCostEstimator::PRODUCT_COST_META,
-				'label'             => __( 'Product cost', 'goalcart' ) . ' (' . __( 'FaraCart', 'goalcart' ) . ')',
-				'description'       => __( 'The unit cost FaraCart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown.', 'goalcart' ),
+				'label'             => __( 'Product cost', 'faracart' ) . ' (' . __( 'FaraCart', 'faracart' ) . ')',
+				'description'       => __( 'The unit cost FaraCart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown.', 'faracart' ),
 				'desc_tip'          => true,
 				'type'              => 'number',
 				'custom_attributes' => array(
@@ -102,15 +102,15 @@ final class ProductCostField {
 		echo '<div class="form-row form-row-full">';
 		printf(
 			'<label for="%1$s">%2$s</label>',
-			esc_attr( 'goalcart_product_cost_' . (int) $loop ),
-			esc_html__( 'Product cost', 'goalcart' ) . ' (' . esc_html__( 'FaraCart', 'goalcart' ) . ')'
+			esc_attr( 'faracart_product_cost_' . (int) $loop ),
+			esc_html__( 'Product cost', 'faracart' ) . ' (' . esc_html__( 'FaraCart', 'faracart' ) . ')'
 		);
 		printf(
 			'<input type="number" step="any" min="0" id="%1$s" name="%2$s" value="%3$s" placeholder="%4$s" class="short" />',
-			esc_attr( 'goalcart_product_cost_' . (int) $loop ),
-			esc_attr( 'goalcart_product_cost[' . (int) $loop . ']' ),
+			esc_attr( 'faracart_product_cost_' . (int) $loop ),
+			esc_attr( 'faracart_product_cost[' . (int) $loop . ']' ),
 			esc_attr( is_numeric( $value ) ? (string) round( (float) $value, 4 ) : '' ),
-			esc_attr__( 'Cost per unit (FaraCart)', 'goalcart' )
+			esc_attr__( 'Cost per unit (FaraCart)', 'faracart' )
 		);
 		echo '</div>';
 	}
@@ -145,8 +145,8 @@ final class ProductCostField {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- WooCommerce core verifies the product-edit nonce before this hook fires.
-		$values = isset( $_POST['goalcart_product_cost'] ) && is_array( $_POST['goalcart_product_cost'] )
-			? wp_unslash( $_POST['goalcart_product_cost'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below.
+		$values = isset( $_POST['faracart_product_cost'] ) && is_array( $_POST['faracart_product_cost'] )
+			? wp_unslash( $_POST['faracart_product_cost'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below.
 			: array();
 
 		$raw = isset( $values[ (int) $loop ] ) ? $values[ (int) $loop ] : '';

@@ -2,10 +2,10 @@
 /**
  * Reward evaluation result for the FaraCart engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards;
+namespace FaraCart\Rewards;
 
 defined( 'ABSPATH' ) || exit;
 

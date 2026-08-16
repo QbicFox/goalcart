@@ -2,13 +2,13 @@
 /**
  * Storefront progress UI for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Frontend;
+namespace FaraCart\Frontend;
 
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * Phase 11 (Frontend Progress UI) — the customer-facing widget layer. It
  * renders empty widget containers at the display locations and lets the
  * vanilla JS library (`assets/js/frontend.js`, no build step — mirroring
- * the reference plugin's frontend pattern) fetch `/goalcart/v1/progress`
+ * the reference plugin's frontend pattern) fetch `/faracart/v1/progress`
  * and fill them in, so the server never renders progress markup directly
  * and cart changes update the UI through WooCommerce's own JS events.
  *
@@ -35,20 +35,20 @@ defined( 'ABSPATH' ) || exit;
  *                                           → compact widget on shop/archives
  *  - `woocommerce_single_product_summary` / `woocommerce_after_single_product_summary`
  *                                           → compact widget on product pages
- *  - `[goalcart_progress]` shortcode       → widget anywhere (full/compact)
+ *  - `[faracart_progress]` shortcode       → widget anywhere (full/compact)
  *  - `wp_footer`                           → sticky bottom progress bar
  *
  * Duplicate-render guard (P11): each location renders at most once per
  * request (a rendered-location registry), every container has a unique id,
- * and the JS mounts each container exactly once (`data-goalcart-widget`),
+ * and the JS mounts each container exactly once (`data-faracart-widget`),
  * so a page can never end up with two widgets in the same spot.
  *
  * Master toggle: the `enabled` setting gates everything, overridable with
- * the `goalcart_frontend_enabled` filter. The per-location set is
- * filterable via `goalcart_frontend_locations` (Phase 18 wires the
+ * the `faracart_frontend_enabled` filter. The per-location set is
+ * filterable via `faracart_frontend_locations` (Phase 18 wires the
  * frontend settings to it). Logged-in site admins browsing the
  * storefront do not see the shopper-facing widgets by default
- * (`is_visible_to_user()`, filterable via `goalcart_frontend_visible_to_user`).
+ * (`is_visible_to_user()`, filterable via `faracart_frontend_visible_to_user`).
  */
 final class ProgressUI {
 
@@ -57,7 +57,7 @@ final class ProgressUI {
 	 *
 	 * @var string
 	 */
-	const SHORTCODE = 'goalcart_progress';
+	const SHORTCODE = 'faracart_progress';
 
 	/**
 	 * Gutenberg block name rendered server-side (Phase 21).
@@ -71,14 +71,14 @@ final class ProgressUI {
 	 *
 	 * @var string
 	 */
-	const BLOCK = 'goalcart/progress';
+	const BLOCK = 'faracart/progress';
 
 	/**
 	 * Asset handle for the frontend JS/CSS.
 	 *
 	 * @var string
 	 */
-	const HANDLE = 'goalcart-frontend';
+	const HANDLE = 'faracart-frontend';
 
 	/**
 	 * Storefront progress template variants.
@@ -140,7 +140,7 @@ final class ProgressUI {
 		$hooks->add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 
 		// Config printed early in the footer (priority 5) so the footer
-		// script — enqueued with in_footer — finds `window.goalcartFrontend`
+		// script — enqueued with in_footer — finds `window.faracartFrontend`
 		// ready (reference plugin's config-before-script convention).
 		$hooks->add_action( 'wp_footer', array( $this, 'print_config' ), 5 );
 
@@ -172,7 +172,7 @@ final class ProgressUI {
 	}
 
 	/**
-	 * Register the `[goalcart_progress]` shortcode.
+	 * Register the `[faracart_progress]` shortcode.
 	 *
 	 * @return void
 	 */
@@ -181,10 +181,10 @@ final class ProgressUI {
 	}
 
 	/**
-	 * Register the Gutenberg `goalcart/progress` block (Phase 21).
+	 * Register the Gutenberg `faracart/progress` block (Phase 21).
 	 *
 	 * Server-rendered via render_block_type(): the Block Editor inserts a
-	 * goalcart/progress block and the render callback below outputs the
+	 * faracart/progress block and the render callback below outputs the
 	 * same empty widget container the shortcode emits, which the shared
 	 * storefront JS fills. No JS block editor build, no new dependency —
 	 * consistent with the reference plugin's server-rendered widget
@@ -205,10 +205,10 @@ final class ProgressUI {
 			self::BLOCK,
 			array(
 				'api_version'     => 2,
-				'title'           => __( 'FaraCart Progress', 'goalcart' ),
+				'title'           => __( 'FaraCart Progress', 'faracart' ),
 				'category'        => 'widgets',
 				'icon'            => 'cart',
-				'description'     => __( 'Show cart goals, progress and rewards (FaraCart).', 'goalcart' ),
+				'description'     => __( 'Show cart goals, progress and rewards (FaraCart).', 'faracart' ),
 				'keywords'        => array( 'goal', 'cart', 'progress', 'aov' ),
 				'supports'        => array(
 					'anchor'     => true,
@@ -236,7 +236,7 @@ final class ProgressUI {
 	}
 
 	/**
-	 * Render the `goalcart/progress` block (Phase 21).
+	 * Render the `faracart/progress` block (Phase 21).
 	 *
 	 * Same contract as the shortcode: an inert, uniquely-id'd widget
 	 * container the storefront JS mounts. Block ids share the shortcode
@@ -262,14 +262,14 @@ final class ProgressUI {
 
 		$this->shortcode_index++;
 
-		return $this->widget_container( 'goalcart-block-' . $this->shortcode_index, $attributes['variant'], $attributes['template'] );
+		return $this->widget_container( 'faracart-block-' . $this->shortcode_index, $attributes['variant'], $attributes['template'] );
 	}
 
 	/**
 	 * Whether the frontend progress UI is enabled for the current visitor.
 	 *
 	 * Master toggle = the `enabled` setting, overridable with the
-	 * `goalcart_frontend_enabled` filter (reference `is_tracking_allowed()`
+	 * `faracart_frontend_enabled` filter (reference `is_tracking_allowed()`
 	 * convention). A logged-in site admin browsing the storefront is
 	 * additionally hidden from the shopper-facing widgets by default —
 	 * see `is_visible_to_user()`.
@@ -277,7 +277,7 @@ final class ProgressUI {
 	 * @return bool
 	 */
 	public function is_enabled() {
-		$enabled = (bool) apply_filters( 'goalcart_frontend_enabled', $this->settings->get( 'enabled', true ) );
+		$enabled = (bool) apply_filters( 'faracart_frontend_enabled', $this->settings->get( 'enabled', true ) );
 
 		return $enabled && $this->is_visible_to_user();
 	}
@@ -289,18 +289,18 @@ final class ProgressUI {
 	 * default so staff browsing or testing the storefront never see the
 	 * customer funnel (progress bars, rewards, suggestions, sticky bar).
 	 * "Admin" is the same capability the admin menu uses
-	 * (`goalcart_admin_capability` filter, default `manage_options`), so
+	 * (`faracart_admin_capability` filter, default `manage_options`), so
 	 * every user who can administer the plugin is treated as staff. The
-	 * whole decision is filterable with `goalcart_frontend_visible_to_user`
+	 * whole decision is filterable with `faracart_frontend_visible_to_user`
 	 * (e.g. hide for every logged-in user, or for shop managers too).
 	 *
 	 * @return bool
 	 */
 	public function is_visible_to_user() {
-		$capability = (string) apply_filters( 'goalcart_admin_capability', 'manage_options' );
+		$capability = (string) apply_filters( 'faracart_admin_capability', 'manage_options' );
 		$visible    = ! ( is_user_logged_in() && current_user_can( $capability ) );
 
-		return (bool) apply_filters( 'goalcart_frontend_visible_to_user', $visible );
+		return (bool) apply_filters( 'faracart_frontend_visible_to_user', $visible );
 	}
 
 	/**
@@ -308,7 +308,7 @@ final class ProgressUI {
 	 *
 	 * Phase 18 (Settings → Frontend): driven by the `frontend_locations`
 	 * setting (the default set ships all six locations), still filterable
-	 * via goalcart_frontend_locations. Unknown keys are dropped so a bad
+	 * via faracart_frontend_locations. Unknown keys are dropped so a bad
 	 * stored value can never register a location.
 	 *
 	 * @return string[]
@@ -319,7 +319,7 @@ final class ProgressUI {
 
 		$locations = array_values( array_intersect( $allowed, $stored ) );
 
-		return (array) apply_filters( 'goalcart_frontend_locations', $locations );
+		return (array) apply_filters( 'faracart_frontend_locations', $locations );
 	}
 
 	/**
@@ -332,7 +332,7 @@ final class ProgressUI {
 	 * @return string
 	 */
 	public function position() {
-		$position = apply_filters( 'goalcart_frontend_position', $this->settings->get( 'frontend_position', 'top' ) );
+		$position = apply_filters( 'faracart_frontend_position', $this->settings->get( 'frontend_position', 'top' ) );
 
 		return in_array( $position, array( 'top', 'bottom' ), true ) ? $position : 'top';
 	}
@@ -353,14 +353,14 @@ final class ProgressUI {
 
 		wp_enqueue_style(
 			self::HANDLE,
-			GOALCART_URL . 'assets/css/frontend.css',
+			FARACART_URL . 'assets/css/frontend.css',
 			array(),
 			$this->asset_version( 'assets/css/frontend.css' )
 		);
 
 		wp_enqueue_script(
 			self::HANDLE,
-			GOALCART_URL . 'assets/js/frontend.js',
+			FARACART_URL . 'assets/js/frontend.js',
 			array(),
 			$this->asset_version( 'assets/js/frontend.js' ),
 			array( 'in_footer' => true )
@@ -375,11 +375,11 @@ final class ProgressUI {
 	/**
 	 * Cache-busting version for a frontend asset.
 	 *
-	 * The static GOALCART_VERSION only changes between releases, so the
+	 * The static FARACART_VERSION only changes between releases, so the
 	 * storefront would keep serving stale cached JS/CSS after every edit
 	 * in between. filemtime() gives each file change a fresh version —
 	 * the standard WP pattern for versioned static assets — and falls
-	 * back to GOALCART_VERSION when the file cannot be stat'd.
+	 * back to FARACART_VERSION when the file cannot be stat'd.
 	 *
 	 * @param string $relative Asset path relative to the plugin root.
 	 * @return string
@@ -387,16 +387,16 @@ final class ProgressUI {
 	protected function asset_version( $relative ) {
 		// @phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- stat
 		// failure is handled by the fallback below; silence keeps the log clean.
-		$mtime = @filemtime( GOALCART_PATH . $relative );
+		$mtime = @filemtime( FARACART_PATH . $relative );
 
-		return false === $mtime ? GOALCART_VERSION : (string) $mtime;
+		return false === $mtime ? FARACART_VERSION : (string) $mtime;
 	}
 
 	/**
 	 * Print the frontend config object for the JS library.
 	 *
 	 * Mirrors the reference plugin: a single inline script tag
-	 * (`window.goalcartFrontend`) printed early in `wp_footer`, consumed by
+	 * (`window.faracartFrontend`) printed early in `wp_footer`, consumed by
 	 * vanilla JS with a must-never-throw contract.
 	 *
 	 * @return void
@@ -407,8 +407,8 @@ final class ProgressUI {
 		}
 
 		wp_print_inline_script_tag(
-			'window.goalcartFrontend = ' . wp_json_encode( $this->frontend_config() ) . ';',
-			array( 'id' => 'goalcart-frontend-config', 'type' => 'text/javascript' )
+			'window.faracartFrontend = ' . wp_json_encode( $this->frontend_config() ) . ';',
+			array( 'id' => 'faracart-frontend-config', 'type' => 'text/javascript' )
 		);
 	}
 
@@ -432,9 +432,9 @@ final class ProgressUI {
 		$position   = $this->settings->get( 'sticky_position', 'bottom' );
 
 		return array(
-			'endpoint'  => esc_url_raw( rest_url( 'goalcart/v1/progress' ) ),
-			'refresh'   => (int) apply_filters( 'goalcart_frontend_refresh_interval', 0 ),
-			'currency'  => function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '',
+			'endpoint'  => esc_url_raw( rest_url( 'faracart/v1/progress' ) ),
+			'refresh'   => (int) apply_filters( 'faracart_frontend_refresh_interval', 0 ),
+			'currency'  => $this->settings->currency(),
 			// Phase 27 (Internationalization): the site locale reaches the
 			// JS so Intl.NumberFormat renders locale-aware digits and
 			// grouping (e.g. Persian digits for fa_IR) instead of the
@@ -443,20 +443,20 @@ final class ProgressUI {
 			'isRtl'     => is_rtl(),
 			'position'  => $this->position(),
 			'template'  => $this->template(),
-			'animation' => (bool) apply_filters( 'goalcart_frontend_animation', $this->settings->get( 'frontend_animation', true ) ),
+			'animation' => (bool) apply_filters( 'faracart_frontend_animation', $this->settings->get( 'frontend_animation', true ) ),
 			'currencyDisplay' => $this->currency_display(),
 			'mobile'    => $this->mobile_behavior(),
 			'appearance' => $appearance,
 			'labels'    => $this->reward_labels(),
 			// Phase 32 (countdown + celebration).
-			'countdown' => (bool) apply_filters( 'goalcart_frontend_countdown', $this->settings->get( 'frontend_countdown', true ) ),
-			'celebrate' => (bool) apply_filters( 'goalcart_frontend_celebrate', $this->settings->get( 'frontend_celebrate', true ) ),
+			'countdown' => (bool) apply_filters( 'faracart_frontend_countdown', $this->settings->get( 'frontend_countdown', true ) ),
+			'celebrate' => (bool) apply_filters( 'faracart_frontend_celebrate', $this->settings->get( 'frontend_celebrate', true ) ),
 			// Phase 32 (free gift selection): the storefront gift picker
 			// posts to this endpoint with this nonce; empty nonce = the
 			// plugin is disabled (picker hidden).
-			'giftEndpoint' => esc_url_raw( rest_url( 'goalcart/v1/gift' ) ),
+			'giftEndpoint' => esc_url_raw( rest_url( 'faracart/v1/gift' ) ),
 			'giftNonce'   => $this->settings->get( 'enabled', true )
-				? wp_create_nonce( \GoalCart\REST\GiftController::GIFT_NONCE_ACTION )
+				? wp_create_nonce( \FaraCart\REST\GiftController::GIFT_NONCE_ACTION )
 				: '',
 			// Phase 32 (advanced sticky bar).
 			'sticky'    => array(
@@ -481,9 +481,9 @@ final class ProgressUI {
 	 * The storefront smart-upsell panel config (Phase 33.7).
 	 *
 	 * Mirrors the UpsellRanker gate (master enabled + analytics toggles +
-	 * the goalcart_upsells_enabled filter) so the panel only renders when
+	 * the faracart_upsells_enabled filter) so the panel only renders when
 	 * the ranking engine is on. The track endpoint rides on the same
-	 * tracking nonce window.goalcartTracking already carries — the JS
+	 * tracking nonce window.faracartTracking already carries — the JS
 	 * reuses it, so no second nonce is needed. Every string is
 	 * translatable; the JS falls back to its English literals when the
 	 * locale file misses a key.
@@ -500,7 +500,7 @@ final class ProgressUI {
 		 *
 		 * @param bool $enabled Whether smart upsells are enabled.
 		 */
-		$enabled = (bool) apply_filters( 'goalcart_upsells_enabled', $enabled );
+		$enabled = (bool) apply_filters( 'faracart_upsells_enabled', $enabled );
 
 		if ( ! $enabled ) {
 			return array(
@@ -514,18 +514,18 @@ final class ProgressUI {
 
 		return array(
 			'enabled'       => true,
-			'endpoint'      => esc_url_raw( rest_url( 'goalcart/v1/upsell/rank' ) ),
-			'trackEndpoint' => esc_url_raw( rest_url( 'goalcart/v1/upsell/track' ) ),
-			'limit'         => max( 1, min( 6, (int) apply_filters( 'goalcart_frontend_upsell_limit', 3 ) ) ),
+			'endpoint'      => esc_url_raw( rest_url( 'faracart/v1/upsell/rank' ) ),
+			'trackEndpoint' => esc_url_raw( rest_url( 'faracart/v1/upsell/track' ) ),
+			'limit'         => max( 1, min( 6, (int) apply_filters( 'faracart_frontend_upsell_limit', 3 ) ) ),
 			'labels'        => array(
 				// Unified customer-facing copy: suggestions and upsells are
 				// one experience now, so the heading never names the
 				// internal strategy.
-				'heading'     => __( 'Products suggested for you', 'goalcart' ),
-				'add'         => __( 'Add to cart', 'goalcart' ),
-				'adding'      => __( 'Adding…', 'goalcart' ),
-				'added'       => __( 'Added', 'goalcart' ),
-				'unavailable' => __( 'No recommendations available right now.', 'goalcart' ),
+				'heading'     => __( 'Products suggested for you', 'faracart' ),
+				'add'         => __( 'Add to cart', 'faracart' ),
+				'adding'      => __( 'Adding…', 'faracart' ),
+				'added'       => __( 'Added', 'faracart' ),
+				'unavailable' => __( 'No recommendations available right now.', 'faracart' ),
 			),
 		);
 	}
@@ -535,12 +535,12 @@ final class ProgressUI {
 	 *
 	 * Phase 18 (Settings → General): symbol | code | name — passed to the
 	 * JS so Intl.NumberFormat renders the store currency the configured
-	 * way. Filterable via goalcart_currency_display.
+	 * way. Filterable via faracart_currency_display.
 	 *
 	 * @return string
 	 */
 	public function currency_display() {
-		$display = apply_filters( 'goalcart_currency_display', $this->settings->get( 'currency_display', 'symbol' ) );
+		$display = apply_filters( 'faracart_currency_display', $this->settings->get( 'currency_display', 'symbol' ) );
 
 		return in_array( $display, array( 'symbol', 'code', 'name' ), true ) ? $display : 'symbol';
 	}
@@ -550,12 +550,12 @@ final class ProgressUI {
 	 *
 	 * Phase 18 (Settings → Frontend): show | hide — when 'hide', the JS
 	 * skips rendering widgets on small screens. Filterable via
-	 * goalcart_frontend_mobile.
+	 * faracart_frontend_mobile.
 	 *
 	 * @return string
 	 */
 	public function mobile_behavior() {
-		$behavior = apply_filters( 'goalcart_frontend_mobile', $this->settings->get( 'frontend_mobile', 'show' ) );
+		$behavior = apply_filters( 'faracart_frontend_mobile', $this->settings->get( 'frontend_mobile', 'show' ) );
 
 		return 'hide' === $behavior ? 'hide' : 'show';
 	}
@@ -563,14 +563,14 @@ final class ProgressUI {
 	/**
 	 * The active storefront template variant.
 	 *
-	 * Settings-driven, overridable with the `goalcart_frontend_template`
+	 * Settings-driven, overridable with the `faracart_frontend_template`
 	 * filter, and normalized to the template enum so a bad stored value
 	 * can never reach the JS.
 	 *
 	 * @return string
 	 */
 	public function template() {
-		$template = apply_filters( 'goalcart_frontend_template', $this->settings->get( 'frontend_template', 'template-1' ) );
+		$template = apply_filters( 'faracart_frontend_template', $this->settings->get( 'frontend_template', 'template-1' ) );
 
 		if ( in_array( $template, self::TEMPLATES, true ) ) {
 			return $template;
@@ -611,7 +611,7 @@ final class ProgressUI {
 	 * The inline stylesheet for the storefront widgets.
 	 *
 	 * A small token block overriding the CSS custom properties with the
-	 * resolved appearance (the stylesheet reads `var(--goalcart-*)`), plus
+	 * resolved appearance (the stylesheet reads `var(--faracart-*)`), plus
 	 * the admin-authored custom CSS appended verbatim. Injected through
 	 * wp_add_inline_style so it is versioned and scoped with the main
 	 * stylesheet.
@@ -622,7 +622,7 @@ final class ProgressUI {
 		$a = $this->appearance();
 
 		$css = sprintf(
-			'.goalcart-widget, #goalcart-sticky { --goalcart-accent:%1$s; --goalcart-bg:%2$s; --goalcart-border:%3$s; --goalcart-text:%4$s; --goalcart-radius:%5$dpx; --goalcart-bar-height:%6$dpx; }',
+			'.faracart-widget, #faracart-sticky { --faracart-accent:%1$s; --faracart-bg:%2$s; --faracart-border:%3$s; --faracart-text:%4$s; --faracart-radius:%5$dpx; --faracart-bar-height:%6$dpx; }',
 			$a['accent'],
 			$a['bg'],
 			$a['border'],
@@ -641,7 +641,7 @@ final class ProgressUI {
 	}
 
 	/**
-	 * Shortcode callback: `[goalcart_progress variant="full|compact"]`.
+	 * Shortcode callback: `[faracart_progress variant="full|compact"]`.
 	 *
 	 * Every instance renders its own uniquely-id'd container so a page can
 	 * host several widgets without collisions. The optional `template`
@@ -666,7 +666,7 @@ final class ProgressUI {
 
 		$this->shortcode_index++;
 
-		return $this->widget_container( 'goalcart-shortcode-' . $this->shortcode_index, $atts['variant'], $atts['template'] );
+		return $this->widget_container( 'faracart-shortcode-' . $this->shortcode_index, $atts['variant'], $atts['template'] );
 	}
 
 	/**
@@ -765,20 +765,20 @@ final class ProgressUI {
 
 		// Phase 32 (advanced sticky bar): the configured position renders as
 		// a class so the stylesheet can anchor the bar to the top edge.
-		$position = 'top' === $this->settings->get( 'sticky_position', 'bottom' ) ? ' goalcart-sticky--top' : '';
+		$position = 'top' === $this->settings->get( 'sticky_position', 'bottom' ) ? ' faracart-sticky--top' : '';
 
 		// phpcs:ignore WordPress.Security.EscapeOutput -- static markup.
-		echo '<div id="goalcart-sticky" class="goalcart-sticky' . esc_attr( $position ) . '" aria-hidden="true"></div>';
+		echo '<div id="faracart-sticky" class="faracart-sticky' . esc_attr( $position ) . '" aria-hidden="true"></div>';
 	}
 
 	/**
 	 * Build an empty widget container.
 	 *
-	 * The container carries `data-goalcart-widget` (JS mount marker), a
+	 * The container carries `data-faracart-widget` (JS mount marker), a
 	 * variant flag the JS uses to decide which components to render
 	 * (full = progress + milestones + reward + suggestions, compact =
 	 * progress + message + reward chip), and — when a per-widget template
-	 * override exists — a `data-goalcart-template` marker. The configured
+	 * override exists — a `data-faracart-template` marker. The configured
 	 * custom CSS class is appended to the container so theme authors can
 	 * target it. Output is `esc_html`'d attribute values over static
 	 * strings.
@@ -791,7 +791,7 @@ final class ProgressUI {
 	public function widget_container( $id, $variant = 'full', $template = '' ) {
 		$variant = 'compact' === $variant ? 'compact' : 'full';
 
-		$class = 'goalcart-widget goalcart-widget--' . esc_attr( $variant );
+		$class = 'faracart-widget faracart-widget--' . esc_attr( $variant );
 		$extra = trim( (string) $this->settings->get( 'frontend_css_class', '' ) );
 
 		if ( '' !== $extra ) {
@@ -799,13 +799,13 @@ final class ProgressUI {
 		}
 
 		$markup = '<div id="' . esc_attr( $id ) . '" class="' . $class . '"'
-			. ' data-goalcart-widget data-goalcart-variant="' . esc_attr( $variant ) . '"'
+			. ' data-faracart-widget data-faracart-variant="' . esc_attr( $variant ) . '"'
 			. ' role="status" aria-live="polite"></div>';
 
 		if ( in_array( $template, self::TEMPLATES, true ) ) {
 			$markup = str_replace(
-				' data-goalcart-widget',
-				' data-goalcart-widget data-goalcart-template="' . esc_attr( $template ) . '"',
+				' data-faracart-widget',
+				' data-faracart-widget data-faracart-template="' . esc_attr( $template ) . '"',
 				$markup
 			);
 		}
@@ -865,7 +865,7 @@ final class ProgressUI {
 		$this->rendered[ $location ] = true;
 
 		// phpcs:ignore WordPress.Security.EscapeOutput -- widget_container escapes its own attributes.
-		$widget = $this->widget_container( 'goalcart-' . $location, $variant );
+		$widget = $this->widget_container( 'faracart-' . $location, $variant );
 
 		return 'top' === $this->position() ? $widget . $block_content : $block_content . $widget;
 	}
@@ -901,7 +901,7 @@ final class ProgressUI {
 		$this->rendered[ $location ] = true;
 
 		// phpcs:ignore WordPress.Security.EscapeOutput -- widget_container escapes its own attributes.
-		echo $this->widget_container( 'goalcart-' . $location, $variant );
+		echo $this->widget_container( 'faracart-' . $location, $variant );
 	}
 
 	/**
@@ -929,7 +929,7 @@ final class ProgressUI {
 		}
 
 		// Direct shortcode in the content, or a Gutenberg page that embeds
-		// the goalcart/progress block (Phase 21) — the block renders
+		// the faracart/progress block (Phase 21) — the block renders
 		// server-side, so the storefront assets must load on the page.
 		return has_shortcode( $post->post_content, self::SHORTCODE )
 			|| ( function_exists( 'has_block' ) && has_block( self::BLOCK, $post ) );
@@ -944,37 +944,37 @@ final class ProgressUI {
 	 */
 	protected function reward_labels() {
 		return array(
-			'free_shipping'    => __( 'Free shipping', 'goalcart' ),
-			'percent_discount' => __( 'Percentage discount', 'goalcart' ),
-			'fixed_discount'   => __( 'Fixed discount', 'goalcart' ),
-			'free_gift'        => __( 'Free gift', 'goalcart' ),
-			'coupon'           => __( 'Coupon', 'goalcart' ),
-			'countdown'        => __( 'Ends in', 'goalcart' ),
-			'countdown_ended'  => __( 'Ended', 'goalcart' ),
-			'gift_picker'      => __( 'Pick your free gift', 'goalcart' ),
-			'gift_chosen'      => __( 'Gift added to your cart', 'goalcart' ),
-			'dismiss'          => __( 'Dismiss', 'goalcart' ),
+			'free_shipping'    => __( 'Free shipping', 'faracart' ),
+			'percent_discount' => __( 'Percentage discount', 'faracart' ),
+			'fixed_discount'   => __( 'Fixed discount', 'faracart' ),
+			'free_gift'        => __( 'Free gift', 'faracart' ),
+			'coupon'           => __( 'Coupon', 'faracart' ),
+			'countdown'        => __( 'Ends in', 'faracart' ),
+			'countdown_ended'  => __( 'Ended', 'faracart' ),
+			'gift_picker'      => __( 'Pick your free gift', 'faracart' ),
+			'gift_chosen'      => __( 'Gift added to your cart', 'faracart' ),
+			'dismiss'          => __( 'Dismiss', 'faracart' ),
 			// Design-template storefront copy (the six progress templates).
-			'shopping_goal'    => __( 'Shopping goal', 'goalcart' ),
-			'progress'         => __( 'Progress', 'goalcart' ),
-			'paid'             => __( 'Paid', 'goalcart' ),
-			'remaining'        => __( 'Remaining', 'goalcart' ),
-			'left'             => __( '%s left', 'goalcart' ),
-			'add'              => __( 'Add', 'goalcart' ),
-			'add_more'         => __( 'Add %s more', 'goalcart' ),
-			'view_products'    => __( 'View products', 'goalcart' ),
-			'only_price'       => __( 'Only %s', 'goalcart' ),
-			'recommend_heading' => __( 'Add these products to reach your goal faster:', 'goalcart' ),
-			'completed'        => __( 'Completed', 'goalcart' ),
-			'goal_reached'     => __( 'Goal completed', 'goalcart' ),
-			'reward_active'    => __( '%s is active', 'goalcart' ),
-			'expired'          => __( 'Expired', 'goalcart' ),
-			'goal_ended'       => __( 'This goal has ended', 'goalcart' ),
-			'almost_done'      => __( 'Almost there!', 'goalcart' ),
-			'congrats'         => __( 'Congratulations!', 'goalcart' ),
-			'with_purchase'    => __( 'With a purchase of', 'goalcart' ),
-			'finish_today'     => __( 'Finish today — your reward is waiting', 'goalcart' ),
-			'unavailable'      => __( 'No recommendations available right now.', 'goalcart' ),
+			'shopping_goal'    => __( 'Shopping goal', 'faracart' ),
+			'progress'         => __( 'Progress', 'faracart' ),
+			'paid'             => __( 'Paid', 'faracart' ),
+			'remaining'        => __( 'Remaining', 'faracart' ),
+			'left'             => __( '%s left', 'faracart' ),
+			'add'              => __( 'Add', 'faracart' ),
+			'add_more'         => __( 'Add %s more', 'faracart' ),
+			'view_products'    => __( 'View products', 'faracart' ),
+			'only_price'       => __( 'Only %s', 'faracart' ),
+			'recommend_heading' => __( 'Add these products to reach your goal faster:', 'faracart' ),
+			'completed'        => __( 'Completed', 'faracart' ),
+			'goal_reached'     => __( 'Goal completed', 'faracart' ),
+			'reward_active'    => __( '%s is active', 'faracart' ),
+			'expired'          => __( 'Expired', 'faracart' ),
+			'goal_ended'       => __( 'This goal has ended', 'faracart' ),
+			'almost_done'      => __( 'Almost there!', 'faracart' ),
+			'congrats'         => __( 'Congratulations!', 'faracart' ),
+			'with_purchase'    => __( 'With a purchase of', 'faracart' ),
+			'finish_today'     => __( 'Finish today — your reward is waiting', 'faracart' ),
+			'unavailable'      => __( 'No recommendations available right now.', 'faracart' ),
 		);
 	}
 }

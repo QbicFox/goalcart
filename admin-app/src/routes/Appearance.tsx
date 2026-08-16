@@ -49,7 +49,7 @@ function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
   return {
     goal_id: 1,
     campaign_id: 0,
-    goal_name: __('Free shipping', 'goalcart'),
+    goal_name: __('Free shipping', 'faracart'),
     goal_type: 'amount',
     is_money: true,
     icon: '🎯',
@@ -61,12 +61,12 @@ function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
     percentage: 82,
     completed: false,
     state: 'nearly_complete',
-    message: __('Only %s left to reach your goal', 'goalcart').replace('%s', '350,000'),
+    message: __('Only %s left to reach your goal', 'faracart').replace('%s', '350,000'),
     reward: { type: 'free_shipping', value: null, max_value: null, meta: {} },
     suggestions: [
       {
         id: 1,
-        name: __('Classic cotton t-shirt', 'goalcart'),
+        name: __('Classic cotton t-shirt', 'faracart'),
         permalink: '#',
         price: 290000,
         price_html: '',
@@ -76,7 +76,7 @@ function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
       },
       {
         id: 2,
-        name: __('Baseball cap', 'goalcart'),
+        name: __('Baseball cap', 'faracart'),
         permalink: '#',
         price: 180000,
         price_html: '',
@@ -98,7 +98,7 @@ function sampleMilestones(): ProgressGoal[] {
   return [
     sampleGoal({
       goal_id: 1,
-      goal_name: __('Free shipping', 'goalcart'),
+      goal_name: __('Free shipping', 'faracart'),
       target: 100,
       current: 93,
       remaining: 7,
@@ -107,7 +107,7 @@ function sampleMilestones(): ProgressGoal[] {
     }),
     sampleGoal({
       goal_id: 2,
-      goal_name: __('Free gift', 'goalcart'),
+      goal_name: __('Free gift', 'faracart'),
       target: 200,
       current: 93,
       remaining: 107,
@@ -116,7 +116,7 @@ function sampleMilestones(): ProgressGoal[] {
     }),
     sampleGoal({
       goal_id: 3,
-      goal_name: __('10% off', 'goalcart'),
+      goal_name: __('10% off', 'faracart'),
       target: 300,
       current: 93,
       remaining: 207,
@@ -151,7 +151,7 @@ function ScopeLivePreview({
       <Alert severity="info" variant="outlined">
         {__(
           'No campaign template selected — each milestone renders as its own goal card on the storefront.',
-          'goalcart'
+          'faracart'
         )}
       </Alert>
     );
@@ -182,7 +182,7 @@ function ScopeLivePreview({
 
   const campaign: ProgressCampaign = {
     campaign_id: 999,
-    name: __('Sample campaign', 'goalcart'),
+    name: __('Sample campaign', 'faracart'),
     template: id,
     settings,
   };
@@ -231,7 +231,7 @@ function TemplateSettingsPanel({
       <Stack spacing={2}>
         <Box>
           <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
-            {__('Template appearance', 'goalcart')}
+            {__('Template appearance', 'faracart')}
           </Typography>
           <Stack
             direction="row"
@@ -266,7 +266,7 @@ function TemplateSettingsPanel({
             startIcon={<RestartAltIcon />}
             onClick={() => onReset(definition.id)}
           >
-            {__('Reset to template defaults', 'goalcart')}
+            {__('Reset to template defaults', 'faracart')}
           </Button>
         </Box>
       </Stack>
@@ -286,7 +286,7 @@ function TemplateSettingsPanel({
  *    schema-driven appearance form — mounted lazily, so no inactive
  *    template's form ever sits in the DOM,
  *  - the save action persists the scope default + every edited template's
- *    appearance through `POST /goalcart/v1/settings` as `template_defaults`
+ *    appearance through `POST /faracart/v1/settings` as `template_defaults`
  *    + `template_settings` (identical semantics to the previous layout).
  *
  * The legacy `frontend_*` surface stays honored by the engine as the
@@ -360,7 +360,7 @@ export default function Appearance() {
       template_settings?: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
     }) => saveSettings(values),
     onSuccess: (saved) => {
-      notify(__('Appearance saved.', 'goalcart'));
+      notify(__('Appearance saved.', 'faracart'));
 
       // Keep the envelope shape in the shared cache so the Settings page
       // (and the preview dialogs) still find `data` after this save, then
@@ -474,7 +474,7 @@ export default function Appearance() {
             onClick={handleSave}
             sx={{ minWidth: 160 }}
           >
-            {saveMutation.isPending ? __('Saving…', 'goalcart') : __('Save appearance', 'goalcart')}
+            {saveMutation.isPending ? __('Saving…', 'faracart') : __('Save appearance', 'faracart')}
           </Button>
           <Button
             variant="outlined"
@@ -483,7 +483,7 @@ export default function Appearance() {
             disabled={saveMutation.isPending}
             onClick={discardChanges}
           >
-            {__('Discard changes', 'goalcart')}
+            {__('Discard changes', 'faracart')}
           </Button>
         </>
       ) : null
@@ -492,8 +492,8 @@ export default function Appearance() {
   if (templatesQuery.isLoading) {
     return (
       <PageContainer
-        title={__('Appearance', 'goalcart')}
-        description={__('Customize how the cart progress UI looks on your storefront.', 'goalcart')}
+        title={__('Appearance', 'faracart')}
+        description={__('Customize how the cart progress UI looks on your storefront.', 'faracart')}
       >
         <Stack spacing={2}>
           <Skeleton variant="rounded" height={52} />
@@ -507,13 +507,13 @@ export default function Appearance() {
   if (templatesQuery.isError || !templates) {
     return (
       <PageContainer
-        title={__('Appearance', 'goalcart')}
-        description={__('Customize how the cart progress UI looks on your storefront.', 'goalcart')}
+        title={__('Appearance', 'faracart')}
+        description={__('Customize how the cart progress UI looks on your storefront.', 'faracart')}
       >
         <Alert severity="error" variant="outlined">
           {templatesQuery.error instanceof Error
             ? templatesQuery.error.message
-            : __('Could not load the progress templates.', 'goalcart')}
+            : __('Could not load the progress templates.', 'faracart')}
         </Alert>
       </PageContainer>
     );
@@ -529,10 +529,10 @@ export default function Appearance() {
 
   return (
     <PageContainer
-      title={__('Appearance', 'goalcart')}
+      title={__('Appearance', 'faracart')}
       description={__(
         'Pick the default progress template and tune its appearance — separately for Goals and Campaigns.',
-        'goalcart'
+        'faracart'
       )}
     >
       <Stack spacing={3}>
@@ -541,21 +541,21 @@ export default function Appearance() {
           onChange={(_event, next) => setTab(next)}
           variant="fullWidth"
           sx={{ borderBottom: 1, borderColor: 'divider' }}
-          aria-label={__('Template scope', 'goalcart')}
+          aria-label={__('Template scope', 'faracart')}
         >
           <Tab
             id="appearance-tab-goal"
             aria-controls="appearance-panel-goal"
             icon={<RocketLaunchIcon />}
             iconPosition="start"
-            label={__('Goal', 'goalcart')}
+            label={__('Goal', 'faracart')}
           />
           <Tab
             id="appearance-tab-campaign"
             aria-controls="appearance-panel-campaign"
             icon={<StorefrontIcon />}
             iconPosition="start"
-            label={__('Campaign', 'goalcart')}
+            label={__('Campaign', 'faracart')}
           />
         </Tabs>
 
@@ -569,17 +569,17 @@ export default function Appearance() {
           <Stack spacing={2.5}>
             <Box>
               <Typography variant="h6" component="h3" gutterBottom>
-                {isCampaign ? __('Campaign template', 'goalcart') : __('Goal template', 'goalcart')}
+                {isCampaign ? __('Campaign template', 'faracart') : __('Goal template', 'faracart')}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {isCampaign
                   ? __(
                       'The default template that renders a whole campaign on the storefront (e.g. the milestone chain).',
-                      'goalcart'
+                      'faracart'
                     )
                   : __(
                       'The default template for every goal that does not pin its own on the Goal Builder.',
-                      'goalcart'
+                      'faracart'
                     )}
               </Typography>
             </Box>
@@ -587,12 +587,12 @@ export default function Appearance() {
             {/* Template dropdown — list the active scope's registered templates. */}
             <FormControl size="small" fullWidth>
               <InputLabel id="appearance-template-label">
-                {isCampaign ? __('Campaign template', 'goalcart') : __('Goal template', 'goalcart')}
+                {isCampaign ? __('Campaign template', 'faracart') : __('Goal template', 'faracart')}
               </InputLabel>
               <Select
                 labelId="appearance-template-label"
                 label={
-                  isCampaign ? __('Campaign template', 'goalcart') : __('Goal template', 'goalcart')
+                  isCampaign ? __('Campaign template', 'faracart') : __('Goal template', 'faracart')
                 }
                 value={selectedId}
                 onChange={(event) =>
@@ -601,7 +601,7 @@ export default function Appearance() {
               >
                 {isCampaign && (
                   <MenuItem value="">
-                    <em>{__('No campaign template', 'goalcart')}</em>
+                    <em>{__('No campaign template', 'faracart')}</em>
                   </MenuItem>
                 )}
                 {scopeTemplates.map((template) => (
@@ -616,7 +616,7 @@ export default function Appearance() {
               <Alert severity="info" variant="outlined">
                 {__(
                   'No templates are registered for this scope yet. Add one on the backend template registry.',
-                  'goalcart'
+                  'faracart'
                 )}
               </Alert>
             )}
@@ -625,7 +625,7 @@ export default function Appearance() {
               <Alert severity="warning" variant="outlined">
                 {__(
                   'The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here.',
-                  'goalcart'
+                  'faracart'
                 )}
               </Alert>
             )}
@@ -639,7 +639,7 @@ export default function Appearance() {
                   color="text.secondary"
                   sx={{ display: 'block', mb: 1 }}
                 >
-                  {__('Live preview', 'goalcart')}
+                  {__('Live preview', 'faracart')}
                 </Typography>
                 <Box sx={{ maxWidth: 440 }}>
                   <ScopeLivePreview

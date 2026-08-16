@@ -2,15 +2,15 @@
 /**
  * REST controller for plugin settings.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\REST;
+namespace FaraCart\REST;
 
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
-use GoalCart\Templates\TemplateEngine;
-use GoalCart\Utils\Logger;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
+use FaraCart\Templates\TemplateEngine;
+use FaraCart\Utils\Logger;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -19,9 +19,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * Phase 7 (REST API / AJAX Layer) settings endpoints:
  *
- *  - `GET  /goalcart/v1/settings` — the full settings array (merged with
+ *  - `GET  /faracart/v1/settings` — the full settings array (merged with
  *    defaults).
- *  - `POST /goalcart/v1/settings` — saves a validated settings array.
+ *  - `POST /faracart/v1/settings` — saves a validated settings array.
  *    Every key is validated/sanitized through the REST arg schema, unknown
  *    keys are ignored, and the persisted values are returned so the UI can
  *    sync its state.
@@ -71,7 +71,7 @@ class SettingsController extends BaseController {
 	 */
 	protected function templates() {
 		if ( null === $this->templates ) {
-			$this->templates = \GoalCart\Plugin::instance()->container()->get( TemplateEngine::class );
+			$this->templates = \FaraCart\Plugin::instance()->container()->get( TemplateEngine::class );
 		}
 
 		return $this->templates;
@@ -129,7 +129,7 @@ class SettingsController extends BaseController {
 	public function handle_get( $request ) {
 		$meta = array(
 			// Phase 18 (Advanced → developer hooks): the reference list of
-			// public goalcart_* hooks, rendered by the Settings page.
+			// public faracart_* hooks, rendered by the Settings page.
 			'hooks' => HookManager::documented_hooks(),
 			// Phase 32 (customer-role conditions): the editable role list
 			// for the goal builder's role picker.
@@ -193,8 +193,8 @@ class SettingsController extends BaseController {
 
 		if ( empty( $clean ) ) {
 			return $this->error(
-				'goalcart_settings_empty',
-				__( 'No settings were provided to save.', 'goalcart' ),
+				'faracart_settings_empty',
+				__( 'No settings were provided to save.', 'faracart' ),
 				400
 			);
 		}
@@ -203,8 +203,8 @@ class SettingsController extends BaseController {
 
 		if ( ! $this->settings->save() ) {
 			return $this->error(
-				'goalcart_settings_save_failed',
-				__( 'Could not save the settings. Please try again.', 'goalcart' ),
+				'faracart_settings_save_failed',
+				__( 'Could not save the settings. Please try again.', 'faracart' ),
 				500
 			);
 		}
@@ -220,7 +220,7 @@ class SettingsController extends BaseController {
 		 * @param array<string, mixed> $clean     Sanitized key/value pairs.
 		 * @param Settings             $settings  Settings service.
 		 */
-		do_action( 'goalcart_settings_saved', $clean, $this->settings );
+		do_action( 'faracart_settings_saved', $clean, $this->settings );
 
 		return $this->success( $this->settings->all() );
 	}
@@ -242,6 +242,8 @@ class SettingsController extends BaseController {
 			// General (P18-T01).
 			'enabled'               => $bool,
 			'fullscreen_dashboard'  => $bool,
+			// Display currency unit override ('' = follow the store currency).
+			'currency'              => array( 'type' => 'string' ),
 			'currency_display'      => array( 'type' => 'string', 'enum' => array( 'symbol', 'code', 'name' ) ),
 			'default_goal_behavior' => array( 'type' => 'string', 'enum' => array( 'all', 'first', 'closest' ) ),
 			'conflict_resolution'   => array( 'type' => 'string', 'enum' => array( 'cumulative', 'best', 'first' ) ),
@@ -467,6 +469,14 @@ class SettingsController extends BaseController {
 			case 'logging_enabled':
 			case 'developer_hooks':
 				return (bool) $value;
+
+			case 'currency':
+				// An uppercase 3-letter ISO-4217 code, or '' to follow the
+				// WooCommerce store currency. Anything else falls back to the
+				// default (empty = store currency).
+				$code = strtoupper( trim( (string) $value ) );
+
+				return '' !== $code && preg_match( '/^[A-Z]{3}$/', $code ) ? $code : $defaults['currency'];
 
 			case 'currency_display':
 				return in_array( $value, array( 'symbol', 'code', 'name' ), true ) ? $value : $defaults['currency_display'];

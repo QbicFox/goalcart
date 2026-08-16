@@ -10,53 +10,53 @@
  * Author URI:        https://example.com
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       goalcart
+ * Text Domain:       faracart
  * Domain Path:       /languages
  * WC requires at least: 8.0
  * WC tested up to:      11.0
  * Requires Plugins:   woocommerce
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! defined( 'GOALCART_VERSION' ) ) {
+if ( ! defined( 'FARACART_VERSION' ) ) {
 	/**
 	 * Plugin version.
 	 */
-	define( 'GOALCART_VERSION', '0.1.0' );
+	define( 'FARACART_VERSION', '0.1.0' );
 }
 
-if ( ! defined( 'GOALCART_FILE' ) ) {
+if ( ! defined( 'FARACART_FILE' ) ) {
 	/**
 	 * Absolute path to the plugin main file.
 	 */
-	define( 'GOALCART_FILE', __FILE__ );
+	define( 'FARACART_FILE', __FILE__ );
 }
 
-if ( ! defined( 'GOALCART_PATH' ) ) {
+if ( ! defined( 'FARACART_PATH' ) ) {
 	/**
 	 * Absolute plugin directory path with trailing slash.
 	 */
-	define( 'GOALCART_PATH', plugin_dir_path( __FILE__ ) );
+	define( 'FARACART_PATH', plugin_dir_path( __FILE__ ) );
 }
 
-if ( ! defined( 'GOALCART_URL' ) ) {
+if ( ! defined( 'FARACART_URL' ) ) {
 	/**
 	 * Plugin directory URL with trailing slash.
 	 */
-	define( 'GOALCART_URL', plugin_dir_url( __FILE__ ) );
+	define( 'FARACART_URL', plugin_dir_url( __FILE__ ) );
 }
 
-if ( ! defined( 'GOALCART_BASENAME' ) ) {
+if ( ! defined( 'FARACART_BASENAME' ) ) {
 	/**
 	 * Plugin basename, e.g. "ravis-faracart/ravis-faracart.php".
 	 */
-	define( 'GOALCART_BASENAME', plugin_basename( __FILE__ ) );
+	define( 'FARACART_BASENAME', plugin_basename( __FILE__ ) );
 }
 
-if ( ! defined( 'GOALCART_DB_VERSION' ) ) {
+if ( ! defined( 'FARACART_DB_VERSION' ) ) {
 	/**
 	 * Database schema version. Bump this to trigger Installer migrations.
 	 * 0.2.0 = Phase 3: goals, campaigns and analytics_events tables.
@@ -75,12 +75,12 @@ if ( ! defined( 'GOALCART_DB_VERSION' ) ) {
 	 *         goal_completions history table — dbDelta adds the column
 	 *         and table on upgrade.
 	 */
-	define( 'GOALCART_DB_VERSION', '0.6.0' );
+	define( 'FARACART_DB_VERSION', '0.6.0' );
 }
 
-// Load the Composer autoloader (PSR-4: GoalCart\ => includes/).
-if ( file_exists( GOALCART_PATH . 'vendor/autoload.php' ) ) {
-	require_once GOALCART_PATH . 'vendor/autoload.php';
+// Load the Composer autoloader (PSR-4: FaraCart\ => includes/).
+if ( file_exists( FARACART_PATH . 'vendor/autoload.php' ) ) {
+	require_once FARACART_PATH . 'vendor/autoload.php';
 }
 
 // Bootstrap the plugin core (Phase 2: Plugin Foundation). The Plugin
@@ -96,6 +96,6 @@ if ( file_exists( GOALCART_PATH . 'vendor/autoload.php' ) ) {
 // WooCommerce's. Compatibility::gate() runs on plugins_loaded instead —
 // after every plugin is loaded — and the admin menu is guarded by the
 // same check (never a fatal error; see includes/Compatibility.php).
-if ( class_exists( 'GoalCart\Plugin' ) ) {
-	GoalCart\Plugin::instance()->boot();
+if ( class_exists( 'FaraCart\Plugin' ) ) {
+	FaraCart\Plugin::instance()->boot();
 }

@@ -2,19 +2,19 @@
 /**
  * Goal repository for the FaraCart engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Goals;
+namespace FaraCart\Goals;
 
-use GoalCart\Database\Schema;
+use FaraCart\Database\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Class GoalRepository
  *
- * Loads goal definitions from the `goalcart_goals` table and turns them
+ * Loads goal definitions from the `faracart_goals` table and turns them
  * into Goal value objects. Phase 5 (Reward Engine) is the first consumer:
  * the RewardEngine reads the active goals once per request to decide which
  * rewards apply to the live cart. Later phases (REST admin, campaigns)
@@ -309,7 +309,7 @@ public function create( array $data ) {
 		 *
 		 * @param int $goal_id New goal id.
 		 */
-		do_action( 'goalcart_goals_changed', (int) $wpdb->insert_id );
+		do_action( 'faracart_goals_changed', (int) $wpdb->insert_id );
 	}
 
 	return $inserted ? (int) $wpdb->insert_id : 0;
@@ -355,7 +355,7 @@ public function update( $goal_id, array $data ) {
 		 *
 		 * @param int $goal_id Goal id.
 		 */
-		do_action( 'goalcart_goals_changed', (int) $goal_id );
+		do_action( 'faracart_goals_changed', (int) $goal_id );
 	}
 
 	return false !== $updated;
@@ -385,7 +385,7 @@ public function delete( $goal_id ) {
 		 *
 		 * @param int $goal_id Goal id.
 		 */
-		do_action( 'goalcart_goals_changed', (int) $goal_id );
+		do_action( 'faracart_goals_changed', (int) $goal_id );
 	}
 
 	return false !== $deleted;
@@ -408,7 +408,7 @@ public function delete( $goal_id ) {
 
 	$row['name'] = sprintf(
 		/* translators: %s: original goal name. */
-		__( '%s (copy)', 'goalcart' ),
+		__( '%s (copy)', 'faracart' ),
 		$row['name']
 	);
 

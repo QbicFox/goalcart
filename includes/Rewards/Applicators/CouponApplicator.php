@@ -2,17 +2,17 @@
 /**
  * Coupon reward applicator.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards\Applicators;
+namespace FaraCart\Rewards\Applicators;
 
-use GoalCart\Goals\CartContext;
-use GoalCart\Goals\GoalResult;
-use GoalCart\Rewards\Reward;
-use GoalCart\Rewards\RewardApplicator;
-use GoalCart\Rewards\RewardResult;
-use GoalCart\Rewards\RewardSafety;
+use FaraCart\Goals\CartContext;
+use FaraCart\Goals\GoalResult;
+use FaraCart\Rewards\Reward;
+use FaraCart\Rewards\RewardApplicator;
+use FaraCart\Rewards\RewardResult;
+use FaraCart\Rewards\RewardSafety;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -41,14 +41,14 @@ final class CouponApplicator implements RewardApplicator {
 	 *
 	 * @var string
 	 */
-	const GENERATED_OPTION = 'goalcart_generated_coupons';
+	const GENERATED_OPTION = 'faracart_generated_coupons';
 
 	/**
 	 * Meta key marking coupons created by this applicator.
 	 *
 	 * @var string
 	 */
-	const OWNERSHIP_META = '_goalcart_generated';
+	const OWNERSHIP_META = '_faracart_generated';
 
 	/**
 	 * Per-request memo of resolved codes (goal_id => code).
@@ -146,8 +146,8 @@ final class CouponApplicator implements RewardApplicator {
 	 *
 	 * Uses WooCommerce's public WC_Coupon API only. The coupon persists so
 	 * the same goal always maps to the same code; it is removed on plugin
-	 * uninstall. Generated coupons carry a '_goalcart_generated' marker so
-	 * a pre-existing store coupon that happens to reuse a GOALCART-* code
+	 * uninstall. Generated coupons carry a '_faracart_generated' marker so
+	 * a pre-existing store coupon that happens to reuse a FARACART-* code
 	 * is never mistaken for this reward's coupon.
 	 *
 	 * @param Reward $reward  Reward configuration.

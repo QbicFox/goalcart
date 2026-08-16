@@ -480,7 +480,7 @@ Reuse the existing product cost sources:
 * WooCommerce `_cost`
 * WooCommerce `_wc_cog_cost`
 * variation → parent fallback where already supported
-* `goalcart_product_cost` filter
+* `faracart_product_cost` filter
 
 ---
 

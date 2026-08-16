@@ -61,15 +61,15 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\AttributionEngine;
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\REST\AnalyticsController;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\AttributionEngine;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\REST\AnalyticsController;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -93,7 +93,7 @@ function close( $a, $b, $eps = 0.01 ) {
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $engine    = $container->get( AttributionEngine::class );
 $tracker   = $container->get( RevenueTracker::class );
@@ -474,7 +474,7 @@ try {
 	// -----------------------------------------------------------------------
 	echo "\n== 7. /analytics extension ==\n";
 
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'goal_id', 501 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$data = $resp->get_data();
@@ -502,7 +502,7 @@ try {
 
 	// product_id cannot be expressed in attribution → the purchase fields
 	// are null (never a fabricated number), legacy fields keep working.
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'product_id', $p1 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$sum = $resp->get_data()['data']['summary'];
@@ -512,7 +512,7 @@ try {
 	check( 'product filter → legacy impressions still present', array_key_exists( 'impressions', $sum ) );
 
 	// Campaign filter resolves to the campaign's goal ids (509 + 510).
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'campaign_id', $campaign_id );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$sum = $resp->get_data()['data']['summary'];
@@ -520,7 +520,7 @@ try {
 	check( 'campaign filter → purchased_orders 1', 1 === (int) $sum['purchased_orders'] );
 
 	// Reward filter resolves to the goals carrying that reward type.
-	$req = new \WP_REST_Request( 'GET', '/goalcart/v1/analytics' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'reward', 'free_shipping' );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$sum = $resp->get_data()['data']['summary'];

@@ -34,8 +34,8 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Cart\CartIntegration;
-use GoalCart\Goals\CartContext;
+use FaraCart\Cart\CartIntegration;
+use FaraCart\Goals\CartContext;
 
 $failures = 0;
 $checks   = 0;
@@ -83,7 +83,7 @@ function cart_line( $key, $product_id, $variation_id, $quantity, $subtotal, $tot
 // ---------------------------------------------------------------------------
 echo "\n== 1. Cart lifecycle hook wiring ==\n";
 
-$ci = \GoalCart\Plugin::instance()->cart_integration();
+$ci = \FaraCart\Plugin::instance()->cart_integration();
 
 $lifecycle_hooks = array(
 	'woocommerce_cart_loaded_from_session',
@@ -117,7 +117,7 @@ $fresh = new CartIntegration();
 
 $a = $fresh->context( $cart, array( 'exclude_shipping' => true ) );
 check( 'first build reads line-item subtotal', near( $a->subtotal(), 200 ) );
-check( 'first build reads line-item total basis', near( $a->amount( \GoalCart\Goals\Goal::MODE_TOTAL ), 180 ) );
+check( 'first build reads line-item total basis', near( $a->amount( \FaraCart\Goals\Goal::MODE_TOTAL ), 180 ) );
 
 $b = $fresh->context( $cart, array( 'exclude_shipping' => true ) );
 check( 'second build is memoized (same instance)', $a === $b );

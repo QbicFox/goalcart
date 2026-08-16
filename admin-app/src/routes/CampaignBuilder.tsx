@@ -26,9 +26,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { createCampaign, fetchCampaign, updateCampaign } from '../api/campaigns';
 import { fetchGoals } from '../api/goals';
+import PreviewPanel from '../components/preview/PreviewPanel';
+import { usePreview } from '../components/preview/usePreview';
 import SectionCard from '../components/goal-builder/SectionCard';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { useStickyBarActions } from '../providers/ActionBarProvider';
+import { useFullscreen } from '../providers/FullscreenProvider';
 import PageContainer from '../components/PageContainer';
 import { formatCurrency, formatNumber } from '../lib/format';
 import SchemaForm from '../templates/SchemaForm';
@@ -36,21 +39,21 @@ import { useTemplates } from '../templates/useTemplates';
 import type { Campaign, CampaignInput, Goal } from '../types';
 
 const REWARD_LABELS: Record<string, string> = {
-  free_shipping: __('Free shipping', 'goalcart'),
-  percent_discount: __('% discount', 'goalcart'),
-  fixed_discount: __('Fixed discount', 'goalcart'),
-  free_gift: __('Free gift', 'goalcart'),
-  coupon: __('Coupon', 'goalcart'),
+  free_shipping: __('Free shipping', 'faracart'),
+  percent_discount: __('% discount', 'faracart'),
+  fixed_discount: __('Fixed discount', 'faracart'),
+  free_gift: __('Free gift', 'faracart'),
+  coupon: __('Coupon', 'faracart'),
 };
 
 const WEEKDAYS = [
-  { value: 1, label: __('Monday', 'goalcart') },
-  { value: 2, label: __('Tuesday', 'goalcart') },
-  { value: 3, label: __('Wednesday', 'goalcart') },
-  { value: 4, label: __('Thursday', 'goalcart') },
-  { value: 5, label: __('Friday', 'goalcart') },
-  { value: 6, label: __('Saturday', 'goalcart') },
-  { value: 7, label: __('Sunday', 'goalcart') },
+  { value: 1, label: __('Monday', 'faracart') },
+  { value: 2, label: __('Tuesday', 'faracart') },
+  { value: 3, label: __('Wednesday', 'faracart') },
+  { value: 4, label: __('Thursday', 'faracart') },
+  { value: 5, label: __('Friday', 'faracart') },
+  { value: 6, label: __('Saturday', 'faracart') },
+  { value: 7, label: __('Sunday', 'faracart') },
 ];
 
 /** Fresh-campaign defaults (mirror the backend save-arg defaults). */
@@ -94,11 +97,40 @@ function targetLabel(goal: Goal): string {
   return formatCurrency(goal.target);
 }
 
+/** Amount/quantity a state preset fraction should simulate for the form. */
+function campaignPresetTargets(
+  values: CampaignInput,
+  goalsById: Map<number, Goal>,
+  fraction: number
+): { amount: number; quantity: number } {
+  // Anchor the presets to the top milestone target (mirrors the campaign
+  // preview dialog's topMilestone anchoring).
+  let top: Goal | null = null;
+
+  for (const goalId of values.goals) {
+    const goal = goalsById.get(goalId);
+
+    if (goal && (!top || goal.target > top.target)) {
+      top = goal;
+    }
+  }
+
+  const value = (top ? Number(top.target) || 0 : 0) * fraction;
+  const countTypes = ['quantity', 'distinct_quantity', 'weight'];
+  const isMoney = top ? !countTypes.includes(top.type) : true;
+
+  return isMoney ? { amount: value, quantity: 0 } : { amount: 0, quantity: value };
+}
+
 /**
  * Campaign Builder (Phase 10). A form for creating and editing campaigns
  * — Basic information, Schedule, Priority and Milestones (goal ordering)
  * — wired to the Phase 10 REST CRUD endpoints. New campaigns use
  * `/campaigns/new`, existing ones `/campaigns/:id/edit`.
+ *
+ * The page is a two-column layout: the form on the right (RTL) and a
+ * sticky live preview on the left, driven by the current form values
+ * through the shared Phase 15 preview system.
  */
 export default function CampaignBuilder() {
   const { id } = useParams();
@@ -107,6 +139,7 @@ export default function CampaignBuilder() {
   const { notify } = useSnackbar();
   const queryClient = useQueryClient();
   const { data: templates } = useTemplates();
+  const { fullscreen } = useFullscreen();
 
   const [values, setValues] = useState<CampaignInput>(emptyCampaign);
 
@@ -160,8 +193,8 @@ export default function CampaignBuilder() {
     onSuccess: () => {
       notify(
         editId
-          ? __('The campaign was updated.', 'goalcart')
-          : __('The campaign was created.', 'goalcart')
+          ? __('The campaign was updated.', 'faracart')
+          : __('The campaign was created.', 'faracart')
       );
       void queryClient.invalidateQueries({ queryKey: ['campaigns'] });
       void queryClient.invalidateQueries({ queryKey: ['goals'] });
@@ -182,6 +215,31 @@ export default function CampaignBuilder() {
 
   const goals = useMemo(() => goalsQuery.data?.items ?? [], [goalsQuery.data]);
   const goalsById = useMemo(() => new Map(goals.map((goal) => [goal.id, goal])), [goals]);
+
+  // Live preview: the target key includes the (possibly unsaved) form
+  // values, so the preview refetches whenever the form changes
+  // (debounced inside usePreview). The backend loads the milestone goals
+  // by id and applies the form's name + display_rules, so the preview
+  // reflects the current form state.
+  const previewTarget = useMemo(
+    () => ({ id: editId ?? 0, values, goalsById }),
+    [editId, values, goalsById]
+  );
+
+  const preview = usePreview({
+    target: previewTarget,
+    derive: (current) => ({
+      templateDefault: '',
+      targetsFor: (fraction) => campaignPresetTargets(current.values, current.goalsById, fraction),
+      paramsFor: () => ({ campaignId: editId ?? undefined, campaign: current.values }),
+      payloadKey: `campaign:${current.id}:${JSON.stringify(current.values)}`,
+    }),
+  });
+
+  // The sticky preview column sticks below the WP admin bar in embedded
+  // mode (32px) and flush in full-screen mode where the app's own header
+  // is fixed and the content area scrolls internally.
+  const stickyTop = fullscreen ? 8 : 40;
 
   const milestones = values.goals
     .map((goalId) => goalsById.get(goalId))
@@ -220,13 +278,13 @@ export default function CampaignBuilder() {
           onClick={() => saveMutation.mutate(values)}
         >
           {saveMutation.isPending
-            ? __('Saving…', 'goalcart')
+            ? __('Saving…', 'faracart')
             : editId
-              ? __('Save changes', 'goalcart')
-              : __('Create campaign', 'goalcart')}
+              ? __('Save changes', 'faracart')
+              : __('Create campaign', 'faracart')}
         </Button>
         <Button variant="outlined" onClick={() => navigate('/campaigns')}>
-          {__('Cancel', 'goalcart')}
+          {__('Cancel', 'faracart')}
         </Button>
       </>
     )
@@ -235,8 +293,8 @@ export default function CampaignBuilder() {
   if (editId && campaignQuery.isLoading) {
     return (
       <PageContainer
-        title={__('Edit campaign', 'goalcart')}
-        description={__('Loading the campaign…', 'goalcart')}
+        title={__('Edit campaign', 'faracart')}
+        description={__('Loading the campaign…', 'faracart')}
       >
         <Stack spacing={2}>
           <Skeleton variant="rounded" height={120} />
@@ -249,13 +307,13 @@ export default function CampaignBuilder() {
   if (campaignQuery.isError) {
     return (
       <PageContainer
-        title={__('Edit campaign', 'goalcart')}
-        description={__('Campaign editor', 'goalcart')}
+        title={__('Edit campaign', 'faracart')}
+        description={__('Campaign editor', 'faracart')}
       >
         <Alert severity="error" variant="outlined">
           {campaignQuery.error instanceof Error
             ? campaignQuery.error.message
-            : __('Could not load the campaign.', 'goalcart')}
+            : __('Could not load the campaign.', 'faracart')}
         </Alert>
       </PageContainer>
     );
@@ -263,304 +321,321 @@ export default function CampaignBuilder() {
 
   return (
     <PageContainer
-      title={editId ? __('Edit campaign', 'goalcart') : __('Add campaign', 'goalcart')}
+      title={editId ? __('Edit campaign', 'faracart') : __('Add campaign', 'faracart')}
       description={__(
         'Group goals into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds.',
-        'goalcart'
+        'faracart'
       )}
       actions={
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/campaigns')}>
-          {__('Back to campaigns', 'goalcart')}
+          {__('Back to campaigns', 'faracart')}
         </Button>
       }
     >
-      <Stack spacing={3}>
-        {/* 1. Basic information */}
-        <SectionCard
-          title={__('Basic information', 'goalcart')}
-          description={__('The identity and lifecycle of the campaign.', 'goalcart')}
-        >
-          <Stack spacing={2}>
-            <TextField
-              label={__('Name', 'goalcart')}
-              required
-              fullWidth
-              value={values.name}
-              placeholder={__('e.g. Summer Sale', 'goalcart')}
-              error={values.name.trim().length === 0}
-              helperText={
-                values.name.trim().length === 0
-                  ? __('Give the campaign a name.', 'goalcart')
-                  : __('Internal name shown in the admin.', 'goalcart')
-              }
-              onChange={(event) => patch({ name: event.target.value })}
-            />
-            <TextField
-              label={__('Description', 'goalcart')}
-              fullWidth
-              multiline
-              minRows={2}
-              value={values.description}
-              placeholder={__('Internal notes about this campaign.', 'goalcart')}
-              onChange={(event) => patch({ description: event.target.value })}
-            />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={values.status === 'active'}
-                  onChange={(event) =>
-                    patch({ status: event.target.checked ? 'active' : 'inactive' })
+      <Grid container spacing={3}>
+        {/* Right column (RTL): the edit form. */}
+        <Grid size={{ xs: 12, md: 7, lg: 8 }}>
+          <Stack spacing={3}>
+            {/* 1. Basic information */}
+            <SectionCard
+              title={__('Basic information', 'faracart')}
+              description={__('The identity and lifecycle of the campaign.', 'faracart')}
+            >
+              <Stack spacing={2}>
+                <TextField
+                  label={__('Name', 'faracart')}
+                  required
+                  fullWidth
+                  value={values.name}
+                  placeholder={__('e.g. Summer Sale', 'faracart')}
+                  error={values.name.trim().length === 0}
+                  helperText={
+                    values.name.trim().length === 0
+                      ? __('Give the campaign a name.', 'faracart')
+                      : __('Internal name shown in the admin.', 'faracart')
+                  }
+                  onChange={(event) => patch({ name: event.target.value })}
+                />
+                <TextField
+                  label={__('Description', 'faracart')}
+                  fullWidth
+                  multiline
+                  minRows={2}
+                  value={values.description}
+                  placeholder={__('Internal notes about this campaign.', 'faracart')}
+                  onChange={(event) => patch({ description: event.target.value })}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={values.status === 'active'}
+                      onChange={(event) =>
+                        patch({ status: event.target.checked ? 'active' : 'inactive' })
+                      }
+                    />
+                  }
+                  label={
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {__('Active', 'faracart')}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {__(
+                          'Inactive campaigns never evaluate their goals on the storefront.',
+                          'faracart'
+                        )}
+                      </Typography>
+                    </Box>
                   }
                 />
-              }
-              label={
-                <Box>
-                  <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                    {__('Active', 'goalcart')}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {__(
-                      'Inactive campaigns never evaluate their goals on the storefront.',
-                      'goalcart'
-                    )}
-                  </Typography>
-                </Box>
-              }
-            />
-          </Stack>
-        </SectionCard>
-        {/* 2. Schedule + priority */}
-        <SectionCard
-          title={__('Schedule & priority', 'goalcart')}
-          description={__(
-            'When the campaign runs, and how it competes with other campaigns.',
-            'goalcart'
-          )}
-        >
-          <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
-            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <TextFieldDate
-                label={__('Starts at', 'goalcart')}
-                value={values.starts_at}
-                onChange={(starts_at) => patch({ starts_at })}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <TextFieldDate
-                label={__('Ends at', 'goalcart')}
-                value={values.ends_at}
-                onChange={(ends_at) => patch({ ends_at })}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <TextField
-                select
-                label={__('Priority', 'goalcart')}
-                fullWidth
-                value={values.priority}
-                onChange={(event) => patch({ priority: Number(event.target.value) })}
-                helperText={__('Lower numbers win conflicts.', 'goalcart')}
-              >
-                {[1, 5, 10, 20, 50].map((priority) => (
-                  <MenuItem key={priority} value={priority}>
-                    {priority}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
-          </Grid>
-        </SectionCard>{' '}
-        {/* 3. Advanced schedule (Phase 32) */}
-        <SectionCard
-          title={__('Recurring schedule', 'goalcart')}
-          description={__(
-            'Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Goals inherit these rules unless they pin their own.',
-            'goalcart'
-          )}
-        >
-          <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
-            <Grid size={12}>
-              <Box>
-                <Typography variant="caption" color="text.secondary" component="div" gutterBottom>
-                  {__('Repeat on days (optional)', 'goalcart')}
-                </Typography>
-                <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
-                  {WEEKDAYS.map((day) => {
-                    const selected = scheduleDays.includes(day.value);
-                    return (
-                      <Chip
-                        key={day.value}
-                        label={day.label}
-                        size="small"
-                        color={selected ? 'primary' : 'default'}
-                        variant={selected ? 'filled' : 'outlined'}
-                        onClick={() => toggleScheduleDay(day.value)}
-                      />
-                    );
-                  })}
-                </Stack>
-              </Box>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <TextField
-                label={__('Daily from', 'goalcart')}
-                type="time"
-                fullWidth
-                value={scheduleStart}
-                onChange={(event) => patchDisplay({ schedule_start_time: event.target.value })}
-                helperText={__('Optional start of the daily window.', 'goalcart')}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-              <TextField
-                label={__('Daily until', 'goalcart')}
-                type="time"
-                fullWidth
-                value={scheduleEnd}
-                onChange={(event) => patchDisplay({ schedule_end_time: event.target.value })}
-                helperText={__(
-                  'A start later than the end means “after start OR before end” (crosses midnight).',
-                  'goalcart'
-                )}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-            </Grid>
-          </Grid>
-        </SectionCard>
-        {/* 4. Display (pluggable template engine) */}
-        <SectionCard
-          title={__('Display', 'goalcart')}
-          description={__(
-            'How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own goal card.',
-            'goalcart'
-          )}
-        >
-          <CampaignDisplayFields
-            display={values.display_rules as Record<string, unknown>}
-            templates={templates?.campaign ?? []}
-            onChange={(display_rules) => patch({ display_rules })}
-          />
-        </SectionCard>
-        {/* 5. Milestones (goal ordering) */}
-        <SectionCard
-          title={__('Milestones', 'goalcart')}
-          description={__(
-            'The ordered goals of the campaign. Shoppers unlock each goal in order as their cart grows.',
-            'goalcart'
-          )}
-        >
-          {goalsQuery.isLoading ? (
-            <Skeleton variant="rounded" height={160} />
-          ) : (
-            <Stack spacing={2}>
-              {milestones.length > 0 && (
-                <Paper variant="outlined" sx={{ p: 1 }}>
-                  {milestones.map((goal, index) => (
-                    <Box
-                      key={goal.id}
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        p: 1,
-                        borderBottom: index < milestones.length - 1 ? '1px solid' : 'none',
-                        borderColor: 'divider',
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          width: 30,
-                          height: 30,
-                          borderRadius: '50%',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          bgcolor: 'primary.main',
-                          color: 'primary.contrastText',
-                          fontSize: 13,
-                          fontWeight: 600,
-                          flexShrink: 0,
-                        }}
-                      >
-                        {index + 1}
-                      </Box>
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-                          {goal.name}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary" noWrap>
-                          {sprintf('%s · %s', targetLabel(goal), rewardLabel(goal))}
-                        </Typography>
-                      </Box>
-                      <Tooltip title={__('Move up', 'goalcart')}>
-                        <span>
-                          <IconButton
-                            size="small"
-                            disabled={index === 0}
-                            onClick={() => move(index, -1)}
-                          >
-                            <ArrowUpwardIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                      <Tooltip title={__('Move down', 'goalcart')}>
-                        <span>
-                          <IconButton
-                            size="small"
-                            disabled={index === milestones.length - 1}
-                            onClick={() => move(index, 1)}
-                          >
-                            <ArrowDownwardIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                      <Tooltip title={__('Remove', 'goalcart')}>
-                        <span>
-                          <IconButton size="small" color="error" onClick={() => remove(index)}>
-                            <CloseIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
-                    </Box>
-                  ))}
-                </Paper>
+              </Stack>
+            </SectionCard>
+            {/* 2. Schedule + priority */}
+            <SectionCard
+              title={__('Schedule & priority', 'faracart')}
+              description={__(
+                'When the campaign runs, and how it competes with other campaigns.',
+                'faracart'
               )}
-
-              {availableGoals.length > 0 ? (
-                <Box>
-                  <Typography variant="subtitle2" gutterBottom>
-                    {__('Add a milestone', 'goalcart')}
-                  </Typography>
-                  <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-                    {availableGoals.map((goal) => (
-                      <Chip
-                        key={goal.id}
-                        label={`${goal.name} · ${targetLabel(goal)}`}
-                        onClick={() => patch({ goals: [...values.goals, goal.id] })}
-                        variant="outlined"
-                      />
+            >
+              <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <TextFieldDate
+                    label={__('Starts at', 'faracart')}
+                    value={values.starts_at}
+                    onChange={(starts_at) => patch({ starts_at })}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <TextFieldDate
+                    label={__('Ends at', 'faracart')}
+                    value={values.ends_at}
+                    onChange={(ends_at) => patch({ ends_at })}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <TextField
+                    select
+                    label={__('Priority', 'faracart')}
+                    fullWidth
+                    value={values.priority}
+                    onChange={(event) => patch({ priority: Number(event.target.value) })}
+                    helperText={__('Lower numbers win conflicts.', 'faracart')}
+                  >
+                    {[1, 5, 10, 20, 50].map((priority) => (
+                      <MenuItem key={priority} value={priority}>
+                        {priority}
+                      </MenuItem>
                     ))}
-                  </Stack>
-                </Box>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  {values.goals.length === 0
-                    ? __('No goals yet — create a goal on the Goals page first.', 'goalcart')
-                    : __('All goals are already milestones of this campaign.', 'goalcart')}
-                </Typography>
+                  </TextField>
+                </Grid>
+              </Grid>
+            </SectionCard>{' '}
+            {/* 3. Advanced schedule (Phase 32) */}
+            <SectionCard
+              title={__('Recurring schedule', 'faracart')}
+              description={__(
+                'Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Goals inherit these rules unless they pin their own.',
+                'faracart'
               )}
-            </Stack>
-          )}
-        </SectionCard>
-      </Stack>
+            >
+              <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
+                <Grid size={12}>
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      component="div"
+                      gutterBottom
+                    >
+                      {__('Repeat on days (optional)', 'faracart')}
+                    </Typography>
+                    <Stack direction="row" spacing={0.75} useFlexGap sx={{ flexWrap: 'wrap' }}>
+                      {WEEKDAYS.map((day) => {
+                        const selected = scheduleDays.includes(day.value);
+                        return (
+                          <Chip
+                            key={day.value}
+                            label={day.label}
+                            size="small"
+                            color={selected ? 'primary' : 'default'}
+                            variant={selected ? 'filled' : 'outlined'}
+                            onClick={() => toggleScheduleDay(day.value)}
+                          />
+                        );
+                      })}
+                    </Stack>
+                  </Box>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <TextField
+                    label={__('Daily from', 'faracart')}
+                    type="time"
+                    fullWidth
+                    value={scheduleStart}
+                    onChange={(event) => patchDisplay({ schedule_start_time: event.target.value })}
+                    helperText={__('Optional start of the daily window.', 'faracart')}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <TextField
+                    label={__('Daily until', 'faracart')}
+                    type="time"
+                    fullWidth
+                    value={scheduleEnd}
+                    onChange={(event) => patchDisplay({ schedule_end_time: event.target.value })}
+                    helperText={__(
+                      'A start later than the end means “after start OR before end” (crosses midnight).',
+                      'faracart'
+                    )}
+                    slotProps={{ inputLabel: { shrink: true } }}
+                  />
+                </Grid>
+              </Grid>
+            </SectionCard>
+            {/* 4. Display (pluggable template engine) */}
+            <SectionCard
+              title={__('Display', 'faracart')}
+              description={__(
+                'How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own goal card.',
+                'faracart'
+              )}
+            >
+              <CampaignDisplayFields
+                display={values.display_rules as Record<string, unknown>}
+                templates={templates?.campaign ?? []}
+                onChange={(display_rules) => patch({ display_rules })}
+              />
+            </SectionCard>
+            {/* 5. Milestones (goal ordering) */}
+            <SectionCard
+              title={__('Milestones', 'faracart')}
+              description={__(
+                'The ordered goals of the campaign. Shoppers unlock each goal in order as their cart grows.',
+                'faracart'
+              )}
+            >
+              {goalsQuery.isLoading ? (
+                <Skeleton variant="rounded" height={160} />
+              ) : (
+                <Stack spacing={2}>
+                  {milestones.length > 0 && (
+                    <Paper variant="outlined" sx={{ p: 1 }}>
+                      {milestones.map((goal, index) => (
+                        <Box
+                          key={goal.id}
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            p: 1,
+                            borderBottom: index < milestones.length - 1 ? '1px solid' : 'none',
+                            borderColor: 'divider',
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: 30,
+                              height: 30,
+                              borderRadius: '50%',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              bgcolor: 'primary.main',
+                              color: 'primary.contrastText',
+                              fontSize: 13,
+                              fontWeight: 600,
+                              flexShrink: 0,
+                            }}
+                          >
+                            {index + 1}
+                          </Box>
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
+                              {goal.name}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" noWrap>
+                              {sprintf('%s · %s', targetLabel(goal), rewardLabel(goal))}
+                            </Typography>
+                          </Box>
+                          <Tooltip title={__('Move up', 'faracart')}>
+                            <span>
+                              <IconButton
+                                size="small"
+                                disabled={index === 0}
+                                onClick={() => move(index, -1)}
+                              >
+                                <ArrowUpwardIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title={__('Move down', 'faracart')}>
+                            <span>
+                              <IconButton
+                                size="small"
+                                disabled={index === milestones.length - 1}
+                                onClick={() => move(index, 1)}
+                              >
+                                <ArrowDownwardIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title={__('Remove', 'faracart')}>
+                            <span>
+                              <IconButton size="small" color="error" onClick={() => remove(index)}>
+                                <CloseIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        </Box>
+                      ))}
+                    </Paper>
+                  )}
+
+                  {availableGoals.length > 0 ? (
+                    <Box>
+                      <Typography variant="subtitle2" gutterBottom>
+                        {__('Add a milestone', 'faracart')}
+                      </Typography>
+                      <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
+                        {availableGoals.map((goal) => (
+                          <Chip
+                            key={goal.id}
+                            label={`${goal.name} · ${targetLabel(goal)}`}
+                            onClick={() => patch({ goals: [...values.goals, goal.id] })}
+                            variant="outlined"
+                          />
+                        ))}
+                      </Stack>
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="text.secondary">
+                      {values.goals.length === 0
+                        ? __('No goals yet — create a goal on the Goals page first.', 'faracart')
+                        : __('All goals are already milestones of this campaign.', 'faracart')}
+                    </Typography>
+                  )}
+                </Stack>
+              )}
+            </SectionCard>
+          </Stack>
+        </Grid>
+
+        {/* Left column (RTL): the sticky live preview. */}
+        <Grid size={{ xs: 12, md: 5, lg: 4 }}>
+          <Box sx={{ position: 'sticky', top: stickyTop }}>
+            <PreviewPanel scope="campaign" preview={preview} campaign={values} />
+          </Box>
+        </Grid>
+      </Grid>
     </PageContainer>
   );
 }
 
 function rewardLabel(goal: Goal): string {
   if (!goal.reward_type) {
-    return __('No reward', 'goalcart');
+    return __('No reward', 'faracart');
   }
 
   const base = REWARD_LABELS[goal.reward_type] ?? goal.reward_type;
@@ -628,13 +703,13 @@ function CampaignDisplayFields({
     <Stack spacing={2}>
       <TextField
         select
-        label={__('Campaign template', 'goalcart')}
+        label={__('Campaign template', 'faracart')}
         fullWidth
         value={templateId}
         onChange={(event) => chooseTemplate(event.target.value)}
       >
         <MenuItem value="">
-          <em>{__('Default (no campaign template)', 'goalcart')}</em>
+          <em>{__('Default (no campaign template)', 'faracart')}</em>
         </MenuItem>
         {templates.map((template) => (
           <MenuItem key={template.id} value={template.id}>
@@ -671,7 +746,7 @@ function CampaignDisplayFields({
               </Typography>
             </Box>
             <Button size="small" startIcon={<RestartAltIcon />} onClick={() => chooseTemplate('')}>
-              {__('Use global default', 'goalcart')}
+              {__('Use global default', 'faracart')}
             </Button>
           </Box>
           <SchemaForm

@@ -21,11 +21,11 @@ import type { CostCoverage, CostSource, ProfitDetails, ProfitReasonCode } from '
 
 /** User-facing labels for the cost sources the estimator consults (§10). */
 const SOURCE_LABELS: Record<CostSource, string> = {
-  _goalcart_product_cost: __("FaraCart's product cost field", 'goalcart'),
-  _cost: __('WooCommerce product cost field (_cost)', 'goalcart'),
-  _wc_cog_cost: __('Cost of goods field (_wc_cog_cost)', 'goalcart'),
-  goalcart_product_cost: __('The goalcart_product_cost filter', 'goalcart'),
-  variation_fallback: __('Variation falls back to its parent product', 'goalcart'),
+  _faracart_product_cost: __("FaraCart's product cost field", 'faracart'),
+  _cost: __('WooCommerce product cost field (_cost)', 'faracart'),
+  _wc_cog_cost: __('Cost of goods field (_wc_cog_cost)', 'faracart'),
+  faracart_product_cost: __('The faracart_product_cost filter', 'faracart'),
+  variation_fallback: __('Variation falls back to its parent product', 'faracart'),
 };
 
 interface EstimatedProfitCardProps {
@@ -90,7 +90,7 @@ export default function EstimatedProfitCard({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
           <SavingsIcon fontSize="small" />
           <Typography variant="body2" color="text.secondary" noWrap>
-            {__('Estimated Profit', 'goalcart')}
+            {__('Estimated Profit', 'faracart')}
           </Typography>
         </Box>
 
@@ -100,7 +100,7 @@ export default function EstimatedProfitCard({
           </Typography>
         ) : (
           <Typography variant="h6" component="p" sx={{ m: 0, fontWeight: 600 }}>
-            {noDataYet ? '—' : __('Not available', 'goalcart')}
+            {noDataYet ? '—' : __('Not available', 'faracart')}
           </Typography>
         )}
 
@@ -109,16 +109,16 @@ export default function EstimatedProfitCard({
         <Typography variant="caption" color="text.secondary">
           {isAvailable
             ? limitedData
-              ? __('Limited data — based on orders with complete cost information', 'goalcart')
-              : __('Estimated, not guaranteed', 'goalcart')
+              ? __('Limited data — based on orders with complete cost information', 'faracart')
+              : __('Estimated, not guaranteed', 'faracart')
             : noDataYet
-              ? __('Not enough attributed order data yet.', 'goalcart')
-              : __('FaraCart needs product cost data to estimate profit.', 'goalcart')}
+              ? __('Not enough attributed order data yet.', 'faracart')
+              : __('FaraCart needs product cost data to estimate profit.', 'faracart')}
         </Typography>
 
         {isNegative && (
           <Typography variant="caption" color="text.secondary">
-            {__('Rewards and shipping costs were higher than the estimated incremental margin.', 'goalcart')}
+            {__('Rewards and shipping costs were higher than the estimated incremental margin.', 'faracart')}
           </Typography>
         )}
 
@@ -131,7 +131,7 @@ export default function EstimatedProfitCard({
               onClick={() => setHelpOpen((open) => !open)}
               aria-expanded={helpOpen}
             >
-              {__('Set up product costs', 'goalcart')}
+              {__('Set up product costs', 'faracart')}
             </Button>
             <Button
               size="small"
@@ -140,7 +140,7 @@ export default function EstimatedProfitCard({
               onClick={() => setHelpOpen((open) => !open)}
               aria-expanded={helpOpen}
             >
-              {__('Learn how', 'goalcart')}
+              {__('Learn how', 'faracart')}
             </Button>
           </Box>
         )}
@@ -149,7 +149,7 @@ export default function EstimatedProfitCard({
           <Typography variant="caption" color="text.secondary">
             {sprintf(
               /* translators: 1: coverage percentage. */
-              __('Cost data coverage: %1$s — profit is calculated only for orders with complete cost data.', 'goalcart'),
+              __('Cost data coverage: %1$s — profit is calculated only for orders with complete cost data.', 'faracart'),
               formatPercentValue(coveragePct)
             )}
           </Typography>
@@ -167,30 +167,30 @@ export default function EstimatedProfitCard({
               expandIcon={<ExpandMoreIcon />}
               sx={{ '& .MuiAccordionSummary-content': { m: 0, py: 0.5 } }}
             >
-              <Typography variant="body2">{__('How is this calculated?', 'goalcart')}</Typography>
+              <Typography variant="body2">{__('How is this calculated?', 'faracart')}</Typography>
             </AccordionSummary>
             <AccordionDetails sx={{ pt: 0 }}>
               <Stack spacing={0.75}>
                 <DetailRow
-                  label={__('Sales attributed', 'goalcart')}
+                  label={__('Sales attributed', 'faracart')}
                   value={formatCurrency(profitDetails.incremental_revenue)}
                 />
                 <DetailRow
-                  label={__('Estimated product margin', 'goalcart')}
+                  label={__('Estimated product margin', 'faracart')}
                   value={marginAmount !== null ? formatCurrency(marginAmount) : '—'}
                 />
-                <DetailRow label={__('Reward cost', 'goalcart')} value={formatCurrency(profitDetails.reward_cost)} />
+                <DetailRow label={__('Reward cost', 'faracart')} value={formatCurrency(profitDetails.reward_cost)} />
                 <DetailRow
-                  label={__('Shipping cost', 'goalcart')}
+                  label={__('Shipping cost', 'faracart')}
                   value={profitDetails.shipping_cost !== null ? formatCurrency(profitDetails.shipping_cost) : '—'}
                 />
                 <Divider />
-                <DetailRow label={__('Estimated profit', 'goalcart')} value={formatCurrency(profitImpact ?? 0)} strong />
+                <DetailRow label={__('Estimated profit', 'faracart')} value={formatCurrency(profitImpact ?? 0)} strong />
               </Stack>
               <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
                 {__(
                   'This is an analytical estimate based on available WooCommerce cost and order data. It is not accounting profit.',
-                  'goalcart'
+                  'faracart'
                 )}
               </Typography>
             </AccordionDetails>
@@ -209,15 +209,15 @@ export default function EstimatedProfitCard({
               expandIcon={<ExpandMoreIcon />}
               sx={{ '& .MuiAccordionSummary-content': { m: 0, py: 0.5 } }}
             >
-              <Typography variant="body2">{__('How Estimated Profit becomes available', 'goalcart')}</Typography>
+              <Typography variant="body2">{__('How Estimated Profit becomes available', 'faracart')}</Typography>
             </AccordionSummary>
             <AccordionDetails sx={{ pt: 0 }}>
               <Stack spacing={0.75}>
-                <Typography variant="body2">{__('FaraCart does not invent product costs.', 'goalcart')}</Typography>
+                <Typography variant="body2">{__('FaraCart does not invent product costs.', 'faracart')}</Typography>
                 <Typography variant="body2">
                   {__(
                     'Product cost must come from WooCommerce or your product-cost data. FaraCart reads, in order:',
-                    'goalcart'
+                    'faracart'
                   )}
                 </Typography>
                 <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
@@ -228,13 +228,13 @@ export default function EstimatedProfitCard({
                   ))}
                 </Box>
                 <Typography variant="body2">
-                  {__('Once cost data exists, Estimated Profit becomes available automatically.', 'goalcart')}
+                  {__('Once cost data exists, Estimated Profit becomes available automatically.', 'faracart')}
                 </Typography>
                 <Typography variant="body2">
-                  {__('The calculation includes product cost/margin, reward cost, shipping cost and incremental revenue.', 'goalcart')}
+                  {__('The calculation includes product cost/margin, reward cost, shipping cost and incremental revenue.', 'faracart')}
                 </Typography>
                 <Button size="small" variant="outlined" href={productsUrl} target="_blank" rel="noreferrer">
-                  {__('Open your products', 'goalcart')}
+                  {__('Open your products', 'faracart')}
                 </Button>
               </Stack>
             </AccordionDetails>

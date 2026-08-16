@@ -56,12 +56,12 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Analytics\Session;
-use GoalCart\Database\Installer;
-use GoalCart\Database\Schema;
-use GoalCart\Hooks\HookManager;
-use GoalCart\Settings\Settings;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Analytics\Session;
+use FaraCart\Database\Installer;
+use FaraCart\Database\Schema;
+use FaraCart\Hooks\HookManager;
+use FaraCart\Settings\Settings;
 
 $failures = 0;
 $checks   = 0;
@@ -83,7 +83,7 @@ function check( $label, $cond ) {
 // real tables, exactly as the plugin would create them.
 Installer::maybe_create_tables();
 
-$container = \GoalCart\Plugin::instance()->container();
+$container = \FaraCart\Plugin::instance()->container();
 
 $tracker = $container->get( RevenueTracker::class );
 $settings = $container->get( Settings::class );
@@ -95,9 +95,9 @@ $wpdb    = $GLOBALS['wpdb'];
 echo "\n== 1. Service wiring ==\n";
 
 check( 'RevenueTracker resolves from the container', $tracker instanceof RevenueTracker );
-check( 'cleanup cron event name is a plugin constant', RevenueTracker::CLEANUP_EVENT === 'goalcart_revenue_cleanup' );
-check( 'cleanup cron is in the installer cron list', in_array( RevenueTracker::CLEANUP_EVENT, \GoalCart\Database\Installer::cron_events(), true ) );
-check( 'tracker registers hooks through the hook manager', did_action( 'goalcart_loaded' ) > 0 );	$hooks = new HookManager();
+check( 'cleanup cron event name is a plugin constant', RevenueTracker::CLEANUP_EVENT === 'faracart_revenue_cleanup' );
+check( 'cleanup cron is in the installer cron list', in_array( RevenueTracker::CLEANUP_EVENT, \FaraCart\Database\Installer::cron_events(), true ) );
+check( 'tracker registers hooks through the hook manager', did_action( 'faracart_loaded' ) > 0 );	$hooks = new HookManager();
 	$tracker->register( $hooks );
 	$hooks->run();
 	check( 'cleanup handler registered by the tracker', has_action( RevenueTracker::CLEANUP_EVENT ) );

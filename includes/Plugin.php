@@ -2,54 +2,54 @@
 /**
  * Plugin bootstrap class for FaraCart.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart;
+namespace FaraCart;
 
-use GoalCart\Admin\Admin;
-use GoalCart\Admin\AssetLoader;
-use GoalCart\Admin\ProductCostField;
-use GoalCart\Analytics\AnalyticsRepository;
-use GoalCart\Analytics\OrderCostSnapshot;
-use GoalCart\Analytics\AttributionEngine;
-use GoalCart\Analytics\DailyAggregator;
-use GoalCart\Analytics\GoalRecommendationEngine;
-use GoalCart\Analytics\RevenueRepository;
-use GoalCart\Analytics\RevenueTracker;
-use GoalCart\Analytics\RewardCostEstimator;
-use GoalCart\Analytics\UpsellRanker;
-use GoalCart\Analytics\Session;
-use GoalCart\Analytics\Tracker;
-use GoalCart\Campaigns\CampaignRepository;
-use GoalCart\Cart\CartIntegration;
-use GoalCart\Compatibility;
-use GoalCart\Database\Installer;
-use GoalCart\Frontend\ProgressUI;
-use GoalCart\Goals\CompletionService;
-use GoalCart\Goals\GoalEngine;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Goals\MessageEngine;
-use GoalCart\Hooks\HookManager;
-use GoalCart\REST\AnalyticsController;
-use GoalCart\REST\CampaignsController;
-use GoalCart\REST\FrontendController;
-use GoalCart\REST\GiftController;
-use GoalCart\REST\GoalsController;
-use GoalCart\REST\PreviewController;
-use GoalCart\REST\RecommendationsController;
-use GoalCart\REST\RevenueController;
-use GoalCart\REST\SearchController;
-use GoalCart\REST\SettingsController;
-use GoalCart\REST\TemplatesController;
-use GoalCart\REST\TrackController;
-use GoalCart\REST\UpsellController;
-use GoalCart\Recommendations\ProductRecommendationEngine;
-use GoalCart\Rewards\RewardEngine;
-use GoalCart\Settings\Settings;
-use GoalCart\Suggestions\SuggestionEngine;
-use GoalCart\Templates\TemplateEngine;
-use GoalCart\Templates\TemplateRegistry;
+use FaraCart\Admin\Admin;
+use FaraCart\Admin\AssetLoader;
+use FaraCart\Admin\ProductCostField;
+use FaraCart\Analytics\AnalyticsRepository;
+use FaraCart\Analytics\OrderCostSnapshot;
+use FaraCart\Analytics\AttributionEngine;
+use FaraCart\Analytics\DailyAggregator;
+use FaraCart\Analytics\GoalRecommendationEngine;
+use FaraCart\Analytics\RevenueRepository;
+use FaraCart\Analytics\RevenueTracker;
+use FaraCart\Analytics\RewardCostEstimator;
+use FaraCart\Analytics\UpsellRanker;
+use FaraCart\Analytics\Session;
+use FaraCart\Analytics\Tracker;
+use FaraCart\Campaigns\CampaignRepository;
+use FaraCart\Cart\CartIntegration;
+use FaraCart\Compatibility;
+use FaraCart\Database\Installer;
+use FaraCart\Frontend\ProgressUI;
+use FaraCart\Goals\CompletionService;
+use FaraCart\Goals\GoalEngine;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Goals\MessageEngine;
+use FaraCart\Hooks\HookManager;
+use FaraCart\REST\AnalyticsController;
+use FaraCart\REST\CampaignsController;
+use FaraCart\REST\FrontendController;
+use FaraCart\REST\GiftController;
+use FaraCart\REST\GoalsController;
+use FaraCart\REST\PreviewController;
+use FaraCart\REST\RecommendationsController;
+use FaraCart\REST\RevenueController;
+use FaraCart\REST\SearchController;
+use FaraCart\REST\SettingsController;
+use FaraCart\REST\TemplatesController;
+use FaraCart\REST\TrackController;
+use FaraCart\REST\UpsellController;
+use FaraCart\Recommendations\ProductRecommendationEngine;
+use FaraCart\Rewards\RewardEngine;
+use FaraCart\Settings\Settings;
+use FaraCart\Suggestions\SuggestionEngine;
+use FaraCart\Templates\TemplateEngine;
+use FaraCart\Templates\TemplateRegistry;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -142,8 +142,8 @@ final class Plugin {
 		$this->booted = true;
 
 		// Activation / deactivation hooks (Phase 2: Plugin Foundation).
-		register_activation_hook( GOALCART_FILE, array( Installer::class, 'activate' ) );
-		register_deactivation_hook( GOALCART_FILE, array( Installer::class, 'deactivate' ) );
+		register_activation_hook( FARACART_FILE, array( Installer::class, 'activate' ) );
+		register_deactivation_hook( FARACART_FILE, array( Installer::class, 'deactivate' ) );
 
 		// WooCommerce dependency + version gate. Runs at priority 5 on
 		// plugins_loaded — after every plugin is loaded — so the WC checks
@@ -266,7 +266,7 @@ final class Plugin {
 		 *
 		 * @param Plugin $plugin Plugin instance.
 		 */
-		do_action( 'goalcart_loaded', $this );
+		do_action( 'faracart_loaded', $this );
 	}
 
 	/**
@@ -308,9 +308,11 @@ final class Plugin {
 
 		// Message engine (Phase 13): stateless dynamic-message template
 		// engine — state detection, variable substitution and localized
-		// per-state copy, consumed by the frontend REST layer.
-		$this->container->singleton( MessageEngine::class, function () {
-			return new MessageEngine();
+		// per-state copy, consumed by the frontend REST layer. The resolved
+		// display currency rides along so server-rendered amounts are
+		// labelled with the same unit the storefront widgets use.
+		$this->container->singleton( MessageEngine::class, function ( Container $container ) {
+			return new MessageEngine( $container->get( Settings::class )->currency() );
 		} );
 
 		// Suggestion engine (Phase 14): product recommendations that close
@@ -640,7 +642,7 @@ final class Plugin {
 		} );
 
 		// WooCommerce product-cost field (UPSELL_REFACTOR §19/§20): adds
-		// the `_goalcart_product_cost` input to simple products and
+		// the `_faracart_product_cost` input to simple products and
 		// variations, saved with the product-edit screen's own capability
 		// guard.
 		$this->container->singleton( ProductCostField::class, function () {
@@ -744,7 +746,7 @@ final class Plugin {
 
 		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility(
 			'custom_order_tables',
-			GOALCART_FILE,
+			FARACART_FILE,
 			true
 		);
 	}
@@ -755,6 +757,6 @@ final class Plugin {
 	 * @return void
 	 */
 	public function load_textdomain() {
-		load_plugin_textdomain( 'goalcart', false, dirname( GOALCART_BASENAME ) . '/languages' );
+		load_plugin_textdomain( 'faracart', false, dirname( FARACART_BASENAME ) . '/languages' );
 	}
 }

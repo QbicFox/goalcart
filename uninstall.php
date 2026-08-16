@@ -5,7 +5,7 @@
  * Removes all plugin database tables and options when the plugin
  * is deleted from the WordPress admin.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
@@ -13,11 +13,11 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 // Load the Composer autoloader so the Installer class is available.
 // __DIR__ is used (not a hardcoded folder name) so the uninstall works
 // even if the plugin directory has been renamed.
-$goalcart_autoloader = __DIR__ . '/vendor/autoload.php';
-if ( file_exists( $goalcart_autoloader ) ) {
-	require_once $goalcart_autoloader;
+$faracart_autoloader = __DIR__ . '/vendor/autoload.php';
+if ( file_exists( $faracart_autoloader ) ) {
+	require_once $faracart_autoloader;
 }
 
-if ( class_exists( 'GoalCart\Database\Installer' ) ) {
-	GoalCart\Database\Installer::uninstall();
+if ( class_exists( 'FaraCart\Database\Installer' ) ) {
+	FaraCart\Database\Installer::uninstall();
 }

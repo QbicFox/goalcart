@@ -2,10 +2,10 @@
 /**
  * Reward safety guards for the FaraCart engine.
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Rewards;
+namespace FaraCart\Rewards;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -105,6 +105,6 @@ final class RewardSafety {
 	 * @return string
 	 */
 	public static function generated_coupon_code( $goal_id ) {
-		return 'GOALCART-' . strtoupper( substr( md5( 'goalcart-reward-' . (int) $goal_id ), 0, 10 ) );
+		return 'FARACART-' . strtoupper( substr( md5( 'faracart-reward-' . (int) $goal_id ), 0, 10 ) );
 	}
 }

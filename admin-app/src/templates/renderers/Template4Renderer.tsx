@@ -79,7 +79,7 @@ export default function Template4Renderer({ goal, currency, settings, animation 
                 whiteSpace: 'nowrap',
               }}
             >
-              {__('Completed', 'goalcart')} ✓
+              {__('Completed', 'faracart')} ✓
             </Box>
           )}
         </Box>
@@ -100,13 +100,13 @@ export default function Template4Renderer({ goal, currency, settings, animation 
             <LightbulbIcon
               sx={{ fontSize: 14, color: '#eab308', verticalAlign: 'middle', ml: 0.25 }}
             />
-            {__('Add these products to reach your goal faster:', 'goalcart')}
+            {__('Add these products to reach your goal faster:', 'faracart')}
           </Typography>
         )}
 
         {products.length === 0 ? (
           <Typography sx={{ fontSize: 12, color: muted }}>
-            {__('No recommendations available right now.', 'goalcart')}
+            {__('No recommendations available right now.', 'faracart')}
           </Typography>
         ) : (
           <Box>

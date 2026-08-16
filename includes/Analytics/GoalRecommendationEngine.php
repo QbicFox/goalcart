@@ -2,14 +2,14 @@
 /**
  * Smart goal recommendation engine for FaraCart (Phase 33.4).
  *
- * @package GoalCart
+ * @package FaraCart
  */
 
-namespace GoalCart\Analytics;
+namespace FaraCart\Analytics;
 
-use GoalCart\Goals\Goal;
-use GoalCart\Goals\GoalRepository;
-use GoalCart\Rewards\Reward;
+use FaraCart\Goals\Goal;
+use FaraCart\Goals\GoalRepository;
+use FaraCart\Rewards\Reward;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -86,7 +86,7 @@ final class GoalRecommendationEngine {
 
 	/**
 	 * Minimum orders for any recommendation (P33-52, filterable via
-	 * goalcart_recommendation_min_orders).
+	 * faracart_recommendation_min_orders).
 	 *
 	 * @var int
 	 */
@@ -102,7 +102,7 @@ final class GoalRecommendationEngine {
 
 	/**
 	 * Composite scoring weights (P33-22). Filterable per call through
-	 * goalcart_recommendation_weights.
+	 * faracart_recommendation_weights.
 	 *
 	 * @var array<string, float>
 	 */
@@ -189,7 +189,7 @@ final class GoalRecommendationEngine {
 		 * @param bool                     $enabled Whether recommendations are enabled.
 		 * @param GoalRecommendationEngine $engine  Engine instance.
 		 */
-		return (bool) apply_filters( 'goalcart_recommendations_enabled', true, $this );
+		return (bool) apply_filters( 'faracart_recommendations_enabled', true, $this );
 	}
 
 	/**
@@ -223,7 +223,7 @@ final class GoalRecommendationEngine {
 		};
 
 		if ( ! $this->enabled() ) {
-			return $unavailable( __( 'Smart goal recommendations are disabled.', 'goalcart' ) );
+			return $unavailable( __( 'Smart goal recommendations are disabled.', 'faracart' ) );
 		}
 
 		// Goal context (required by the admin Recommendations page): a
@@ -235,7 +235,7 @@ final class GoalRecommendationEngine {
 		$goal = $this->resolve_goal( $args );
 
 		if ( ! empty( $args['goal_id'] ) && null === $goal ) {
-			return $unavailable( __( 'The selected goal could not be found.', 'goalcart' ) );
+			return $unavailable( __( 'The selected goal could not be found.', 'faracart' ) );
 		}
 
 		// Resolve the analysis window (explicit range wins over window_days).
@@ -254,16 +254,16 @@ final class GoalRecommendationEngine {
 		$orders = $this->engine->store_order_values( $window );
 
 		if ( ! $orders['available'] ) {
-			return $unavailable( __( 'WooCommerce order data is not available — no recommendation can be computed.', 'goalcart' ) );
+			return $unavailable( __( 'WooCommerce order data is not available — no recommendation can be computed.', 'faracart' ) );
 		}
 
-		$min_orders = (int) apply_filters( 'goalcart_recommendation_min_orders', self::MIN_ORDERS );
+		$min_orders = (int) apply_filters( 'faracart_recommendation_min_orders', self::MIN_ORDERS );
 
 		if ( $orders['count'] < max( 1, $min_orders ) ) {
 			return $unavailable(
 				sprintf(
 					/* translators: 1: order count in the window, 2: minimum orders required. */
-					__( 'Not enough order data for a reliable recommendation (%d orders in the window; at least %d required).', 'goalcart' ),
+					__( 'Not enough order data for a reliable recommendation (%d orders in the window; at least %d required).', 'faracart' ),
 					(int) $orders['count'],
 					(int) $min_orders
 				)
@@ -291,10 +291,10 @@ final class GoalRecommendationEngine {
 		 * @param string|null           $reward_type Reward type being recommended for.
 		 * @param array<string, mixed>  $shipping   Shipping stats.
 		 */
-		$candidates = (array) apply_filters( 'goalcart_recommendation_candidates', $candidates, $stats, $reward_type, $shipping );
+		$candidates = (array) apply_filters( 'faracart_recommendation_candidates', $candidates, $stats, $reward_type, $shipping );
 
 		if ( empty( $candidates ) ) {
-			return $unavailable( __( 'No candidate thresholds could be generated from the order data.', 'goalcart' ) );
+			return $unavailable( __( 'No candidate thresholds could be generated from the order data.', 'faracart' ) );
 		}
 
 		// --- Score every candidate. ---
@@ -365,7 +365,7 @@ final class GoalRecommendationEngine {
 		 * @param array<string, mixed>   $args    Original request args.
 		 * @param GoalRecommendationEngine $engine Engine instance.
 		 */
-		return (array) apply_filters( 'goalcart_recommendations', $payload, $args, $this );
+		return (array) apply_filters( 'faracart_recommendations', $payload, $args, $this );
 	}
 
 	/**
@@ -673,7 +673,7 @@ final class GoalRecommendationEngine {
 	 * Plain-English explanation bullets for a candidate.
 	 *
  * Every bullet is derived from the actual computed factors — no
- * hard-coded claims. The bullet strings are translatable (the goalcart
+ * hard-coded claims. The bullet strings are translatable (the faracart
  * text domain) because the admin UI renders them directly.
  *
 	 * @param float                $threshold      Candidate threshold.
@@ -695,7 +695,7 @@ final class GoalRecommendationEngine {
 		if ( (float) $stats['median'] > 0 ) {
 			$reasons[] = sprintf(
 				/* translators: 1: percentage above the median, 2: formatted median order value. */
-				__( 'This threshold is %s above the median order value (%s).', 'goalcart' ),
+				__( 'This threshold is %s above the median order value (%s).', 'faracart' ),
 				$this->fmt_pct( ( $threshold / (float) $stats['median'] ) * 100.0 - 100.0 ),
 				$this->fmt_amount( (float) $stats['median'] )
 			);
@@ -703,14 +703,14 @@ final class GoalRecommendationEngine {
 
 		$reasons[] = sprintf(
 			/* translators: 1: percentage of orders in reach, 2: reach band percentage. */
-			__( '%s of existing orders are within reach of this threshold (below it by up to %s%%).', 'goalcart' ),
+			__( '%s of existing orders are within reach of this threshold (below it by up to %s%%).', 'faracart' ),
 			$this->fmt_pct( $reach_share * 100.0 ),
 			(int) round( self::REACH_BAND * 100.0 )
 		);
 
 		$reasons[] = sprintf(
 			/* translators: 1: formatted average order value, 2: order count. */
-			__( 'Average order value is %s over %d orders.', 'goalcart' ),
+			__( 'Average order value is %s over %d orders.', 'faracart' ),
 			$this->fmt_amount( (float) $stats['aov'] ),
 			(int) $stats['count']
 		);
@@ -718,7 +718,7 @@ final class GoalRecommendationEngine {
 		if ( Reward::TYPE_FREE_SHIPPING === $reward_type && $shipping['available'] ) {
 			$reasons[] = sprintf(
 				/* translators: 1: formatted average shipping cost. */
-				__( 'Average shipping cost is %s — a free-shipping goal absorbs this cost.', 'goalcart' ),
+				__( 'Average shipping cost is %s — a free-shipping goal absorbs this cost.', 'faracart' ),
 				$this->fmt_amount( (float) $shipping['average_shipping'] )
 			);
 		}
@@ -726,29 +726,29 @@ final class GoalRecommendationEngine {
 		if ( $cost_available ) {
 			$reasons[] = sprintf(
 				/* translators: 1: formatted estimated reward cost. */
-				__( 'Estimated reward cost at this threshold is %s.', 'goalcart' ),
+				__( 'Estimated reward cost at this threshold is %s.', 'faracart' ),
 				$this->fmt_amount( $reward_cost )
 			);
 
 			if ( $margin['available'] ) {
 				$reasons[] = $economics >= 60.0
-					? __( 'Incremental margin at this threshold covers the reward cost.', 'goalcart' )
-					: __( 'Incremental margin at this threshold does not fully cover the reward cost.', 'goalcart' );
+					? __( 'Incremental margin at this threshold covers the reward cost.', 'faracart' )
+					: __( 'Incremental margin at this threshold does not fully cover the reward cost.', 'faracart' );
 			}
 		} elseif ( null !== $reward_type ) {
-			$reasons[] = __( 'Reward cost cannot be estimated from the available data — economics scored neutral.', 'goalcart' );
+			$reasons[] = __( 'Reward cost cannot be estimated from the available data — economics scored neutral.', 'faracart' );
 		}
 
 		if ( ! $margin['available'] ) {
-			$reasons[] = __( 'Product margin data is not available — profit estimates are excluded.', 'goalcart' );
+			$reasons[] = __( 'Product margin data is not available — profit estimates are excluded.', 'faracart' );
 		} elseif ( ! $profit['available'] ) {
-			$reasons[] = __( 'Profit impact could not be estimated for this threshold.', 'goalcart' );
+			$reasons[] = __( 'Profit impact could not be estimated for this threshold.', 'faracart' );
 		}
 
 		if ( null !== $history && (int) $history['views'] > 0 ) {
 			$reasons[] = sprintf(
 				/* translators: 1: historical completion rate. */
-				__( 'Historical goal completion rate is %s.', 'goalcart' ),
+				__( 'Historical goal completion rate is %s.', 'faracart' ),
 				$this->fmt_pct( (float) $history['completion_rate'] * 100.0 )
 			);
 		}
@@ -819,11 +819,11 @@ final class GoalRecommendationEngine {
 		}
 
 		$buckets = array(
-			array( 'label' => __( '< 0.5× AOV', 'goalcart' ), 'min' => null, 'max' => 0.5, 'count' => 0 ),
-			array( 'label' => __( '0.5–0.75× AOV', 'goalcart' ), 'min' => 0.5, 'max' => 0.75, 'count' => 0 ),
-			array( 'label' => __( '0.75–1.0× AOV', 'goalcart' ), 'min' => 0.75, 'max' => 1.0, 'count' => 0 ),
-			array( 'label' => __( '1.0–1.5× AOV', 'goalcart' ), 'min' => 1.0, 'max' => 1.5, 'count' => 0 ),
-			array( 'label' => __( '> 1.5× AOV', 'goalcart' ), 'min' => 1.5, 'max' => null, 'count' => 0 ),
+			array( 'label' => __( '< 0.5× AOV', 'faracart' ), 'min' => null, 'max' => 0.5, 'count' => 0 ),
+			array( 'label' => __( '0.5–0.75× AOV', 'faracart' ), 'min' => 0.5, 'max' => 0.75, 'count' => 0 ),
+			array( 'label' => __( '0.75–1.0× AOV', 'faracart' ), 'min' => 0.75, 'max' => 1.0, 'count' => 0 ),
+			array( 'label' => __( '1.0–1.5× AOV', 'faracart' ), 'min' => 1.0, 'max' => 1.5, 'count' => 0 ),
+			array( 'label' => __( '> 1.5× AOV', 'faracart' ), 'min' => 1.5, 'max' => null, 'count' => 0 ),
 		);
 
 		foreach ( $totals as $total ) {
@@ -876,7 +876,7 @@ final class GoalRecommendationEngine {
 			return $result;
 		}
 
-		$sample = (int) apply_filters( 'goalcart_recommendation_margin_products', self::MARGIN_SAMPLE_PRODUCTS );
+		$sample = (int) apply_filters( 'faracart_recommendation_margin_products', self::MARGIN_SAMPLE_PRODUCTS );
 
 		$query = new \WC_Product_Query(
 			array(
@@ -1070,7 +1070,7 @@ final class GoalRecommendationEngine {
 	 * @return array<string, float>
 	 */
 	protected function score_weights() {
-		$weights = (array) apply_filters( 'goalcart_recommendation_weights', self::SCORE_WEIGHTS );
+		$weights = (array) apply_filters( 'faracart_recommendation_weights', self::SCORE_WEIGHTS );
 
 		// Fall back per-key so a partial filter cannot zero a component.
 		foreach ( self::SCORE_WEIGHTS as $key => $default ) {

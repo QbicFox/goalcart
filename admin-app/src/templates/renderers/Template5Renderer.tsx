@@ -83,7 +83,7 @@ export default function Template5Renderer({ goal, currency, settings, animation 
           )}
           {goal.completed && (
             <Typography sx={{ fontSize: 12, fontWeight: 700, color: accent, whiteSpace: 'nowrap' }}>
-              {__('Completed', 'goalcart')} ✓
+              {__('Completed', 'faracart')} ✓
             </Typography>
           )}
         </Box>
@@ -116,7 +116,7 @@ export default function Template5Renderer({ goal, currency, settings, animation 
             '&:hover': { background: accent, filter: 'brightness(0.95)' },
           }}
         >
-          {__('Add', 'goalcart')}
+          {__('Add', 'faracart')}
         </Button>
       )}
     </Box>
