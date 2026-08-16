@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart line-item value object for the Goal Cart engine.
+ * Cart line-item value object for the FaraCart engine.
  *
  * @package GoalCart
  */

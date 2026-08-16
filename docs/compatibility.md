@@ -1,4 +1,4 @@
-# Goal Cart — WooCommerce Compatibility
+# FaraCart — WooCommerce Compatibility
 
 > **Phase 19 / Tasks P19-T01–T02.** The WooCommerce compatibility contract:
 > what is tested, on which surfaces, and why the plugin only ever relies on
@@ -55,7 +55,7 @@ so a classic + block hybrid page can never show the widget twice.
 - **HPOS (custom order tables)** — the plugin declares compatibility via the
   public `Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility()`
   in `Plugin::declare_feature_compatibility()` (hooked to
-  `before_woocommerce_init`). Analytics read Goal Cart's own tables; no
+  `before_woocommerce_init`). Analytics read FaraCart's own tables; no
   WooCommerce order tables are read or written directly.
 
 ## 5. Public Hook / API Contract (P19-T02)
@@ -81,7 +81,7 @@ update that breaks a supported API fails the test before a shopper sees it.
 ## 6. WordPress / PHP Support Matrix (P20)
 
 The exact version contract is pinned in the plugin header
-(`goalcart.php`) and enforced by `includes/Compatibility.php`:
+(`ravis-faracart.php`) and enforced by `includes/Compatibility.php`:
 
 | Component | Minimum | Tested | Enforced by |
 |---|---|---|---|

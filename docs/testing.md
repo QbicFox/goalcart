@@ -1,4 +1,4 @@
-# Goal Cart — Testing & Regression (Phase 10)
+# FaraCart — Testing & Regression (Phase 10)
 
 This document records the Phase 10 testing work: the full regression run,
 the checklist-to-suite coverage map, and the documented live-store drift

@@ -1,4 +1,4 @@
-# Goal Cart — Reward Engine
+# FaraCart — Reward Engine
 
 > **Phase 5 / Tasks P05-T01–T03.** The reward layer that turns goal completion into
 > real cart value. Rewards are fully decoupled from goal calculation: the GoalEngine

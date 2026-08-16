@@ -30,7 +30,7 @@ export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // Keep the console useful for debugging without breaking the UI.
-    console.error('Goal Cart admin section failed to render:', error, info);
+    console.error('FaraCart admin section failed to render:', error, info);
   }
 
   private handleRetry = (): void => {

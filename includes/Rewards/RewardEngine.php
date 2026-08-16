@@ -1,6 +1,6 @@
 <?php
 /**
- * Reward engine facade for Goal Cart.
+ * Reward engine facade for FaraCart.
  *
  * @package GoalCart
  */
@@ -336,7 +336,7 @@ final class RewardEngine {
 				return array();
 			}
 
-			// Evaluation context: Goal Cart's own fees and shipping are
+			// Evaluation context: FaraCart's own fees and shipping are
 			// excluded so a reward can never un-grant itself. The cart
 			// snapshot comes from the CartIntegration service (Phase 6) —
 			// the single source of truth — falling back to a direct build

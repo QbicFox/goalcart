@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart — full regression runner (Improvement.md Phase 10).
+ * FaraCart — full regression runner (Improvement.md Phase 10).
  *
  * Runs every tests/*-test.php suite in a fresh PHP process, captures each
  * suite's Checks/Failures summary, and reports a verdict:

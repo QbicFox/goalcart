@@ -1,14 +1,14 @@
-# GoalCart — Replace Goal Templates with New MUI Templates
+# FaraCart — Replace Goal Templates with New MUI Templates
 
 ## Objective
 
-Replace the existing GoalCart goal-template system with the six new templates defined in:
+Replace the existing FaraCart goal-template system with the six new templates defined in:
 
-`01-GoalCart - UI Exploration Boar.html`
+`01-FaraCart - UI Exploration Boar.html`
 
-The HTML file will be placed directly inside the GoalCart project folder by the developer/AI agent. Treat that file as the **visual source of truth** for the new designs.
+The HTML file will be placed directly inside the FaraCart project folder by the developer/AI agent. Treat that file as the **visual source of truth** for the new designs.
 
-The final implementation must use the project's existing React + MUI architecture and must integrate with the existing GoalCart data, state, business logic, admin panel, and WooCommerce frontend.
+The final implementation must use the project's existing React + MUI architecture and must integrate with the existing FaraCart data, state, business logic, admin panel, and WooCommerce frontend.
 
 Do not keep the old templates.
 
@@ -18,7 +18,7 @@ Do not keep the old templates.
 
 Before changing any code:
 
-1. Scan the entire GoalCart project.
+1. Scan the entire FaraCart project.
 2. Locate the current goal-template system.
 3. Identify:
    - Existing template components
@@ -32,7 +32,7 @@ Before changing any code:
    - Frontend rendering logic
    - Any backend/API references to template IDs
 4. Locate and read:
-   - `01-GoalCart - UI Exploration Boar.html`
+   - `01-FaraCart - UI Exploration Boar.html`
 5. Compare the HTML designs with the current implementation.
 
 Do not start implementation until the existing template architecture is understood.
@@ -182,7 +182,7 @@ Implement:
 
 Do not hard-code the demonstration products from the HTML.
 
-Use the existing GoalCart/WooCommerce recommendation data and existing add-to-cart functionality.
+Use the existing FaraCart/WooCommerce recommendation data and existing add-to-cart functionality.
 
 Do not implement a second recommendation engine.
 
@@ -283,7 +283,7 @@ Do not add unnecessary dependencies.
 
 Templates are presentation components.
 
-Do not duplicate GoalCart business logic inside individual templates.
+Do not duplicate FaraCart business logic inside individual templates.
 
 Do not independently calculate:
 
@@ -318,7 +318,7 @@ Examples of values that must remain dynamic:
 - Product prices
 - Product images
 
-Use the existing GoalCart formatting utilities for prices/currency.
+Use the existing FaraCart formatting utilities for prices/currency.
 
 Do not create a second currency formatter if one already exists.
 
@@ -326,7 +326,7 @@ Do not create a second currency formatter if one already exists.
 
 # 13. Goal States
 
-Respect the existing GoalCart state model.
+Respect the existing FaraCart state model.
 
 Where supported, templates should be able to represent:
 
@@ -372,7 +372,7 @@ Show:
 
 # 14. RTL and Persian
 
-GoalCart is a Persian/RTL product.
+FaraCart is a Persian/RTL product.
 
 All templates must:
 
@@ -418,7 +418,7 @@ They must adapt to their available container width.
 
 # 16. Admin Template Selection
 
-Find the existing GoalCart admin screen where the template is selected.
+Find the existing FaraCart admin screen where the template is selected.
 
 Replace the existing options with exactly:
 
@@ -503,7 +503,7 @@ Do not create a duplicate registry if one already exists.
 
 # 19. Component Architecture
 
-Follow the existing GoalCart folder conventions.
+Follow the existing FaraCart folder conventions.
 
 A possible structure is:
 
@@ -692,7 +692,7 @@ HTML design
 → understand visual structure
 → identify reusable patterns
 → map patterns to MUI
-→ connect to existing GoalCart data
+→ connect to existing FaraCart data
 → integrate with existing architecture
 → validate visually
 ```
@@ -768,7 +768,7 @@ The final code should look like a properly designed React/MUI implementation.
 - [x] Admin preview works
 - [x] Template selection persists
 - [x] Frontend renderer works
-- [x] Existing GoalCart functionality still works
+- [x] Existing FaraCart functionality still works
 
 ## Quality
 
@@ -782,7 +782,7 @@ The final code should look like a properly designed React/MUI implementation.
 
 # 29. Final Result
 
-After completion, GoalCart must have exactly six selectable goal templates:
+After completion, FaraCart must have exactly six selectable goal templates:
 
 1. **قالب ۱** — Classic Progress Card
 2. **قالب ۲** — Minimal Inline Cart Goal
@@ -791,20 +791,20 @@ After completion, GoalCart must have exactly six selectable goal templates:
 5. **قالب ۵** — Compact Floating / Sticky Goal
 6. **قالب ۶** — Premium / Elegant E-commerce Style
 
-The six templates must be reusable React/MUI components integrated with the existing GoalCart architecture.
+The six templates must be reusable React/MUI components integrated with the existing FaraCart architecture.
 
 The old template system must be fully replaced.
 
 The file:
 
-`01-GoalCart - UI Exploration Boar.html`
+`01-FaraCart - UI Exploration Boar.html`
 
-must be treated as the design reference, while the existing GoalCart codebase remains the source of truth for business logic, data, architecture, and integration.
+must be treated as the design reference, while the existing FaraCart codebase remains the source of truth for business logic, data, architecture, and integration.
 
 
 # 30. Admin Dashboard — Template Preview Must Be Fully Updated
 
-After implementing the six new templates, the GoalCart admin dashboard must be updated so that the template preview system correctly displays the new templates.
+After implementing the six new templates, the FaraCart admin dashboard must be updated so that the template preview system correctly displays the new templates.
 
 This is a required part of the task, not a separate follow-up task.
 
@@ -866,7 +866,7 @@ Both must use the same template component and the same appearance configuration.
 
 # 31. Per-Template Appearance Settings
 
-Each template must support appropriate visual customization settings from the GoalCart admin dashboard.
+Each template must support appropriate visual customization settings from the FaraCart admin dashboard.
 
 Do not assume that all six templates should have exactly the same settings.
 
@@ -1112,7 +1112,7 @@ The important requirement is that appearance configuration must be:
 
 # 35. Appearance Settings UI
 
-Add the appearance controls to the existing GoalCart admin dashboard.
+Add the appearance controls to the existing FaraCart admin dashboard.
 
 The UI should be easy for a store owner to understand.
 
@@ -1190,7 +1190,7 @@ Saving should persist the final configuration, but preview must work live before
 
 # 37. Persistence
 
-Appearance settings must be persisted using the existing GoalCart configuration/storage architecture.
+Appearance settings must be persisted using the existing FaraCart configuration/storage architecture.
 
 Before implementing persistence:
 
@@ -1281,7 +1281,7 @@ Before finishing, verify:
 - [x] Saved appearance settings are restored when reopening the template
 - [x] Template defaults match the HTML reference
 - [x] Changing one template's settings does not unexpectedly modify another template
-- [x] Existing GoalCart functionality remains intact
+- [x] Existing FaraCart functionality remains intact
 
 ---
 
@@ -1313,7 +1313,7 @@ Do not build one implementation for the admin preview and another implementation
 
 # 43. Updated Final Result
 
-After completion, GoalCart must have:
+After completion, FaraCart must have:
 
 ### Six templates
 
@@ -1340,4 +1340,4 @@ The admin dashboard preview and the frontend must always use the same production
 
 The HTML file remains the visual source of truth for the default design.
 
-The existing GoalCart codebase remains the source of truth for business logic, data, architecture, and persistence.
+The existing FaraCart codebase remains the source of truth for business logic, data, architecture, and persistence.

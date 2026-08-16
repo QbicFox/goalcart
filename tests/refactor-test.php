@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart UPSELL_REFACTOR tests (Goal Optimization & Upsell Performance).
+ * FaraCart UPSELL_REFACTOR tests (Goal Optimization & Upsell Performance).
  *
  * Verifies the full refactor task list (`UPSELL_REFACTOR.md`):
  *
@@ -56,7 +56,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Admin\ProductCostField;
 use GoalCart\Analytics\AttributionEngine;
@@ -181,11 +181,11 @@ try {
 
 	check( 'live _cost read', close( 400, $costs->product_cost( (int) $post_id ) ) );
 
-	// Now save Goal Cart's own field on top — it must take precedence.
+	// Now save FaraCart's own field on top — it must take precedence.
 	update_post_meta( (int) $post_id, RewardCostEstimator::PRODUCT_COST_META, '250' );
 	check( '_goalcart_product_cost beats _cost', close( 250, $costs->product_cost( (int) $post_id ) ) );
 
-	// Zero/negative in Goal Cart's field is "no data" → falls through.
+	// Zero/negative in FaraCart's field is "no data" → falls through.
 	update_post_meta( (int) $post_id, RewardCostEstimator::PRODUCT_COST_META, '0' );
 	check( 'zero _goalcart_product_cost treated as missing (falls back to _cost)', close( 400, $costs->product_cost( (int) $post_id ) ) );
 

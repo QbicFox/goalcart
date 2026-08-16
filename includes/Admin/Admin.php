@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin-facing functionality for Goal Cart.
+ * Admin-facing functionality for FaraCart.
  *
  * @package GoalCart
  */
@@ -110,8 +110,8 @@ class Admin {
 		$capability = apply_filters( 'goalcart_admin_capability', 'manage_options' );
 
 		add_menu_page(
-			__( 'Goal Cart', 'goalcart' ),
-			__( 'Goal Cart', 'goalcart' ),
+			__( 'FaraCart', 'goalcart' ),
+			__( 'FaraCart', 'goalcart' ),
 			$capability,
 			self::MENU_SLUG,
 			array( $this, 'render_dashboard' ),
@@ -145,7 +145,7 @@ class Admin {
 	}
 
 	/**
-	 * Add page body classes on the Goal Cart admin screen.
+	 * Add page body classes on the FaraCart admin screen.
 	 *
 	 * `goalcart-admin-page` is always added so admin-fullscreen.css can
 	 * target the screen in both display modes. `goalcart-fullscreen` is
@@ -169,7 +169,7 @@ class Admin {
 	}
 
 	/**
-	 * Whether the current admin request is the Goal Cart page.
+	 * Whether the current admin request is the FaraCart page.
 	 *
 	 * @return bool
 	 */
@@ -210,7 +210,7 @@ class Admin {
 		// full-screen mode (admin-fullscreen.css hides generic notices).
 		printf(
 			'<div class="notice notice-warning is-dismissible goalcart-build-notice"><p><strong>%1$s</strong> %2$s</p></div>',
-			esc_html__( 'Goal Cart:', 'goalcart' ),
+			esc_html__( 'FaraCart:', 'goalcart' ),
 			wp_kses_post( $hint )
 		);
 	}
@@ -230,7 +230,7 @@ class Admin {
 
 		echo '<div class="wrap">';
 		echo '<div id="goalcart-admin" dir="' . esc_attr( $dir ) . '" class="goalcart-admin-root">';
-		echo '<div class="goalcart-admin-loading">' . esc_html__( 'Loading Goal Cart…', 'goalcart' ) . '</div>';
+		echo '<div class="goalcart-admin-loading">' . esc_html__( 'Loading FaraCart…', 'goalcart' ) . '</div>';
 		echo '</div>';
 		echo '</div>';
 	}

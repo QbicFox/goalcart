@@ -15,7 +15,7 @@ export function getBootData(): GoalCartBootData {
 
   if (!window.goalcart) {
     throw new Error(
-      'Goal Cart boot data is missing. Make sure the admin app is enqueued by the Goal Cart plugin.'
+      'FaraCart boot data is missing. Make sure the admin app is enqueued by the FaraCart plugin.'
     );
   }
 

@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name:       Goal Cart for WooCommerce
- * Plugin URI:        https://example.com/goalcart
+ * Plugin Name:       FaraCart
+ * Plugin URI:        https://example.com/faracart
  * Description:       Increase average order value by showing cart goals, progress bars, rewards, milestones, and smart product suggestions for your store.
  * Version:           0.1.0
  * Requires at least: 6.3
  * Requires PHP:      7.4
- * Author:            Goal Cart Team
+ * Author:            FaraCart Team
  * Author URI:        https://example.com
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -51,7 +51,7 @@ if ( ! defined( 'GOALCART_URL' ) ) {
 
 if ( ! defined( 'GOALCART_BASENAME' ) ) {
 	/**
-	 * Plugin basename, e.g. "goalcart/goalcart.php".
+	 * Plugin basename, e.g. "ravis-faracart/ravis-faracart.php".
 	 */
 	define( 'GOALCART_BASENAME', plugin_basename( __FILE__ ) );
 }
@@ -92,7 +92,7 @@ if ( file_exists( GOALCART_PATH . 'vendor/autoload.php' ) ) {
 // The WooCommerce dependency + version gate deliberately does NOT run at
 // file scope: WordPress loads active plugins sequentially in
 // active_plugins order, so class_exists('WooCommerce') / WC_VERSION can be
-// false or undefined simply because the Goal Cart file was required before
+// false or undefined simply because the FaraCart file was required before
 // WooCommerce's. Compatibility::gate() runs on plugins_loaded instead —
 // after every plugin is loaded — and the admin menu is guarded by the
 // same check (never a fatal error; see includes/Compatibility.php).

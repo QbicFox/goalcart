@@ -1,6 +1,6 @@
 <?php
 /**
- * Template engine for the Goal Cart pluggable progress templates.
+ * Template engine for the FaraCart pluggable progress templates.
  *
  * @package GoalCart
  */

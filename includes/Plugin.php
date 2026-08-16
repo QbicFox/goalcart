@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin bootstrap class for Goal Cart.
+ * Plugin bootstrap class for FaraCart.
  *
  * @package GoalCart
  */
@@ -164,7 +164,7 @@ final class Plugin {
 		// themselves after each run.
 		$this->hooks()->add_filter( 'cron_schedules', array( Installer::class, 'cron_schedules' ) );
 
-		// Declare WooCommerce feature compatibility (HPOS). Goal Cart
+		// Declare WooCommerce feature compatibility (HPOS). FaraCart
 		// reads orders through wc_get_order() and never writes to
 		// WooCommerce's order tables, so HPOS is fully supported. Without
 		// this declaration WooCommerce flags the plugin as incompatible
@@ -231,7 +231,7 @@ final class Plugin {
 		$this->hooks()->register( $this->container->get( RevenueController::class ) );
 
 		// Product cost (UPSELL_REFACTOR §18–§22): the WooCommerce product
-		// editor gains Goal Cart's own cost field (simple + variations), and
+		// editor gains FaraCart's own cost field (simple + variations), and
 		// order creation snapshots each line's unit cost so historical
 		// profit never changes when a product cost is edited later.
 		$this->hooks()->register( $this->container->get( ProductCostField::class ) );
@@ -731,7 +731,7 @@ final class Plugin {
 	 * "incompatible plugins" notice for any plugin that has not declared
 	 * compatibility with an enabled feature whose default compatibility
 	 * is 'incompatible' — most notably the custom order tables (HPOS)
-	 * feature. Goal Cart reads orders through wc_get_order() and runs its
+	 * feature. FaraCart reads orders through wc_get_order() and runs its
 	 * own analytics against its own tables, so declaring compatibility is
 	 * accurate.
 	 *

@@ -1,6 +1,6 @@
 <?php
 /**
- * Reward evaluation result for the Goal Cart engine.
+ * Reward evaluation result for the FaraCart engine.
  *
  * @package GoalCart
  */

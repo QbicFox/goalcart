@@ -1,6 +1,6 @@
 <?php
 /**
- * Environment compatibility checks for Goal Cart.
+ * Environment compatibility checks for FaraCart.
  *
  * @package GoalCart
  */
@@ -104,7 +104,7 @@ class Compatibility {
 	 *
 	 * Deliberately not run at file scope: WordPress requires active plugins
 	 * sequentially in active_plugins order, so class_exists('WooCommerce')
-	 * and WC_VERSION may be unavailable simply because the Goal Cart main
+	 * and WC_VERSION may be unavailable simply because the FaraCart main
 	 * file was required before WooCommerce's. By plugins_loaded both are
 	 * reliable (including network-activated WooCommerce in multisite).
 	 * When requirements are not met, an admin notice is registered; the
@@ -169,7 +169,7 @@ class Compatibility {
 
 		printf(
 			'<div class="notice notice-error goalcart-compat-notice"><p><strong>%1$s</strong></p><ul>%2$s</ul></div>',
-			esc_html__( 'Goal Cart is inactive because the site does not meet its requirements:', 'goalcart' ),
+			esc_html__( 'FaraCart is inactive because the site does not meet its requirements:', 'goalcart' ),
 			$list // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each item is escaped above.
 		);
 	}

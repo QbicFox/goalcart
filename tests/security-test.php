@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart security hardening tests (P22-T01 / P22-T02 / P22-T03 / P22-T04).
+ * FaraCart security hardening tests (P22-T01 / P22-T02 / P22-T03 / P22-T04).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then audits
  * the Phase 22 security posture end-to-end:
@@ -60,7 +60,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Analytics\AnalyticsRepository;
 use GoalCart\Analytics\Tracker;

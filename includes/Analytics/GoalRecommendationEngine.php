@@ -1,6 +1,6 @@
 <?php
 /**
- * Smart goal recommendation engine for Goal Cart (Phase 33.4).
+ * Smart goal recommendation engine for FaraCart (Phase 33.4).
  *
  * @package GoalCart
  */

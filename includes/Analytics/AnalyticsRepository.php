@@ -1,6 +1,6 @@
 <?php
 /**
- * Analytics metrics repository for Goal Cart.
+ * Analytics metrics repository for FaraCart.
  *
  * @package GoalCart
  */

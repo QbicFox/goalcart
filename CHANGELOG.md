@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the **Goal Cart for WooCommerce** plugin are documented in this file.
+All notable changes to the **FaraCart for WooCommerce** plugin are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/) and the project adheres to
 [Semantic Versioning](https://semver.org/). Task IDs reference the register in `AGENT.md`.
@@ -269,7 +269,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 - **Phase 4 — Revenue Overview Redesign (Revenue & Analytics UX
   simplification)** — the `/revenue` page is now **Sales Performance**,
-  answering "how much did Goal Cart sell, how many customers purchased,
+  answering "how much did FaraCart sell, how many customers purchased,
   and how profitable was it" (Improvement.md §5–§15, §49):
   - **Four primary KPI cards** (§5–§8) — **Sales Attributed to Goal
     Cart** (direct incremental revenue with an expandable "How is this
@@ -287,7 +287,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     expandable profit panel shows sales attributed / estimated margin /
     reward cost / shipping cost / estimated profit plus the
     "analytical estimate, not accounting profit" disclaimer.
-  - **Simplified trend** (§14) — "Goal Cart Sales Performance" defaults
+  - **Simplified trend** (§14) — "FaraCart Sales Performance" defaults
     to Attributed Sales + Purchased Orders with toggles for Goal
     Completions and an optional advanced Incremental Revenue series.
   - **Insight cards** (§15/§26) — 2–3 deterministic plain-English
@@ -1380,7 +1380,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 1 — Product Specification (100% complete)
 
-- **P01-T01 Objective** — Defined Goal Cart as a **WooCommerce Cart Revenue Optimization Engine** (goals + rewards + progress + suggestions + campaigns + analytics), not merely a progress-bar widget; documented positioning and success metrics.
+- **P01-T01 Objective** — Defined FaraCart as a **WooCommerce Cart Revenue Optimization Engine** (goals + rewards + progress + suggestions + campaigns + analytics), not merely a progress-bar widget; documented positioning and success metrics.
 - **P01-T02 Core Product Concepts** — Defined Goal (types/target/priority/conditions), Reward (free shipping, percentage discount, fixed discount + safety rules), Campaign (scheduled milestone collections), Progress (current/target/remaining/percentage/completed/reward_state/eligible), and Suggestion (sources, ranking, gap-closing pricing).
 - **P01-T03 Initial MVP Scope** — Captured all 20 MVP features (amount/quantity/category goals, multiple + milestone goals, free shipping/percentage/fixed rewards, progress bar, dynamic messages, cart/mini-cart/checkout integration, AJAX updates, responsive UI, RTL, currency-aware formatting, product suggestions, campaign scheduling, basic analytics) with explicit deferrals of advanced AI and A/B testing.
 - Added `docs/PRODUCT_SPEC.md` — the product source of truth covering vision, concepts, user journeys, MVP scope, functional/non-functional requirements, success metrics, and Definition of Done.
@@ -1389,7 +1389,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 2 — Plugin Foundation (100% complete)
 
-- **P02-T01 Objective** — Created the Goal Cart plugin using the exact architectural conventions discovered in Phase 0 (reference: `wooinsights`): namespace `GoalCart\` → `includes/`, singleton bootstrap at file scope, DI container, HookManager, Schema/Installer migration framework, Vite admin-app.
+- **P02-T01 Objective** — Created the FaraCart plugin using the exact architectural conventions discovered in Phase 0 (reference: `wooinsights`): namespace `GoalCart\` → `includes/`, singleton bootstrap at file scope, DI container, HookManager, Schema/Installer migration framework, Vite admin-app.
 - **P02-T02 Tasks** — Implemented all foundation tasks: plugin slug `goalcart` (`goalcart.php`); plugin bootstrap; Composer config (PSR-4, PHP ≥ 7.4); frontend build stack (`admin-app/`: Vite 5, TypeScript strict, ESLint 9 flat, Prettier, npm scripts); activation/deactivation/uninstall (`Installer` + `uninstall.php`); plugin constants; WooCommerce dependency checks; WP/PHP/WC minimum version compatibility checks (`Compatibility`, load-order-safe `plugins_loaded` gate); capability checks (`goalcart_admin_capability` filter); nonce strategy (`wp_rest` nonce in admin boot data + `X-WP-Nonce` client header); translation loading (`load_plugin_textdomain`); logging strategy consistent with the reference (`error_log` with phpcs annotations).
 - **P02-T03 Definition of Done** — Plugin loads and boots without fatal errors in a real WordPress 7.0.2 + WooCommerce 11.0.0 context (verified via read-only WP smoke test: constants, DI wiring, all hooks, compatibility gate, admin shell); follows the reference architecture.
 - Added files: `goalcart.php`, `uninstall.php`, `composer.json`, `.editorconfig`, `.gitignore`, `README.md`, `includes/{Plugin,Container,Compatibility}.php`, `includes/Hooks/HookManager.php`, `includes/Database/{Schema,Installer}.php`, `includes/Settings/Settings.php`, `includes/Admin/{Admin,AssetLoader}.php`, `assets/css/admin-fullscreen.css`, `languages/.gitkeep`, `tests/.gitkeep`, and the `admin-app/` Vite + TypeScript + MUI scaffold.
@@ -1535,7 +1535,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 14 — Smart Product Suggestions (100% complete)
 
-- **P14-T01 Objective** — Turned Goal Cart into an actual revenue-optimization feature: new `includes/Suggestions/SuggestionEngine.php` (`GoalCart\Suggestions`, DI-wired in `Plugin.php`) turns goal progress into product recommendations that close the gap, consumed by the public `/progress` payload and rendered by the Phase 11 `SuggestionList`.
+- **P14-T01 Objective** — Turned FaraCart into an actual revenue-optimization feature: new `includes/Suggestions/SuggestionEngine.php` (`GoalCart\Suggestions`, DI-wired in `Plugin.php`) turns goal progress into product recommendations that close the gap, consumed by the public `/progress` payload and rendered by the Phase 11 `SuggestionList`.
 - **P14-T02 Recommendation Sources** — Seven candidate sources, deduped with the first (highest-priority) source kept for the badge: manual (the goal's own `products`), category (goal categories via a term-relationship query — no `wc_product_meta_lookup` dependency, so products created outside WC CRUD are found), the cart items' upsells/cross-sells/`wc_get_related_products()`, the shopper's `woocommerce_recently_viewed` cookie, and best sellers by `total_sales`. Bounded (per-source limits, `MAX_CANDIDATES` 40, batched load with a `wc_get_product` fallback when the lookup table lags).
 - **P14-T03 Ranking** — Stock availability filters first (published, in stock, priced); then a score from goal eligibility (manual +3, counts toward the goal +2), relevance (shares a cart-item category +1), WC-endorsed sources (+0.5) and — for money goals — price proximity to `remaining` (0.6–1.4× band +2, cheaper +0.75; the spec's "prefer 150K–220K when 180K is left"). Capped at `MAX_SUGGESTIONS` (4), deterministic (score desc, id asc), never suggests cart items / excluded / out-of-stock / ghost ids, and the final list is filterable via the `goalcart_suggestions` filter.
 - **P14-T04 Example** — In-band products rank above arbitrary expensive ones; verified in `tests/suggestion-test.php` (28 checks, transactional products rolled back): sources, stock filter, ranking, cap, dedupe, exclusion, cart-item skip, quantity-goal no-price-banding, and the filter.
@@ -1608,7 +1608,7 @@ activated.
 
 ### Phase 16 — Analytics Foundation (100% complete)
 
-- **P16-T01 Objective** — Goal Cart now measures whether it actually
+- **P16-T01 Objective** — FaraCart now measures whether it actually
 increases revenue: an append-only analytics event pipeline records what
 shoppers see and do (goal impressions, progress, completions, reward
 activations, suggestion impressions/clicks/adds) into the existing

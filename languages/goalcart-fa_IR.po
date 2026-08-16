@@ -1,16 +1,16 @@
-# Persian (fa_IR) translation of Goal Cart.
-# This file is distributed under the same license as the Goal Cart plugin (GPL-2.0-or-later).
+# Persian (fa_IR) translation of FaraCart.
+# This file is distributed under the same license as the FaraCart plugin (GPL-2.0-or-later).
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Goal Cart 0.6.0\n"
-"Report-Msgid-Bugs-To: https://goalcart.com/support\n"
+"Project-Id-Version: FaraCart 0.6.0\n"
+"Report-Msgid-Bugs-To: https://faracart.com/support\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2026-08-14\n"
-"Last-Translator: Goal Cart Team <translations@goalcart.com>\n"
-"Language-Team: Persian <fa@goalcart.com>\n"
+"Last-Translator: FaraCart Team <translations@faracart.com>\n"
+"Language-Team: Persian <fa@faracart.com>\n"
 "Language: fa_IR\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Domain: goalcart\n"
@@ -222,8 +222,8 @@ msgid "AND (all children required)"
 msgstr "و (همهٔ زیرشرط‌ها الزامی)"
 
 #: admin-app/src/routes/RevenueOverview.tsx:652
-msgid "AOV comparisons are observed impact — they do not prove that Goal Cart caused the difference."
-msgstr "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاهده‌شده است — ثابت نمی‌کند که گل کارت باعث این تفاوت شده است."
+msgid "AOV comparisons are observed impact — they do not prove that FaraCart caused the difference."
+msgstr "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاهده‌شده است — ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
 
 #: admin-app/src/routes/Recommendations.tsx:160
 msgid "AOV ratio"
@@ -292,12 +292,12 @@ msgstr "برای برآورد سودآوری، دادهٔ قیمت تمام‌ش
 
 #: admin-app/src/routes/Analytics.tsx:303
 #: admin-app/src/routes/RevenueOverview.tsx:182
-msgid "Add product cost data to see the estimated profit of Goal Cart."
-msgstr "برای دیدن سود تخمینی گل کارت، دادهٔ قیمت تمام‌شده را اضافه کنید."
+msgid "Add product cost data to see the estimated profit of FaraCart."
+msgstr "برای دیدن سود تخمینی فراکارت، دادهٔ قیمت تمام‌شده را اضافه کنید."
 
 #: admin-app/src/routes/Dashboard.tsx
-msgid "Add product costs to unlock Estimated Profit — Goal Cart never invents a margin."
-msgstr "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — گل کارت هرگز حاشیه سود را حدس نمی‌زند."
+msgid "Add product costs to unlock Estimated Profit — FaraCart never invents a margin."
+msgstr "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — فراکارت هرگز حاشیه سود را حدس نمی‌زند."
 
 #: includes/Frontend/ProgressUI.php:492
 msgid "Add to cart"
@@ -1051,7 +1051,7 @@ msgid "Cost of goods field (_wc_cog_cost)"
 msgstr "فیلد بهای تمام‌شده (_wc_cog_cost)"
 
 #: includes/Admin/ProductCostField.php:113
-msgid "Cost per unit (Goal Cart)"
+msgid "Cost per unit (FaraCart)"
 msgstr "هزینهٔ هر واحد (هدف سبد خرید)"
 
 #: admin-app/src/routes/GoalPerformance.tsx:416
@@ -1241,12 +1241,12 @@ msgid "Customers are interacting with your goals, but no attributed purchases ha
 msgstr "مشتری‌ها با اهداف شما در تعامل هستند، اما در این بازهٔ زمانی خریدی مرتبط ثبت نشده است."
 
 #: admin-app/src/routes/RevenueOverview.tsx:105
-msgid "Customers interacting with Goal Cart spent %1$s less per order on average (observed impact)."
-msgstr "مشتریانی که با گل کارت تعامل داشتند، به‌طور میانگین %1$s کمتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
+msgid "Customers interacting with FaraCart spent %1$s less per order on average (observed impact)."
+msgstr "مشتریانی که با فراکارت تعامل داشتند، به‌طور میانگین %1$s کمتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
 
 #: admin-app/src/routes/RevenueOverview.tsx:100
-msgid "Customers interacting with Goal Cart spent %1$s more per order on average (observed impact)."
-msgstr "مشتریانی که با گل کارت تعامل داشتند، به‌طور میانگین %1$s بیشتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
+msgid "Customers interacting with FaraCart spent %1$s more per order on average (observed impact)."
+msgstr "مشتریانی که با فراکارت تعامل داشتند، به‌طور میانگین %1$s بیشتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
 
 #: admin-app/src/routes/GoalPerformance.tsx:532
 msgid "Customers who progressed or completed the goal before ordering are direct; exposure-only sessions are assisted."
@@ -1434,8 +1434,8 @@ msgid "Dismiss"
 msgstr "رد کردن"
 
 #: admin-app/src/routes/Dashboard.tsx:226
-msgid "Dismiss how Goal Cart works"
-msgstr "بستن توضیح طرز کار گل کارت"
+msgid "Dismiss how FaraCart works"
+msgstr "بستن توضیح طرز کار فراکارت"
 
 #: admin-app/src/routes/Settings.tsx:566
 msgid "Dismissible"
@@ -1550,8 +1550,8 @@ msgid "Enable"
 msgstr "فعال کردن"
 
 #: admin-app/src/routes/Settings.tsx:381
-msgid "Enable Goal Cart"
-msgstr "فعال کردن گل کارت"
+msgid "Enable FaraCart"
+msgstr "فعال کردن فراکارت"
 
 #: includes/Frontend/ProgressUI.php:883
 msgid "Ended"
@@ -1829,45 +1829,45 @@ msgstr "محاسبهٔ هدف"
 #: includes/Admin/Admin.php:114
 #: includes/Admin/ProductCostField.php:75
 #: includes/Admin/ProductCostField.php:106
-msgid "Goal Cart"
-msgstr "گل کارت"
+msgid "FaraCart"
+msgstr "فراکارت"
 
 #: includes/Frontend/ProgressUI.php:191
-msgid "Goal Cart Progress"
-msgstr "پیشرفت گل کارت"
+msgid "FaraCart Progress"
+msgstr "پیشرفت فراکارت"
 
 #: admin-app/src/routes/RevenueOverview.tsx:431
-msgid "Goal Cart Sales Performance"
-msgstr "عملکرد فروش گل کارت"
+msgid "FaraCart Sales Performance"
+msgstr "عملکرد فروش فراکارت"
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:210
-msgid "Goal Cart does not invent product costs."
-msgstr "گل کارت قیمت تمام‌شده را اختراع نمی‌کند."
+msgid "FaraCart does not invent product costs."
+msgstr "فراکارت قیمت تمام‌شده را اختراع نمی‌کند."
 
 #: admin-app/src/routes/Analytics.tsx:318
 #: admin-app/src/routes/RevenueOverview.tsx:141
-msgid "Goal Cart generated an estimated profit of %1$s after reward and shipping costs."
-msgstr "گل کارت پس از کسر هزینه‌های پاداش و ارسال، سود تخمینی %1$s ایجاد کرد."
+msgid "FaraCart generated an estimated profit of %1$s after reward and shipping costs."
+msgstr "فراکارت پس از کسر هزینه‌های پاداش و ارسال، سود تخمینی %1$s ایجاد کرد."
 
 #: admin-app/src/routes/RevenueOverview.tsx:83
-msgid "Goal Cart influenced %1$s purchases during this period."
-msgstr "گل کارت در این بازه بر %1$s خرید تأثیر گذاشت."
+msgid "FaraCart influenced %1$s purchases during this period."
+msgstr "فراکارت در این بازه بر %1$s خرید تأثیر گذاشت."
 
 #: includes/Compatibility.php:172
-msgid "Goal Cart is inactive because the site does not meet its requirements:"
-msgstr "گل کارت غیرفعال است، زیرا سایت الزامات آن را برآورده نمی‌کند:"
+msgid "FaraCart is inactive because the site does not meet its requirements:"
+msgstr "فراکارت غیرفعال است، زیرا سایت الزامات آن را برآورده نمی‌کند:"
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:110
-msgid "Goal Cart needs product cost data to estimate profit."
-msgstr "گل کارت برای برآورد سود به دادهٔ قیمت تمام‌شده نیاز دارد."
+msgid "FaraCart needs product cost data to estimate profit."
+msgstr "فراکارت برای برآورد سود به دادهٔ قیمت تمام‌شده نیاز دارد."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:23
-msgid "Goal Cart's product cost field"
-msgstr "فیلد قیمت تمام‌شده گل کارت"
+msgid "FaraCart's product cost field"
+msgstr "فیلد قیمت تمام‌شده فراکارت"
 
 #: includes/Admin/Admin.php:213
-msgid "Goal Cart:"
-msgstr "گل کارت:"
+msgid "FaraCart:"
+msgstr "فراکارت:"
 
 #: admin-app/src/routes/Analytics.tsx:736
 msgid "Goal Comparison"
@@ -2023,16 +2023,16 @@ msgid "How Estimated Profit becomes available"
 msgstr "چگونه سود تخمینی در دسترس می‌شود"
 
 #: admin-app/src/routes/Dashboard.tsx:232
-msgid "How Goal Cart works"
-msgstr "گل کارت چگونه کار می‌کند"
+msgid "How FaraCart works"
+msgstr "فراکارت چگونه کار می‌کند"
 
 #: admin-app/src/routes/Settings.tsx:419
 msgid "How completed goals grant rewards when several compete: combine them, grant only the highest-priority matching goal, or grant only the best reward. Per-goal exclusive flags and priorities are respected in every mode."
 msgstr "نحوهٔ اعطای پاداش اهداف تکمیل‌شده وقتی چند هدف رقابت می‌کنند: ترکیب آن‌ها، اعطای فقط به هدف منطبق با بالاترین اولویت، یا اعطای فقط بهترین پاداش. پرچم‌های انحصاری و اولویت‌های هر هدف در هر حالت رعایت می‌شوند."
 
 #: admin-app/src/routes/RevenueOverview.tsx:305
-msgid "How did Goal Cart perform? Sales attributed, purchased orders, average basket and estimated profit."
-msgstr "گل کارت چه عملکردی داشت؟ فروش منتسب، سفارش‌های خریداری‌شده، میانگین سبد و سود تخمینی."
+msgid "How did FaraCart perform? Sales attributed, purchased orders, average basket and estimated profit."
+msgstr "فراکارت چه عملکردی داشت؟ فروش منتسب، سفارش‌های خریداری‌شده، میانگین سبد و سود تخمینی."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:164
 #: admin-app/src/routes/RevenueOverview.tsx:673
@@ -2160,8 +2160,8 @@ msgid "Incremental margin at this threshold does not fully cover the reward cost
 msgstr "حاشیهٔ سود افزایشی در این آستانه هزینهٔ پاداش را به‌طور کامل پوشش نمی‌دهد."
 
 #: admin-app/src/routes/RevenueOverview.tsx:690
-msgid "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the Goal Cart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once."
-msgstr "فروش افزایشی همان فروش مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که اهداف ایجاد کرده‌اند. انتساب از مدل گل کارت پیروی می‌کند: اهداف پیشرفته/تکمیل‌شده مستقیم‌اند، اهداف فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
+msgid "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the FaraCart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once."
+msgstr "فروش افزایشی همان فروش مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که اهداف ایجاد کرده‌اند. انتساب از مدل فراکارت پیروی می‌کند: اهداف پیشرفته/تکمیل‌شده مستقیم‌اند، اهداف فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
 
 #: admin-app/src/routes/Analytics.tsx:859
 #: admin-app/src/routes/AttributionDashboard.tsx:141
@@ -2284,8 +2284,8 @@ msgid "Live preview"
 msgstr "پیش‌نمایش زنده"
 
 #: includes/Admin/Admin.php:233
-msgid "Loading Goal Cart…"
-msgstr "در حال بارگذاری گل کارت…"
+msgid "Loading FaraCart…"
+msgstr "در حال بارگذاری فراکارت…"
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:115
 msgid "Loading product…"
@@ -2629,12 +2629,12 @@ msgid "Observed impact"
 msgstr "تأثیر مشاهده‌شده"
 
 #: admin-app/src/routes/GoalPerformance.tsx:549
-msgid "Observed impact — incremental cart value relative to the baseline. It does not prove that Goal Cart caused the difference."
-msgstr "تأثیر مشاهده‌شده — ارزش افزایشی سبد نسبت به خط مبنا. ثابت نمی‌کند که گل کارت باعث این تفاوت شده است."
+msgid "Observed impact — incremental cart value relative to the baseline. It does not prove that FaraCart caused the difference."
+msgstr "تأثیر مشاهده‌شده — ارزش افزایشی سبد نسبت به خط مبنا. ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
 
 #: admin-app/src/routes/RevenueOverview.tsx:727
-msgid "Observed impact — this comparison does not prove that Goal Cart caused the difference."
-msgstr "تأثیر مشاهده‌شده — این مقایسه ثابت نمی‌کند که گل کارت باعث این تفاوت شده است."
+msgid "Observed impact — this comparison does not prove that FaraCart caused the difference."
+msgstr "تأثیر مشاهده‌شده — این مقایسه ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
 
 #: admin-app/src/routes/Goals.tsx:110
 msgid "Once"
@@ -2653,16 +2653,16 @@ msgid "Once customers interact with your Goals, performance data will appear her
 msgstr "وقتی مشتریان با اهداف شما تعامل کنند، داده‌های عملکرد اینجا نمایش داده می‌شوند."
 
 #: admin-app/src/routes/Analytics.tsx:562
-msgid "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit insights here."
-msgstr "به محض اینکه مشتریان با اهداف شما تعامل کنند، گل کارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
+msgid "Once customers start interacting with your goals, FaraCart will show purchases, sales and profit insights here."
+msgstr "به محض اینکه مشتریان با اهداف شما تعامل کنند، فراکارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
 
 #: admin-app/src/routes/GoalPerformance.tsx:660
-msgid "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit per goal here."
-msgstr "به محض اینکه مشتریان با اهداف شما تعامل کنند، گل کارت خرید، فروش و سود هر هدف را اینجا نشان می‌دهد."
+msgid "Once customers start interacting with your goals, FaraCart will show purchases, sales and profit per goal here."
+msgstr "به محض اینکه مشتریان با اهداف شما تعامل کنند، فراکارت خرید، فروش و سود هر هدف را اینجا نشان می‌دهد."
 
 #: admin-app/src/routes/RevenueOverview.tsx:340
-msgid "Once customers start interacting with your goals, Goal Cart will show sales, purchases and profit insights here."
-msgstr "به محض اینکه مشتریان با اهداف شما تعامل کنند، گل کارت فروش، خریدها و بینش‌های سود را اینجا نشان می‌دهد."
+msgid "Once customers start interacting with your goals, FaraCart will show sales, purchases and profit insights here."
+msgstr "به محض اینکه مشتریان با اهداف شما تعامل کنند، فراکارت فروش، خریدها و بینش‌های سود را اینجا نشان می‌دهد."
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:47
 msgid "One overall progress bar for the whole campaign, with a milestone counter and the rewards still on display."
@@ -2966,8 +2966,8 @@ msgid "Product cost data is not available — profit impact unavailable (revenue
 msgstr "دادهٔ قیمت تمام‌شده در دسترس نیست — تأثیر بر سود در دسترس نیست (تحلیل‌های صرفاً مبتنی بر فروش)."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:212
-msgid "Product cost must come from WooCommerce or your product-cost data. Goal Cart reads, in order:"
-msgstr "قیمت تمام‌شده باید از ووکامرس یا داده‌های قیمت تمام‌شده شما باشد. گل کارت به ترتیب می‌خواند:"
+msgid "Product cost must come from WooCommerce or your product-cost data. FaraCart reads, in order:"
+msgstr "قیمت تمام‌شده باید از ووکامرس یا داده‌های قیمت تمام‌شده شما باشد. فراکارت به ترتیب می‌خواند:"
 
 #: includes/Analytics/GoalRecommendationEngine.php:743
 msgid "Product margin data is not available — profit estimates are excluded."
@@ -3323,8 +3323,8 @@ msgid "Sales & Goal Performance"
 msgstr "فروش و عملکرد اهداف"
 
 #: admin-app/src/routes/RevenueOverview.tsx:365
-msgid "Sales Attributed to Goal Cart"
-msgstr "فروش منتسب به گل کارت"
+msgid "Sales Attributed to FaraCart"
+msgstr "فروش منتسب به فراکارت"
 
 #: admin-app/src/components/layout/navigation.ts:52
 #: admin-app/src/routes/RevenueOverview.tsx:304
@@ -3336,17 +3336,17 @@ msgid "Sales attributed"
 msgstr "فروش منتسب"
 
 #: admin-app/src/routes/Analytics.tsx:615
-msgid "Sales attributed to Goal Cart"
-msgstr "فروش منتسب به گل کارت"
+msgid "Sales attributed to FaraCart"
+msgstr "فروش منتسب به فراکارت"
 
 #: admin-app/src/routes/Analytics.tsx:193
 #: admin-app/src/routes/GoalPerformance.tsx:95
-msgid "Sales attributed to Goal Cart — the incremental order value driven by this goal."
-msgstr "فروش منتسب به گل کارت — ارزش افزایشی سفارش ناشی از این هدف."
+msgid "Sales attributed to FaraCart — the incremental order value driven by this goal."
+msgstr "فروش منتسب به فراکارت — ارزش افزایشی سفارش ناشی از این هدف."
 
 #: admin-app/src/routes/Analytics.tsx:702
-msgid "Sales generated after Goal Cart interaction."
-msgstr "فروش ایجادشده پس از تعامل با گل کارت."
+msgid "Sales generated after FaraCart interaction."
+msgstr "فروش ایجادشده پس از تعامل با فراکارت."
 
 #: admin-app/src/routes/Appearance.tsx:159
 msgid "Sample campaign"
@@ -3498,8 +3498,8 @@ msgid "Show campaign name"
 msgstr "نمایش نام کمپین"
 
 #: includes/Frontend/ProgressUI.php:194
-msgid "Show cart goals, progress and rewards (Goal Cart)."
-msgstr "اهداف سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (گل کارت)."
+msgid "Show cart goals, progress and rewards (FaraCart)."
+msgstr "اهداف سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (فراکارت)."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:320
 msgid "Show interaction details"
@@ -3845,8 +3845,8 @@ msgid "The discount never applies to these products."
 msgstr "این تخفیف هرگز روی این محصولات اعمال نمی‌شود."
 
 #: admin-app/src/routes/AttributionDashboard.tsx:88
-msgid "The funnel and the direct vs assisted models behind Goal Cart’s attributed revenue."
-msgstr "قیف و مدل‌های مستقیم در برابر کمکی پشت فروش منتسب گل کارت."
+msgid "The funnel and the direct vs assisted models behind FaraCart’s attributed revenue."
+msgstr "قیف و مدل‌های مستقیم در برابر کمکی پشت فروش منتسب فراکارت."
 
 #: includes/REST/GoalsController.php:222
 msgid "The goal could not be created."
@@ -3978,12 +3978,12 @@ msgid "The threshold shoppers need to reach."
 msgstr "آستانه‌ای که مشتریان باید به آن برسند."
 
 #: includes/Admin/ProductCostField.php:76
-msgid "The unit cost Goal Cart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown."
+msgid "The unit cost FaraCart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown."
 msgstr "هزینهٔ هر واحدی که هدف سبد خرید برای «سود تخمینی»، اقتصاد هدف و امتیازدهی حاشیهٔ سودِ پیشنهاد خرید به کار می‌برد. اگر نامشخص است خالی بگذارید."
 
 #: admin-app/src/routes/Analytics.tsx:901
-msgid "These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting."
-msgstr "این شاخص‌ها از مدل انتساب گل کارت استفاده می‌کنند — مستقیم در برابر کمکی، سفارش‌های متمایز، بدون شمارش دوبار."
+msgid "These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting."
+msgstr "این شاخص‌ها از مدل انتساب فراکارت استفاده می‌کنند — مستقیم در برابر کمکی، سفارش‌های متمایز، بدون شمارش دوبار."
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:103
 msgid "These products never count toward the goal, even when they would otherwise qualify."
@@ -4260,8 +4260,8 @@ msgid "Weight"
 msgstr "وزن"
 
 #: admin-app/src/routes/Dashboard.tsx
-msgid "Welcome to Goal Cart"
-msgstr "به گل کارت خوش آمدید"
+msgid "Welcome to FaraCart"
+msgstr "به فراکارت خوش آمدید"
 
 #: admin-app/src/routes/RevenueOverview.tsx:566
 msgid "What happened?"
@@ -4272,8 +4272,8 @@ msgid "What happens after customers see and complete your goals — purchases, s
 msgstr "پس از دیدن و تکمیل اهداف شما توسط مشتریان چه اتفاقی می‌افتد — خریدها، فروش و سود."
 
 #: admin-app/src/routes/Dashboard.tsx:151
-msgid "What is Goal Cart?"
-msgstr "گل کارت چیست؟"
+msgid "What is FaraCart?"
+msgstr "فراکارت چیست؟"
 
 #: admin-app/src/routes/GoalPerformance.tsx:220
 msgid "What target should this goal use — based on real store data."
@@ -4421,8 +4421,8 @@ msgstr "پس از هزینهٔ پاداش تخمینی %1$s"
 #: admin-app/src/routes/Analytics.tsx:599
 #: admin-app/src/routes/GoalPerformance.tsx:380
 #: admin-app/src/routes/RevenueOverview.tsx:401
-msgid "after Goal Cart interaction"
-msgstr "پس از تعامل با گل کارت"
+msgid "after FaraCart interaction"
+msgstr "پس از تعامل با فراکارت"
 
 #: includes/Analytics/UpsellRanker.php:1165
 msgid "almost exactly"

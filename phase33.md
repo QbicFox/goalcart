@@ -2,7 +2,7 @@
 
 ## Comprehensive Implementation Prompt
 
-You are working on the **Goal Cart WooCommerce plugin**.
+You are working on the **FaraCart WooCommerce plugin**.
 
 Your task is to fully implement **Phase 33 — Advanced V3 Revenue Optimization**.
 
@@ -22,7 +22,7 @@ Phase:
 ████████████████████ 100%
 ```
 
-The purpose of this phase is to transform Goal Cart from a simple goal/progress-bar plugin into a **data-driven revenue optimization engine for WooCommerce**.
+The purpose of this phase is to transform FaraCart from a simple goal/progress-bar plugin into a **data-driven revenue optimization engine for WooCommerce**.
 
 The system must not only display goals but also measure their financial impact, recommend optimal goal thresholds, and intelligently recommend upsell products.
 
@@ -41,7 +41,7 @@ Implement three major systems:
 The final system should answer:
 
 ```text
-How much additional revenue did Goal Cart generate?
+How much additional revenue did FaraCart generate?
 
 Which goal thresholds should this store use?
 
@@ -62,13 +62,13 @@ The architecture must however be extensible so AI/ML-based recommendations can b
 
 Before writing code:
 
-1. Inspect the entire existing Goal Cart plugin.
+1. Inspect the entire existing FaraCart plugin.
 2. Understand the current architecture.
 3. Reuse existing coding conventions.
 4. Reuse existing database abstractions where possible.
 5. Reuse existing React Admin architecture.
 6. Do not duplicate existing functionality.
-7. Do not break existing Goal Cart functionality.
+7. Do not break existing FaraCart functionality.
 8. Follow existing security conventions.
 9. Follow WordPress and WooCommerce coding standards.
 10. Make all analytics calculations timezone-aware.
@@ -128,7 +128,7 @@ Revenue Optimization
 
 ## 5.1 Goal View Tracking
 
-Track when a customer is exposed to a Goal Cart goal.
+Track when a customer is exposed to a FaraCart goal.
 
 Track:
 
@@ -332,7 +332,7 @@ based on the selected attribution model.
 
 ## Goal Assisted Revenue
 
-Calculate revenue from orders where Goal Cart played an assisting role.
+Calculate revenue from orders where FaraCart played an assisting role.
 
 ---
 
@@ -366,8 +366,8 @@ Total Order Revenue / Number of Orders
 Compare:
 
 ```text
-Before Goal Cart
-After Goal Cart
+Before FaraCart
+After FaraCart
 ```
 
 Where possible, also compare:
@@ -443,7 +443,7 @@ Net Revenue Impact:
 33,200,000
 ```
 
-Support reward cost calculations based on the existing Goal Cart reward implementation.
+Support reward cost calculations based on the existing FaraCart reward implementation.
 
 ---
 
@@ -1252,7 +1252,7 @@ rather than completely unrelated high-priced products.
 
 # 37. Frontend Integration
 
-Integrate Smart Upsell with existing Goal Cart frontend components.
+Integrate Smart Upsell with existing FaraCart frontend components.
 
 Possible UI:
 
@@ -1274,7 +1274,7 @@ Add one of these:
 + Add
 ```
 
-Do not redesign existing Goal Cart UI unnecessarily.
+Do not redesign existing FaraCart UI unnecessarily.
 
 Reuse existing components and styles where possible.
 
@@ -1818,7 +1818,7 @@ Readable
 Responsive
 RTL-compatible
 WooCommerce-friendly
-Consistent with existing Goal Cart React UI
+Consistent with existing FaraCart React UI
 ```
 
 Do not introduce a completely different design language.
@@ -2613,13 +2613,13 @@ Phase 33 is complete only when all of the following are true:
 * [x] No duplicate events
 * [x] Unit tests pass
 * [x] Integration tests pass
-* [x] Existing Goal Cart functionality remains intact
+* [x] Existing FaraCart functionality remains intact
 
 ---
 
 # 64. Final Expected Result
 
-After Phase 33, Goal Cart should evolve from:
+After Phase 33, FaraCart should evolve from:
 
 ```text
 A WooCommerce cart goal/progress plugin
@@ -2634,7 +2634,7 @@ A Revenue Optimization Engine
 The final system should allow a store owner to see:
 
 ```text
-How much revenue Goal Cart influenced
+How much revenue FaraCart influenced
 How much additional cart value it generated
 How much AOV changed
 How much rewards cost
@@ -2675,7 +2675,7 @@ as real production-ready functionality.
 
 Before changing any file:
 
-1. Inspect the existing Goal Cart architecture.
+1. Inspect the existing FaraCart architecture.
 2. Identify reusable services/components.
 3. Identify existing database tables.
 4. Identify existing REST APIs.

@@ -28,7 +28,7 @@ interface EntityAutocompleteProps {
 }
 
 /**
- * Debounced async picker backed by a Goal Cart search endpoint
+ * Debounced async picker backed by a FaraCart search endpoint
  * (`/search/products`, `/search/categories`, `/search/coupons`).
  *
  * - typing searches server-side (debounced, Phase 23: server-side search)

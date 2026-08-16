@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart analytics dashboard tests (P17-T01 Dashboard / P17-T02
+ * FaraCart analytics dashboard tests (P17-T01 Dashboard / P17-T02
  * Filters / P17-T03 Charts).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
@@ -52,7 +52,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Analytics\AnalyticsRepository;
 use GoalCart\Analytics\Tracker;

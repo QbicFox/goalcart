@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart — demo data seeder (manual-testing helper).
+ * FaraCart — demo data seeder (manual-testing helper).
  *
  * Seeds a realistic, fully-removable demo dataset so every revenue
  * dashboard (Sales Performance, Goal Conversion & Purchase Analysis,
@@ -52,7 +52,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Analytics\AttributionEngine;
 use GoalCart\Analytics\DailyAggregator;

@@ -1,4 +1,4 @@
-# Goal Cart Frontend
+# FaraCart Frontend
 
 This document covers both frontends:
 
@@ -565,7 +565,7 @@ appearance tokens, so what the admin sees matches the storefront 1:1.
 
 ---
 
-# Goal Cart React Admin App (Phase 8)
+# FaraCart React Admin App (Phase 8)
 
 The admin dashboard is a React + TypeScript SPA (Vite + MUI) mounted
 inside the WordPress admin at `#goalcart-admin` (see
@@ -692,7 +692,7 @@ it.
   not dismissible while busy).
 - `EmptyState` / `ErrorBoundary` — no-data and render-error panels.
 - `SnackbarProvider` — shared notifications (the reference renders a
-  local Snackbar per page; the shared provider is the Goal Cart
+  local Snackbar per page; the shared provider is the FaraCart
   foundation variant).
 
 ## Pages

@@ -1,5 +1,5 @@
 /**
- * Goal Cart storefront progress widgets (Phase 11).
+ * FaraCart storefront progress widgets (Phase 11).
  *
  * Vanilla JS, no build step — mirrors the reference plugin's frontend
  * convention (assets/js + a single inline window config + a
@@ -125,7 +125,7 @@
 			return fn();
 		} catch ( error ) {
 			if ( window.console && window.console.warn ) {
-				window.console.warn( 'Goal Cart frontend:', error );
+				window.console.warn( 'FaraCart frontend:', error );
 			}
 			return null;
 		}
@@ -536,7 +536,7 @@
 	 * Format a catalog price with the same settings as goal targets.
 	 *
 	 * The API keeps price_html for compatibility, but that value is
-	 * produced by WooCommerce and cannot reflect Goal Cart's currency
+	 * produced by WooCommerce and cannot reflect FaraCart's currency
 	 * display setting. Raw prices therefore win whenever available.
 	 *
 	 * @param {Object} item Catalog item.
@@ -1865,7 +1865,7 @@
 	/**
 	 * Template 4 — Product Recommendation + Goal (Concept 07). A gradient
 	 * progress header (title + remaining chip + bar) followed by the
-	 * goal's own recommended products (the existing Goal Cart / WooCommerce
+	 * goal's own recommended products (the existing FaraCart / WooCommerce
 	 * recommendation data) with add-to-cart buttons.
 	 *
 	 * @param {Object} goal     Progress goal entry.

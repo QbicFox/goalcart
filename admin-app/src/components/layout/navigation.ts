@@ -26,10 +26,10 @@ export interface NavSection {
 }
 
 /**
- * Goal Cart sidebar navigation (UICHANGES.md §4 information architecture).
+ * FaraCart sidebar navigation (UICHANGES.md §4 information architecture).
  *
  * Sales Performance is the single primary analytics destination — it
- * answers "is Goal Cart helping my store sell more profitably?" with
+ * answers "is FaraCart helping my store sell more profitably?" with
  * business outcomes. Optimization holds the two "what should I change?"
  * engines: Recommendations (choose better Goal targets) and Upsells
  * (which products to recommend).
@@ -41,7 +41,7 @@ export interface NavSection {
  */
 export const NAV_SECTIONS: NavSection[] = [
   {
-    title: __('Goal Cart', 'goalcart'),
+    title: __('FaraCart', 'goalcart'),
     items: [
       { path: '/dashboard', label: __('Dashboard', 'goalcart'), icon: DashboardIcon },
       { path: '/goals', label: __('Goals', 'goalcart'), icon: FlagIcon },

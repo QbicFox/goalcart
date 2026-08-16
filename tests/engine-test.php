@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart engine edge-case tests (P04-T05).
+ * FaraCart engine edge-case tests (P04-T05).
  *
  * Boots WordPress, then runs the GoalEngine against synthetic CartContext
  * snapshots — the engine is UI- and WooCommerce-independent, so every edge
@@ -37,7 +37,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Goals\CartContext;
 use GoalCart\Goals\Goal;

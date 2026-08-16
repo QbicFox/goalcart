@@ -1,6 +1,6 @@
 <?php
 /**
- * Uninstall handler for Goal Cart.
+ * Uninstall handler for FaraCart.
  *
  * Removes all plugin database tables and options when the plugin
  * is deleted from the WordPress admin.

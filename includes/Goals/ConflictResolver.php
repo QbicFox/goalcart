@@ -1,6 +1,6 @@
 <?php
 /**
- * Conflict & priority resolution for the Goal Cart engine.
+ * Conflict & priority resolution for the FaraCart engine.
  *
  * @package GoalCart
  */

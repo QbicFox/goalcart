@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart internationalization tests (Phase 27).
+ * FaraCart internationalization tests (Phase 27).
  *
  * Boots WordPress and verifies the translation posture end-to-end:
  *
@@ -58,7 +58,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Frontend\ProgressUI;
 use GoalCart\Settings\Settings;
@@ -84,7 +84,7 @@ function read_source( $path ) {
 }
 
 function php_files( $root ) {
-	$files = array( $root . '/goalcart.php' );
+	$files = array( $root . '/ravis-faracart.php' );
 
 	$iterator = new RecursiveIteratorIterator(
 		new RecursiveDirectoryIterator( $root . '/includes', FilesystemIterator::SKIP_DOTS )
@@ -120,7 +120,7 @@ function admin_sources( $root ) {
 // ---------------------------------------------------------------------------
 echo "\n== 1. Text domain ==\n";
 
-$header = read_source( $root . '/goalcart.php' );
+$header = read_source( $root . '/ravis-faracart.php' );
 check( 'plugin header declares Text Domain: goalcart', false !== strpos( $header, 'Text Domain:       goalcart' ) );
 check( 'plugin header declares Domain Path: /languages', false !== strpos( $header, 'Domain Path:       /languages' ) );
 check( 'languages directory exists', is_dir( $root . '/languages' ) );
@@ -377,7 +377,7 @@ $tmp_dir = sys_get_temp_dir() . '/goalcart-i18n-' . getmypid();	try {
 
 	$po = "msgid \"\"\n"
 		. "msgstr \"\"\n"
-		. "\"Project-Id-Version: Goal Cart 0.1.0\\n\"\n"
+		. "\"Project-Id-Version: FaraCart 0.1.0\\n\"\n"
 		. "\"Plural-Forms: nplurals=2; plural=(n > 1);\\n\"\n"
 		. "\"X-Domain: goalcart\\n\"\n"
 		. "\n"

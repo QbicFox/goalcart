@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart context for the Goal Cart engine.
+ * Cart context for the FaraCart engine.
  *
  * @package GoalCart
  */
@@ -174,7 +174,7 @@ final class CartContext {
 	 * tax is a cart-level refinement for Phase 6 (shipping is excluded
 	 * below anyway).
 	 *
-	 * Reward-loop safety (Phase 5): Goal Cart's own discount fees are
+	 * Reward-loop safety (Phase 5): FaraCart's own discount fees are
 	 * subtracted from the `total` basis, and passing `exclude_shipping`
 	 * removes shipping from `total` and `shipping_total`, so a reward can
 	 * never change the value it was granted on.
@@ -489,7 +489,7 @@ final class CartContext {
 	}
 
 	/**
-	 * Sum of Goal Cart's own (negative) discount fees in the cart.
+	 * Sum of FaraCart's own (negative) discount fees in the cart.
 	 *
 	 * @param \WC_Cart $cart Live cart.
 	 * @return float Positive magnitude of the own fees (0 when none).

@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal repository for the Goal Cart engine.
+ * Goal repository for the FaraCart engine.
  *
  * @package GoalCart
  */

@@ -1,8 +1,8 @@
 {
-  "name": "goalcart-admin",
+  "name": "faracart-admin",
   "version": "0.1.0",
   "private": true,
-  "description": "Goal Cart admin panel — React SPA (Vite + TypeScript + MUI) mounted inside WP admin.",
+  "description": "FaraCart admin panel — React SPA (Vite + TypeScript + MUI) mounted inside WP admin.",
   "type": "module",
   "engines": {
     "node": ">=20.19.0"

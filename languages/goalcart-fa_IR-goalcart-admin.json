@@ -154,8 +154,8 @@
             "AND (all children required)": [
                 "و (همهٔ زیرشرط‌ها الزامی)"
             ],
-            "AOV comparisons are observed impact — they do not prove that Goal Cart caused the difference.": [
-                "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاهده‌شده است — ثابت نمی‌کند که گل کارت باعث این تفاوت شده است."
+            "AOV comparisons are observed impact — they do not prove that FaraCart caused the difference.": [
+                "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاهده‌شده است — ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
             ],
             "AOV ratio": [
                 "نسبت به میانگین ارزش سفارش"
@@ -196,11 +196,11 @@
             "Add product cost data to estimate profitability.": [
                 "برای برآورد سودآوری، دادهٔ قیمت تمام‌شده را اضافه کنید."
             ],
-            "Add product cost data to see the estimated profit of Goal Cart.": [
-                "برای دیدن سود تخمینی گل کارت، دادهٔ قیمت تمام‌شده را اضافه کنید."
+            "Add product cost data to see the estimated profit of FaraCart.": [
+                "برای دیدن سود تخمینی فراکارت، دادهٔ قیمت تمام‌شده را اضافه کنید."
             ],
-            "Add product costs to unlock Estimated Profit — Goal Cart never invents a margin.": [
-                "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — گل کارت هرگز حاشیه سود را حدس نمی‌زند."
+            "Add product costs to unlock Estimated Profit — FaraCart never invents a margin.": [
+                "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — فراکارت هرگز حاشیه سود را حدس نمی‌زند."
             ],
             "Add to cart": [
                 "افزودن به سبد خرید"
@@ -661,7 +661,7 @@
             "Cost of goods field (_wc_cog_cost)": [
                 "فیلد بهای تمام‌شده (_wc_cog_cost)"
             ],
-            "Cost per unit (Goal Cart)": [
+            "Cost per unit (FaraCart)": [
                 "هزینهٔ هر واحد (هدف سبد خرید)"
             ],
             "Costs": [
@@ -790,11 +790,11 @@
             "Customers are interacting with your goals, but no attributed purchases have been recorded for this period.": [
                 "مشتری‌ها با اهداف شما در تعامل هستند، اما در این بازهٔ زمانی خریدی مرتبط ثبت نشده است."
             ],
-            "Customers interacting with Goal Cart spent %1$s less per order on average (observed impact).": [
-                "مشتریانی که با گل کارت تعامل داشتند، به‌طور میانگین %1$s کمتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
+            "Customers interacting with FaraCart spent %1$s less per order on average (observed impact).": [
+                "مشتریانی که با فراکارت تعامل داشتند، به‌طور میانگین %1$s کمتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
             ],
-            "Customers interacting with Goal Cart spent %1$s more per order on average (observed impact).": [
-                "مشتریانی که با گل کارت تعامل داشتند، به‌طور میانگین %1$s بیشتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
+            "Customers interacting with FaraCart spent %1$s more per order on average (observed impact).": [
+                "مشتریانی که با فراکارت تعامل داشتند، به‌طور میانگین %1$s بیشتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
             ],
             "Customers who progressed or completed the goal before ordering are direct; exposure-only sessions are assisted.": [
                 "مشتریانی که پیش از سفارش به هدف پیشرفت کردند یا آن را تکمیل کردند، مستقیم هستند؛ نشست‌های فقط-مشاهده، کمکی هستند."
@@ -916,8 +916,8 @@
             "Dismiss": [
                 "رد کردن"
             ],
-            "Dismiss how Goal Cart works": [
-                "بستن توضیح طرز کار گل کارت"
+            "Dismiss how FaraCart works": [
+                "بستن توضیح طرز کار فراکارت"
             ],
             "Dismissible": [
                 "قابل بستن"
@@ -994,8 +994,8 @@
             "Enable": [
                 "فعال کردن"
             ],
-            "Enable Goal Cart": [
-                "فعال کردن گل کارت"
+            "Enable FaraCart": [
+                "فعال کردن فراکارت"
             ],
             "Ended": [
                 "پایان‌یافته"
@@ -1165,35 +1165,35 @@
             "Goal Calculation": [
                 "محاسبهٔ هدف"
             ],
-            "Goal Cart": [
-                "گل کارت"
+            "FaraCart": [
+                "فراکارت"
             ],
-            "Goal Cart Progress": [
-                "پیشرفت گل کارت"
+            "FaraCart Progress": [
+                "پیشرفت فراکارت"
             ],
-            "Goal Cart Sales Performance": [
-                "عملکرد فروش گل کارت"
+            "FaraCart Sales Performance": [
+                "عملکرد فروش فراکارت"
             ],
-            "Goal Cart does not invent product costs.": [
-                "گل کارت قیمت تمام‌شده را اختراع نمی‌کند."
+            "FaraCart does not invent product costs.": [
+                "فراکارت قیمت تمام‌شده را اختراع نمی‌کند."
             ],
-            "Goal Cart generated an estimated profit of %1$s after reward and shipping costs.": [
-                "گل کارت پس از کسر هزینه‌های پاداش و ارسال، سود تخمینی %1$s ایجاد کرد."
+            "FaraCart generated an estimated profit of %1$s after reward and shipping costs.": [
+                "فراکارت پس از کسر هزینه‌های پاداش و ارسال، سود تخمینی %1$s ایجاد کرد."
             ],
-            "Goal Cart influenced %1$s purchases during this period.": [
-                "گل کارت در این بازه بر %1$s خرید تأثیر گذاشت."
+            "FaraCart influenced %1$s purchases during this period.": [
+                "فراکارت در این بازه بر %1$s خرید تأثیر گذاشت."
             ],
-            "Goal Cart is inactive because the site does not meet its requirements:": [
-                "گل کارت غیرفعال است، زیرا سایت الزامات آن را برآورده نمی‌کند:"
+            "FaraCart is inactive because the site does not meet its requirements:": [
+                "فراکارت غیرفعال است، زیرا سایت الزامات آن را برآورده نمی‌کند:"
             ],
-            "Goal Cart needs product cost data to estimate profit.": [
-                "گل کارت برای برآورد سود به دادهٔ قیمت تمام‌شده نیاز دارد."
+            "FaraCart needs product cost data to estimate profit.": [
+                "فراکارت برای برآورد سود به دادهٔ قیمت تمام‌شده نیاز دارد."
             ],
-            "Goal Cart's product cost field": [
-                "فیلد قیمت تمام‌شده گل کارت"
+            "FaraCart's product cost field": [
+                "فیلد قیمت تمام‌شده فراکارت"
             ],
-            "Goal Cart:": [
-                "گل کارت:"
+            "FaraCart:": [
+                "فراکارت:"
             ],
             "Goal Comparison": [
                 "مقایسهٔ اهداف"
@@ -1303,14 +1303,14 @@
             "How Estimated Profit becomes available": [
                 "چگونه سود تخمینی در دسترس می‌شود"
             ],
-            "How Goal Cart works": [
-                "گل کارت چگونه کار می‌کند"
+            "How FaraCart works": [
+                "فراکارت چگونه کار می‌کند"
             ],
             "How completed goals grant rewards when several compete: combine them, grant only the highest-priority matching goal, or grant only the best reward. Per-goal exclusive flags and priorities are respected in every mode.": [
                 "نحوهٔ اعطای پاداش اهداف تکمیل‌شده وقتی چند هدف رقابت می‌کنند: ترکیب آن‌ها، اعطای فقط به هدف منطبق با بالاترین اولویت، یا اعطای فقط بهترین پاداش. پرچم‌های انحصاری و اولویت‌های هر هدف در هر حالت رعایت می‌شوند."
             ],
-            "How did Goal Cart perform? Sales attributed, purchased orders, average basket and estimated profit.": [
-                "گل کارت چه عملکردی داشت؟ فروش منتسب، سفارش‌های خریداری‌شده، میانگین سبد و سود تخمینی."
+            "How did FaraCart perform? Sales attributed, purchased orders, average basket and estimated profit.": [
+                "فراکارت چه عملکردی داشت؟ فروش منتسب، سفارش‌های خریداری‌شده، میانگین سبد و سود تخمینی."
             ],
             "How is this calculated?": [
                 "این چگونه محاسبه می‌شود؟"
@@ -1399,8 +1399,8 @@
             "Incremental margin at this threshold does not fully cover the reward cost.": [
                 "حاشیهٔ سود افزایشی در این آستانه هزینهٔ پاداش را به‌طور کامل پوشش نمی‌دهد."
             ],
-            "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the Goal Cart model: progressed\/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once.": [
-                "فروش افزایشی همان فروش مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که اهداف ایجاد کرده‌اند. انتساب از مدل گل کارت پیروی می‌کند: اهداف پیشرفته\/تکمیل‌شده مستقیم‌اند، اهداف فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
+            "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the FaraCart model: progressed\/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once.": [
+                "فروش افزایشی همان فروش مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که اهداف ایجاد کرده‌اند. انتساب از مدل فراکارت پیروی می‌کند: اهداف پیشرفته\/تکمیل‌شده مستقیم‌اند، اهداف فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
             ],
             "Influenced sales": [
                 "فروش تأثیرپذیرفته"
@@ -1480,8 +1480,8 @@
             "Live preview": [
                 "پیش‌نمایش زنده"
             ],
-            "Loading Goal Cart…": [
-                "در حال بارگذاری گل کارت…"
+            "Loading FaraCart…": [
+                "در حال بارگذاری فراکارت…"
             ],
             "Loading product…": [
                 "در حال بارگذاری محصول…"
@@ -1723,11 +1723,11 @@
             "Observed impact": [
                 "تأثیر مشاهده‌شده"
             ],
-            "Observed impact — incremental cart value relative to the baseline. It does not prove that Goal Cart caused the difference.": [
-                "تأثیر مشاهده‌شده — ارزش افزایشی سبد نسبت به خط مبنا. ثابت نمی‌کند که گل کارت باعث این تفاوت شده است."
+            "Observed impact — incremental cart value relative to the baseline. It does not prove that FaraCart caused the difference.": [
+                "تأثیر مشاهده‌شده — ارزش افزایشی سبد نسبت به خط مبنا. ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
             ],
-            "Observed impact — this comparison does not prove that Goal Cart caused the difference.": [
-                "تأثیر مشاهده‌شده — این مقایسه ثابت نمی‌کند که گل کارت باعث این تفاوت شده است."
+            "Observed impact — this comparison does not prove that FaraCart caused the difference.": [
+                "تأثیر مشاهده‌شده — این مقایسه ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
             ],
             "Once": [
                 "یک بار"
@@ -1741,14 +1741,14 @@
             "Once customers interact with your Goals, performance data will appear here.": [
                 "وقتی مشتریان با اهداف شما تعامل کنند، داده‌های عملکرد اینجا نمایش داده می‌شوند."
             ],
-            "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit insights here.": [
-                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گل کارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
+            "Once customers start interacting with your goals, FaraCart will show purchases, sales and profit insights here.": [
+                "به محض اینکه مشتریان با اهداف شما تعامل کنند، فراکارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
             ],
-            "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit per goal here.": [
-                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گل کارت خرید، فروش و سود هر هدف را اینجا نشان می‌دهد."
+            "Once customers start interacting with your goals, FaraCart will show purchases, sales and profit per goal here.": [
+                "به محض اینکه مشتریان با اهداف شما تعامل کنند، فراکارت خرید، فروش و سود هر هدف را اینجا نشان می‌دهد."
             ],
-            "Once customers start interacting with your goals, Goal Cart will show sales, purchases and profit insights here.": [
-                "به محض اینکه مشتریان با اهداف شما تعامل کنند، گل کارت فروش، خریدها و بینش‌های سود را اینجا نشان می‌دهد."
+            "Once customers start interacting with your goals, FaraCart will show sales, purchases and profit insights here.": [
+                "به محض اینکه مشتریان با اهداف شما تعامل کنند، فراکارت فروش، خریدها و بینش‌های سود را اینجا نشان می‌دهد."
             ],
             "One overall progress bar for the whole campaign, with a milestone counter and the rewards still on display.": [
                 "یک نوار پیشرفت کلی برای کل کمپین، همراه با شمارندهٔ نقاط عطف و پاداش‌های در حال نمایش."
@@ -1957,8 +1957,8 @@
             "Product cost data is not available — profit impact unavailable (revenue-only analytics).": [
                 "دادهٔ قیمت تمام‌شده در دسترس نیست — تأثیر بر سود در دسترس نیست (تحلیل‌های صرفاً مبتنی بر فروش)."
             ],
-            "Product cost must come from WooCommerce or your product-cost data. Goal Cart reads, in order:": [
-                "قیمت تمام‌شده باید از ووکامرس یا داده‌های قیمت تمام‌شده شما باشد. گل کارت به ترتیب می‌خواند:"
+            "Product cost must come from WooCommerce or your product-cost data. FaraCart reads, in order:": [
+                "قیمت تمام‌شده باید از ووکامرس یا داده‌های قیمت تمام‌شده شما باشد. فراکارت به ترتیب می‌خواند:"
             ],
             "Product margin data is not available — profit estimates are excluded.": [
                 "دادهٔ حاشیهٔ سود محصول در دسترس نیست — تخمین سود حذف شد."
@@ -2194,8 +2194,8 @@
             "Sales & Goal Performance": [
                 "فروش و عملکرد اهداف"
             ],
-            "Sales Attributed to Goal Cart": [
-                "فروش منتسب به گل کارت"
+            "Sales Attributed to FaraCart": [
+                "فروش منتسب به فراکارت"
             ],
             "Sales Performance": [
                 "عملکرد فروش"
@@ -2203,14 +2203,14 @@
             "Sales attributed": [
                 "فروش منتسب"
             ],
-            "Sales attributed to Goal Cart": [
-                "فروش منتسب به گل کارت"
+            "Sales attributed to FaraCart": [
+                "فروش منتسب به فراکارت"
             ],
-            "Sales attributed to Goal Cart — the incremental order value driven by this goal.": [
-                "فروش منتسب به گل کارت — ارزش افزایشی سفارش ناشی از این هدف."
+            "Sales attributed to FaraCart — the incremental order value driven by this goal.": [
+                "فروش منتسب به فراکارت — ارزش افزایشی سفارش ناشی از این هدف."
             ],
-            "Sales generated after Goal Cart interaction.": [
-                "فروش ایجادشده پس از تعامل با گل کارت."
+            "Sales generated after FaraCart interaction.": [
+                "فروش ایجادشده پس از تعامل با فراکارت."
             ],
             "Sample campaign": [
                 "کمپین نمونه"
@@ -2308,8 +2308,8 @@
             "Show campaign name": [
                 "نمایش نام کمپین"
             ],
-            "Show cart goals, progress and rewards (Goal Cart).": [
-                "اهداف سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (گل کارت)."
+            "Show cart goals, progress and rewards (FaraCart).": [
+                "اهداف سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (فراکارت)."
             ],
             "Show interaction details": [
                 "نمایش جزئیات تعامل"
@@ -2548,8 +2548,8 @@
             "The discount never applies to these products.": [
                 "این تخفیف هرگز روی این محصولات اعمال نمی‌شود."
             ],
-            "The funnel and the direct vs assisted models behind Goal Cart’s attributed revenue.": [
-                "قیف و مدل‌های مستقیم در برابر کمکی پشت فروش منتسب گل کارت."
+            "The funnel and the direct vs assisted models behind FaraCart’s attributed revenue.": [
+                "قیف و مدل‌های مستقیم در برابر کمکی پشت فروش منتسب فراکارت."
             ],
             "The goal could not be created.": [
                 "ایجاد هدف ممکن نشد."
@@ -2644,11 +2644,11 @@
             "The threshold shoppers need to reach.": [
                 "آستانه‌ای که مشتریان باید به آن برسند."
             ],
-            "The unit cost Goal Cart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown.": [
+            "The unit cost FaraCart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown.": [
                 "هزینهٔ هر واحدی که هدف سبد خرید برای «سود تخمینی»، اقتصاد هدف و امتیازدهی حاشیهٔ سودِ پیشنهاد خرید به کار می‌برد. اگر نامشخص است خالی بگذارید."
             ],
-            "These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting.": [
-                "این شاخص‌ها از مدل انتساب گل کارت استفاده می‌کنند — مستقیم در برابر کمکی، سفارش‌های متمایز، بدون شمارش دوبار."
+            "These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting.": [
+                "این شاخص‌ها از مدل انتساب فراکارت استفاده می‌کنند — مستقیم در برابر کمکی، سفارش‌های متمایز، بدون شمارش دوبار."
             ],
             "These products never count toward the goal, even when they would otherwise qualify.": [
                 "این محصولات هرگز به سمت هدف محاسبه نمی‌شوند، حتی وقتی در غیر این صورت واجد شرایط باشند."
@@ -2845,8 +2845,8 @@
             "Weight": [
                 "وزن"
             ],
-            "Welcome to Goal Cart": [
-                "به گل کارت خوش آمدید"
+            "Welcome to FaraCart": [
+                "به فراکارت خوش آمدید"
             ],
             "What happened?": [
                 "چه اتفاقی افتاد؟"
@@ -2854,8 +2854,8 @@
             "What happens after customers see and complete your goals — purchases, sales and profit.": [
                 "پس از دیدن و تکمیل اهداف شما توسط مشتریان چه اتفاقی می‌افتد — خریدها، فروش و سود."
             ],
-            "What is Goal Cart?": [
-                "گل کارت چیست؟"
+            "What is FaraCart?": [
+                "فراکارت چیست؟"
             ],
             "What target should this goal use — based on real store data.": [
                 "این هدف باید از کدام آستانه استفاده کند — بر اساس داده‌های واقعی فروشگاه."
@@ -2962,8 +2962,8 @@
             "after %1$s estimated reward cost": [
                 "پس از هزینهٔ پاداش تخمینی %1$s"
             ],
-            "after Goal Cart interaction": [
-                "پس از تعامل با گل کارت"
+            "after FaraCart interaction": [
+                "پس از تعامل با فراکارت"
             ],
             "almost exactly": [
                 "تقریباً دقیقاً"

@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart REST cart-initialization regression tests.
+ * FaraCart REST cart-initialization regression tests.
  *
  * Database-independent reproduction of the custom REST lifecycle where
  * WooCommerce has a session-backed cart but has not initialized WC()->cart.

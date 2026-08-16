@@ -20,7 +20,7 @@ export interface RequestOptions extends Omit<RequestInit, 'headers'> {
 }
 
 /**
- * Fetch helper for the Goal Cart REST namespace.
+ * Fetch helper for the FaraCart REST namespace.
  *
  * Sends the WordPress REST nonce (`X-WP-Nonce`) on every request so the
  * backend authenticates the current admin user (Phase 2 nonce strategy),
@@ -52,7 +52,7 @@ export async function apiFetch<T>(
   } catch (error) {
     throw new ApiError(
       0,
-      'Network error while contacting the Goal Cart API.',
+      'Network error while contacting the FaraCart API.',
       'network_error',
       error
     );

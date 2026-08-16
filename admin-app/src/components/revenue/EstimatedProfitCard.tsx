@@ -21,7 +21,7 @@ import type { CostCoverage, CostSource, ProfitDetails, ProfitReasonCode } from '
 
 /** User-facing labels for the cost sources the estimator consults (§10). */
 const SOURCE_LABELS: Record<CostSource, string> = {
-  _goalcart_product_cost: __("Goal Cart's product cost field", 'goalcart'),
+  _goalcart_product_cost: __("FaraCart's product cost field", 'goalcart'),
   _cost: __('WooCommerce product cost field (_cost)', 'goalcart'),
   _wc_cog_cost: __('Cost of goods field (_wc_cog_cost)', 'goalcart'),
   goalcart_product_cost: __('The goalcart_product_cost filter', 'goalcart'),
@@ -113,7 +113,7 @@ export default function EstimatedProfitCard({
               : __('Estimated, not guaranteed', 'goalcart')
             : noDataYet
               ? __('Not enough attributed order data yet.', 'goalcart')
-              : __('Goal Cart needs product cost data to estimate profit.', 'goalcart')}
+              : __('FaraCart needs product cost data to estimate profit.', 'goalcart')}
         </Typography>
 
         {isNegative && (
@@ -213,10 +213,10 @@ export default function EstimatedProfitCard({
             </AccordionSummary>
             <AccordionDetails sx={{ pt: 0 }}>
               <Stack spacing={0.75}>
-                <Typography variant="body2">{__('Goal Cart does not invent product costs.', 'goalcart')}</Typography>
+                <Typography variant="body2">{__('FaraCart does not invent product costs.', 'goalcart')}</Typography>
                 <Typography variant="body2">
                   {__(
-                    'Product cost must come from WooCommerce or your product-cost data. Goal Cart reads, in order:',
+                    'Product cost must come from WooCommerce or your product-cost data. FaraCart reads, in order:',
                     'goalcart'
                   )}
                 </Typography>

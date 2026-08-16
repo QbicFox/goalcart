@@ -1,6 +1,6 @@
 {
-    "name": "goalcart/goalcart",
-    "description": "Increase average order value by showing cart goals, progress bars, rewards, milestones, and smart product suggestions for WooCommerce.",
+    "name": "ravis/faracart",
+    "description": "FaraCart increases average order value by showing cart goals, progress bars, rewards, milestones, and smart product suggestions for WooCommerce.",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "keywords": [

@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart WooCommerce compatibility tests (P19-T01 / P19-T02).
+ * FaraCart WooCommerce compatibility tests (P19-T01 / P19-T02).
  *
  * Boots WordPress + WooCommerce and verifies the Phase 19 must-test matrix
  * against the installed WooCommerce version:
@@ -53,7 +53,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Goals\CartContext;
 use GoalCart\Goals\Goal;
@@ -274,7 +274,7 @@ $declared = false;
 if ( $features_api ) {
 	$compat = \Automattic\WooCommerce\Utilities\FeaturesUtil::get_compatible_plugins_for_feature( 'custom_order_tables' );
 	foreach ( (array) $compat as $bucket ) {
-		if ( in_array( 'goalcart/goalcart.php', (array) $bucket, true ) ) {
+		if ( in_array( 'ravis-faracart/ravis-faracart.php', (array) $bucket, true ) ) {
 			$declared = true;
 			break;
 		}

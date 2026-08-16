@@ -1,14 +1,14 @@
-# Copyright (C) 2026 Goal Cart Contributors
-# This file is distributed under the same license as the Goal Cart plugin (GPL-2.0-or-later).
+# Copyright (C) 2026 FaraCart Contributors
+# This file is distributed under the same license as the FaraCart plugin (GPL-2.0-or-later).
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Goal Cart 0.1.0\n"
-"Report-Msgid-Bugs-To: https://goalcart.com/support\n"
+"Project-Id-Version: FaraCart 0.1.0\n"
+"Report-Msgid-Bugs-To: https://faracart.com/support\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-15T14:49:15Z\n"
+"POT-Creation-Date: 2026-08-16T09:02:40Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -26,7 +26,7 @@ msgstr ""
 msgid "% off the eligible cart value"
 msgstr ""
 
-#: admin-app/src/components/CampaignPreviewDialog.tsx:141
+#: admin-app/src/components/CampaignPreviewDialog.tsx:160
 msgid "%1$d/%2$d milestones"
 msgstr ""
 
@@ -101,7 +101,7 @@ msgstr ""
 msgid "%s completion rate"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:982
+#: includes/Frontend/ProgressUI.php:970
 msgid "%s is active"
 msgstr ""
 
@@ -110,7 +110,7 @@ msgid "%s is your top performer"
 msgstr ""
 
 #: admin-app/src/templates/renderers/goalShared.tsx:30
-#: includes/Frontend/ProgressUI.php:974
+#: includes/Frontend/ProgressUI.php:962
 msgid "%s left"
 msgstr ""
 
@@ -207,7 +207,7 @@ msgid "AND (all children required)"
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:642
-msgid "AOV comparisons are observed impact — they do not prove that Goal Cart caused the difference."
+msgid "AOV comparisons are observed impact — they do not prove that FaraCart caused the difference."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:160
@@ -239,12 +239,12 @@ msgstr ""
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:91
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:119
 #: admin-app/src/templates/renderers/goalShared.tsx:317
-#: includes/Frontend/ProgressUI.php:975
+#: includes/Frontend/ProgressUI.php:963
 msgid "Add"
 msgstr ""
 
 #: admin-app/src/templates/renderers/goalShared.tsx:39
-#: includes/Frontend/ProgressUI.php:976
+#: includes/Frontend/ProgressUI.php:964
 msgid "Add %s more"
 msgstr ""
 
@@ -290,15 +290,15 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:332
 #: admin-app/src/routes/RevenueOverview.tsx:149
-msgid "Add product cost data to see the estimated profit of Goal Cart."
+msgid "Add product cost data to see the estimated profit of FaraCart."
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:111
-msgid "Add product costs to unlock Estimated Profit — Goal Cart never invents a margin."
+msgid "Add product costs to unlock Estimated Profit — FaraCart never invents a margin."
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:103
-#: includes/Frontend/ProgressUI.php:979
+#: includes/Frontend/ProgressUI.php:967
 msgid "Add these products to reach your goal faster:"
 msgstr ""
 
@@ -414,7 +414,7 @@ msgstr ""
 msgid "Allowed shipping zones"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:985
+#: includes/Frontend/ProgressUI.php:973
 msgid "Almost there!"
 msgstr ""
 
@@ -578,7 +578,7 @@ msgstr ""
 msgid "Attribution window"
 msgstr ""
 
-#: admin-app/src/components/CampaignPreviewDialog.tsx:100
+#: admin-app/src/components/CampaignPreviewDialog.tsx:119
 #: admin-app/src/components/preview/PreviewControls.tsx:124
 msgid "Auto"
 msgstr ""
@@ -839,7 +839,7 @@ msgstr ""
 msgid "Campaign editor"
 msgstr ""
 
-#: admin-app/src/components/CampaignPreviewDialog.tsx:107
+#: admin-app/src/components/CampaignPreviewDialog.tsx:126
 msgid "Campaign preview"
 msgstr ""
 
@@ -1055,7 +1055,7 @@ msgstr ""
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:59
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:82
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:86
-#: includes/Frontend/ProgressUI.php:980
+#: includes/Frontend/ProgressUI.php:968
 msgid "Completed"
 msgstr ""
 
@@ -1128,7 +1128,7 @@ msgid "Conflict resolution"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:55
-#: includes/Frontend/ProgressUI.php:986
+#: includes/Frontend/ProgressUI.php:974
 msgid "Congratulations!"
 msgstr ""
 
@@ -1189,7 +1189,7 @@ msgid "Cost of goods field (_wc_cog_cost)"
 msgstr ""
 
 #: includes/Admin/ProductCostField.php:113
-msgid "Cost per unit (Goal Cart)"
+msgid "Cost per unit (FaraCart)"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:473
@@ -1228,7 +1228,7 @@ msgstr ""
 msgid "Could not load the goals."
 msgstr ""
 
-#: admin-app/src/components/CampaignPreviewDialog.tsx:154
+#: admin-app/src/components/CampaignPreviewDialog.tsx:173
 #: admin-app/src/components/GoalPreviewDialog.tsx:139
 msgid "Could not load the preview."
 msgstr ""
@@ -1253,7 +1253,7 @@ msgstr ""
 msgid "Could not record the event."
 msgstr ""
 
-#: includes/REST/SettingsController.php:206
+#: includes/REST/SettingsController.php:207
 msgid "Could not save the settings. Please try again."
 msgstr ""
 
@@ -1270,7 +1270,7 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:43
 #: admin-app/src/routes/Goals.tsx:48
 #: admin-app/src/templates/rewardLabel.ts:12
-#: includes/Frontend/ProgressUI.php:963
+#: includes/Frontend/ProgressUI.php:951
 #: includes/Goals/MessageEngine.php:329
 msgid "Coupon"
 msgstr ""
@@ -1368,11 +1368,11 @@ msgid "Customers are interacting with your goals, but no attributed purchases ha
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:105
-msgid "Customers interacting with Goal Cart spent %1$s less per order on average (observed impact)."
+msgid "Customers interacting with FaraCart spent %1$s less per order on average (observed impact)."
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:100
-msgid "Customers interacting with Goal Cart spent %1$s more per order on average (observed impact)."
+msgid "Customers interacting with FaraCart spent %1$s more per order on average (observed impact)."
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:609
@@ -1555,7 +1555,7 @@ msgid "Discounted subtotal"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:349
-#: includes/Frontend/ProgressUI.php:968
+#: includes/Frontend/ProgressUI.php:956
 msgid "Dismiss"
 msgstr ""
 
@@ -1672,10 +1672,10 @@ msgid "Enable"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:386
-msgid "Enable Goal Cart"
+msgid "Enable FaraCart"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:965
+#: includes/Frontend/ProgressUI.php:953
 msgid "Ended"
 msgstr ""
 
@@ -1684,7 +1684,7 @@ msgstr ""
 msgid "Ends at"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:964
+#: includes/Frontend/ProgressUI.php:952
 msgid "Ends in"
 msgstr ""
 
@@ -1804,7 +1804,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:49
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:67
-#: includes/Frontend/ProgressUI.php:983
+#: includes/Frontend/ProgressUI.php:971
 msgid "Expired"
 msgstr ""
 
@@ -1819,8 +1819,54 @@ msgstr ""
 msgid "Extra CSS class"
 msgstr ""
 
+#: admin-app/src/components/layout/AdminLayout.tsx:354
+#: admin-app/src/components/layout/navigation.ts:44
+#: includes/Admin/Admin.php:113
+#: includes/Admin/Admin.php:114
+#: includes/Admin/ProductCostField.php:75
+#: includes/Admin/ProductCostField.php:106
+msgid "FaraCart"
+msgstr ""
+
+#: includes/Frontend/ProgressUI.php:208
+msgid "FaraCart Progress"
+msgstr ""
+
+#: admin-app/src/routes/RevenueOverview.tsx:421
+msgid "FaraCart Sales Performance"
+msgstr ""
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:216
+msgid "FaraCart does not invent product costs."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:318
+#: admin-app/src/routes/RevenueOverview.tsx:141
+msgid "FaraCart generated an estimated profit of %1$s after reward and shipping costs."
+msgstr ""
+
+#: admin-app/src/routes/RevenueOverview.tsx:83
+msgid "FaraCart influenced %1$s purchases during this period."
+msgstr ""
+
+#: includes/Compatibility.php:172
+msgid "FaraCart is inactive because the site does not meet its requirements:"
+msgstr ""
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:116
+msgid "FaraCart needs product cost data to estimate profit."
+msgstr ""
+
+#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:24
+msgid "FaraCart's product cost field"
+msgstr ""
+
+#: includes/Admin/Admin.php:213
+msgid "FaraCart:"
+msgstr ""
+
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:184
-#: includes/Frontend/ProgressUI.php:988
+#: includes/Frontend/ProgressUI.php:976
 msgid "Finish today — your reward is waiting"
 msgstr ""
 
@@ -1847,7 +1893,7 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:41
 #: admin-app/src/routes/Goals.tsx:46
 #: admin-app/src/templates/rewardLabel.ts:10
-#: includes/Frontend/ProgressUI.php:961
+#: includes/Frontend/ProgressUI.php:949
 #: includes/Goals/MessageEngine.php:316
 msgid "Fixed discount"
 msgstr ""
@@ -1858,7 +1904,7 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:42
 #: admin-app/src/routes/Goals.tsx:47
 #: admin-app/src/templates/rewardLabel.ts:11
-#: includes/Frontend/ProgressUI.php:962
+#: includes/Frontend/ProgressUI.php:950
 #: includes/Goals/MessageEngine.php:326
 msgid "Free gift"
 msgstr ""
@@ -1870,7 +1916,7 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:39
 #: admin-app/src/routes/Goals.tsx:44
 #: admin-app/src/templates/rewardLabel.ts:8
-#: includes/Frontend/ProgressUI.php:959
+#: includes/Frontend/ProgressUI.php:947
 #: includes/Goals/MessageEngine.php:303
 msgid "Free shipping"
 msgstr ""
@@ -1913,7 +1959,7 @@ msgstr ""
 msgid "Generate a coupon from these rules"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:967
+#: includes/Frontend/ProgressUI.php:955
 msgid "Gift added to your cart"
 msgstr ""
 
@@ -1950,51 +1996,6 @@ msgstr ""
 msgid "Goal Calculation"
 msgstr ""
 
-#: admin-app/src/components/layout/navigation.ts:44
-#: includes/Admin/Admin.php:113
-#: includes/Admin/Admin.php:114
-#: includes/Admin/ProductCostField.php:75
-#: includes/Admin/ProductCostField.php:106
-msgid "Goal Cart"
-msgstr ""
-
-#: includes/Frontend/ProgressUI.php:208
-msgid "Goal Cart Progress"
-msgstr ""
-
-#: admin-app/src/routes/RevenueOverview.tsx:421
-msgid "Goal Cart Sales Performance"
-msgstr ""
-
-#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:216
-msgid "Goal Cart does not invent product costs."
-msgstr ""
-
-#: admin-app/src/routes/Analytics.tsx:318
-#: admin-app/src/routes/RevenueOverview.tsx:141
-msgid "Goal Cart generated an estimated profit of %1$s after reward and shipping costs."
-msgstr ""
-
-#: admin-app/src/routes/RevenueOverview.tsx:83
-msgid "Goal Cart influenced %1$s purchases during this period."
-msgstr ""
-
-#: includes/Compatibility.php:172
-msgid "Goal Cart is inactive because the site does not meet its requirements:"
-msgstr ""
-
-#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:116
-msgid "Goal Cart needs product cost data to estimate profit."
-msgstr ""
-
-#: admin-app/src/components/revenue/EstimatedProfitCard.tsx:24
-msgid "Goal Cart's product cost field"
-msgstr ""
-
-#: includes/Admin/Admin.php:213
-msgid "Goal Cart:"
-msgstr ""
-
 #: admin-app/src/routes/Analytics.tsx:813
 msgid "Goal Comparison"
 msgstr ""
@@ -2022,7 +2023,7 @@ msgid "Goal Views"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:94
-#: includes/Frontend/ProgressUI.php:981
+#: includes/Frontend/ProgressUI.php:969
 msgid "Goal completed"
 msgstr ""
 
@@ -2169,7 +2170,7 @@ msgid "How completed goals grant rewards when several compete: combine them, gra
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:285
-msgid "How did Goal Cart perform? Sales attributed, purchased orders, average basket and estimated profit."
+msgid "How did FaraCart perform? Sales attributed, purchased orders, average basket and estimated profit."
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:170
@@ -2302,7 +2303,7 @@ msgid "Incremental margin at this threshold does not fully cover the reward cost
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:680
-msgid "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the Goal Cart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once."
+msgid "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the FaraCart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:972
@@ -2427,7 +2428,7 @@ msgid "Live preview"
 msgstr ""
 
 #: includes/Admin/Admin.php:233
-msgid "Loading Goal Cart…"
+msgid "Loading FaraCart…"
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:153
@@ -2677,7 +2678,7 @@ msgstr ""
 msgid "No historical upsell performance data yet — conversion scored neutral."
 msgstr ""
 
-#: admin-app/src/components/CampaignPreviewDialog.tsx:159
+#: admin-app/src/components/CampaignPreviewDialog.tsx:178
 msgid "No milestones in this campaign yet."
 msgstr ""
 
@@ -2696,7 +2697,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:109
 #: includes/Frontend/ProgressUI.php:528
-#: includes/Frontend/ProgressUI.php:989
+#: includes/Frontend/ProgressUI.php:977
 msgid "No recommendations available right now."
 msgstr ""
 
@@ -2714,7 +2715,7 @@ msgstr ""
 msgid "No sales data yet"
 msgstr ""
 
-#: includes/REST/SettingsController.php:196
+#: includes/REST/SettingsController.php:197
 msgid "No settings were provided to save."
 msgstr ""
 
@@ -2768,11 +2769,11 @@ msgid "Observed impact"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:630
-msgid "Observed impact — incremental cart value relative to the baseline. It does not prove that Goal Cart caused the difference."
+msgid "Observed impact — incremental cart value relative to the baseline. It does not prove that FaraCart caused the difference."
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:717
-msgid "Observed impact — this comparison does not prove that Goal Cart caused the difference."
+msgid "Observed impact — this comparison does not prove that FaraCart caused the difference."
 msgstr ""
 
 #: admin-app/src/routes/Goals.tsx:110
@@ -2792,15 +2793,15 @@ msgid "Once customers interact with your Goals, performance data will appear her
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:614
-msgid "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit insights here."
+msgid "Once customers start interacting with your goals, FaraCart will show purchases, sales and profit insights here."
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:751
-msgid "Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit per goal here."
+msgid "Once customers start interacting with your goals, FaraCart will show purchases, sales and profit per goal here."
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:320
-msgid "Once customers start interacting with your goals, Goal Cart will show sales, purchases and profit insights here."
+msgid "Once customers start interacting with your goals, FaraCart will show sales, purchases and profit insights here."
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:47
@@ -2812,7 +2813,7 @@ msgid "Only %1$s of completed goals were followed by an attributed purchase."
 msgstr ""
 
 #: admin-app/src/templates/renderers/goalShared.tsx:294
-#: includes/Frontend/ProgressUI.php:978
+#: includes/Frontend/ProgressUI.php:966
 msgid "Only %s"
 msgstr ""
 
@@ -2956,7 +2957,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:131
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:116
-#: includes/Frontend/ProgressUI.php:972
+#: includes/Frontend/ProgressUI.php:960
 msgid "Paid"
 msgstr ""
 
@@ -2969,7 +2970,7 @@ msgid "Percentage"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:25
-#: includes/Frontend/ProgressUI.php:960
+#: includes/Frontend/ProgressUI.php:948
 #: includes/Goals/MessageEngine.php:307
 msgid "Percentage discount"
 msgstr ""
@@ -2997,7 +2998,7 @@ msgstr ""
 msgid "Pick the default progress template and tune its appearance — separately for Goals and Campaigns."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:966
+#: includes/Frontend/ProgressUI.php:954
 msgid "Pick your free gift"
 msgstr ""
 
@@ -3054,7 +3055,7 @@ msgstr ""
 msgid "Preview state"
 msgstr ""
 
-#: admin-app/src/components/CampaignPreviewDialog.tsx:106
+#: admin-app/src/components/CampaignPreviewDialog.tsx:125
 #: admin-app/src/components/GoalPreviewDialog.tsx:97
 msgid "Preview: %s"
 msgstr ""
@@ -3114,7 +3115,7 @@ msgid "Product cost data is not available — profit impact unavailable (revenue
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:218
-msgid "Product cost must come from WooCommerce or your product-cost data. Goal Cart reads, in order:"
+msgid "Product cost must come from WooCommerce or your product-cost data. FaraCart reads, in order:"
 msgstr ""
 
 #: includes/Templates/Goal/Template4.php:142
@@ -3185,7 +3186,7 @@ msgid "Profit not estimated yet"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:100
-#: includes/Frontend/ProgressUI.php:971
+#: includes/Frontend/ProgressUI.php:959
 msgid "Progress"
 msgstr ""
 
@@ -3379,7 +3380,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:137
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:124
-#: includes/Frontend/ProgressUI.php:973
+#: includes/Frontend/ProgressUI.php:961
 msgid "Remaining"
 msgstr ""
 
@@ -3500,7 +3501,7 @@ msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:630
 #: admin-app/src/routes/RevenueOverview.tsx:345
-msgid "Sales Attributed to Goal Cart"
+msgid "Sales Attributed to FaraCart"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:52
@@ -3513,16 +3514,16 @@ msgid "Sales attributed"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:672
-msgid "Sales attributed to Goal Cart"
+msgid "Sales attributed to FaraCart"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:205
 #: admin-app/src/routes/GoalPerformance.tsx:103
-msgid "Sales attributed to Goal Cart — the incremental order value driven by this goal."
+msgid "Sales attributed to FaraCart — the incremental order value driven by this goal."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:774
-msgid "Sales generated after Goal Cart interaction."
+msgid "Sales generated after FaraCart interaction."
 msgstr ""
 
 #: admin-app/src/routes/Appearance.tsx:185
@@ -3681,7 +3682,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:129
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:65
-#: includes/Frontend/ProgressUI.php:970
+#: includes/Frontend/ProgressUI.php:958
 msgid "Shopping goal"
 msgstr ""
 
@@ -3698,7 +3699,7 @@ msgid "Show campaign name"
 msgstr ""
 
 #: includes/Frontend/ProgressUI.php:211
-msgid "Show cart goals, progress and rewards (Goal Cart)."
+msgid "Show cart goals, progress and rewards (FaraCart)."
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:395
@@ -4105,7 +4106,7 @@ msgid "The discount never applies to these products."
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:88
-msgid "The funnel and the direct vs assisted models behind Goal Cart’s attributed revenue."
+msgid "The funnel and the direct vs assisted models behind FaraCart’s attributed revenue."
 msgstr ""
 
 #: includes/REST/GoalsController.php:222
@@ -4241,11 +4242,11 @@ msgid "The threshold shoppers need to reach."
 msgstr ""
 
 #: includes/Admin/ProductCostField.php:76
-msgid "The unit cost Goal Cart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown."
+msgid "The unit cost FaraCart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1023
-msgid "These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting."
+msgid "These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting."
 msgstr ""
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:103
@@ -4261,7 +4262,7 @@ msgid "This gift is no longer available for the goal."
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:52
-#: includes/Frontend/ProgressUI.php:984
+#: includes/Frontend/ProgressUI.php:972
 msgid "This goal has ended"
 msgstr ""
 
@@ -4417,7 +4418,7 @@ msgstr ""
 msgid "Unlocked"
 msgstr ""
 
-#: admin-app/src/components/CampaignPreviewDialog.tsx:180
+#: admin-app/src/components/CampaignPreviewDialog.tsx:197
 #: admin-app/src/components/GoalPreviewDialog.tsx:160
 msgid "Updating…"
 msgstr ""
@@ -4491,7 +4492,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:168
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:155
-#: includes/Frontend/ProgressUI.php:977
+#: includes/Frontend/ProgressUI.php:965
 msgid "View products"
 msgstr ""
 
@@ -4528,7 +4529,7 @@ msgid "Weight"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:436
-msgid "Welcome to Goal Cart"
+msgid "Welcome to FaraCart"
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:556
@@ -4613,7 +4614,7 @@ msgid "Window"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:177
-#: includes/Frontend/ProgressUI.php:987
+#: includes/Frontend/ProgressUI.php:975
 msgid "With a purchase of"
 msgstr ""
 
@@ -4694,7 +4695,7 @@ msgstr ""
 #: admin-app/src/routes/Dashboard.tsx:667
 #: admin-app/src/routes/GoalPerformance.tsx:430
 #: admin-app/src/routes/RevenueOverview.tsx:383
-msgid "after Goal Cart interaction"
+msgid "after FaraCart interaction"
 msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:1165

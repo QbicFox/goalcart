@@ -1,6 +1,6 @@
 <?php
 /**
- * Smart upsell ranking engine for Goal Cart (Phase 33.5).
+ * Smart upsell ranking engine for FaraCart (Phase 33.5).
  *
  * @package GoalCart
  */

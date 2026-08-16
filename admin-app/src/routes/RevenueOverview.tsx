@@ -80,7 +80,7 @@ function buildInsights(summary: RevenueSummary, aov: AovAnalysis): Insight[] {
       title: __('Good performance', 'goalcart'),
       body: sprintf(
         /* translators: 1: number of purchased orders. */
-        __('Goal Cart influenced %1$s purchases during this period.', 'goalcart'),
+        __('FaraCart influenced %1$s purchases during this period.', 'goalcart'),
         formatNumber(summary.orders)
       ),
     });
@@ -97,12 +97,12 @@ function buildInsights(summary: RevenueSummary, aov: AovAnalysis): Insight[] {
         aov.percentage_change >= 0
           ? sprintf(
               /* translators: 1: signed percentage. */
-              __('Customers interacting with Goal Cart spent %1$s more per order on average (observed impact).', 'goalcart'),
+              __('Customers interacting with FaraCart spent %1$s more per order on average (observed impact).', 'goalcart'),
               change
             )
           : sprintf(
               /* translators: 1: percentage. */
-              __('Customers interacting with Goal Cart spent %1$s less per order on average (observed impact).', 'goalcart'),
+              __('Customers interacting with FaraCart spent %1$s less per order on average (observed impact).', 'goalcart'),
               magnitude
             ),
     });
@@ -138,7 +138,7 @@ function buildInsights(summary: RevenueSummary, aov: AovAnalysis): Insight[] {
       title: __('Estimated profit', 'goalcart'),
       body: sprintf(
         /* translators: 1: estimated profit currency value. */
-        __('Goal Cart generated an estimated profit of %1$s after reward and shipping costs.', 'goalcart'),
+        __('FaraCart generated an estimated profit of %1$s after reward and shipping costs.', 'goalcart'),
         formatCurrency(summary.profit_impact)
       ),
     });
@@ -146,7 +146,7 @@ function buildInsights(summary: RevenueSummary, aov: AovAnalysis): Insight[] {
     insights.push({
       icon: <PaymentsIcon fontSize="small" />,
       title: __('Profit not estimated yet', 'goalcart'),
-      body: __('Add product cost data to see the estimated profit of Goal Cart.', 'goalcart'),
+      body: __('Add product cost data to see the estimated profit of FaraCart.', 'goalcart'),
     });
   }
 
@@ -283,7 +283,7 @@ export default function RevenueOverview() {
     <PageContainer
       title={__('Sales Performance', 'goalcart')}
       description={__(
-        'How did Goal Cart perform? Sales attributed, purchased orders, average basket and estimated profit.',
+        'How did FaraCart perform? Sales attributed, purchased orders, average basket and estimated profit.',
         'goalcart'
       )}
     >
@@ -318,7 +318,7 @@ export default function RevenueOverview() {
           icon={<TrendingUpIcon fontSize="large" />}
           title={__('No sales data yet', 'goalcart')}
           description={__(
-            'Once customers start interacting with your goals, Goal Cart will show sales, purchases and profit insights here.',
+            'Once customers start interacting with your goals, FaraCart will show sales, purchases and profit insights here.',
             'goalcart'
           )}
         />
@@ -342,7 +342,7 @@ export default function RevenueOverview() {
             }}
           >
             <KpiCard
-              label={__('Sales Attributed to Goal Cart', 'goalcart')}
+              label={__('Sales Attributed to FaraCart', 'goalcart')}
               value={formatCurrency(summary.goal_driven_revenue)}
               icon={<PaymentsIcon fontSize="small" />}
               trend={{ change: percentChange(previous?.goal_driven_revenue, summary.goal_driven_revenue) }}
@@ -380,7 +380,7 @@ export default function RevenueOverview() {
               value={formatNumber(summary.orders)}
               icon={<ShoppingCartCheckoutIcon fontSize="small" />}
               trend={{ change: percentChange(previous?.orders, summary.orders) }}
-              hint={__('after Goal Cart interaction', 'goalcart')}
+              hint={__('after FaraCart interaction', 'goalcart')}
             />
 
             <EstimatedProfitCard
@@ -418,7 +418,7 @@ export default function RevenueOverview() {
                 }}
               >
                 <Typography variant="h6" component="h3">
-                  {__('Goal Cart Sales Performance', 'goalcart')}
+                  {__('FaraCart Sales Performance', 'goalcart')}
                 </Typography>
                 <Stack direction="row" spacing={1} useFlexGap sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
                   <ToggleButtonGroup
@@ -639,7 +639,7 @@ export default function RevenueOverview() {
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', color: 'text.secondary' }}>
                   <LocalShippingIcon fontSize="small" />
                   <Typography variant="caption">
-                    {__('AOV comparisons are observed impact — they do not prove that Goal Cart caused the difference.', 'goalcart')}
+                    {__('AOV comparisons are observed impact — they do not prove that FaraCart caused the difference.', 'goalcart')}
                   </Typography>
                 </Box>
               </Stack>
@@ -678,7 +678,7 @@ function HowCalculated({ summary }: { summary: RevenueSummary }) {
           />
           <Typography variant="caption" color="text.secondary" component="p">
             {__(
-              'Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the Goal Cart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once.',
+              'Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the FaraCart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once.',
               'goalcart'
             )}
           </Typography>
@@ -714,7 +714,7 @@ function BasketCompare({ aov }: { aov: AovAnalysis }) {
               value={formatSignedPercent(aov.percentage_change)}
             />
             <Typography variant="caption" color="text.secondary" component="p">
-              {__('Observed impact — this comparison does not prove that Goal Cart caused the difference.', 'goalcart')}
+              {__('Observed impact — this comparison does not prove that FaraCart caused the difference.', 'goalcart')}
             </Typography>
           </Stack>
         )}

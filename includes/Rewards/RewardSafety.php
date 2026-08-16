@@ -1,6 +1,6 @@
 <?php
 /**
- * Reward safety guards for the Goal Cart engine.
+ * Reward safety guards for the FaraCart engine.
  *
  * @package GoalCart
  */

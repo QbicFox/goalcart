@@ -1,6 +1,6 @@
-# Goal Cart for WooCommerce
+# FaraCart for WooCommerce
 
-Goal Cart increases Average Order Value (AOV) by showing WooCommerce shoppers cart goals, progress
+FaraCart increases Average Order Value (AOV) by showing WooCommerce shoppers cart goals, progress
 bars, rewards, milestones, and smart product suggestions that close the gap to the next reward.
 
 > **Note:** This plugin is under active development following the roadmap in `AGENT.md`.
@@ -35,7 +35,7 @@ npm run typecheck  # TypeScript (no emit)
 **Development workflow (HMR inside WP admin):**
 
 1. Start the Vite dev server: `cd admin-app && npm run dev` (default `http://localhost:5173`).
-2. Load the **Goal Cart** admin page while WordPress runs with an environment type of `local` or
+2. Load the **FaraCart** admin page while WordPress runs with an environment type of `local` or
    `development` — the plugin auto-detects the dev server and enqueues the app straight from it.
 3. If your dev server is not on `localhost:5173`, define the `GOALCART_DEV_SERVER_URL` constant.
 
@@ -49,8 +49,8 @@ locale) so the app can authenticate REST calls via the `X-WP-Nonce` header.
 ## Directory Structure
 
 ```
-goalcart/
-├── goalcart.php          # Main plugin file (bootstrap)
+ravis-faracart/
+├── ravis-faracart.php    # Main plugin file (bootstrap)
 ├── composer.json         # Composer config + PSR-4 autoloader
 ├── includes/             # Core plugin classes (GoalCart\ namespace)
 │   ├── Plugin.php        # Singleton bootstrap + DI wiring

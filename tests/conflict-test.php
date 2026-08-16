@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart conflict & priority engine tests (Phase 26).
+ * FaraCart conflict & priority engine tests (Phase 26).
  *
  * Boots WordPress and exercises the Phase 26 deterministic behavior when
  * multiple goals/campaigns are active:
@@ -49,7 +49,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Database\Installer;

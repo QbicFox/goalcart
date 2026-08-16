@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart Phase 33.4 tests (Smart Goal Recommendation).
+ * FaraCart Phase 33.4 tests (Smart Goal Recommendation).
  *
  * Boots WordPress, then exercises the Phase 33.4 deterministic
  * goal-threshold recommendation engine and its admin endpoint:
@@ -54,7 +54,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 // Deterministic English assertions regardless of the site locale: the
 // recommendation reasons / insufficient_reason are translated for the

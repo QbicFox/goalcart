@@ -1,6 +1,6 @@
 <?php
 /**
- * Revenue attribution engine for Goal Cart (Phase 33.2).
+ * Revenue attribution engine for FaraCart (Phase 33.2).
  *
  * @package GoalCart
  */

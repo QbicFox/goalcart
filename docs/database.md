@@ -1,4 +1,4 @@
-# Goal Cart — Database & Domain Model
+# FaraCart — Database & Domain Model
 
 > **Phase 3 / Tasks P03-T01–T03.** Defines the persistence layer: the Goal, Campaign and Analytics
 > Event domain entities, their tables, and the migration strategy. The schema is authoritative in
@@ -270,7 +270,7 @@ reference plugin's convention.
 6. **Safe, repeatable upgrades** — all migrations are idempotent and additive; `uninstall()`
    drops only plugin tables + options; deactivation preserves data.
 7. **Settings via option, not table** — the reference declares an unused settings *table* while its
-   service uses an option; Goal Cart keeps a single `goalcart_settings` option (no duplicated storage).
+   service uses an option; FaraCart keeps a single `goalcart_settings` option (no duplicated storage).
 
 ## 4. Design decisions & deviations
 

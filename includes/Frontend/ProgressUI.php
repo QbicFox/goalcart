@@ -1,6 +1,6 @@
 <?php
 /**
- * Storefront progress UI for Goal Cart.
+ * Storefront progress UI for FaraCart.
  *
  * @package GoalCart
  */
@@ -205,10 +205,10 @@ final class ProgressUI {
 			self::BLOCK,
 			array(
 				'api_version'     => 2,
-				'title'           => __( 'Goal Cart Progress', 'goalcart' ),
+				'title'           => __( 'FaraCart Progress', 'goalcart' ),
 				'category'        => 'widgets',
 				'icon'            => 'cart',
-				'description'     => __( 'Show cart goals, progress and rewards (Goal Cart).', 'goalcart' ),
+				'description'     => __( 'Show cart goals, progress and rewards (FaraCart).', 'goalcart' ),
 				'keywords'        => array( 'goal', 'cart', 'progress', 'aov' ),
 				'supports'        => array(
 					'anchor'     => true,

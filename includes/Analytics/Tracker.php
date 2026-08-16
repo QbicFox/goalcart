@@ -1,6 +1,6 @@
 <?php
 /**
- * Analytics event tracker for Goal Cart.
+ * Analytics event tracker for FaraCart.
  *
  * @package GoalCart
  */

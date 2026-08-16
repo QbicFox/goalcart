@@ -1,6 +1,6 @@
 <?php
 /**
- * Cached revenue summaries for Goal Cart (Phase 33.3 — Aggregation & Performance).
+ * Cached revenue summaries for FaraCart (Phase 33.3 — Aggregation & Performance).
  *
  * @package GoalCart
  */

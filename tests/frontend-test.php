@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart frontend progress UI tests (P11-T01 / P11-T02 / P11-T03).
+ * FaraCart frontend progress UI tests (P11-T01 / P11-T02 / P11-T03).
  *
  * Boots WordPress and exercises the Phase 11 storefront widget layer:
  *
@@ -44,7 +44,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Frontend\ProgressUI;
 
@@ -385,7 +385,7 @@ try {
 	$post_id = wp_insert_post( array(
 		'post_type'    => 'post',
 		'post_status'  => 'publish',
-		'post_title'   => 'Goal Cart frontend test',
+		'post_title'   => 'FaraCart frontend test',
 		'post_content' => '[goalcart_progress]',
 	), true );
 
@@ -567,7 +567,7 @@ if ( $block_type ) {
 		$post_id = wp_insert_post( array(
 			'post_type'    => 'post',
 			'post_status'  => 'publish',
-			'post_title'   => 'Goal Cart block test',
+			'post_title'   => 'FaraCart block test',
 			'post_content' => '<!-- wp:goalcart/progress {"variant":"compact"} /-->',
 		), true );
 

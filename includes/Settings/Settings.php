@@ -1,6 +1,6 @@
 <?php
 /**
- * Settings management for Goal Cart.
+ * Settings management for FaraCart.
  *
  * @package GoalCart
  */

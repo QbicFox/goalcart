@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart performance tests (P23-T01 / P23-T02 / P23-T03).
+ * FaraCart performance tests (P23-T01 / P23-T02 / P23-T03).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then audits
  * the Phase 23 performance posture end-to-end:
@@ -53,7 +53,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Goals\GoalRepository;

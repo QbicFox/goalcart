@@ -1,6 +1,6 @@
 <?php
 /**
- * Cart integration service for the Goal Cart engine.
+ * Cart integration service for the FaraCart engine.
  *
  * @package GoalCart
  */

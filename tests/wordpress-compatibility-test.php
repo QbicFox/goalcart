@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart WordPress compatibility tests (P20).
+ * FaraCart WordPress compatibility tests (P20).
  *
  * Boots WordPress and verifies the Phase 20 (WordPress Compatibility)
  * checklist against the installed environment:
@@ -42,7 +42,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Compatibility;
 use GoalCart\Database\Installer;

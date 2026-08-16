@@ -1,6 +1,6 @@
 <?php
 /**
- * Unified product recommendation engine for Goal Cart.
+ * Unified product recommendation engine for FaraCart.
  *
  * @package GoalCart
  */

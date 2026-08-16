@@ -1,6 +1,6 @@
 # WooInsights Reference Architecture Report
 
-> **Phase 0 / Task 0.9** — Architectural source of truth for the **Goal Cart for WooCommerce** plugin.
+> **Phase 0 / Task 0.9** — Architectural source of truth for the **FaraCart for WooCommerce** plugin.
 > Reference plugin: `/home/qbicfox/public_html/woo-app/wp-content/plugins/wooinsights` (v0.1.0).
 > Inspected against: WordPress 7.0.2, WooCommerce 11.0.0, PHP ≥ 7.4, Node ≥ 18.
 > This report derives **patterns** only — WooInsights business logic (search analytics) is NOT to be copied.
@@ -226,7 +226,7 @@ wooinsights/                      # Plugin root (slug = folder name)
 - **Status: not yet implemented.** `tests/` contains only `.gitkeep`; no PHPUnit config, no test files, no JS test framework (no vitest/jest) in the reference plugin.
 - `composer.json` reserves `autoload-dev` PSR-4 namespace `WooInsights\Tests\ => tests/`.
 - `.gitignore` anticipates `.phpunit.result.cache` and `coverage/`.
-- **Implication for Goal Cart**: testing conventions must be established in Phase 2 (choose PHPUnit + WP test framework and Vitest/RTL as the project's own convention, since the reference has none).
+- **Implication for FaraCart**: testing conventions must be established in Phase 2 (choose PHPUnit + WP test framework and Vitest/RTL as the project's own convention, since the reference has none).
 
 ## 8. Coding Conventions
 
@@ -279,7 +279,7 @@ wooinsights/                      # Plugin root (slug = folder name)
 | Capabilities | Menu/API capability filterable (`wooinsights_admin_capability`, `wooinsights_rest_capability`) |
 | Cookies | HttpOnly, SameSite=Lax, Secure on SSL |
 
-## 11. Reusable Patterns (must adopt for Goal Cart)
+## 11. Reusable Patterns (must adopt for FaraCart)
 
 1. **Bootstrap**: single main file → constants → Composer autoload → `Plugin::instance()->boot()` at file scope.
 2. **DI container + HookManager**: constructor-injected singleton services; components declare hooks via `register(HookManager)`; one `run()` applies all.
@@ -293,7 +293,7 @@ wooinsights/                      # Plugin root (slug = folder name)
 10. **WC integration**: `before_woocommerce_init` HPOS declaration; `wc_*` functions guarded by `function_exists`; site-timezone `current_time()` datetimes everywhere.
 11. **i18n pipeline**: PHP text domain + POT + MO; React via `wp.i18n` shim + JED JSON + extraction/build/verify scripts; RTL support end-to-end.
 12. **Utils pattern**: static helper classes (`Helpers`, `Formatting`) for shared sanitization/formatting; `number_format_i18n`, `wc_price`, `date_i18n`.
-13. **Pluggable template engine (Goal Cart pattern, extends the registry
+13. **Pluggable template engine (FaraCart pattern, extends the registry
     convention)**: a `Template` contract — stable id, translated
     label/description, scope (goal | campaign | both), a settings
     `schema` (field type, default, validation, label, group) and a
@@ -311,14 +311,14 @@ wooinsights/                      # Plugin root (slug = folder name)
 
 ## 12. Patterns That MUST NOT Be Copied
 
-1. **WooInsights business logic**: search tracking, session cookies, funnel/opportunity/quality/typo/synonym/brand/segment/device analytics, notification rules — Goal Cart implements its own domain (goals, rewards, campaigns, cart progress).
-2. **Table schemas**: the 8 analytics tables are WooInsights-specific; Goal Cart defines its own schema following the same *style* (prefix, dbDelta, indexes, FK pattern).
-3. **Settings keys**: `wooinsights_settings` option contents are search-analytics settings; Goal Cart has its own settings model.
-4. **The `admin/` and `public/` empty-placeholder dirs** (`.gitkeep`) — legacy from the reference's scaffolding; Goal Cart may omit them.
-5. **`docs/user/`** structure unless Goal Cart ships user docs.
-6. **The reference's own `AGENT.md` roadmap content** (tasks/IDs referenced in comments like "Task 2.4") — Goal Cart's roadmap is its own.
+1. **WooInsights business logic**: search tracking, session cookies, funnel/opportunity/quality/typo/synonym/brand/segment/device analytics, notification rules — FaraCart implements its own domain (goals, rewards, campaigns, cart progress).
+2. **Table schemas**: the 8 analytics tables are WooInsights-specific; FaraCart defines its own schema following the same *style* (prefix, dbDelta, indexes, FK pattern).
+3. **Settings keys**: `wooinsights_settings` option contents are search-analytics settings; FaraCart has its own settings model.
+4. **The `admin/` and `public/` empty-placeholder dirs** (`.gitkeep`) — legacy from the reference's scaffolding; FaraCart may omit them.
+5. **`docs/user/`** structure unless FaraCart ships user docs.
+6. **The reference's own `AGENT.md` roadmap content** (tasks/IDs referenced in comments like "Task 2.4") — FaraCart's roadmap is its own.
 7. **Icons/menu position/copy**: `dashicons-chart-area` at position 58 and all UI copy are WooInsights-specific choices.
-8. **"No tests" status**: WooInsights has no test suite; Goal Cart must establish its own testing strategy (Phase 24) rather than mirroring the absence.
+8. **"No tests" status**: WooInsights has no test suite; FaraCart must establish its own testing strategy (Phase 24) rather than mirroring the absence.
 
 ---
 
@@ -327,5 +327,5 @@ wooinsights/                      # Plugin root (slug = folder name)
 - [x] Reference plugin inspected (`/home/qbicfox/public_html/woo-app/wp-content/plugins/wooinsights` exists, readable, version 0.1.0).
 - [x] Architecture documented (this report + `docs/reference-plugin-file-inventory.md`).
 - [x] No major structural assumption remains undocumented (bootstrap, DI, hooks, DB, REST, React, build, i18n, security, cron, WC integration covered).
-- [x] New plugin architecture can be derived from this report (Phase 2 can scaffold Goal Cart following §1–§11).
+- [x] New plugin architecture can be derived from this report (Phase 2 can scaffold FaraCart following §1–§11).
 - [x] Reference plugin NOT modified.

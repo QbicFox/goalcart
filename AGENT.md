@@ -1,4 +1,4 @@
-# Goal Cart for WooCommerce — AI Agent Implementation Roadmap
+# FaraCart for WooCommerce — AI Agent Implementation Roadmap
 
 **Document Type:** Execution Roadmap  
 **Language:** English  
@@ -36,7 +36,7 @@ Before implementation, the agent MUST follow these rules.
    - translations/i18n conventions
 5. Reuse architectural patterns, NOT business logic. Do not copy unrelated WooInsights features.
 6. Do not modify `wooinsights`.
-7. Do not begin Goal Cart business implementation until the reference architecture report has been produced.
+7. Do not begin FaraCart business implementation until the reference architecture report has been produced.
 8. Every phase must end with verification and a Definition of Done.
 9. Never mark a task complete merely because files were created. Run the relevant checks.
 10. Prefer small, reversible changes.
@@ -270,7 +270,7 @@ Phase 1: ████████████████████ 100%
 
 ## Objective
 
-Define Goal Cart as a revenue-optimization engine, not merely a progress-bar widget.
+Define FaraCart as a revenue-optimization engine, not merely a progress-bar widget.
 
 ## Core Product Concepts
 
@@ -996,7 +996,7 @@ Build reusable frontend components.
 Conceptually:
 
 ```text
-GoalCart
+FaraCart
 ├── GoalContainer
 ├── ProgressBar
 ├── GoalMessage
@@ -1237,7 +1237,7 @@ Phase 14: ████████████████████ 100%
 
 ## Objective
 
-Turn Goal Cart into an actual revenue optimization feature.
+Turn FaraCart into an actual revenue optimization feature.
 
 ## Recommendation Sources
 
@@ -1328,7 +1328,7 @@ Phase 16: ████████████████████ 100%
 
 ## Objective
 
-Measure whether Goal Cart actually increases revenue.
+Measure whether FaraCart actually increases revenue.
 
 ## Events
 
@@ -2120,7 +2120,7 @@ Potential features:
 - analyze goal performance
 - suggest campaign improvements
 
-Core Goal Cart functionality must work without AI.
+Core FaraCart functionality must work without AI.
 
 ---
 

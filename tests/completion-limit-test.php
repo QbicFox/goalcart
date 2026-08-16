@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart per-user completion limit tests (Phase 36).
+ * FaraCart per-user completion limit tests (Phase 36).
  *
  * Boots WordPress and exercises the per-user goal completion limit end to
  * end:
@@ -54,7 +54,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 // Force English assertions (the storefront strings are translated for the
 // site locale, which is fa_IR on this install) — same pattern as

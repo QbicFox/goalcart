@@ -1,10 +1,10 @@
-# Goal Cart — Revenue & Analytics UX Consolidation and Simplification
+# FaraCart — Revenue & Analytics UX Consolidation and Simplification
 
 ## Objective
 
-Redesign and simplify the Goal Cart admin Revenue, Analytics, Goal Performance, and Attribution experience.
+Redesign and simplify the FaraCart admin Revenue, Analytics, Goal Performance, and Attribution experience.
 
-The current Goal Cart implementation already contains a strong revenue attribution, purchase analytics, AOV, profit, goal-performance, recommendation, and upsell analytics stack.
+The current FaraCart implementation already contains a strong revenue attribution, purchase analytics, AOV, profit, goal-performance, recommendation, and upsell analytics stack.
 
 The problem is NOT lack of functionality.
 
@@ -40,13 +40,13 @@ This makes the plugin technically powerful but cognitively expensive for store o
 
 The goal of this task is to transform the existing analytics experience into a **simple business-oriented Sales Performance system**.
 
-The store owner should be able to understand the commercial performance of Goal Cart within a few seconds.
+The store owner should be able to understand the commercial performance of FaraCart within a few seconds.
 
 ---
 
 # 1. IMPORTANT — READ THE PROJECT FIRST
 
-Before modifying any code, inspect the complete Goal Cart project.
+Before modifying any code, inspect the complete FaraCart project.
 
 Read at minimum:
 
@@ -112,11 +112,11 @@ The existing implementation is the source of truth.
 
 # 2. CORE PRODUCT PRINCIPLE
 
-Goal Cart is a revenue optimization product, not an analytics laboratory.
+FaraCart is a revenue optimization product, not an analytics laboratory.
 
 The primary admin question is:
 
-> "Is Goal Cart helping my store sell more profitably?"
+> "Is FaraCart helping my store sell more profitably?"
 
 The UI must answer this question first.
 
@@ -134,7 +134,7 @@ Business outcomes.
 
 Examples:
 
-* Sales attributed to Goal Cart
+* Sales attributed to FaraCart
 * Purchased Orders
 * Average Basket Increase
 * Estimated Profit
@@ -311,7 +311,7 @@ Rename the user-facing concept to:
 
 or:
 
-> Goal Cart Performance
+> FaraCart Performance
 
 Choose the option most consistent with the current product terminology.
 
@@ -327,12 +327,12 @@ The Overview must immediately communicate commercial impact.
 
 The first viewport should contain exactly four primary KPI cards.
 
-## KPI 1 — Sales Attributed to Goal Cart
+## KPI 1 — Sales Attributed to FaraCart
 
 Display:
 
 ```text
-Sales Attributed to Goal Cart
+Sales Attributed to FaraCart
 
 12,400,000 تومان
 
@@ -370,7 +370,7 @@ Purchased Orders
 
 187
 
-after Goal Cart interaction
+after FaraCart interaction
 ```
 
 The metric must represent real qualifying WooCommerce orders.
@@ -504,13 +504,13 @@ Estimated Profit
 
 Not available yet
 
-Goal Cart needs product cost data
+FaraCart needs product cost data
 to estimate profit.
 
 [Learn how]
 ```
 
-Explain that Goal Cart never invents product costs.
+Explain that FaraCart never invents product costs.
 
 If there is no suitable product-cost configuration route, provide an explanation/help panel rather than creating a fake cost system.
 
@@ -640,7 +640,7 @@ Do NOT display 5–6 lines by default.
 
 The chart should answer:
 
-> "Is Goal Cart performance improving or declining?"
+> "Is FaraCart performance improving or declining?"
 
 The date range must be shared with every other component on the page.
 
@@ -676,7 +676,7 @@ Examples:
 ```text
 Good performance
 
-Goal Cart was associated with 187 purchases
+FaraCart was associated with 187 purchases
 during this period.
 ```
 
@@ -878,7 +878,7 @@ Purchase Rate
 ## Revenue
 
 ```text
-Sales Attributed to Goal Cart
+Sales Attributed to FaraCart
 Incremental Sales
 ```
 
@@ -1073,7 +1073,7 @@ Use:
 
 | Internal                | User-facing                   |
 | ----------------------- | ----------------------------- |
-| goal_driven_revenue     | Sales Attributed to Goal Cart |
+| goal_driven_revenue     | Sales Attributed to FaraCart |
 | goal_assisted_revenue   | Assisted Sales                |
 | goal_influenced_revenue | Influenced Sales              |
 | incremental_revenue     | Additional Sales Value        |
@@ -1126,7 +1126,7 @@ Every analytics component must distinguish:
 ```text
 No sales data yet
 
-Goal Cart has not collected enough
+FaraCart has not collected enough
 data for this period.
 ```
 
@@ -1380,7 +1380,7 @@ The Sales Performance → Goals section is specifically for performance analysis
 The redesigned experience should support this journey:
 
 ```text
-Store owner opens Goal Cart
+Store owner opens FaraCart
         ↓
 Dashboard
         ↓
@@ -1640,7 +1640,7 @@ The redesign is complete only when:
 ### UX
 
 * [ ] Same metric is not unnecessarily repeated across pages
-* [ ] First viewport answers "Is Goal Cart helping my store?"
+* [ ] First viewport answers "Is FaraCart helping my store?"
 * [ ] Advanced information is progressively disclosed
 * [ ] Empty states are meaningful
 * [ ] Loading/error/unavailable states are handled
@@ -1655,12 +1655,12 @@ The redesign is complete only when:
 
 After implementation, ask:
 
-> If a store owner opens Goal Cart for the first time, can they understand its sales impact within 5–10 seconds?
+> If a store owner opens FaraCart for the first time, can they understand its sales impact within 5–10 seconds?
 
 The first viewport should allow them to answer:
 
 ```text
-How much did Goal Cart sell?
+How much did FaraCart sell?
 
 How many orders did it influence?
 
@@ -1691,5 +1691,5 @@ Do not sacrifice analytical power.
 
 Reduce cognitive load.
 
-Make Goal Cart feel like a **sales performance tool**, not a collection of analytics dashboards.
+Make FaraCart feel like a **sales performance tool**, not a collection of analytics dashboards.
 

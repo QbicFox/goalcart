@@ -383,7 +383,7 @@ export default function Settings() {
                   <BooleanField
                     control={control}
                     name="enabled"
-                    label={__('Enable Goal Cart', 'goalcart')}
+                    label={__('Enable FaraCart', 'goalcart')}
                     description={__(
                       'Turn the storefront goals, rewards and progress bars on or off.',
                       'goalcart'

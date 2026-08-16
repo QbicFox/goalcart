@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart Phase 33.7 (Frontend Upsell Integration) tests.
+ * FaraCart Phase 33.7 (Frontend Upsell Integration) tests.
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
  * exercises the storefront upsell surface end to end:
@@ -53,7 +53,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 // Locale-independent reason assertions: force en_US and unload the
 // goalcart domain (the same convention message-test/upsell-test use) so

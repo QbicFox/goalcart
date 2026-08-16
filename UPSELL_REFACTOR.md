@@ -1,8 +1,8 @@
-# Goal Cart — Goal Optimization & Smart Upsell Architecture Refactor
+# FaraCart — Goal Optimization & Smart Upsell Architecture Refactor
 
 ## Mission
 
-Refactor the Goal Cart recommendation and upsell architecture so that the product has a clear and non-overlapping distinction between:
+Refactor the FaraCart recommendation and upsell architecture so that the product has a clear and non-overlapping distinction between:
 
 1. **Goal Optimization** — an admin-side system that recommends better Goal configurations and thresholds.
 2. **Smart Upsells** — a customer-facing system that recommends products to help customers reach the currently active Goal.
@@ -499,7 +499,7 @@ Do not make price gap the only ranking factor.
 
 # 17. MARGIN MUST REMAIN PART OF UPSELL
 
-Because Goal Cart is moving toward Estimated Profit analytics, margin becomes even more important.
+Because FaraCart is moving toward Estimated Profit analytics, margin becomes even more important.
 
 The Upsell engine should continue considering product margin where cost data is available.
 
@@ -511,14 +511,14 @@ Use actual Product Cost data when available.
 
 # 18. PRODUCT COST INTEGRATION
 
-Goal Cart should support a Product Cost field because WooCommerce Core does not provide a universal built-in product cost field.
+FaraCart should support a Product Cost field because WooCommerce Core does not provide a universal built-in product cost field.
 
 Preferred architecture:
 
 ```text
 WooCommerce Product
         ↓
-Goal Cart Product Cost
+FaraCart Product Cost
         ↓
 Order Created
         ↓
@@ -546,7 +546,7 @@ to WooCommerce product editing.
 
 For variable products, support cost per variation.
 
-Do not require the store owner to configure cost for every product before Goal Cart works.
+Do not require the store owner to configure cost for every product before FaraCart works.
 
 Products without cost simply have limited profit/economics data.
 
@@ -554,7 +554,7 @@ Products without cost simply have limited profit/economics data.
 
 # 20. PRODUCT COST STORAGE
 
-Use a dedicated Goal Cart product meta field or the project's established product-data architecture.
+Use a dedicated FaraCart product meta field or the project's established product-data architecture.
 
 Do not overload unrelated WooCommerce fields.
 
@@ -951,7 +951,7 @@ Do not expose raw recommendation scores by default.
 Preferred admin navigation:
 
 ```text
-Goal Cart
+FaraCart
 
 ├── Dashboard
 ├── Goals
@@ -1043,7 +1043,7 @@ This should eliminate conceptual confusion.
 On first use, optionally show:
 
 ```text
-How Goal Cart works
+How FaraCart works
 
 1. Goal Optimization
    Find better Goal settings.
@@ -1379,7 +1379,7 @@ Existing caches should be invalidated correctly when Goal configuration changes.
 The final product should feel like this:
 
 ```text
-Goal Cart
+FaraCart
 
 Dashboard
 
@@ -1410,7 +1410,7 @@ A store owner should understand immediately:
 
 # 56. FINAL PRODUCT STORY
 
-The complete Goal Cart story should be:
+The complete FaraCart story should be:
 
 ```text
 1. Goal Optimization
@@ -1445,7 +1445,7 @@ The complete Goal Cart story should be:
 
 6. Sales & Profit
 
-"Here's what Goal Cart generated."
+"Here's what FaraCart generated."
 
         ↓
 
@@ -1460,7 +1460,7 @@ The complete Goal Cart story should be:
 "Now improve the Goal again."
 ```
 
-This loop should become the central product philosophy of Goal Cart.
+This loop should become the central product philosophy of FaraCart.
 
 ---
 
@@ -1520,11 +1520,11 @@ The implementation is complete when:
 
 ## Product Cost
 
-- [ ] Goal Cart can store Product Cost.
+- [ ] FaraCart can store Product Cost.
 - [ ] Variations can have their own cost where supported.
 - [ ] Order-item cost is snapshotted.
 - [ ] Historical profit does not change when current product cost changes.
-- [ ] Missing cost does not break Goal Cart.
+- [ ] Missing cost does not break FaraCart.
 
 ## Profit
 
@@ -1563,12 +1563,12 @@ The most important architectural rule is:
 
 Do not blur these responsibilities.
 
-The final Goal Cart product should not feel like it contains several unrelated recommendation systems.
+The final FaraCart product should not feel like it contains several unrelated recommendation systems.
 
 It should feel like one intelligent optimization system:
 
 ```text
-             GOAL CART
+             FaraCart
                  │
         ┌────────┴────────┐
         │                 │

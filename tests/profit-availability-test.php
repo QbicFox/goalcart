@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart Phase 3 tests (Profit Availability).
+ * FaraCart Phase 3 tests (Profit Availability).
  *
  * Verifies the actual WooCommerce cost sources behind the estimated-profit
  * model (Improvement.md Phase 3) and the UI-ready availability metadata
@@ -53,7 +53,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Analytics\AttributionEngine;
 use GoalCart\Analytics\RevenueTracker;

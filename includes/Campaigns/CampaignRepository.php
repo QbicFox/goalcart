@@ -1,6 +1,6 @@
 <?php
 /**
- * Campaign repository for the Goal Cart REST layer.
+ * Campaign repository for the FaraCart REST layer.
  *
  * @package GoalCart
  */

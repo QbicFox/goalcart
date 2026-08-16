@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * The product-recommendation goal card (Concept 07 — Product
  * Recommendation + Goal): a gradient progress header with the remaining
  * amount, followed by the goal's own recommended products (the existing
- * Goal Cart / WooCommerce recommendation data) with add-to-cart buttons.
+ * FaraCart / WooCommerce recommendation data) with add-to-cart buttons.
  * The default appearance follows the reference design (blue/indigo
  * header).
  */

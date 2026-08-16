@@ -1,6 +1,6 @@
 <?php
 /**
- * Dynamic message template engine for Goal Cart.
+ * Dynamic message template engine for FaraCart.
  *
  * @package GoalCart
  */

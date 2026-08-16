@@ -1,6 +1,6 @@
 <?php
 /**
- * Order cost snapshot for Goal Cart (UPSELL_REFACTOR §21/§22).
+ * Order cost snapshot for FaraCart (UPSELL_REFACTOR §21/§22).
  *
  * @package GoalCart
  */

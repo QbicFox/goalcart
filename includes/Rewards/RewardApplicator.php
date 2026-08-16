@@ -1,6 +1,6 @@
 <?php
 /**
- * Reward applicator contract for the Goal Cart engine.
+ * Reward applicator contract for the FaraCart engine.
  *
  * @package GoalCart
  */

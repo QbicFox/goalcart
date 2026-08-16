@@ -1,6 +1,6 @@
 <?php
 /**
- * Revenue event tracker for Goal Cart (Phase 33.1 — Analytics Foundation).
+ * Revenue event tracker for FaraCart (Phase 33.1 — Analytics Foundation).
  *
  * @package GoalCart
  */

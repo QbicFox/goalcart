@@ -1,6 +1,6 @@
 <?php
 /**
- * WooCommerce product-cost field for Goal Cart (UPSELL_REFACTOR §19/§20).
+ * WooCommerce product-cost field for FaraCart (UPSELL_REFACTOR §19/§20).
  *
  * @package GoalCart
  */
@@ -72,8 +72,8 @@ final class ProductCostField {
 		woocommerce_wp_text_input(
 			array(
 				'id'                => RewardCostEstimator::PRODUCT_COST_META,
-				'label'             => __( 'Product cost', 'goalcart' ) . ' (' . __( 'Goal Cart', 'goalcart' ) . ')',
-				'description'       => __( 'The unit cost Goal Cart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown.', 'goalcart' ),
+				'label'             => __( 'Product cost', 'goalcart' ) . ' (' . __( 'FaraCart', 'goalcart' ) . ')',
+				'description'       => __( 'The unit cost FaraCart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown.', 'goalcart' ),
 				'desc_tip'          => true,
 				'type'              => 'number',
 				'custom_attributes' => array(
@@ -103,14 +103,14 @@ final class ProductCostField {
 		printf(
 			'<label for="%1$s">%2$s</label>',
 			esc_attr( 'goalcart_product_cost_' . (int) $loop ),
-			esc_html__( 'Product cost', 'goalcart' ) . ' (' . esc_html__( 'Goal Cart', 'goalcart' ) . ')'
+			esc_html__( 'Product cost', 'goalcart' ) . ' (' . esc_html__( 'FaraCart', 'goalcart' ) . ')'
 		);
 		printf(
 			'<input type="number" step="any" min="0" id="%1$s" name="%2$s" value="%3$s" placeholder="%4$s" class="short" />',
 			esc_attr( 'goalcart_product_cost_' . (int) $loop ),
 			esc_attr( 'goalcart_product_cost[' . (int) $loop . ']' ),
 			esc_attr( is_numeric( $value ) ? (string) round( (float) $value, 4 ) : '' ),
-			esc_attr__( 'Cost per unit (Goal Cart)', 'goalcart' )
+			esc_attr__( 'Cost per unit (FaraCart)', 'goalcart' )
 		);
 		echo '</div>';
 	}

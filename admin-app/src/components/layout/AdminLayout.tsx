@@ -351,7 +351,7 @@ export default function AdminLayout() {
 						component="h1"
 						sx={{ flexGrow: 1, fontWeight: 600, fontSize: "1.05rem" }}
 					>
-						Goal Cart
+						{__('FaraCart', 'goalcart')}
 					</Typography>
 
 					{fullscreen && (

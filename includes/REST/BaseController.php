@@ -1,6 +1,6 @@
 <?php
 /**
- * Base REST controller for Goal Cart.
+ * Base REST controller for FaraCart.
  *
  * @package GoalCart
  */
@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class BaseController
  *
- * Foundation for every Goal Cart REST endpoint (Phase 7: REST API / AJAX
+ * Foundation for every FaraCart REST endpoint (Phase 7: REST API / AJAX
  * Layer). Provides:
  *
  *  - the `goalcart/v1` namespace (created implicitly by the first

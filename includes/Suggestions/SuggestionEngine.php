@@ -1,6 +1,6 @@
 <?php
 /**
- * Smart product suggestion engine for Goal Cart.
+ * Smart product suggestion engine for FaraCart.
  *
  * @package GoalCart
  */

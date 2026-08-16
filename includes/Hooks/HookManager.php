@@ -1,6 +1,6 @@
 <?php
 /**
- * Action and filter hook management for Goal Cart.
+ * Action and filter hook management for FaraCart.
  *
  * @package GoalCart
  */

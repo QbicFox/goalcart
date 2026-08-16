@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart Phase 33.2 tests (Revenue Attribution).
+ * FaraCart Phase 33.2 tests (Revenue Attribution).
  *
  * Boots WordPress, then exercises the Phase 33.2 revenue attribution
  * engine and reward-cost / profit estimator:
@@ -58,7 +58,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Analytics\AttributionEngine;
 use GoalCart\Analytics\RewardCostEstimator;

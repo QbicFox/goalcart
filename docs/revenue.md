@@ -1,4 +1,4 @@
-# Goal Cart — Revenue Attribution (Phase 33.2)
+# FaraCart — Revenue Attribution (Phase 33.2)
 
 > **Phase 33 / Tasks P33-T02.** Turns the Phase 33.1 revenue event funnel
 > (`goal_view` → `goal_progress` → `goal_completed` → `order_paid`) into
@@ -110,7 +110,7 @@ instead of a guessed number.
 
 - **Product cost** — read from the standard WooCommerce `_cost` field, the
   common cost-of-goods `_wc_cog_cost` field (variations fall back to
-  their parent) and Goal Cart's own optional **`_goalcart_product_cost`**
+  their parent) and FaraCart's own optional **`_goalcart_product_cost`**
   field (UPSELL_REFACTOR §19/§20 — a namespaced "Product cost" input on
   the product editor, simple products and per-variation, saved through
   `ProductCostField`), all through the `goalcart_product_cost` filter.
@@ -173,9 +173,9 @@ attribution summary):
 
 1. **`goalcart_product_cost` filter** — a store plugin can plug its own
    cost source (return `float`, or `null` to fall through).
-2. **`_goalcart_product_cost`** — Goal Cart's own product-editor field
+2. **`_goalcart_product_cost`** — FaraCart's own product-editor field
    (UPSELL_REFACTOR §19/§20), read before the standard WooCommerce keys
-   so a store using the Goal Cart field always wins.
+   so a store using the FaraCart field always wins.
 3. **`_cost`** — the standard WooCommerce product cost field.
 4. **`_wc_cog_cost`** — the common cost-of-goods field, read when `_cost`
    is absent. `_cost` takes precedence when both are present.
@@ -218,7 +218,7 @@ estimates as facts:
 
 ```text
 Internal                User-facing
-goal_driven_revenue     Sales Attributed to Goal Cart
+goal_driven_revenue     Sales Attributed to FaraCart
 goal_assisted_revenue   Assisted Sales
 goal_influenced_revenue Influenced Sales
 incremental_revenue     Additional Sales Value
@@ -256,7 +256,7 @@ goal completion is never presented as a purchase (`UICHANGES.md` §22/§31).
 
 ---
 
-# Goal Cart — Smart Goal Recommendation (Phase 33.4)
+# FaraCart — Smart Goal Recommendation (Phase 33.4)
 
 `GoalRecommendationEngine` (`includes/Analytics/`) answers *"what
 threshold should this store use?"* with a fully deterministic,
@@ -362,7 +362,7 @@ that same shape without touching the REST layer or the admin UI (P33-60).
 
 ---
 
-# Goal Cart — Smart Upsell Ranking (Phase 33.5)
+# FaraCart — Smart Upsell Ranking (Phase 33.5)
 
 `UpsellRanker` (`includes/Analytics/`) answers *"which products should
 this shopper add to reach the goal?"* with a fully transparent,
@@ -454,10 +454,10 @@ without touching the REST layer or the admin UI (P33-60).
 
 ---
 
-# Goal Cart — React Admin Revenue Section (Phase 33.6 + UICHANGES.md)
+# FaraCart — React Admin Revenue Section (Phase 33.6 + UICHANGES.md)
 
 The admin analytics area is **Sales Performance** (`UICHANGES.md` §4/§6):
-one primary analytics destination answering "is Goal Cart helping my
+one primary analytics destination answering "is FaraCart helping my
 store sell more profitably?" — the Overview (four business KPI cards,
 trend, funnel, insights) and the Goal Performance comparison table —
 plus the **Optimization** engines (Recommendations for better Goal
@@ -493,7 +493,7 @@ revenue read.
 
 The first viewport answers the store owner's question in seconds
 (`UICHANGES.md` §42): exactly **four primary KPI cards** — Sales
-Attributed to Goal Cart (with a "How is this calculated?" panel),
+Attributed to FaraCart (with a "How is this calculated?" panel),
 Average Basket Increase (labeled *Observed impact*), Purchased Orders
 and Estimated Profit (every data state, never a fabricated number).
 Below the KPIs:
@@ -616,7 +616,7 @@ Every revenue page implements the full frontend-state contract
 (Improvement.md §43/§44) — loading skeletons, error Alerts, empty /
 unavailable / partial / zero / negative states, never a blank card:
 
-- **Distinct empty states (§44)** — "No sales data yet" (no Goal Cart
+- **Distinct empty states (§44)** — "No sales data yet" (no FaraCart
   interactions at all) is different from "No purchases yet" (customers
   interact with goals but no attributed purchase was recorded in the
   period). The Sales Performance page and the Goal Conversion & Purchase

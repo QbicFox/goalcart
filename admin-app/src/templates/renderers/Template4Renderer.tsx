@@ -12,7 +12,7 @@ import { GoalBar, RecommendedProductItem, goalPercent, remainingLabel } from './
  *
  * A gradient progress header (goal title + remaining chip + bar) followed
  * by the goal's own recommended products with add-to-cart buttons. The
- * products come from the existing Goal Cart / WooCommerce recommendation
+ * products come from the existing FaraCart / WooCommerce recommendation
  * data (goal.suggestions) — nothing is hard-coded and no second
  * recommendation engine is introduced.
  */

@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart unified product recommendation tests (Suggestions + Upsells
+ * FaraCart unified product recommendation tests (Suggestions + Upsells
  * consolidation).
  *
  * Boots WordPress and exercises the ProductRecommendationEngine against
@@ -57,7 +57,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Analytics\UpsellRanker;
 use GoalCart\Database\Installer;

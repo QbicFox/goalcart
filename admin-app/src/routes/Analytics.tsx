@@ -203,7 +203,7 @@ const COMPARISON_COLUMNS: ComparisonColumn[] = [
     label: __('Sales', 'goalcart'),
     align: 'right',
     tooltip: __(
-      'Sales attributed to Goal Cart — the incremental order value driven by this goal.',
+      'Sales attributed to FaraCart — the incremental order value driven by this goal.',
       'goalcart'
     ),
   },
@@ -316,7 +316,7 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
       body: sprintf(
         /* translators: 1: estimated profit amount. */
         __(
-          'Goal Cart generated an estimated profit of %1$s after reward and shipping costs.',
+          'FaraCart generated an estimated profit of %1$s after reward and shipping costs.',
           'goalcart'
         ),
         formatCurrency(summary.estimated_profit)
@@ -329,7 +329,7 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
     insights.push({
       icon: <PaymentsIcon fontSize="small" />,
       title: __('Profit not estimated yet', 'goalcart'),
-      body: __('Add product cost data to see the estimated profit of Goal Cart.', 'goalcart'),
+      body: __('Add product cost data to see the estimated profit of FaraCart.', 'goalcart'),
     });
   }
 
@@ -612,7 +612,7 @@ export default function Analytics() {
           icon={<InsightsIcon fontSize="large" />}
           title={__('No sales data yet', 'goalcart')}
           description={__(
-            'Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit insights here.',
+            'Once customers start interacting with your goals, FaraCart will show purchases, sales and profit insights here.',
             'goalcart'
           )}
         />
@@ -648,7 +648,7 @@ export default function Analytics() {
               label={__('Purchased Orders', 'goalcart')}
               value={funnel ? formatNumber(funnel.converted) : '—'}
               icon={<ShoppingCartCheckoutIcon fontSize="small" />}
-              hint={__('after Goal Cart interaction', 'goalcart')}
+              hint={__('after FaraCart interaction', 'goalcart')}
               tooltip={__(
                 'Distinct orders associated with a goal — a purchase, not a goal completion.',
                 'goalcart'
@@ -669,7 +669,7 @@ export default function Analytics() {
                 summary.attributed_sales === null ? '—' : formatCurrency(summary.attributed_sales)
               }
               icon={<PaymentsIcon fontSize="small" />}
-              hint={__('Sales attributed to Goal Cart', 'goalcart')}
+              hint={__('Sales attributed to FaraCart', 'goalcart')}
               tooltip={__(
                 'The incremental order value from orders where customers interacted with a goal before purchasing.',
                 'goalcart'
@@ -771,7 +771,7 @@ export default function Analytics() {
                         ? '—'
                         : formatCurrency(summary.attributed_sales)
                     }
-                    explanation={__('Sales generated after Goal Cart interaction.', 'goalcart')}
+                    explanation={__('Sales generated after FaraCart interaction.', 'goalcart')}
                   />
                   <StatRow
                     label={__('Average Purchased Order', 'goalcart')}
@@ -1021,7 +1021,7 @@ export default function Analytics() {
                     <LocalShippingIcon fontSize="small" />
                     <Typography variant="caption">
                       {__(
-                        'These metrics use the Goal Cart attribution model — direct vs assisted, distinct orders, no double counting.',
+                        'These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting.',
                         'goalcart'
                       )}
                     </Typography>

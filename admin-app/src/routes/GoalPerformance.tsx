@@ -101,7 +101,7 @@ const COLUMNS: Column[] = [
     label: __('Sales', 'goalcart'),
     align: 'right',
     tooltip: __(
-      'Sales attributed to Goal Cart — the incremental order value driven by this goal.',
+      'Sales attributed to FaraCart — the incremental order value driven by this goal.',
       'goalcart'
     ),
   },
@@ -427,7 +427,7 @@ function GoalDetailDrawer({
               <StatCell
                 label={__('Purchased', 'goalcart')}
                 value={formatNumber(row.converted)}
-                hint={__('after Goal Cart interaction', 'goalcart')}
+                hint={__('after FaraCart interaction', 'goalcart')}
               />
               <StatCell
                 label={__('Attributed Sales', 'goalcart')}
@@ -628,7 +628,7 @@ function GoalDetailDrawer({
                   label={__('Average basket increase', 'goalcart')}
                   value={aovImpact !== null ? formatSignedPercent(aovImpact) : '—'}
                   explanation={__(
-                    'Observed impact — incremental cart value relative to the baseline. It does not prove that Goal Cart caused the difference.',
+                    'Observed impact — incremental cart value relative to the baseline. It does not prove that FaraCart caused the difference.',
                     'goalcart'
                   )}
                 />
@@ -655,7 +655,7 @@ function GoalDetailDrawer({
  * Per-goal commercial outcomes from `GET /goalcart/v1/revenue/goals`:
  * the funnel counts (viewed → progressed → completed → purchased), the
  * purchase rate (purchased / completed — never confused with completion
- * rate, §17/§28), sales attributed to Goal Cart and estimated profit.
+ * rate, §17/§28), sales attributed to FaraCart and estimated profit.
  * Each row opens a detail drawer with the full customer journey, costs
  * and the advanced attribution details behind accordions (§20).
  */
@@ -749,7 +749,7 @@ export default function GoalPerformance() {
           icon={<LeaderboardIcon fontSize="large" />}
           title={__('No goal performance yet', 'goalcart')}
           description={__(
-            'Once customers start interacting with your goals, Goal Cart will show purchases, sales and profit per goal here.',
+            'Once customers start interacting with your goals, FaraCart will show purchases, sales and profit per goal here.',
             'goalcart'
           )}
         />

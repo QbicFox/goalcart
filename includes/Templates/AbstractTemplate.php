@@ -1,6 +1,6 @@
 <?php
 /**
- * Base class for Goal Cart progress templates.
+ * Base class for FaraCart progress templates.
  *
  * @package GoalCart
  */

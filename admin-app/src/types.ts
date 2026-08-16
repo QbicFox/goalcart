@@ -22,7 +22,7 @@ export interface GoalCartBootData {
   locale: string;
   isRtl: boolean;
   currency: string;
-  /** Storefront/dashboard currency display style from Goal Cart settings. */
+  /** Storefront/dashboard currency display style from FaraCart settings. */
   currencyDisplay: 'symbol' | 'code' | 'name';
   /** Site-local today (Y-m-d), so date math matches the backend timezone. */
   currentDate: string;
@@ -36,7 +36,7 @@ export interface GoalCartBootData {
 }
 
 /**
- * Standard REST response envelope used by the Goal Cart API
+ * Standard REST response envelope used by the FaraCart API
  * (Phase 7: base controller + response envelope, mirroring the reference).
  */
 export interface ApiEnvelope<T> {

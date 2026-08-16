@@ -4,7 +4,7 @@
 > Visibility and Purchase Analytics* initiative (see `Improvement.md`).
 >
 > This document is a **read-only audit**. No code was modified. It maps the existing
-> Goal Cart revenue/analytics implementation to the requested UX, lists what is
+> FaraCart revenue/analytics implementation to the requested UX, lists what is
 > already reusable, what is missing, and what later phases must change.
 >
 > Audit date: 2026-08-12 · Scope: `includes/`, `admin-app/src/`, `tests/`, `docs/`,
@@ -14,7 +14,7 @@
 
 ## 1. Executive summary
 
-Goal Cart already contains a complete, tested revenue-attribution and analytics stack
+FaraCart already contains a complete, tested revenue-attribution and analytics stack
 (Phases 33.1–33.6 of `AGENT.md`): a bounded event pipeline, an attribution engine with
 direct/assisted models, daily aggregation, a cached repository layer, admin-only REST
 endpoints and five React pages. **The core data needed by the Improvement.md UX already
@@ -168,7 +168,7 @@ already the engine's core rule (`goal_completed` flag ≠ an associated order).
 | Purchased Orders (per goal) | `goal_metrics().converted` | `RevenueRepository::goal_performance()` |
 | Purchase Rate | `conversion_rate` (null when 0 completions — the spec's "—" rule already holds) | `funnel()`, `goal_metrics()` |
 | Completion Rate | `completion_rate` (completed/views) | `funnel()`, `goal_metrics()` |
-| Sales attributed to Goal Cart | `goal_driven_revenue` (direct incremental) | `attribution_summary()` |
+| Sales attributed to FaraCart | `goal_driven_revenue` (direct incremental) | `attribution_summary()` |
 | Assisted sales | `goal_assisted_revenue` | `attribution_summary()` |
 | Influenced sales | `goal_influenced_revenue` | `attribution_summary()` |
 | Incremental cart value | `incremental_cart_value.average` (+ baseline, sessions) | `incremental_cart_value()` |
@@ -273,7 +273,7 @@ All additive; existing fields/routes are never removed or renamed.
 ### 7.2 Revenue Overview (§5–§15, §49)
 
 - Four primary KPI cards, in order:
-  1. **Sales Attributed to Goal Cart** — `goal_driven_revenue`, hint = `summary.orders`
+  1. **Sales Attributed to FaraCart** — `goal_driven_revenue`, hint = `summary.orders`
      purchased orders. Expandable "How is this calculated?" showing direct / assisted /
      influenced / incremental revenue + attribution methodology (from the same summary
      payload).
@@ -340,7 +340,7 @@ All additive; existing fields/routes are never removed or renamed.
 - **Terminology** (§32): apply the full technical→user-facing label table; never show
   raw field names.
 - **i18n** (§52): add translations for all new labels (Purchased Orders, Purchase Rate,
-  Sales Attributed to Goal Cart, Average Basket Increase, Estimated Profit, Cost Data,
+  Sales Attributed to FaraCart, Average Basket Increase, Estimated Profit, Cost Data,
   Cost Coverage, Advanced Analytics, Purchase Analysis, Observed Impact, Data
   Sufficiency, profit states…), regenerate POT/JED, keep `fa_IR` in sync.
 - **RTL / responsive / a11y** (§51/§53): 2-column KPI grid on small screens,
@@ -353,7 +353,7 @@ All additive; existing fields/routes are never removed or renamed.
 
 | Improvement.md request | Existing source | Change needed |
 | --- | --- | --- |
-| Sales Attributed to Goal Cart | `summary.goal_driven_revenue` | label only |
+| Sales Attributed to FaraCart | `summary.goal_driven_revenue` | label only |
 | Average Basket Increase | `aov.percentage_change` / `absolute_change` | label + "Observed impact" |
 | Purchased Orders | `summary.orders` / `funnel.converted` / `trend[].conversions` / `goal.converted` | label ("Converted" → "Purchased") |
 | Purchase Rate | `funnel.conversion_rate` / `goal.conversion_rate` | label ("Conversion" → "Purchase Rate"); tooltip |

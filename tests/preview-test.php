@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart admin preview tests (P15-T02 / P15-T03).
+ * FaraCart admin preview tests (P15-T02 / P15-T03).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
  * exercises the Phase 15 admin preview endpoint:
@@ -47,7 +47,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\REST\PreviewController;
 

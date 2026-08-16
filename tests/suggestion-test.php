@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart smart-suggestion tests (P14-T02 / P14-T03 / P14-T04).
+ * FaraCart smart-suggestion tests (P14-T02 / P14-T03 / P14-T04).
  *
  * Boots WordPress and exercises the Phase 14 SuggestionEngine against
  * products created inside a single database transaction (rolled back
@@ -42,7 +42,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Goals\CartContext;
 use GoalCart\Goals\Goal;

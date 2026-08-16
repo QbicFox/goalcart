@@ -1,6 +1,6 @@
 <?php
 /**
- * Dependency injection container for Goal Cart.
+ * Dependency injection container for FaraCart.
  *
  * @package GoalCart
  */

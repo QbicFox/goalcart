@@ -1,6 +1,6 @@
 <?php
 /**
- * Reward cost & profit impact estimator for Goal Cart (Phase 33.2).
+ * Reward cost & profit impact estimator for FaraCart (Phase 33.2).
  *
  * @package GoalCart
  */
@@ -52,7 +52,7 @@ final class RewardCostEstimator {
 	 * Phase 3 / §10). Labels are kept in the UI layer; these keys never
 	 * change across versions.
 	 *
-	 * `_goalcart_product_cost` is Goal Cart's own product-cost field (the
+	 * `_goalcart_product_cost` is FaraCart's own product-cost field (the
 	 * WooCommerce product-edit metabox ProductCostField writes it) and
 	 * takes precedence when present; WooCommerce's standard `_cost` and the
 	 * common `_wc_cog_cost` cost-of-goods field are the fallbacks for
@@ -315,7 +315,7 @@ final class RewardCostEstimator {
 	/**
 	 * Read the raw cost from the product's own meta fields.
 	 *
-	 * Priority: Goal Cart's own `_goalcart_product_cost` field first, then
+	 * Priority: FaraCart's own `_goalcart_product_cost` field first, then
 	 * WooCommerce's standard `_cost`, then the cost-of-goods
 	 * `_wc_cog_cost`. Zero/negative values count as "no cost data" — the
 	 * same contract as product_cost().
@@ -471,7 +471,7 @@ final class RewardCostEstimator {
 	 * Product-level cost coverage (UPSELL_REFACTOR §25).
 	 *
 	 * How much of the catalog carries cost data: published products with a
-	 * direct cost meta (Goal Cart's own field, `_cost` or `_wc_cog_cost`)
+	 * direct cost meta (FaraCart's own field, `_cost` or `_wc_cog_cost`)
 	 * OR at least one variation with cost data, over the total published
 	 * product count. Two bounded indexed EXISTS scans — never a full
 	 * product scan. Coverage semantics are guaranteed: every product in

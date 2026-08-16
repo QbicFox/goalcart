@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 /**
- * Vite configuration for the Goal Cart admin app.
+ * Vite configuration for the FaraCart admin app.
  *
  * - `build.manifest` writes `.vite/manifest.json` so the PHP asset loader
  *   (`includes/Admin/AssetLoader.php`) can enqueue the hashed entry assets.
@@ -33,7 +33,7 @@ export default defineConfig({
     },
   },
   // Relative base: the plugin can live at any URL (WordPress installs in
-  // subdirectories, e.g. /woo-app/wp-content/plugins/goalcart/), so asset
+  // subdirectories, e.g. /woo-app/wp-content/plugins/ravis-faracart/), so asset
   // URLs must resolve against the chunk's own location via import.meta.url
   // rather than the site root.
   base: './',

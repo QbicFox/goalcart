@@ -86,7 +86,7 @@ export default function AttributionDashboard() {
     <PageContainer
       title={__('Revenue Attribution', 'goalcart')}
       description={__(
-        'The funnel and the direct vs assisted models behind Goal Cart’s attributed revenue.',
+        'The funnel and the direct vs assisted models behind FaraCart’s attributed revenue.',
         'goalcart'
       )}
     >

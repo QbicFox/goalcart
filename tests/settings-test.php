@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart settings tests (P18-T01 General / P18-T02 Frontend /
+ * FaraCart settings tests (P18-T01 General / P18-T02 Frontend /
  * P18-T03 Goal Calculation / P18-T04 Performance / P18-T05 Advanced).
  *
  * Boots WordPress and exercises the Phase 18 settings surface:
@@ -55,7 +55,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Admin\AssetLoader;
 use GoalCart\Analytics\Tracker;

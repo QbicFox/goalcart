@@ -1,6 +1,6 @@
 <?php
 /**
- * Debug log utility for Goal Cart.
+ * Debug log utility for FaraCart.
  *
  * @package GoalCart
  */

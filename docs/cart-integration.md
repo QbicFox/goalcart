@@ -1,4 +1,4 @@
-# Goal Cart — Cart Context & WooCommerce Integration
+# FaraCart — Cart Context & WooCommerce Integration
 
 > **Phase 6 / Tasks P06-T01–T04.** The single, reliable source of truth for the
 > live cart state. Phase 4 built the pure `CartContext` value object; Phase 5

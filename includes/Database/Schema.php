@@ -1,6 +1,6 @@
 <?php
 /**
- * Database schema definitions for Goal Cart.
+ * Database schema definitions for FaraCart.
  *
  * @package GoalCart
  */

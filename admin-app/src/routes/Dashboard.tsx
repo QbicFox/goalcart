@@ -109,7 +109,7 @@ function buildOpportunities(
       icon: <WarningAmberIcon fontSize="small" color="warning" />,
       title: __('Product cost data is incomplete', 'goalcart'),
       body: __(
-        'Add product costs to unlock Estimated Profit — Goal Cart never invents a margin.',
+        'Add product costs to unlock Estimated Profit — FaraCart never invents a margin.',
         'goalcart'
       ),
       action: { label: __('Add costs', 'goalcart'), href: productsUrl },
@@ -433,7 +433,7 @@ function Onboarding() {
         <FlagIcon sx={{ fontSize: 48 }} />
       </Box>
       <Typography variant="h5" component="h2" gutterBottom>
-        {__('Welcome to Goal Cart', 'goalcart')}
+        {__('Welcome to FaraCart', 'goalcart')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 480, mx: 'auto' }}>
         {__('Increase cart value with Goals and Smart Upsells.', 'goalcart')}
@@ -627,7 +627,7 @@ export default function Dashboard() {
             }}
           >
             <KpiCard
-              label={__('Sales Attributed to Goal Cart', 'goalcart')}
+              label={__('Sales Attributed to FaraCart', 'goalcart')}
               value={formatCurrency(summary.goal_driven_revenue)}
               icon={<PaymentsIcon fontSize="small" />}
               trend={salesTrend}
@@ -664,7 +664,7 @@ export default function Dashboard() {
               value={formatNumber(summary.orders)}
               icon={<ShoppingCartCheckoutIcon fontSize="small" />}
               trend={ordersTrend}
-              hint={__('after Goal Cart interaction', 'goalcart')}
+              hint={__('after FaraCart interaction', 'goalcart')}
             />
             <KpiCard
               label={__('Purchase Rate', 'goalcart')}

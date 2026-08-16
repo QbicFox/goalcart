@@ -1,6 +1,6 @@
 <?php
 /**
- * Daily revenue aggregation for Goal Cart (Phase 33.3 — Aggregation & Performance).
+ * Daily revenue aggregation for FaraCart (Phase 33.3 — Aggregation & Performance).
  *
  * @package GoalCart
  */

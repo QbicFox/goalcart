@@ -1,6 +1,6 @@
 # Reference Plugin — Complete File Inventory
 
-> **Phase 0 / Task 0.2** — Generated for the Goal Cart project.
+> **Phase 0 / Task 0.2** — Generated for the FaraCart project.
 > Reference plugin: `/home/qbicfox/public_html/woo-app/wp-content/plugins/wooinsights` (v0.1.0).
 > Site context: WordPress 7.0.2, WooCommerce 11.0.0, PHP ≥ 7.4.
 
@@ -17,7 +17,7 @@ excluded from the detailed listing but noted where relevant.
 | `composer.json` | Composer config: `type: wordpress-plugin`, PSR-4 `WooInsights\ => includes/`, `autoload-dev` `WooInsights\Tests\ => tests/`, `optimize-autoloader`, `sort-packages`, requires PHP ≥ 7.4 only (no runtime packages). |
 | `uninstall.php` | WordPress uninstall handler: loads the Composer autoloader via `__DIR__` (rename-safe), calls `WooInsights\Database\Installer::uninstall()` (drops all tables + options). |
 | `README.md` | Setup/build/i18n documentation for the plugin. |
-| `AGENT.md` | The plugin's own AI-agent execution roadmap (same pattern as Goal Cart). |
+| `AGENT.md` | The plugin's own AI-agent execution roadmap (same pattern as FaraCart). |
 | `.editorconfig` | Tabs for PHP, 2-space for YAML/JSON, UTF-8, LF, final newline, trim trailing whitespace. |
 | `.gitignore` | Ignores `/vendor/`, `composer.lock`, `*.log`, `.DS_Store`, IDE dirs, `.phpunit.result.cache`, `coverage/`, `admin-app/node_modules/`, `admin-app/dist/`, `*.eslintcache`. |
 

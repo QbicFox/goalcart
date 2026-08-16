@@ -1,6 +1,6 @@
 <?php
 /**
- * Shared progress math for the Goal Cart engine.
+ * Shared progress math for the FaraCart engine.
  *
  * @package GoalCart
  */

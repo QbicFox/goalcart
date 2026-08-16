@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart Phase 32 tests (Advanced V2 features).
+ * FaraCart Phase 32 tests (Advanced V2 features).
  *
  * Boots WordPress and exercises the Phase 32 surface:
  *
@@ -50,7 +50,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Goals\CartContext;
 use GoalCart\Goals\Goal;

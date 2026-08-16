@@ -1,13 +1,13 @@
-# Goal Cart for WooCommerce — Product Specification
+# FaraCart for WooCommerce — Product Specification
 
-> **Phase 1 / Tasks P01-T01–T03** — Defines Goal Cart as a **WooCommerce Cart Revenue Optimization Engine**, not merely a cart progress-bar widget.
+> **Phase 1 / Tasks P01-T01–T03** — Defines FaraCart as a **WooCommerce Cart Revenue Optimization Engine**, not merely a cart progress-bar widget.
 > This document is the product source of truth for all implementation phases (Phases 2–35). Technical architecture decisions live in `docs/REFERENCE_ARCHITECTURE.md`; developer docs are produced in Phase 29.
 
 ---
 
 ## 1. Product Objective (P01-T01)
 
-Goal Cart helps WooCommerce store owners **increase Average Order Value (AOV) and conversion** by showing shoppers a clear, motivating path from their current cart to a reachable next goal, and by suggesting the incremental products that close the gap.
+FaraCart helps WooCommerce store owners **increase Average Order Value (AOV) and conversion** by showing shoppers a clear, motivating path from their current cart to a reachable next goal, and by suggesting the incremental products that close the gap.
 
 The product is **not** a passive progress-bar widget. It is a revenue-optimization engine built on four connected mechanisms:
 
@@ -183,7 +183,7 @@ The MVP is defined by the roadmap's feature list. Each item below states its req
 
 The roadmap explicitly defers to later phases — they must **not** block or become dependencies of the MVP:
 
-- **Advanced AI** (Phase 34): campaign copy generation, smart thresholds, AI recommendations. Core Goal Cart must work fully without AI.
+- **Advanced AI** (Phase 34): campaign copy generation, smart thresholds, AI recommendations. Core FaraCart must work fully without AI.
 - **A/B testing** (Phase 33): copy/design/threshold/reward/CTA experiments.
 - **Revenue attribution & smart upsell/margins** (Phase 33).
 - **Post-MVP backlog** (from roadmap, prioritized): free gift → customer-selected gifts → advanced conditions → shipping-zone rules → customer segmentation → countdown → sticky bar → campaign templates → full analytics dashboard → A/B testing → revenue attribution → smart goal recommendation → margin-aware recommendations → AI campaign optimization.
@@ -246,7 +246,7 @@ These are the acceptance-level expectations the implementation phases must satis
 
 Product success is not "the progress bar renders". MVP success is measured by:
 
-- **AOV lift** — average order value before vs after enabling Goal Cart.
+- **AOV lift** — average order value before vs after enabling FaraCart.
 - **Goal completion rate** — completed goals ÷ impressions.
 - **Suggestion conversion** — CTR and add-to-cart rate of suggested products, and their contribution to cart value.
 - **Friction** — checkout UX not harmed; no performance regression on storefront.
@@ -256,7 +256,7 @@ Product success is not "the progress bar renders". MVP success is measured by:
 
 ## 8. Out of Scope for Phase 1
 
-Phase 1 is a **specification-only phase**: it produces this document and the progress update. It does **not** produce code, and it must not begin Goal Cart business implementation (rule 7) — the architecture report (Phase 0) is complete and `docs/REFERENCE_ARCHITECTURE.md` is authoritative for conventions.
+Phase 1 is a **specification-only phase**: it produces this document and the progress update. It does **not** produce code, and it must not begin FaraCart business implementation (rule 7) — the architecture report (Phase 0) is complete and `docs/REFERENCE_ARCHITECTURE.md` is authoritative for conventions.
 
 ## 9. Definition of Done (Phase 1)
 

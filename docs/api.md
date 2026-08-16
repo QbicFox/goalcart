@@ -1,4 +1,4 @@
-# Goal Cart REST API (Phase 7)
+# FaraCart REST API (Phase 7)
 
 The plugin exposes a clean API for the React admin app and the frontend
 progress widgets through a single REST namespace:
@@ -709,7 +709,7 @@ bad event type or field), `goalcart_track_failed` (500).
 ## 3. Developer API — registering a third-party template
 
 The template engine (pluggable template engine, Phase 12) is the one
-Goal Cart surface a third party extends with a **class-map filter**,
+FaraCart surface a third party extends with a **class-map filter**,
 using the same convention as the goal evaluators and reward
 applicators:
 

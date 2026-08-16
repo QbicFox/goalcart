@@ -26,7 +26,7 @@ const SnackbarContext = createContext<SnackbarContextValue | null>(null);
  * chrome) shows the latest message with an auto-hide timer.
  *
  * Note: the reference plugin renders a local Snackbar per page; this
- * shared provider is the Goal Cart foundation variant so any page or
+ * shared provider is the FaraCart foundation variant so any page or
  * mutation can raise notifications without wiring its own Snackbar.
  */
 export function SnackbarProvider({ children }: { children: ReactNode }) {

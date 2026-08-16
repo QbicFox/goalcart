@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart cart-integration tests (P06-T01 / P06-T02 / P06-T03 / P06-T04).
+ * FaraCart cart-integration tests (P06-T01 / P06-T02 / P06-T03 / P06-T04).
  *
  * Boots WordPress, then exercises the CartIntegration service — the single
  * source of truth for the live-cart snapshot — and the Phase 6 additions to
@@ -32,7 +32,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Cart\CartIntegration;
 use GoalCart\Goals\CartContext;

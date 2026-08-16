@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart Phase 33.6 (React Admin) revenue REST tests.
+ * FaraCart Phase 33.6 (React Admin) revenue REST tests.
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
  * exercises the revenue optimization read endpoints that power the new
@@ -47,7 +47,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Analytics\RevenueRepository;
 use GoalCart\Analytics\RevenueTracker;

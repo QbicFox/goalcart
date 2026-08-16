@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart Phase 2 tests (Backend/Data Layer — purchase & profit metrics).
+ * FaraCart Phase 2 tests (Backend/Data Layer — purchase & profit metrics).
  *
  * Exercises the purchase-analysis data layer added for the Revenue &
  * Analytics UX simplification (Improvement.md Phase 2):
@@ -59,7 +59,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Analytics\AttributionEngine;
 use GoalCart\Analytics\RevenueRepository;

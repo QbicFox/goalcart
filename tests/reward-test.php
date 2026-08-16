@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart reward engine tests (P05-T02 / P05-T03).
+ * FaraCart reward engine tests (P05-T02 / P05-T03).
  *
  * Boots WordPress, then exercises the RewardEngine, the reward applicators
  * and the RewardSafety guards against synthetic Goal / GoalResult /
@@ -34,7 +34,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Goals\CartContext;
 use GoalCart\Goals\Goal;
@@ -514,7 +514,7 @@ if ( class_exists( 'WC_Shipping_Rate' ) ) {
 // ---------------------------------------------------------------------------
 echo "\n== 9. WooCommerce integration wiring ==\n";
 
-// The plugin boots at file scope (goalcart.php), so the RewardEngine's
+// The plugin boots at file scope (ravis-faracart.php), so the RewardEngine's
 // WooCommerce hooks must be live with their declared priorities. Read-only:
 // no cart, session, or database state is touched.
 $re = \GoalCart\Plugin::instance()->reward_engine();

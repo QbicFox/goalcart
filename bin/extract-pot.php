@@ -1,8 +1,8 @@
 <?php
 /**
- * POT extractor for Goal Cart (PHP + admin React strings).
+ * POT extractor for FaraCart (PHP + admin React strings).
  *
- * Phase 27 (Internationalization): scans the PHP layer (goalcart.php,
+ * Phase 27 (Internationalization): scans the PHP layer (ravis-faracart.php,
  * includes/) and the admin React app (admin-app/src) for WordPress
  * translation-function calls and emits `languages/goalcart.pot` — the
  * English source template translators work from. Output is deterministic
@@ -46,7 +46,7 @@ for ( $i = 1; $i < $argc; $i++ ) {
  */
 function gc_i18n_files( $root ) {
 	$targets = array(
-		$root . '/goalcart.php',
+		$root . '/ravis-faracart.php',
 		$root . '/includes',
 		$root . '/admin-app/src',
 	);
@@ -192,13 +192,13 @@ function gc_i18n_pot_escape( $s ) {
  */
 function gc_i18n_render_pot( array $entries, $version ) {
 	$lines   = array();
-	$lines[] = '# Copyright (C) 2026 Goal Cart Contributors';
-	$lines[] = '# This file is distributed under the same license as the Goal Cart plugin (GPL-2.0-or-later).';
+	$lines[] = '# Copyright (C) 2026 FaraCart Contributors';
+	$lines[] = '# This file is distributed under the same license as the FaraCart plugin (GPL-2.0-or-later).';
 	$lines[] = '#';
 	$lines[] = 'msgid ""';
 	$lines[] = 'msgstr ""';
-	$lines[] = '"Project-Id-Version: Goal Cart ' . gc_i18n_pot_escape( $version ) . '\\n"';
-	$lines[] = '"Report-Msgid-Bugs-To: https://goalcart.com/support\\n"';
+	$lines[] = '"Project-Id-Version: FaraCart ' . gc_i18n_pot_escape( $version ) . '\\n"';
+	$lines[] = '"Report-Msgid-Bugs-To: https://faracart.com/support\\n"';
 	$lines[] = '"MIME-Version: 1.0\\n"';
 	$lines[] = '"Content-Type: text/plain; charset=UTF-8\\n"';
 	$lines[] = '"Content-Transfer-Encoding: 8bit\\n"';
@@ -286,8 +286,8 @@ foreach ( gc_i18n_files( $root ) as $file ) {
 
 $version = '0.1.0';
 
-if ( is_file( $root . '/goalcart.php' ) ) {
-	$header = (string) file_get_contents( $root . '/goalcart.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+if ( is_file( $root . '/ravis-faracart.php' ) ) {
+	$header = (string) file_get_contents( $root . '/ravis-faracart.php' ); // phpcs:ignore WordPress.WP.AlternativeFunctions
 
 	if ( preg_match( '/^ \* Version:\s*(.+)$/m', $header, $m ) ) {
 		$version = trim( $m[1] );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Anonymous session management for Goal Cart analytics.
+ * Anonymous session management for FaraCart analytics.
  *
  * @package GoalCart
  */

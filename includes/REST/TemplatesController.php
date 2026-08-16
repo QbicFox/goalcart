@@ -25,7 +25,7 @@ defined( 'ABSPATH' ) || exit;
  *    for which templates exist and what they accept.
  *
  * Admin-only (manage_options + rate limit, P07-T04), same conventions as
- * every Goal Cart admin endpoint.
+ * every FaraCart admin endpoint.
  */
 class TemplatesController extends BaseController {
 

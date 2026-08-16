@@ -1,4 +1,4 @@
-# Goal Cart — Goal Engine
+# FaraCart — Goal Engine
 
 > **Phase 4 / Tasks P04-T01–T05.** The central calculation engine, built independently
 > from any UI. The engine is authoritative in `includes/Goals/`; this document explains the

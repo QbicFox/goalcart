@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart Phase 33.5 tests (Smart Upsell).
+ * FaraCart Phase 33.5 tests (Smart Upsell).
  *
  * Boots WordPress, then exercises the Phase 33.5 deterministic
  * product-ranking engine and its endpoints:
@@ -52,7 +52,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 // Deterministic English assertions regardless of the site locale: the
 // upsell reasons are translated for the site locale (fa_IR on this

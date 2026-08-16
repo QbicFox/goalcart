@@ -1,6 +1,6 @@
 <?php
 /**
- * Compile Goal Cart .po translation files into .mo and JED JSON.
+ * Compile FaraCart .po translation files into .mo and JED JSON.
  *
  * Phase 27 (Internationalization): for every `languages/goalcart-<locale>.po`
  * this writes:

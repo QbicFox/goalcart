@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart Phase 33.8 tests (Testing & Optimization).
+ * FaraCart Phase 33.8 tests (Testing & Optimization).
  *
  * The Phase 33 regression/quality suite. Phase 33.1–33.7 each shipped a
  * focused suite (revenue-foundation / attribution / aggregation /
@@ -68,7 +68,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\Analytics\AttributionEngine;
 use GoalCart\Analytics\DailyAggregator;
@@ -485,7 +485,7 @@ if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
 	$compat   = \Automattic\WooCommerce\Utilities\FeaturesUtil::get_compatible_plugins_for_feature( 'custom_order_tables' );
 
 	foreach ( (array) $compat as $bucket ) {
-		if ( in_array( 'goalcart/goalcart.php', (array) $bucket, true ) ) {
+		if ( in_array( 'ravis-faracart/ravis-faracart.php', (array) $bucket, true ) ) {
 			$declared = true;
 			break;
 		}

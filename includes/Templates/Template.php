@@ -1,6 +1,6 @@
 <?php
 /**
- * Template contract for the Goal Cart template engine.
+ * Template contract for the FaraCart template engine.
  *
  * @package GoalCart
  */

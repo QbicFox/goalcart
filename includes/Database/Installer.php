@@ -1,6 +1,6 @@
 <?php
 /**
- * Database installer and migrator for Goal Cart.
+ * Database installer and migrator for FaraCart.
  *
  * @package GoalCart
  */
@@ -243,7 +243,7 @@ class Installer {
 				if ( ! empty( $wpdb->last_error ) ) {
 					// Log the failure without blocking activation; missing
 					// indexes can be retried on the next upgrade.
-					error_log( 'Goal Cart: failed to add index ' . $name . ' on ' . $table . ': ' . $wpdb->last_error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					error_log( 'FaraCart: failed to add index ' . $name . ' on ' . $table . ': ' . $wpdb->last_error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 				}
 			}
 		}
@@ -285,7 +285,7 @@ class Installer {
 			if ( ! empty( $wpdb->last_error ) ) {
 				// Log the failure without blocking activation; missing FKs
 				// can be retried on the next upgrade.
-				error_log( 'Goal Cart: failed to add foreign key ' . $fk['name'] . ': ' . $wpdb->last_error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+				error_log( 'FaraCart: failed to add foreign key ' . $fk['name'] . ': ' . $wpdb->last_error ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			}
 		}
 	}

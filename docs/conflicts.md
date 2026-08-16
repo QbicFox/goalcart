@@ -1,4 +1,4 @@
-# Goal Cart — Conflict & Priority Engine
+# FaraCart — Conflict & Priority Engine
 
 > **Phase 26 / Tasks P26-T01–T04.** The single deterministic rule for what happens when
 > multiple goals/campaigns are active at the same time. The engine is authoritative in

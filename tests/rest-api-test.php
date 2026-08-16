@@ -1,6 +1,6 @@
 <?php
 /**
- * Goal Cart REST API tests (P07-T01 / P07-T02 / P07-T03 / P07-T04).
+ * FaraCart REST API tests (P07-T01 / P07-T02 / P07-T03 / P07-T04).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
  * exercises the Phase 7 REST layer:
@@ -49,7 +49,7 @@ $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
 $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 
 require $dir . '/wp-load.php';
-require dirname( __DIR__ ) . '/goalcart.php';
+require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use GoalCart\REST\CampaignsController;
 use GoalCart\REST\FrontendController;

@@ -1,17 +1,17 @@
-# Goal Cart — Revenue & Analytics UX Simplification, Profit Visibility and Purchase Analytics
+# FaraCart — Revenue & Analytics UX Simplification, Profit Visibility and Purchase Analytics
 
 ## Mission
 
-Redesign and simplify the Goal Cart Revenue and Analytics experience without removing the existing analytics capabilities, attribution logic, or tested backend architecture.
+Redesign and simplify the FaraCart Revenue and Analytics experience without removing the existing analytics capabilities, attribution logic, or tested backend architecture.
 
 The current system contains strong revenue attribution, funnel, AOV, reward-cost, margin, estimated-profit, recommendation, and upsell analytics capabilities. However, the admin UI currently exposes too much technical analytics terminology and does not clearly answer the store owner's most important questions:
 
-1. How much additional sales did Goal Cart generate?
-2. How much did Goal Cart increase basket value?
+1. How much additional sales did FaraCart generate?
+2. How much did FaraCart increase basket value?
 3. How many customers actually purchased after interacting with a goal?
 4. Which goals perform best?
 5. How much did rewards cost?
-6. How much estimated profit did Goal Cart generate?
+6. How much estimated profit did FaraCart generate?
 7. What should the store owner change to improve results?
 
 The goal of this implementation is therefore NOT to remove analytics.
@@ -58,7 +58,7 @@ Phase 10: ████████████████████ 100%   Te
 
 # 1. IMPORTANT: READ THE EXISTING PROJECT FIRST
 
-Before changing any code, inspect the existing Goal Cart plugin and all relevant documentation.
+Before changing any code, inspect the existing FaraCart plugin and all relevant documentation.
 
 The documentation package includes:
 
@@ -120,7 +120,7 @@ Simple business metrics.
 
 Examples:
 
-* Sales attributed to Goal Cart
+* Sales attributed to FaraCart
 * Additional basket value
 * Purchased orders
 * Estimated profit
@@ -131,7 +131,7 @@ Explain the metric.
 
 Examples:
 
-* 187 orders purchased after Goal Cart interaction
+* 187 orders purchased after FaraCart interaction
 * Average basket was 8.7% higher
 * 102 orders completed the free-shipping goal
 * Estimated profit is based on product cost, reward cost, and shipping cost
@@ -200,7 +200,7 @@ For the admin-facing UI, prefer:
 
 or
 
-"Goal Cart Performance"
+"FaraCart Performance"
 
 Use whichever naming is consistent with the existing product terminology.
 
@@ -220,7 +220,7 @@ Use exactly four primary KPI cards.
 
 Label:
 
-> Sales Attributed to Goal Cart
+> Sales Attributed to FaraCart
 
 Display the primary revenue metric.
 
@@ -239,7 +239,7 @@ This creates confusion.
 Instead:
 
 ```text
-Sales Attributed to Goal Cart
+Sales Attributed to FaraCart
 12,400,000 تومان
 
 187 purchased orders
@@ -275,7 +275,7 @@ Example:
 ```text
 +8.7%
 
-Customers interacting with Goal Cart
+Customers interacting with FaraCart
 spent 8.7% more per order on average.
 ```
 
@@ -312,7 +312,7 @@ Example:
 187
 orders
 
-after Goal Cart interaction
+after FaraCart interaction
 ```
 
 The user must immediately understand that:
@@ -412,7 +412,7 @@ Estimated Profit
 
 Not available yet
 
-Goal Cart needs product cost data
+FaraCart needs product cost data
 to estimate profit.
 ```
 
@@ -424,7 +424,7 @@ If the plugin already has a suitable WooCommerce product-cost configuration rout
 
 If no suitable route exists, provide an in-plugin setup/help panel explaining:
 
-1. Goal Cart does not invent product costs.
+1. FaraCart does not invent product costs.
 2. Product cost must be available from WooCommerce/product cost data.
 3. Once cost data exists, Estimated Profit becomes available automatically.
 4. The calculation includes:
@@ -572,7 +572,7 @@ Keep the existing daily trend functionality but simplify the chart.
 
 Primary chart:
 
-> Goal Cart Sales Performance
+> FaraCart Sales Performance
 
 Allow the user to toggle:
 
@@ -604,7 +604,7 @@ Examples:
 ```text
 Good performance
 
-Goal Cart influenced 187 purchases during this period.
+FaraCart influenced 187 purchases during this period.
 ```
 
 ```text
@@ -930,7 +930,7 @@ Purchase Rate          21.0%
 
 Then show:
 
-> Sales generated after Goal Cart interaction
+> Sales generated after FaraCart interaction
 
 and:
 
@@ -1120,7 +1120,7 @@ Use these user-facing labels:
 
 | Technical               | User-facing                   |
 | ----------------------- | ----------------------------- |
-| goal_driven_revenue     | Sales attributed to Goal Cart |
+| goal_driven_revenue     | Sales attributed to FaraCart |
 | goal_assisted_revenue   | Assisted sales                |
 | goal_influenced_revenue | Influenced sales              |
 | incremental_revenue     | Additional sales value        |
@@ -1492,13 +1492,13 @@ when profit is unavailable.
 
 # 44. EMPTY STATE
 
-If there are no Goal Cart interactions:
+If there are no FaraCart interactions:
 
 ```text
 No sales data yet
 
 Once customers start interacting with your goals,
-Goal Cart will show sales, purchases and profit insights here.
+FaraCart will show sales, purchases and profit insights here.
 ```
 
 If there are interactions but no purchases:
@@ -1551,7 +1551,7 @@ Whenever AOV comparison is shown, use:
 
 and:
 
-> This comparison shows how order values differ. It does not prove that Goal Cart caused the difference.
+> This comparison shows how order values differ. It does not prove that FaraCart caused the difference.
 
 Keep this subtle.
 
@@ -1601,7 +1601,7 @@ The first viewport must NOT look like an analytics laboratory.
 The first viewport should look like:
 
 ```text
-How did Goal Cart perform?
+How did FaraCart perform?
 ```
 
 Then:
@@ -1645,7 +1645,7 @@ Implement approximately:
 │                                                 │
 ├─────────────────────────────────────────────────┤
 │                                                 │
-│ Goal Cart Sales Performance                    │
+│ FaraCart Sales Performance                    │
 │                                                 │
 │      Sales ───────────────                      │
 │      Orders ─ ─ ─ ─ ─ ─                        │
@@ -1654,7 +1654,7 @@ Implement approximately:
 │                                                 │
 │ What happened?                                 │
 │                                                 │
-│ Goal Cart influenced 187 purchases.             │
+│ FaraCart influenced 187 purchases.             │
 │ Average basket value was 8.7% higher.           │
 │                                                 │
 ├─────────────────────────────────────────────────┤
@@ -1777,7 +1777,7 @@ Add translations for:
 
 * Purchased Orders
 * Purchase Rate
-* Sales Attributed to Goal Cart
+* Sales Attributed to FaraCart
 * Average Basket Increase
 * Estimated Profit
 * Cost Data
@@ -1979,7 +1979,7 @@ already supplied every value):
 
 * `admin-app/src/routes/RevenueOverview.tsx` rewritten as **Sales
   Performance**:
-  - **Four KPI cards** (§5–§8): Sales Attributed to Goal Cart (direct
+  - **Four KPI cards** (§5–§8): Sales Attributed to FaraCart (direct
     incremental + purchased-orders sub-line + expandable "How is this
     calculated?" with direct/assisted/influenced + methodology),
     Average Basket Increase (signed %, observed impact + compare panel:
@@ -2435,10 +2435,10 @@ The implementation is complete only when all of the following are true:
 
 # 56. FINAL PRODUCT PRINCIPLE
 
-The final Goal Cart analytics experience should communicate this story:
+The final FaraCart analytics experience should communicate this story:
 
 ```text
-Goal Cart Performance
+FaraCart Performance
         ↓
 How much did it sell?
         ↓
@@ -2460,17 +2460,17 @@ The user should NOT have to understand:
 * statistical terminology
 * event architecture
 
-to understand whether Goal Cart is helping their store.
+to understand whether FaraCart is helping their store.
 
 Those concepts should remain available for advanced users, but the primary dashboard must communicate business outcomes.
 
 The final experience should feel like:
 
-> "Goal Cart tells me what happened, how much money it made, how many customers actually bought, how profitable it was, and what I should do next."
+> "FaraCart tells me what happened, how much money it made, how many customers actually bought, how profitable it was, and what I should do next."
 
 Not:
 
-> "Goal Cart gives me a collection of analytics metrics and expects me to interpret them."
+> "FaraCart gives me a collection of analytics metrics and expects me to interpret them."
 
 ---
 
