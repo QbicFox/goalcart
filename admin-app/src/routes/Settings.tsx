@@ -130,8 +130,6 @@ const CURRENCY_OPTIONS: Array<{ value: string; label: string }> = [
   { value: '', label: __('Auto (store currency)', 'faracart') },
   { value: 'IRT', label: __('IRT — Iranian toman', 'faracart') },
   { value: 'IRR', label: __('IRR — Iranian rial', 'faracart') },
-  { value: 'USD', label: __('USD — US dollar', 'faracart') },
-  { value: 'EUR', label: __('EUR — Euro', 'faracart') },
 ];
 
 /** The select options for the currency setting, including a stored custom code. */
@@ -429,20 +427,6 @@ export default function Settings() {
                       'faracart'
                     )}
                     options={currencyOptions(data?.currency)}
-                  />
-                  <SelectField
-                    control={control}
-                    name="currency_display"
-                    label={__('Currency display', 'faracart')}
-                    description={__(
-                      'How money amounts are shown on the storefront widgets.',
-                      'faracart'
-                    )}
-                    options={[
-                      { value: 'symbol', label: __('Symbol ($100)', 'faracart') },
-                      { value: 'code', label: __('Code (USD 100)', 'faracart') },
-                      { value: 'name', label: __('Name (US dollars)', 'faracart') },
-                    ]}
                   />
                   <SelectField
                     control={control}
