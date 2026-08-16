@@ -2287,6 +2287,9 @@
             "Sessions": [
                 "نشست‌ها"
             ],
+            "Set a target to preview progress.": [
+                "برای پیش‌نمایش پیشرفت، یک هدف تعیین کنید."
+            ],
             "Set the goal target to %s?": [
                 "آستانهٔ هدف را روی %s تنظیم کنم؟"
             ],

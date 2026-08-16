@@ -228,7 +228,6 @@ export default function GoalBuilder() {
   const preview = usePreview({
     target: previewTarget,
     derive: (current) => ({
-      templateDefault: '',
       targetsFor: (fraction) => presetTargets(current.values, fraction),
       paramsFor: () => ({ goalId: editId ?? undefined, goal: current.values }),
       payloadKey: `goal:${current.id}:${JSON.stringify(current.values)}`,
@@ -546,9 +545,11 @@ export default function GoalBuilder() {
           </Stack>
         </Grid>
 
-        {/* Left column (RTL): the sticky live preview. */}
+        {/* Left column (RTL): the sticky live preview. Sticky only on
+            desktop — on small screens the preview flows after the form
+            in a single column. */}
         <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-          <Box sx={{ position: 'sticky', top: stickyTop }}>
+          <Box sx={{ position: { xs: 'static', md: 'sticky' }, top: stickyTop }}>
             <PreviewPanel scope="goal" preview={preview} />
           </Box>
         </Grid>

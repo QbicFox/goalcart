@@ -1,43 +1,27 @@
-/** Device-width presets for the preview frame (Phase 15 Preview Controls). */
-export type PreviewDevice = 'mobile' | 'tablet' | 'desktop';
-
 /** How the reward chip should render in the preview. */
 export type PreviewRewardState = 'auto' | 'locked' | 'unlocked';
 
 /**
  * Simulated cart-state presets (Phase 15 Preview States): empty cart,
- * 25%, 50%, 75%, completed, plus manual `custom` values.
+ * 25%, 50%, 75%, completed. The preset fraction drives the simulated
+ * amount/quantity internally — the admin never edits raw simulation
+ * values; the preview consumes the current form state instead.
  */
-export type PreviewPreset = 'empty' | '25' | '50' | '75' | '100' | 'custom';
+export type PreviewPreset = 'empty' | '25' | '50' | '75' | '100';
 
 /**
- * The full preview control state shared by the goal and campaign preview
- * dialogs.
- *
- * `template` may be `''` to mean "auto": render each goal with its own
- * resolved template + settings from the payload (the backend resolves
- * item override → scope default → legacy → fallback, identically to the
- * live frontend). Choosing a template id forces that variant with its
- * global default appearance.
+ * The preview control state shared by the goal and campaign preview
+ * panels. Only the preview-state preset remains user-selectable — the
+ * simulated amount/quantity, reward state, device width and template
+ * override are gone: the preview renders the form's own configuration
+ * (the selected template, or the global default) at the available width.
  */
 export interface PreviewControlsValue {
   preset: PreviewPreset;
-  amount: number;
-  quantity: number;
-  rewardState: PreviewRewardState;
-  deviceWidth: PreviewDevice;
-  template: string;
 }
 
-/** Frame widths (px) for each device preset. */
-export const DEVICE_WIDTHS: Record<PreviewDevice, number> = {
-  mobile: 375,
-  tablet: 768,
-  desktop: 1280,
-};
-
 /** The fraction of the (top) goal target each state preset simulates. */
-export const PRESET_PERCENTS: Record<Exclude<PreviewPreset, 'custom'>, number> = {
+export const PRESET_PERCENTS: Record<PreviewPreset, number> = {
   empty: 0,
   '25': 0.25,
   '50': 0.5,
@@ -89,17 +73,5 @@ export function tokensFromSettings(
     text: settings?.frontend_text || DEFAULT_PREVIEW_TOKENS.text,
     radius: settings?.frontend_radius ?? DEFAULT_PREVIEW_TOKENS.radius,
     barHeight: settings?.frontend_bar_height ?? DEFAULT_PREVIEW_TOKENS.barHeight,
-  };
-}
-
-/** Default (fresh-open) control state for a goal/campaign preview. */
-export function defaultControls(template: string): PreviewControlsValue {
-  return {
-    preset: '50',
-    amount: 0,
-    quantity: 0,
-    rewardState: 'auto',
-    deviceWidth: 'desktop',
-    template,
   };
 }

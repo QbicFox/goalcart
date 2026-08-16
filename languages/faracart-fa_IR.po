@@ -3456,6 +3456,10 @@ msgstr "ارائهٔ درخواست‌های مکرر ویجت از یک حاف�
 msgid "Sessions"
 msgstr "نشست‌ها"
 
+#: admin-app/src/components/preview/PreviewPanel.tsx:109
+msgid "Set a target to preview progress."
+msgstr "برای پیش‌نمایش پیشرفت، یک هدف تعیین کنید."
+
 #: admin-app/src/routes/Recommendations.tsx:726
 msgid "Set the goal target to %s?"
 msgstr "آستانهٔ هدف را روی %s تنظیم کنم؟"

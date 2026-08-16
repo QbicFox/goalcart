@@ -11,13 +11,11 @@ import type {
   SettingsMeta,
   TemplatesPayload,
 } from '../../types';
-import { PRESET_PERCENTS, defaultControls } from './types';
+import { PRESET_PERCENTS } from './types';
 import type { PreviewControlsValue, PreviewPreset } from './types';
 
 /** What a target needs to derive per goal/campaign preview. */
 export interface PreviewDerivation {
-  /** Initial template for the preview ('' = resolve the goal/campaign one). */
-  templateDefault: string;
   /** Amount/quantity a state preset fraction should simulate. */
   targetsFor: (fraction: number) => { amount: number; quantity: number };
   /** The endpoint parameters for the current target (ids and/or form payloads). */
@@ -30,12 +28,10 @@ export interface PreviewDerivation {
   payloadKey: string;
 }
 
-/** Everything a preview panel (dialog or builder column) needs. */
+/** Everything a preview panel (builder column) needs. */
 export interface PreviewState {
   controls: PreviewControlsValue;
-  /** Apply a partial update to the control state. */
-  patch: (update: Partial<PreviewControlsValue>) => void;
-  /** Apply a state preset (computes amount/quantity from the target). */
+  /** Apply a preview-state preset (computes amount/quantity from the target). */
   applyPreset: (preset: PreviewPreset) => void;
   previewQuery: UseQueryResult<PreviewPayload, Error>;
   settingsQuery: UseQueryResult<{ data: FaraCartSettings; meta: SettingsMeta }, Error>;
@@ -50,99 +46,80 @@ interface UsePreviewOptions<T> {
 }
 
 /**
- * Shared Phase 15 preview state: control values (state presets, simulated
- * amount/quantity, reward state, device width, template), debounced
- * simulated values + target key, the preview query (`POST /preview`) and
- * the settings query (appearance tokens).
+ * Shared Phase 15 preview state: the preview-state preset (empty cart →
+ * completed), debounced simulated values derived from the preset + the
+ * current form target, the preview query (`POST /preview`) and the
+ * settings query (appearance tokens).
  *
- * Unlike the original dialog hook, the preview is always on — the builder
- * pages render it as a persistent column, so nothing resets on open. The
- * `payloadKey` derivation keeps the query key in sync with the (possibly
- * unsaved) form values, so the live preview always reflects the current
- * form state after a short debounce.
+ * The builder pages render the preview as a persistent column, so nothing
+ * resets on open. The `payloadKey` derivation keeps the query key in sync
+ * with the (possibly unsaved) form values, so the live preview always
+ * reflects the current form state after a short debounce — no save
+ * required. The simulated amount/quantity are derived internally from the
+ * preset fraction and the form's own target (never editable), and the
+ * preview renders the template the backend resolved for the form (item
+ * override → scope default → fallback), identical to the storefront.
  */
 export function usePreview<T>({ target, derive }: UsePreviewOptions<T>): PreviewState {
-  const [controls, setControls] = useState<PreviewControlsValue>(() => defaultControls(''));
+  // The only user-facing preview control: which progress state to show.
+  const [preset, setPreset] = useState<PreviewPreset>('50');
   const [debounced, setDebounced] = useState<{
     amount: number;
     quantity: number;
     payloadKey: string;
   }>({ amount: 0, quantity: 0, payloadKey: '' });
 
-  const seededRef = useRef(false);
   const derivationRef = useRef<PreviewDerivation | null>(null);
 
   // Recompute the derivation each render (it is cheap — a JSON key plus
   // closures over the target), so render code can read the payloadKey
   // without touching the ref. The latest derivation also lives in a ref
-  // for callbacks (presets, the query), which always fire with fresh
-  // form state.
+  // for callbacks (the query), which always fire with fresh form state.
   const payloadKey = derive(target).payloadKey;
 
   useEffect(() => {
     derivationRef.current = derive(target);
   }, [target, derive]);
 
-  // Seed the controls once from the initial target (50% preset), so the
-  // preview opens at a sensible simulated state without ever clobbering
-  // the admin's adjustments afterwards.
+  // Derive the simulated amount/quantity from the preset fraction applied
+  // to the current form target, and debounce them AND the target key so
+  // typing in the form (or switching the preset) does not fire a preview
+  // request per change.
   useEffect(() => {
-    if (seededRef.current) {
-      return;
-    }
-    seededRef.current = true;
-
     const derivation = derivationRef.current;
 
     if (!derivation) {
       return;
     }
 
-    const targets = derivation.targetsFor(PRESET_PERCENTS['50']);
-    const next = { ...defaultControls(derivation.templateDefault), ...targets };
+    const { amount, quantity } = derivation.targetsFor(PRESET_PERCENTS[preset]);
 
-    setControls(next);
-    setDebounced({
-      amount: next.amount,
-      quantity: next.quantity,
-      payloadKey: derivation.payloadKey,
-    });
-  }, []);
-
-  // Debounce amount/quantity AND the target key so typing in the form (or
-  // the simulated values) does not fire a preview request per keystroke.
-  useEffect(() => {
     const timer = window.setTimeout(() => {
-      setDebounced({ amount: controls.amount, quantity: controls.quantity, payloadKey });
+      setDebounced({ amount, quantity, payloadKey });
     }, 300);
 
     return () => window.clearTimeout(timer);
-  }, [controls.amount, controls.quantity, payloadKey]);
+  }, [preset, payloadKey]);
 
-  const patch = (update: Partial<PreviewControlsValue>) =>
-    setControls((current) => ({ ...current, ...update }));
+  const applyPreset = (next: PreviewPreset) => setPreset(next);
 
-  const applyPreset = (preset: PreviewPreset) => {
-    const derivation = derivationRef.current;
-
-    if (!derivation) {
-      return;
-    }
-
-    if (preset === 'custom') {
-      setControls((current) => ({ ...current, preset }));
-      return;
-    }
-
-    setControls((current) => ({
-      ...current,
-      preset,
-      ...derivation.targetsFor(PRESET_PERCENTS[preset]),
-    }));
-  };
+  // The shared template registry (pluggable engine): the preview needs
+  // the registered templates for the resolved-template label.
+  const templatesQuery = useTemplates();
 
   const previewQuery = useQuery({
-    queryKey: ['preview', debounced.payloadKey, debounced.amount, debounced.quantity],
+    // The scope-default template ids ride on the key: when the global /
+    // default template changes (Appearance page), the preview refetches
+    // so a goal or campaign without its own template reflects the new
+    // default — never a stale one.
+    queryKey: [
+      'preview',
+      debounced.payloadKey,
+      debounced.amount,
+      debounced.quantity,
+      templatesQuery.data?.defaults?.goal ?? '',
+      templatesQuery.data?.defaults?.campaign ?? '',
+    ],
     queryFn: () => {
       const simulated = { amount: debounced.amount, quantity: debounced.quantity };
       const derivation = derivationRef.current;
@@ -159,10 +136,5 @@ export function usePreview<T>({ target, derive }: UsePreviewOptions<T>): Preview
   // reads the settings off `data` like everywhere else.
   const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: fetchSettingsEnvelope });
 
-  // The shared template registry (pluggable engine): the preview needs
-  // the registered templates + their global defaults for the template
-  // override control and the forced-template preview settings.
-  const templatesQuery = useTemplates();
-
-  return { controls, patch, applyPreset, previewQuery, settingsQuery, templatesQuery };
+  return { controls: { preset }, applyPreset, previewQuery, settingsQuery, templatesQuery };
 }

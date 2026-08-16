@@ -229,7 +229,6 @@ export default function CampaignBuilder() {
   const preview = usePreview({
     target: previewTarget,
     derive: (current) => ({
-      templateDefault: '',
       targetsFor: (fraction) => campaignPresetTargets(current.values, current.goalsById, fraction),
       paramsFor: () => ({ campaignId: editId ?? undefined, campaign: current.values }),
       payloadKey: `campaign:${current.id}:${JSON.stringify(current.values)}`,
@@ -622,10 +621,12 @@ export default function CampaignBuilder() {
           </Stack>
         </Grid>
 
-        {/* Left column (RTL): the sticky live preview. */}
+        {/* Left column (RTL): the sticky live preview. Sticky only on
+            desktop — on small screens the preview flows after the form
+            in a single column. */}
         <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-          <Box sx={{ position: 'sticky', top: stickyTop }}>
-            <PreviewPanel scope="campaign" preview={preview} campaign={values} />
+          <Box sx={{ position: { xs: 'static', md: 'sticky' }, top: stickyTop }}>
+            <PreviewPanel scope="campaign" preview={preview} />
           </Box>
         </Grid>
       </Grid>

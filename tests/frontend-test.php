@@ -435,15 +435,32 @@ echo "\n== 8. Templates & appearance ==\n";
 $appearance_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/routes/Appearance.tsx' );
 check( 'Appearance campaign preview stamps the sample campaign id on milestones', false !== strpos( $appearance_tsx, 'campaign_id: campaign.campaign_id' ) );
 
-// The Campaign builder preview panel forces a campaign template by
-// synthesizing the campaign group (id + name + template + settings)
-// instead of passing it as a goal-card template override — PreviewWidget
-// only applies that override to standalone goal cards, so without the
-// synthesized group a forced "Milestone chain" would render plain
-// template-1 milestone cards. Source-scanned so that regression cannot
-// slip through silently.
+// The builder preview panels render the payload-resolved template — the
+// backend's TemplateEngine is the single template-resolution mechanism
+// shared with the storefront — instead of forcing a template from a
+// preview-side selector. Source-scanned so a preview-side template
+// override (which would let the preview drift from the storefront) or a
+// device-width/simulation control cannot silently come back.
 $preview_panel_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/components/preview/PreviewPanel.tsx' );
-check( 'Campaign preview panel synthesizes the forced campaign group', false !== strpos( $preview_panel_tsx, 'template: forcedTemplate.id' ) && false !== strpos( $preview_panel_tsx, 'campaign_id: payloadGroup?.campaign_id ?? -1' ) );
+check( 'Goal preview renders the payload-resolved template', false !== strpos( $preview_panel_tsx, 'goals[0]?.template' ) );
+check( 'Campaign preview renders the payload-resolved template', false !== strpos( $preview_panel_tsx, 'campaigns?.[0]?.template' ) );
+check( 'Preview panel has no forced template override', false === strpos( $preview_panel_tsx, 'templateOverride' ) );
+check( 'Preview panel has no device-width frame', false === strpos( $preview_panel_tsx, 'DEVICE_WIDTHS' ) && false === strpos( $preview_panel_tsx, 'frameWidth' ) );
+// A goal whose form target is still 0 (a fresh or cleared target) would
+// evaluate server-side as trivially complete (target <= 0 -> 100%) — the
+// preview must not claim a fake "100% complete" card for an unsaved
+// draft. Source-scanned so the configuring hint cannot silently drop.
+check( 'Goal preview shows a hint for target-less goals', false !== strpos( $preview_panel_tsx, 'target <= 0' ) && false !== strpos( $preview_panel_tsx, 'Set a target to preview progress.' ) );
+
+// The preview controls expose no simulation inputs or template selector —
+// the preview consumes the form's own configuration (selected template /
+// global default) and only the progress-state preset remains.
+$preview_controls_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/components/preview/PreviewControls.tsx' );
+check( 'Preview controls keep no simulated amount field', false === strpos( $preview_controls_tsx, 'Simulated cart amount' ) );
+check( 'Preview controls keep no simulated quantity field', false === strpos( $preview_controls_tsx, 'Simulated quantity' ) );
+check( 'Preview controls keep no simulated reward control', false === strpos( $preview_controls_tsx, 'Simulated reward' ) );
+check( 'Preview controls keep no device-width control', false === strpos( $preview_controls_tsx, 'Device width' ) );
+check( 'Preview controls keep no template selector', false === strpos( $preview_controls_tsx, 'Template' ) );
 
 $config = $ui->frontend_config();
 check( 'config carries the template', isset( $config['template'] ) && 'template-1' === $config['template'] );
