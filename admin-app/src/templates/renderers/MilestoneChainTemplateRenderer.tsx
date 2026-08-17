@@ -15,7 +15,7 @@ import type { CampaignTemplateProps } from '../registry';
  */
 export default function MilestoneChainTemplateRenderer({
   campaign,
-  goals,
+  missions,
   currency,
   settings,
   animation,
@@ -27,15 +27,15 @@ export default function MilestoneChainTemplateRenderer({
   const doneColor = str(settings, 'doneColor', '#00a32a');
   const connectorColor = str(settings, 'connectorColor', '#dcdcde');
 
-  let top: (typeof goals)[number] | null = null;
-  for (const goal of goals) {
-    if (!top || goal.target > top.target) {
-      top = goal;
+  let top: (typeof missions)[number] | null = null;
+  for (const mission of missions) {
+    if (!top || mission.target > top.target) {
+      top = mission;
     }
   }
 
   const overallPercent = top ? Math.max(0, Math.min(100, top.percentage)) : 0;
-  const allDone = goals.length > 0 && goals.every((goal) => goal.completed);
+  const allDone = missions.length > 0 && missions.every((mission) => mission.completed);
 
   return (
     <Box>
@@ -52,12 +52,12 @@ export default function MilestoneChainTemplateRenderer({
           listStyle: 'none',
         }}
       >
-        {goals.map((goal, index) => {
-          const done = goal.completed;
+        {missions.map((mission, index) => {
+          const done = mission.completed;
           return (
             <Box
               component="li"
-              key={goal.goal_id || index}
+              key={mission.mission_id || index}
               sx={{
                 position: 'relative',
                 flex: '1 1 0',
@@ -94,17 +94,17 @@ export default function MilestoneChainTemplateRenderer({
               />
               {showLabels && (
                 <Typography sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.3 }} noWrap>
-                  {goal.goal_name}
+                  {mission.mission_name}
                 </Typography>
               )}
               {showTargets && (
                 <Typography sx={{ fontSize: 12, color: '#646970', lineHeight: 1.3 }}>
-                  {goal.is_money
-                    ? formatCurrency(goal.target, currency)
-                    : formatNumber(goal.target)}
+                  {mission.is_money
+                    ? formatCurrency(mission.target, currency)
+                    : formatNumber(mission.target)}
                 </Typography>
               )}
-              {showRewards && goal.reward?.type && (
+              {showRewards && mission.reward?.type && (
                 <Box
                   component="span"
                   sx={{
@@ -119,7 +119,7 @@ export default function MilestoneChainTemplateRenderer({
                     color: done ? '#007017' : '#646970',
                   }}
                 >
-                  {rewardLabel(goal.reward)}
+                  {rewardLabel(mission.reward)}
                 </Box>
               )}
             </Box>

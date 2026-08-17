@@ -7,8 +7,8 @@
 
 namespace FaraCart\Rewards\Applicators;
 
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Rewards\Reward;
 use FaraCart\Rewards\RewardApplicator;
 use FaraCart\Rewards\RewardResult;
@@ -18,19 +18,19 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class FreeShippingApplicator
  *
- * Waives shipping costs when the goal is met, applied through WooCommerce's
+ * Waives shipping costs when the mission is met, applied through WooCommerce's
  * public 'woocommerce_package_rates' filter so it composes with existing
  * shipping zones and methods (P05-T02).
  *
  * Compatibility with existing shipping rules:
  *  - rates are only modified while a free-shipping reward is active; when
- *    the goal is incomplete every rate passes through untouched
+ *    the mission is incomplete every rate passes through untouched
  *  - the reward can be restricted to specific shipping zones and/or method
  *    instances (e.g. 'flat_rate' or 'flat_rate:3'); with no restrictions
  *    every rate in the package becomes free
  *  - the store's own free_shipping method settings are never altered
  *
- * The applicator is stateless: the RewardEngine evaluates goal completion
+ * The applicator is stateless: the RewardEngine evaluates mission completion
  * once per request and calls apply_to_rates() inside the package filter.
  */
 final class FreeShippingApplicator implements RewardApplicator {
@@ -45,10 +45,10 @@ final class FreeShippingApplicator implements RewardApplicator {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function evaluate( Reward $reward, GoalResult $result, ?CartContext $context = null ) {
+	public function evaluate( Reward $reward, MissionResult $result, ?CartContext $context = null ) {
 		return RewardResult::available(
 			$reward,
-			$result->goal()->id(),
+			$result->mission()->id(),
 			0.0,
 			array(
 				'shipping_zone_ids'   => $reward->shipping_zone_ids(),
@@ -63,7 +63,7 @@ final class FreeShippingApplicator implements RewardApplicator {
 	 * Free shipping is applied statelessly through the package-rates filter
 	 * (apply_to_rates), so there is nothing to attach here.
 	 */
-	public function apply( Reward $reward, RewardResult $evaluation, \WC_Cart $cart, $goal_id ) {
+	public function apply( Reward $reward, RewardResult $evaluation, \WC_Cart $cart, $mission_id ) {
 		return true;
 	}
 

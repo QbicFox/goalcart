@@ -3,29 +3,29 @@
  * FaraCart — demo data seeder (manual-testing helper).
  *
  * Seeds a realistic, fully-removable demo dataset so every revenue
- * dashboard (Sales Performance, Goal Conversion & Purchase Analysis,
- * Goal Performance, Smart Recommendations, Upsell Analytics) has data
+ * dashboard (Sales Performance, Mission Conversion & Purchase Analysis,
+ * Mission Performance, Smart Recommendations, Upsell Analytics) has data
  * to show. Mirrors the exact fixture patterns the plugin's own test
- * suites use (goals + campaigns, costed products, funnel events,
+ * suites use (missions + campaigns, costed products, funnel events,
  * order attribution, upsell funnel, daily aggregation).
  *
  * Usage:
  *   php bin/seed-demo-data.php                # seed (rich by default)
- *   php bin/seed-demo-data.php --scale small  # 2 goals / 4 products / ~25 orders
- *   php bin/seed-demo-data.php --scale medium # 4 goals / 6 products / ~90 orders
- *   php bin/seed-demo-data.php --scale rich   # 6 goals / 10 products / ~220 orders
+ *   php bin/seed-demo-data.php --scale small  # 2 missions / 4 products / ~25 orders
+ *   php bin/seed-demo-data.php --scale medium # 4 missions / 6 products / ~90 orders
+ *   php bin/seed-demo-data.php --scale rich   # 6 missions / 10 products / ~220 orders
  *   php bin/seed-demo-data.php --clean        # remove every seeded demo row
  *
  * What is seeded (rich):
- *   - 6 goals + 2 campaigns (names prefixed "[Demo]")
+ *   - 6 missions + 2 campaigns (names prefixed "[Demo]")
  *   - 10 products with WooCommerce cost data (_cost) — marked
  *   - ~220 completed orders spread over the last 90 days — marked
- *   - goal funnel events (view / progress / completed) + order
+ *   - mission funnel events (view / progress / completed) + order
  *     attribution (direct / assisted) + upsell funnel events, all
  *     backdated to match each order's date
  *   - revenue_daily + upsell_stats aggregation, then cache invalidation
  *
- * Reversibility: every row is marked (goal/campaign name prefix "[Demo]",
+ * Reversibility: every row is marked (mission/campaign name prefix "[Demo]",
  * order/product meta `_faracart_demo_seed`, event meta `demo_seed`), so
  * `--clean` deletes exactly the demo rows and never touches existing
  * store data. Run from the plugin directory.
@@ -61,7 +61,7 @@ use FaraCart\Analytics\RevenueTracker;
 use FaraCart\Campaigns\CampaignRepository;
 use FaraCart\Database\Installer;
 use FaraCart\Database\Schema;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\Settings\Settings;
 
 // ---------------------------------------------------------------------------
@@ -73,15 +73,15 @@ $container     = \FaraCart\Plugin::instance()->container();
 $engine        = $container->get( AttributionEngine::class );
 $tracker       = $container->get( RevenueTracker::class );
 $settings      = $container->get( Settings::class );
-$goals_repo    = $container->get( GoalRepository::class );
+$missions_repo    = $container->get( MissionRepository::class );
 $campaigns_repo = $container->get( CampaignRepository::class );
 $repo          = $container->get( RevenueRepository::class );
 $aggregator    = $container->get( DailyAggregator::class );
 $wpdb          = $GLOBALS['wpdb'];
 
 $revenue_table     = Schema::table( 'revenue_events' );
-$attrib_table      = Schema::table( 'goal_attribution' );
-$goals_table       = Schema::table( 'goals' );
+$attrib_table      = Schema::table( 'mission_attribution' );
+$missions_table       = Schema::table( 'missions' );
 $campaigns_table   = Schema::table( 'campaigns' );
 $upsell_table      = Schema::table( 'upsell_events' );
 $daily_table       = Schema::table( 'revenue_daily' );
@@ -93,7 +93,7 @@ $clean = in_array( '--clean', $argv, true );
 // Cleanup: remove exactly the demo rows (idempotent).
 // ---------------------------------------------------------------------------
 if ( $clean ) {
-	$goal_ids = array_map( 'intval', (array) $wpdb->get_col( "SELECT id FROM {$goals_table} WHERE name LIKE '[Demo]%'" ) );
+	$mission_ids = array_map( 'intval', (array) $wpdb->get_col( "SELECT id FROM {$missions_table} WHERE name LIKE '[Demo]%'" ) );
 	$campaign_ids = array_map( 'intval', (array) $wpdb->get_col( "SELECT id FROM {$campaigns_table} WHERE name LIKE '[Demo]%'" ) );
 	$product_ids = array_map( 'intval', (array) $wpdb->get_col(
 		"SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_faracart_demo_seed'"
@@ -102,14 +102,14 @@ if ( $clean ) {
 		"SELECT DISTINCT p.ID FROM {$wpdb->posts} p INNER JOIN {$wpdb->postmeta} m ON m.post_id = p.ID AND m.meta_key = '_faracart_demo_seed' WHERE p.post_type IN ('shop_order','shop_order_placehold')"
 	) );
 
-	$goal_in   = $goal_ids ? implode( ',', $goal_ids ) : '0';
+	$mission_in   = $mission_ids ? implode( ',', $mission_ids ) : '0';
 	$order_in  = $order_ids ? implode( ',', $order_ids ) : '0';
 	$product_in = $product_ids ? implode( ',', $product_ids ) : '0';
 
-	$wpdb->query( "DELETE FROM {$revenue_table} WHERE goal_id IN ({$goal_in}) OR order_id IN ({$order_in}) OR meta LIKE '%demo_seed%'" );
+	$wpdb->query( "DELETE FROM {$revenue_table} WHERE mission_id IN ({$mission_in}) OR order_id IN ({$order_in}) OR meta LIKE '%demo_seed%'" );
 	$wpdb->query( "DELETE FROM {$attrib_table} WHERE order_id IN ({$order_in})" );
-	$wpdb->query( "DELETE FROM {$upsell_table} WHERE goal_id IN ({$goal_in}) OR order_id IN ({$order_in}) OR meta LIKE '%demo_seed%'" );
-	$wpdb->query( "DELETE FROM {$daily_table} WHERE goal_id IN ({$goal_in})" );
+	$wpdb->query( "DELETE FROM {$upsell_table} WHERE mission_id IN ({$mission_in}) OR order_id IN ({$order_in}) OR meta LIKE '%demo_seed%'" );
+	$wpdb->query( "DELETE FROM {$daily_table} WHERE mission_id IN ({$mission_in})" );
 	$wpdb->query( "DELETE FROM {$upsell_stats_table} WHERE product_id IN ({$product_in})" );
 
 	foreach ( $order_ids as $order_id ) {
@@ -121,8 +121,8 @@ if ( $clean ) {
 	foreach ( $product_ids as $product_id ) {
 		wp_delete_post( $product_id, true );
 	}
-	foreach ( $goal_ids as $goal_id ) {
-		$goals_repo->delete( $goal_id );
+	foreach ( $mission_ids as $mission_id ) {
+		$missions_repo->delete( $mission_id );
 	}
 	foreach ( $campaign_ids as $campaign_id ) {
 		$campaigns_repo->delete( $campaign_id );
@@ -131,8 +131,8 @@ if ( $clean ) {
 	$repo->invalidate();
 
 	printf(
-		"Cleaned %d goals, %d campaigns, %d products, %d orders (and their events/attribution/aggregates).\n",
-		count( $goal_ids ),
+		"Cleaned %d missions, %d campaigns, %d products, %d orders (and their events/attribution/aggregates).\n",
+		count( $mission_ids ),
 		count( $campaign_ids ),
 		count( $product_ids ),
 		count( $order_ids )
@@ -150,14 +150,14 @@ foreach ( $argv as $arg ) {
 	}
 }
 $scales = array(
-	'small'  => array( 'orders' => 25,  'window' => 30,  'goals' => array( 0, 1 ),           'products' => array( 0, 1, 2, 3 ) ),
-	'medium' => array( 'orders' => 90,  'window' => 60,  'goals' => array( 0, 1, 2, 3 ),     'products' => array( 0, 1, 2, 3, 4, 5 ) ),
-	'rich'   => array( 'orders' => 220, 'window' => 90,  'goals' => array( 0, 1, 2, 3, 4, 5 ), 'products' => array( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) ),
+	'small'  => array( 'orders' => 25,  'window' => 30,  'missions' => array( 0, 1 ),           'products' => array( 0, 1, 2, 3 ) ),
+	'medium' => array( 'orders' => 90,  'window' => 60,  'missions' => array( 0, 1, 2, 3 ),     'products' => array( 0, 1, 2, 3, 4, 5 ) ),
+	'rich'   => array( 'orders' => 220, 'window' => 90,  'missions' => array( 0, 1, 2, 3, 4, 5 ), 'products' => array( 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ) ),
 );
 $scale = isset( $scales[ $scale ] ) ? $scale : 'rich';
 $cfg  = $scales[ $scale ];
 
-$GOAL_SPECS = array(
+$MISSION_SPECS = array(
 	array( 'name' => '[Demo] Free Shipping on 500K',  'type' => 'amount', 'target' => 500000,  'reward_type' => 'free_shipping',     'priority' => 10 ),
 	array( 'name' => '[Demo] 10% Discount on 800K',   'type' => 'amount', 'target' => 800000,  'reward_type' => 'percent_discount', 'reward_value' => 10, 'reward_max_value' => 100000, 'priority' => 20 ),
 	array( 'name' => '[Demo] Free Gift on 1.2M',      'type' => 'amount', 'target' => 1200000, 'reward_type' => 'free_gift',         'priority' => 30 ),
@@ -180,28 +180,28 @@ $PRODUCT_SPECS = array(
 );
 
 // ---------------------------------------------------------------------------
-// 1. Goals + campaigns.
+// 1. Missions + campaigns.
 // ---------------------------------------------------------------------------
-$goal_ids = array();
-foreach ( $GOAL_SPECS as $index => $spec ) {
-	if ( ! in_array( $index, $cfg['goals'], true ) ) {
+$mission_ids = array();
+foreach ( $MISSION_SPECS as $index => $spec ) {
+	if ( ! in_array( $index, $cfg['missions'], true ) ) {
 		continue;
 	}
-	$id = $goals_repo->create( $spec );
+	$id = $missions_repo->create( $spec );
 	if ( ! $id ) {
-		fwrite( STDERR, "Failed to create demo goal: {$spec['name']}\n" );
+		fwrite( STDERR, "Failed to create demo mission: {$spec['name']}\n" );
 		exit( 1 );
 	}
-	$goal_ids[ $index ] = (int) $id;
+	$mission_ids[ $index ] = (int) $id;
 }
 
-$campaign_goals = array( array( 1, 3 ), array( 2, 4 ) );
+$campaign_missions = array( array( 1, 3 ), array( 2, 4 ) );
 $campaign_names = array( '[Demo] Summer Boost', '[Demo] Premium Rewards' );
-foreach ( $campaign_goals as $ci => $members ) {
+foreach ( $campaign_missions as $ci => $members ) {
 	$linked = array();
 	foreach ( $members as $gi ) {
-		if ( isset( $goal_ids[ $gi ] ) ) {
-			$linked[] = $goal_ids[ $gi ];
+		if ( isset( $mission_ids[ $gi ] ) ) {
+			$linked[] = $mission_ids[ $gi ];
 		}
 	}
 	if ( ! $linked ) {
@@ -210,7 +210,7 @@ foreach ( $campaign_goals as $ci => $members ) {
 	$campaigns_repo->create( array(
 		'name'   => $campaign_names[ $ci ],
 		'status' => 'active',
-		'goals'  => $linked,
+		'missions'  => $linked,
 	) );
 }
 
@@ -245,25 +245,25 @@ foreach ( $PRODUCT_SPECS as $index => $spec ) {
 // ---------------------------------------------------------------------------
 $order_total = $cfg['orders'];
 $window      = $cfg['window'];
-$demo_goal_list = array_values( $goal_ids );
+$demo_mission_list = array_values( $mission_ids );
 
-// Goal pick weights — the small "Free Shipping 300K" and "500K" goals are the
-// most common (they convert most), matching a realistic top-performing goal.
-$goal_weights = array();
-foreach ( $goal_ids as $gi => $id ) {
-	$goal_weights[ $id ] = array( 30, 15, 12, 15, 8, 20 )[ $gi ] ?? 15;
+// Mission pick weights — the small "Free Shipping 300K" and "500K" missions are the
+// most common (they convert most), matching a realistic top-performing mission.
+$mission_weights = array();
+foreach ( $mission_ids as $gi => $id ) {
+	$mission_weights[ $id ] = array( 30, 15, 12, 15, 8, 20 )[ $gi ] ?? 15;
 }
 
-$pick_goal = function () use ( $demo_goal_list, $goal_weights ) {
-	$total = array_sum( $goal_weights );
+$pick_mission = function () use ( $demo_mission_list, $mission_weights ) {
+	$total = array_sum( $mission_weights );
 	$r     = mt_rand( 1, $total );
-	foreach ( $demo_goal_list as $gid ) {
-		$r -= $goal_weights[ $gid ];
+	foreach ( $demo_mission_list as $gid ) {
+		$r -= $mission_weights[ $gid ];
 		if ( $r <= 0 ) {
 			return (int) $gid;
 		}
 	}
-	return (int) $demo_goal_list[0];
+	return (int) $demo_mission_list[0];
 };
 
 // A deterministic "random" date biased toward recent days.
@@ -290,7 +290,7 @@ for ( $i = 1; $i <= $order_total; $i++ ) {
 	$date_mysql = $date->format( 'Y-m-d H:i:s' );
 	$dates[ substr( $date_mysql, 0, 10 ) ] = true;
 
-	// Goal association: ~18% plain, ~25% view-only (assisted),
+	// Mission association: ~18% plain, ~25% view-only (assisted),
 	// ~20% progressed (direct), ~37% completed (direct).
 	$r = mt_rand( 1, 100 );
 	if ( $r > 82 ) {
@@ -304,12 +304,12 @@ for ( $i = 1; $i <= $order_total; $i++ ) {
 	}
 	$counts[ $mode ]++;
 
-	$goal_id   = 'plain' === $mode ? 0 : $pick_goal();
-	$goal_info = 0 !== $goal_id ? $goals_repo->get( $goal_id ) : null;
-	$target    = $goal_info ? (float) $goal_info['target'] : 0.0;
+	$mission_id   = 'plain' === $mode ? 0 : $pick_mission();
+	$mission_info = 0 !== $mission_id ? $missions_repo->get( $mission_id ) : null;
+	$target    = $mission_info ? (float) $mission_info['target'] : 0.0;
 
 	// Build the basket: 1-3 random demo products; for completed sessions
-	// keep adding items until the subtotal clears the goal target.
+	// keep adding items until the subtotal clears the mission target.
 	$items   = array();
 	$subtotal = 0.0;
 	$max_attempts = 6;
@@ -352,7 +352,7 @@ for ( $i = 1; $i <= $order_total; $i++ ) {
 		'i'         => $i,
 		'order_id'  => $order_id,
 		'mode'      => $mode,
-		'goal_id'   => $goal_id,
+		'mission_id'   => $mission_id,
 		'target'    => $target,
 		'subtotal'  => $subtotal,
 		'shipping'  => $shipping,
@@ -375,21 +375,21 @@ foreach ( $orders as $descriptor ) {
 	$i        = $descriptor['i'];
 	$order_id = $descriptor['order_id'];
 	$mode     = $descriptor['mode'];
-	$goal_id  = $descriptor['goal_id'];
+	$mission_id  = $descriptor['mission_id'];
 	$target   = $descriptor['target'];
 	$subtotal = $descriptor['subtotal'];
 	$date     = $descriptor['date'];
 	$session  = md5( 'gc-demo-' . $i );
 
 	$context = array(
-		'goal_id'     => $goal_id,
+		'mission_id'     => $mission_id,
 		'session_id'  => $session,
-		'goal_target' => $target,
+		'mission_target' => $target,
 		'meta'        => array( 'demo_seed' => 1 ),
 	);
 
-	// Funnel events (only for goal sessions).
-	if ( 0 !== $goal_id ) {
+	// Funnel events (only for mission sessions).
+	if ( 0 !== $mission_id ) {
 		$rid = $tracker->record( RevenueTracker::EVENT_GOAL_VIEW, $context + array(
 			'cart_value' => max( 1, (int) floor( $subtotal * 0.3 ) ),
 		) );
@@ -416,7 +416,7 @@ foreach ( $orders as $descriptor ) {
 		}
 	}
 
-	// Attribute the order (records order_paid + goal_attribution rows).
+	// Attribute the order (records order_paid + mission_attribution rows).
 	$engine->attribute_order( $order_id, array(
 		'total'          => $descriptor['total'],
 		'status'         => 'completed',
@@ -452,7 +452,7 @@ foreach ( $orders as $descriptor ) {
 		}
 		foreach ( $upsell_products as $position => $product_id ) {
 			$ucontext = array(
-				'goal_id'    => $goal_id,
+				'mission_id'    => $mission_id,
 				'product_id' => $product_id,
 				'session_id' => $session,
 				'cart_value' => (int) $subtotal,
@@ -509,9 +509,9 @@ $settings->set( 'analytics_enabled', $prev_analytics );
 $event_count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table} WHERE meta LIKE '%demo_seed%' OR order_id IN (SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_faracart_demo_seed')" );
 
 printf(
-	"Seeded %s demo dataset: %d goals, %d campaigns, %d products, %d orders, %d revenue events.\n",
+	"Seeded %s demo dataset: %d missions, %d campaigns, %d products, %d orders, %d revenue events.\n",
 	strtoupper( $scale ),
-	count( $goal_ids ),
+	count( $mission_ids ),
 	2,
 	count( $product_ids ),
 	count( $orders ),

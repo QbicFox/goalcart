@@ -11,15 +11,15 @@
  *    tolerance + hard decay, relevance signal composition, inventory
  *    thresholds, popularity normalization, margin neutrality/gain,
  *    conversion blend, composite weight normalization
- *  - integration (rolled back): fixture products + a fixture goal drive an
+ *  - integration (rolled back): fixture products + a fixture mission drive an
  *    exact ranking — gap-fitting products rank above overshoots and
  *    unrelated expensive items; stock-managed scoring; margin-aware profit;
- *    out-of-stock exclusion; explicit remaining vs goal-derived gap
+ *    out-of-stock exclusion; explicit remaining vs mission-derived gap
  *  - historical performance (P33-35): tracker upsell events feed the
  *    aggregator, the conversion score reflects the funnel, and
  *    attribute_order() records exactly-once upsell_order events for a
  *    session's recommended products
- *  - graceful degradation: no goal/remaining → unavailable with a reason;
+ *  - graceful degradation: no mission/remaining → unavailable with a reason;
  *    disabled flag; no candidates; no margin data → profit unavailable
  *  - caching: the ranking is served through the generation-versioned
  *    transient, and invalidate() forces a recompute on the next read
@@ -75,8 +75,8 @@ use FaraCart\Analytics\Session;
 use FaraCart\Analytics\UpsellRanker;
 use FaraCart\Database\Installer;
 use FaraCart\Database\Schema;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\REST\UpsellController;
 use FaraCart\Settings\Settings;
 
@@ -110,12 +110,12 @@ $tracker = $container->get( RevenueTracker::class );
 $costs   = $container->get( RewardCostEstimator::class );
 $aggregator = $container->get( DailyAggregator::class );
 $settings = $container->get( Settings::class );
-$goals    = $container->get( GoalRepository::class );
+$missions    = $container->get( MissionRepository::class );
 $wpdb     = $GLOBALS['wpdb'];
 
 $upsell_events = Schema::table( 'upsell_events' );
 $upsell_stats  = Schema::table( 'upsell_stats' );
-$goals_table   = Schema::table( 'goals' );
+$missions_table   = Schema::table( 'missions' );
 $revenue_table = Schema::table( 'revenue_events' );
 
 // ---------------------------------------------------------------------------
@@ -170,7 +170,7 @@ check( 'price gap: missing price is neutral 50', close( 50, $invoke( 'price_gap_
 check( 'price gap: missing gap is neutral 50', close( 50, $invoke( 'price_gap_score', array( 450, null ) ) ) );
 check( 'price gap: zero gap is neutral 50', close( 50, $invoke( 'price_gap_score', array( 450, 0 ) ) ) );
 
-// --- Relevance (P33-28): goal eligibility + cart overlap + WC sources. ---
+// --- Relevance (P33-28): mission eligibility + cart overlap + WC sources. ---
 // term_exists() first — a previous run's leftovers would make wp_insert_term
 // return a WP_Error instead of the term id.
 $cat_id = term_exists( 'P33.5 Upsell Cat', 'product_cat' );
@@ -245,7 +245,7 @@ if ( $tag_id ) {
 check( 'relevance: no signals is a low baseline', close( 0, $invoke( 'relevance_score', array( $relevance_b, 'popular', array(), null ) ) ) );
 check( 'relevance: WC-endorsed source adds trust', close( 15, $invoke( 'relevance_score', array( $relevance_b, 'upsell', array(), null ) ) ) );
 check( 'relevance: shared category adds 30', close( 30, $invoke( 'relevance_score', array( $relevance_a, 'popular', array( $relevance_a->get_id() ), null ) ) ) );
-check( 'relevance: goal manual product adds 55', close( 55, $invoke( 'relevance_score', array( $relevance_a, 'manual', array(), new Goal( array( 'products' => array( $relevance_a->get_id() ) ) ) ) ) ) );
+check( 'relevance: mission manual product adds 55', close( 55, $invoke( 'relevance_score', array( $relevance_a, 'manual', array(), new Mission( array( 'products' => array( $relevance_a->get_id() ) ) ) ) ) ) );
 
 // --- Inventory (P33-29). ---
 $inv_high  = $make_product( 'Inv High', 100, 50 );
@@ -303,25 +303,25 @@ try {
 
 	$candidate_ids = array( $gap_product->get_id(), $ok_product->get_id(), $overshoot->get_id(), $expensive->get_id(), $out_of_stock->get_id() );
 
-	// --- Fixture goal (money goal, target 2,000,000) whose own products
+	// --- Fixture mission (money mission, target 2,000,000) whose own products
 	// are the fixtures — pinning the candidate set so the assertions never
 	// depend on which products happen to fill the store's best-seller
 	// pool. ---
-	$goal_id = $goals->create( array(
-		'name'      => 'P33.5 upsell goal',
+	$mission_id = $missions->create( array(
+		'name'      => 'P33.5 upsell mission',
 		'type'      => 'amount',
 		'target'    => 2000000,
 		'status'    => 'active',
 		'products'  => $candidate_ids,
 	) );
 
-	check( 'fixture goal created', $goal_id > 0 );
+	check( 'fixture mission created', $mission_id > 0 );
 
 	// Explicit remaining gap: 450,000 (P33-36 — prefer ~350K–600K products).
 	$rec = $ranker->rank( array(
 		'remaining' => 450000,
 		'cart'      => array(),
-		'goal_id'   => $goal_id,
+		'mission_id'   => $mission_id,
 		'limit'     => 5,
 	) );
 
@@ -357,17 +357,17 @@ try {
 	check( 'every product exposes plain-English reasons', null !== $top && is_array( $top['reasons'] ) && count( $top['reasons'] ) >= 2 );
 	check( 'every product exposes historical conversion stats', null !== $top && isset( $top['conversion']['impressions'], $top['conversion']['orders'] ) );
 
-	// Goal-derived gap: target 2,000,000 − cart_value 1,550,000 = 450,000.
-	$rec_goal = $ranker->rank( array(
-		'goal_id'    => $goal_id,
+	// Mission-derived gap: target 2,000,000 − cart_value 1,550,000 = 450,000.
+	$rec_mission = $ranker->rank( array(
+		'mission_id'    => $mission_id,
 		'cart_value' => 1550000,
 		'limit'      => 5,
 	) );
-	check( 'goal-derived gap matches explicit gap', close( 450000, $rec_goal['context']['remaining'] ) );
+	check( 'mission-derived gap matches explicit gap', close( 450000, $rec_mission['context']['remaining'] ) );
 
-	// No remaining and no goal → unavailable with a reason.
+	// No remaining and no mission → unavailable with a reason.
 	$no_gap = $ranker->rank( array() );
-	check( 'no goal and no remaining → unavailable', empty( $no_gap['available'] ) && '' !== (string) $no_gap['reason'] );
+	check( 'no mission and no remaining → unavailable', empty( $no_gap['available'] ) && '' !== (string) $no_gap['reason'] );
 
 	// Closed gap → unavailable.
 	$closed = $ranker->rank( array( 'remaining' => 0 ) );
@@ -387,7 +387,7 @@ try {
 	$margin = $costs->product_margin( $gap_product->get_id() );
 	check( 'product cost read from the store field', null !== $margin && close( 0.5, $margin['margin_pct'] ) );
 
-	$rec_margin = $ranker->rank( array( 'remaining' => 450000, 'goal_id' => $goal_id, 'limit' => 5 ) );
+	$rec_margin = $ranker->rank( array( 'remaining' => 450000, 'mission_id' => $mission_id, 'limit' => 5 ) );
 	$gap_margin = null;
 
 	foreach ( $rec_margin['recommendations'] as $item ) {
@@ -400,7 +400,7 @@ try {
 	check( 'margin reason present', null !== $gap_margin && 1 === preg_match( '/Estimated margin/', implode( ' ', $gap_margin['reasons'] ) ) );
 
 	// Without margin data, profit is unavailable but the product still ranks.
-	$rec_nomargin = $ranker->rank( array( 'remaining' => 450000, 'goal_id' => $goal_id, 'limit' => 5 ) );
+	$rec_nomargin = $ranker->rank( array( 'remaining' => 450000, 'mission_id' => $mission_id, 'limit' => 5 ) );
 	$ok_nomargin  = null;
 
 	foreach ( $rec_nomargin['recommendations'] as $item ) {
@@ -416,7 +416,7 @@ try {
 	add_filter( 'faracart_upsell_candidates', function () use ( $candidate_ids ) {
 		return array_combine( array_slice( $candidate_ids, 0, 2 ), array_fill( 0, 2, 'manual' ) );
 	} );
-	$pinned = $ranker->rank( array( 'remaining' => 450000, 'goal_id' => $goal_id, 'limit' => 5 ) );
+	$pinned = $ranker->rank( array( 'remaining' => 450000, 'mission_id' => $mission_id, 'limit' => 5 ) );
 	remove_all_filters( 'faracart_upsell_candidates' );
 	check( 'candidate filter pins the candidate set', (int) $pinned['candidates'] >= 2 && count( $pinned['recommendations'] ) >= 2 );
 
@@ -426,7 +426,7 @@ try {
 
 		return $payload;
 	} );
-	$filtered_payload = $ranker->rank( array( 'remaining' => 450000, 'goal_id' => $goal_id ) );
+	$filtered_payload = $ranker->rank( array( 'remaining' => 450000, 'mission_id' => $mission_id ) );
 	remove_all_filters( 'faracart_upsells' );
 	check( 'payload filter can shape the result', ! empty( $filtered_payload['filter_applied'] ) );
 
@@ -447,13 +447,13 @@ try {
 	$cookie_session = $tracker->get_session_id();
 	check( 'cookie session is well-formed', Session::is_valid( $cookie_session ) );
 
-	// 20 impressions for the gap product in the goal's funnel. Upsell
-	// impressions are deduped per session+goal+product within 24h, so each
+	// 20 impressions for the gap product in the mission's funnel. Upsell
+	// impressions are deduped per session+mission+product within 24h, so each
 	// impression must come from a distinct session to accumulate a real
 	// funnel (mirrors 20 different shoppers seeing the recommendation).
 	for ( $i = 0; $i < 20; $i++ ) {
 		$tracker->record_upsell( 'upsell_impression', array(
-			'goal_id'    => $goal_id,
+			'mission_id'    => $mission_id,
 			'product_id' => $gap_product->get_id(),
 			'session_id' => sprintf( '%032x', $i + 1 ),
 			'cart_value' => 1550000,
@@ -461,14 +461,14 @@ try {
 	}
 
 	$tracker->record_upsell( 'upsell_clicked', array(
-		'goal_id'    => $goal_id,
+		'mission_id'    => $mission_id,
 		'product_id' => $gap_product->get_id(),
 		'session_id' => $cookie_session,
 		'cart_value' => 1550000,
 	) );
 
 	$tracker->record_upsell( 'upsell_added', array(
-		'goal_id'    => $goal_id,
+		'mission_id'    => $mission_id,
 		'product_id' => $gap_product->get_id(),
 		'session_id' => $cookie_session,
 		'cart_value' => 1550000,
@@ -545,12 +545,12 @@ try {
 	$fresh_ranker = new UpsellRanker(
 		$tracker,
 		$costs,
-		$goals,
+		$missions,
 		$settings
 	);
 
 	// The conversion scorer must reflect the funnel (5% over 20 impressions).
-	$rec_hist = $fresh_ranker->rank( array( 'remaining' => 450000, 'goal_id' => $goal_id, 'limit' => 5 ) );
+	$rec_hist = $fresh_ranker->rank( array( 'remaining' => 450000, 'mission_id' => $mission_id, 'limit' => 5 ) );
 	$gap_hist = null;
 
 	foreach ( $rec_hist['recommendations'] as $item ) {
@@ -568,7 +568,7 @@ try {
 	// -----------------------------------------------------------------------
 	echo "\n== 5. Caching ==\n";
 
-	$cache_args  = array( 'remaining' => 450000, 'goal_id' => $goal_id, 'limit' => 5 );
+	$cache_args  = array( 'remaining' => 450000, 'mission_id' => $mission_id, 'limit' => 5 );
 	$version_before = (int) get_option( RevenueRepository::CACHE_VERSION_OPTION, 1 );
 	$key_before     = RevenueRepository::CACHE_PREFIX . $version_before . '_upsell_rank_' . md5( wp_json_encode( $cache_args ) );
 
@@ -588,10 +588,10 @@ try {
 	remove_all_filters( 'faracart_revenue_cache_enabled' );
 	check( 'cache bypass still returns the ranking', ! empty( $bypass['available'] ) );
 
-	// Analytics table. upsell_order rows inherit the goal from the funnel
-	// events that triggered the attribution, so the goal filter counts the
+	// Analytics table. upsell_order rows inherit the mission from the funnel
+	// events that triggered the attribution, so the mission filter counts the
 	// order too.
-	$analytics = $repo->upsell_analytics( array( 'goal_id' => $goal_id, 'limit' => 10 ) );
+	$analytics = $repo->upsell_analytics( array( 'mission_id' => $mission_id, 'limit' => 10 ) );
 	check( 'upsell analytics groups the funnel per product', count( $analytics ) >= 1 );
 	$gap_row = null;
 
@@ -628,10 +628,10 @@ check( 'upsell_events row count unchanged after rollback', $upsell_events_before
 check( 'upsell_stats row count unchanged after rollback', $upsell_stats_before === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_stats}" ) );
 check( 'revenue_events row count unchanged after rollback', $revenue_before === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table}" ) );
 
-$leftover_goals = (int) $wpdb->get_var(
-	$wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE name = %s", 'P33.5 upsell goal' )
+$leftover_missions = (int) $wpdb->get_var(
+	$wpdb->prepare( "SELECT COUNT(*) FROM {$missions_table} WHERE name = %s", 'P33.5 upsell mission' )
 );
-check( 'fixture goal removed by rollback', 0 === $leftover_goals );
+check( 'fixture mission removed by rollback', 0 === $leftover_missions );
 
 $leftover_products = get_posts( array(
 	'post_type'   => 'product',

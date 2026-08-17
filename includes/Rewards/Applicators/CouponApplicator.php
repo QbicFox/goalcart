@@ -7,8 +7,8 @@
 
 namespace FaraCart\Rewards\Applicators;
 
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Rewards\Reward;
 use FaraCart\Rewards\RewardApplicator;
 use FaraCart\Rewards\RewardResult;
@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class CouponApplicator
  *
- * Applies a coupon according to configured rules when the goal is met
+ * Applies a coupon according to configured rules when the mission is met
  * (P05-T02). Two modes:
  *
  *  - existing coupon: reward_meta['coupon_code'] names a real WooCommerce
@@ -31,13 +31,13 @@ defined( 'ABSPATH' ) || exit;
  *
  * Safety: codes are validated before application (RewardSafety::coupon_exists()),
  * generated coupons are individual-use by default (unless stacking='stack'),
- * and the RewardEngine removes exactly the coupons it applied when a goal
+ * and the RewardEngine removes exactly the coupons it applied when a mission
  * becomes incomplete — the shopper's own coupons are never touched.
  */
 final class CouponApplicator implements RewardApplicator {
 
 	/**
-	 * Option storing goal_id => generated coupon code, cleaned on uninstall.
+	 * Option storing mission_id => generated coupon code, cleaned on uninstall.
 	 *
 	 * @var string
 	 */
@@ -51,11 +51,11 @@ final class CouponApplicator implements RewardApplicator {
 	const OWNERSHIP_META = '_faracart_generated';
 
 	/**
-	 * Per-request memo of resolved codes (goal_id => code).
+	 * Per-request memo of resolved codes (mission_id => code).
 	 *
 	 * The RewardEngine reconciles rewards on every totals pass, so the
-	 * resolved/generated code for a goal is looked up multiple times per
-	 * request; this cache keeps that to one option/DB resolution per goal.
+	 * resolved/generated code for a mission is looked up multiple times per
+	 * request; this cache keeps that to one option/DB resolution per mission.
 	 *
 	 * @var array<int, string>
 	 */
@@ -71,20 +71,20 @@ final class CouponApplicator implements RewardApplicator {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function evaluate( Reward $reward, GoalResult $result, ?CartContext $context = null ) {
+	public function evaluate( Reward $reward, MissionResult $result, ?CartContext $context = null ) {
 		$code = $reward->coupon_code();
 
 		if ( '' === $code && ! $reward->coupon_generate() ) {
-			return RewardResult::blocked( $reward, $result->goal()->id(), RewardResult::REASON_INVALID_COUPON );
+			return RewardResult::blocked( $reward, $result->mission()->id(), RewardResult::REASON_INVALID_COUPON );
 		}
 
 		if ( '' !== $code && ! RewardSafety::coupon_exists( $code ) ) {
-			return RewardResult::blocked( $reward, $result->goal()->id(), RewardResult::REASON_INVALID_COUPON );
+			return RewardResult::blocked( $reward, $result->mission()->id(), RewardResult::REASON_INVALID_COUPON );
 		}
 
 		return RewardResult::available(
 			$reward,
-			$result->goal()->id(),
+			$result->mission()->id(),
 			0.0,
 			array(
 				'coupon_code' => $code,
@@ -95,8 +95,8 @@ final class CouponApplicator implements RewardApplicator {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function apply( Reward $reward, RewardResult $evaluation, \WC_Cart $cart, $goal_id ) {
-		$code = $this->resolve_coupon_code( $reward, $goal_id );
+	public function apply( Reward $reward, RewardResult $evaluation, \WC_Cart $cart, $mission_id ) {
+		$code = $this->resolve_coupon_code( $reward, $mission_id );
 
 		if ( '' === $code ) {
 			return false;
@@ -114,18 +114,18 @@ final class CouponApplicator implements RewardApplicator {
 	/**
 	 * Resolve the coupon code to apply (existing or generated).
 	 *
-	 * The result is memoized per goal for the duration of the request so
+	 * The result is memoized per mission for the duration of the request so
 	 * the per-pass reconciliation never re-queries or re-generates.
 	 *
 	 * @param Reward $reward  Reward configuration.
-	 * @param int    $goal_id Goal id.
+	 * @param int    $mission_id Mission id.
 	 * @return string Empty when the reward has no usable code.
 	 */
-	public function resolve_coupon_code( Reward $reward, $goal_id ) {
-		$goal_id = (int) $goal_id;
+	public function resolve_coupon_code( Reward $reward, $mission_id ) {
+		$mission_id = (int) $mission_id;
 
-		if ( isset( self::$code_cache[ $goal_id ] ) ) {
-			return self::$code_cache[ $goal_id ];
+		if ( isset( self::$code_cache[ $mission_id ] ) ) {
+			return self::$code_cache[ $mission_id ];
 		}
 
 		$code = '';
@@ -133,33 +133,33 @@ final class CouponApplicator implements RewardApplicator {
 		if ( '' !== $reward->coupon_code() ) {
 			$code = $reward->coupon_code();
 		} elseif ( $reward->coupon_generate() ) {
-			$code = $this->generate_coupon( $reward, $goal_id );
+			$code = $this->generate_coupon( $reward, $mission_id );
 		}
 
-		self::$code_cache[ $goal_id ] = $code;
+		self::$code_cache[ $mission_id ] = $code;
 
 		return $code;
 	}
 
 	/**
-	 * Create (once) the deterministic coupon for a goal and return its code.
+	 * Create (once) the deterministic coupon for a mission and return its code.
 	 *
 	 * Uses WooCommerce's public WC_Coupon API only. The coupon persists so
-	 * the same goal always maps to the same code; it is removed on plugin
+	 * the same mission always maps to the same code; it is removed on plugin
 	 * uninstall. Generated coupons carry a '_faracart_generated' marker so
 	 * a pre-existing store coupon that happens to reuse a FARACART-* code
 	 * is never mistaken for this reward's coupon.
 	 *
 	 * @param Reward $reward  Reward configuration.
-	 * @param int    $goal_id Goal id.
+	 * @param int    $mission_id Mission id.
 	 * @return string Empty when the coupon could not be created.
 	 */
-	protected function generate_coupon( Reward $reward, $goal_id ) {
+	protected function generate_coupon( Reward $reward, $mission_id ) {
 		$generated = get_option( self::GENERATED_OPTION, array() );
 		$generated = is_array( $generated ) ? $generated : array();
-		$code      = RewardSafety::generated_coupon_code( $goal_id );
+		$code      = RewardSafety::generated_coupon_code( $mission_id );
 
-		if ( isset( $generated[ $goal_id ] ) && $code === $generated[ $goal_id ] && RewardSafety::coupon_exists( $code ) ) {
+		if ( isset( $generated[ $mission_id ] ) && $code === $generated[ $mission_id ] && RewardSafety::coupon_exists( $code ) ) {
 			$coupon_id = wc_get_coupon_id_by_code( $code );
 
 			if ( $coupon_id && (int) get_post_meta( $coupon_id, self::OWNERSHIP_META, true ) ) {
@@ -200,7 +200,7 @@ final class CouponApplicator implements RewardApplicator {
 		$coupon->set_usage_limit_per_user( 1 );
 
 		// Mark ownership so the deterministic code is only trusted when it
-		// really refers to this goal's coupon.
+		// really refers to this mission's coupon.
 		$coupon->update_meta_data( self::OWNERSHIP_META, 1 );
 
 		$coupon->save();
@@ -211,7 +211,7 @@ final class CouponApplicator implements RewardApplicator {
 			return '';
 		}
 
-		$generated[ $goal_id ] = $coupon->get_code();
+		$generated[ $mission_id ] = $coupon->get_code();
 		update_option( self::GENERATED_OPTION, $generated, false );
 
 		return $coupon->get_code();

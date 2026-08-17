@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Pure, testable rules enforcing the Phase 5 "Reward Safety" guarantees:
  *
- *  - duplicate rewards: a goal's reward is applied at most once, and
+ *  - duplicate rewards: a mission's reward is applied at most once, and
  *    non-stacking rewards of the same type never both apply
  *  - unintended stacking: stacking='none' rewards block same-type rewards
  *  - invalid coupon application: coupon codes are validated against
@@ -98,13 +98,13 @@ final class RewardSafety {
 	/**
 	 * Build the deterministic code for a generated coupon reward.
 	 *
-	 * The code is derived from the goal id + reward value so the same goal
+	 * The code is derived from the mission id + reward value so the same mission
 	 * always maps to the same coupon (idempotent generation).
 	 *
-	 * @param int $goal_id Goal id.
+	 * @param int $mission_id Mission id.
 	 * @return string
 	 */
-	public static function generated_coupon_code( $goal_id ) {
-		return 'FARACART-' . strtoupper( substr( md5( 'faracart-reward-' . (int) $goal_id ), 0, 10 ) );
+	public static function generated_coupon_code( $mission_id ) {
+		return 'FARACART-' . strtoupper( substr( md5( 'faracart-reward-' . (int) $mission_id ), 0, 10 ) );
 	}
 }

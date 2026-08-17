@@ -115,7 +115,7 @@ function buildInsights(summary: RevenueSummary, aov: AovAnalysis): Insight[] {
         title: __('Optimization opportunity', 'faracart'),
         body: sprintf(
           /* translators: 1: purchase rate percentage. */
-          __('Only %1$s of completed goals were followed by an attributed purchase.', 'faracart'),
+          __('Only %1$s of completed missions were followed by an attributed purchase.', 'faracart'),
           formatPercent(funnel.conversion_rate)
         ),
       });
@@ -125,7 +125,7 @@ function buildInsights(summary: RevenueSummary, aov: AovAnalysis): Insight[] {
         title: __('Purchases', 'faracart'),
         body: sprintf(
           /* translators: 1: purchase rate percentage. */
-          __('%1$s of completed goals were followed by an attributed purchase.', 'faracart'),
+          __('%1$s of completed missions were followed by an attributed purchase.', 'faracart'),
           formatPercent(funnel.conversion_rate)
         ),
       });
@@ -165,15 +165,15 @@ type TrendMetric = 'sales' | 'orders' | 'completions' | 'incremental';
 const TREND_PRIMARY: Array<{ value: TrendMetric; label: string }> = [
   { value: 'sales', label: __('Attributed Sales', 'faracart') },
   { value: 'orders', label: __('Purchased Orders', 'faracart') },
-  { value: 'completions', label: __('Goal Completions', 'faracart') },
+  { value: 'completions', label: __('Mission Completions', 'faracart') },
 ];
 
 /**
  * The one canonical funnel (UICHANGES.md §18): views → progressed →
  * completed → purchased. Every stage shows its count and the percentage
  * carried from the previous stage, so the largest drop-off reads at a
- * glance. Only the Goal-detail drawer renders this same funnel again,
- * scoped to a specific goal (§18/§24).
+ * glance. Only the Mission-detail drawer renders this same funnel again,
+ * scoped to a specific mission (§18/§24).
  */
 function CustomerJourneyFunnel({ funnel }: { funnel: RevenueSummary['funnel'] }) {
   return (
@@ -195,7 +195,7 @@ function CustomerJourneyFunnel({ funnel }: { funnel: RevenueSummary['funnel'] })
         />
         <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
           {__(
-            'A completion means the customer reached the goal target. A purchase means a qualifying order was actually associated with the goal.',
+            'A completion means the customer reached the mission target. A purchase means a qualifying order was actually associated with the mission.',
             'faracart'
           )}
         </Typography>
@@ -207,39 +207,39 @@ function CustomerJourneyFunnel({ funnel }: { funnel: RevenueSummary['funnel'] })
 /**
  * Sales Performance (Phase 4 redesign of the Revenue Overview).
  *
- * Answers the store owner's questions at a glance — how much did Goal
+ * Answers the store owner's questions at a glance — how much did Mission
  * Cart sell, how many customers purchased, how profitable was it — with
  * four business KPI cards (Improvement.md §5–§13), a simplified trend
  * (§14), deterministic insight cards (§15) and the technical attribution
  * detail moved behind an expandable drawer (§30). Same payload, same
  * route: `GET /faracart/v1/revenue/overview` sliced by the shared date
- * range + goal filter.
+ * range + mission filter.
  */
 export default function RevenueOverview() {
   const { range, comparison } = useDateRange();
-  const [goalId, setGoalId] = useState<number>(0);
+  const [missionId, setMissionId] = useState<number>(0);
   const [visibleMetrics, setVisibleMetrics] = useState<TrendMetric[]>(['sales', 'orders']);
   const [showAdvancedTrend, setShowAdvancedTrend] = useState(false);
 
   const query = useQuery({
-    queryKey: ['revenue', 'overview', { from: range.from, to: range.to, goalId }],
+    queryKey: ['revenue', 'overview', { from: range.from, to: range.to, missionId }],
     queryFn: () =>
       fetchRevenueOverview({
         from: range.from,
         to: range.to,
-        goal_id: goalId || undefined,
+        mission_id: missionId || undefined,
       }),
   });
 
   // Previous equal-length period — the "vs previous period" context for
   // the KPI trend indicators (§7/§8).
   const comparisonQuery = useQuery({
-    queryKey: ['revenue', 'overview', { from: comparison.from, to: comparison.to, goalId }],
+    queryKey: ['revenue', 'overview', { from: comparison.from, to: comparison.to, missionId }],
     queryFn: () =>
       fetchRevenueOverview({
         from: comparison.from,
         to: comparison.to,
-        goal_id: goalId || undefined,
+        mission_id: missionId || undefined,
       }),
   });
 
@@ -287,7 +287,7 @@ export default function RevenueOverview() {
         'faracart'
       )}
     >
-      <RevenueToolbar goalId={goalId} onGoalChange={setGoalId} />
+      <RevenueToolbar missionId={missionId} onMissionChange={setMissionId} />
 
       {query.isError && (
         <Alert severity="error" variant="outlined">
@@ -318,7 +318,7 @@ export default function RevenueOverview() {
           icon={<TrendingUpIcon fontSize="large" />}
           title={__('No sales data yet', 'faracart')}
           description={__(
-            'Once customers start interacting with your goals, FaraCart will show sales, purchases and profit insights here.',
+            'Once customers start interacting with your missions, FaraCart will show sales, purchases and profit insights here.',
             'faracart'
           )}
         />
@@ -327,7 +327,7 @@ export default function RevenueOverview() {
           icon={<ShoppingCartCheckoutIcon fontSize="large" />}
           title={__('No purchases yet', 'faracart')}
           description={__(
-            'Customers are interacting with your goals, but no attributed purchases have been recorded for this period.',
+            'Customers are interacting with your missions, but no attributed purchases have been recorded for this period.',
             'faracart'
           )}
         />
@@ -343,9 +343,9 @@ export default function RevenueOverview() {
           >
             <KpiCard
               label={__('Sales Attributed to FaraCart', 'faracart')}
-              value={formatCurrency(summary.goal_driven_revenue)}
+              value={formatCurrency(summary.mission_driven_revenue)}
               icon={<PaymentsIcon fontSize="small" />}
-              trend={{ change: percentChange(previous?.goal_driven_revenue, summary.goal_driven_revenue) }}
+              trend={{ change: percentChange(previous?.mission_driven_revenue, summary.mission_driven_revenue) }}
               hint={sprintf(
                 /* translators: 1: purchased orders. */
                 __('%1$s purchased orders', 'faracart'),
@@ -497,7 +497,7 @@ export default function RevenueOverview() {
                       <Bar
                         yAxisId="count"
                         dataKey="completions"
-                        name={__('Goal Completions', 'faracart')}
+                        name={__('Mission Completions', 'faracart')}
                         fill={COLORS.primaryLight}
                         radius={[3, 3, 0, 0]}
                       />
@@ -589,25 +589,25 @@ export default function RevenueOverview() {
               <Stack spacing={1.25}>
                 <StatRow
                   label={__('Direct revenue', 'faracart')}
-                  value={formatCurrency(summary.goal_driven_revenue)}
+                  value={formatCurrency(summary.mission_driven_revenue)}
                   explanation={__(
-                    'Revenue from the incremental value of orders where customers progressed toward or completed a goal before ordering.',
+                    'Revenue from the incremental value of orders where customers progressed toward or completed a mission before ordering.',
                     'faracart'
                   )}
                 />
                 <StatRow
                   label={__('Assisted revenue', 'faracart')}
-                  value={formatCurrency(summary.goal_assisted_revenue)}
+                  value={formatCurrency(summary.mission_assisted_revenue)}
                   explanation={__(
-                    'Order totals from orders that were only exposed to a goal, never progressed.',
+                    'Order totals from orders that were only exposed to a mission, never progressed.',
                     'faracart'
                   )}
                 />
                 <StatRow
                   label={__('Influenced sales', 'faracart')}
-                  value={formatCurrency(summary.goal_influenced_revenue)}
+                  value={formatCurrency(summary.mission_influenced_revenue)}
                   explanation={__(
-                    'Order totals of every order associated with a goal — distinct orders, never double counted.',
+                    'Order totals of every order associated with a mission — distinct orders, never double counted.',
                     'faracart'
                   )}
                 />
@@ -615,7 +615,7 @@ export default function RevenueOverview() {
                   label={__('Incremental cart value', 'faracart')}
                   value={formatCurrency(data.incremental_cart_value.average)}
                   explanation={__(
-                    'Average cart value after goal exposure minus the value at first exposure, per session.',
+                    'Average cart value after mission exposure minus the value at first exposure, per session.',
                     'faracart'
                   )}
                 />
@@ -666,19 +666,19 @@ function HowCalculated({ summary }: { summary: RevenueSummary }) {
         <Stack spacing={0.75}>
           <StatRow
             label={__('Direct revenue', 'faracart')}
-            value={formatCurrency(summary.goal_driven_revenue)}
+            value={formatCurrency(summary.mission_driven_revenue)}
           />
           <StatRow
             label={__('Assisted revenue', 'faracart')}
-            value={formatCurrency(summary.goal_assisted_revenue)}
+            value={formatCurrency(summary.mission_assisted_revenue)}
           />
           <StatRow
             label={__('Influenced sales', 'faracart')}
-            value={formatCurrency(summary.goal_influenced_revenue)}
+            value={formatCurrency(summary.mission_influenced_revenue)}
           />
           <Typography variant="caption" color="text.secondary" component="p">
             {__(
-              'Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the FaraCart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once.',
+              'Incremental revenue is the direct revenue shown above — the additional order value the missions moved. Attribution follows the FaraCart model: progressed/completed missions are direct, exposure-only missions are assisted, and every associated order is counted once.',
               'faracart'
             )}
           </Typography>
@@ -707,7 +707,7 @@ function BasketCompare({ aov }: { aov: AovAnalysis }) {
         ) : (
           <Stack spacing={0.75}>
             <StatRow label={__('Store average', 'faracart')} value={formatCurrency(aov.overall_aov)} />
-            <StatRow label={__('Goal-exposed', 'faracart')} value={formatCurrency(aov.exposed_aov)} />
+            <StatRow label={__('Mission-exposed', 'faracart')} value={formatCurrency(aov.exposed_aov)} />
             <StatRow label={__('Difference', 'faracart')} value={formatCurrency(aov.absolute_change)} />
             <StatRow
               label={__('Percentage', 'faracart')}

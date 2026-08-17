@@ -35,8 +35,8 @@ import {
   YAxis,
 } from 'recharts';
 
-import { fetchGoals } from '../api/goals';
-import { fetchGoalPerformance, fetchRevenueOverview, fetchUpsellAnalytics } from '../api/revenue';
+import { fetchMissions } from '../api/missions';
+import { fetchMissionPerformance, fetchRevenueOverview, fetchUpsellAnalytics } from '../api/revenue';
 import { getBootData } from '../boot';
 import DateRangeFilter from '../components/date-range/DateRangeFilter';
 import EmptyState from '../components/EmptyState';
@@ -53,7 +53,7 @@ import {
   formatShortDay,
   percentChange,
 } from '../lib/format';
-import type { GoalPerformanceRow, RevenueSummary, RevenueTrendPoint, UpsellAnalyticsRow } from '../types';
+import type { MissionPerformanceRow, RevenueSummary, RevenueTrendPoint, UpsellAnalyticsRow } from '../types';
 
 const COLORS = {
   grid: '#dcdcde',
@@ -98,7 +98,7 @@ function sumUpsells(rows: UpsellAnalyticsRow[]): UpsellTotals {
  */
 function buildOpportunities(
   summary: RevenueSummary,
-  topGoal: GoalPerformanceRow | null,
+  topMission: MissionPerformanceRow | null,
   upsellAssisted: number,
   productsUrl: string
 ): Opportunity[] {
@@ -123,10 +123,10 @@ function buildOpportunities(
       title: __('Many completions don’t become purchases', 'faracart'),
       body: sprintf(
         /* translators: %s: purchase rate. */
-        __('Only %s of completed goals were followed by a purchase. Review your goal targets.', 'faracart'),
+        __('Only %s of completed missions were followed by a purchase. Review your mission targets.', 'faracart'),
         formatPercent(purchaseRate)
       ),
-      action: { label: __('Review', 'faracart'), to: '/optimization/goals' },
+      action: { label: __('Review', 'faracart'), to: '/optimization/missions' },
     });
   }
 
@@ -136,41 +136,41 @@ function buildOpportunities(
       title: __('Upsells are assisting completions', 'faracart'),
       body: sprintf(
         /* translators: %s: number of assisted completions. */
-        __('Smart Upsells assisted %s goal completions this period.', 'faracart'),
+        __('Smart Upsells assisted %s mission completions this period.', 'faracart'),
         formatNumber(upsellAssisted)
       ),
       action: { label: __('View performance', 'faracart'), to: '/optimization/upsells' },
     });
   }
 
-  if (topGoal && topGoal.attributed_revenue > 0) {
+  if (topMission && topMission.attributed_revenue > 0) {
     opportunities.push({
       icon: <InsightsIcon fontSize="small" color="primary" />,
       title: sprintf(
-        /* translators: %s: goal name. */
+        /* translators: %s: mission name. */
         __('%s is your top performer', 'faracart'),
-        topGoal.name
+        topMission.name
       ),
       body: sprintf(
         /* translators: %s: attributed sales. */
         __('It generated %s in attributed sales this period.', 'faracart'),
-        formatCurrency(topGoal.attributed_revenue)
+        formatCurrency(topMission.attributed_revenue)
       ),
-      action: { label: __('View goals', 'faracart'), to: '/revenue/goals' },
+      action: { label: __('View missions', 'faracart'), to: '/revenue/missions' },
     });
   }
 
   return opportunities.slice(0, 4);
 }
 
-/** Primary trend chart: attributed sales (line) + goal completions (bar). */
+/** Primary trend chart: attributed sales (line) + mission completions (bar). */
 function SalesTrendChart({ data }: { data: RevenueTrendPoint[] }) {
   const points = data.map((point) => ({ ...point, label: formatShortDay(point.date) }));
 
   return (
     <Box
       role="img"
-      aria-label={__('Daily attributed sales and goal completions trend', 'faracart')}
+      aria-label={__('Daily attributed sales and mission completions trend', 'faracart')}
       sx={{ width: '100%', height: 260 }}
     >
       <ResponsiveContainer width="100%" height="100%">
@@ -211,7 +211,7 @@ function SalesTrendChart({ data }: { data: RevenueTrendPoint[] }) {
           <Bar
             yAxisId="count"
             dataKey="completions"
-            name={__('Goal Completions', 'faracart')}
+            name={__('Mission Completions', 'faracart')}
             fill={COLORS.completions}
             radius={[3, 3, 0, 0]}
           />
@@ -230,16 +230,16 @@ function SalesTrendChart({ data }: { data: RevenueTrendPoint[] }) {
   );
 }
 
-/** Top goals summary card (top 5 by attributed sales) + "View all". */
-function GoalPerformanceCard({ goals, loading }: { goals: GoalPerformanceRow[]; loading: boolean }) {
+/** Top missions summary card (top 5 by attributed sales) + "View all". */
+function MissionPerformanceCard({ missions, loading }: { missions: MissionPerformanceRow[]; loading: boolean }) {
   return (
     <Card variant="outlined" sx={{ height: '100%' }}>
       <CardContent sx={{ height: '100%' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
           <Typography variant="h6" component="h2">
-            {__('Goal Performance', 'faracart')}
+            {__('Mission Performance', 'faracart')}
           </Typography>
-          <Button component={RouterLink} to="/revenue/goals" size="small">
+          <Button component={RouterLink} to="/revenue/missions" size="small">
             {__('View all', 'faracart')}
           </Button>
         </Box>
@@ -249,30 +249,30 @@ function GoalPerformanceCard({ goals, loading }: { goals: GoalPerformanceRow[]; 
               <Skeleton key={index} variant="rounded" height={40} />
             ))}
           </Stack>
-        ) : goals.length === 0 ? (
+        ) : missions.length === 0 ? (
           <Typography variant="body2" color="text.secondary">
-            {__('No goal performance yet.', 'faracart')}
+            {__('No mission performance yet.', 'faracart')}
           </Typography>
         ) : (
           <Stack spacing={1.75}>
-            {goals.map((goal) => (
-              <Box key={goal.goal_id}>
+            {missions.map((mission) => (
+              <Box key={mission.mission_id}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 1, mb: 0.5 }}>
                   <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-                    {goal.name}
+                    {mission.name}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
                     {sprintf(
                       /* translators: 1: purchases, 2: sales. */
                       __('%1$s purchases · %2$s sales', 'faracart'),
-                      formatNumber(goal.converted),
-                      formatCurrency(goal.attributed_revenue)
+                      formatNumber(mission.converted),
+                      formatCurrency(mission.attributed_revenue)
                     )}
                   </Typography>
                 </Box>
                 <LinearProgress
                   variant="determinate"
-                  value={goal.completion_rate === null ? 0 : Math.min(100, goal.completion_rate * 100)}
+                  value={mission.completion_rate === null ? 0 : Math.min(100, mission.completion_rate * 100)}
                   sx={{ height: 6, borderRadius: 3 }}
                 />
               </Box>
@@ -419,10 +419,10 @@ function DashboardSkeleton() {
   );
 }
 
-/** First-run onboarding for a store with no goals yet (§18). */
+/** First-run onboarding for a store with no missions yet (§18). */
 function Onboarding() {
   const steps = [
-    __('Create your first Goal', 'faracart'),
+    __('Create your first Mission', 'faracart'),
     __('Configure Smart Upsells', 'faracart'),
     __('Start collecting performance data', 'faracart'),
   ];
@@ -436,7 +436,7 @@ function Onboarding() {
         {__('Welcome to FaraCart', 'faracart')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 480, mx: 'auto' }}>
-        {__('Increase cart value with Goals and Smart Upsells.', 'faracart')}
+        {__('Increase cart value with Missions and Smart Upsells.', 'faracart')}
       </Typography>
       <Box
         component="ol"
@@ -473,8 +473,8 @@ function Onboarding() {
           </Box>
         ))}
       </Box>
-      <Button component={RouterLink} to="/goals/new" variant="contained" sx={{ mt: 3 }}>
-        {__('Create Goal', 'faracart')}
+      <Button component={RouterLink} to="/missions/new" variant="contained" sx={{ mt: 3 }}>
+        {__('Create Mission', 'faracart')}
       </Button>
     </Paper>
   );
@@ -483,14 +483,14 @@ function Onboarding() {
 /**
  * Dashboard — the Level-1 business summary (UICHANGES.md §3, §4).
  *
- * Answers "what happened?" at a glance: sales, estimated profit, goal
+ * Answers "what happened?" at a glance: sales, estimated profit, mission
  * completions, purchased orders, purchase rate and average order value,
- * a compact sales + completions trend, the top goals, the upsell summary
+ * a compact sales + completions trend, the top missions, the upsell summary
  * and deterministic optimization opportunities. Deep analytics live in
  * Sales Performance; this page stays a decision-making summary.
  *
  * Data comes from the existing revenue endpoints (no business-logic
- * changes): overview (+ previous period for the trend context), goal
+ * changes): overview (+ previous period for the trend context), mission
  * performance and upsell analytics, all sliced by the shared date range.
  */
 export default function Dashboard() {
@@ -498,9 +498,9 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
   const boot = getBootData();
 
-  const goalsQuery = useQuery({
-    queryKey: ['goals', 'summary'],
-    queryFn: () => fetchGoals({ per_page: 100 }),
+  const missionsQuery = useQuery({
+    queryKey: ['missions', 'summary'],
+    queryFn: () => fetchMissions({ per_page: 100 }),
   });
 
   const overviewQuery = useQuery({
@@ -513,9 +513,9 @@ export default function Dashboard() {
     queryFn: () => fetchRevenueOverview({ from: comparison.from, to: comparison.to }),
   });
 
-  const goalsPerfQuery = useQuery({
-    queryKey: ['revenue', 'goals', { from: range.from, to: range.to }],
-    queryFn: () => fetchGoalPerformance({ from: range.from, to: range.to }),
+  const missionsPerfQuery = useQuery({
+    queryKey: ['revenue', 'missions', { from: range.from, to: range.to }],
+    queryFn: () => fetchMissionPerformance({ from: range.from, to: range.to }),
   });
 
   const upsellsQuery = useQuery({
@@ -524,23 +524,23 @@ export default function Dashboard() {
   });
 
   const summary = overviewQuery.data?.summary;
-  const hasGoals = (goalsQuery.data?.total ?? 0) > 0;
-  // No analytics yet = no goal views and no attributed orders this period.
+  const hasMissions = (missionsQuery.data?.total ?? 0) > 0;
+  // No analytics yet = no mission views and no attributed orders this period.
   const hasData = summary !== undefined && (summary.funnel.views > 0 || summary.orders > 0);
 
-  const topGoals = useMemo(() => {
-    const items = goalsPerfQuery.data?.items ?? [];
+  const topMissions = useMemo(() => {
+    const items = missionsPerfQuery.data?.items ?? [];
 
     return [...items]
       .sort((a, b) => b.attributed_revenue - a.attributed_revenue || b.converted - a.converted)
       .slice(0, 5);
-  }, [goalsPerfQuery.data]);
+  }, [missionsPerfQuery.data]);
 
   const upsellTotals = useMemo(() => sumUpsells(upsellsQuery.data ?? []), [upsellsQuery.data]);
 
   const upsellAssisted = useMemo(
-    () => (goalsPerfQuery.data?.items ?? []).reduce((sum, goal) => sum + goal.upsell_assisted, 0),
-    [goalsPerfQuery.data]
+    () => (missionsPerfQuery.data?.items ?? []).reduce((sum, mission) => sum + mission.upsell_assisted, 0),
+    [missionsPerfQuery.data]
   );
 
   const previous = comparisonQuery.data?.summary;
@@ -548,13 +548,13 @@ export default function Dashboard() {
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['revenue'] });
-    queryClient.invalidateQueries({ queryKey: ['goals'] });
+    queryClient.invalidateQueries({ queryKey: ['missions'] });
   };
 
   // Trends are only derived from real previous-period values; a zero or
   // missing previous value yields "—" (never a fabricated percentage).
   const salesTrend: Trend = {
-    change: summary ? percentChange(previous?.goal_driven_revenue, summary.goal_driven_revenue) : null,
+    change: summary ? percentChange(previous?.mission_driven_revenue, summary.mission_driven_revenue) : null,
   };
   const completionsTrend: Trend = {
     change: summary ? percentChange(previous?.funnel.completed, summary.funnel.completed) : null,
@@ -574,12 +574,12 @@ export default function Dashboard() {
   const opportunities =
     summary === undefined
       ? []
-      : buildOpportunities(summary, topGoals[0] ?? null, upsellAssisted, productsUrl);
+      : buildOpportunities(summary, topMissions[0] ?? null, upsellAssisted, productsUrl);
 
   return (
     <PageContainer
       title={__('Overview', 'faracart')}
-      description={__('A business summary of your Goals and Smart Upsells.', 'faracart')}
+      description={__('A business summary of your Missions and Smart Upsells.', 'faracart')}
       actions={
         <>
           <DateRangeFilter />
@@ -601,18 +601,18 @@ export default function Dashboard() {
             </Button>
           }
         >
-          {__('We couldn’t load your analytics. Your Goals are still working normally.', 'faracart')}
+          {__('We couldn’t load your analytics. Your Missions are still working normally.', 'faracart')}
         </Alert>
-      ) : overviewQuery.isLoading || goalsQuery.isLoading ? (
+      ) : overviewQuery.isLoading || missionsQuery.isLoading ? (
         <DashboardSkeleton />
-      ) : !hasGoals ? (
+      ) : !hasMissions ? (
         <Onboarding />
       ) : !hasData ? (
         <EmptyState
           icon={<TrendingUpIcon fontSize="large" />}
           title={__('Your analytics are getting ready', 'faracart')}
           description={__(
-            'Once customers interact with your Goals, performance data will appear here.',
+            'Once customers interact with your Missions, performance data will appear here.',
             'faracart'
           )}
         />
@@ -628,7 +628,7 @@ export default function Dashboard() {
           >
             <KpiCard
               label={__('Sales Attributed to FaraCart', 'faracart')}
-              value={formatCurrency(summary.goal_driven_revenue)}
+              value={formatCurrency(summary.mission_driven_revenue)}
               icon={<PaymentsIcon fontSize="small" />}
               trend={salesTrend}
               hint={sprintf(
@@ -649,7 +649,7 @@ export default function Dashboard() {
               trend={profitTrend}
             />
             <KpiCard
-              label={__('Goal Completions', 'faracart')}
+              label={__('Mission Completions', 'faracart')}
               value={formatNumber(summary.funnel.completed)}
               icon={<FlagIcon fontSize="small" />}
               trend={completionsTrend}
@@ -670,27 +670,27 @@ export default function Dashboard() {
               label={__('Purchase Rate', 'faracart')}
               value={formatPercent(summary.funnel.conversion_rate)}
               icon={<PercentIcon fontSize="small" />}
-              hint={__('purchases per completed goal', 'faracart')}
+              hint={__('purchases per completed mission', 'faracart')}
             />
             <KpiCard
               label={__('Average Order Value', 'faracart')}
               value={formatCurrency(overviewQuery.data.aov.exposed_aov)}
               icon={<InsightsIcon fontSize="small" />}
-              hint={__('goal-exposed customers', 'faracart')}
+              hint={__('mission-exposed customers', 'faracart')}
             />
           </Box>
 
-          {/* Primary chart — sales & goal performance over time (§11). */}
+          {/* Primary chart — sales & mission performance over time (§11). */}
           <Card variant="outlined">
             <CardContent>
               <Typography variant="h6" component="h2" gutterBottom>
-                {__('Sales & Goal Performance', 'faracart')}
+                {__('Sales & Mission Performance', 'faracart')}
               </Typography>
               <SalesTrendChart data={overviewQuery.data.trend} />
             </CardContent>
           </Card>
 
-          {/* Level 2 — goal + upsell performance (§12, §13). */}
+          {/* Level 2 — mission + upsell performance (§12, §13). */}
           <Box
             sx={{
               display: 'grid',
@@ -699,7 +699,7 @@ export default function Dashboard() {
               alignItems: 'stretch',
             }}
           >
-            <GoalPerformanceCard goals={topGoals} loading={goalsPerfQuery.isLoading} />
+            <MissionPerformanceCard missions={topMissions} loading={missionsPerfQuery.isLoading} />
             <UpsellPerformanceCard
               totals={upsellTotals}
               assisted={upsellAssisted}

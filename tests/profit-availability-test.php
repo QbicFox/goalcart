@@ -24,7 +24,7 @@
  *    the inputs the help panel needs to explain how to enable profit (§10)
  *
  * All writes happen inside a single database transaction that is rolled
- * back; absence of residue is asserted afterwards. Fixtures use goal ids
+ * back; absence of residue is asserted afterwards. Fixtures use mission ids
  * 601+, sessions "t01"-style and products with the "P3 " prefix, so they
  * never collide with live store traffic or other suites' residue.
  *
@@ -60,7 +60,7 @@ use FaraCart\Analytics\RevenueTracker;
 use FaraCart\Analytics\RewardCostEstimator;
 use FaraCart\Database\Installer;
 use FaraCart\Database\Schema;
-use FaraCart\Goals\Goal;
+use FaraCart\Missions\Mission;
 use FaraCart\Settings\Settings;
 
 $failures = 0;
@@ -93,9 +93,9 @@ $costs     = $container->get( RewardCostEstimator::class );
 $settings  = $container->get( Settings::class );
 $wpdb      = $GLOBALS['wpdb'];
 
-$goals_table   = Schema::table( 'goals' );
+$missions_table   = Schema::table( 'missions' );
 $revenue_table = Schema::table( 'revenue_events' );
-$attrib_table  = Schema::table( 'goal_attribution' );
+$attrib_table  = Schema::table( 'mission_attribution' );
 
 // ---------------------------------------------------------------------------
 // 1. Service wiring + the stable cost-source contract
@@ -233,22 +233,22 @@ try {
 	// -----------------------------------------------------------------------
 	echo "\n== 3. Reward cost + shipping cost ==\n";
 
-	$goal_pct  = new Goal( array( 'id' => 601, 'reward_type' => 'percent_discount', 'reward_value' => 10, 'reward_max_value' => 50 ) );
-	$goal_fixed = new Goal( array( 'id' => 602, 'reward_type' => 'fixed_discount', 'reward_value' => 75 ) );
-	$goal_ship  = new Goal( array( 'id' => 603, 'reward_type' => 'free_shipping' ) );
-	$goal_gift  = new Goal( array( 'id' => 604, 'reward_type' => 'free_gift', 'reward_meta' => array( 'gift_product_id' => $p_cost ) ) );
-	$goal_gift_none = new Goal( array( 'id' => 605, 'reward_type' => 'free_gift', 'reward_meta' => array( 'gift_product_id' => $p_plain ) ) );
+	$mission_pct  = new Mission( array( 'id' => 601, 'reward_type' => 'percent_discount', 'reward_value' => 10, 'reward_max_value' => 50 ) );
+	$mission_fixed = new Mission( array( 'id' => 602, 'reward_type' => 'fixed_discount', 'reward_value' => 75 ) );
+	$mission_ship  = new Mission( array( 'id' => 603, 'reward_type' => 'free_shipping' ) );
+	$mission_gift  = new Mission( array( 'id' => 604, 'reward_type' => 'free_gift', 'reward_meta' => array( 'gift_product_id' => $p_cost ) ) );
+	$mission_gift_none = new Mission( array( 'id' => 605, 'reward_type' => 'free_gift', 'reward_meta' => array( 'gift_product_id' => $p_plain ) ) );
 
-	$pct = $costs->estimate_reward_cost( $goal_pct, 1000 );
+	$pct = $costs->estimate_reward_cost( $mission_pct, 1000 );
 	check( 'percent discount cost capped at reward max', close( 50, $pct['estimated_cost'] ) && $pct['available'] );
 
-	$fixed = $costs->estimate_reward_cost( $goal_fixed, 1000 );
+	$fixed = $costs->estimate_reward_cost( $mission_fixed, 1000 );
 	check( 'fixed discount costs its amount', close( 75, $fixed['estimated_cost'] ) && $fixed['available'] );
 
-	$ship_ctx = $costs->estimate_reward_cost( $goal_ship, 1000, array( 'shipping_total' => 85 ) );
+	$ship_ctx = $costs->estimate_reward_cost( $mission_ship, 1000, array( 'shipping_total' => 85 ) );
 	check( 'free shipping costs the order shipping total (context)', close( 85, $ship_ctx['estimated_cost'] ) && $ship_ctx['available'] );
 
-	$ship_unknown = $costs->estimate_reward_cost( $goal_ship, 1000 );
+	$ship_unknown = $costs->estimate_reward_cost( $mission_ship, 1000 );
 	check( 'free shipping without shipping data is unavailable', ! $ship_unknown['available'] && 0.0 === $ship_unknown['estimated_cost'] );
 
 	$order = wc_create_order();
@@ -260,13 +260,13 @@ try {
 	$order_id = (int) $order->get_id();
 
 	check( 'order shipping total readable', close( 85, $costs->order_shipping_total( $order_id ) ) );
-	$ship_order = $costs->estimate_reward_cost( $goal_ship, 1000, array( 'order_id' => $order_id ) );
+	$ship_order = $costs->estimate_reward_cost( $mission_ship, 1000, array( 'order_id' => $order_id ) );
 	check( 'free shipping reads the real order shipping', close( 85, $ship_order['estimated_cost'] ) && $ship_order['available'] );
 
-	$gift = $costs->estimate_reward_cost( $goal_gift, 1000 );
+	$gift = $costs->estimate_reward_cost( $mission_gift, 1000 );
 	check( 'free gift costs the gift product cost', close( 400, $gift['estimated_cost'] ) && $gift['available'] );
 
-	$gift_none = $costs->estimate_reward_cost( $goal_gift_none, 1000 );
+	$gift_none = $costs->estimate_reward_cost( $mission_gift_none, 1000 );
 	check( 'free gift without cost data is unavailable', ! $gift_none['available'] && 0.0 === $gift_none['estimated_cost'] );
 
 	// -----------------------------------------------------------------------
@@ -291,11 +291,11 @@ try {
 	) );
 	check( 'no margin → profit unavailable + reason code', ! $profit_none['available'] && null === $profit_none['estimated_profit'] && 'missing_product_cost' === $profit_none['reason_code'] );
 
-	// Attribution summary path: a real order attributed to a completed goal,
+	// Attribution summary path: a real order attributed to a completed mission,
 	// so the summary's profit + availability metadata reflect real data.
-	$wpdb->insert( $goals_table, array(
+	$wpdb->insert( $missions_table, array(
 		'id'               => 606,
-		'name'             => 'P3 profit goal',
+		'name'             => 'P3 profit mission',
 		'status'           => 'active',
 		'type'             => 'amount',
 		'target'           => 1000000,
@@ -307,9 +307,9 @@ try {
 	) );
 
 	$session = 't01' . str_repeat( 'ab', 14 );
-	$tracker->record( 'goal_view', array( 'goal_id' => 606, 'cart_value' => 600, 'goal_target' => 1000000, 'session_id' => $session ) );
-	$tracker->record( 'goal_progress', array( 'goal_id' => 606, 'cart_value' => 800, 'goal_target' => 1000000, 'session_id' => $session ) );
-	$tracker->record( 'goal_completed', array( 'goal_id' => 606, 'cart_value' => 1000, 'goal_target' => 1000000, 'session_id' => $session ) );
+	$tracker->record( 'goal_view', array( 'mission_id' => 606, 'cart_value' => 600, 'mission_target' => 1000000, 'session_id' => $session ) );
+	$tracker->record( 'goal_progress', array( 'mission_id' => 606, 'cart_value' => 800, 'mission_target' => 1000000, 'session_id' => $session ) );
+	$tracker->record( 'goal_completed', array( 'mission_id' => 606, 'cart_value' => 1000, 'mission_target' => 1000000, 'session_id' => $session ) );
 
 	// Order on the costed product → order margin = 0.6, incremental = 400.
 	$settings->set( 'analytics_enabled', false );
@@ -330,7 +330,7 @@ try {
 	) );
 	check( 'profit order attributed', 1 === $written );
 
-	$summary = $engine->attribution_summary( array( 'goal_id' => 606 ) );
+	$summary = $engine->attribution_summary( array( 'mission_id' => 606 ) );
 	check( 'summary profit available', true === $summary['profit_available'] );
 	check( 'summary profit = 400×0.6 − 50 − 100', close( 90, $summary['profit_impact'] ) );
 	check( 'summary reason_code available', 'available' === $summary['profit_reason_code'] );
@@ -361,8 +361,8 @@ $revenue_after = (int) $wpdb->get_var(
 );
 check( 'no test events remain after rollback', 0 === $revenue_after );
 
-$goals_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table} WHERE id BETWEEN 601 AND 606" );
-check( 'no test goals remain after rollback', 0 === $goals_after );
+$missions_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table} WHERE id BETWEEN 601 AND 606" );
+check( 'no test missions remain after rollback', 0 === $missions_after );
 
 $attrib_after = (int) $wpdb->get_var(
 	$wpdb->prepare( "SELECT COUNT(*) FROM {$attrib_table} WHERE session_id IN ({$placeholders})", $sessions )

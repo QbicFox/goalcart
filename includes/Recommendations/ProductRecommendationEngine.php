@@ -8,9 +8,9 @@
 namespace FaraCart\Recommendations;
 
 use FaraCart\Analytics\UpsellRanker;
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Suggestions\SuggestionEngine;
 
 defined( 'ABSPATH' ) || exit;
@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * The single customer-facing recommendation layer. It preserves BOTH
  * internal recommendation strategies — the Phase 14 SuggestionEngine
- * (goal-gap product suggestions) and the Phase 33.5 UpsellRanker (six
+ * (mission-gap product suggestions) and the Phase 33.5 UpsellRanker (six
  * normalized component scorers over the same candidates) — and merges
  * them into ONE ranked, deduplicated list that the storefront renders as
  * a single panel. The customer never sees "suggestions" vs "upsells":
@@ -31,11 +31,11 @@ defined( 'ABSPATH' ) || exit;
  *                       ↓
  *   Score / Rank → Business Filters → Limit → Unified items
  *
- * Pipeline (per goal, per request):
+ * Pipeline (per mission, per request):
  *
  *  1. Generate — run SuggestionEngine::suggest() (already filtered and
  *     capped by its own rules) and UpsellRanker::rank() on the same
- *     goal + cart context.
+ *     mission + cart context.
  *  2. Normalize — both halves are reduced to one candidate shape; every
  *     product is scored on the SAME 0–100 scale. Upsell candidates keep
  *     their composite ranker score; suggestion-only candidates are
@@ -57,8 +57,8 @@ defined( 'ABSPATH' ) || exit;
  *     to the shopper.
  *
  * Business rules come from the two engines unchanged: published +
- * priced + in-stock products only, cart items and goal-excluded products
- * never recommended, quantity goals degrade to suggestion-only. The
+ * priced + in-stock products only, cart items and mission-excluded products
+ * never recommended, quantity missions degrade to suggestion-only. The
  * whole pipeline is pure — no writes, no cache churn — and rides inside
  * the already-cached progress payload, so the storefront makes no extra
  * recommendation request.
@@ -89,7 +89,7 @@ final class ProductRecommendationEngine {
 	 * Minimum unified score for a candidate to be recommended.
 	 *
 	 * A candidate that scored 0 under the merged weights contributed no
-	 * positive signal (e.g. a live-catalog best seller with no goal or
+	 * positive signal (e.g. a live-catalog best seller with no mission or
 	 * cart link under relevance-only weights) — it must never pad the
 	 * panel. Fewer strong candidates → fewer items, never invented
 	 * fillers.
@@ -99,7 +99,7 @@ final class ProductRecommendationEngine {
 	const MIN_SCORE = 0.0;
 
 	/**
-	 * Suggestion engine (Phase 14) — the goal-gap candidate half.
+	 * Suggestion engine (Phase 14) — the mission-gap candidate half.
 	 *
 	 * @var SuggestionEngine
 	 */
@@ -126,19 +126,19 @@ final class ProductRecommendationEngine {
 	}
 
 	/**
-	 * Recommend products for one goal on the current cart context.
+	 * Recommend products for one mission on the current cart context.
 	 *
-	 * Deterministic: the same goal + cart + catalog always yields the
+	 * Deterministic: the same mission + cart + catalog always yields the
 	 * same ranked list. Never writes anything. Returns an empty array
-	 * (never a fabricated list) when the goal is completed, ineligible,
+	 * (never a fabricated list) when the mission is completed, ineligible,
 	 * the gap is closed, or no candidate survives the business filters.
 	 *
-	 * @param Goal        $goal    Goal being recommended for.
-	 * @param GoalResult  $result  Evaluation result (current/target/remaining).
+	 * @param Mission        $mission    Mission being recommended for.
+	 * @param MissionResult  $result  Evaluation result (current/target/remaining).
 	 * @param CartContext $context Cart snapshot.
 	 * @return array<int, array<string, mixed>> Unified items, ranked.
 	 */
-	public function recommend( Goal $goal, GoalResult $result, CartContext $context ) {
+	public function recommend( Mission $mission, MissionResult $result, CartContext $context ) {
 		// A closed gap (completed / ineligible / nothing left) has no
 		// recommendation to make — the suggestion engine agrees.
 		if ( ! $result->eligible() || $result->completed() || $result->remaining() <= 0 ) {
@@ -146,9 +146,9 @@ final class ProductRecommendationEngine {
 		}
 
 		// 1. Generate candidates from BOTH engines (each already applies
-		// its own business filters: stock, price, cart + goal exclusions).
-		$suggestion_items = $this->suggestions->suggest( $goal, $result, $context );
-		$upsell_items     = $this->upsell_items( $goal, $result, $context );
+		// its own business filters: stock, price, cart + mission exclusions).
+		$suggestion_items = $this->suggestions->suggest( $mission, $result, $context );
+		$upsell_items     = $this->upsell_items( $mission, $result, $context );
 
 		// 2–3. Normalize + deduplicate by product id. The upsell half is
 		// merged first so a product in both halves keeps the ranker's
@@ -213,7 +213,7 @@ final class ProductRecommendationEngine {
 					isset( $item['source'] ) ? (string) $item['source'] : UpsellRanker::SOURCE_POPULAR,
 					$remaining,
 					$cart_ids,
-					$goal
+					$mission
 				);
 
 				$item  = $scored;
@@ -236,7 +236,7 @@ final class ProductRecommendationEngine {
 
 		// Weak-candidate floor: drop everything that scored 0 so the
 		// panel is never padded with no-signal fillers (e.g. live-catalog
-		// best sellers with no goal/cart link under relevance-only
+		// best sellers with no mission/cart link under relevance-only
 		// weights). This is the "never invent fillers" guarantee — the
 		// limit caps, it never fabricates.
 		$candidates = array_values( array_filter( $candidates, function ( $candidate ) {
@@ -274,33 +274,33 @@ final class ProductRecommendationEngine {
 		}
 
 		/**
-		 * Filters the unified recommendations for a goal before they
+		 * Filters the unified recommendations for a mission before they
 		 * reach the payload — the same developer API the Phase 14
 		 * suggestion engine exposes, now applied to the merged list.
 		 *
 		 * @param array       $items   Shaped unified items.
-		 * @param Goal        $goal    Goal.
-		 * @param GoalResult  $result  Evaluation result.
+		 * @param Mission        $mission    Mission.
+		 * @param MissionResult  $result  Evaluation result.
 		 * @param CartContext $context Cart snapshot.
 		 */
-		return (array) apply_filters( 'faracart_suggestions', $items, $goal, $result, $context );
+		return (array) apply_filters( 'faracart_suggestions', $items, $mission, $result, $context );
 	}
 
 	/**
 	 * The upsell half of the pool (Phase 33.5 ranker).
 	 *
-	 * Only money goals with a positive remaining gap produce upsell
+	 * Only money missions with a positive remaining gap produce upsell
 	 * candidates; the ranker's own gate (master enabled + analytics +
 	 * faracart_upsells_enabled) is respected, so a store that disabled
 	 * smart upsells simply gets the suggestion half.
 	 *
-	 * @param Goal        $goal    Goal.
-	 * @param GoalResult  $result  Evaluation result.
+	 * @param Mission        $mission    Mission.
+	 * @param MissionResult  $result  Evaluation result.
 	 * @param CartContext $context Cart snapshot.
 	 * @return array<int, array<string, mixed>> Ranked upsell items.
 	 */
-	protected function upsell_items( Goal $goal, GoalResult $result, CartContext $context ) {
-		if ( ! $this->upsells->enabled() || ! $goal->is_money_goal() ) {
+	protected function upsell_items( Mission $mission, MissionResult $result, CartContext $context ) {
+		if ( ! $this->upsells->enabled() || ! $mission->is_money_mission() ) {
 			return array();
 		}
 
@@ -312,16 +312,16 @@ final class ProductRecommendationEngine {
 
 		$payload = $this->upsells->rank(
 			array(
-				// Hand the in-memory Goal over directly: the ranker's
+				// Hand the in-memory Mission over directly: the ranker's
 				// manual-source candidates and relevance scoring need the
-				// goal's own products even when the goal is fresh/unpersisted
+				// mission's own products even when the mission is fresh/unpersisted
 				// (the id-only path resolves from the repository instead).
-				'goal'       => $goal,
-				'goal_id'    => $goal->id(),
+				'mission'       => $mission,
+				'mission_id'    => $mission->id(),
 				'cart_value' => (float) $result->current(),
 				'remaining'  => $remaining,
 				'cart'       => $this->cart_ids( $context ),
-				'exclude'    => $goal->excluded_products(),
+				'exclude'    => $mission->excluded_products(),
 				'limit'      => $this->limit(),
 			)
 		);
@@ -334,7 +334,7 @@ final class ProductRecommendationEngine {
 	/**
 	 * Shape one merged candidate into the payload item.
 	 *
-	 * `id` keeps the suggestion-stream contract (goal.suggestions[].id);
+	 * `id` keeps the suggestion-stream contract (mission.suggestions[].id);
 	 * `product_id` feeds the storefront add-to-cart flow; `source` and
 	 * `score` preserve the attribution/analytics signal without exposing
 	 * it to the shopper.

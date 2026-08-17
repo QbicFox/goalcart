@@ -179,14 +179,14 @@ namespace FaraCart\Settings {
 }
 
 namespace {
-	require dirname( __DIR__ ) . '/includes/Goals/CartItem.php';
-	require dirname( __DIR__ ) . '/includes/Goals/CartContext.php';
+	require dirname( __DIR__ ) . '/includes/Missions/CartItem.php';
+	require dirname( __DIR__ ) . '/includes/Missions/CartContext.php';
 	require dirname( __DIR__ ) . '/includes/Cart/CartIntegration.php';
-	require dirname( __DIR__ ) . '/includes/Goals/Goal.php';
-	require dirname( __DIR__ ) . '/includes/Goals/GoalResult.php';
-	require dirname( __DIR__ ) . '/includes/Goals/ProgressCalculator.php';
-	require dirname( __DIR__ ) . '/includes/Goals/GoalEvaluator.php';
-	require dirname( __DIR__ ) . '/includes/Goals/Evaluators/AmountEvaluator.php';
+	require dirname( __DIR__ ) . '/includes/Missions/Mission.php';
+	require dirname( __DIR__ ) . '/includes/Missions/MissionResult.php';
+	require dirname( __DIR__ ) . '/includes/Missions/ProgressCalculator.php';
+	require dirname( __DIR__ ) . '/includes/Missions/MissionEvaluator.php';
+	require dirname( __DIR__ ) . '/includes/Missions/Evaluators/AmountEvaluator.php';
 
 	$failures = 0;
 	$checks   = 0;
@@ -239,15 +239,15 @@ namespace {
 	check( 'live_cart exposes the REST-initialized WC cart', $live instanceof WC_Cart );
 	check( 'gift-endpoint cart acquisition sees the session-backed item', null !== $live && 1 === count( $live->get_cart() ) );
 
-	$goal = new \FaraCart\Goals\Goal(
+	$mission = new \FaraCart\Missions\Mission(
 		array(
-			'type'   => \FaraCart\Goals\Goal::TYPE_AMOUNT,
+			'type'   => \FaraCart\Missions\Mission::TYPE_AMOUNT,
 			'target' => 100,
 		)
 	);
-	$result = ( new \FaraCart\Goals\Evaluators\AmountEvaluator() )->evaluate( $goal, $context );
+	$result = ( new \FaraCart\Missions\Evaluators\AmountEvaluator() )->evaluate( $mission, $context );
 
-	check( 'restored cart produces the expected current goal value', 40.0 === $result->current() );
+	check( 'restored cart produces the expected current mission value', 40.0 === $result->current() );
 	check( 'restored cart produces non-zero progress', 40.0 === $result->percentage() );
 
 	$repeat = $integration->context();

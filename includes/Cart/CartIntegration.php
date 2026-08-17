@@ -7,7 +7,7 @@
 
 namespace FaraCart\Cart;
 
-use FaraCart\Goals\CartContext;
+use FaraCart\Missions\CartContext;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Settings\Settings;
 
@@ -18,14 +18,14 @@ defined( 'ABSPATH' ) || exit;
  *
  * The single, request-level source of truth for the current cart snapshot
  * (P06-T01). It converts the live WooCommerce cart into the normalized
- * CartContext the goal engine consumes, memoizes the result per cart
+ * CartContext the mission engine consumes, memoizes the result per cart
  * contents + args so repeated builds (several totals passes per request,
  * REST reads, frontend refreshes) never repeat work, and listens to the
  * cart lifecycle hooks (P06-T02) so the cache is invalidated the moment
  * the shopper changes anything.
  *
  * Cart Context (P06-T03): the memoized CartContext carries only the
- * numbers the Goal Engine needs, with product categories preloaded in a
+ * numbers the Mission Engine needs, with product categories preloaded in a
  * single batched query (variations resolved from their parent product,
  * the WooCommerce convention) so no per-item term queries run.
  *
@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
  *  - request-level memoization keyed by the shopper-controlled line data
  *  - product categories preloaded with one wp_get_object_terms() call per
  *    build; WP core caches object-term relations, so later builds are cheap
- *  - the GoalRepository and GoalEngine stay per-request cached
+ *  - the MissionRepository and MissionEngine stay per-request cached
  *
  * WooCommerce Blocks: Store API cart mutations funnel through the classic
  * WC_Cart methods (add_to_cart, remove_cart_item, set_quantity,
@@ -43,7 +43,7 @@ defined( 'ABSPATH' ) || exit;
 final class CartIntegration {
 
 	/**
-	 * Settings instance (Phase 18: the Goal Calculation toggles).
+	 * Settings instance (Phase 18: the Mission Calculation toggles).
 	 *
 	 * @var Settings
 	 */
@@ -97,7 +97,7 @@ final class CartIntegration {
 	}
 
 	/**
-	 * Build (and cache) the goal-engine context for the live cart.
+	 * Build (and cache) the mission-engine context for the live cart.
 	 *
 	 * Memoized per cart contents + args for the duration of the request; it
 	 * is rebuilt automatically when the cart changes (the cache key embeds
@@ -105,7 +105,7 @@ final class CartIntegration {
 	 * the key) or when a lifecycle hook invalidates it.
 	 *
 	 * Timing note: the snapshot reflects the cart's line data at build time.
-	 * The goal bases are line-derived, so they stay correct while WC has
+	 * The mission bases are line-derived, so they stay correct while WC has
 	 * reset the aggregate totals; the cart-level aggregates (taxes,
 	 * shipping) are captured when readable and may be zeroed mid-calculation
 	 * (see the timing note in CartContext::from_cart).
@@ -143,8 +143,8 @@ final class CartIntegration {
 
 		// Preload categories once per build (one batched query) and hand
 		// them to from_cart so no per-item term queries run. Phase 32
-		// (brand/tag/attribute goals) preloads tags and attribute
-		// taxonomies the same way. Phase 18: the Goal Calculation settings
+		// (brand/tag/attribute missions) preloads tags and attribute
+		// taxonomies the same way. Phase 18: the Mission Calculation settings
 		// refine the snapshot (tax / discount / shipping / sale / virtual
 		// inclusion), unless the caller passed explicit overrides.
 		$args['categories'] = $this->load_categories( $cart );
@@ -208,7 +208,7 @@ final class CartIntegration {
 	}
 
 	/**
-	 * Merge the Goal Calculation settings into the from_cart args.
+	 * Merge the Mission Calculation settings into the from_cart args.
 	 *
 	 * Explicit caller args always win; otherwise the Phase 18 settings
 	 * apply (each default preserves the pre-Phase-18 behavior).

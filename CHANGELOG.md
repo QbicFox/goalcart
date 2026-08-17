@@ -9,26 +9,26 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Added
 
-- **Six new MUI design templates replace the old goal templates** — the
-  Phase 12 Goal variants (basic / percentage / milestone / card / ring)
+- **Six new MUI design templates replace the old mission templates** — the
+  Phase 12 Mission variants (basic / percentage / milestone / card / ring)
   are fully removed and replaced by the six design templates
   (`template-1` … `template-6`): classic progress card, minimal inline
-  cart goal, circular progress, product recommendation + goal, compact
-  floating/sticky goal, and premium/elegant e-commerce style. Each is a
+  cart mission, circular progress, product recommendation + mission, compact
+  floating/sticky mission, and premium/elegant e-commerce style. Each is a
   production MUI component shared by the admin preview and the
   WooCommerce storefront (`admin-app/src/templates/renderers/`,
-  `includes/Templates/Goal/`, `assets/js/frontend.js` `t1Panel`…
+  `includes/Templates/Mission/`, `assets/js/frontend.js` `t1Panel`…
   `t6Panel`).
   - **Schema-driven appearance settings** — every template exposes only
     the settings that suit its design (colors, radius, bar height,
     button style, density, ring size, product image size, shadow,
     content toggles) via the pluggable template contract; the
-    Appearance page, Goal Builder and Campaign Builder render the
+    Appearance page, Mission Builder and Campaign Builder render the
     settings form generically and the live preview updates instantly.
     Defaults match the reference designs (orange card, indigo inline,
     indigo ring, blue recommendation, dark sticky, premium gold).
-  - **No old-template mapping** — persisted old Phase 12 ids (goal
-    `display_settings`, `template_defaults.goal`, `frontend_template`)
+  - **No old-template mapping** — persisted old Phase 12 ids (mission
+    `display_settings`, `template_defaults.mission`, `frontend_template`)
     are never mapped to a current template; an old id simply falls back
     to the scope default / store-wide template (`template-1`). The
     legacy migration map and the pre-engine `display_settings.template`
@@ -41,36 +41,36 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     settings / frontend / preview / rest-api suites; PHP lint, `npm run
     typecheck`, `npm run lint` and `npm run build` all pass.
 
-- **Per-user goal completion limit (Phase 36)** — every goal now has a
+- **Per-user mission completion limit (Phase 36)** — every mission now has a
   configurable `max_completions_per_user` ("تعداد دفعات تکمیل توسط هر
-  کاربر"): how many times the same shopper may complete the goal. Null =
-  unlimited (the default, so existing goals behave exactly as before).
-  - **Server-side enforcement** — a new `faracart_goal_completions`
-    history table (one row per goal per order per identity) records a
-    completion when a paid order meets a goal; `CompletionService`
+  کاربر"): how many times the same shopper may complete the mission. Null =
+  unlimited (the default, so existing missions behave exactly as before).
+  - **Server-side enforcement** — a new `faracart_mission_completions`
+    history table (one row per mission per order per identity) records a
+    completion when a paid order meets a mission; `CompletionService`
     counts per user (logged-in by `user_id`, guests by the existing
     anonymous session stamped on the order at checkout) and enforces
     the limit transactionally (row lock + fresh count inside a
-    transaction, plus an `order_goal` unique key that makes replays and
+    transaction, plus an `order_mission` unique key that makes replays and
     double-submits exactly-once).
-  - **Reward protection** — an exhausted goal drops out of the reward
+  - **Reward protection** — an exhausted mission drops out of the reward
     engine's evaluation (and the gift-claim gate), so no reward is ever
     granted past the limit; previously granted rewards are revoked by
     the normal reconcile pass.
-  - **Admin UI** — the goal builder gains a "Completion limit" section
+  - **Admin UI** — the mission builder gains a "Completion limit" section
     (unlimited switch + positive-integer input, zero/negative/decimals
-    rejected) and the goals list shows the limit per goal.
+    rejected) and the missions list shows the limit per mission.
   - **Storefront** — the progress payload carries the shopper's
     `completion` status (limit / count / remaining / can_complete); a
-    reached limit renders the "You have already completed this goal."
+    reached limit renders the "You have already completed this mission."
     state with the reward chip locked, and the optional progress cache
     is keyed by identity so counts never leak between shoppers.
   - **Tests** — `tests/completion-limit-test.php` (64 checks): limit 1 /
-    3 / unlimited, different users and goals, guests, reward protection,
-    order-time recording, goal-reset independence, the message copy and
+    3 / unlimited, different users and missions, guests, reward protection,
+    order-time recording, mission-reset independence, the message copy and
     the payload fragment.
 
-- **Best Recommendation + `NaN%` fix on `/optimization/goals`** — the
+- **Best Recommendation + `NaN%` fix on `/optimization/missions`** — the
   Recommendations page now shows the store administrator exactly ONE
   optimization recommendation — the single best one:
   - **Single best recommendation** — the engine already generates and
@@ -112,15 +112,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     purchased) with the percentage each stage carries from the
     previous one, so the largest drop-off reads at a glance. It is the
     one store-wide funnel; the same funnel appears again only scoped
-    to a goal in the Goal Detail drawer. Data comes from the existing
+    to a mission in the Mission Detail drawer. Data comes from the existing
     overview payload's `summary.funnel` — no new request.
   - **§30 terminology** — the trend's advanced toggle and series are
     renamed **Incremental Revenue → Additional Sales Value**; the
     page titles of the two Optimization engines now match the
-    navigation labels (**Goal Optimization → Recommendations**,
+    navigation labels (**Mission Optimization → Recommendations**,
     **Upsell Performance → Upsells**), with the copy that explained
-    the old names updated. The Goal Detail drawer's two engine
-    sections use the same canonical labels (**Goal Optimization →
+    the old names updated. The Mission Detail drawer's two engine
+    sections use the same canonical labels (**Mission Optimization →
     Recommendations**, **Smart Upsells → Upsells**) and the legacy
     Attribution Dashboard's revenue cards use the shared §30 labels
     (Direct revenue / Assisted revenue / Influenced sales).
@@ -138,7 +138,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     `/optimization/*` canonical routes (legacy `/revenue/*` redirects),
     and a governing-spec note naming `UICHANGES.md`.
 
-- **UPSELL_REFACTOR — Goal Optimization & Upsell Performance** — the
+- **UPSELL_REFACTOR — Mission Optimization & Upsell Performance** — the
   full `UPSELL_REFACTOR.md` task list: product-cost foundation,
   terminology, and the feedback loop:
   - **Product Cost is a first-class field** — new
@@ -147,7 +147,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     stored under the namespaced `_faracart_product_cost` meta. It is
     the highest-priority meta source in `RewardCostEstimator::COST_SOURCES`
     (filter → `_faracart_product_cost` → `_cost` → `_wc_cog_cost` →
-    parent fallback), so Estimated Profit, Goal economics and the upsell
+    parent fallback), so Estimated Profit, Mission economics and the upsell
     margin scorer all pick it up with zero configuration.
   - **Historical cost snapshots** — new `Analytics\OrderCostSnapshot`
     stamps each order line item with its unit cost at checkout
@@ -158,29 +158,29 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   - **Catalog cost coverage** — new admin-only
     `GET /revenue/cost-coverage` (`RevenueController`): costed vs total
     products + coverage %, powering the "x / y products carry cost data"
-    banner on Goal Optimization.
+    banner on Mission Optimization.
   - **Recommendation feedback loop** — new admin-only
-    `POST /revenue/goal-recommendations/apply` (`RecommendationsController`):
-    applies one `goal_id` + `threshold` (never other Goal settings),
+    `POST /revenue/mission-recommendations/apply` (`RecommendationsController`):
+    applies one `mission_id` + `threshold` (never other Mission settings),
     records the `recommendation_applied` event (`RevenueTracker`, deduped
-    daily per goal, meta carries previous + applied threshold) and
+    daily per mission, meta carries previous + applied threshold) and
     invalidates the revenue caches.
-  - **Upsell-assisted completions** — `AttributionEngine::goal_metrics()`
-    and `GoalRecommendationEngine::goal_history()` now expose
-    `upsell_assisted` / `upsell_assisted_rate` (goal completions whose
-    session also engaged the smart-upsell panel), so Goal Performance and
-    Goal Optimization can show whether suggested products helped close
-    the goal.
-  - **Terminology & navigation** — **Smart Recommendations → Goal
+  - **Upsell-assisted completions** — `AttributionEngine::mission_metrics()`
+    and `MissionRecommendationEngine::mission_history()` now expose
+    `upsell_assisted` / `upsell_assisted_rate` (mission completions whose
+    session also engaged the smart-upsell panel), so Mission Performance and
+    Mission Optimization can show whether suggested products helped close
+    the mission.
+  - **Terminology & navigation** — **Smart Recommendations → Mission
     Optimization** and **Upsell Analytics → Upsell Performance** across
     the admin (navigation, titles, tooltips), with route redirects
     preserving old links; "Influenced revenue → Influenced sales" on the
     Sales Performance / Analytics pages; the Dashboard gains an education
     card linking the profit model to product-cost setup.
-  - **React** — `Recommendations.tsx` shows the current goal's own
+  - **React** — `Recommendations.tsx` shows the current mission's own
     performance on the top card, applies through the new endpoint, and
-    displays cost coverage; `GoalPerformance.tsx` adds the
-    Upsell-assisted column + Smart Upsells / Goal Optimization drawer
+    displays cost coverage; `MissionPerformance.tsx` adds the
+    Upsell-assisted column + Smart Upsells / Mission Optimization drawer
     sections; `UpsellAnalytics.tsx` retitles with an explanatory
     tooltip; types + `api/revenue.ts` extended
     (`upsell_assisted`, cost-coverage and apply calls).
@@ -202,8 +202,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     `estimated_profit`, `profit_available`, `profit_reason`,
     `profit_reason_code`, `cost_coverage` and `profit_details` — all
     derived from the cached `AttributionEngine` layer with the same
-    date range + goal filters. Campaign and reward filters resolve to
-    the matching goal ids (`GoalRepository::ids_by_campaign()` /
+    date range + mission filters. Campaign and reward filters resolve to
+    the matching mission ids (`MissionRepository::ids_by_campaign()` /
     `ids_by_reward_type()`); `product_id` is unsupported in attribution
     and degrades the purchase fields to null (never a fabricated
     number). Existing fields are untouched (API compatibility).
@@ -226,14 +226,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     one / many, direct / assisted / mixed / split, duplicate order
     events), every profit state (complete / missing / partial cost
     data, zero, negative, reward + shipping + margin math), cost
-    coverage, reason codes, goal + date filtering and the `/analytics`
+    coverage, reason codes, mission + date filtering and the `/analytics`
     extension; `analytics-dashboard-test.php` and
-    `revenue-admin-test.php` extended for the new summary/goal/overview
+    `revenue-admin-test.php` extended for the new summary/mission/overview
     fields. All rolled back, zero residue.
   - **Types** — `admin-app/src/types.ts` carries the new payload
     fields (`ProfitReasonCode`, `CostCoverage`, `ProfitDetails`,
     extended `AnalyticsSummary` / `RevenueSummary` /
-    `GoalPerformanceRow`).
+    `MissionPerformanceRow`).
 
 - **Phase 3 — Profit Availability (Revenue & Analytics UX simplification)**
   verifying the WooCommerce cost sources behind estimated profit and
@@ -254,7 +254,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     and `store_has_cost_data` (one cheap store-wide scan: whether any
     product has cost data — distinguishes "set up product costs" from
     "partial coverage"). Mirrored in the `/analytics` summary (null
-    for filters attribution cannot express), goal rows and empty
+    for filters attribution cannot express), mission rows and empty
     summaries.
   - **Tests** — new `tests/profit-availability-test.php` (44 checks):
     every cost source (incl. precedence, safety, both variation
@@ -265,16 +265,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     metadata on a real attributed summary. All rolled back.
   - **Types** — `admin-app/src/types.ts` adds `CostSource` and the
     `cost_sources` / `store_has_cost_data` fields to
-    `AnalyticsSummary`, `RevenueSummary` and `GoalPerformanceRow`.
+    `AnalyticsSummary`, `RevenueSummary` and `MissionPerformanceRow`.
 
 - **Phase 4 — Revenue Overview Redesign (Revenue & Analytics UX
   simplification)** — the `/revenue` page is now **Sales Performance**,
   answering "how much did FaraCart sell, how many customers purchased,
   and how profitable was it" (Improvement.md §5–§15, §49):
-  - **Four primary KPI cards** (§5–§8) — **Sales Attributed to Goal
+  - **Four primary KPI cards** (§5–§8) — **Sales Attributed to Mission
     Cart** (direct incremental revenue with an expandable "How is this
     calculated?" panel), **Average Basket Increase** (signed observed
-    impact with a comparison panel: store average / goal-exposed /
+    impact with a comparison panel: store average / mission-exposed /
     difference / percentage), **Purchased Orders** and **Estimated
     Profit**. The old seven-card row of technical metrics is gone from
     the primary view.
@@ -288,7 +288,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     reward cost / shipping cost / estimated profit plus the
     "analytical estimate, not accounting profit" disclaimer.
   - **Simplified trend** (§14) — "FaraCart Sales Performance" defaults
-    to Attributed Sales + Purchased Orders with toggles for Goal
+    to Attributed Sales + Purchased Orders with toggles for Mission
     Completions and an optional advanced Incremental Revenue series.
   - **Insight cards** (§15/§26) — 2–3 deterministic plain-English
     insights derived from the actual payload (purchases influenced,
@@ -307,9 +307,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   - **Tests/verification** — `tsc --noEmit`, ESLint and `vite build`
     all clean on the changed files.
 
-- **Phase 5 — Goal Performance Redesign (Revenue & Analytics UX
-  simplification)** — the Goals revenue page is now a commercial-outcome
-  table (Improvement.md §16–§20): **Goal / Viewed / Progressed /
+- **Phase 5 — Mission Performance Redesign (Revenue & Analytics UX
+  simplification)** — the Missions revenue page is now a commercial-outcome
+  table (Improvement.md §16–§20): **Mission / Viewed / Progressed /
   Completed / Purchased / Purchase Rate / Sales / Estimated Profit**,
   sortable (default: attributed sales; unavailable values always sort
   last) with header tooltips keeping completion and purchase distinct.
@@ -320,33 +320,33 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   assisted / influenced revenue + incremental cart value) and an
   Advanced section (attribution model, window, data sufficiency,
   observed basket impact). Additive backend fields on
-  `AttributionEngine::goal_metrics()` (`influenced_revenue`,
+  `AttributionEngine::mission_metrics()` (`influenced_revenue`,
   `attribution_window_days`, `data_sufficiency`) — no new queries;
   `FunnelVisual` gained `showTransitions`; `tests/revenue-admin-test.php`
   extended to 56 checks; POT regenerated (847 strings).
 
 - **Phase 6 — Analytics Redesign (Revenue & Analytics UX
-  simplification)** — the Analytics page is now **Goal Conversion &
+  simplification)** — the Analytics page is now **Mission Conversion &
   Purchase Analysis** (Improvement.md §21–§30, §50): primary KPI row
   (Purchased Orders, Purchase Rate, Attributed Sales and the shared
-  Estimated Profit card) with Goal Views + Completions secondary; the
+  Estimated Profit card) with Mission Views + Completions secondary; the
   customer-journey funnel ending in **Purchased** with drop-off
   percentages; a purchase-analysis section (completed vs purchased,
   purchase rate, attributed sales, average purchased order, estimated
-  profit); a sortable goal-comparison table (default sort: attributed
+  profit); a sortable mission-comparison table (default sort: attributed
   sales); deterministic drop-off insights; an advanced-attribution
   accordion; and the legacy activity metrics preserved behind a
   Detailed Activity accordion. Backend additions are additive:
-  `RevenueRepository::resolve_goal_ids()` / `goal_comparison()` and the
+  `RevenueRepository::resolve_mission_ids()` / `mission_comparison()` and the
   `/analytics` summary carrying `funnel`, `assisted_sales`,
-  `influenced_sales` and `goal_comparison` — legacy fields intact.
+  `influenced_sales` and `mission_comparison` — legacy fields intact.
   `StatRow` extracted as the shared detail row; `tests/analytics-
   dashboard-test.php` extended; POT regenerated (868 strings).
 
 - **Phase 7 — Recommendations (Revenue & Analytics UX simplification)**
   — the Smart Recommendations page keeps the deterministic Phase 33.4
   engine but presents it business-first (Improvement.md §33–§34):
-  - **Top recommendation card** — the recommended goal target up front,
+  - **Top recommendation card** — the recommended mission target up front,
     a **"Confidence: High / Medium / Low"** label (tiered from the raw
     score — the number is no longer the primary read), the expected
     impact as "+X% – +Y% average basket value", expected profit with
@@ -361,7 +361,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     Moderate / Good data) instead of the raw confidence-tier chip, and
     each ranked candidate shows threshold + expected impact + confidence
     label with its score bar/reasons/reward cost behind a Details
-    expander. The explicit **Apply → confirm → `PUT /goals/{id}`** flow
+    expander. The explicit **Apply → confirm → `PUT /missions/{id}`** flow
     and the Dismiss behavior are unchanged.
   - **Types** — `RecommendationCandidate.factors` is now the typed
     `RecommendationFactors` interface (component scores, ratios,
@@ -414,9 +414,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   — verified and completed the shared frontend-state contract
   (Improvement.md §43–§53):
   - **Distinct empty states (§44)** — the Sales Performance page and the
-    Goal Conversion & Purchase Analysis page now distinguish "No sales
+    Mission Conversion & Purchase Analysis page now distinguish "No sales
     data yet" (no interactions at all) from **"No purchases yet"**
-    (customers interact with goals but no attributed purchase was
+    (customers interact with missions but no attributed purchase was
     recorded): `views === 0 && orders === 0` shows the first;
     `views > 0 && orders === 0` shows the second with the §44 copy and
     a cart icon. Previously both situations collapsed into a single
@@ -451,11 +451,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     107, revenue-admin 56, attribution core, reward 130, engine 75,
     security 65, i18n 53, template 133, upsell 82, …); 12 suites sit
     within a **documented live-store drift baseline** (real orders,
-    events, goals and storefront settings on this store break
+    events, missions and storefront settings on this store break
     clean-DB fixtures); **0 regressions**.
   - **Checklist coverage** — every Phase 10 item (purchase metrics,
     purchase rate, funnel, estimated profit, profit unavailable /
-    negative, goal + date filtering, direct / assisted attribution,
+    negative, mission + date filtering, direct / assisted attribution,
     duplicate order prevention, caching, permissions) mapped to existing
     suites in `docs/testing.md` — no new backend tests were needed.
   - **Non-regression proof** — `git log 3ce5008..HEAD -- includes/` is
@@ -477,7 +477,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   (pending / disabled) and the form state the handlers read — so the bar
   always saves the latest values, never a stale snapshot. The **Settings** save button (now submits
   via the form's `requestSubmit()`), **Appearance** Save appearance +
-  Discard changes, and the **Goal** / **Campaign** builders' Save /
+  Discard changes, and the **Mission** / **Campaign** builders' Save /
   Create + Cancel buttons all live in the bar; it renders nothing on
   pages without actions. Loading/error states hide the bar so it never
   submits an empty form.
@@ -486,12 +486,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   Phase 33 (P33-T08):
   - **New `tests/phase33-test.php` (99 checks)** — unit coverage of the
     ranker's scorers at the price-gap band edges, the tracker's dedup
-    windows (view/impression/click per session+goal+product, progress
+    windows (view/impression/click per session+mission+product, progress
     within 30 min, order events exactly once) and confidence edge cases;
     a transactional WooCommerce integration fixture covering the full
     order flow (payment → exactly-once `order_paid` / `upsell_order`,
     double-payment idempotency, refunded/cancelled orders never
-    attributed, empty-cart and no-session degradation, multiple goals);
+    attributed, empty-cart and no-session degradation, multiple missions);
     HPOS via the `custom_order_tables` feature declaration and the
     order-scan caps (`ORDER_SCAN_PAGES`, `ATTRIBUTION_WINDOW`);
     performance/query-optimization bounds on the bounded-read constants
@@ -512,14 +512,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   the Smart Upsell engine (P33-T07):
   - **Public rank endpoint** — new `GET /faracart/v1/upsell/rank`
     (`UpsellController`), public + per-IP rate limited like `/progress`,
-    serving catalog data only. The storefront sends just `goal_id` +
-    `limit`; the server resolves the goal (explicit or the featured
-    active money goal), computes the remaining gap from the **live cart**
-    through the shared `GoalEngine` (target − current, exactly what the
+    serving catalog data only. The storefront sends just `mission_id` +
+    `limit`; the server resolves the mission (explicit or the featured
+    active money mission), computes the remaining gap from the **live cart**
+    through the shared `MissionEngine` (target − current, exactly what the
     widgets display — never trusted from the client) and runs the
     deterministic `UpsellRanker` directly, so the ranking always reflects
     the current cart with no per-cart transient churn. All Phase 33.5
-    degradation holds: no goal / closed gap / disabled / no candidates
+    degradation holds: no mission / closed gap / disabled / no candidates
     → unavailable with a reason, never a fabricated list. The response
     is `Cache-Control: no-store` (cart-dependent, like `/progress`), and
     the store's cost-derived margin/profit fields (`estimated_profit` /
@@ -528,12 +528,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     harvest the store's margins (P22-style public-payload redaction;
     the admin analytics surface keeps them behind manage_options).
   - **Upsell panel component** — full-variant cards on cart/checkout now
-    render ranked gap-closers for money goals with a positive remaining
+    render ranked gap-closers for money missions with a positive remaining
     gap: heading + product rows (image, name, server-formatted price,
     add-to-cart button), fetched through a new `cfg.upsells` frontend
     config block (rank + track endpoints, limit, localized labels,
     gated by the same `faracart_upsells_enabled` gate as the ranker),
-    cached per goal:gap, and dropped entirely on network failure.
+    cached per mission:gap, and dropped entirely on network failure.
   - **Add-to-cart integration** — the panel adds through WooCommerce's
     own public `?wc-ajax=add_to_cart` surface (the same endpoint the
     theme's buttons use — theme-compatible by construction), falls back
@@ -541,7 +541,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     variation-requiring items to their product page. Success funnels
     into the centralized `faracart:cart-changed` bridge, so the widgets
     re-poll and the gap closes live.
-  - **Conversion tracking** — `upsell_impression` (once per goal+product
+  - **Conversion tracking** — `upsell_impression` (once per mission+product
     per session), `upsell_clicked` (link + add) and `upsell_added`
     (after a successful add) report through the Phase 33.5 public
     `POST /faracart/v1/upsell/track` route, reusing the Phase 16
@@ -555,7 +555,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     registration, arg-schema validation, anonymous public access, the
     live-cart gap derivation (target − evaluated cart value with the
     in-cart product excluded from recommendations), explicit-context
-    overrides, closed-gap / disabled / unknown-goal degradation, the
+    overrides, closed-gap / disabled / unknown-mission degradation, the
     storefront config block (incl. the analytics-off gate) and the JS/CSS
     wiring — all inside a rolled-back transaction with residue checks.
     `tests/frontend-test.php` gained the `cfg.upsells` config-shape
@@ -566,19 +566,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   - **Event model** — new `RevenueTracker` (`includes/Analytics/`)
     owns two raw logs: `revenue_events` (the attribution funnel
     `goal_view` → `goal_progress` → `goal_completed` → `order_paid`,
-    each row carrying `cart_value`, `goal_target` and
+    each row carrying `cart_value`, `mission_target` and
     `incremental_value`) and `upsell_events` (impression → clicked →
     added → order per product per session). The Phase 16
     `Tracker`/`analytics_events` pipeline is untouched.
   - **Schema** — five new tables (`revenue_events`, `revenue_daily`,
-    `goal_attribution`, `upsell_events`, `upsell_stats`) with full
-    index coverage (single + composite `goal_event` / `order_event` /
-    `product_event` / `goal_date`, unique `order_goal_model` /
+    `mission_attribution`, `upsell_events`, `upsell_stats`) with full
+    index coverage (single + composite `mission_event` / `order_event` /
+    `product_event` / `mission_date`, unique `order_mission_model` /
     `product_id`); DB version bumped to `0.5.0`; new indexes are
     applied idempotently by `Installer::maybe_add_indexes()` on
     upgraded installs.
   - **Deduplication** — idempotent recording by design: views,
-    completions and upsell impressions/clicks dedup per session+goal
+    completions and upsell impressions/clicks dedup per session+mission
     (+product) within a 24 h window, `goal_progress` within 30 min,
     and `order_paid` / `upsell_order` exactly once per order — so
     page refreshes, poll loops and cart sync passes never
@@ -605,23 +605,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     (`includes/Analytics/`) hooks `woocommerce_payment_complete` plus
     `woocommerce_order_status_completed` (both idempotent) and
     attributes every revenue-producing order (statuses `processing` /
-    `completed` only) to the goals that influenced its session within a
-    30-day lookback. Rows land in `goal_attribution` under the
-    `order_goal_model` unique key; the order_paid event is recorded
+    `completed` only) to the missions that influenced its session within a
+    30-day lookback. Rows land in `mission_attribution` under the
+    `order_mission_model` unique key; the order_paid event is recorded
     through the 33.1 tracker.
-  - **Direct vs assisted attribution** — a goal the session progressed
+  - **Direct vs assisted attribution** — a mission the session progressed
     or completed before ordering is `direct` (the order's incremental
     value — order total above the cart value at first exposure — is
-    split equally across the direct goals, never double counted); a
-    viewed-only goal is `assisted` (order total recorded, zero
+    split equally across the direct missions, never double counted); a
+    viewed-only mission is `assisted` (order total recorded, zero
     incremental). The session resolves from the recorded order_paid
-    event, the live cookie, or the logged-in user's recent goal session.
+    event, the live cookie, or the logged-in user's recent mission session.
   - **Metrics** — SQL-aggregated, bounded reads: funnel counts with
     completion/conversion rates, incremental cart value (peak − baseline
-    per session), goal-driven (direct incremental) revenue, goal-assisted
-    revenue (pure-assisted orders), goal-influenced revenue (distinct
-    order totals), per-goal performance metrics, AOV analysis
-    (store-wide vs goal-exposed — labeled *observed* impact, never
+    per session), mission-driven (direct incremental) revenue, mission-assisted
+    revenue (pure-assisted orders), mission-influenced revenue (distinct
+    order totals), per-mission performance metrics, AOV analysis
+    (store-wide vs mission-exposed — labeled *observed* impact, never
     causality) and shipping stats (average, per-method, free share).
   - **Reward cost** — new `RewardCostEstimator` maps every reward type
     to a deterministic cost model (percent capped at max, fixed,
@@ -647,12 +647,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   read layer over the 33.1/33.2 pipeline (P33-T03):
   - **Daily aggregation** — new `DailyAggregator`
     (`includes/Analytics/`) rolls each day's `revenue_events` +
-    `goal_attribution` rows into `revenue_daily` (views → progressions
+    `mission_attribution` rows into `revenue_daily` (views → progressions
     → completions → conversions, revenue, incremental_revenue,
     reward_cost, estimated_profit) through the new
     `AttributionEngine::daily_metrics()` — the exact same funnel /
     summary / reward-cost / profit code the live dashboard reads, so
-    the aggregate and the live view can never drift. Only goals with
+    the aggregate and the live view can never drift. Only missions with
     activity that day get rows; delete-then-insert makes re-runs
     idempotent.
   - **Upsell product statistics** — `aggregate_upsells()` rebuilds
@@ -671,7 +671,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     runs instead of one unbounded pass.
   - **Cached revenue summaries** — new `RevenueRepository` serves
     `overview()` (attribution summary + incremental cart value + AOV +
-    shipping merged), `goal_performance()`, `daily_trend()` (reads the
+    shipping merged), `mission_performance()`, `daily_trend()` (reads the
     aggregated `revenue_daily`, zero-filled, merging today's live
     bucket until the next tick) and `product_stats()` (reads
     `upsell_stats`) — all memoized in generation-versioned transients
@@ -680,17 +680,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     (`faracart_revenue_cache_enabled`).
   - **Cache invalidation** — `invalidate()` bumps the generation
     counter (stale keys expire through their TTL); wired to order
-    payment/status changes, goal CRUD (new `faracart_goals_changed`
-    action from `GoalRepository`), product saves and the aggregation
+    payment/status changes, mission CRUD (new `faracart_missions_changed`
+    action from `MissionRepository`), product saves and the aggregation
     run (`faracart_revenue_aggregated`).
   - **Tests** — new `tests/aggregation-test.php` (73 checks) covering
     wiring/cron, schema indexes, daily aggregation values, idempotency,
     bounded catch-up, upsell-stats rebuild, the cached repository
     reads, versioned invalidation, the cache bypass and the
-    `faracart_goals_changed` CRUD hook — all rolled back, zero residue.
-- **Phase 33.4 — Smart Goal Recommendation** — the deterministic
+    `faracart_missions_changed` CRUD hook — all rolled back, zero residue.
+- **Phase 33.4 — Smart Mission Recommendation** — the deterministic
   threshold recommender on top of the 33.2/33.3 analytics (P33-T04):
-  - **Recommendation engine** — new `GoalRecommendationEngine`
+  - **Recommendation engine** — new `MissionRecommendationEngine`
     (`includes/Analytics/`) answers "what threshold should this store
     use?" from the store's own data, no LLM/AI: AOV, median and the
     order-value distribution come from the new
@@ -699,10 +699,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     shipping from `shipping_stats()` (average + free share), margins by
     sampling the newest catalog products through the existing
     `faracart_product_cost` read path (unavailable when the store
-    stores no costs — never invented), and current goal performance
-    via the attribution funnel when a `goal_id` is supplied.
+    stores no costs — never invented), and current mission performance
+    via the attribution funnel when a `mission_id` is supplied.
   - **Candidates + scoring** — thresholds are generated around the AOV
-    ({0.9×…1.5×} plus shipping-aware additions for free-shipping goals)
+    ({0.9×…1.5×} plus shipping-aware additions for free-shipping missions)
     and scored on four filterable-weight components: reachability
     (share of orders within 30% below the threshold), distance
     (stretch above median + AOV), economics (reward cost vs
@@ -715,14 +715,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     (CV), margin/shipping availability and history depth, clamped
     40–95; fewer than the minimum orders returns no recommendation
     with an `insufficient_reason`; profit estimates are excluded
-    without margin data; the engine never modifies a goal (explicit
+    without margin data; the engine never modifies a mission (explicit
     admin approval required).
   - **API + caching** — new admin-only
-    `GET /faracart/v1/revenue/goal-recommendations`
+    `GET /faracart/v1/revenue/mission-recommendations`
     (`RecommendationsController`), served through the Phase 33.3
     generation-versioned transient layer
-    (`RevenueRepository::goal_recommendations`), so the existing
-    order/goal/product invalidation already keeps recommendations
+    (`RevenueRepository::mission_recommendations`), so the existing
+    order/mission/product invalidation already keeps recommendations
     fresh. New documented hooks: `faracart_recommendations_enabled`,
     `faracart_recommendation_min_orders`,
     `faracart_recommendation_candidates`,
@@ -736,27 +736,27 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     confidence/candidates/statistics/tiers), a transactional fixture
     store (60 uniform orders in a clean window) with exact AOV/median/
     distribution assertions, ranked-output invariants, shipping-aware
-    candidates, goal-history through real funnel events + attribution,
+    candidates, mission-history through real funnel events + attribution,
     the margin-aware path with a costed product, all graceful
     degradation branches, the candidate/payload filters, the cached
     read + generation invalidation, and rollback residue checks —
     zero residue.
 - **Phase 33.5 — Smart Upsell Ranking** — the deterministic product
   ranker that answers "which products should this shopper add to reach
-  the goal?" (P33-T05):
+  the mission?" (P33-T05):
   - **Ranking engine** — new `UpsellRanker` (`includes/Analytics/`)
     with a fully transparent weighted pipeline, no LLM/AI. Candidates
-    (bounded to 60) come from the goal's own products, products
-    historically recommended for the goal, the goal's categories, the
+    (bounded to 60) come from the mission's own products, products
+    historically recommended for the mission, the mission's categories, the
     cart items' WooCommerce upsells / cross-sells / related products,
     category/tag overlap with the cart, and best sellers — with
-    out-of-stock / private / draft / already-in-cart / goal-excluded
+    out-of-stock / private / draft / already-in-cart / mission-excluded
     products excluded before scoring.
   - **Six normalized (0–100) components** with filterable weights
     (`faracart_upsell_weights`, defaults 25/25/15/10/15/10): price gap
     (sweet band [0.75×, 1.30×] → 100 with small-overshoot tolerance,
     hard decay to 0 at 3×, neutral without a price/gap), relevance
-    (goal manual +55 / counts-toward-goal +35, category overlap +30,
+    (mission manual +55 / counts-toward-mission +35, category overlap +30,
     tag overlap +20, WC-endorsed source +15), popularity (sales +
     rating, bounded), inventory (healthy stock preferred, unmanaged
     neutral), margin (only when the store provides product cost data —
@@ -779,17 +779,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     added — exactly once per order via the tracker dedup. The Phase 33.3
     aggregator's `upsell_stats` rebuild feeds the conversion scorer:
     deterministic historical scoring, no black-box model.
-  - **Graceful degradation** — no goal / no remaining gap / disabled /
+  - **Graceful degradation** — no mission / no remaining gap / disabled /
     no candidates → unavailable with a human-readable reason (never a
     fabricated list); no margin data → margin neutral and profit
     excluded while the product still ranks.
   - **API + caching** — new admin-only
     `GET /faracart/v1/revenue/upsells` (ranked products for a cart +
-    goal context) and `GET /faracart/v1/revenue/upsells/{product_id}`
+    mission context) and `GET /faracart/v1/revenue/upsells/{product_id}`
     (one product's score breakdown + stats), served through
     `RevenueRepository::upsell_ranking()` /
     `upsell_product_detail()` on the same generation-versioned
-    transients (existing order/goal/product/aggregation invalidation
+    transients (existing order/mission/product/aggregation invalidation
     keeps rankings fresh); `upsell_analytics()` powers the admin
     top-products table. New documented hooks:
     `faracart_upsells_enabled`, `faracart_upsell_weights`,
@@ -798,7 +798,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     REST route wiring, reflection unit tests of every scoring component
     and the weight normalization, a transactional fixture store with
     exact ranking invariants (gap-fitting product beats an unrelated
-    expensive one, sold-out exclusion, goal-derived gap), margin-aware
+    expensive one, sold-out exclusion, mission-derived gap), margin-aware
     profit with a costed product, the full upsell funnel
     (impressions/clicks/adds → aggregated conversion → exactly-once
     server-side `upsell_order` attribution on a paid order), all
@@ -807,30 +807,30 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     — deterministic across repeated runs, zero residue.
 - **Phase 33.6 — React Admin** — the Revenue Optimization admin section
   (P33-T06):
-  - **Revenue Overview page** (`/revenue`) — attribution KPIs (goal-
-    influenced / goal-driven revenue, incremental cart value, AOV
-    impact, goal conversion rate, reward cost, estimated profit), the
+  - **Revenue Overview page** (`/revenue`) — attribution KPIs (mission-
+    influenced / mission-driven revenue, incremental cart value, AOV
+    impact, mission conversion rate, reward cost, estimated profit), the
     daily revenue trend (views/completions/conversions bars + revenue /
     incremental lines from `revenue_daily` + today's live bucket), the
     observed AOV comparison (exposed vs store-wide, labeled, never
     causality) and shipping stats — from `GET /revenue/overview`.
-  - **Goal Performance page** (`/revenue/goals`) — per-goal funnel
+  - **Mission Performance page** (`/revenue/missions`) — per-mission funnel
     counts, completion/conversion rates, cart-value lift, attributed +
     assisted revenue, reward cost and profit, with an expandable funnel
-    visual per goal — from `GET /revenue/goals`.
+    visual per mission — from `GET /revenue/missions`.
   - **Attribution Dashboard page** (`/revenue/attribution`) — the
     funnel (views → progressed → completed → converted), direct vs
     assisted model revenue cards, incremental cart value with a data-
     sufficiency badge and the profit-impact panel with its graceful
     unavailability reason.
   - **Smart Recommendations page** (`/revenue/recommendations`) — the
-    Phase 33.4 goal-threshold recommendation UI: analyzed store data
+    Phase 33.4 mission-threshold recommendation UI: analyzed store data
     (AOV, median, order distribution, shipping, margin, confidence
     tier), the top recommendation (threshold, confidence, expected AOV
     impact / completion / profit, reasons) with **Apply (explicit admin
-    confirmation through `updateGoal` — never automatic), View details
+    confirmation through `updateMission` — never automatic), View details
     and Dismiss**, plus the ranked candidate list. All from
-    `GET /revenue/goal-recommendations`.
+    `GET /revenue/mission-recommendations`.
   - **Upsell Analytics page** (`/revenue/upsells`) — the top-products
     table (impressions / clicks / adds / orders / conversion / revenue /
     estimated profit / upsell score) with the four spec views (top /
@@ -842,21 +842,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   - **REST** — new admin-only `RevenueController`
     (`includes/REST/RevenueController.php`) exposing
     `GET /revenue/overview`, `GET /revenue/attribution` and
-    `GET /revenue/goals`, all manage_options-gated, per-user rate
-    limited, arg-schema validated (dates + goal_id) and served through
+    `GET /revenue/missions`, all manage_options-gated, per-user rate
+    limited, arg-schema validated (dates + mission_id) and served through
     the cached `RevenueRepository` layer.
   - **Shared admin infrastructure** — a new `Revenue` navigation
-    section (Overview / Goal Performance / Attribution / Recommendations
+    section (Overview / Mission Performance / Attribution / Recommendations
     / Upsell Analytics), five lazy-loaded route pages, a shared
-    `RevenueToolbar` (date range + goal filter) and `FunnelVisual`, new
+    `RevenueToolbar` (date range + mission filter) and `FunnelVisual`, new
     `api/revenue.ts` client + revenue TypeScript payload types, and
     shared `formatPercent` / `formatPercentValue` / `formatCompact` /
     `formatShortDay` helpers. Loading (skeletons), empty, error and RTL
     states follow the existing Analytics page conventions throughout.
   - **Tests** — new `tests/revenue-admin-test.php` (47 checks): route
     registration, window arg-schema validation, anonymous 403 on every
-    revenue route, the overview / attribution / goals payload shapes,
-    goal-scoped reads, the upsell-analytics profit/margin fields with
+    revenue route, the overview / attribution / missions payload shapes,
+    mission-scoped reads, the upsell-analytics profit/margin fields with
     graceful degradation, and rollback residue checks — deterministic
     across repeated runs.
 
@@ -865,9 +865,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 - **The `optional` gift add mode is gone.** `gift_add_mode` now accepts
   only `automatic` (silently add the configured gift — mandatory,
   non-removable) and `choose` (shopper picks one gift from the
-  `gift_products` list). The Goal Builder's gift-mode select drops
+  `gift_products` list). The Mission Builder's gift-mode select drops
   "Offer as optional", `Reward::GIFT_OPTIONAL` and the `'optional'`
-  union member were deleted, and `docs/rewards.md` updated. Legacy goals
+  union member were deleted, and `docs/rewards.md` updated. Legacy missions
   still storing `gift_add_mode = 'optional'` read as `automatic` (mode
   normalization in the `Reward` model), so the removed value can never
   reach the UI, REST payloads, or the engine again. Cart lines already
@@ -880,24 +880,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 ### Added
 
 - **Phase 32 — Advanced V2 features** — the full V2 surface:
-  - **Goal types** — `tag`, `attribute` and `brand` goals (amount or
+  - **Mission types** — `tag`, `attribute` and `brand` missions (amount or
     quantity restricted to products carrying the configured product tags,
     global attribute taxonomies or the brand attribute), evaluated by new
     `TagEvaluator` / `AttributeEvaluator` / `BrandEvaluator` against
     per-item tags and attribute taxonomies preloaded by `CartIntegration`
-    in the same batched way as categories; the admin Goal Builder gained
+    in the same batched way as categories; the admin Mission Builder gained
     the three types with taxonomy/tag pickers.
   - **Advanced conditions** — `customer_roles`, `customer_state`
     (guest / logged-in), `first_order`, `vip` (+ `vip_min_spend` /
     `vip_min_orders`), `shipping_zones`, `cart_coupons` and
-    `cart_min_items` gate goals through
-    `GoalEngine::conditions_reason()`, with new GoalResult reasons
+    `cart_min_items` gate missions through
+    `MissionEngine::conditions_reason()`, with new MissionResult reasons
     (`customer_conditions`, `first_order_only`, `vip_only`,
     `shipping_zone`, `cart_conditions`). The CartContext snapshot now
     carries applied coupons and the matching shipping zone; first-order
     and VIP use public WC customer-history helpers.
   - **Advanced scheduling** — recurring weekdays + a daily time window
-    (midnight-crossing supported) on goals, and campaign-level rules in
+    (midnight-crossing supported) on missions, and campaign-level rules in
     `display_rules` that milestones inherit; the Campaign Builder gained
     a Recurring schedule section.
   - **Free gift selection** — free-gift rewards support `choose` mode
@@ -906,14 +906,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
     `POST /faracart/v1/gift` endpoint (`GiftController`);
     `RewardEngine` reconciles the chosen gift. The RewardFields UI gains
     the multi-product picker.
-  - **Countdown** — goals and campaign groups ship `countdown_end`;
+  - **Countdown** — missions and campaign groups ship `countdown_end`;
     the storefront runs one global ticker for live, locale-aware
     countdown chips, gated by `frontend_countdown` / `sticky_countdown`.
   - **Campaign templates** — the second campaign-scoped template
     `campaign_progress` (`CampaignProgressTemplate`, React renderer,
     storefront `campaignProgress()`) renders the whole campaign as one
     progress readout with a milestone counter.
-  - **Celebration animations** — a one-per-goal-per-session confetti
+  - **Celebration animations** — a one-per-mission-per-session confetti
     burst + card pulse on completion, gated by `frontend_celebrate`.
   - **Advanced sticky bar** — position (bottom/top), behavior
     (dismissible / auto-hide with scroll-direction tracking), appear
@@ -930,10 +930,10 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 - **Persian (fa_IR) translation of the admin dashboard** —
   `languages/faracart-fa_IR.po` now translates **every** string in the
   POT (727 entries): all 634 referenced from `admin-app/src` (navigation,
-  analytics KPIs, the Phase 33.6 revenue section, goal & campaign
+  analytics KPIs, the Phase 33.6 revenue section, mission & campaign
   builders, settings, appearance, previews, empty states, confirmations,
   toasts, …) plus the storefront/REST PHP strings. The 196 strings added
-  in this pass cover the new revenue pages (Revenue Overview, Goal
+  in this pass cover the new revenue pages (Revenue Overview, Mission
   Performance, Attribution, Smart Recommendations, Upsell Analytics),
   their REST error messages and the remaining storefront strings;
   the file is regenerated from `languages/faracart.pot` so it can never
@@ -986,16 +986,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Fixed
 
-- **The Campaign preview dialog's forced template showed plain goal
+- **The Campaign preview dialog's forced template showed plain mission
   cards instead of the chosen campaign template (milestone chain /
   campaign progress).** When the admin picked a template in the dialog's
   template dropdown for a campaign that has no template configured
-  itself, the override was passed to `PreviewWidget` as a goal-card
+  itself, the override was passed to `PreviewWidget` as a mission-card
   `templateOverride` — but `PreviewWidget` only applies that override
-  to standalone goal cards, and the server-side preview payload's
+  to standalone mission cards, and the server-side preview payload's
   campaign group (which carries no template for such a campaign) still
   wins the grouping, so the forced "Milestone chain" degraded to the
-  fallback per-goal cards and the merchant never saw the selected
+  fallback per-mission cards and the merchant never saw the selected
   campaign template. The dialog now synthesizes the campaign group
   itself (`campaign_id` + name + the forced template id + its settings)
   when a template is forced, so `PreviewWidget` renders the whole
@@ -1004,18 +1004,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   for the synthesized group.
 - **WooCommerce cart page / add-to-cart returning HTTP 502 (nginx "Bad
   Gateway") on PHP 8.2+** — the Phase 36 completion-limit column was
-  assigned in `Goal::from_array()` as a *dynamic* property
+  assigned in `Mission::from_array()` as a *dynamic* property
   (`$this->max_completions_per_user` was never declared on the class), so
-  every goal hydration emitted a `Creation of dynamic property ... is
+  every mission hydration emitted a `Creation of dynamic property ... is
   deprecated` notice — on PHP 8.5 (and any 8.2+ with error output wired
-  to the FastCGI stream) the 17-goal storefront evaluation pass printed
+  to the FastCGI stream) the 17-mission storefront evaluation pass printed
   34 deprecation lines that corrupted the response mid-stream, and nginx
   answered 502 instead of the cart page or the add-to-cart redirect.
-  `Goal` now declares `protected $max_completions_per_user;` (declared
+  `Mission` now declares `protected $max_completions_per_user;` (declared
   property = no deprecation, identical behavior), so the cart totals
   pass, add-to-cart and the cart page all complete normally. Reproduced
   and verified on the live store (PHP 8.5 / WooCommerce 11):
-  add-to-cart and the cart page with qualifying goals now return 200
+  add-to-cart and the cart page with qualifying missions now return 200
   consistently, and `tests/run-all.php` stays regression-free.
 - **MUI form inputs clashing with WP admin form styles** — WP admin's
   element-level form rules (`wp-admin/css/forms.css`, e.g.
@@ -1048,53 +1048,53 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   `height: 1.4375em` on `.MuiInputBase-input` (excluding the Select
   display, which keeps `height: auto`, and multiline textareas),
   verified against the installed @mui/material v9 in headless Chrome.
-- **Saving the Settings page still failed with `Invalid parameter(s): frontend_template` (400) — the earlier sync fix left the already-corrupted stored value untouched.** The old back-sync wrote pluggable template ids (e.g. `ring`) into the legacy `frontend_template` option; removing the sync stopped *new* corruption, but a store whose option was already poisoned kept serving the out-of-enum value to the Settings page, which echoed it back and hit the REST enum schema. `Settings::all()` now self-heals on read: a stored `frontend_template` outside the four legacy enum values (`basic` | `percentage` | `milestone` | `card`) falls back to the default, so every consumer (Settings page, storefront, previews) stays schema-safe. The `TemplateEngine` already resolves `template_defaults.goal` before `frontend_template`, so the Appearance page's template selection (e.g. `ring`) is unaffected. `tests/settings-test.php` gained self-heal regression checks (128 checks).
+- **Saving the Settings page still failed with `Invalid parameter(s): frontend_template` (400) — the earlier sync fix left the already-corrupted stored value untouched.** The old back-sync wrote pluggable template ids (e.g. `ring`) into the legacy `frontend_template` option; removing the sync stopped *new* corruption, but a store whose option was already poisoned kept serving the out-of-enum value to the Settings page, which echoed it back and hit the REST enum schema. `Settings::all()` now self-heals on read: a stored `frontend_template` outside the four legacy enum values (`basic` | `percentage` | `milestone` | `card`) falls back to the default, so every consumer (Settings page, storefront, previews) stays schema-safe. The `TemplateEngine` already resolves `template_defaults.mission` before `frontend_template`, so the Appearance page's template selection (e.g. `ring`) is unaffected. `tests/settings-test.php` gained self-heal regression checks (128 checks).
 - **Saving the Settings page failed with `Invalid parameter(s): frontend_template` (400).**
   The `handle_save` method in `SettingsController` back-synced
-  `template_defaults.goal` into the legacy `frontend_template` field, writing
+  `template_defaults.mission` into the legacy `frontend_template` field, writing
   pluggable template ids (`milestone_chain`, `campaign_progress`) into a
   setting whose REST schema only accepts the four legacy enum values (`basic`
   | `percentage` | `milestone` | `card`). The next Settings-page save sent the
   out-of-enum value back, and the REST layer rejected it with a 400 before any
   option was written. The reverse sync (`frontend_template →
-  template_defaults.goal`) would silently overwrite the Appearance page's
+  template_defaults.mission`) would silently overwrite the Appearance page's
   template selection when the Settings page saved. Both sync directions were
   removed — the `TemplateEngine` already handles the correct fallback chain
-  (`template_defaults.goal` → `frontend_template` → `basic`), so no syncing is
+  (`template_defaults.mission` → `frontend_template` → `basic`), so no syncing is
   needed. `tests/template-test.php` updated (133 checks).
 
 - **Free-gift auto-add/remove was inverted on the cart page (regression).**
   Two root causes fixed. (1) **CartContext read stale `line_subtotal`**
   during `woocommerce_before_calculate_totals`: `WC_Cart::set_quantity()`
   updates the `quantity` field immediately but leaves `line_subtotal` at
-  its previous value until the totals pass recomputes it. The goal engine
+  its previous value until the totals pass recomputes it. The mission engine
   evaluates on `before_calculate_totals`, so a cart that just crossed the
   threshold upward would still read the old, lower subtotal (gift not
   granted), and a cart that crossed downward would still read the old,
   higher subtotal (gift not revoked). `CartContext::from_cart()` now
   recomputes every line's value as `price × quantity` when the product
   price is available — the same math the totals pass will run — so the
-  goal evaluation always sees the current cart, not the stale snapshot.
-  (2) **`restore_removed_gift` never checked the goal is currently met:**
+  mission evaluation always sees the current cart, not the stale snapshot.
+  (2) **`restore_removed_gift` never checked the mission is currently met:**
   when a gift line was removed via `woocommerce_cart_item_removed`, the
-  engine re-added it as long as the goal was merely *active* (status =
+  engine re-added it as long as the mission was merely *active* (status =
   'active'), even if the cart no longer qualified. It now re-evaluates
-  the goal against the live cart and only restores the gift when the goal
+  the mission against the live cart and only restores the gift when the mission
   is still met (`REWARD_UNLOCKED`). `tests/reward-test.php` grew to 130
   checks (0 failures) with transactional coverage of the stale-context
-  crossing (up and down) and the unmet-goal restore hardening.
+  crossing (up and down) and the unmet-mission restore hardening.
 - **The campaign template preview on the Appearance page showed three
-  plain goal cards instead of the campaign readout (milestone chain /
+  plain mission cards instead of the campaign readout (milestone chain /
   campaign progress).** The page's live preview builds its own sample
   data — a sample campaign (`campaign_id: 999`) plus sample milestone
-  goals — but `sampleGoal()` hardcoded `campaign_id: 0` on every
-  milestone. `PreviewWidget` groups a goal into a campaign only when
-  `goal.campaign_id` matches, so the milestones never joined the sample
+  missions — but `sampleMission()` hardcoded `campaign_id: 0` on every
+  milestone. `PreviewWidget` groups a mission into a campaign only when
+  `mission.campaign_id` matches, so the milestones never joined the sample
   campaign and the selected campaign template was never rendered — the
   merchant saw the fallback `basic` cards instead. The Appearance page
   now stamps the sample campaign's id onto its sample milestones before
   rendering (`campaign_id: campaign.campaign_id`), so the preview shows
-  exactly what the storefront renders. The campaign/Goal preview
+  exactly what the storefront renders. The campaign/Mission preview
   dialogs were already correct (they use the server-side preview
   payload). `tests/frontend-test.php` gained a source-scan guard for
   the stamping.
@@ -1117,12 +1117,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   overwrite fresher progress; and a subtle `faracart-widget--updating`
   dim (never a blank or flash, disabled under
   `prefers-reduced-motion`) signals an in-flight refresh. Purely
-  presentational — no change to goal/reward calculation, REST payloads
+  presentational — no change to mission/reward calculation, REST payloads
   or caching. `tests/frontend-test.php` gained 10 source-scan checks
   (98 total).
 - **Free-gift rewards are now shopper-proof — and actually get added.**
   Two gaps fixed. (1) When the reward type is free gift, the gift is now
-  added to the cart **with a zero price** as soon as the goal is complete:
+  added to the cart **with a zero price** as soon as the mission is complete:
   `FreeGiftApplicator::apply()` stamps the gift line with the
   `faracart_gift_product` marker and `RewardEngine::zero_gift_prices()`
   zeroes gift lines during totals calculation (priority-10 hook before
@@ -1130,21 +1130,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   remove an earned gift from the cart: the remove link is hidden
   (`woocommerce_cart_item_remove_link`), the quantity is locked to 1 with
   a hidden input (`woocommerce_cart_item_quantity`), and a gift line a
-  shopper removes while its goal still grants an automatic free gift is
+  shopper removes while its mission still grants an automatic free gift is
   **restored immediately** (`woocommerce_cart_item_removed` →
-  `RewardEngine::restore_removed_gift()`, which re-checks the goal's
-  current state via a cache-free `find()` so deactivated goals are never
+  `RewardEngine::restore_removed_gift()`, which re-checks the mission's
+  current state via a cache-free `find()` so deactivated missions are never
   re-granted — the engine's own revocations are suppressed via the
-  removing-gift flag). Restored lines are re-zeroed on the spot. The goal
+  removing-gift flag). Restored lines are re-zeroed on the spot. The mission
   builder now warns when a free-gift reward has no gift product selected
-  (goal #1484 on this store was configured as free gift with an empty
+  (mission #1484 on this store was configured as free gift with an empty
   `reward_meta`, so the engine correctly refused to add anything).
   `tests/reward-test.php` gained the full protection matrix (94 checks):
   remove-link/quantity/restore wiring, zero-pricing, quantity lock,
-  remove-link hiding, non-gift and orphaned-goal removals not restored,
+  remove-link hiding, non-gift and orphaned-mission removals not restored,
   engine revocation not restored, and the transactional positive restore
   path (gift re-added with marker + zero price, permanent removal once
-  the goal is inactive). Note: the remove-link/quantity filters are
+  the mission is inactive). Note: the remove-link/quantity filters are
   classic cart-table hooks, so on WooCommerce Blocks carts the shopper
   still sees the UI affordances — but the engine-level
   `woocommerce_cart_item_removed` restore blocks the removal there too,
@@ -1159,9 +1159,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   `woocommerce_store_api_product_quantity_editable` filter renders the
   Blocks-cart quantity fixed (no editable stepper). Previously only the
   classic cart page display was locked, so a direct Store API request
-  could raise the quantity. (2) **A gift whose granting goal stops
+  could raise the quantity. (2) **A gift whose granting mission stops
   qualifying is now removed live (stale-reward guarantee restored):**
-  `reconcile_gifts()` sweeps goal-marked cart lines (scoped to the goals
+  `reconcile_gifts()` sweeps mission-marked cart lines (scoped to the missions
   evaluated in the pass) in addition to the session-tracked removal, so
   session/cart divergence (expiry, restored persistent cart) can no
   longer leave a stale gift in the cart; customer-added lines of the
@@ -1206,8 +1206,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   trend query already used — summary KPIs and top lists now include the
   `to` day. `tests/analytics-dashboard-test.php` gained today-inclusive
   range checks.
-- **Disabling a goal (or campaign) reset its untouched fields — the goal
-  amount was saved as 0.** The Goals/Campaigns list switches send a
+- **Disabling a mission (or campaign) reset its untouched fields — the mission
+  amount was saved as 0.** The Missions/Campaigns list switches send a
   partial update (`PUT` with only `{ status }`), but the update route
   schemas declared defaults for every field and WP_REST_Server injects
   those defaults into params the client did not send during
@@ -1215,13 +1215,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   repository, so a status-only toggle silently wrote `target = 0`,
   `campaign_id = null`, `children = []`, `reward_meta/display_settings/limits
   = []`, `priority = 10`, `exclusive = false`, `description = ''` and the
-  `status/type/calculation_mode/operator` defaults on top of the goal's
-  real values. The update arg schemas in `GoalsController::update_args()`
+  `status/type/calculation_mode/operator` defaults on top of the mission's
+  real values. The update arg schemas in `MissionsController::update_args()`
   and `CampaignsController::update_args()` now strip every `default`, so
   only the keys the client actually sent are ever written (the create
   schemas keep their defaults). `tests/rest-api-test.php` gained
-  dispatched-PUT regression checks that toggle a goal/campaign/composite
-  goal as an admin and assert the untouched fields survive (142 checks).
+  dispatched-PUT regression checks that toggle a mission/campaign/composite
+  mission as an admin and assert the untouched fields survive (142 checks).
 - **Saved settings sometimes did not show when opening the Settings page.**
   Three consumers shared the `['settings']` TanStack Query cache but
   disagreed on its shape: the Settings page cached the REST envelope
@@ -1236,18 +1236,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   writes `{ data: saved, meta }`, the preview dialogs read
   `settingsQuery.data?.data`, and the raw `fetchSettings()` helper was
   removed so the mismatch cannot reappear.
-- **Storefront widgets showed only one goal when a campaign was active —
+- **Storefront widgets showed only one mission when a campaign was active —
   its other milestones were invisible.** The widget layer rendered a
-  single “featured” goal per container plus a tiny milestone ladder
+  single “featured” mission per container plus a tiny milestone ladder
   (target dots), and compact locations (mini-cart, shop, product,
   sticky) skipped even that — so a campaign with several milestone
-  goals looked like a single-goal widget. Every eligible goal now
+  missions looked like a single-mission widget. Every eligible mission now
   renders as its own full card, stacked in a shared
-  `.faracart-widget__goals` wrapper (`renderWidget()` in
+  `.faracart-widget__missions` wrapper (`renderWidget()` in
   `assets/js/frontend.js`), in full *and* compact widgets; the
-  cross-goal ladder was removed (each goal IS a card) and the
-  `milestone` template shows the goal's own threshold as a single rung.
-  The sticky bar keeps the featured (first eligible) goal — a slim bar
+  cross-mission ladder was removed (each mission IS a card) and the
+  `milestone` template shows the mission's own threshold as a single rung.
+  The sticky bar keeps the featured (first eligible) mission — a slim bar
   stays at-a-glance. The admin preview mirror
   (`admin-app/src/components/preview/PreviewWidget.tsx`) renders the
   same stacked-card layout so previews stay 1:1 with the storefront.
@@ -1265,14 +1265,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   `faracart_frontend_visible_to_user` filter (e.g. hide for every
   logged-in user). `tests/frontend-test.php` gained transactional admin
   checks; docs/frontend.md documents the gate.
-- **Admin builders showed the pre-save values after editing a goal or
-  campaign.** The Goal/Campaign builder detail queries (`['goal', id]`
+- **Admin builders showed the pre-save values after editing a mission or
+  campaign.** The Mission/Campaign builder detail queries (`['mission', id]`
   / `['campaign', id]`) were never invalidated after a save — only the
-  list queries (`['goals']` / `['campaigns']`) were — so with the
-  client's 60 s stale window, reopening a just-edited goal or campaign
+  list queries (`['missions']` / `['campaigns']`) were — so with the
+  client's 60 s stale window, reopening a just-edited mission or campaign
   served the cached pre-save row and the form loaded the old settings.
   The builders now invalidate their detail query on save, and the
-  Goals/Campaigns list mutations (enable/disable, duplicate, delete)
+  Missions/Campaigns list mutations (enable/disable, duplicate, delete)
   invalidate the matching detail prefix too, so a reopened builder
   always refetches the current row. `tests/rest-api-test.php` already
   proves the update endpoints return the fresh row (120/120).
@@ -1337,15 +1337,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   (`FrontendController::prevent_progress_caching()`), and
   `assets/js/frontend.js` cache-busts every poll with a `?_=<timestamp>`
   parameter. `tests/frontend-test.php` asserts both layers (75 checks).
-- **Per-goal display template now reaches the storefront** — the goal
+- **Per-mission display template now reaches the storefront** — the mission
   builder's Display → Template picker (`display_settings.template`) was
-  saved but never served: `GET /faracart/v1/progress` exposed the goal's
+  saved but never served: `GET /faracart/v1/progress` exposed the mission's
   `icon` but not its `template`, and `frontend.js` only honored the
   per-widget `data-faracart-template` override or the store-wide
-  Appearance setting. The payload now carries each goal's normalized
-  `template` (`goal_template()` in `FrontendController`), and the widget
-  resolves it per goal — container override → goal template → global
-  Appearance template → `basic` — so a goal set to Milestones/Card/
+  Appearance setting. The payload now carries each mission's normalized
+  `template` (`mission_template()` in `FrontendController`), and the widget
+  resolves it per mission — container override → mission template → global
+  Appearance template → `basic` — so a mission set to Milestones/Card/
   Percentage renders that variant on the storefront.
 - **All templates looked identical on the storefront — two causes
   fixed.** (1) The frontend JS/CSS were enqueued with the static
@@ -1353,14 +1353,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
   kept serving the stale cached bundle no matter what template was
   chosen; `ProgressUI::enqueue_assets()` now versions both assets by
   `filemtime()` (falling back to `FARACART_VERSION`), so every edit
-  cache-busts. (2) The milestone template with a single goal rendered as
+  cache-busts. (2) The milestone template with a single mission rendered as
   a bare progress bar (the ladder needs ≥2 rungs), visually identical to
   basic; `milestonePanel()` in `assets/js/frontend.js` now renders the
   single threshold as one rung (dot + target label) — in full *and*
   compact widgets — so Milestones is visibly distinct even with one
-  goal. Also hardened `goalContainer()` with a null guard for
-  reward-less goals (an unguarded `appendChild` of the optional reward
-  chip crashed the widget, leaving reward-less goals invisible).
+  mission. Also hardened `missionContainer()` with a null guard for
+  reward-less missions (an unguarded `appendChild` of the optional reward
+  chip crashed the widget, leaving reward-less missions invisible).
 
 ### Phase 0 — Reference Plugin Discovery (100% complete)
 
@@ -1380,9 +1380,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 1 — Product Specification (100% complete)
 
-- **P01-T01 Objective** — Defined FaraCart as a **WooCommerce Cart Revenue Optimization Engine** (goals + rewards + progress + suggestions + campaigns + analytics), not merely a progress-bar widget; documented positioning and success metrics.
-- **P01-T02 Core Product Concepts** — Defined Goal (types/target/priority/conditions), Reward (free shipping, percentage discount, fixed discount + safety rules), Campaign (scheduled milestone collections), Progress (current/target/remaining/percentage/completed/reward_state/eligible), and Suggestion (sources, ranking, gap-closing pricing).
-- **P01-T03 Initial MVP Scope** — Captured all 20 MVP features (amount/quantity/category goals, multiple + milestone goals, free shipping/percentage/fixed rewards, progress bar, dynamic messages, cart/mini-cart/checkout integration, AJAX updates, responsive UI, RTL, currency-aware formatting, product suggestions, campaign scheduling, basic analytics) with explicit deferrals of advanced AI and A/B testing.
+- **P01-T01 Objective** — Defined FaraCart as a **WooCommerce Cart Revenue Optimization Engine** (missions + rewards + progress + suggestions + campaigns + analytics), not merely a progress-bar widget; documented positioning and success metrics.
+- **P01-T02 Core Product Concepts** — Defined Mission (types/target/priority/conditions), Reward (free shipping, percentage discount, fixed discount + safety rules), Campaign (scheduled milestone collections), Progress (current/target/remaining/percentage/completed/reward_state/eligible), and Suggestion (sources, ranking, gap-closing pricing).
+- **P01-T03 Initial MVP Scope** — Captured all 20 MVP features (amount/quantity/category missions, multiple + milestone missions, free shipping/percentage/fixed rewards, progress bar, dynamic messages, cart/mini-cart/checkout integration, AJAX updates, responsive UI, RTL, currency-aware formatting, product suggestions, campaign scheduling, basic analytics) with explicit deferrals of advanced AI and A/B testing.
 - Added `docs/PRODUCT_SPEC.md` — the product source of truth covering vision, concepts, user journeys, MVP scope, functional/non-functional requirements, success metrics, and Definition of Done.
 
 **Overall project progress: 8%** (Phase 0 5% + Phase 1 weight 3% × 100%).
@@ -1401,8 +1401,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 3 — Database & Domain Model (100% complete)
 
-- **P03-T01 Objective** — Designed the persistence layer to store goals, campaigns, and analytics events, following the reference (`wooinsights`) migration strategy: `Schema::get_schema()` table definitions + `Installer::maybe_upgrade()` version-gated `dbDelta` migrations with `WOOINSIGHTS_DB_VERSION`-style version constant.
-- **P03-T02 Recommended Domain Entities** — Implemented three tables in `includes/Database/Schema.php`: `faracart_goals` (goal definition: type, target, calculation_mode, reward_type, campaign FK, priority, menu_order), `faracart_campaigns` (name, status, starts_at, ends_at, priority), `faracart_analytics_events` (goal/campaign FKs, event_type, session_id, cart_value). Added plugin-owned foreign keys (SET NULL) and indexes on lookup columns (campaign_id, goal_id, status, dates, event_type).
+- **P03-T01 Objective** — Designed the persistence layer to store missions, campaigns, and analytics events, following the reference (`wooinsights`) migration strategy: `Schema::get_schema()` table definitions + `Installer::maybe_upgrade()` version-gated `dbDelta` migrations with `WOOINSIGHTS_DB_VERSION`-style version constant.
+- **P03-T02 Recommended Domain Entities** — Implemented three tables in `includes/Database/Schema.php`: `faracart_missions` (mission definition: type, target, calculation_mode, reward_type, campaign FK, priority, menu_order), `faracart_campaigns` (name, status, starts_at, ends_at, priority), `faracart_analytics_events` (mission/campaign FKs, event_type, session_id, cart_value). Added plugin-owned foreign keys (SET NULL) and indexes on lookup columns (campaign_id, mission_id, status, dates, event_type).
 - **P03-T03 Database Rules** — Applied the rules: indexes on all FK + frequently-filtered columns; JSON used only where genuinely needed (deferred); no duplication of WC data (product/order values referenced by ID, never copied); safe upgrades via version-gated `dbDelta`; foreign-key-aware uninstall (FK checks disabled around table drops).
 - Added files: `docs/database.md` (domain model, schema DDL, ERD, index/FK rationale, migration & upgrade policy, uninstall behavior).
 - **Verification:** `php -l` clean; WP-context DB round-trip test passes against the real WordPress 7.0.2 + WooCommerce 11.0.0 database — all three tables created, all 3 plugin-owned foreign keys verified (the two product/order FKs into `wp_posts` were removed during review: HPOS stores orders outside `wp_posts` and FKs into WC tables would block WC deletions or cascade-wipe analytics), insert/delete round-trip OK, uninstall drops everything leaving zero `faracart_` tables (no trace). DB version bumped to `0.2.0` (`FARACART_DB_VERSION`). Tables are **not** left installed on the live site (test cleans up after itself); plugin not activated.
@@ -1411,14 +1411,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ---
 
-### Phase 4 — Goal Engine (100% complete)
+### Phase 4 — Mission Engine (100% complete)
 
-- **P04-T01 Objective** — Built the central calculation engine independently from any UI: it never renders, never touches the database, and never reads request state — callers supply a `Goal` + `CartContext` and receive a `GoalResult`.
-- **P04-T02 Architecture** — Implemented the `CartContext → GoalEvaluator → GoalResult → ProgressCalculator` pipeline in `includes/Goals/`: `Goal` + `CartItem` + `CartContext` value objects (with `CartContext::from_cart()` WC adapter), `GoalEvaluator` interface, `GoalEvaluatorRegistry` (filterable via `faracart_goal_evaluator_classes`), `GoalEngine` facade (status/schedule/target eligibility checks), and shared `ProgressCalculator` math. Engine registered in the DI container (`Plugin::goal_engine()`).
-- **P04-T03 Goal Types** — All seven types implemented as stateless evaluators in `includes/Goals/Evaluators/`: amount (subtotal/total/discounted_subtotal), quantity (decimal-aware), distinct quantity, category (amount or quantity), product (variations + parents; quantity default), weight, and composite (AND = weakest child, OR = best child, over nested child goals). Type-aware default calculation bases.
-- **P04-T04 Goal Result** — Consistent 8-field result object: `current`, `target`, `remaining` (never negative), `percentage` (0–100 capped), `completed`, `reward_state` (not_applicable/locked/unlocked), `eligible`, `reason` (goal_inactive/out_of_schedule/invalid_target/no_matching_items/unknown_type), plus `to_array()` for the REST/JS layer.
-- **P04-T05 Edge Cases** — Added `tests/engine-test.php` (71 checks, runnable via `php tests/engine-test.php`): empty cart, zero/negative target, sale prices, coupons, taxes, shipping, virtual/downloadable products, variable products + variations, excluded products, decimal quantities, guest vs logged-in users, inactive goals, scheduling windows, unknown types. All pass in the real WordPress 7.0.2 + WooCommerce 11.0.0 context.
-- Added files: `includes/Goals/` (11 classes), `tests/engine-test.php`, `docs/goal-engine.md`.
+- **P04-T01 Objective** — Built the central calculation engine independently from any UI: it never renders, never touches the database, and never reads request state — callers supply a `Mission` + `CartContext` and receive a `MissionResult`.
+- **P04-T02 Architecture** — Implemented the `CartContext → MissionEvaluator → MissionResult → ProgressCalculator` pipeline in `includes/Missions/`: `Mission` + `CartItem` + `CartContext` value objects (with `CartContext::from_cart()` WC adapter), `MissionEvaluator` interface, `MissionEvaluatorRegistry` (filterable via `faracart_mission_evaluator_classes`), `MissionEngine` facade (status/schedule/target eligibility checks), and shared `ProgressCalculator` math. Engine registered in the DI container (`Plugin::mission_engine()`).
+- **P04-T03 Mission Types** — All seven types implemented as stateless evaluators in `includes/Missions/Evaluators/`: amount (subtotal/total/discounted_subtotal), quantity (decimal-aware), distinct quantity, category (amount or quantity), product (variations + parents; quantity default), weight, and composite (AND = weakest child, OR = best child, over nested child missions). Type-aware default calculation bases.
+- **P04-T04 Mission Result** — Consistent 8-field result object: `current`, `target`, `remaining` (never negative), `percentage` (0–100 capped), `completed`, `reward_state` (not_applicable/locked/unlocked), `eligible`, `reason` (mission_inactive/out_of_schedule/invalid_target/no_matching_items/unknown_type), plus `to_array()` for the REST/JS layer.
+- **P04-T05 Edge Cases** — Added `tests/engine-test.php` (71 checks, runnable via `php tests/engine-test.php`): empty cart, zero/negative target, sale prices, coupons, taxes, shipping, virtual/downloadable products, variable products + variations, excluded products, decimal quantities, guest vs logged-in users, inactive missions, scheduling windows, unknown types. All pass in the real WordPress 7.0.2 + WooCommerce 11.0.0 context.
+- Added files: `includes/Missions/` (11 classes), `tests/engine-test.php`, `docs/mission-engine.md`.
 - **Verification:** `php -l` clean; engine test suite 71/71; Phase 2 smoke test still passes (no regressions); no database changes, plugin not activated.
 
 **Overall project progress: 22%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 weight 7% × 100%).
@@ -1427,11 +1427,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 5 — Reward Engine (100% complete)
 
-- **P05-T01 Objective** — Decoupled rewards from goal calculation: the GoalEngine (Phase 4) computes a `GoalResult` and the RewardEngine turns it into a `RewardResult` using the goal's reward configuration, so rewards can be changed, stacked, and safety-checked independently of the math.
-- **P05-T02 Reward Types** — Implemented the reward layer in `includes/Rewards/`: `Reward` value object (typed accessors over the reward columns + JSON `reward_meta`), `RewardResult` (5 states + blocking reasons), `RewardApplicator` interface, `RewardApplicatorRegistry` (filterable via `faracart_reward_applicator_classes`), and five applicators — free shipping (shipping zones + method instances, via `woocommerce_package_rates`), percentage discount (cap + eligible/excluded products & categories, negative cart fee), fixed discount (clamped to the eligible value), free gift (automatic or optional), and coupon (existing validated codes or deterministic generated coupons, cleaned up on uninstall). The `RewardEngine` registers the WooCommerce hooks (`woocommerce_before_calculate_totals` ×2, `woocommerce_cart_calculate_fees`, `woocommerce_package_rates`) and is DI-wired via `Plugin::reward_engine()`; `Goals\GoalRepository` loads active goals (with campaign gating) once per request.
-- **P05-T03 Reward Safety** — Enforced every Phase 5 guarantee: duplicate/stacking rules (`RewardSafety::stacking_allows()`), reward-loop prevention (own-fee exclusion in `CartContext::own_fees_total()` + idempotent reconciliation), stale-reward reversal (coupons/gifts session-tracked and reconciled on **every** totals pass, so a goal that stops qualifying without any cart change — schedule expiry, admin deactivation — has its reward revoked immediately; discount fees rebuilt per pass), invalid-coupon validation (+ generated-coupon ownership marker and save-failure guard), and excluded-product exclusion in discount bases and generated coupons.
-- **Live-cart correctness (review-driven)** — Verified empirically that WC zeroes the cart's aggregate totals before `woocommerce_before_calculate_totals` fires; `CartContext::from_cart()` now derives the money bases from the cart line items (always current) so amount-mode goals evaluate honestly on the live cart, with the grand total falling back to the after-discount line value until totals are computed (tax refinement deferred to Phase 6).
-- Added files: `includes/Rewards/` (12 classes), `includes/Goals/GoalRepository.php`, `tests/reward-test.php`, `docs/rewards.md`.
+- **P05-T01 Objective** — Decoupled rewards from mission calculation: the MissionEngine (Phase 4) computes a `MissionResult` and the RewardEngine turns it into a `RewardResult` using the mission's reward configuration, so rewards can be changed, stacked, and safety-checked independently of the math.
+- **P05-T02 Reward Types** — Implemented the reward layer in `includes/Rewards/`: `Reward` value object (typed accessors over the reward columns + JSON `reward_meta`), `RewardResult` (5 states + blocking reasons), `RewardApplicator` interface, `RewardApplicatorRegistry` (filterable via `faracart_reward_applicator_classes`), and five applicators — free shipping (shipping zones + method instances, via `woocommerce_package_rates`), percentage discount (cap + eligible/excluded products & categories, negative cart fee), fixed discount (clamped to the eligible value), free gift (automatic or optional), and coupon (existing validated codes or deterministic generated coupons, cleaned up on uninstall). The `RewardEngine` registers the WooCommerce hooks (`woocommerce_before_calculate_totals` ×2, `woocommerce_cart_calculate_fees`, `woocommerce_package_rates`) and is DI-wired via `Plugin::reward_engine()`; `Missions\MissionRepository` loads active missions (with campaign gating) once per request.
+- **P05-T03 Reward Safety** — Enforced every Phase 5 guarantee: duplicate/stacking rules (`RewardSafety::stacking_allows()`), reward-loop prevention (own-fee exclusion in `CartContext::own_fees_total()` + idempotent reconciliation), stale-reward reversal (coupons/gifts session-tracked and reconciled on **every** totals pass, so a mission that stops qualifying without any cart change — schedule expiry, admin deactivation — has its reward revoked immediately; discount fees rebuilt per pass), invalid-coupon validation (+ generated-coupon ownership marker and save-failure guard), and excluded-product exclusion in discount bases and generated coupons.
+- **Live-cart correctness (review-driven)** — Verified empirically that WC zeroes the cart's aggregate totals before `woocommerce_before_calculate_totals` fires; `CartContext::from_cart()` now derives the money bases from the cart line items (always current) so amount-mode missions evaluate honestly on the live cart, with the grand total falling back to the after-discount line value until totals are computed (tax refinement deferred to Phase 6).
+- Added files: `includes/Rewards/` (12 classes), `includes/Missions/MissionRepository.php`, `tests/reward-test.php`, `docs/rewards.md`.
 - **Verification:** `php -l` clean; reward test suite 72/72 (free-shipping rate filtering, stacking, coupon/gift safety, WC hook wiring, `from_cart` line-item bases); engine test suite 75/75 (no regressions); PHP 8.4 implicit-nullable deprecations removed from the applicator interface; tests stay read-only (no products created, no database writes, plugin not activated).
 
 **Overall project progress: 27%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 weight 5% × 100%).
@@ -1442,8 +1442,8 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 - **P06-T01 Objective** — Created `includes/Cart/CartIntegration.php` (`FaraCart\Cart`): the single, request-level source of truth for the live-cart snapshot. The reward engine now consumes `CartIntegration::context()` instead of building the context itself (falling back to a direct build when the service is absent, so the Phase 5 tests stay untouched).
 - **P06-T02 Integrate With** — Registered 10 cart-lifecycle invalidation hooks: cart init/session restore (`woocommerce_cart_loaded_from_session`), add (`woocommerce_add_to_cart`), remove/restore (`woocommerce_cart_item_removed` / `_restored`), quantity updates (`woocommerce_after_cart_item_quantity_update`), coupon apply/remove (`woocommerce_applied_coupon` / `woocommerce_removed_coupon`), shipping changes (`woocommerce_shipping_method_chosen` + Store API `woocommerce_store_api_cart_select_shipping_rate`), and checkout AJAX (`woocommerce_checkout_update_order_review`). WooCommerce Blocks cart mutations funnel through the classic `WC_Cart` methods, so the classic hooks cover Blocks automatically.
-- **P06-T03 Cart Context** — `CartContext::from_cart()` now accepts a preloaded product-id → category-ids map and resolves variation categories from the **parent** product (the WC convention — categories live on the parent), so category goals count variations correctly; per-item term queries only run as a fallback.
-- **P06-T04 Performance** — Request-level memoization of the built context (cache keyed by shopper-controlled line data + args, rebuilt automatically when contents change), batched category preloading via a single `wp_get_object_terms()` call (WP object-cache backed), and the existing per-request-cached `GoalRepository`/`GoalEngine` retained. Verified on the live store: a 6-item cart builds its context in **1 query** (previously 6+), the memoized second build runs **0 queries**.
+- **P06-T03 Cart Context** — `CartContext::from_cart()` now accepts a preloaded product-id → category-ids map and resolves variation categories from the **parent** product (the WC convention — categories live on the parent), so category missions count variations correctly; per-item term queries only run as a fallback.
+- **P06-T04 Performance** — Request-level memoization of the built context (cache keyed by shopper-controlled line data + args, rebuilt automatically when contents change), batched category preloading via a single `wp_get_object_terms()` call (WP object-cache backed), and the existing per-request-cached `MissionRepository`/`MissionEngine` retained. Verified on the live store: a 6-item cart builds its context in **1 query** (previously 6+), the memoized second build runs **0 queries**.
 - Added files: `includes/Cart/CartIntegration.php`, `tests/cart-integration-test.php`, `docs/cart-integration.md`.
 - **Verification:** `php -l` clean; cart-integration test suite 22/22 (hook wiring, memoization, invalidation, cache keying, preloaded variation categories, null-cart guard); reward test suite 72/72 and engine test suite 75/75 (no regressions); live-cart behavior verified read-only against the real WordPress 7.0.2 + WooCommerce 11.0.0 environment (no products created, no database writes, plugin not activated).
 
@@ -1454,11 +1454,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 ### Phase 7 — REST API / AJAX Layer (100% complete)
 
 - **P07-T01 Objective** — Exposed a clean API for the React admin and frontend components through a `faracart/v1` REST namespace (`includes/REST/BaseController`), mirroring the reference plugin's REST conventions: the `{ data, meta, pagination }` response envelope (matching the `ApiEnvelope` type already in `admin-app/src/types.ts`), capability + rate-limited permission callbacks, and structured `WP_Error` responses.
-- **P07-T02 Admin API** — Implemented the admin endpoints: goals list (paginated, status filter, name search), goal details, create, update (partial — only provided keys written), delete, and duplicate (`GoalsController`); settings GET/POST (`SettingsController`); product/category/coupon search for the goal builder (`SearchController`, capped at 50 results, server-side); and a read-only campaigns list/detail (`CampaignsController` + `CampaignRepository`) so the builder can assign goals to campaigns — full campaign CRUD arrives with Phase 10. Analytics endpoints are deliberately deferred to Phases 16–17 (no analytics data exists yet). `GoalRepository` gained the full CRUD layer (`all`/`get`/`create`/`update`/`delete`/`duplicate`) plus a fix that spreads the persisted `conditions` JSON onto the Goal model's `categories`/`products`/`excluded_products`/`operator`/`children` keys — so stored category/product/composite goals now evaluate correctly.
-- **P07-T03 Frontend API** — Added the public `GET /faracart/v1/progress` endpoint (`FrontendController`): evaluates every active goal against the live cart snapshot (via `CartIntegration`) and exposes only the minimum necessary data — `current, target, remaining, percentage, completed, message, reward, suggestions` (plus reward state, eligibility and reason) — with a minimal built-in message until the Phase 13 template engine and empty suggestions until Phase 14.
+- **P07-T02 Admin API** — Implemented the admin endpoints: missions list (paginated, status filter, name search), mission details, create, update (partial — only provided keys written), delete, and duplicate (`MissionsController`); settings GET/POST (`SettingsController`); product/category/coupon search for the mission builder (`SearchController`, capped at 50 results, server-side); and a read-only campaigns list/detail (`CampaignsController` + `CampaignRepository`) so the builder can assign missions to campaigns — full campaign CRUD arrives with Phase 10. Analytics endpoints are deliberately deferred to Phases 16–17 (no analytics data exists yet). `MissionRepository` gained the full CRUD layer (`all`/`get`/`create`/`update`/`delete`/`duplicate`) plus a fix that spreads the persisted `conditions` JSON onto the Mission model's `categories`/`products`/`excluded_products`/`operator`/`children` keys — so stored category/product/composite missions now evaluate correctly.
+- **P07-T03 Frontend API** — Added the public `GET /faracart/v1/progress` endpoint (`FrontendController`): evaluates every active mission against the live cart snapshot (via `CartIntegration`) and exposes only the minimum necessary data — `current, target, remaining, percentage, completed, message, reward, suggestions` (plus reward state, eligibility and reason) — with a minimal built-in message until the Phase 13 template engine and empty suggestions until Phase 14.
 - **P07-T04 Security** — Every endpoint implements: capability checks (`manage_options`, filterable via `faracart_rest_capability`), per-user rate limiting on admin routes and per-IP rate limiting on the public progress route, REST arg-schema validation/sanitization (enums, types, ranges, datetime + campaign-existence validate callbacks, sanitize callbacks), predictable `{ code, message, data: { status } }` errors, and payload shaping that serializes only known fields. Anonymous admin access is rejected with 403 (verified through a real `WP_REST_Server` dispatch).
 - Added files: `includes/REST/` (BaseController + 5 controllers), `includes/Campaigns/CampaignRepository.php`, `tests/rest-api-test.php`, `docs/api.md`.
-- **Verification:** `php -l` clean; REST test suite 62/62 (route registration, response envelope, permission callbacks, schema validation, transactional goal CRUD + duplicate, progress payload, search, settings — every write wrapped in a rolled-back transaction and asserted absent afterwards); reward 72/72, engine 75/75, cart-integration 22/22 (no regressions); end-to-end dispatch verified read-only against the real WordPress 7.0.2 + WooCommerce 11.0.0 store with a real admin user (create/list/rollback through the live dispatch path, real product search, guest progress).
+- **Verification:** `php -l` clean; REST test suite 62/62 (route registration, response envelope, permission callbacks, schema validation, transactional mission CRUD + duplicate, progress payload, search, settings — every write wrapped in a rolled-back transaction and asserted absent afterwards); reward 72/72, engine 75/75, cart-integration 22/22 (no regressions); end-to-end dispatch verified read-only against the real WordPress 7.0.2 + WooCommerce 11.0.0 store with a real admin user (create/list/rollback through the live dispatch path, real product search, guest progress).
 
 **Overall project progress: 35%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 weight 3% × 100%).
 
@@ -1466,23 +1466,23 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 8 — React Admin Foundation (100% complete)
 
-- **P08-T01 Objective** — Built the complete admin shell in `admin-app/src/` using the reference plugin's React architecture: MUI theme (WP-admin palette), dedicated RTL-aware Emotion cache, TanStack Query, `createHashRouter` data router, responsive `AdminLayout`, sidebar navigation, page containers, and the six admin pages — Dashboard, Goals, Campaigns, Analytics, Settings, Appearance.
-- **P08-T02 Required** — Implemented every required capability: React 18 + TypeScript (strict); hash routing with lazy-loaded secondary routes (code splitting — Settings/Campaigns/Analytics/Appearance are separate chunks); shared layout with collapsible nav groups (persisted in localStorage) + mobile drawer + user menu + full-screen mode (FullscreenProvider owns the `faracart-fullscreen` body class, switching instantly when saved); page container (`PageContainer`); API client (`apiFetch` with `X-WP-Nonce` + Phase 7 envelope unwrap) with typed `api/goals.ts` + `api/settings.ts`; server state (TanStack Query mutations/queries); forms (react-hook-form in Settings); validation (RHF + REST contract); notifications (shared `SnackbarProvider` + `useSnackbar`); loading states (skeletons); error states (query error alerts + `ErrorBoundary` with retry); confirmation dialogs (`ConfirmDialog`, wired into goal deletion).
-- **P08-T03 Admin Pages** — Initial navigation matches the spec (Dashboard / Goals / Campaigns / Analytics / Settings / Appearance). Dashboard is live REST-backed (goal counts, currency, version); Goals shows a read-only list (name, type, target, reward, status) with delete-through-confirmation + snackbar + refetch (Phase 9 replaces it with the full CRUD builder); Settings is fully functional (enabled + full-screen toggles saved via the Phase 7 REST API, full-screen mode previews live); Campaigns/Analytics/Appearance are page containers with empty states for their phases (10, 16–17, 12); `NotFound` 404 route added. `types.ts` gained the `Goal` / `FaraCartSettings` / pagination types mirroring the Phase 7 payloads.
+- **P08-T01 Objective** — Built the complete admin shell in `admin-app/src/` using the reference plugin's React architecture: MUI theme (WP-admin palette), dedicated RTL-aware Emotion cache, TanStack Query, `createHashRouter` data router, responsive `AdminLayout`, sidebar navigation, page containers, and the six admin pages — Dashboard, Missions, Campaigns, Analytics, Settings, Appearance.
+- **P08-T02 Required** — Implemented every required capability: React 18 + TypeScript (strict); hash routing with lazy-loaded secondary routes (code splitting — Settings/Campaigns/Analytics/Appearance are separate chunks); shared layout with collapsible nav groups (persisted in localStorage) + mobile drawer + user menu + full-screen mode (FullscreenProvider owns the `faracart-fullscreen` body class, switching instantly when saved); page container (`PageContainer`); API client (`apiFetch` with `X-WP-Nonce` + Phase 7 envelope unwrap) with typed `api/missions.ts` + `api/settings.ts`; server state (TanStack Query mutations/queries); forms (react-hook-form in Settings); validation (RHF + REST contract); notifications (shared `SnackbarProvider` + `useSnackbar`); loading states (skeletons); error states (query error alerts + `ErrorBoundary` with retry); confirmation dialogs (`ConfirmDialog`, wired into mission deletion).
+- **P08-T03 Admin Pages** — Initial navigation matches the spec (Dashboard / Missions / Campaigns / Analytics / Settings / Appearance). Dashboard is live REST-backed (mission counts, currency, version); Missions shows a read-only list (name, type, target, reward, status) with delete-through-confirmation + snackbar + refetch (Phase 9 replaces it with the full CRUD builder); Settings is fully functional (enabled + full-screen toggles saved via the Phase 7 REST API, full-screen mode previews live); Campaigns/Analytics/Appearance are page containers with empty states for their phases (10, 16–17, 12); `NotFound` 404 route added. `types.ts` gained the `Mission` / `FaraCartSettings` / pagination types mirroring the Phase 7 payloads.
 - Added files: `docs/frontend.md`, plus `admin-app/src/{theme,providers,api,components,routes}/` (16 new modules).
-- **Verification:** `npm run typecheck`, `npm run lint`, Prettier check and `npm run build` all pass (manifest regenerated; lazy chunks emitted). Browser smoke test of the built bundle with injected boot data renders every route correctly — Dashboard shows live summary (Total 2 / Active 1 / Inactive 1), Goals lists both goals, Settings renders both toggles, empty states render for Campaigns/Analytics/Appearance, unknown routes hit the 404 page — with zero console errors. PHP regression suites unaffected (no PHP changes): reward 72/72, engine 75/75, cart-integration 22/22, rest-api 67/67.
+- **Verification:** `npm run typecheck`, `npm run lint`, Prettier check and `npm run build` all pass (manifest regenerated; lazy chunks emitted). Browser smoke test of the built bundle with injected boot data renders every route correctly — Dashboard shows live summary (Total 2 / Active 1 / Inactive 1), Missions lists both missions, Settings renders both toggles, empty states render for Campaigns/Analytics/Appearance, unknown routes hit the 404 page — with zero console errors. PHP regression suites unaffected (no PHP changes): reward 72/72, engine 75/75, cart-integration 22/22, rest-api 67/67.
 
 **Overall project progress: 39%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 weight 4% × 100%).
 
 ---
 
-### Phase 9 — Goal Management UI (100% complete)
+### Phase 9 — Mission Management UI (100% complete)
 
-- **P09-T01 Objective** — Built a professional Goal CRUD experience on top of the Phase 7 REST layer: a full goal list and a seven-section goal builder, replacing the Phase 8 read-only list.
-- **P09-T02 Goal List** — `routes/Goals.tsx` now shows all required columns — name (with target + campaign), type, reward, status, priority, schedule, completion stats (placeholder until Phase 16–17 analytics), actions — with server-side search, status filter and pagination (Phase 23 admin-list pattern). Actions: create (→ builder), edit (→ `/goals/:id/edit`), duplicate (`POST /goals/{id}/duplicate`), enable/disable (partial status update), delete (confirm dialog), and preview (lightweight simulated-progress dialog; the full preview system is Phase 15).
-- **P09-T03 Goal Builder** — New `routes/GoalBuilder.tsx` (`/goals/new` + `/goals/:id/edit`, lazy-loaded) with all seven sections: Basic Information (name, description, status), Goal Type (7 types, visual picker), Target (dynamic per type — amount/quantity/distinct_quantity/weight targets, category/product scoped pickers + calculation basis, composite children with AND/OR), Reward (dynamic per reward type — free shipping, percentage/fixed discount with eligible/excluded products & categories + cap, free gift product + mode, coupon via existing-code search or generated rules, label, stacking), Conditions (excluded products + schedule window; roles/customer-state/cart-state conditions are roadmap Phase 32 deferrals that need schema fields), Display (title, message, completed message, icon, template), and Priority. Backed by `api/goals.ts` (fetchGoal/createGoal/updateGoal/duplicateGoal), new `api/search.ts`, new `lib/format.ts` (locale/currency-aware formatting), and the `goal-builder/` component set (`EntityAutocomplete` debounced async picker with id preload, `SectionCard`, `GoalTypePicker`, `TargetFields`, `CompositeChildrenEditor`, `RewardFields`, `ConditionFields`, `DisplayFields`).
-- Backend: `SearchController` search routes now accept an `ids` array param (positive ints, schema-validated) to preload saved builder selections; `types.ts` gained `GoalInput`, `RewardMetaInput`, `DisplaySettingsInput`, `GoalChildInput` and the search-result types.
-- **Verification:** `php -l` clean on changed PHP; REST suite now 75/75 (new `ids` param checks); `npm run typecheck`, `npm run lint`, Prettier and `npm run build` all pass (GoalBuilder emitted as its own lazy chunk). No database changes; plugin not activated.
+- **P09-T01 Objective** — Built a professional Mission CRUD experience on top of the Phase 7 REST layer: a full mission list and a seven-section mission builder, replacing the Phase 8 read-only list.
+- **P09-T02 Mission List** — `routes/Missions.tsx` now shows all required columns — name (with target + campaign), type, reward, status, priority, schedule, completion stats (placeholder until Phase 16–17 analytics), actions — with server-side search, status filter and pagination (Phase 23 admin-list pattern). Actions: create (→ builder), edit (→ `/missions/:id/edit`), duplicate (`POST /missions/{id}/duplicate`), enable/disable (partial status update), delete (confirm dialog), and preview (lightweight simulated-progress dialog; the full preview system is Phase 15).
+- **P09-T03 Mission Builder** — New `routes/MissionBuilder.tsx` (`/missions/new` + `/missions/:id/edit`, lazy-loaded) with all seven sections: Basic Information (name, description, status), Mission Type (7 types, visual picker), Target (dynamic per type — amount/quantity/distinct_quantity/weight targets, category/product scoped pickers + calculation basis, composite children with AND/OR), Reward (dynamic per reward type — free shipping, percentage/fixed discount with eligible/excluded products & categories + cap, free gift product + mode, coupon via existing-code search or generated rules, label, stacking), Conditions (excluded products + schedule window; roles/customer-state/cart-state conditions are roadmap Phase 32 deferrals that need schema fields), Display (title, message, completed message, icon, template), and Priority. Backed by `api/missions.ts` (fetchMission/createMission/updateMission/duplicateMission), new `api/search.ts`, new `lib/format.ts` (locale/currency-aware formatting), and the `mission-builder/` component set (`EntityAutocomplete` debounced async picker with id preload, `SectionCard`, `MissionTypePicker`, `TargetFields`, `CompositeChildrenEditor`, `RewardFields`, `ConditionFields`, `DisplayFields`).
+- Backend: `SearchController` search routes now accept an `ids` array param (positive ints, schema-validated) to preload saved builder selections; `types.ts` gained `MissionInput`, `RewardMetaInput`, `DisplaySettingsInput`, `MissionChildInput` and the search-result types.
+- **Verification:** `php -l` clean on changed PHP; REST suite now 75/75 (new `ids` param checks); `npm run typecheck`, `npm run lint`, Prettier and `npm run build` all pass (MissionBuilder emitted as its own lazy chunk). No database changes; plugin not activated.
 
 **Overall project progress: 43%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 weight 4% × 100%).
 
@@ -1490,9 +1490,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 10 — Campaign Builder (100% complete)
 
-- **P10-T01 Objective** — Built the Campaign Builder on the Phase 7 read-only campaign layer: multiple goals now work as a scheduled, prioritized campaign with ordered milestones (e.g. 500K → Free Shipping, 1M → Free Gift, 1.5M → 10% discount).
-- **P10-T02 Features** — Backend: `CampaignRepository` gained the full CRUD surface (`create`/`update`/`delete`/`duplicate`) plus milestone ordering — an ordered `goals` array of goal ids becomes `goals.campaign_id` + `goals.menu_order`, and goals removed from the list are detached for reuse; reads carry `goal_count` (list) and `goals` (detail). `CampaignsController` gained `POST /campaigns`, `PUT /campaigns/{id}`, `DELETE /campaigns/{id}` and `POST /campaigns/{id}/duplicate` (copy starts inactive, its goals are copied as new rows). Frontend: new `api/campaigns.ts`; `routes/Campaigns.tsx` is now a full CRUD list (name, milestone count, status + enable/disable switch, priority, schedule, actions: preview/edit/duplicate/delete, create → builder); new `routes/CampaignBuilder.tsx` (`/campaigns/new` + `/campaigns/:id/edit`, lazy-loaded) with Basic information (name/description/status), Schedule & priority (datetime window + conflict priority) and Milestones (goal ordering with move up/down/remove + add-from-goals chips); `CampaignPreviewDialog` shows the milestone ladder at simulated progress. Activation, scheduling, priority, customer-facing milestone copy and preview all covered — customer-state rules remain a roadmap deferral (Phase 32, needs schema fields).
-- Also fixed a Phase 9 list bug found during review: `fetchGoals` read `envelope.data.items`, but `GET /goals` returns `data` as a plain array — the Dashboard and Goals page silently showed an empty list even with stored goals. The client now reads the array directly (verified against the live envelope shape).
+- **P10-T01 Objective** — Built the Campaign Builder on the Phase 7 read-only campaign layer: multiple missions now work as a scheduled, prioritized campaign with ordered milestones (e.g. 500K → Free Shipping, 1M → Free Gift, 1.5M → 10% discount).
+- **P10-T02 Features** — Backend: `CampaignRepository` gained the full CRUD surface (`create`/`update`/`delete`/`duplicate`) plus milestone ordering — an ordered `missions` array of mission ids becomes `missions.campaign_id` + `missions.menu_order`, and missions removed from the list are detached for reuse; reads carry `mission_count` (list) and `missions` (detail). `CampaignsController` gained `POST /campaigns`, `PUT /campaigns/{id}`, `DELETE /campaigns/{id}` and `POST /campaigns/{id}/duplicate` (copy starts inactive, its missions are copied as new rows). Frontend: new `api/campaigns.ts`; `routes/Campaigns.tsx` is now a full CRUD list (name, milestone count, status + enable/disable switch, priority, schedule, actions: preview/edit/duplicate/delete, create → builder); new `routes/CampaignBuilder.tsx` (`/campaigns/new` + `/campaigns/:id/edit`, lazy-loaded) with Basic information (name/description/status), Schedule & priority (datetime window + conflict priority) and Milestones (mission ordering with move up/down/remove + add-from-missions chips); `CampaignPreviewDialog` shows the milestone ladder at simulated progress. Activation, scheduling, priority, customer-facing milestone copy and preview all covered — customer-state rules remain a roadmap deferral (Phase 32, needs schema fields).
+- Also fixed a Phase 9 list bug found during review: `fetchMissions` read `envelope.data.items`, but `GET /missions` returns `data` as a plain array — the Dashboard and Missions page silently showed an empty list even with stored missions. The client now reads the array directly (verified against the live envelope shape).
 - **Verification:** `php -l` clean; REST suite 102/102 (new campaign create/order/reorder/duplicate/delete + rollback checks); engine 75/75, reward 72/72, cart-integration 22/22 (no regressions); `npm run typecheck`, `npm run lint`, Prettier and `npm run build` all pass (CampaignBuilder emitted as its own lazy chunk). No database changes; plugin not activated.
 
 **Overall project progress: 45%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 weight 2% × 100%).
@@ -1502,7 +1502,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 ### Phase 11 — Frontend Progress UI (100% complete)
 
 - **P11-T01 Objective** — Built reusable, customer-facing progress components on the storefront, following the reference plugin's frontend convention: hand-written vanilla JS in `assets/js/` (no build step), a single inline `window.faracartFrontend` config printed early in `wp_footer`, and a must-never-throw contract in the JS.
-- **P11-T02 Components** — New `assets/js/frontend.js` implements the full component set (GoalContainer, ProgressBar, GoalMessage, GoalMilestones, RewardStatus, SuggestionList, StickyGoalBar) fed by the public `GET /faracart/v1/progress` endpoint: full widgets render reward chip + progress + message + milestone ladder + suggestions, compact widgets render progress + message + reward chip, the sticky bar is a fixed dismissible bottom bar, and empty/no-eligible-goal states hide the widget. The progress payload gained an `is_money` flag so the JS formats milestone labels as currency vs plain numbers correctly. New `assets/css/frontend.css` is scoped, responsive, RTL-aware (logical properties), motion-safe, and themeable via `--faracart-*` custom properties (Phase 12 Appearance reuses the tokens).
+- **P11-T02 Components** — New `assets/js/frontend.js` implements the full component set (MissionContainer, ProgressBar, MissionMessage, MissionMilestones, RewardStatus, SuggestionList, StickyMissionBar) fed by the public `GET /faracart/v1/progress` endpoint: full widgets render reward chip + progress + message + milestone ladder + suggestions, compact widgets render progress + message + reward chip, the sticky bar is a fixed dismissible bottom bar, and empty/no-eligible-mission states hide the widget. The progress payload gained an `is_money` flag so the JS formats milestone labels as currency vs plain numbers correctly. New `assets/css/frontend.css` is scoped, responsive, RTL-aware (logical properties), motion-safe, and themeable via `--faracart-*` custom properties (Phase 12 Appearance reuses the tokens).
 - **P11-T03 Display Locations** — New `includes/Frontend/ProgressUI.php` service (wired into the DI container + HookManager in `Plugin.php`) prints empty widget containers at every location with a rendered-location registry guarding against double injection: cart (`woocommerce_before_cart`), mini cart (`woocommerce_after_mini_cart`, re-mounted after fragment refreshes), checkout (`woocommerce_before_checkout_form`), shop/archives (`woocommerce_archive_description`), product pages (`woocommerce_single_product_summary` prio 45), the `[faracart_progress variant="full|compact"]` shortcode (unique ids per instance), and the sticky bar (`wp_footer`). The UI is gated by the `enabled` setting (`faracart_frontend_enabled` filter), locations are filterable (`faracart_frontend_locations`), assets load only on widget-capable pages, and the JS refreshes on WooCommerce's cart events (jQuery-bound with a native fallback) plus an optional `faracart_frontend_refresh_interval` poll.
 - Added files: `includes/Frontend/ProgressUI.php`, `assets/js/frontend.js`, `assets/css/frontend.css`, `tests/frontend-test.php`.
 - **Verification:** `php -l` clean; new frontend suite 36/36 (container resolution, hook registration incl. priorities, shortcode markup + unique ids, duplicate-render guard, config payload, enabled gate + filter, page gating with a rolled-back shortcode post); engine 75/75, reward 72/72, cart-integration 22/22, rest-api 102/102 (no regressions); `node --check` on the JS; headless-Chrome smoke test against a mock `/progress` endpoint renders the full/compact/sticky widgets (42.5% fill, milestone targets, reward chips, completed state) with zero console errors. No database changes; plugin not activated.
@@ -1513,7 +1513,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 12 — Progress Templates (100% complete)
 
-- **P12-T01 Templates** — The storefront widget body now renders per an active template variant. `assets/js/frontend.js` gained a `widgetTemplate()` resolver (per-widget `data-faracart-template` override, else the config) and `templateBody()` variants: **basic** (bar + message), **percentage** (large percent readout above the bar), **milestone** (the goal ladder as the hero visual, bar underneath), and **card** (icon + goal-title header above the bar). The shared flow — message, reward chip, suggestions, sticky bar — stays identical across variants. `assets/css/frontend.css` adds the `.faracart-template--*` styles, a `--faracart-bar-height` token, and the milestone/card/percentage layouts.
+- **P12-T01 Templates** — The storefront widget body now renders per an active template variant. `assets/js/frontend.js` gained a `widgetTemplate()` resolver (per-widget `data-faracart-template` override, else the config) and `templateBody()` variants: **basic** (bar + message), **percentage** (large percent readout above the bar), **milestone** (the mission ladder as the hero visual, bar underneath), and **card** (icon + mission-title header above the bar). The shared flow — message, reward chip, suggestions, sticky bar — stays identical across variants. `assets/css/frontend.css` adds the `.faracart-template--*` styles, a `--faracart-bar-height` token, and the milestone/card/percentage layouts.
 - **P12-T02 Customization** — Full appearance surface: new `frontend_*` settings (template, animation, bar height, accent/bg/border/text colors, radius, CSS class, custom CSS) with defaults in `Settings`, REST schema + sanitizer in `SettingsController` (enum validation, hex-color fallbacks, range clamping, tag-stripping). `ProgressUI` resolves `template()`/`appearance()`, prints the token + custom-CSS inline block via `wp_add_inline_style`, appends the custom class to every container, and exposes the shortcode `template` attribute. The admin **Appearance** page (`routes/Appearance.tsx`) is now fully functional: a 4-card template picker with live thumbnails, color pickers, bar-height/radius sliders, an animation switch, custom class + custom CSS fields, a live preview panel driven by the form values, and reset-to-defaults — all persisted through `POST /faracart/v1/settings`.
 - **Verification:** `php -l` clean; frontend suite 50/50 (config template/animation/appearance keys, shortcode template override, custom container class, token + custom CSS output, template filter), REST suite 113/113 (Phase 12 settings sanitization + schema checks); engine 75/75, reward 72/72, cart-integration 22/22 (no regressions); `node --check` on the JS; `npm run typecheck`, `npm run lint` and `npm run build` all pass (Appearance emitted as its own lazy chunk); headless-Chrome smoke test renders all four templates against a mock `/progress` endpoint (58% readout, milestone ladder targets, card icon/title, no-anim classes on and off) with zero console errors. No database changes; plugin not activated.
 
@@ -1523,9 +1523,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 13 — Dynamic Messaging (100% complete)
 
-- **P13-T01 Objective** — New `includes/Goals/MessageEngine.php` (`FaraCart\Goals`): a stateless, database-free message template engine (Phase 4 engine contract) that turns a `Goal` + `GoalResult` into localized copy. Rendered server-side by the frontend controller, so every storefront message (widget, sticky bar, milestones) shares one engine; wired into the DI container (`Plugin.php`).
-- **P13-T02 Variables** — Nine placeholders: `{current}` `{target}` `{remaining}` `{percentage}` `{quantity}` `{remaining_quantity}` `{reward}` `{goal_name}` `{campaign_name}`. Money-based goals format currency via `wc_price` (plain locale numbers otherwise); `quantity`/`remaining_quantity` come from the cart (controller passes `CartContext::total_quantity()`) with quantity-mode fallback; `reward` is value-aware ("10% discount", "Fixed $20.00 off"); `campaign_name` is folded into the goal by the repository's campaign join (`Goal::campaign_name()`); unknown placeholders stay untouched. Also fixed a Phase 11 bug surfaced here: quantity/distinct-quantity/weight goals default to the subtotal calculation mode, so `is_money_goal` is now type-aware (both `MessageEngine` and `FrontendController` mirror the fix) — quantity goals no longer format as currency.
-- **P13-T03 States** — Six-state detection: `inactive` (goal inactive), `unavailable` (no matching items / out of schedule / invalid target), `progressing` (< 80%), `nearly_complete` (≥ 80%), `completed` (no reward), `reward_activated` (with reward) — each with localized default copy; the goal builder's `display_settings.message` / `completed_message` override progress/completion copy. The public `/progress` payload now carries `state`; the widget maps it to a `faracart-state--{state}` card class (near-completion copy highlighted).
+- **P13-T01 Objective** — New `includes/Missions/MessageEngine.php` (`FaraCart\Missions`): a stateless, database-free message template engine (Phase 4 engine contract) that turns a `Mission` + `MissionResult` into localized copy. Rendered server-side by the frontend controller, so every storefront message (widget, sticky bar, milestones) shares one engine; wired into the DI container (`Plugin.php`).
+- **P13-T02 Variables** — Nine placeholders: `{current}` `{target}` `{remaining}` `{percentage}` `{quantity}` `{remaining_quantity}` `{reward}` `{mission_name}` `{campaign_name}`. Money-based missions format currency via `wc_price` (plain locale numbers otherwise); `quantity`/`remaining_quantity` come from the cart (controller passes `CartContext::total_quantity()`) with quantity-mode fallback; `reward` is value-aware ("10% discount", "Fixed $20.00 off"); `campaign_name` is folded into the mission by the repository's campaign join (`Mission::campaign_name()`); unknown placeholders stay untouched. Also fixed a Phase 11 bug surfaced here: quantity/distinct-quantity/weight missions default to the subtotal calculation mode, so `is_money_mission` is now type-aware (both `MessageEngine` and `FrontendController` mirror the fix) — quantity missions no longer format as currency.
+- **P13-T03 States** — Six-state detection: `inactive` (mission inactive), `unavailable` (no matching items / out of schedule / invalid target), `progressing` (< 80%), `nearly_complete` (≥ 80%), `completed` (no reward), `reward_activated` (with reward) — each with localized default copy; the mission builder's `display_settings.message` / `completed_message` override progress/completion copy. The public `/progress` payload now carries `state`; the widget maps it to a `faracart-state--{state}` card class (near-completion copy highlighted).
 - **P13-T04 Example** — `Only {remaining} left until {reward}` → “Only $38.00 left until Free shipping”; documented in `docs/frontend.md` (states/variables/templates tables) and `docs/api.md` (payload `state` + engine-rendered `message`).
 - **Verification:** `php -l` clean; new message suite 47/47 (container wiring, all six states, all nine variables incl. currency-agnostic money formatting, reward labels, display-settings overrides, unknown-placeholder safety); REST suite 116/116 (payload `state` + no unresolved placeholders); engine 75/75, reward 72/72, cart-integration 22/22, frontend 50/50 (no regressions); `node --check` on the JS; headless-Chrome smoke renders the `faracart-state--nearly_complete` class + engine message with zero console errors. No database changes; plugin not activated.
 
@@ -1535,12 +1535,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 
 ### Phase 14 — Smart Product Suggestions (100% complete)
 
-- **P14-T01 Objective** — Turned FaraCart into an actual revenue-optimization feature: new `includes/Suggestions/SuggestionEngine.php` (`FaraCart\Suggestions`, DI-wired in `Plugin.php`) turns goal progress into product recommendations that close the gap, consumed by the public `/progress` payload and rendered by the Phase 11 `SuggestionList`.
-- **P14-T02 Recommendation Sources** — Seven candidate sources, deduped with the first (highest-priority) source kept for the badge: manual (the goal's own `products`), category (goal categories via a term-relationship query — no `wc_product_meta_lookup` dependency, so products created outside WC CRUD are found), the cart items' upsells/cross-sells/`wc_get_related_products()`, the shopper's `woocommerce_recently_viewed` cookie, and best sellers by `total_sales`. Bounded (per-source limits, `MAX_CANDIDATES` 40, batched load with a `wc_get_product` fallback when the lookup table lags).
-- **P14-T03 Ranking** — Stock availability filters first (published, in stock, priced); then a score from goal eligibility (manual +3, counts toward the goal +2), relevance (shares a cart-item category +1), WC-endorsed sources (+0.5) and — for money goals — price proximity to `remaining` (0.6–1.4× band +2, cheaper +0.75; the spec's "prefer 150K–220K when 180K is left"). Capped at `MAX_SUGGESTIONS` (4), deterministic (score desc, id asc), never suggests cart items / excluded / out-of-stock / ghost ids, and the final list is filterable via the `faracart_suggestions` filter.
-- **P14-T04 Example** — In-band products rank above arbitrary expensive ones; verified in `tests/suggestion-test.php` (28 checks, transactional products rolled back): sources, stock filter, ranking, cap, dedupe, exclusion, cart-item skip, quantity-goal no-price-banding, and the filter.
+- **P14-T01 Objective** — Turned FaraCart into an actual revenue-optimization feature: new `includes/Suggestions/SuggestionEngine.php` (`FaraCart\Suggestions`, DI-wired in `Plugin.php`) turns mission progress into product recommendations that close the gap, consumed by the public `/progress` payload and rendered by the Phase 11 `SuggestionList`.
+- **P14-T02 Recommendation Sources** — Seven candidate sources, deduped with the first (highest-priority) source kept for the badge: manual (the mission's own `products`), category (mission categories via a term-relationship query — no `wc_product_meta_lookup` dependency, so products created outside WC CRUD are found), the cart items' upsells/cross-sells/`wc_get_related_products()`, the shopper's `woocommerce_recently_viewed` cookie, and best sellers by `total_sales`. Bounded (per-source limits, `MAX_CANDIDATES` 40, batched load with a `wc_get_product` fallback when the lookup table lags).
+- **P14-T03 Ranking** — Stock availability filters first (published, in stock, priced); then a score from mission eligibility (manual +3, counts toward the mission +2), relevance (shares a cart-item category +1), WC-endorsed sources (+0.5) and — for money missions — price proximity to `remaining` (0.6–1.4× band +2, cheaper +0.75; the spec's "prefer 150K–220K when 180K is left"). Capped at `MAX_SUGGESTIONS` (4), deterministic (score desc, id asc), never suggests cart items / excluded / out-of-stock / ghost ids, and the final list is filterable via the `faracart_suggestions` filter.
+- **P14-T04 Example** — In-band products rank above arbitrary expensive ones; verified in `tests/suggestion-test.php` (28 checks, transactional products rolled back): sources, stock filter, ranking, cap, dedupe, exclusion, cart-item skip, quantity-mission no-price-banding, and the filter.
 - **P14-T05 Future** — Margin-aware recommendations and AI optimization remain documented roadmap deferrals (Phases 32–34).
-- Refactor: the type-aware `is_money_goal()` check moved onto the `Goal` model (single source of truth); `MessageEngine` and `FrontendController` delegate to it. `frontend.js` prefers the server-formatted `price_html` in the suggestion list (raw `price` fallback) and keeps the suggestion-URL protocol guard.
+- Refactor: the type-aware `is_money_mission()` check moved onto the `Mission` model (single source of truth); `MessageEngine` and `FrontendController` delegate to it. `frontend.js` prefers the server-formatted `price_html` in the suggestion list (raw `price` fallback) and keeps the suggestion-URL protocol guard.
 - **Verification:** `php -l` clean; new suggestion suite 28/28; engine 75/75, reward 72/72, cart-integration 22/22, rest-api 120/120, frontend 50/50, message 47/47 (no regressions); `node --check` on the JS; `npm run typecheck`, `npm run lint` and `npm run build` all pass. No database changes; plugin not activated.
 
 **Overall project progress: 57%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 weight 4% × 100%).
@@ -1550,24 +1550,24 @@ The format follows [Keep a Changelog](https://keepachangelog.com/) and the proje
 ### Phase 15 — Admin Preview System (100% complete)
 
 - **P15-T01 Objective** — Administrators can now see the customer
-experience before publishing: the Preview buttons on the Goals and
+experience before publishing: the Preview buttons on the Missions and
 Campaigns lists open a server-driven dialog that evaluates the **real
-goal engine** against a **simulated cart** and renders the real storefront
+mission engine** against a **simulated cart** and renders the real storefront
 widget (templates, messages, rewards, suggestions) at the chosen device
 width. New `includes/REST/PreviewController.php` registers
 `POST /faracart/v1/preview` (admin-only, `manage_options` + rate limit):
 it builds a synthetic `CartContext` (one simulated line carrying amount /
 quantity / weight / categories / product id, so amount / quantity /
-distinct-quantity / category / product / weight / composite goals all
-evaluate honestly) and returns the **same per-goal payload shape as the
+distinct-quantity / category / product / weight / composite missions all
+evaluate honestly) and returns the **same per-mission payload shape as the
 public `/progress` endpoint** via a newly extracted shared
-`FrontendController::shape_goal()` — the two payload builders can never
+`FrontendController::shape_mission()` — the two payload builders can never
 drift. **Preview never touches the real WooCommerce cart** (no cart
 loaded, no session touched, no fees/coupons applied — verified by test)
-and ignores publish gating on purpose, so drafts, inactive goals and
+and ignores publish gating on purpose, so drafts, inactive missions and
 scheduled campaigns are previewable before going live.
 - **P15-T02 Preview States** — Empty cart / 25% / 50% / 75% / Completed
-presets for single goals (anchored to the goal target) and **multiple
+presets for single missions (anchored to the mission target) and **multiple
 milestones** for campaigns (every milestone evaluated against the same
 simulated cart, anchored to the top milestone target so mid states show
 several completed rungs).
@@ -1575,12 +1575,12 @@ several completed rungs).
 quantity fields (debounced 300 ms), simulated reward state (auto / locked
 / unlocked chip), device width (mobile 375 / tablet 768 / desktop 1280)
 and template variant (basic / percentage / milestone / card, defaulting
-through the goal's Display template → the store-wide Appearance template
+through the mission's Display template → the store-wide Appearance template
 — the widget's own resolution order). The React side is a faithful mirror
 of `assets/js/frontend.js`: new `components/preview/` (`PreviewWidget`,
 `PreviewControls`, `usePreviewDialog` shared hook, `types`), rewritten
-`GoalPreviewDialog` / `CampaignPreviewDialog`, `api/preview.ts`, and the
-`ProgressGoal` / `PreviewPayload` types. Appearance tokens come from the
+`MissionPreviewDialog` / `CampaignPreviewDialog`, `api/preview.ts`, and the
+`ProgressMission` / `PreviewPayload` types. Appearance tokens come from the
 Phase 12 settings, so the admin sees the storefront 1:1.
 - Added files: `includes/REST/PreviewController.php`, `tests/preview-test.php`,
 `admin-app/src/api/preview.ts`, `admin-app/src/components/preview/`
@@ -1589,9 +1589,9 @@ payload types) and `admin-app/src/lib/format.ts` (optional currency param
 for the preview's payload-currency formatting).
 - **Verification:** `php -l` clean; new preview suite 90/90 (routes,
 schema, anonymous 403, empty/50%/completed states, live-cart-unchanged,
-publish-gating bypass, every goal type's simulated context — quantity,
+publish-gating bypass, every mission type's simulated context — quantity,
 distinct-quantity, category (both modes), product, weight, composite —
-quantity goals, campaign milestones in order, 400/404 paths, rollback);
+quantity missions, campaign milestones in order, 400/404 paths, rollback);
 rest-api 120/120, engine 75/75, reward 72/72, cart-integration 22/22,
 message 47/47, suggestion 28/28 (no regressions); `npm run typecheck`,
 `npm run lint` and `npm run build` all pass (the preview widgets are part
@@ -1610,7 +1610,7 @@ activated.
 
 - **P16-T01 Objective** — FaraCart now measures whether it actually
 increases revenue: an append-only analytics event pipeline records what
-shoppers see and do (goal impressions, progress, completions, reward
+shoppers see and do (mission impressions, progress, completions, reward
 activations, suggestion impressions/clicks/adds) into the existing
 `faracart_analytics_events` table, keyed by anonymous sessions.
 - **P16-T02 Events** — New `includes/Analytics/` services (DI-wired in
@@ -1628,20 +1628,20 @@ validating the event-type whitelist, and `suggested_product_added`
 rejected from the client so conversions can never be self-reported. The
 storefront `assets/js/frontend.js` reports six events with a
 must-never-throw contract (sendBeacon with XHR fallback): impressions
-once per goal per page session, progress on percentage change, completion
-/reward events once per goal, suggestion impressions once per goal +
+once per mission per page session, progress on percentage change, completion
+/reward events once per mission, suggestion impressions once per mission +
 product, and suggestion clicks through a delegated listener on the
-`data-faracart-suggestion-id` / `data-faracart-goal-id` link attributes.
+`data-faracart-suggestion-id` / `data-faracart-mission-id` link attributes.
 - **P16-T03 Metrics** — `AnalyticsRepository` computes impressions,
 completions (goal_completed + reward_activated), completion rate,
 average cart value at impression, revenue associated with completed
-goals (SUM of cart_value at completion events), suggestion CTR and
+missions (SUM of cart_value at completion events), suggestion CTR and
 suggestion add-to-cart rate — each filterable by date range (from/to),
-campaign and goal for the Phase 17 dashboard, with zero-denominator
-guards. The shared progress payload and `Goal` model now carry
+campaign and mission for the Phase 17 dashboard, with zero-denominator
+guards. The shared progress payload and `Mission` model now carry
 `campaign_id` so events attribute to campaigns.
 - **P16-T04 Privacy** — The events table stores only aggregate numbers
-(cart value, percentage), goal/campaign/product/order ids and the
+(cart value, percentage), mission/campaign/product/order ids and the
 anonymous session token — no IP, user agent, email or other PII (the
 table has no PII columns at all); `user_id` is recorded only when the
 shopper is logged in; guests stay anonymous. Tracking respects the master
@@ -1671,28 +1671,28 @@ measurement dashboard served by one admin endpoint,
 wired in `Plugin.php`): seven KPI cards (impressions, completions,
 completion rate, revenue influenced, average cart value, suggestion CTR,
 suggestion add-to-cart rate), a daily trend chart, top campaigns / top
-goals / top suggested products, loading skeletons, an error alert and an
+missions / top suggested products, loading skeletons, an error alert and an
 empty state when the range has no impressions.
 - **P17-T02 Filters** — The dashboard toolbar shares one date range
 through a new `date-range/` module (`DateRangeContext` provider wired
 inside the data router in `App.tsx`, `DateRangeFilter` + a lazy-loaded
 Gregorian `CustomRangePicker` — mirroring the reference plugin's date
-filter, minus the Jalali calendar) plus campaign / goal / reward selects
+filter, minus the Jalali calendar) plus campaign / mission / reward selects
 and a product filter reusing `EntityAutocomplete`. Server-side, the
-`AnalyticsRepository` gained `goal_ids`, `product_id` and `reward_type`
-(goal-join subquery, whitelisted against `Reward::types()`) filters with
+`AnalyticsRepository` gained `mission_ids`, `product_id` and `reward_type`
+(mission-join subquery, whitelisted against `Reward::types()`) filters with
 table-alias support, and `AnalyticsController` validates every filter
-through its route arg schema (dates, reward enum, goal_ids items, the
+through its route arg schema (dates, reward enum, mission_ids items, the
 1–20 limit clamp).
 - **P17-T03 Charts** — recharts (the reference plugin's charting
 convention): a ComposedChart with impressions/completions bars and a
 revenue line over a zero-filled daily window, a horizontal top-campaigns
-bar chart, completion-rate progress bars for top goals, and a top
+bar chart, completion-rate progress bars for top missions, and a top
 suggested products table — all localized, WP-admin-palette themed, with
 formatted tooltips.
 - New `AnalyticsRepository` queries: `trend()` (daily buckets, default
-30-day window, zero-filled gaps), `top_campaigns()`, `top_goals()`
-(INNER JOIN campaigns/goals for names, ranked by completions) and
+30-day window, zero-filled gaps), `top_campaigns()`, `top_missions()`
+(INNER JOIN campaigns/missions for names, ranked by completions) and
 `top_suggested_products()` (INNER JOIN `wp_posts` for product names,
 ranked by conversions) — every query fully `$wpdb->prepare`-bound.
 - Added files: `includes/REST/AnalyticsController.php`,
@@ -1720,13 +1720,13 @@ ships in the lazy-loaded Analytics chunk). No database changes.
 - **P18-T01 General** — The Settings page now carries the full store
 surface: enable/disable, currency display (symbol / code / name, consumed
 by the storefront widget's `currencyDisplay` config and the frontend JS
-number/currency formatter), default goal behavior (all | first | closest
-— `FrontendController::active_goals_for()` narrows the `/progress` goal
-set per the setting, with 'closest' picking the eligible goal with the
+number/currency formatter), default mission behavior (all | first | closest
+— `FrontendController::active_missions_for()` narrows the `/progress` mission
+set per the setting, with 'closest' picking the eligible mission with the
 highest percentage) and the store-wide default calculation mode
 (`faracart_default_calculation_mode` filter in `Settings::register()` +
-`Goal::default_calculation_mode()` — amount/category/composite goals
-follow the store mode, quantity-style goals keep their type defaults;
+`Mission::default_calculation_mode()` — amount/category/composite missions
+follow the store mode, quantity-style missions keep their type defaults;
 each default preserves the pre-Phase-18 behavior).
 - **P18-T02 Frontend** — Display locations are now driven by the
 `frontend_locations` setting (was hard-coded in `ProgressUI`): the widget
@@ -1738,7 +1738,7 @@ and the color tokens continue to drive the Appearance page, and
 prints the `mobile` config key and `assets/js/frontend.js` applies a
 `faracart-mobile-hidden` class (CSS media query) that hides every widget
 under 600 px.
-- **P18-T03 Goal Calculation** — `CartContext::from_cart()` now honors
+- **P18-T03 Mission Calculation** — `CartContext::from_cart()` now honors
 five inclusion toggles, each defaulting to the pre-Phase-18 engine
 behavior: `include_tax` (line taxes fold into the subtotal/discounted
 bases), `include_discount` (when off, the discounted basis ignores
@@ -1748,12 +1748,12 @@ line; legacy `exclude_shipping` still wins), `include_sale` and
 the bases rebased onto the remaining lines). `CartItem` gained `line_tax`;
 `CartIntegration::context()` merges the settings into the build args
 (explicit caller args win) and stays optional-injected so `new
-CartIntegration()` callers keep working. `Goal::default_calculation_mode()`
+CartIntegration()` callers keep working. `Mission::default_calculation_mode()`
 became filterable for the P18-T01 store mode.
 - **P18-T04 Performance** — Three switches: `performance_caching` (a
-10-second `faracart_progress_*` transient keyed by cart snapshot + goal
+10-second `faracart_progress_*` transient keyed by cart snapshot + mission
 ids + behavior + suggestions serves repeat widget polls without
-re-evaluating every goal; off by default), `analytics_enabled` (the new
+re-evaluating every mission; off by default), `analytics_enabled` (the new
 settings toggle gates the Phase 16 Tracker — the analytics config is only
 printed and events only recorded while on) and `performance_suggestions`
 (the storefront suggestion list is emptied when off; filterable via
@@ -1765,7 +1765,7 @@ convention): a best-effort `faracart-debug.log` in `WP_CONTENT_DIR`
 mode), with the log path surfaced in the settings GET meta and REST
 failures logged through `BaseController::error()`. The Settings page
 rewrite (`admin-app/src/routes/Settings.tsx`) is a five-tab layout —
-General / Frontend / Goal Calculation / Performance / Advanced — with a
+General / Frontend / Mission Calculation / Performance / Advanced — with a
 documented-hooks reference (developer hooks toggle) rendered from
 `HookManager::documented_hooks()`.
 - `Settings::save()` no-op fix — `update_option()` returns `false` both
@@ -1775,7 +1775,7 @@ successful save (the reference plugin carries the same latent bug; this
 implementation fixes it).
 - Added files: `includes/Utils/Logger.php`, `tests/settings-test.php`;
 extended `includes/Settings/Settings.php`, `includes/REST/SettingsController.php`,
-`includes/Goals/{Goal,CartItem,CartContext}.php`, `includes/Cart/CartIntegration.php`,
+`includes/Missions/{Mission,CartItem,CartContext}.php`, `includes/Cart/CartIntegration.php`,
 `includes/Frontend/ProgressUI.php`, `includes/REST/{FrontendController,BaseController}.php`,
 `includes/Analytics/Tracker.php`, `includes/Hooks/HookManager.php`,
 `includes/Plugin.php`, `assets/js/frontend.js`, `assets/css/frontend.css`,
@@ -1784,7 +1784,7 @@ extended `includes/Settings/Settings.php`, `includes/REST/SettingsController.php
 for every new key preserving pre-Phase-18 behavior, REST schema + sanitizer
 normalization, calculation toggles incl. line-tax folding and
 discount/shipping/sale/virtual drops, the store-mode filter, locations +
-sticky gating, currencyDisplay/mobile config, goal behavior all/first/closest,
+sticky gating, currencyDisplay/mobile config, mission behavior all/first/closest,
 progress caching write + read + sentinel serve, analytics/suggestions toggles,
 developer-hooks meta, Logger gating + cleanup — every DB write rolled back
 and residue asserted); regressions: engine 75/75, cart-integration 22/22,
@@ -1806,7 +1806,7 @@ all pass (Settings ships as its own lazy chunk). No database changes.
   `faracart_rest_capability` / `faracart_admin_capability`, on every admin
   route and the admin menu), sanitization (REST arg schemas, repository
   column sanitizers, and the recursive composite-children whitelist
-  `GoalsController::sanitize_children` — unknown keys dropped, strings
+  `MissionsController::sanitize_children` — unknown keys dropped, strings
   sanitized, ids positive-int-cast), escaping (widget container attributes,
   admin page markup, inline config JSON), SQL parameterization (every
   repository query `$wpdb->prepare`-bound), and safe serialization
@@ -1833,12 +1833,12 @@ all pass (Settings ships as its own lazy chunk). No database changes.
   localStorage/JSON parsing is exception-guarded. `npm run typecheck`,
   `npm run lint` and `npm run build` all pass.
 - **P22-T04 Database** — Prepared statements throughout: SQL-injection
-  payloads in the goal search/status filters neither error nor widen the
+  payloads in the mission search/status filters neither error nor widen the
   result set (verified), the analytics date-range clamp caps any trend
   window at 366 days (a pathological 2000–2100 range is clamped), and a
   schema-hygiene audit surfaced a real migration gap — **dbDelta cannot
   add indexes to an existing table**, so the composite analytics keys
-  (`goal_event`, `campaign_event`) declared in the schema were missing on
+  (`mission_event`, `campaign_event`) declared in the schema were missing on
   upgraded installs. `Schema::indexes()` now centralizes the full index
   set and `Installer::maybe_add_indexes()` applies any missing key
   idempotently (INFORMATION_SCHEMA check + ALTER TABLE, the existing
@@ -1872,7 +1872,7 @@ all pass (Settings ships as its own lazy chunk). No database changes.
   their own chunks), server state is cached via TanStack Query
   (`staleTime: 60s`, `refetchOnWindowFocus: false` in `AppProviders`),
   product/category/coupon searches are debounced (300 ms) and capped
-  (`per_page: 20`) in `EntityAutocomplete`, the goal list search is
+  (`per_page: 20`) in `EntityAutocomplete`, the mission list search is
   debounced client-side and paginated server-side, and the analytics trend
   series is `useMemo`-memoized. **New: bundle-size minimization** —
   `admin-app/vite.config.ts` now splits vendors with `manualChunks`
@@ -1883,14 +1883,14 @@ all pass (Settings ships as its own lazy chunk). No database changes.
   same minimal config without `manualChunks`, and the deviation is driven
   by the Phase 23 roadmap requirement to minimize bundle size — the
   routing/base/manifest architecture is unchanged.
-- **P23-T02 WooCommerce Frontend** — Audit of the storefront path: goal
-  evaluation is cached within a request (`GoalRepository` per-request
-  active-goal cache — verified: a second `active_goals()` call runs zero
+- **P23-T02 WooCommerce Frontend** — Audit of the storefront path: mission
+  evaluation is cached within a request (`MissionRepository` per-request
+  active-mission cache — verified: a second `active_missions()` call runs zero
   queries; `CartIntegration` memoizes the cart context per cart contents;
   `RewardEngine` caches per-request reward results), product categories
   are preloaded in one batched `wp_get_object_terms` call (no per-item
   term queries), repeated widget polls are served from the 10-second
-  progress transient when `performance_caching` is enabled, and goal
+  progress transient when `performance_caching` is enabled, and mission
   calculations are snapshot-based (no per-render re-computation). **New:
   update only changed UI fragments** — `assets/js/frontend.js` now
   computes a payload fingerprint (`payloadFingerprint`) per refresh and
@@ -1900,7 +1900,7 @@ all pass (Settings ships as its own lazy chunk). No database changes.
   mini-cart container still mounts (empty containers always render), the
   sticky bar follows the same rule, and the mobile-hide toggle is folded
   into the fingerprint so breakpoint crossings still re-render.
-- **P23-T03 Admin** — Audit of the admin list surfaces: the goal list is
+- **P23-T03 Admin** — Audit of the admin list surfaces: the mission list is
   server-paginated (page/per_page + envelope) with server-side search
   (name `LIKE`) and status filtering (verified behaviorally), the list
   endpoint clamps `per_page` to 100, the search endpoints declare
@@ -1926,33 +1926,33 @@ all pass (Settings ships as its own lazy chunk). No database changes.
 
 ### Phase 26 — Conflict & Priority Engine (100% complete)
 
-- **P26-T01 Objective & deterministic order** — When several goals are
-  active — standalone goals, campaign milestones, or both — the plugin
-  now behaves **deterministically**. New `includes/Goals/ConflictResolver.php`
+- **P26-T01 Objective & deterministic order** — When several missions are
+  active — standalone missions, campaign milestones, or both — the plugin
+  now behaves **deterministically**. New `includes/Missions/ConflictResolver.php`
   is the single authoritative rule, shared by the live cart
   (`RewardEngine::sync_cart()`) and the display paths (`FrontendController`
   progress payload + `PreviewController` campaign preview), so the reward
   granted and the reward displayed can never drift apart.
-  `GoalRepository::active_goals()` now returns the active goals in the
+  `MissionRepository::active_missions()` now returns the active missions in the
   deterministic Phase 26 order — `ORDER BY COALESCE(campaigns.priority,
-  10) ASC, goals.priority ASC, goals.id ASC`: campaign priority is the
+  10) ASC, missions.priority ASC, missions.id ASC`: campaign priority is the
   primary sort key (a campaign is a deliberate merchandising unit, so its
-  priority outranks any goal inside it), standalone goals compete at the
-  schema-default campaign priority 10, then goal priority, then id for a
+  priority outranks any mission inside it), standalone missions compete at the
+  schema-default campaign priority 10, then mission priority, then id for a
   stable tie-break.
 - **P26-T02 Resolution modes** — New store-wide `conflict_resolution`
   setting (Settings → General → Conflict resolution, default
-  `cumulative`) selects how *completed* reward-bearing goals compete:
-  **cumulative** (every completed goal grants, subject to the existing
+  `cumulative`) selects how *completed* reward-bearing missions compete:
+  **cumulative** (every completed mission grants, subject to the existing
   per-reward stacking rules — exactly the pre-Phase-26 behavior),
-  **first** (only the first matching goal in priority order grants;
+  **first** (only the first matching mission in priority order grants;
   later completions suppressed with `not_first`), and **best** (only the
   highest-value reward grants; `not_best` for the rest). "Best" compares
   the reward's *computed* discount amount on the current cart when
   available (the `RewardEngine` pass — percentage discounts resolved to
   their real value), falling back to a deterministic static score
   (fixed/percentage value; free shipping, gifts and coupons count as
-  equal-value offers), ties broken by priority then id. Suppressed goals
+  equal-value offers), ties broken by priority then id. Suppressed missions
   still show their progress on the storefront (a shopper may be working
   toward the next milestone) but their reward never renders as unlocked
   and never grants. The progress-cache transient key now includes the
@@ -1966,42 +1966,42 @@ all pass (Settings ships as its own lazy chunk). No database changes.
   shopper or an admin sees is exactly what the live cart grants (review-
   driven hardening; verified end-to-end by the payload parity checks in
   `tests/conflict-test.php`).
-- **P26-T03 Mutually exclusive goals** — A goal marked **Exclusive** in
-  the goal builder (`goals.exclusive`, new column, database version
-  bumped to `0.3.0`) suppresses every lower-priority *completed* goal
+- **P26-T03 Mutually exclusive missions** — A mission marked **Exclusive** in
+  the mission builder (`missions.exclusive`, new column, database version
+  bumped to `0.3.0`) suppresses every lower-priority *completed* mission
   (`exclusive` reason) in **every** mode — exclusivity is resolved
-  **before** mode selection, so e.g. in `best` mode an exclusive goal
+  **before** mode selection, so e.g. in `best` mode an exclusive mission
   beats a higher-value lower-priority reward. Priority above the
-  exclusive goal is still respected (exclusive means "I win over
+  exclusive mission is still respected (exclusive means "I win over
   everything below me", never "I silence everything").
-  `Goal::exclusive()` / the REST goal shape and schema expose the flag.
+  `Mission::exclusive()` / the REST mission shape and schema expose the flag.
 - **P26-T04 Admin UI communication** — The behavior is visible in every
   surface: Settings → General gains the **Conflict resolution** picker
-  with a plain explanation of each mode; the goal builder's **Priority &
+  with a plain explanation of each mode; the mission builder's **Priority &
   conflicts** section carries the priority field (lower wins) plus the
   **Exclusive (mutually exclusive)** toggle with its behavior explained;
-  the Goals list shows an **Exclusive** chip; campaign priority already
-  participates (campaigns compete before goals); and the goal/campaign
+  the Missions list shows an **Exclusive** chip; campaign priority already
+  participates (campaigns compete before missions); and the mission/campaign
   preview shows a **"Blocked — …"** conflict chip naming the reason.
   On the storefront, `assets/js/frontend.js` renders a suppressed
   reward as **locked** (never unlocked) and reports `goal_completed`
   instead of `reward_activated` for it (verified: the tracking event
   follows the conflict state).
 - **Payload contract** — The public `GET /faracart/v1/progress` and the
-  admin `POST /faracart/v1/preview` payloads carry per goal
+  admin `POST /faracart/v1/preview` payloads carry per mission
   `"conflict": { "resolved": true, "reason": "" }`; `resolved: false`
   means the reward is blocked, with the machine-readable reason
   (`not_first` / `not_best` / `exclusive` / `stacking`; `lower_priority`
   reserved). The `RewardResult` mirrors it through its `blocked` state,
   so analytics and previews agree with the live cart.
-- Added files: `includes/Goals/ConflictResolver.php`,
+- Added files: `includes/Missions/ConflictResolver.php`,
   `tests/conflict-test.php` (45 checks), `docs/conflicts.md`; extended
-  `includes/Goals/{Goal,GoalRepository}.php`, `includes/Database/Schema.php`,
+  `includes/Missions/{Mission,MissionRepository}.php`, `includes/Database/Schema.php`,
   `includes/Rewards/RewardEngine.php`, `includes/Settings/Settings.php`,
-  `includes/REST/{SettingsController,FrontendController,PreviewController,GoalsController}.php`,
+  `includes/REST/{SettingsController,FrontendController,PreviewController,MissionsController}.php`,
   `includes/Plugin.php`, `faracart.php` (DB version `0.3.0`),
   `assets/js/frontend.js`, `tests/settings-test.php`, `docs/{api,database}.md`,
-  and the admin app (`types.ts`, `routes/{Settings,GoalBuilder,Goals,Appearance}.tsx`,
+  and the admin app (`types.ts`, `routes/{Settings,MissionBuilder,Missions,Appearance}.tsx`,
   `components/preview/PreviewWidget.tsx`).
 - **Verification:** `php -l` clean on every changed PHP file; new
   conflict suite 57/57 (modes, exclusive, campaign-priority ordering,
@@ -2019,7 +2019,7 @@ all pass (Settings ships as its own lazy chunk). No database changes.
   has the Appearance template saved as `card` — same documented
   artifact as Phase 15, untouched by this phase); `node --check` on the
   JS; `npm run typecheck`, `npm run lint` and `npm run build` all pass.
-  Database migration `0.3.0` adds `goals.exclusive` (idempotent,
+  Database migration `0.3.0` adds `missions.exclusive` (idempotent,
   existing rows default to 0 = not exclusive).
 
 **Overall project progress: 78%** (Phase 0 5% + Phase 1 3% + Phase 2 4% + Phase 3 3% + Phase 4 7% + Phase 5 5% + Phase 6 5% + Phase 7 3% + Phase 8 4% + Phase 9 4% + Phase 10 2% + Phase 11 4% + Phase 12 2% + Phase 13 2% + Phase 14 4% + Phase 15 2% + Phase 16 2% + Phase 17 2% + Phase 18 2% + Phase 19 2% + Phase 20 2% + Phase 21 1% + Phase 22 3% + Phase 23 3% + Phase 26 weight 2% × 100%).

@@ -8,7 +8,7 @@
 namespace FaraCart\Analytics;
 
 use FaraCart\Database\Schema;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
  *  - overview()          — one cached payload merging the attribution
  *                          summary, incremental cart value, AOV analysis and
  *                          shipping stats (the Revenue Optimization KPIs).
- *  - goal_performance()  — per-goal metrics (all goals or one).
+ *  - mission_performance()  — per-mission metrics (all missions or one).
  *  - daily_trend()       — the daily revenue series read from revenue_daily
  *                          (the aggregated table), zero-filled over the
  *                          window, with today's still-live data merged from
@@ -32,7 +32,7 @@ defined( 'ABSPATH' ) || exit;
  *  - product_stats()     — per-product upsell aggregates read from
  *                          upsell_stats (rebuilt by DailyAggregator).
  *  - upsell_ranking()    — the Phase 33.5 Smart Upsell ranked products for
- *                          a cart + goal context (cached, deterministic).
+ *                          a cart + mission context (cached, deterministic).
  *  - upsell_analytics()  — the top-products upsell analytics table
  *                          (impressions/clicks/adds/orders/revenue/profit/
  *                          score) over a window.
@@ -43,7 +43,7 @@ defined( 'ABSPATH' ) || exit;
  * counter, so stale entries are never served and no key enumeration is
  * needed; old transients expire through their TTL. Invalidation is wired to
  * the events that change the underlying data — order payment/status changes,
- * goal CRUD (faracart_goals_changed), product saves (upsell stats), and the
+ * mission CRUD (faracart_missions_changed), product saves (upsell stats), and the
  * daily aggregation run (faracart_revenue_aggregated).
  *
  * The whole layer is gated by faracart_revenue_cache_enabled (default on)
@@ -81,7 +81,7 @@ final class RevenueRepository {
 	const PRODUCTS_CACHE_TTL = HOUR_IN_SECONDS;
 
 	/**
-	 * Default TTL for goal recommendations (filterable with
+	 * Default TTL for mission recommendations (filterable with
 	 * faracart_recommendation_cache_ttl).
 	 *
 	 * @var int
@@ -96,16 +96,16 @@ final class RevenueRepository {
 	protected $engine;
 
 	/**
-	 * Goal repository (goal list for the performance report).
+	 * Mission repository (mission list for the performance report).
 	 *
-	 * @var GoalRepository
+	 * @var MissionRepository
 	 */
 	protected $repository;
 
 	/**
-	 * Smart goal recommendation engine (Phase 33.4).
+	 * Smart mission recommendation engine (Phase 33.4).
 	 *
-	 * @var GoalRecommendationEngine
+	 * @var MissionRecommendationEngine
 	 */
 	protected $recommendations;
 
@@ -120,11 +120,11 @@ final class RevenueRepository {
 	 * Constructor.
 	 *
 	 * @param AttributionEngine        $engine         Revenue attribution engine.
-	 * @param GoalRepository           $repository     Goal repository.
-	 * @param GoalRecommendationEngine $recommendations Goal recommendation engine.
+	 * @param MissionRepository           $repository     Mission repository.
+	 * @param MissionRecommendationEngine $recommendations Mission recommendation engine.
 	 * @param UpsellRanker|null        $upsells        Upsell ranking engine (Phase 33.5).
 	 */
-	public function __construct( AttributionEngine $engine, GoalRepository $repository, GoalRecommendationEngine $recommendations, ?UpsellRanker $upsells = null ) {
+	public function __construct( AttributionEngine $engine, MissionRepository $repository, MissionRecommendationEngine $recommendations, ?UpsellRanker $upsells = null ) {
 		$this->engine         = $engine;
 		$this->repository     = $repository;
 		$this->recommendations = $recommendations;
@@ -144,8 +144,8 @@ final class RevenueRepository {
 		$hooks->add_action( 'woocommerce_order_status_completed', array( $this, 'invalidate' ) );
 		$hooks->add_action( 'woocommerce_order_status_changed', array( $this, 'invalidate' ) );
 
-		// Goal CRUD changes reward config, funnel targets and names.
-		$hooks->add_action( 'faracart_goals_changed', array( $this, 'invalidate' ) );
+		// Mission CRUD changes reward config, funnel targets and names.
+		$hooks->add_action( 'faracart_missions_changed', array( $this, 'invalidate' ) );
 
 		// Product saves change names/prices behind the upsell stats.
 		$hooks->add_action( 'save_post_product', array( $this, 'invalidate' ) );
@@ -170,7 +170,7 @@ final class RevenueRepository {
 	/**
 	 * Revenue Optimization overview — the KPI payload, cached.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, from, to.
+	 * @param array<string, mixed> $args Optional: mission_id, from, to.
 	 * @return array<string, mixed>
 	 */
 	public function overview( array $args = array() ) {
@@ -191,26 +191,26 @@ final class RevenueRepository {
 	}
 
 	/**
-	 * Goal Performance rows — every goal (or a filtered subset), cached.
+	 * Mission Performance rows — every mission (or a filtered subset), cached.
 	 *
-	 * `goal_ids` (optional) restricts the iteration to the listed goals, so
+	 * `mission_ids` (optional) restricts the iteration to the listed missions, so
 	 * the Analytics comparison table (Phase 6, §27) can slice the same
 	 * cached rows by campaign/reward filters. Additive — existing callers
-	 * that pass only goal_id / from / to behave exactly as before.
+	 * that pass only mission_id / from / to behave exactly as before.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, goal_ids, from, to.
+	 * @param array<string, mixed> $args Optional: mission_id, mission_ids, from, to.
 	 * @return array<int, array<string, mixed>>
 	 */
-	public function goal_performance( array $args = array() ) {
+	public function mission_performance( array $args = array() ) {
 		return $this->cached(
-			'goals',
+			'missions',
 			$args,
 			self::CACHE_TTL,
 			function () use ( $args ) {
 				$items = array();
 
-				if ( ! empty( $args['goal_id'] ) ) {
-					$metrics = $this->engine->goal_metrics( (int) $args['goal_id'], $args );
+				if ( ! empty( $args['mission_id'] ) ) {
+					$metrics = $this->engine->mission_metrics( (int) $args['mission_id'], $args );
 
 					if ( null !== $metrics ) {
 						$items[] = $metrics;
@@ -219,17 +219,17 @@ final class RevenueRepository {
 					return $items;
 				}
 
-				// Optional IN-clause: when present, only the listed goals
+				// Optional IN-clause: when present, only the listed missions
 				// participate in the comparison table.
-				$goal_ids = null;
+				$mission_ids = null;
 
-				if ( ! empty( $args['goal_ids'] ) && is_array( $args['goal_ids'] ) ) {
-					$goal_ids = array_values( array_filter( array_map( 'absint', $args['goal_ids'] ), function ( $id ) {
+				if ( ! empty( $args['mission_ids'] ) && is_array( $args['mission_ids'] ) ) {
+					$mission_ids = array_values( array_filter( array_map( 'absint', $args['mission_ids'] ), function ( $id ) {
 						return $id > 0;
 					} ) );
 				}
 
-				// All goals, paged — never silently truncated by a fixed cap.
+				// All missions, paged — never silently truncated by a fixed cap.
 				$page = 1;
 
 				while ( true ) {
@@ -238,11 +238,11 @@ final class RevenueRepository {
 					);
 
 					foreach ( $result['items'] as $row ) {
-						if ( null !== $goal_ids && ! in_array( (int) $row['id'], $goal_ids, true ) ) {
+						if ( null !== $mission_ids && ! in_array( (int) $row['id'], $mission_ids, true ) ) {
 							continue;
 					}
 
-						$metrics = $this->engine->goal_metrics( (int) $row['id'], $args );
+						$metrics = $this->engine->mission_metrics( (int) $row['id'], $args );
 
 						if ( null !== $metrics ) {
 							$items[] = $metrics;
@@ -273,7 +273,7 @@ final class RevenueRepository {
 	 * beyond today in a custom range are clamped to today (there is no data
 	 * for the future).
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, from, to.
+	 * @param array<string, mixed> $args Optional: mission_id, from, to.
 	 * @return array<int, array{date: string, views: int, progressions: int, completions: int, conversions: int, revenue: float, incremental_revenue: float, reward_cost: float, estimated_profit: float}>
 	 */
 	public function daily_trend( array $args = array() ) {
@@ -305,9 +305,9 @@ final class RevenueRepository {
 				$where  = 'report_date >= %s AND report_date <= %s';
 				$params = array( $from, $to );
 
-				if ( ! empty( $args['goal_id'] ) ) {
-					$where   .= ' AND goal_id = %d';
-					$params[] = (int) $args['goal_id'];
+				if ( ! empty( $args['mission_id'] ) ) {
+					$where   .= ' AND mission_id = %d';
+					$params[] = (int) $args['mission_id'];
 				}
 
 				$rows = $wpdb->get_results(
@@ -394,16 +394,16 @@ final class RevenueRepository {
 	 * Filter mapping (Improvement.md §36/§37 — extend, don't duplicate):
 	 *
 	 *  - from / to          → the attribution window (the same date range)
-	 *  - goal_id / goal_ids → the goal(s) directly
-	 *  - campaign_id        → resolved to the campaign's goal ids
-	 *  - reward_type        → resolved to the goals carrying that reward
-	 *  - product_id         → unsupported in attribution (goal_attribution
+	 *  - mission_id / mission_ids → the mission(s) directly
+	 *  - campaign_id        → resolved to the campaign's mission ids
+	 *  - reward_type        → resolved to the missions carrying that reward
+	 *  - product_id         → unsupported in attribution (mission_attribution
 	 *                         has no product dimension) → null, so the UI
 	 *                         never shows a misleading number for a
 	 *                         dimension the engine does not track
 	 *
 	 * @param array<string, mixed> $filters Optional from/to, campaign_id,
-	 *                                      goal_id, goal_ids, product_id,
+	 *                                      mission_id, mission_ids, product_id,
 	 *                                      reward_type.
 	 * @return array<string, mixed>|null The attribution summary shape, or
 	 *                                  null when the filters cannot be
@@ -421,22 +421,22 @@ final class RevenueRepository {
 			'to'   => isset( $filters['to'] ) ? (string) $filters['to'] : '',
 		);
 
-		$goal_ids = $this->resolve_goal_ids( $filters );
+		$mission_ids = $this->resolve_mission_ids( $filters );
 
-		// A goal/campaign/reward filter that resolves to no goals is a
+		// A mission/campaign/reward filter that resolves to no missions is a
 		// genuine empty window — return the zeroed summary rather than
 		// silently reporting store-wide data for the wrong filter.
-		$filter_active = ! empty( $filters['goal_id'] )
-			|| ! empty( $filters['goal_ids'] )
+		$filter_active = ! empty( $filters['mission_id'] )
+			|| ! empty( $filters['mission_ids'] )
 			|| ! empty( $filters['campaign_id'] )
 			|| ! empty( $filters['reward_type'] );
 
-		if ( $filter_active && empty( $goal_ids ) ) {
+		if ( $filter_active && empty( $mission_ids ) ) {
 			return $this->empty_purchase_summary();
 		}
 
-		if ( ! empty( $goal_ids ) ) {
-			$args['goal_ids'] = $goal_ids;
+		if ( ! empty( $mission_ids ) ) {
+			$args['mission_ids'] = $mission_ids;
 		}
 
 		return $this->cached(
@@ -450,25 +450,25 @@ final class RevenueRepository {
 	}
 
 	/**
-	 * Resolve the analytics-style filters onto the attribution goal
+	 * Resolve the analytics-style filters onto the attribution mission
 	 * dimension.
 	 *
-	 * Priority mirrors the documented semantics: an explicit goal_id wins,
-	 * then a goal_ids list, then the campaign/reward resolution onto the
-	 * goals table. Shared by purchase_summary() and goal_comparison() so
+	 * Priority mirrors the documented semantics: an explicit mission_id wins,
+	 * then a mission_ids list, then the campaign/reward resolution onto the
+	 * missions table. Shared by purchase_summary() and mission_comparison() so
 	 * both reads apply the exact same filter interpretation.
 	 *
-	 * @param array<string, mixed> $filters Optional goal_id, goal_ids,
+	 * @param array<string, mixed> $filters Optional mission_id, mission_ids,
 	 *                                      campaign_id, reward_type.
 	 * @return array<int, int>
 	 */
-	protected function resolve_goal_ids( array $filters ) {
-		if ( ! empty( $filters['goal_id'] ) ) {
-			return array( (int) $filters['goal_id'] );
+	protected function resolve_mission_ids( array $filters ) {
+		if ( ! empty( $filters['mission_id'] ) ) {
+			return array( (int) $filters['mission_id'] );
 		}
 
-		if ( ! empty( $filters['goal_ids'] ) && is_array( $filters['goal_ids'] ) ) {
-			return array_values( array_filter( array_map( 'absint', $filters['goal_ids'] ), function ( $id ) {
+		if ( ! empty( $filters['mission_ids'] ) && is_array( $filters['mission_ids'] ) ) {
+			return array_values( array_filter( array_map( 'absint', $filters['mission_ids'] ), function ( $id ) {
 				return $id > 0;
 			} ) );
 		}
@@ -485,22 +485,22 @@ final class RevenueRepository {
 	}
 
 	/**
-	 * Per-goal comparison rows for the Analytics page (Phase 6 — Goal
+	 * Per-mission comparison rows for the Analytics page (Phase 6 — Mission
 	 * Conversion & Purchase Analysis, Improvement.md §27).
 	 *
-	 * The same cached goal performance rows as `/revenue/goals`, sliced by
-	 * the analytics filter set: an explicit goal shows only itself, while
-	 * campaign / reward / goal_ids filters resolve onto the attribution
-	 * goal dimension exactly like the purchase summary. A product filter
+	 * The same cached mission performance rows as `/revenue/missions`, sliced by
+	 * the analytics filter set: an explicit mission shows only itself, while
+	 * campaign / reward / mission_ids filters resolve onto the attribution
+	 * mission dimension exactly like the purchase summary. A product filter
 	 * cannot be expressed in attribution → null (the UI explains it), never
 	 * a fabricated list.
 	 *
 	 * @param array<string, mixed> $filters Optional from/to, campaign_id,
-	 *                                      goal_id, goal_ids, product_id,
+	 *                                      mission_id, mission_ids, product_id,
 	 *                                      reward_type.
 	 * @return array<int, array<string, mixed>>|null
 	 */
-	public function goal_comparison( array $filters = array() ) {
+	public function mission_comparison( array $filters = array() ) {
 		if ( ! empty( $filters['product_id'] ) ) {
 			return null;
 		}
@@ -510,24 +510,24 @@ final class RevenueRepository {
 			'to'   => isset( $filters['to'] ) ? (string) $filters['to'] : '',
 		);
 
-		$goal_ids = $this->resolve_goal_ids( $filters );
+		$mission_ids = $this->resolve_mission_ids( $filters );
 
-		// A goal/campaign/reward filter that resolves to no goals is a
+		// A mission/campaign/reward filter that resolves to no missions is a
 		// genuine empty window — no rows, never the store-wide list.
-		$filter_active = ! empty( $filters['goal_id'] )
-			|| ! empty( $filters['goal_ids'] )
+		$filter_active = ! empty( $filters['mission_id'] )
+			|| ! empty( $filters['mission_ids'] )
 			|| ! empty( $filters['campaign_id'] )
 			|| ! empty( $filters['reward_type'] );
 
-		if ( $filter_active && empty( $goal_ids ) ) {
+		if ( $filter_active && empty( $mission_ids ) ) {
 			return array();
 		}
 
-		if ( ! empty( $goal_ids ) ) {
-			$args['goal_ids'] = $goal_ids;
+		if ( ! empty( $mission_ids ) ) {
+			$args['mission_ids'] = $mission_ids;
 		}
 
-		return $this->goal_performance( $args );
+		return $this->mission_performance( $args );
 	}
 
 	/**
@@ -542,9 +542,9 @@ final class RevenueRepository {
 	 */
 	protected function empty_purchase_summary() {
 		return array(
-			'goal_driven_revenue'    => 0.0,
-			'goal_assisted_revenue'  => 0.0,
-			'goal_influenced_revenue'=> 0.0,
+			'mission_driven_revenue'    => 0.0,
+			'mission_assisted_revenue'  => 0.0,
+			'mission_influenced_revenue'=> 0.0,
 			'orders'                 => 0,
 			'reward_cost'            => 0.0,
 			'reward_cost_available'  => true,
@@ -582,22 +582,22 @@ final class RevenueRepository {
 	}
 
 	/**
-	 * Smart goal recommendations, cached with the same generation-versioned
+	 * Smart mission recommendations, cached with the same generation-versioned
 	 * transient system as the other revenue reads.
 	 *
 	 * The recommendation engine is deterministic and pure (no writes), so
 	 * caching only skips recomputation; the existing invalidation — order
-	 * payment/status changes, goal CRUD, product saves, aggregation runs —
+	 * payment/status changes, mission CRUD, product saves, aggregation runs —
 	 * already covers every event that could change a recommendation.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, reward_type,
+	 * @param array<string, mixed> $args Optional: mission_id, reward_type,
 	 *                                   reward_value, reward_max_value,
 	 *                                   reward_meta, window_days, from, to.
 	 * @return array<string, mixed>
 	 */
-	public function goal_recommendations( array $args = array() ) {
+	public function mission_recommendations( array $args = array() ) {
 		return $this->cached(
-			'goal_recs',
+			'mission_recs',
 			$args,
 			(int) apply_filters( 'faracart_recommendation_cache_ttl', self::RECS_CACHE_TTL ),
 			function () use ( $args ) {
@@ -664,11 +664,11 @@ final class RevenueRepository {
 	 *
 	 * The UpsellRanker is deterministic and pure (no writes), so caching
 	 * only skips recomputation; the existing invalidation — order payment/
-	 * status changes (upsell funnel), goal CRUD (eligibility), product
+	 * status changes (upsell funnel), mission CRUD (eligibility), product
 	 * saves (prices/stock/margin), aggregation runs (upsell_stats) —
 	 * already covers every event that could change a ranking.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, cart_value,
+	 * @param array<string, mixed> $args Optional: mission_id, cart_value,
 	 *                                   remaining, cart, limit, exclude.
 	 * @return array<string, mixed>
 	 */
@@ -692,13 +692,13 @@ final class RevenueRepository {
 	 *
 	 * Unlike product_stats() (which reads the pre-aggregated upsell_stats
 	 * table), this read supports the admin analytics window (from/to) and
-	 * goal filtering by scanning the retention-bounded upsell_events log
+	 * mission filtering by scanning the retention-bounded upsell_events log
 	 * — grouped per product, bounded by the same pagination caps as the
 	 * other revenue reads. Each row is enriched with the product's margin
 	 * (when the store provides cost data) and its upsell score computed
 	 * through the same Phase 33.5 component math.
 	 *
-	 * @param array<string, mixed> $args Optional: from, to, goal_id, limit.
+	 * @param array<string, mixed> $args Optional: from, to, mission_id, limit.
 	 * @return array<int, array<string, mixed>>
 	 */
 	public function upsell_analytics( array $args = array() ) {
@@ -717,7 +717,7 @@ final class RevenueRepository {
 	 * cached.
 	 *
 	 * @param int                  $product_id Product id.
-	 * @param array<string, mixed> $args       Optional: goal_id, cart_value,
+	 * @param array<string, mixed> $args       Optional: mission_id, cart_value,
 	 *                                         remaining, cart.
 	 * @return array<string, mixed>|null Null when the product is not found
 	 *                                   or not rankable.
@@ -740,7 +740,7 @@ final class RevenueRepository {
 	/**
 	 * Build the top-products upsell analytics rows.
 	 *
-	 * @param array<string, mixed> $args Optional: from, to, goal_id, limit.
+	 * @param array<string, mixed> $args Optional: from, to, mission_id, limit.
 	 * @return array<int, array<string, mixed>>
 	 */
 	protected function build_upsell_analytics( array $args ) {
@@ -753,9 +753,9 @@ final class RevenueRepository {
 		$where  = '1=1';
 		$params = array();
 
-		if ( ! empty( $args['goal_id'] ) ) {
-			$where .= ' AND goal_id = %d';
-			$params[] = (int) $args['goal_id'];
+		if ( ! empty( $args['mission_id'] ) ) {
+			$where .= ' AND mission_id = %d';
+			$params[] = (int) $args['mission_id'];
 		}
 
 		if ( ! empty( $args['from'] ) ) {
@@ -894,8 +894,8 @@ final class RevenueRepository {
 	/**
 	 * The live single-day bucket for the trend's un-aggregated tail.
 	 *
-	 * Reuses the engine's daily_metrics() for a goal-scoped trend, or the
-	 * store-wide funnel + summary when no goal is requested, then normalizes
+	 * Reuses the engine's daily_metrics() for a mission-scoped trend, or the
+	 * store-wide funnel + summary when no mission is requested, then normalizes
 	 * to the trend row shape.
 	 *
 	 * @param array<string, mixed> $args  Original trend args.
@@ -905,8 +905,8 @@ final class RevenueRepository {
 	protected function live_day( array $args, $day ) {
 		$scoped = array_merge( $args, array( 'from' => $day, 'to' => $day ) );
 
-		if ( ! empty( $args['goal_id'] ) ) {
-			$m = $this->engine->daily_metrics( (int) $args['goal_id'], $scoped );
+		if ( ! empty( $args['mission_id'] ) ) {
+			$m = $this->engine->daily_metrics( (int) $args['mission_id'], $scoped );
 
 			return array(
 				'views'               => $m['views'],
@@ -928,8 +928,8 @@ final class RevenueRepository {
 			'progressions'        => $funnel['progressed'],
 			'completions'         => $funnel['completed'],
 			'conversions'         => $funnel['converted'],
-			'revenue'             => $summary['goal_influenced_revenue'],
-			'incremental_revenue' => $summary['goal_driven_revenue'],
+			'revenue'             => $summary['mission_influenced_revenue'],
+			'incremental_revenue' => $summary['mission_driven_revenue'],
 			'reward_cost'         => $summary['reward_cost'],
 			'estimated_profit'    => null !== $summary['profit_impact'] ? $summary['profit_impact'] : 0.0,
 		);

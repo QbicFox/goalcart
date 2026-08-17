@@ -38,25 +38,25 @@ import { templateById, useTemplates } from "../templates/useTemplates";
 import { bool } from "../templates/utils";
 import type {
 	ProgressCampaign,
-	ProgressGoal,
+	ProgressMission,
 	TemplateDefinition,
 	TemplateScope,
 	TemplateSettingsValue,
 } from "../types";
 
-const SCOPES: TemplateScope[] = ["goal", "campaign"];
+const SCOPES: TemplateScope[] = ["mission", "campaign"];
 
 /**
- * A sample goal for the live previews — the reference design's demo
+ * A sample mission for the live previews — the reference design's demo
  * values scaled to a preview-state fraction (0 = empty cart → 1 =
  * completed), plus two sample recommended products so every template
  * demonstrates its actual capabilities. Preview-only; never used as
  * production data.
  */
-function sampleGoalAt(
+function sampleMissionAt(
 	fraction: number,
-	overrides: Partial<ProgressGoal> = {},
-): ProgressGoal {
+	overrides: Partial<ProgressMission> = {},
+): ProgressMission {
 	const target = overrides.target ?? 2000000;
 	const percentage = Math.min(100, Math.round(fraction * 100));
 	const completed = fraction >= 1;
@@ -64,10 +64,10 @@ function sampleGoalAt(
 	const remaining = Math.max(0, target - current);
 
 	return {
-		goal_id: 1,
+		mission_id: 1,
 		campaign_id: 0,
-		goal_name: __("Free shipping", "faracart"),
-		goal_type: "amount",
+		mission_name: __("Free shipping", "faracart"),
+		mission_type: "amount",
 		is_money: true,
 		icon: "🎯",
 		template: "template-1",
@@ -83,8 +83,8 @@ function sampleGoalAt(
 				? "nearly_complete"
 				: "progressing",
 		message: completed
-			? __("You reached your goal!", "faracart")
-			: __("Only %s left to reach your goal", "faracart").replace(
+			? __("You reached your mission!", "faracart")
+			: __("Only %s left to reach your mission", "faracart").replace(
 					"%s",
 					remaining.toLocaleString(),
 				),
@@ -120,23 +120,23 @@ function sampleGoalAt(
 }
 
 /** Three sample milestones for the campaign previews, at a state fraction. */
-function sampleMilestonesAt(fraction: number): ProgressGoal[] {
+function sampleMilestonesAt(fraction: number): ProgressMission[] {
 	return [
-		sampleGoalAt(fraction, {
-			goal_id: 1,
-			goal_name: __("Free shipping", "faracart"),
+		sampleMissionAt(fraction, {
+			mission_id: 1,
+			mission_name: __("Free shipping", "faracart"),
 			target: 100,
 			reward: { type: "free_shipping", value: null, max_value: null, meta: {} },
 		}),
-		sampleGoalAt(fraction, {
-			goal_id: 2,
-			goal_name: __("Free gift", "faracart"),
+		sampleMissionAt(fraction, {
+			mission_id: 2,
+			mission_name: __("Free gift", "faracart"),
 			target: 200,
 			reward: { type: "free_gift", value: null, max_value: null, meta: {} },
 		}),
-		sampleGoalAt(fraction, {
-			goal_id: 3,
-			goal_name: __("10% off", "faracart"),
+		sampleMissionAt(fraction, {
+			mission_id: 3,
+			mission_name: __("10% off", "faracart"),
 			target: 300,
 			reward: {
 				type: "percent_discount",
@@ -152,7 +152,7 @@ function sampleMilestonesAt(fraction: number): ProgressGoal[] {
  * The live preview of one template with its current draft appearance —
  * rendered through PreviewWidget (the same component the Phase 15 preview
  * dialogs use), so what the merchant sees here matches the storefront.
- * Framed like the Goal/Campaign builder preview (PreviewPanel): a chip
+ * Framed like the Mission/Campaign builder preview (PreviewPanel): a chip
  * header (progress + template), the rendered widget on a gray stage, and
  * the Preview state control (empty cart → completed) below.
  */
@@ -179,7 +179,7 @@ function ScopeLivePreview({
 		return (
 			<Alert severity="info" variant="outlined">
 				{__(
-					"No campaign template selected — each milestone renders as its own goal card on the storefront.",
+					"No campaign template selected — each milestone renders as its own mission card on the storefront.",
 					"faracart",
 				)}
 			</Alert>
@@ -194,13 +194,13 @@ function ScopeLivePreview({
 
 	const settings = drafts[scope][id] ?? definition.settings;
 	const animation = bool(settings, "animation", true);
-	// The sample goals scale with the chosen preview state (empty → done).
+	// The sample missions scale with the chosen preview state (empty → done).
 	const fraction = PRESET_PERCENTS[preset];
 
 	// The sample milestones must carry the campaign's id so PreviewWidget's
-	// grouping (goal.campaign_id → campaign) actually joins them into the
+	// grouping (mission.campaign_id → campaign) actually joins them into the
 	// campaign and renders it through the selected campaign template —
-	// otherwise they fall through as standalone goal cards and the campaign
+	// otherwise they fall through as standalone mission cards and the campaign
 	// preview always shows the wrong (basic) rendering.
 	const campaign: ProgressCampaign = {
 		campaign_id: 999,
@@ -209,29 +209,29 @@ function ScopeLivePreview({
 		settings,
 	};
 
-	const goals =
-		scope === "goal"
-			? [sampleGoalAt(fraction)]
-			: sampleMilestonesAt(fraction).map((goal) => ({
-					...goal,
+	const missions =
+		scope === "mission"
+			? [sampleMissionAt(fraction)]
+			: sampleMilestonesAt(fraction).map((mission) => ({
+					...mission,
 					campaign_id: campaign.campaign_id,
 				}));
 
-	const completedCount = goals.filter((goal) => goal.completed).length;
-	const percent = Math.round(goals[0].percentage);
+	const completedCount = missions.filter((mission) => mission.completed).length;
+	const percent = Math.round(missions[0].percentage);
 	const stateLabel =
 		scope === "campaign"
 			? sprintf(
 					/* translators: %1$d: completed milestones, %2$d: total milestones. */
 					__("%1$d/%2$d milestones", "faracart"),
 					completedCount,
-					goals.length,
+					missions.length,
 				)
 			: sprintf(__("%d%% progress", "faracart"), percent);
 
 	return (
 		<Stack spacing={2}>
-			{/* The rendered preview — the same frame the Goal/Campaign
+			{/* The rendered preview — the same frame the Mission/Campaign
             builders use (chips + gray stage). */}
 			<Paper
 				variant="outlined"
@@ -250,9 +250,9 @@ function ScopeLivePreview({
 					<Chip size="small" variant="outlined" label={definition.label} />
 				</Box>
 
-				{scope === "goal" ? (
+				{scope === "mission" ? (
 					<PreviewWidget
-						goals={goals}
+						missions={missions}
 						currency={currency}
 						tokens={tokens}
 						templateOverride={id}
@@ -262,7 +262,7 @@ function ScopeLivePreview({
 					/>
 				) : (
 					<PreviewWidget
-						goals={goals}
+						missions={missions}
 						campaigns={[campaign]}
 						currency={currency}
 						tokens={tokens}
@@ -272,7 +272,7 @@ function ScopeLivePreview({
 				)}
 			</Paper>
 
-			{/* Preview state — the same control the Goal/Campaign builders
+			{/* Preview state — the same control the Mission/Campaign builders
             use, so the appearance preview shows any progress state. */}
 			<Paper variant="outlined" sx={{ p: 2.5 }}>
 				<PreviewControls value={{ preset }} onApplyPreset={onPresetChange} />
@@ -283,7 +283,7 @@ function ScopeLivePreview({
 
 /**
  * The single active template panel: the schema-driven appearance form (the
- * same SchemaForm the Goal and Campaign builders use) plus a "reset to
+ * same SchemaForm the Mission and Campaign builders use) plus a "reset to
  * template defaults" action that restores the factory schema defaults.
  * Only ever mounted for the template currently selected in the dropdown.
  */
@@ -348,12 +348,12 @@ function TemplateSettingsPanel({
 
 /**
  * Appearance (pluggable template engine): the storefront progress UI is
- * template-driven, independently for Goals and Campaigns.
+ * template-driven, independently for Missions and Campaigns.
  *
- *  - the layout mirrors the Goal/Campaign builders: a two-column grid
+ *  - the layout mirrors the Mission/Campaign builders: a two-column grid
  *    with the settings on the right (RTL) and a sticky live preview on
  *    the left (single column on small screens),
- *  - Tabs switch between the Goal and Campaign scopes (only one is visible
+ *  - Tabs switch between the Mission and Campaign scopes (only one is visible
  *    at a time),
  *  - a dropdown lists every registered template for the active scope,
  *    defaulting to that scope's current default template,
@@ -393,12 +393,12 @@ export default function Appearance() {
 	// is fixed and the content area scrolls internally.
 	const stickyTop = fullscreen ? 8 : 40;
 
-	// Active tab: 0 = Goal, 1 = Campaign.
+	// Active tab: 0 = Mission, 1 = Campaign.
 	const [tab, setTab] = useState(0);
 	const scope = SCOPES[tab];
 
 	// Preview-state preset for the live preview (the same control the
-	// Goal/Campaign builders use: empty cart → completed).
+	// Mission/Campaign builders use: empty cart → completed).
 	const [preset, setPreset] = useState<PreviewPreset>("50");
 
 	// Working copy: scope defaults + per-template default appearance.
@@ -406,13 +406,13 @@ export default function Appearance() {
 	// carries the effective defaults (stored appearance merged over the
 	// schema defaults and legacy tokens), so no draft is ever empty.
 	const [defaults, setDefaults] = useState<Record<TemplateScope, string>>({
-		goal: "template-1",
+		mission: "template-1",
 		campaign: "",
 	});
 	const [drafts, setDrafts] = useState<
 		Record<TemplateScope, Record<string, TemplateSettingsValue>>
 	>({
-		goal: {},
+		mission: {},
 		campaign: {},
 	});
 	const seeded = useRef(false);
@@ -424,12 +424,12 @@ export default function Appearance() {
 
 		seeded.current = true;
 		setDefaults({
-			goal: templates.defaults.goal || "template-1",
+			mission: templates.defaults.mission || "template-1",
 			campaign: templates.defaults.campaign || "",
 		});
 
 		const next: Record<TemplateScope, Record<string, TemplateSettingsValue>> = {
-			goal: {},
+			mission: {},
 			campaign: {},
 		};
 
@@ -483,7 +483,7 @@ export default function Appearance() {
 			TemplateScope,
 			Record<string, TemplateSettingsValue>
 		> = {
-			goal: { ...(stored?.goal ?? {}) },
+			mission: { ...(stored?.mission ?? {}) },
 			campaign: { ...(stored?.campaign ?? {}) },
 		};
 		let changed = false;
@@ -523,12 +523,12 @@ export default function Appearance() {
 		}
 
 		setDefaults({
-			goal: templates.defaults.goal || "template-1",
+			mission: templates.defaults.mission || "template-1",
 			campaign: templates.defaults.campaign || "",
 		});
 
 		const next: Record<TemplateScope, Record<string, TemplateSettingsValue>> = {
-			goal: {},
+			mission: {},
 			campaign: {},
 		};
 
@@ -649,7 +649,7 @@ export default function Appearance() {
 		<PageContainer
 			title={__("Appearance", "faracart")}
 			description={__(
-				"Pick the default progress template and tune its appearance — separately for Goals and Campaigns.",
+				"Pick the default progress template and tune its appearance — separately for Missions and Campaigns.",
 				"faracart",
 			)}
 		>
@@ -666,11 +666,11 @@ export default function Appearance() {
 							aria-label={__("Template scope", "faracart")}
 						>
 							<Tab
-								id="appearance-tab-goal"
-								aria-controls="appearance-panel-goal"
+								id="appearance-tab-mission"
+								aria-controls="appearance-panel-mission"
 								icon={<RocketLaunchIcon />}
 								iconPosition="start"
-								label={__("Goal", "faracart")}
+								label={__("Mission", "faracart")}
 							/>
 							<Tab
 								id="appearance-tab-campaign"
@@ -693,7 +693,7 @@ export default function Appearance() {
 									<Typography variant="h6" component="h3" gutterBottom>
 										{isCampaign
 											? __("Campaign template", "faracart")
-											: __("Goal template", "faracart")}
+											: __("Mission template", "faracart")}
 									</Typography>
 									<Typography variant="body2" color="text.secondary">
 										{isCampaign
@@ -702,7 +702,7 @@ export default function Appearance() {
 													"faracart",
 												)
 											: __(
-													"The default template for every goal that does not pin its own on the Goal Builder.",
+													"The default template for every mission that does not pin its own on the Mission Builder.",
 													"faracart",
 												)}
 									</Typography>
@@ -713,14 +713,14 @@ export default function Appearance() {
 									<InputLabel id="appearance-template-label">
 										{isCampaign
 											? __("Campaign template", "faracart")
-											: __("Goal template", "faracart")}
+											: __("Mission template", "faracart")}
 									</InputLabel>
 									<Select
 										labelId="appearance-template-label"
 										label={
 											isCampaign
 												? __("Campaign template", "faracart")
-												: __("Goal template", "faracart")
+												: __("Mission template", "faracart")
 										}
 										value={selectedId}
 										onChange={(event) =>

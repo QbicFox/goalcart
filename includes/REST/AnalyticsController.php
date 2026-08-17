@@ -22,8 +22,8 @@ defined( 'ABSPATH' ) || exit;
  * the admin dashboard page:
  *
  *  - `GET /faracart/v1/analytics` — summary KPIs, daily trend, and the
- *    top campaigns / top goals / top suggested products lists, all
- *    sliced by the same filter set (date range, campaign, goal, goal
+ *    top campaigns / top missions / top suggested products lists, all
+ *    sliced by the same filter set (date range, campaign, mission, mission
  *    ids, reward type, product).
  *
  * The response envelope is:
@@ -36,7 +36,7 @@ defined( 'ABSPATH' ) || exit;
  *    (impressions, completions, revenue) with zero-filled gaps
  *  - data.top_campaigns        — per-campaign impressions/completions/
  *    revenue/completion rate, ranked by completions
- *  - data.top_goals            — same shape, ranked per goal
+ *  - data.top_missions            — same shape, ranked per mission
  *  - data.top_suggested_products — per-product suggestion impressions/
  *    clicks/conversions plus CTR and add-to-cart rate
  *  - meta.applied              — the exact filters that produced the
@@ -115,15 +115,15 @@ class AnalyticsController extends BaseController {
 			'from'        => (string) $request->get_param( 'from' ),
 			'to'          => (string) $request->get_param( 'to' ),
 			'campaign_id' => (int) $request->get_param( 'campaign_id' ),
-			'goal_id'     => (int) $request->get_param( 'goal_id' ),
-			'goal_ids'    => $request->get_param( 'goal_ids' ),
+			'mission_id'     => (int) $request->get_param( 'mission_id' ),
+			'mission_ids'    => $request->get_param( 'mission_ids' ),
 			'product_id'  => (int) $request->get_param( 'product_id' ),
 			'reward_type' => (string) $request->get_param( 'reward' ),
 		);
 
 		// Defaults are applied here (not only by the REST server) so direct
 		// handler calls behave like dispatched requests (same pattern as
-		// GoalsController::handle_index).
+		// MissionsController::handle_index).
 		$limit = max( 1, min( 20, (int) $request->get_param( 'limit' ) ?: 5 ) );
 
 		$summary = array(
@@ -131,14 +131,14 @@ class AnalyticsController extends BaseController {
 			'completions'                 => $this->analytics->completions( $filters ),
 			'completion_rate'             => $this->analytics->completion_rate( $filters ),
 			'average_cart_value'          => $this->analytics->average_cart_value( $filters ),
-			'revenue_influenced'          => $this->analytics->revenue_associated_with_completed_goals( $filters ),
+			'revenue_influenced'          => $this->analytics->revenue_associated_with_completed_missions( $filters ),
 			'suggestion_ctr'              => $this->analytics->suggestion_ctr( $filters ),
 			'suggestion_add_to_cart_rate' => $this->analytics->suggestion_add_to_cart_rate( $filters ),
 		);
 
 		// Phase 2 (Backend/Data Layer — Improvement.md §37/§38): the same
 		// payload now also carries the purchase/profit metrics derived from
-		// the existing attribution layer (same date range + goal filters,
+		// the existing attribution layer (same date range + mission filters,
 		// cached through the revenue repository). Null when the active
 		// filter cannot be expressed in attribution (product_id) — never a
 		// fabricated number. Existing fields are untouched (API
@@ -150,20 +150,20 @@ class AnalyticsController extends BaseController {
 				'summary'              => $summary,
 				'trend'                => $this->analytics->trend( $filters ),
 				'top_campaigns'        => $this->analytics->top_campaigns( $filters, $limit ),
-				'top_goals'            => $this->analytics->top_goals( $filters, $limit ),
+				'top_missions'            => $this->analytics->top_missions( $filters, $limit ),
 				'top_suggested_products' => $this->analytics->top_suggested_products( $filters, $limit ),
-				// Phase 6 — per-goal purchase comparison rows (§27), same
-				// shape as /revenue/goals, sliced by the same filters; null
+				// Phase 6 — per-mission purchase comparison rows (§27), same
+				// shape as /revenue/missions, sliced by the same filters; null
 				// when the active filter cannot be expressed in attribution.
-				'goal_comparison'      => $this->revenue->goal_comparison( $filters ),
+				'mission_comparison'      => $this->revenue->mission_comparison( $filters ),
 			),
 			array(
 				'applied' => array(
 					'from'        => $filters['from'],
 					'to'          => $filters['to'],
 					'campaign_id' => $filters['campaign_id'],
-					'goal_id'     => $filters['goal_id'],
-					'goal_ids'    => $filters['goal_ids'],
+					'mission_id'     => $filters['mission_id'],
+					'mission_ids'    => $filters['mission_ids'],
 					'product_id'  => $filters['product_id'],
 					'reward'      => $filters['reward_type'],
 					'limit'       => $limit,
@@ -215,7 +215,7 @@ class AnalyticsController extends BaseController {
 			'progressed'         => (int) $purchase['funnel']['progressed'],
 			'purchased_orders'   => (int) $purchase['orders'],
 			'purchase_rate'      => $purchase['funnel']['conversion_rate'],
-			'attributed_sales'   => round( (float) $purchase['goal_driven_revenue'], 4 ),
+			'attributed_sales'   => round( (float) $purchase['mission_driven_revenue'], 4 ),
 			'estimated_profit'   => $purchase['profit_impact'],
 			'profit_available'   => (bool) $purchase['profit_available'],
 			'profit_reason'      => $purchase['profit_reason'],
@@ -230,8 +230,8 @@ class AnalyticsController extends BaseController {
 			// completion-vs-purchase comparison (§25) and the advanced
 			// attribution section (§30) from one self-consistent pipeline.
 			'funnel'             => $purchase['funnel'],
-			'assisted_sales'     => round( (float) $purchase['goal_assisted_revenue'], 4 ),
-			'influenced_sales'   => round( (float) $purchase['goal_influenced_revenue'], 4 ),
+			'assisted_sales'     => round( (float) $purchase['mission_assisted_revenue'], 4 ),
+			'influenced_sales'   => round( (float) $purchase['mission_influenced_revenue'], 4 ),
 		);
 	}
 
@@ -257,12 +257,12 @@ class AnalyticsController extends BaseController {
 				'default' => 0,
 				'minimum' => 0,
 			),
-			'goal_id'     => array(
+			'mission_id'     => array(
 				'type'    => 'integer',
 				'default' => 0,
 				'minimum' => 0,
 			),
-			'goal_ids'    => array(
+			'mission_ids'    => array(
 				'type'  => 'array',
 				'items' => array(
 					'type'    => 'integer',

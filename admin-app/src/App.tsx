@@ -6,7 +6,7 @@ import Skeleton from '@mui/material/Skeleton';
 import AdminLayout from './components/layout/AdminLayout';
 import { DateRangeProvider } from './date-range/DateRangeContext';
 import Dashboard from './routes/Dashboard';
-import Goals from './routes/Goals';
+import Missions from './routes/Missions';
 import NotFound from './routes/NotFound';
 
 // Secondary routes are lazy-loaded so their chunks are only fetched when
@@ -16,11 +16,11 @@ const Campaigns = lazy(() => import('./routes/Campaigns'));
 const Analytics = lazy(() => import('./routes/Analytics'));
 const Appearance = lazy(() => import('./routes/Appearance'));
 const Settings = lazy(() => import('./routes/Settings'));
-const GoalBuilder = lazy(() => import('./routes/GoalBuilder'));
+const MissionBuilder = lazy(() => import('./routes/MissionBuilder'));
 const CampaignBuilder = lazy(() => import('./routes/CampaignBuilder'));
 // Phase 33.6 (React Admin) — the Revenue Optimization section.
 const RevenueOverview = lazy(() => import('./routes/RevenueOverview'));
-const GoalPerformance = lazy(() => import('./routes/GoalPerformance'));
+const MissionPerformance = lazy(() => import('./routes/MissionPerformance'));
 const AttributionDashboard = lazy(() => import('./routes/AttributionDashboard'));
 const Recommendations = lazy(() => import('./routes/Recommendations'));
 const UpsellAnalytics = lazy(() => import('./routes/UpsellAnalytics'));
@@ -63,9 +63,9 @@ const router = createHashRouter([
     children: [
       { index: true, element: <Navigate to="/dashboard" replace /> },
       { path: '/dashboard', element: <Dashboard /> },
-      { path: '/goals', element: <Goals /> },
-      { path: '/goals/new', element: lazyRoute(<GoalBuilder />) },
-      { path: '/goals/:id/edit', element: lazyRoute(<GoalBuilder />) },
+      { path: '/missions', element: <Missions /> },
+      { path: '/missions/new', element: lazyRoute(<MissionBuilder />) },
+      { path: '/missions/:id/edit', element: lazyRoute(<MissionBuilder />) },
       { path: '/campaigns', element: lazyRoute(<Campaigns />) },
       { path: '/campaigns/new', element: lazyRoute(<CampaignBuilder />) },
       { path: '/campaigns/:id/edit', element: lazyRoute(<CampaignBuilder />) },
@@ -75,18 +75,18 @@ const router = createHashRouter([
       // useful functionality lives in Sales Performance (§25).
       { path: '/analytics', element: lazyRoute(<Analytics />) },
       { path: '/revenue', element: lazyRoute(<RevenueOverview />) },
-      { path: '/revenue/goals', element: lazyRoute(<GoalPerformance />) },
+      { path: '/revenue/missions', element: lazyRoute(<MissionPerformance />) },
       // Attribution stays reachable at /revenue/attribution for backward
       // compatibility but is not a primary navigation item (UICHANGES.md
       // §26 — advanced attribution lives in the page drawers).
       { path: '/revenue/attribution', element: lazyRoute(<AttributionDashboard />) },
       // Optimization is the canonical home of the two engines —
-      // Recommendations (choose better Goal targets) and Upsells (product
+      // Recommendations (choose better Mission targets) and Upsells (product
       // recommendations). The pre-refactor routes stay alive as redirects
       // so bookmarked URLs never break.
-      { path: '/optimization/goals', element: lazyRoute(<Recommendations />) },
+      { path: '/optimization/missions', element: lazyRoute(<Recommendations />) },
       { path: '/optimization/upsells', element: lazyRoute(<UpsellAnalytics />) },
-      { path: '/revenue/recommendations', element: <Navigate to="/optimization/goals" replace /> },
+      { path: '/revenue/recommendations', element: <Navigate to="/optimization/missions" replace /> },
       { path: '/revenue/upsells', element: <Navigate to="/optimization/upsells" replace /> },
       { path: '/appearance', element: lazyRoute(<Appearance />) },
       { path: '/settings', element: lazyRoute(<Settings />) },

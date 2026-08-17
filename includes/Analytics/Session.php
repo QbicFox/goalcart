@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * Anonymous, cookie-based visitor sessions (P16 — Analytics Foundation,
  * Privacy task). A session is a 32-char random hex ID stored in an
  * HttpOnly, SameSite=Lax cookie. The same ID is reused across page views
- * so every goal impression, completion and suggestion event from one
+ * so every mission impression, completion and suggestion event from one
  * visitor groups into a single session, and the cookie expiry slides
  * forward on each frontend request.
  *

@@ -5,40 +5,40 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
 
-import type { GoalTemplateProps } from '../registry';
+import type { MissionTemplateProps } from '../registry';
 import { bool, num, str } from '../utils';
 import {
   AmountSummary,
-  GoalBar,
-  GoalCta,
-  GoalIcon,
+  MissionBar,
+  MissionCta,
+  MissionIcon,
   PercentChip,
   addMoreLabel,
-  goalPercent,
-  isExpiredGoal,
-} from './goalShared';
+  missionPercent,
+  isExpiredMission,
+} from './missionShared';
 
 /**
  * Template 1 — Classic Progress Card (Concept 01).
  *
- * Icon badge + goal label/title + percentage chip, a horizontal progress
+ * Icon badge + mission label/title + percentage chip, a horizontal progress
  * bar, the current/remaining amounts and a CTA. Renders the completed
  * (green, check) and expired (muted, clock) states. The most
  * general-purpose template.
  */
-export default function Template1Renderer({ goal, currency, settings, animation }: GoalTemplateProps) {
-  const percent = goalPercent(goal);
+export default function Template1Renderer({ mission, currency, settings, animation }: MissionTemplateProps) {
+  const percent = missionPercent(mission);
   const accent = str(settings, 'accent', '#f97316');
   const text = str(settings, 'text', '#1f2937');
   const muted = str(settings, 'secondaryText', '#9ca3af');
   const compact = str(settings, 'density', 'comfortable') === 'compact';
 
-  if (isExpiredGoal(goal)) {
+  if (isExpiredMission(mission)) {
     return (
       <Box sx={{ opacity: 0.75 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <GoalIcon
-            goal={goal}
+          <MissionIcon
+            mission={mission}
             FallbackIcon={AccessTimeIcon}
             bg="#e5e7eb"
             color="#9ca3af"
@@ -49,7 +49,7 @@ export default function Template1Renderer({ goal, currency, settings, animation 
               {__('Expired', 'faracart')}
             </Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 700, color: muted }}>
-              {__('This goal has ended', 'faracart')}
+              {__('This mission has ended', 'faracart')}
             </Typography>
           </Box>
           <Box
@@ -71,7 +71,7 @@ export default function Template1Renderer({ goal, currency, settings, animation 
     );
   }
 
-  if (goal.completed) {
+  if (mission.completed) {
     return (
       <Box
         sx={{
@@ -82,8 +82,8 @@ export default function Template1Renderer({ goal, currency, settings, animation 
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-          <GoalIcon
-            goal={goal}
+          <MissionIcon
+            mission={mission}
             FallbackIcon={CheckCircleIcon}
             bg="#dcfce7"
             color="#16a34a"
@@ -91,14 +91,14 @@ export default function Template1Renderer({ goal, currency, settings, animation 
           />
           <Box>
             <Typography sx={{ fontSize: 12, fontWeight: 500, color: '#16a34a' }}>
-              {__('Goal completed', 'faracart')} 🎉
+              {__('Mission completed', 'faracart')} 🎉
             </Typography>
             <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#166534' }}>
-              {goal.goal_name}
+              {mission.mission_name}
             </Typography>
           </Box>
         </Box>
-        <GoalBar
+        <MissionBar
           percent={100}
           completed
           animation={animation}
@@ -116,8 +116,8 @@ export default function Template1Renderer({ goal, currency, settings, animation 
       <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 1, mb: 1.5 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25, minWidth: 0 }}>
           {bool(settings, 'showIcon', true) && (
-            <GoalIcon
-              goal={goal}
+            <MissionIcon
+              mission={mission}
               FallbackIcon={LocalShippingIcon}
               bg={str(settings, 'iconBg', '#ffedd5')}
               color={str(settings, 'iconColor', accent)}
@@ -126,12 +126,12 @@ export default function Template1Renderer({ goal, currency, settings, animation 
           )}
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontSize: 12, fontWeight: 500, color: muted }}>
-              {__('Shopping goal', 'faracart')}
+              {__('Shopping mission', 'faracart')}
             </Typography>
             <Typography
               sx={{ fontSize: 14, fontWeight: 700, color: text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
             >
-              {goal.goal_name}
+              {mission.mission_name}
             </Typography>
           </Box>
         </Box>
@@ -146,9 +146,9 @@ export default function Template1Renderer({ goal, currency, settings, animation 
       </Box>
 
       {/* Progress bar */}
-      <GoalBar
+      <MissionBar
         percent={percent}
-        completed={goal.completed}
+        completed={mission.completed}
         animation={animation}
         track="#f3f4f6"
         height={num(settings, 'barHeight', 10)}
@@ -158,20 +158,20 @@ export default function Template1Renderer({ goal, currency, settings, animation 
       {/* Amounts */}
       {bool(settings, 'showAmounts', true) && (
         <Box sx={{ mt: 1.25 }}>
-          <AmountSummary goal={goal} currency={currency} settings={settings} highlightColor={accent} />
+          <AmountSummary mission={mission} currency={currency} settings={settings} highlightColor={accent} />
         </Box>
       )}
 
       {/* CTA */}
       {bool(settings, 'showCta', true) && (
-        <GoalCta
-          goal={goal}
+        <MissionCta
+          mission={mission}
           currency={currency}
           settings={settings}
           variant={str(settings, 'buttonStyle', 'solid') === 'outline' ? 'outline' : 'solid'}
         >
-          {addMoreLabel(goal, currency)}
-        </GoalCta>
+          {addMoreLabel(mission, currency)}
+        </MissionCta>
       )}
     </Box>
   );

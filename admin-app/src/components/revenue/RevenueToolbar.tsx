@@ -5,41 +5,41 @@ import TextField from '@mui/material/TextField';
 import { __ } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
 
-import { fetchGoals } from '../../api/goals';
+import { fetchMissions } from '../../api/missions';
 import DateRangeFilter from '../date-range/DateRangeFilter';
 
 interface RevenueToolbarProps {
-  /** Currently selected goal id (0 = none / all goals). */
-  goalId: number;
-  onGoalChange: (goalId: number) => void;
-  /** Hide the goal selector (pages that do not support goal filtering). */
-  showGoal?: boolean;
+  /** Currently selected mission id (0 = none / all missions). */
+  missionId: number;
+  onMissionChange: (missionId: number) => void;
+  /** Hide the mission selector (pages that do not support mission filtering). */
+  showMission?: boolean;
   /**
-   * Required-goal mode (Recommendations): hide the "All goals" option and
-   * show a "Select a goal" placeholder — a goal must be chosen before the
+   * Required-mission mode (Recommendations): hide the "All missions" option and
+   * show a "Select a mission" placeholder — a mission must be chosen before the
    * page can do anything.
    */
-  goalRequired?: boolean;
-  /** Extra filter controls rendered after the goal selector. */
+  missionRequired?: boolean;
+  /** Extra filter controls rendered after the mission selector. */
   children?: ReactNode;
 }
 
 /**
  * Shared filter toolbar for the Phase 33.6 Revenue pages: the global
- * date-range filter (DateRangeContext) plus a goal selector and any
+ * date-range filter (DateRangeContext) plus a mission selector and any
  * page-specific extra controls. Keeps every revenue page's filter
  * behavior consistent with the existing Analytics page.
  */
 export default function RevenueToolbar({
-  goalId,
-  onGoalChange,
-  showGoal = true,
-  goalRequired = false,
+  missionId,
+  onMissionChange,
+  showMission = true,
+  missionRequired = false,
   children,
 }: RevenueToolbarProps) {
-  const goalsQuery = useQuery({
-    queryKey: ['goals', 'revenue-filter-options'],
-    queryFn: () => fetchGoals({ per_page: 100 }),
+  const missionsQuery = useQuery({
+    queryKey: ['missions', 'revenue-filter-options'],
+    queryFn: () => fetchMissions({ per_page: 100 }),
   });
 
   return (
@@ -51,25 +51,25 @@ export default function RevenueToolbar({
     >
       <DateRangeFilter />
 
-      {showGoal && (
+      {showMission && (
         <TextField
           select
-          label={__('Goal', 'faracart')}
+          label={__('Mission', 'faracart')}
           size="small"
           sx={{ minWidth: 190, flexGrow: { lg: 1 } }}
-          value={goalId}
-          onChange={(event) => onGoalChange(Number(event.target.value))}
+          value={missionId}
+          onChange={(event) => onMissionChange(Number(event.target.value))}
         >
-          {goalRequired ? (
+          {missionRequired ? (
             <MenuItem value={0} disabled>
-              {__('Select a goal', 'faracart')}
+              {__('Select a mission', 'faracart')}
             </MenuItem>
           ) : (
-            <MenuItem value={0}>{__('All goals', 'faracart')}</MenuItem>
+            <MenuItem value={0}>{__('All missions', 'faracart')}</MenuItem>
           )}
-          {(goalsQuery.data?.items ?? []).map((goal) => (
-            <MenuItem key={goal.id} value={goal.id}>
-              {goal.name}
+          {(missionsQuery.data?.items ?? []).map((mission) => (
+            <MenuItem key={mission.id} value={mission.id}>
+              {mission.name}
             </MenuItem>
           ))}
         </TextField>

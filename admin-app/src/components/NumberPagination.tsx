@@ -27,9 +27,9 @@ interface NumberPaginationProps {
  *
  * Renders the standard "Showing X–Y of Z" caption plus an explicit page
  * number control (1 2 3 …) — the MUI <TablePagination> default only shows
- * prev/next arrows, which hides the page count. Used across the goal,
+ * prev/next arrows, which hides the page count. Used across the mission,
  * campaign and analytics tables; client-side tables pass `page`/`count`
- * derived from their in-memory rows, server-side lists (Goals) pass the
+ * derived from their in-memory rows, server-side lists (Missions) pass the
  * envelope totals.
  */
 export default function NumberPagination({

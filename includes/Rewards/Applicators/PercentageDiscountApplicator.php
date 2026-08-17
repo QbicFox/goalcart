@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class PercentageDiscountApplicator
  *
- * Grants "X% off the cart" on goal completion. The percentage applies to
+ * Grants "X% off the cart" on mission completion. The percentage applies to
  * the eligible cart value (after existing discounts, excluding tax), is
  * capped by the optional max discount, and is applied as a negative cart
  * fee (see AbstractDiscountApplicator).

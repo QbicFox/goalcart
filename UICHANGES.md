@@ -2,9 +2,9 @@
 
 ## Objective
 
-Redesign and simplify the FaraCart admin Revenue, Analytics, Goal Performance, and Attribution experience.
+Redesign and simplify the FaraCart admin Revenue, Analytics, Mission Performance, and Attribution experience.
 
-The current FaraCart implementation already contains a strong revenue attribution, purchase analytics, AOV, profit, goal-performance, recommendation, and upsell analytics stack.
+The current FaraCart implementation already contains a strong revenue attribution, purchase analytics, AOV, profit, mission-performance, recommendation, and upsell analytics stack.
 
 The problem is NOT lack of functionality.
 
@@ -13,15 +13,15 @@ The problem is **information duplication and excessive analytical fragmentation 
 Currently, several pages expose overlapping metrics:
 
 * Revenue Overview
-* Goal Performance
+* Mission Performance
 * Attribution Dashboard
 * Analytics
 
 Metrics such as:
 
-* Goal Views
+* Mission Views
 * Progressed
-* Goal Completions
+* Mission Completions
 * Purchased Orders
 * Purchase Rate
 * Attributed Sales
@@ -38,7 +38,7 @@ are repeated across different pages with slightly different presentations.
 
 This makes the plugin technically powerful but cognitively expensive for store owners.
 
-The goal of this task is to transform the existing analytics experience into a **simple business-oriented Sales Performance system**.
+The mission of this task is to transform the existing analytics experience into a **simple business-oriented Sales Performance system**.
 
 The store owner should be able to understand the commercial performance of FaraCart within a few seconds.
 
@@ -76,8 +76,8 @@ Inspect:
 * DailyAggregator
 * AnalyticsRepository
 * AnalyticsController
-* GoalRepository
-* Goal performance services
+* MissionRepository
+* Mission performance services
 * Profit calculation services
 * Product cost readers
 * WooCommerce order attribution hooks
@@ -90,7 +90,7 @@ Inspect:
 * navigation configuration
 * DateRangeContext
 * RevenueOverview.tsx
-* GoalPerformance.tsx
+* MissionPerformance.tsx
 * AttributionDashboard.tsx
 * Analytics.tsx
 * Recommendations.tsx
@@ -149,11 +149,11 @@ Performance explanations.
 
 Examples:
 
-* Which goal performed best?
+* Which mission performed best?
 * Where do shoppers drop off?
-* Which goal generated the most purchases?
-* Which goal generated the most sales?
-* Which goal generated the most profit?
+* Which mission generated the most purchases?
+* Which mission generated the most sales?
+* Which mission generated the most profit?
 * Is completion strong but purchase conversion weak?
 
 These are secondary.
@@ -192,11 +192,11 @@ Simplify the primary navigation to:
 ```text
 Dashboard
 
-Goals
+Missions
 
 Sales Performance
   ├── Overview
-  └── Goals
+  └── Missions
 
 Optimization
   ├── Recommendations
@@ -251,9 +251,9 @@ Sales Performance → Overview
 
 Secondary:
 
-Goal Performance table
+Mission Performance table
 
-Goal Detail drawer
+Mission Detail drawer
 
 Do NOT create a separate Purchased Orders KPI on multiple unrelated pages unless context requires it.
 
@@ -267,9 +267,9 @@ Sales Performance → Overview
 
 Secondary:
 
-Goal Performance
+Mission Performance
 
-Goal Detail
+Mission Detail
 
 Advanced Profit details
 
@@ -283,7 +283,7 @@ Sales Performance → Overview
 
 Secondary:
 
-Goal Detail
+Mission Detail
 
 Do NOT recreate the same funnel independently on multiple pages.
 
@@ -297,7 +297,7 @@ Advanced section inside Sales Performance
 
 Secondary:
 
-Goal Detail → Advanced Attribution
+Mission Detail → Advanced Attribution
 
 Do NOT make Attribution Dashboard a primary page.
 
@@ -343,9 +343,9 @@ Use the existing attribution implementation.
 
 Do NOT display these three metrics as competing primary KPIs:
 
-* goal_driven_revenue
-* goal_assisted_revenue
-* goal_influenced_revenue
+* mission_driven_revenue
+* mission_assisted_revenue
+* mission_influenced_revenue
 
 Instead expose them through:
 
@@ -375,7 +375,7 @@ after FaraCart interaction
 
 The metric must represent real qualifying WooCommerce orders.
 
-Do NOT interpret goal completion as purchase.
+Do NOT interpret mission completion as purchase.
 
 Use the existing AttributionEngine semantics and revenue-producing order statuses.
 
@@ -400,14 +400,14 @@ Observed impact
 Supporting text:
 
 ```text
-Goal-exposed customers spent more per order on average.
+Mission-exposed customers spent more per order on average.
 ```
 
 When expanded, show:
 
 ```text
 Store average
-Goal-exposed average
+Mission-exposed average
 Absolute difference
 Percentage difference
 ```
@@ -633,7 +633,7 @@ Default visible metrics:
 
 Optional toggles:
 
-* Goal Completions
+* Mission Completions
 * Incremental Revenue
 
 Do NOT display 5–6 lines by default.
@@ -681,7 +681,7 @@ during this period.
 ```
 
 ```text
-Best performing goal
+Best performing mission
 
 Free Shipping generated the highest
 attributed sales.
@@ -739,21 +739,21 @@ Example:
 
 The funnel should visually communicate where the largest drop-off happens.
 
-Do not duplicate the exact same funnel elsewhere unless it is scoped to a specific Goal.
+Do not duplicate the exact same funnel elsewhere unless it is scoped to a specific Mission.
 
 ---
 
-# 19. GOAL PERFORMANCE
+# 19. MISSION PERFORMANCE
 
-The Goal Performance page must become a **commercial comparison page**, not another generic analytics dashboard.
+The Mission Performance page must become a **commercial comparison page**, not another generic analytics dashboard.
 
 Primary question:
 
-> "Which of my goals actually performs best?"
+> "Which of my missions actually performs best?"
 
 Use a table similar to:
 
-| Goal | Viewed | Completed | Purchased | Purchase Rate | Sales | Profit |
+| Mission | Viewed | Completed | Purchased | Purchase Rate | Sales | Profit |
 | ---- | -----: | --------: | --------: | ------------: | ----: | -----: |
 
 Use real backend data.
@@ -762,7 +762,7 @@ Do not invent values.
 
 ---
 
-# 20. GOAL TABLE METRIC PRIORITY
+# 20. MISSION TABLE METRIC PRIORITY
 
 Primary metrics:
 
@@ -780,13 +780,13 @@ Secondary:
 
 * column visibility
 * row expansion
-* Goal Detail
+* Mission Detail
 
 Do not make every funnel stage equally visually dominant.
 
 ---
 
-# 21. GOAL TABLE SORTING
+# 21. MISSION TABLE SORTING
 
 Support sorting by:
 
@@ -800,7 +800,7 @@ Default:
 
 > Sales
 
-This allows the store owner to immediately identify the highest-value Goal.
+This allows the store owner to immediately identify the highest-value Mission.
 
 ---
 
@@ -810,13 +810,13 @@ This distinction must be visible throughout the UI.
 
 Use:
 
-### Goal Completed
+### Mission Completed
 
 > Customer reached the target.
 
 ### Purchased
 
-> A qualifying WooCommerce order was associated with the goal.
+> A qualifying WooCommerce order was associated with the mission.
 
 Never use generic "conversion" terminology where it could confuse these concepts.
 
@@ -849,15 +849,15 @@ because no meaningful rate can be calculated.
 
 Tooltip:
 
-> Percentage of completed goals followed by an attributed purchase.
+> Percentage of completed missions followed by an attributed purchase.
 
 Do not redefine the existing backend semantics.
 
 ---
 
-# 24. GOAL DETAIL DRAWER
+# 24. MISSION DETAIL DRAWER
 
-Clicking a Goal row should open a Goal Detail drawer/dialog.
+Clicking a Mission row should open a Mission Detail drawer/dialog.
 
 Do NOT immediately navigate to another complex analytics page.
 
@@ -945,14 +945,14 @@ Current Analytics KPI data
 Current Analytics funnel
 → Sales Performance Overview
 
-Current Analytics goal comparison
-→ Sales Performance → Goals
+Current Analytics mission comparison
+→ Sales Performance → Missions
 
-Current Analytics detailed goal analysis
-→ Goal Detail Drawer
+Current Analytics detailed mission analysis
+→ Mission Detail Drawer
 
 Advanced analytics
-→ Goal Detail → Advanced Attribution
+→ Mission Detail → Advanced Attribution
 ```
 
 Do not simply delete existing functionality.
@@ -978,9 +978,9 @@ Advanced Attribution
 and:
 
 ```text
-Goal Performance
+Mission Performance
    ↓
-Goal Detail
+Mission Detail
       ↓
 Advanced Attribution
 ```
@@ -1045,14 +1045,14 @@ Estimated Profit
 Funnel
 → Sales Performance Overview
 
-Goal comparison
-→ Sales Performance → Goals
+Mission comparison
+→ Sales Performance → Missions
 
-Goal details
-→ Goal Detail Drawer
+Mission details
+→ Mission Detail Drawer
 
 Advanced Attribution
-→ Goal Detail / Sales Performance advanced section
+→ Mission Detail / Sales Performance advanced section
 
 Recommendations
 → Optimization → Recommendations
@@ -1073,9 +1073,9 @@ Use:
 
 | Internal                | User-facing                   |
 | ----------------------- | ----------------------------- |
-| goal_driven_revenue     | Sales Attributed to FaraCart |
-| goal_assisted_revenue   | Assisted Sales                |
-| goal_influenced_revenue | Influenced Sales              |
+| mission_driven_revenue     | Sales Attributed to FaraCart |
+| mission_assisted_revenue   | Assisted Sales                |
+| mission_influenced_revenue | Influenced Sales              |
 | incremental_revenue     | Additional Sales Value        |
 | converted               | Purchased Orders              |
 | conversion_rate         | Purchase Rate                 |
@@ -1135,14 +1135,14 @@ data for this period.
 ```text
 No purchases yet
 
-Customers interacted with your goals,
+Customers interacted with your missions,
 but no attributed purchases were recorded.
 ```
 
-### No completed goals
+### No completed missions
 
 ```text
-No completed goals yet
+No completed missions yet
 ```
 
 Do not show all three as a generic "No data".
@@ -1183,7 +1183,7 @@ Requirements:
 
 * KPI cards collapse gracefully
 * tables become horizontally scrollable
-* Goal Detail drawer works on mobile
+* Mission Detail drawer works on mobile
 * charts remain readable
 * advanced sections collapse
 * no horizontal page overflow
@@ -1303,7 +1303,7 @@ Recommended routes:
 
 ```text
 /revenue
-/revenue/goals
+/revenue/missions
 /revenue/recommendations
 /revenue/upsells
 ```
@@ -1351,12 +1351,12 @@ This preserves a clean conceptual distinction.
 
 ---
 
-# 41. DO NOT MERGE GOAL MANAGEMENT WITH GOAL ANALYTICS
+# 41. DO NOT MERGE MISSION MANAGEMENT WITH MISSION ANALYTICS
 
 The existing:
 
 ```text
-Goals
+Missions
 ```
 
 management area should remain focused on:
@@ -1371,7 +1371,7 @@ management area should remain focused on:
 
 Do not turn it into another analytics dashboard.
 
-The Sales Performance → Goals section is specifically for performance analysis.
+The Sales Performance → Missions section is specifically for performance analysis.
 
 ---
 
@@ -1400,11 +1400,11 @@ Checks funnel
         ↓
 Sees drop-off
         ↓
-Opens Goals
+Opens Missions
         ↓
-Identifies best/worst Goal
+Identifies best/worst Mission
         ↓
-Opens Goal Detail
+Opens Mission Detail
         ↓
 Understands:
 - completion
@@ -1473,7 +1473,7 @@ Do not modify code yet.
 Implement:
 
 * new Sales Performance navigation
-* Overview / Goals structure
+* Overview / Missions structure
 * hide Attribution from primary navigation
 * hide Analytics from primary navigation
 * preserve legacy routes
@@ -1494,17 +1494,17 @@ Implement:
 
 ---
 
-## Phase 4 — Goal Performance
+## Phase 4 — Mission Performance
 
 Implement:
 
-* commercial Goal table
+* commercial Mission table
 * sorting
 * purchase metrics
 * sales
 * profit
-* Goal Detail drawer
-* Goal funnel
+* Mission Detail drawer
+* Mission funnel
 * advanced attribution accordion
 
 ---
@@ -1514,8 +1514,8 @@ Implement:
 Move useful Analytics functionality into:
 
 * Sales Performance Overview
-* Sales Performance Goals
-* Goal Detail
+* Sales Performance Missions
+* Mission Detail
 
 Remove duplicated UI.
 
@@ -1528,7 +1528,7 @@ Do not remove underlying functionality.
 Move advanced Attribution UI into:
 
 * Sales Performance → Advanced Attribution
-* Goal Detail → Advanced Attribution
+* Mission Detail → Advanced Attribution
 
 Keep APIs and backend logic intact.
 
@@ -1600,15 +1600,15 @@ The redesign is complete only when:
 * [ ] Funnel exists
 * [ ] Deterministic business insights exist
 
-### Goals
+### Missions
 
-* [ ] Goal Performance focuses on commercial outcomes
+* [ ] Mission Performance focuses on commercial outcomes
 * [ ] Purchased Orders is visible
 * [ ] Purchase Rate is visible
 * [ ] Sales is visible
 * [ ] Profit is visible
 * [ ] Sorting is available
-* [ ] Goal Detail drawer exists
+* [ ] Mission Detail drawer exists
 
 ### Advanced Analytics
 
@@ -1630,7 +1630,7 @@ The redesign is complete only when:
 
 ### Data Integrity
 
-* [ ] Goal completion is not treated as purchase
+* [ ] Mission completion is not treated as purchase
 * [ ] Purchase Rate uses existing documented semantics
 * [ ] No attribution double counting
 * [ ] Existing revenue-producing order rules remain intact
@@ -1671,7 +1671,7 @@ Was the impact profitable?
 
 Then ask:
 
-> Can they identify the best Goal within 30 seconds?
+> Can they identify the best Mission within 30 seconds?
 
 Then:
 
@@ -1683,9 +1683,9 @@ Then:
 
 If the answer to all four is yes, the redesign is successful.
 
-The goal is not to show less data.
+The mission is not to show less data.
 
-The goal is to show **the right data at the right time and in the right context**.
+The mission is to show **the right data at the right time and in the right context**.
 
 Do not sacrifice analytical power.
 

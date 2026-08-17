@@ -26,9 +26,9 @@ defined( 'ABSPATH' ) || exit;
  *    keys are ignored, and the persisted values are returned so the UI can
  *    sync its state.
  *	 * The persisted option (Settings::OPTION_NAME) drives every consumer
-	 * (storefront widgets, goal calculation, tracking, the admin display
+	 * (storefront widgets, mission calculation, tracking, the admin display
 	 * mode), so saving here changes behavior immediately. Phase 18 adds the
-	 * full surface — general, frontend, goal calculation, performance,
+	 * full surface — general, frontend, mission calculation, performance,
 	 * advanced — to the schema and sanitizer, and the GET response carries
 	 * the developer-hooks reference in meta for the Advanced tab.
 	 *
@@ -132,7 +132,7 @@ class SettingsController extends BaseController {
 			// public faracart_* hooks, rendered by the Settings page.
 			'hooks' => HookManager::documented_hooks(),
 			// Phase 32 (customer-role conditions): the editable role list
-			// for the goal builder's role picker.
+			// for the mission builder's role picker.
 			'roles' => $this->role_options(),
 		);
 
@@ -169,17 +169,17 @@ class SettingsController extends BaseController {
 		// Template-engine bookkeeping: saving per-template settings records
 		// the current schema versions for future migrations.
 		//
-		// Note: the template_defaults.goal and frontend_template values are
+		// Note: the template_defaults.mission and frontend_template values are
 		// deliberately NOT synced here — they are independent settings with
 		// different validation scopes. frontend_template only accepts the
 		// six design template ids (template-1 … template-6) via the REST
-		// schema, while template_defaults.goal can hold any valid
+		// schema, while template_defaults.mission can hold any valid
 		// pluggable-template id (e.g. milestone_chain). Back-syncing them
 		// would either corrupt frontend_template with an out-of-enum value
 		// (causing a 400 error on the next Settings-page save) or silently
 		// overwrite the Appearance page's template selection. The
 		// TemplateEngine already handles the correct fallback chain:
-		// template_defaults.goal → frontend_template → template-1. Old
+		// template_defaults.mission → frontend_template → template-1. Old
 		// pre-design ids are never mapped.
 
 		if ( isset( $clean['template_settings'] ) ) {
@@ -245,7 +245,7 @@ class SettingsController extends BaseController {
 			// Display currency unit override ('' = follow the store currency).
 			'currency'              => array( 'type' => 'string' ),
 			'currency_display'      => array( 'type' => 'string', 'enum' => array( 'symbol', 'code', 'name' ) ),
-			'default_goal_behavior' => array( 'type' => 'string', 'enum' => array( 'all', 'first', 'closest' ) ),
+			'default_mission_behavior' => array( 'type' => 'string', 'enum' => array( 'all', 'first', 'closest' ) ),
 			'conflict_resolution'   => array( 'type' => 'string', 'enum' => array( 'cumulative', 'best', 'first' ) ),
 			'calculation_mode'      => array(
 				'type' => 'string',
@@ -255,7 +255,7 @@ class SettingsController extends BaseController {
 			// Frontend (P18-T02).
 			'frontend_template'     => array(
 				'type' => 'string',
-				'enum' => Settings::GOAL_TEMPLATES,
+				'enum' => Settings::MISSION_TEMPLATES,
 			),
 			'frontend_animation'    => $bool,
 			'frontend_locations'    => array(
@@ -279,7 +279,7 @@ class SettingsController extends BaseController {
 			'frontend_countdown'    => $bool,
 			'frontend_celebrate'    => $bool,
 
-			// Floating widget (the floating goals/campaigns button + drawer).
+			// Floating widget (the floating missions/campaigns button + drawer).
 			'floating_enabled'            => $bool,
 			'floating_desktop'            => $this->floating_position_schema(),
 			'floating_mobile'             => $this->floating_position_schema(),
@@ -291,7 +291,7 @@ class SettingsController extends BaseController {
 			'floating_icon'               => array( 'type' => 'string' ),
 			'floating_label'              => array( 'type' => 'string' ),
 
-			// Goal Calculation (P18-T03).
+			// Mission Calculation (P18-T03).
 			'calculation_include_tax'      => $bool,
 			'calculation_include_discount' => $bool,
 			'calculation_include_shipping' => $bool,
@@ -318,7 +318,7 @@ class SettingsController extends BaseController {
 				'type'                 => 'object',
 				'default'              => array(),
 				'properties'           => array(
-					'goal'     => array( 'type' => 'string' ),
+					'mission'     => array( 'type' => 'string' ),
 					'campaign' => array( 'type' => 'string' ),
 				),
 				'additionalProperties' => false,
@@ -388,7 +388,7 @@ class SettingsController extends BaseController {
 			return false;
 		}
 
-		foreach ( array( 'goal', 'campaign' ) as $scope ) {
+		foreach ( array( 'mission', 'campaign' ) as $scope ) {
 			if ( ! array_key_exists( $scope, $value ) ) {
 				continue;
 			}
@@ -415,7 +415,7 @@ class SettingsController extends BaseController {
 		}
 
 		foreach ( array_keys( $value ) as $scope ) {
-			if ( ! in_array( $scope, array( 'goal', 'campaign' ), true ) ) {
+			if ( ! in_array( $scope, array( 'mission', 'campaign' ), true ) ) {
 				return false;
 			}
 
@@ -443,7 +443,7 @@ class SettingsController extends BaseController {
 	 */
 	public function sanitize_template_settings( $value ) {
 		$clean = array(
-			'goal'     => array(),
+			'mission'     => array(),
 			'campaign' => array(),
 		);
 
@@ -451,7 +451,7 @@ class SettingsController extends BaseController {
 			return $clean;
 		}
 
-		foreach ( array( 'goal', 'campaign' ) as $scope ) {
+		foreach ( array( 'mission', 'campaign' ) as $scope ) {
 			if ( ! isset( $value[ $scope ] ) || ! is_array( $value[ $scope ] ) ) {
 				continue;
 			}
@@ -533,8 +533,8 @@ class SettingsController extends BaseController {
 			case 'currency_display':
 				return in_array( $value, array( 'symbol', 'code', 'name' ), true ) ? $value : $defaults['currency_display'];
 
-			case 'default_goal_behavior':
-				return in_array( $value, array( 'all', 'first', 'closest' ), true ) ? $value : $defaults['default_goal_behavior'];
+			case 'default_mission_behavior':
+				return in_array( $value, array( 'all', 'first', 'closest' ), true ) ? $value : $defaults['default_mission_behavior'];
 
 			case 'conflict_resolution':
 				return in_array( $value, array( 'cumulative', 'best', 'first' ), true ) ? $value : $defaults['conflict_resolution'];
@@ -572,7 +572,7 @@ class SettingsController extends BaseController {
 				return array_values( array_unique( $cleaned ) );
 
 			case 'frontend_template':
-				return in_array( $value, Settings::GOAL_TEMPLATES, true ) ? $value : $defaults['frontend_template'];
+				return in_array( $value, Settings::MISSION_TEMPLATES, true ) ? $value : $defaults['frontend_template'];
 
 			case 'frontend_bar_height':
 				return min( 48, max( 4, (int) $value ) );

@@ -1,6 +1,6 @@
 <?php
 /**
- * REST controller for the smart goal recommendations.
+ * REST controller for the smart mission recommendations.
  *
  * @package FaraCart
  */
@@ -9,7 +9,7 @@ namespace FaraCart\REST;
 
 use FaraCart\Analytics\RevenueRepository;
 use FaraCart\Analytics\RevenueTracker;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Rewards\Reward;
 
@@ -18,36 +18,36 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class RecommendationsController
  *
- * Phase 33.4 (Smart Goal Recommendation) — the endpoints behind the
- * admin-facing Goal Optimization surface:
+ * Phase 33.4 (Smart Mission Recommendation) — the endpoints behind the
+ * admin-facing Mission Optimization surface:
  *
- *  - `GET /faracart/v1/revenue/goal-recommendations` — the full
+ *  - `GET /faracart/v1/revenue/mission-recommendations` — the full
  *    recommendation payload: analyzed store data (AOV, median, order
- *    distribution, shipping, margin, current goal history), every ranked
+ *    distribution, shipping, margin, current mission history), every ranked
  *    candidate threshold with its score, confidence, expected impact and
  *    plain-English reasons, plus the top recommendation.
  *
- *  - `POST /faracart/v1/revenue/goal-recommendations/apply` — the only
+ *  - `POST /faracart/v1/revenue/mission-recommendations/apply` — the only
  *    write path (UPSELL_REFACTOR §10/§41): applies a chosen threshold to
- *    an existing goal with explicit confirmation from the admin UI,
- *    records the recommendation_applied feedback-loop event (goal changed
+ *    an existing mission with explicit confirmation from the admin UI,
+ *    records the recommendation_applied feedback-loop event (mission changed
  *    → performance can later be correlated), and invalidates the revenue
- *    caches. It never touches unrelated Goal settings.
+ *    caches. It never touches unrelated Mission settings.
  *
- * GET args: goal_id is REQUIRED (the admin Recommendations page always
- * analyzes exactly one selected goal — the goal's reward type and
- * historical performance feed the scoring, and a goal_id that no longer
+ * GET args: mission_id is REQUIRED (the admin Recommendations page always
+ * analyzes exactly one selected mission — the mission's reward type and
+ * historical performance feed the scoring, and a mission_id that no longer
  * resolves is rejected instead of silently recommending for a deleted
- * goal). Optional: reward_type (one of the Reward::types() whitelist),
+ * mission). Optional: reward_type (one of the Reward::types() whitelist),
  * reward_value / reward_max_value / reward_meta (reward config override
- * for advanced callers — the goal's own reward config is used when
+ * for advanced callers — the mission's own reward config is used when
  * omitted), window_days (7–180, default 90), from / to (explicit date
  * range).
  *
  * Admin-only (manage_options) and rate limited per user like every other
  * admin endpoint; the payload is served through the Phase 33.3 cached read
  * layer, so repeated admin renders never recompute the analysis. The
- * recommendation engine itself never modifies a goal — applying is an
+ * recommendation engine itself never modifies a mission — applying is an
  * explicit, permission-checked admin action through the apply endpoint.
  */
 class RecommendationsController extends BaseController {
@@ -60,11 +60,11 @@ class RecommendationsController extends BaseController {
 	protected $repository;
 
 	/**
-	 * Goal repository (the apply write path).
+	 * Mission repository (the apply write path).
 	 *
-	 * @var GoalRepository
+	 * @var MissionRepository
 	 */
-	protected $goals;
+	protected $missions;
 
 	/**
 	 * Revenue event tracker (feedback-loop event recording).
@@ -77,12 +77,12 @@ class RecommendationsController extends BaseController {
 	 * Constructor.
 	 *
 	 * @param RevenueRepository $repository Revenue repository.
-	 * @param GoalRepository    $goals      Goal repository.
+	 * @param MissionRepository    $missions      Mission repository.
 	 * @param RevenueTracker    $tracker    Revenue event tracker.
 	 */
-	public function __construct( RevenueRepository $repository, GoalRepository $goals, RevenueTracker $tracker ) {
+	public function __construct( RevenueRepository $repository, MissionRepository $missions, RevenueTracker $tracker ) {
 		$this->repository = $repository;
-		$this->goals      = $goals;
+		$this->missions      = $missions;
 		$this->tracker    = $tracker;
 	}
 
@@ -104,7 +104,7 @@ class RecommendationsController extends BaseController {
 	public function register_routes() {
 		register_rest_route(
 			self::NAMESPACE,
-			'/revenue/goal-recommendations',
+			'/revenue/mission-recommendations',
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'handle_get' ),
@@ -115,7 +115,7 @@ class RecommendationsController extends BaseController {
 
 		register_rest_route(
 			self::NAMESPACE,
-			'/revenue/goal-recommendations/apply',
+			'/revenue/mission-recommendations/apply',
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'handle_apply' ),
@@ -126,10 +126,10 @@ class RecommendationsController extends BaseController {
 	}
 
 	/**
-	 * Apply a recommended threshold to an existing goal.
+	 * Apply a recommended threshold to an existing mission.
 	 *
 	 * The admin UI always confirms first (current target vs new target);
-	 * this endpoint only ever changes the goal's target — no other Goal
+	 * this endpoint only ever changes the mission's target — no other Mission
 	 * settings are touched. Records the recommendation_applied event for
 	 * the feedback loop and invalidates the revenue caches so every
 	 * dashboard reflects the change immediately.
@@ -138,15 +138,15 @@ class RecommendationsController extends BaseController {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function handle_apply( $request ) {
-		$goal_id   = (int) $request->get_param( 'goal_id' );
+		$mission_id   = (int) $request->get_param( 'mission_id' );
 		$threshold = (float) $request->get_param( 'threshold' );
 
-		$goal = $this->goals->find( $goal_id );
+		$mission = $this->missions->find( $mission_id );
 
-		if ( null === $goal ) {
+		if ( null === $mission ) {
 			return $this->error(
-				'faracart_goal_not_found',
-				__( 'The goal could not be found.', 'faracart' ),
+				'faracart_mission_not_found',
+				__( 'The mission could not be found.', 'faracart' ),
 				404
 			);
 		}
@@ -159,14 +159,14 @@ class RecommendationsController extends BaseController {
 			);
 		}
 
-		$previous = (float) $goal->target();
+		$previous = (float) $mission->target();
 
 		// Feedback loop (UPSELL_REFACTOR §41): record the apply before the
 		// update so the event always captures the old target.
 		$this->tracker->record(
 			RevenueTracker::EVENT_RECOMMENDATION_APPLIED,
 			array(
-				'goal_id' => $goal_id,
+				'mission_id' => $mission_id,
 				'meta'    => array(
 					'threshold'        => $threshold,
 					'previous_target'  => $previous,
@@ -175,17 +175,17 @@ class RecommendationsController extends BaseController {
 			)
 		);
 
-		$this->goals->update( $goal_id, array( 'target' => $threshold ) );
+		$this->missions->update( $mission_id, array( 'target' => $threshold ) );
 
-		// The goal update fires faracart_goals_changed → revenue cache
+		// The mission update fires faracart_missions_changed → revenue cache
 		// invalidation; bump explicitly too in case that wiring is filtered
 		// away on a store.
 		$this->repository->invalidate();
 
 		return $this->success(
 			array(
-				'goal_id' => $goal_id,
-				'name'    => $goal->name(),
+				'mission_id' => $mission_id,
+				'name'    => $mission->name(),
 				'target'  => $threshold,
 				'previous_target' => $previous,
 			)
@@ -199,7 +199,7 @@ class RecommendationsController extends BaseController {
 	 */
 	public function apply_args() {
 		return array(
-			'goal_id'   => array(
+			'mission_id'   => array(
 				'required'          => true,
 				'type'              => 'integer',
 				'minimum'           => 1,
@@ -223,7 +223,7 @@ class RecommendationsController extends BaseController {
 	public function handle_get( $request ) {
 		$args = array(
 			// Required by the route schema; always ≥ 1 on this page.
-			'goal_id'          => (int) $request->get_param( 'goal_id' ),
+			'mission_id'          => (int) $request->get_param( 'mission_id' ),
 			'reward_type'      => (string) $request->get_param( 'reward_type' ),
 			'reward_value'     => $request->get_param( 'reward_value' ),
 			'reward_max_value' => $request->get_param( 'reward_max_value' ),
@@ -234,10 +234,10 @@ class RecommendationsController extends BaseController {
 		);
 
 		return $this->success(
-			$this->repository->goal_recommendations( $args ),
+			$this->repository->mission_recommendations( $args ),
 			array(
 				'applied' => array(
-					'goal_id'      => $args['goal_id'],
+					'mission_id'      => $args['mission_id'],
 					'reward_type'  => $args['reward_type'],
 					'window_days'  => $args['window_days'],
 					'from'         => $args['from'],
@@ -250,15 +250,15 @@ class RecommendationsController extends BaseController {
 	/**
 	 * Arg schema for the recommendation route.
 	 *
-	 * goal_id is required: recommendations are always computed for exactly
-	 * one selected goal (the admin page never requests an "all goals"
+	 * mission_id is required: recommendations are always computed for exactly
+	 * one selected mission (the admin page never requests an "all missions"
 	 * context).
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	public function recommendation_args() {
 		return array(
-			'goal_id'          => array(
+			'mission_id'          => array(
 				'required'          => true,
 				'type'              => 'integer',
 				'minimum'           => 1,

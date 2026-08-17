@@ -5,21 +5,21 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 
-import type { GoalTemplateProps } from '../registry';
+import type { MissionTemplateProps } from '../registry';
 import { bool, num, str } from '../utils';
-import { GoalBar, formatGoalAmount, goalPercent } from './goalShared';
+import { MissionBar, formatMissionAmount, missionPercent } from './missionShared';
 
 /**
  * Template 6 — Premium / Elegant E-commerce Style (Concept 09).
  *
  * Gold-accented elegant card: a slim header with a gold rail, a large
- * goal title + description, a thin gold progress bar with a marker dot,
+ * mission title + description, a thin gold progress bar with a marker dot,
  * the current/remaining amounts and a refined outline CTA, plus a
  * highlighted "almost completed" callout. Visually distinct — never a
  * generic MUI Card.
  */
-export default function Template6Renderer({ goal, currency, settings, animation }: GoalTemplateProps) {
-  const percent = goalPercent(goal);
+export default function Template6Renderer({ mission, currency, settings, animation }: MissionTemplateProps) {
+  const percent = missionPercent(mission);
   const gold = str(settings, 'accent', '#d4af37');
   const progressColor = str(settings, 'progressColor', gold);
   const bg = str(settings, 'bg', '#fafafa');
@@ -62,7 +62,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
               textTransform: 'uppercase',
             }}
           >
-            {__('Shopping goal', 'faracart')}
+            {__('Shopping mission', 'faracart')}
           </Typography>
         </Box>
         <LocalShippingIcon sx={{ fontSize: 16, color: border }} aria-hidden />
@@ -70,27 +70,27 @@ export default function Template6Renderer({ goal, currency, settings, animation 
 
       {/* Title + description */}
       <Typography sx={{ fontSize: 20, fontWeight: 900, color: text, mb: 0.25 }}>
-        {goal.goal_name}
+        {mission.mission_name}
       </Typography>
       <Typography sx={{ fontSize: 12, color: muted, mb: 1.5 }}>
         {sprintf(
           /* translators: %s: formatted target amount. */
           __('With a purchase of %s', 'faracart'),
-          formatGoalAmount(goal, goal.target, currency)
+          formatMissionAmount(mission, mission.target, currency)
         )}
       </Typography>
 
       {/* Elegant progress with a marker dot at the end */}
       <Box sx={{ position: 'relative', mb: 1.5 }}>
-        <GoalBar
-          percent={goal.completed ? 100 : percent}
-          completed={goal.completed}
+        <MissionBar
+          percent={mission.completed ? 100 : percent}
+          completed={mission.completed}
           animation={animation}
           track="#f3f4f6"
           height={barHeight}
-          color={goal.completed ? '#00a32a' : progressColor}
+          color={mission.completed ? '#00a32a' : progressColor}
         />
-        {!goal.completed && percent > 0 && percent < 100 && (
+        {!mission.completed && percent > 0 && percent < 100 && (
           <Box
             sx={{
               position: 'absolute',
@@ -116,7 +116,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
               {__('Paid', 'faracart')}
             </Typography>
             <Typography sx={{ fontSize: 13, fontWeight: 700, color: text }}>
-              {formatGoalAmount(goal, goal.current, currency)}
+              {formatMissionAmount(mission, mission.current, currency)}
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'end' }}>
@@ -124,7 +124,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
               {__('Remaining', 'faracart')}
             </Typography>
             <Typography sx={{ fontSize: 13, fontWeight: 700, color: outlineColor }}>
-              {formatGoalAmount(goal, goal.remaining, currency)}
+              {formatMissionAmount(mission, mission.remaining, currency)}
             </Typography>
           </Box>
         </Box>
@@ -134,7 +134,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
       {bool(settings, 'showCta', true) && (
         <Button
           component="a"
-          href={(goal.suggestions ?? [])[0]?.permalink}
+          href={(mission.suggestions ?? [])[0]?.permalink}
           target="_blank"
           rel="noreferrer"
           fullWidth
@@ -157,7 +157,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
       )}
 
       {/* Almost-completed callout */}
-      {goal.state === 'nearly_complete' && !goal.completed && (
+      {mission.state === 'nearly_complete' && !mission.completed && (
         <Box
           sx={{
             mt: 1.5,
@@ -177,7 +177,7 @@ export default function Template6Renderer({ goal, currency, settings, animation 
               {sprintf(
                 /* translators: %s: formatted remaining amount. */
                 __('Almost there! Only %s left', 'faracart'),
-                formatGoalAmount(goal, goal.remaining, currency)
+                formatMissionAmount(mission, mission.remaining, currency)
               )}
             </Typography>
             <Typography sx={{ fontSize: 10, color: '#92400e' }}>

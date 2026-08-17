@@ -6,15 +6,15 @@
  * exercises the storefront upsell surface end to end:
  *
  *  - route registration for the public `GET /faracart/v1/upsell/rank`
- *  - the rank arg schema (goal_id / limit / cart bounds)
+ *  - the rank arg schema (mission_id / limit / cart bounds)
  *  - public access: an anonymous GET dispatches with 200 (no capability)
  *  - the payload shape (available + context + per-product score
  *    breakdowns, reasons, catalog fields)
- *  - goal gap calculation against the LIVE cart: a money goal target
+ *  - mission gap calculation against the LIVE cart: a money mission target
  *    minus the evaluated cart value — the storefront sends only
- *    goal_id + limit, the server derives the gap (never trusted from
+ *    mission_id + limit, the server derives the gap (never trusted from
  *    the client)
- *  - graceful degradation: closed gap / no goal / disabled filter all
+ *  - graceful degradation: closed gap / no mission / disabled filter all
  *    return an unavailable payload with a reason — never a fabricated
  *    list
  *  - the storefront config (`ProgressUI::frontend_config()`) carries
@@ -24,7 +24,7 @@
  *    reporter and the mobile/theme-safe styles
  *
  * Read-only like the other suites: the only writes (fixture products, a
- * goal row, the live cart, cache invalidation) happen inside a single
+ * mission row, the live cart, cache invalidation) happen inside a single
  * database transaction that is rolled back, the live cart is emptied,
  * and the absence of any residue is asserted afterwards.
  *
@@ -110,7 +110,7 @@ $controller = $container->get( UpsellController::class );
 $ranker     = $container->get( UpsellRanker::class );
 $repo       = $container->get( RevenueRepository::class );
 $settings   = $container->get( \FaraCart\Settings\Settings::class );
-$goals      = $container->get( \FaraCart\Goals\GoalRepository::class );
+$missions      = $container->get( \FaraCart\Missions\MissionRepository::class );
 $ui         = $container->get( ProgressUI::class );
 
 $server = rest_get_server();
@@ -133,8 +133,8 @@ echo "\n== 2. Input validation ==\n";
 
 $rank_args = $controller->rank_args();
 
-check( 'rank goal_id rejects negatives', is_wp_error( rest_validate_value_from_schema( -1, $rank_args['goal_id'], 'goal_id' ) ) );
-check( 'rank goal_id accepts zero', true === rest_validate_value_from_schema( 0, $rank_args['goal_id'], 'goal_id' ) );
+check( 'rank mission_id rejects negatives', is_wp_error( rest_validate_value_from_schema( -1, $rank_args['mission_id'], 'mission_id' ) ) );
+check( 'rank mission_id accepts zero', true === rest_validate_value_from_schema( 0, $rank_args['mission_id'], 'mission_id' ) );
 check( 'rank limit rejects zero', is_wp_error( rest_validate_value_from_schema( 0, $rank_args['limit'], 'limit' ) ) );
 check( 'rank limit rejects > 10', is_wp_error( rest_validate_value_from_schema( 11, $rank_args['limit'], 'limit' ) ) );
 check( 'rank limit accepts 3', true === rest_validate_value_from_schema( 3, $rank_args['limit'], 'limit' ) );
@@ -150,7 +150,7 @@ echo "\n== 3. Public access ==\n";
 $req  = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
 $resp = $server->dispatch( $req );
 
-// No goal and no remaining → the ranker degrades gracefully, but the
+// No mission and no remaining → the ranker degrades gracefully, but the
 // route itself must be publicly reachable (200, not 401/403).
 check( 'anonymous rank dispatch is allowed (200)', 200 === $resp->get_status() );
 check( 'rank payload wraps in data', isset( $resp->get_data()['data'] ) );
@@ -160,22 +160,22 @@ check( 'rank payload exposes availability', array_key_exists( 'available', $data
 check( 'rank payload exposes status', array_key_exists( 'status', $data ) );
 check( 'rank payload exposes a context echo', isset( $data['context'] ) );
 check( 'rank payload exposes the score weights', is_array( $data['weights'] ?? null ) );
-check( 'no explicit goal falls back to the featured active goal', isset( $data['context']['goal_id'] ) && (int) $data['context']['goal_id'] > 0 );
+check( 'no explicit mission falls back to the featured active mission', isset( $data['context']['mission_id'] ) && (int) $data['context']['mission_id'] > 0 );
 
-// A nonexistent goal id can never produce a fabricated list.
+// A nonexistent mission id can never produce a fabricated list.
 $ghost_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
-$ghost_req->set_param( 'goal_id', 99999999 );
+$ghost_req->set_param( 'mission_id', 99999999 );
 $ghost_data = $server->dispatch( $ghost_req )->get_data()['data'];
-check( 'unknown goal → unavailable with a reason', empty( $ghost_data['available'] ) && '' !== (string) $ghost_data['reason'] && 0 === count( $ghost_data['recommendations'] ) );
+check( 'unknown mission → unavailable with a reason', empty( $ghost_data['available'] ) && '' !== (string) $ghost_data['reason'] && 0 === count( $ghost_data['recommendations'] ) );
 
 // ---------------------------------------------------------------------------
 // 4. Transactional fixtures: live-cart gap + ranking + degradation
 // ---------------------------------------------------------------------------
 echo "\n== 4. Live-cart fixtures (rolled back) ==\n";
 
-$goals_table     = Schema::table( 'goals' );
+$missions_table     = Schema::table( 'missions' );
 $upsell_events_t = Schema::table( 'upsell_events' );
-$goals_before    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
+$missions_before    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}" );
 $events_before   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_events_t}" );
 
 // Cache-generation baseline BEFORE the transaction: product saves fire
@@ -185,16 +185,16 @@ $version_start = (int) get_option( RevenueRepository::CACHE_VERSION_OPTION, 1 );
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	$goal_id = $goals->create(
+	$mission_id = $missions->create(
 		array(
-			'name'             => 'P33.7 Frontend Upsell Goal',
+			'name'             => 'P33.7 Frontend Upsell Mission',
 			'type'             => 'amount',
 			'target'           => 2000000,
 			'status'           => 'active',
 			'calculation_mode' => 'subtotal',
 		)
 	);
-	check( 'fixture goal created', $goal_id > 0 );
+	check( 'fixture mission created', $mission_id > 0 );
 
 	$make_product = function ( $title, $price, $stock = null ) {
 		$post_id = wp_insert_post(
@@ -233,7 +233,7 @@ try {
 	check( 'fixture products created', 4 === count( $product_ids ) );
 
 	// Live cart: the in-cart product (300,000) is the only item, so the
-	// money goal's current = 300,000 and the remaining gap = 1,700,000.
+	// money mission's current = 300,000 and the remaining gap = 1,700,000.
 	$cart = function_exists( 'WC' ) && WC() ? WC()->cart : null;
 	check( 'live cart available', $cart instanceof \WC_Cart );
 
@@ -242,9 +242,9 @@ try {
 		check( 'live cart holds the fixture product', false !== $added && 1 === $cart->get_cart_contents_count() );
 	}
 
-	// --- Live-cart gap: the storefront sends ONLY goal_id + limit. ---
+	// --- Live-cart gap: the storefront sends ONLY mission_id + limit. ---
 	$live_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
-	$live_req->set_param( 'goal_id', (int) $goal_id );
+	$live_req->set_param( 'mission_id', (int) $mission_id );
 	$live_req->set_param( 'limit', 5 );
 	$live_resp = $controller->handle_rank( $live_req );
 	$live      = $live_resp->get_data()['data'];
@@ -285,7 +285,7 @@ try {
 	check( 'fixture product margin is readable server-side', null !== $margin );
 
 	$public_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
-	$public_req->set_param( 'goal_id', (int) $goal_id );
+	$public_req->set_param( 'mission_id', (int) $mission_id );
 	$public_req->set_param( 'cart_value', 1550000 );
 	$public = $controller->handle_rank( $public_req )->get_data()['data'];
 	$public_top = isset( $public['recommendations'][0] ) ? $public['recommendations'][0] : null;
@@ -304,7 +304,7 @@ try {
 
 	// --- Explicit context override (embedded consumers / tests). ---
 	$override_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
-	$override_req->set_param( 'goal_id', (int) $goal_id );
+	$override_req->set_param( 'mission_id', (int) $mission_id );
 	$override_req->set_param( 'cart_value', 1550000 );
 	$override_req->set_param( 'cart', array( $in_cart_product->get_id() ) );
 	$override = $controller->handle_rank( $override_req )->get_data()['data'];
@@ -314,7 +314,7 @@ try {
 
 	// --- Closed gap → unavailable, never a fabricated list. ---
 	$closed_req = new \WP_REST_Request( 'GET', '/faracart/v1/upsell/rank' );
-	$closed_req->set_param( 'goal_id', (int) $goal_id );
+	$closed_req->set_param( 'mission_id', (int) $mission_id );
 	$closed_req->set_param( 'cart_value', 2000000 );
 	$closed = $controller->handle_rank( $closed_req )->get_data()['data'];
 
@@ -357,7 +357,7 @@ wp_cache_flush();
 // ---------------------------------------------------------------------------
 echo "\n== 5. Rollback verification ==\n";
 
-check( 'goals row count unchanged after rollback', $goals_before === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" ) );
+check( 'missions row count unchanged after rollback', $missions_before === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}" ) );
 check( 'cache generation returns to the pre-test baseline', $version_start === (int) get_option( RevenueRepository::CACHE_VERSION_OPTION, 1 ) );
 
 $leftover_products = get_posts(
@@ -412,13 +412,13 @@ $frontend_css = (string) file_get_contents( FARACART_PATH . 'assets/css/frontend
 
 check( 'frontend JS defines the upsell panel component', false !== strpos( $frontend_js, 'function upsellPanel' ) );
 check( 'frontend JS reports upsell events to the upsell track endpoint', false !== strpos( $frontend_js, 'function sendUpsellTrack' ) && false !== strpos( $frontend_js, 'upsells.trackEndpoint' ) );
-check( 'frontend JS reports upsell_impression once per goal+product', false !== strpos( $frontend_js, 'reportedUpsellImpressions' ) && false !== strpos( $frontend_js, "'upsell_impression'" ) );
+check( 'frontend JS reports upsell_impression once per mission+product', false !== strpos( $frontend_js, 'reportedUpsellImpressions' ) && false !== strpos( $frontend_js, "'upsell_impression'" ) );
 check( 'frontend JS reports upsell_clicked on add', false !== strpos( $frontend_js, "'upsell_clicked'" ) );
 check( 'frontend JS reports upsell_added after a successful add', false !== strpos( $frontend_js, "'upsell_added'" ) );
-check( 'frontend JS hides the panel for completed/closed goals', false !== strpos( $frontend_js, 'goal.completed' ) && false !== strpos( $frontend_js, 'remaining' ) );
+check( 'frontend JS hides the panel for completed/closed missions', false !== strpos( $frontend_js, 'mission.completed' ) && false !== strpos( $frontend_js, 'remaining' ) );
 check( 'frontend JS degrades to the redirect add-to-cart without AJAX', false !== strpos( $frontend_js, 'add-to-cart=' ) );
 check( 'frontend JS refreshes through the cart-changed bridge after adding', false !== strpos( $frontend_js, 'emitCartChanged' ) );
-check( 'frontend JS reuses the last ranking per goal:gap', false !== strpos( $frontend_js, 'upsellRankCache' ) );
+check( 'frontend JS reuses the last ranking per mission:gap', false !== strpos( $frontend_js, 'upsellRankCache' ) );
 check( 'frontend JS binds the upsell panel in init', false !== strpos( $frontend_js, 'bindUpsellPanel' ) );
 
 check( 'frontend CSS styles the upsell panel', false !== strpos( $frontend_css, '.faracart-upsells' ) );

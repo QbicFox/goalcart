@@ -23,7 +23,7 @@ const PRESETS: Array<{ value: PreviewPreset; label: string }> = [
 /**
  * Preview Settings: the remaining preview-level control. The simulated
  * amount/quantity, reward state, device width and template override were
- * removed — the preview renders the goal/campaign's own configuration
+ * removed — the preview renders the mission/campaign's own configuration
  * (selected template or the global default) at the column width, and
  * only the progress state (empty cart → completed) is previewable here.
  * Each preset derives its simulated amount/quantity from the current

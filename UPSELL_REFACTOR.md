@@ -1,11 +1,11 @@
-# FaraCart — Goal Optimization & Smart Upsell Architecture Refactor
+# FaraCart — Mission Optimization & Smart Upsell Architecture Refactor
 
 ## Mission
 
 Refactor the FaraCart recommendation and upsell architecture so that the product has a clear and non-overlapping distinction between:
 
-1. **Goal Optimization** — an admin-side system that recommends better Goal configurations and thresholds.
-2. **Smart Upsells** — a customer-facing system that recommends products to help customers reach the currently active Goal.
+1. **Mission Optimization** — an admin-side system that recommends better Mission configurations and thresholds.
+2. **Smart Upsells** — a customer-facing system that recommends products to help customers reach the currently active Mission.
 
 The current implementation contains recommendation and upsell functionality, but the product terminology and information architecture can make these concepts appear similar.
 
@@ -14,17 +14,17 @@ The objective is NOT to remove functionality.
 The objective is to create a clear product model:
 
 ```text
-Goal Optimization
+Mission Optimization
         ↓
-Better Goal Configuration
+Better Mission Configuration
         ↓
-Active Goal
+Active Mission
         ↓
 Smart Upsells
         ↓
 Higher Cart Value
         ↓
-Goal Completion
+Mission Completion
         ↓
 Purchase
         ↓
@@ -48,7 +48,7 @@ Before changing any code, completely inspect:
 - `api.md`
 - `frontend.md`
 - `database.md`
-- `goal-engine.md`
+- `mission-engine.md`
 - `rewards.md`
 - `REFERENCE_ARCHITECTURE.md`
 - `CHANGELOG.md`
@@ -58,15 +58,15 @@ Also inspect the actual implementation.
 
 Specifically locate and understand:
 
-- `GoalRecommendationEngine`
+- `MissionRecommendationEngine`
 - `UpsellRanker`
 - recommendation services
 - recommendation API endpoints
 - upsell API endpoints
-- goal engine
-- goal configuration
-- goal threshold calculation
-- goal performance analytics
+- mission engine
+- mission configuration
+- mission threshold calculation
+- mission performance analytics
 - upsell analytics
 - historical learning
 - attribution
@@ -91,7 +91,7 @@ The actual codebase is the source of truth for implementation details.
 
 The final product must treat these as two different systems.
 
-## Goal Optimization
+## Mission Optimization
 
 Audience:
 
@@ -99,7 +99,7 @@ Audience:
 
 Question:
 
-> "What Goal configuration should I use?"
+> "What Mission configuration should I use?"
 
 Examples:
 
@@ -108,12 +108,12 @@ Examples:
 - Is my free-shipping target reachable?
 - Should I change the reward?
 - What target could increase basket value?
-- Which Goal configuration has the best economics?
+- Which Mission configuration has the best economics?
 
 Output:
 
 ```text
-Recommended Goal Target
+Recommended Mission Target
 
 1,600,000 تومان
 
@@ -138,7 +138,7 @@ Audience:
 
 Question:
 
-> "What should I buy to reach the current Goal?"
+> "What should I buy to reach the current Mission?"
 
 Example:
 
@@ -146,7 +146,7 @@ Example:
 Current cart:
 1,350,000 تومان
 
-Goal:
+Mission:
 1,600,000 تومان
 
 Remaining:
@@ -166,7 +166,7 @@ Product C
 
 Output:
 
-> Product recommendations designed to help complete the active Goal while maximizing commercial value.
+> Product recommendations designed to help complete the active Mission while maximizing commercial value.
 
 ---
 
@@ -175,7 +175,7 @@ Output:
 Do NOT merge:
 
 ```text
-GoalRecommendationEngine
+MissionRecommendationEngine
 ```
 
 and:
@@ -191,11 +191,11 @@ Keep them as separate domain services.
 The relationship should be:
 
 ```text
-GoalRecommendationEngine
+MissionRecommendationEngine
         ↓
-Goal Configuration
+Mission Configuration
         ↓
-Active Goal
+Active Mission
         ↓
 UpsellRanker
         ↓
@@ -209,7 +209,7 @@ Product Recommendations
 The current product may contain terminology such as:
 
 - Smart Recommendations
-- Goal Recommendations
+- Mission Recommendations
 - Upsells
 
 This creates ambiguity.
@@ -218,15 +218,15 @@ The final product terminology should be:
 
 ## Admin
 
-> **Goal Optimization**
+> **Mission Optimization**
 
 Description:
 
-> Improve your Goals using store performance data.
+> Improve your Missions using store performance data.
 
 Inside this section:
 
-> Smart Goal Recommendations
+> Smart Mission Recommendations
 
 ## Storefront
 
@@ -234,37 +234,37 @@ Inside this section:
 
 Description:
 
-> Products recommended to help customers reach their current Goal.
+> Products recommended to help customers reach their current Mission.
 
 ---
 
-# 5. SMART RECOMMENDATIONS → GOAL OPTIMIZATION
+# 5. SMART RECOMMENDATIONS → MISSION OPTIMIZATION
 
-Do not expose "Smart Recommendations" as a generic top-level product area if it refers to Goal threshold/configuration recommendations.
+Do not expose "Smart Recommendations" as a generic top-level product area if it refers to Mission threshold/configuration recommendations.
 
 Rename the admin-facing concept to:
 
-> **Goal Optimization**
+> **Mission Optimization**
 
 If an internal code class currently uses:
 
 ```text
-GoalRecommendationEngine
+MissionRecommendationEngine
 ```
 
 DO NOT rename it merely for cosmetic reasons unless there is a strong architectural reason.
 
-Backend naming can remain `GoalRecommendationEngine` while the UI uses `Goal Optimization`.
+Backend naming can remain `MissionRecommendationEngine` while the UI uses `Mission Optimization`.
 
 ---
 
-# 6. GOAL OPTIMIZATION RESPONSIBILITIES
+# 6. MISSION OPTIMIZATION RESPONSIBILITIES
 
-Goal Optimization should answer:
+Mission Optimization should answer:
 
-1. Is the current Goal reasonable?
-2. Is the Goal too difficult?
-3. Is the Goal too easy?
+1. Is the current Mission reasonable?
+2. Is the Mission too difficult?
+3. Is the Mission too easy?
 4. Is the reward economically reasonable?
 5. What target should be tested?
 
@@ -284,7 +284,7 @@ Do not invent new scoring logic if equivalent logic already exists.
 
 ---
 
-# 7. PRESERVE THE EXISTING GOAL RECOMMENDATION ENGINE
+# 7. PRESERVE THE EXISTING MISSION RECOMMENDATION ENGINE
 
 The existing recommendation engine already evaluates factors such as:
 
@@ -307,16 +307,16 @@ The objective is:
 
 ---
 
-# 8. GOAL OPTIMIZATION UI
+# 8. MISSION OPTIMIZATION UI
 
 Create a clear admin experience.
 
 Recommended layout:
 
 ```text
-Goal Optimization
+Mission Optimization
 
-Improve your Goals using real store data.
+Improve your Missions using real store data.
 
 ────────────────────────────────
 
@@ -347,7 +347,7 @@ High
 
 When the administrator clicks "View Details", show:
 
-### Current Goal
+### Current Mission
 
 - current threshold
 - current reward
@@ -356,7 +356,7 @@ When the administrator clicks "View Details", show:
 - current attributed sales
 - current estimated profit where available
 
-### Recommended Goal
+### Recommended Mission
 
 - recommended threshold
 - expected reachability
@@ -386,29 +386,29 @@ Before applying, show the current and new target and require confirmation.
 
 Use existing permission/security rules.
 
-Do not modify unrelated Goal settings.
+Do not modify unrelated Mission settings.
 
 ---
 
-# 11. GOAL OPTIMIZATION SHOULD NOT RECOMMEND PRODUCTS
+# 11. MISSION OPTIMIZATION SHOULD NOT RECOMMEND PRODUCTS
 
 This is critical.
 
-Goal Optimization should NOT say:
+Mission Optimization should NOT say:
 
 > Buy this product.
 
 It may say:
 
-> Set your Goal to 1.6M.
+> Set your Mission to 1.6M.
 
 Product recommendations belong to Upsells.
 
 Therefore:
 
 ```text
-Goal Optimization
-    → Goal / Threshold / Reward Strategy
+Mission Optimization
+    → Mission / Threshold / Reward Strategy
 
 Smart Upsell
     → Product Recommendation
@@ -422,7 +422,7 @@ Smart Upsell is customer-facing.
 
 Its purpose is:
 
-> Help customers reach the active Goal by recommending suitable products.
+> Help customers reach the active Mission by recommending suitable products.
 
 It should consider:
 
@@ -434,7 +434,7 @@ It should consider:
 - inventory
 - margin
 - historical conversion
-- goal completion probability
+- mission completion probability
 
 Preserve the existing `UpsellRanker`.
 
@@ -474,11 +474,11 @@ Do not show generic unrelated product recommendations.
 
 ---
 
-# 15. SMART UPSELL MUST UNDERSTAND THE GOAL
+# 15. SMART UPSELL MUST UNDERSTAND THE MISSION
 
 Every Upsell recommendation should be aware of:
 
-- Goal
+- Mission
 - Current Cart
 - Remaining Gap
 - Reward
@@ -531,7 +531,7 @@ The Product Cost is used by:
 
 - Estimated Profit
 - Upsell margin scoring
-- Goal economics
+- Mission economics
 - Recommendation economics
 
 ---
@@ -674,9 +674,9 @@ Do not implement complex partial calculations unless the backend can guarantee c
 
 ---
 
-# 26. GOAL OPTIMIZATION + PROFIT
+# 26. MISSION OPTIMIZATION + PROFIT
 
-Goal Optimization should use profitability where data is available.
+Mission Optimization should use profitability where data is available.
 
 Only display expected profit impact if the underlying data supports it.
 
@@ -692,11 +692,11 @@ Upsell ranking should consider margin where available.
 
 This creates an important distinction:
 
-### Goal Optimization
+### Mission Optimization
 
 Optimizes:
 
-> Goal configuration
+> Mission configuration
 
 ### Upsell
 
@@ -719,15 +719,15 @@ These three should form one coherent system.
 Implement and document the following conceptual loop:
 
 ```text
-Goal Optimization
+Mission Optimization
         ↓
-Active Goal
+Active Mission
         ↓
 Smart Upsell
         ↓
 Cart Increase
         ↓
-Goal Completion
+Mission Completion
         ↓
 Purchase
         ↓
@@ -735,7 +735,7 @@ Revenue & Analytics
         ↓
 New Insights
         ↓
-Goal Optimization
+Mission Optimization
 ```
 
 This feedback loop is a core product concept.
@@ -746,7 +746,7 @@ This feedback loop is a core product concept.
 
 Analytics should allow the store owner to understand:
 
-### Goal performance
+### Mission performance
 
 - views
 - progressed
@@ -768,20 +768,20 @@ Analytics should allow the store owner to understand:
 
 This allows the store owner to answer:
 
-> Did Upsell actually help customers complete the Goal?
+> Did Upsell actually help customers complete the Mission?
 
 ---
 
-# 30. ADD UPSELL-ASSISTED GOAL COMPLETION
+# 30. ADD UPSELL-ASSISTED MISSION COMPLETION
 
 Where existing event/attribution data allows it, add:
 
-> Upsell-assisted Goal Completions
+> Upsell-assisted Mission Completions
 
 Example:
 
 ```text
-Goal Completions
+Mission Completions
 920
 
 Upsell-assisted
@@ -808,7 +808,7 @@ Clicks
         ↓
 Add to Cart
         ↓
-Goal Completion
+Mission Completion
         ↓
 Purchase
 ```
@@ -827,7 +827,7 @@ Primary metrics:
 
 - Products shown
 - Added to cart
-- Goal completions assisted
+- Mission completions assisted
 - Purchased orders
 - Sales
 - Estimated profit
@@ -842,9 +842,9 @@ Secondary metrics:
 
 ---
 
-# 33. GOAL PERFORMANCE UI
+# 33. MISSION PERFORMANCE UI
 
-Each Goal should show:
+Each Mission should show:
 
 ```text
 Free Shipping
@@ -863,17 +863,17 @@ Use actual backend data only.
 
 ---
 
-# 34. GOAL DETAIL
+# 34. MISSION DETAIL
 
-Goal detail should contain:
+Mission detail should contain:
 
-## Goal Configuration
+## Mission Configuration
 
 - reward
 - threshold
 - current status
 
-## Goal Optimization
+## Mission Optimization
 
 - current target
 - recommended target
@@ -920,7 +920,7 @@ Use progressive disclosure.
 Primary view:
 
 ```text
-Goal
+Mission
 Performance
 Sales
 Profit
@@ -954,13 +954,13 @@ Preferred admin navigation:
 FaraCart
 
 ├── Dashboard
-├── Goals
+├── Missions
 ├── Sales Performance
 │   ├── Overview
-│   ├── Goal Performance
+│   ├── Mission Performance
 │   └── Analytics
 └── Optimization
-    ├── Goal Optimization
+    ├── Mission Optimization
     └── Upsell Performance
 ```
 
@@ -975,7 +975,7 @@ For example:
 may redirect to:
 
 ```text
-/optimization/goals
+/optimization/missions
 ```
 
 Do not break bookmarked URLs unnecessarily.
@@ -989,15 +989,15 @@ Backend/internal terminology may remain unchanged where needed.
 For example:
 
 ```text
-GoalRecommendationEngine
+MissionRecommendationEngine
 UpsellRanker
-goal_recommendations
+mission_recommendations
 upsell_analytics
 ```
 
 Do not perform a large backend rename only to change UI terminology.
 
-The goal is product clarity, not unnecessary refactoring.
+The mission is product clarity, not unnecessary refactoring.
 
 ---
 
@@ -1007,14 +1007,14 @@ Use:
 
 | Old / Technical | New User-Facing |
 |---|---|
-| Smart Recommendations | Goal Optimization |
-| Goal Recommendations | Smart Goal Recommendations |
-| Recommendation Engine | Goal Optimization Engine |
-| Recommended Threshold | Recommended Goal Target |
+| Smart Recommendations | Mission Optimization |
+| Mission Recommendations | Smart Mission Recommendations |
+| Recommendation Engine | Mission Optimization Engine |
+| Recommended Threshold | Recommended Mission Target |
 | Upsell Analytics | Upsell Performance |
 | Conversion | Purchase Rate where appropriate |
 | Converted | Purchased |
-| Goal Completion | Goal Completed |
+| Mission Completion | Mission Completed |
 | Influenced Revenue | Influenced Sales |
 | Estimated Profit | Estimated Profit |
 
@@ -1022,17 +1022,17 @@ Use existing translations where appropriate.
 
 ---
 
-# 39. GOAL OPTIMIZATION VS UPSELL TOOLTIP
+# 39. MISSION OPTIMIZATION VS UPSELL TOOLTIP
 
 Add a clear explanation in the admin UI.
 
-For Goal Optimization:
+For Mission Optimization:
 
-> Goal Optimization helps you choose better Goal targets and reward configurations.
+> Mission Optimization helps you choose better Mission targets and reward configurations.
 
 For Upsell Performance:
 
-> Upsell Performance shows which products help customers reach Goals and generate additional sales.
+> Upsell Performance shows which products help customers reach Missions and generate additional sales.
 
 This should eliminate conceptual confusion.
 
@@ -1045,11 +1045,11 @@ On first use, optionally show:
 ```text
 How FaraCart works
 
-1. Goal Optimization
-   Find better Goal settings.
+1. Mission Optimization
+   Find better Mission settings.
 
 2. Smart Upsells
-   Help customers reach those Goals.
+   Help customers reach those Missions.
 
 3. Analytics
    Measure purchases, sales and profit.
@@ -1070,9 +1070,9 @@ Recommendation viewed
         ↓
 Recommendation applied
         ↓
-Goal changed
+Mission changed
         ↓
-Goal performance
+Mission performance
 ```
 
 This allows future analysis of which recommendations actually improve performance.
@@ -1092,7 +1092,7 @@ Clicked
         ↓
 Added
         ↓
-Goal completed
+Mission completed
         ↓
 Purchased
 ```
@@ -1108,7 +1108,7 @@ Do not duplicate events.
 Prepare the architecture for:
 
 ```text
-Goal Configuration
+Mission Configuration
         ↓
 Customer Behavior
         ↓
@@ -1154,7 +1154,7 @@ Reuse:
 
 Do not create duplicate APIs if existing endpoints can be extended.
 
-Goal Optimization API should expose, where already supported:
+Mission Optimization API should expose, where already supported:
 
 ```text
 current_target
@@ -1169,7 +1169,7 @@ reachability
 Upsell API should expose:
 
 ```text
-goal_id
+mission_id
 cart_value
 remaining_gap
 products
@@ -1182,7 +1182,7 @@ Upsell Analytics should expose:
 impressions
 clicks
 adds
-goal_completions
+mission_completions
 purchases
 sales
 profit
@@ -1247,7 +1247,7 @@ The storefront only sees:
 
 ---
 
-# 49. TESTING — GOAL OPTIMIZATION
+# 49. TESTING — MISSION OPTIMIZATION
 
 Add/update tests for:
 
@@ -1280,7 +1280,7 @@ Test:
 - out-of-stock products
 - variation products
 - duplicate recommendations
-- goal-specific recommendations
+- mission-specific recommendations
 
 ---
 
@@ -1289,13 +1289,13 @@ Test:
 Test:
 
 ```text
-Goal
+Mission
 ↓
 Upsell shown
 ↓
 Product added
 ↓
-Goal completed
+Mission completed
 ↓
 Purchase
 ```
@@ -1360,7 +1360,7 @@ Do not unnecessarily rename tables.
 
 # 54. BACKWARD COMPATIBILITY
 
-Existing Goals must continue to work.
+Existing Missions must continue to work.
 
 Existing Upsells must continue to work.
 
@@ -1370,7 +1370,7 @@ Existing analytics must continue to work.
 
 Existing API consumers should not break.
 
-Existing caches should be invalidated correctly when Goal configuration changes.
+Existing caches should be invalidated correctly when Mission configuration changes.
 
 ---
 
@@ -1383,24 +1383,24 @@ FaraCart
 
 Dashboard
 
-Goals
+Missions
 
 Sales Performance
 
 Optimization
-   ├── Goal Optimization
+   ├── Mission Optimization
    └── Upsell Performance
 ```
 
 A store owner should understand immediately:
 
-### Goal Optimization
+### Mission Optimization
 
-> "Help me choose better Goals."
+> "Help me choose better Missions."
 
 ### Smart Upsells
 
-> "Help my customers reach those Goals."
+> "Help my customers reach those Missions."
 
 ### Sales Performance
 
@@ -1413,13 +1413,13 @@ A store owner should understand immediately:
 The complete FaraCart story should be:
 
 ```text
-1. Goal Optimization
+1. Mission Optimization
 
 "Set a better target."
 
         ↓
 
-2. Goal
+2. Mission
 
 "Give customers something worth reaching."
 
@@ -1431,7 +1431,7 @@ The complete FaraCart story should be:
 
         ↓
 
-4. Goal Completion
+4. Mission Completion
 
 "They reached the target."
 
@@ -1455,9 +1455,9 @@ The complete FaraCart story should be:
 
         ↓
 
-8. Goal Optimization
+8. Mission Optimization
 
-"Now improve the Goal again."
+"Now improve the Mission again."
 ```
 
 This loop should become the central product philosophy of FaraCart.
@@ -1468,12 +1468,12 @@ This loop should become the central product philosophy of FaraCart.
 
 Do NOT:
 
-- merge GoalRecommendationEngine and UpsellRanker
+- merge MissionRecommendationEngine and UpsellRanker
 - remove Upsells
-- remove Goal Recommendations
+- remove Mission Recommendations
 - create two separate product recommendation systems
-- show product recommendations inside Goal Optimization
-- show Goal threshold recommendations inside the storefront
+- show product recommendations inside Mission Optimization
+- show Mission threshold recommendations inside the storefront
 - expose technical scoring to customers
 - expose profit/cost to customers
 - invent product margins
@@ -1484,7 +1484,7 @@ Do NOT:
 - remove existing analytics
 - break existing routes
 - claim that observed AOV differences are causal
-- call Goal Completion a Purchase
+- call Mission Completion a Purchase
 - call Completion Rate Purchase Rate
 
 ---
@@ -1495,24 +1495,24 @@ The implementation is complete when:
 
 ## Product Architecture
 
-- [ ] Goal Optimization and Smart Upsells have clearly different responsibilities.
-- [ ] GoalRecommendationEngine remains separate from UpsellRanker.
-- [ ] Smart Recommendations and Goal Recommendations are unified conceptually.
-- [ ] Goal Optimization is the admin-facing terminology.
+- [ ] Mission Optimization and Smart Upsells have clearly different responsibilities.
+- [ ] MissionRecommendationEngine remains separate from UpsellRanker.
+- [ ] Smart Recommendations and Mission Recommendations are unified conceptually.
+- [ ] Mission Optimization is the admin-facing terminology.
 - [ ] Smart Upsells remain customer-facing.
 
-## Goal Optimization
+## Mission Optimization
 
-- [ ] Store owner can see recommended Goal targets.
+- [ ] Store owner can see recommended Mission targets.
 - [ ] Recommendation reasons are understandable.
 - [ ] Confidence is visible.
 - [ ] Existing recommendation intelligence is preserved.
 - [ ] Recommendation can be applied where supported.
-- [ ] Product recommendations are NOT shown as part of Goal Optimization.
+- [ ] Product recommendations are NOT shown as part of Mission Optimization.
 
 ## Smart Upsells
 
-- [ ] Upsells are contextual to the active Goal.
+- [ ] Upsells are contextual to the active Mission.
 - [ ] Remaining gap is considered.
 - [ ] Existing ranking factors remain functional.
 - [ ] Margin can influence ranking when cost data exists.
@@ -1536,8 +1536,8 @@ The implementation is complete when:
 
 ## Analytics
 
-- [ ] Goal views are available.
-- [ ] Goal completions are available.
+- [ ] Mission views are available.
+- [ ] Mission completions are available.
 - [ ] Purchased orders are available.
 - [ ] Purchase rate is available.
 - [ ] Upsell-assisted completions are available where reliable data exists.
@@ -1547,7 +1547,7 @@ The implementation is complete when:
 
 ## UX
 
-- [ ] Admin can understand Goal Optimization without technical knowledge.
+- [ ] Admin can understand Mission Optimization without technical knowledge.
 - [ ] Admin can understand Upsell Performance without technical knowledge.
 - [ ] Storefront customers only see relevant product recommendations.
 - [ ] Technical analytics remains available through progressive disclosure.
@@ -1559,7 +1559,7 @@ The implementation is complete when:
 
 The most important architectural rule is:
 
-> **Goal Optimization decides what the Goal should be. Smart Upsell decides what the customer should buy to reach that Goal. Analytics decides whether the strategy actually worked.**
+> **Mission Optimization decides what the Mission should be. Smart Upsell decides what the customer should buy to reach that Mission. Analytics decides whether the strategy actually worked.**
 
 Do not blur these responsibilities.
 
@@ -1573,10 +1573,10 @@ It should feel like one intelligent optimization system:
         ┌────────┴────────┐
         │                 │
         ▼                 ▼
-Goal Optimization    Smart Upsell
+Mission Optimization    Smart Upsell
         │                 │
         ▼                 ▼
- Better Goal          Better Product
+ Better Mission          Better Product
         │                 │
         └────────┬────────┘
                  ▼

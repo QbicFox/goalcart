@@ -17,10 +17,10 @@ defined( 'ABSPATH' ) || exit;
  * The first Campaign-scoped template: the multi-milestone chain from the
  * Phase 10 example — the campaign's milestones render as one connected
  * ladder (dots + labels + rewards) with a progress bar underneath,
- * instead of each goal rendering its own standalone card.
+ * instead of each mission rendering its own standalone card.
  *
  * Campaign templates live in their own scope on purpose: a milestone
- * chain needs the *whole campaign's* milestones, which a single Goal
+ * chain needs the *whole campaign's* milestones, which a single Mission
  * template can never provide, so the two registries stay independent.
  */
 class MilestoneChainTemplate extends AbstractTemplate {

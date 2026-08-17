@@ -9,21 +9,21 @@
  *      lazy-loaded admin routes (App.tsx), cached server state (React
  *      Query staleTime), debounced product/category searches
  *      (EntityAutocomplete), vendor chunk splitting (vite manualChunks),
- *      server-paginated goal list UI, and render hygiene (useMemo on the
+ *      server-paginated mission list UI, and render hygiene (useMemo on the
  *      analytics trend series)
  *  - P23-T02 WooCommerce Frontend:
- *      request-level caching (GoalRepository query-count stable across
- *      repeated active_goals() calls; CartIntegration memoizes the
+ *      request-level caching (MissionRepository query-count stable across
+ *      repeated active_missions() calls; CartIntegration memoizes the
  *      context), the progress transient cache (a repeat poll is served
  *      from the transient), and change-detection in the storefront JS
  *      (payload fingerprints skip unchanged widget re-renders)
  *  - P23-T03 Admin:
  *      server-side pagination (page/per_page + envelope), server-side
- *      search and status filtering on the goal list, per_page caps on
+ *      search and status filtering on the mission list, per_page caps on
  *      the list and search endpoints (never load thousands of products
  *      at once)
  *
- * Read-only like the other suites: the only writes (created goals,
+ * Read-only like the other suites: the only writes (created missions,
  * created products, the progress-cache transient) happen inside a single
  * database transaction that is rolled back, transient keys are deleted
  * explicitly, and the absence of any residue is asserted afterwards.
@@ -56,9 +56,9 @@ require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use FaraCart\Cart\CartIntegration;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\REST\FrontendController;
-use FaraCart\REST\GoalsController;
+use FaraCart\REST\MissionsController;
 use FaraCart\REST\SearchController;
 use FaraCart\Settings\Settings;
 
@@ -84,7 +84,7 @@ if ( ! did_action( 'faracart_performance_test_ready' ) ) {
 
 $container = \FaraCart\Plugin::instance()->container();
 
-$goals_ctrl   = $container->get( GoalsController::class );
+$missions_ctrl   = $container->get( MissionsController::class );
 $frontend_ctrl = $container->get( FrontendController::class );
 $settings     = $container->get( Settings::class );
 $search_ctrl  = new SearchController(); // Fresh instance: no cache, no shared state.
@@ -100,20 +100,20 @@ echo "\n== 1. Frontend performance (P23-T01) ==\n";
 
 $app_tsx    = (string) @file_get_contents( dirname( __DIR__ ) . '/admin-app/src/App.tsx' );
 $providers  = (string) @file_get_contents( dirname( __DIR__ ) . '/admin-app/src/providers/AppProviders.tsx' );
-$autocomplete = (string) @file_get_contents( dirname( __DIR__ ) . '/admin-app/src/components/goal-builder/EntityAutocomplete.tsx' );
-$goals_tsx  = (string) @file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/Goals.tsx' );
+$autocomplete = (string) @file_get_contents( dirname( __DIR__ ) . '/admin-app/src/components/mission-builder/EntityAutocomplete.tsx' );
+$missions_tsx  = (string) @file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/Missions.tsx' );
 $analytics  = (string) @file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/Analytics.tsx' );
 $vite       = (string) @file_get_contents( dirname( __DIR__ ) . '/admin-app/vite.config.ts' );
 
 check( 'App.tsx lazy-loads secondary routes', false !== strpos( $app_tsx, 'lazy(() => import(' ) );
-check( 'dashboard and goals stay eager in the entry bundle', false !== strpos( $app_tsx, "import Dashboard from './routes/Dashboard'" ) && false !== strpos( $app_tsx, "import Goals from './routes/Goals'" ) );
+check( 'dashboard and missions stay eager in the entry bundle', false !== strpos( $app_tsx, "import Dashboard from './routes/Dashboard'" ) && false !== strpos( $app_tsx, "import Missions from './routes/Missions'" ) );
 check( 'React Query caches server state (staleTime)', false !== strpos( $providers, 'staleTime: 60_000' ) );
 check( 'React Query skips focus refetch storms', false !== strpos( $providers, 'refetchOnWindowFocus: false' ) );
 check( 'product/category search debounced', false !== strpos( $autocomplete, 'setTimeout' ) && false !== strpos( $autocomplete, '300' ) );
 check( 'search capped per request (per_page=20)', false !== strpos( $autocomplete, 'per_page: 20' ) );
-check( 'goal list is server-paginated (NumberPagination)', false !== strpos( $goals_tsx, 'NumberPagination' ) );
-check( 'goal list fetches page/per_page server-side', false !== strpos( $goals_tsx, 'fetchGoals({ page: page + 1' ) );
-check( 'goal search debounced client-side', false !== strpos( $goals_tsx, 'setDebouncedSearch(search)' ) );
+check( 'mission list is server-paginated (NumberPagination)', false !== strpos( $missions_tsx, 'NumberPagination' ) );
+check( 'mission list fetches page/per_page server-side', false !== strpos( $missions_tsx, 'fetchMissions({ page: page + 1' ) );
+check( 'mission search debounced client-side', false !== strpos( $missions_tsx, 'setDebouncedSearch(search)' ) );
 check( 'analytics trend memoized (avoid re-renders)', false !== strpos( $analytics, 'useMemo' ) && false !== strpos( $analytics, 'trendData' ) );
 check( 'vite splits vendor chunks (manualChunks)', false !== strpos( $vite, 'manualChunks' ) );
 
@@ -122,16 +122,16 @@ check( 'vite splits vendor chunks (manualChunks)', false !== strpos( $vite, 'man
 // ---------------------------------------------------------------------------
 echo "\n== 2. Request-level caching (P23-T02) ==\n";
 
-// GoalRepository caches the active goal set per request: a second call in
+// MissionRepository caches the active mission set per request: a second call in
 // the same request must not run another query.
-$repo = new GoalRepository();
-$goals_first = $repo->active_goals();
+$repo = new MissionRepository();
+$missions_first = $repo->active_missions();
 $queries_after_first = (int) $wpdb->num_queries;
-$goals_second = $repo->active_goals();
+$missions_second = $repo->active_missions();
 $queries_after_second = (int) $wpdb->num_queries;
 
-check( 'active_goals() returns the same set twice', $goals_first === $goals_second );
-check( 'active_goals() cached per request (no second query)', $queries_after_first === $queries_after_second );
+check( 'active_missions() returns the same set twice', $missions_first === $missions_second );
+check( 'active_missions() cached per request (no second query)', $queries_after_first === $queries_after_second );
 
 // CartIntegration memoizes the snapshot per cart contents + args: two
 // builds with the same cart return the same instance.
@@ -141,7 +141,7 @@ $context_a   = $integration->context( $cart );
 $context_b   = $integration->context( $cart );
 
 check( 'cart context memoized (same instance)', $context_a === $context_b );
-check( 'memoized context is a CartContext', $context_a instanceof \FaraCart\Goals\CartContext );
+check( 'memoized context is a CartContext', $context_a instanceof \FaraCart\Missions\CartContext );
 
 // ---------------------------------------------------------------------------
 // 3. P23-T02 WooCommerce frontend: progress transient cache + JS fragments
@@ -189,35 +189,35 @@ check( 'frontend JS still renders via textContent', false !== strpos( $frontend_
 // ---------------------------------------------------------------------------
 echo "\n== 4. Server-side list behavior (P23-T03) ==\n";
 
-$goals_table = \FaraCart\Database\Schema::table( 'goals' );
+$missions_table = \FaraCart\Database\Schema::table( 'missions' );
 $created_ids = array();
 
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	// Seed three uniquely named goals (two active, one inactive).
+	// Seed three uniquely named missions (two active, one inactive).
 	$seed = array(
-		array( 'name' => 'Perf Test Alpha Goal',   'status' => 'active',   'priority' => 10 ),
-		array( 'name' => 'Perf Test Beta Goal',    'status' => 'active',   'priority' => 20 ),
-		array( 'name' => 'Perf Test Gamma Goal',   'status' => 'inactive', 'priority' => 30 ),
+		array( 'name' => 'Perf Test Alpha Mission',   'status' => 'active',   'priority' => 10 ),
+		array( 'name' => 'Perf Test Beta Mission',    'status' => 'active',   'priority' => 20 ),
+		array( 'name' => 'Perf Test Gamma Mission',   'status' => 'inactive', 'priority' => 30 ),
 	);
 
 	foreach ( $seed as $row ) {
-		$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
+		$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
 		$req->set_param( 'name', $row['name'] );
 		$req->set_param( 'type', 'amount' );
 		$req->set_param( 'target', 100 );
 		$req->set_param( 'status', $row['status'] );
 		$req->set_param( 'priority', $row['priority'] );
-		$resp = $goals_ctrl->handle_create( $req );
+		$resp = $missions_ctrl->handle_create( $req );
 		$created_ids[] = (int) $resp->get_data()['data']['id'];
 	}
 
 	// 4.1 Pagination: per_page=2 → two items on page 1, correct envelope.
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions' );
 	$req->set_param( 'page', 1 );
 	$req->set_param( 'per_page', 2 );
-	$resp = $goals_ctrl->handle_index( $req );
+	$resp = $missions_ctrl->handle_index( $req );
 	$data = $resp->get_data();
 
 	check( 'page 1 returns at most per_page items', count( $data['data'] ) <= 2 );
@@ -225,10 +225,10 @@ try {
 	check( 'pagination envelope carries total_pages', isset( $data['pagination']['total_pages'] ) && (int) $data['pagination']['total_pages'] >= 2 );
 
 	// 4.2 Server-side search narrows the result set.
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions' );
 	$req->set_param( 'search', 'Alpha' );
 	$req->set_param( 'per_page', 50 );
-	$resp = $goals_ctrl->handle_index( $req );
+	$resp = $missions_ctrl->handle_index( $req );
 	$data = $resp->get_data();
 
 	$names = array();
@@ -236,13 +236,13 @@ try {
 		$names[] = $item['name'];
 	}
 
-	check( 'server-side search returns only matches', 1 === (int) $data['pagination']['total'] && in_array( 'Perf Test Alpha Goal', $names, true ) );
+	check( 'server-side search returns only matches', 1 === (int) $data['pagination']['total'] && in_array( 'Perf Test Alpha Mission', $names, true ) );
 
 	// 4.3 Server-side status filtering.
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions' );
 	$req->set_param( 'status', 'inactive' );
 	$req->set_param( 'per_page', 50 );
-	$resp = $goals_ctrl->handle_index( $req );
+	$resp = $missions_ctrl->handle_index( $req );
 	$data = $resp->get_data();
 
 	$only_inactive = true;
@@ -253,12 +253,12 @@ try {
 	}
 
 	check( 'server-side status filter returns only that status', $only_inactive );
-	check( 'status filter isolates the inactive goal', 1 === (int) $data['pagination']['total'] );
+	check( 'status filter isolates the inactive mission', 1 === (int) $data['pagination']['total'] );
 
 	// 4.4 The list endpoint clamps per_page (never thousands at once).
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions' );
 	$req->set_param( 'per_page', 5000 );
-	$resp = $goals_ctrl->handle_index( $req );
+	$resp = $missions_ctrl->handle_index( $req );
 	$data = $resp->get_data();
 
 	check( 'list per_page clamped to 100', (int) $data['pagination']['per_page'] <= 100 );
@@ -275,7 +275,7 @@ try {
 	check( 'search per_page schema maximum declared', isset( $schema['per_page']['maximum'] ) && 50 === (int) $schema['per_page']['maximum'] );
 
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/search/products' );
-	$req->set_param( 'q', 'Perf Test Alpha Goal' );
+	$req->set_param( 'q', 'Perf Test Alpha Mission' );
 	$req->set_param( 'per_page', 5000 );
 	$resp = $search_ctrl->handle_products( $req );
 
@@ -291,12 +291,12 @@ try {
 echo "\n== 5. Rollback verification ==\n";
 
 foreach ( $created_ids as $id ) {
-	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE id = %d", $id ) );
-	check( "rolled-back goal {$id} is gone", 0 === $count );
+	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$missions_table} WHERE id = %d", $id ) );
+	check( "rolled-back mission {$id} is gone", 0 === $count );
 }
 
-$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE name LIKE %s", 'Perf Test %' ) );
-check( 'no perf-test goals remain by name', 0 === $count );
+$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$missions_table} WHERE name LIKE %s", 'Perf Test %' ) );
+check( 'no perf-test missions remain by name', 0 === $count );
 
 $transients = $wpdb->get_col(
 	"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE '_transient_faracart_progress_%'"

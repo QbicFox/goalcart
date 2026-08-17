@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  *
  *  - `revenue_events`  — the attribution funnel (goal_view → goal_progress
  *    → goal_completed → order_paid), each row carrying the cart value, the
- *    goal target and the incremental value. This is the deterministic
+ *    mission target and the incremental value. This is the deterministic
  *    input for direct/assisted attribution, incremental cart value and
  *    AOV analysis (Phase 33.2).
  *  - `upsell_events`   — the upsell interaction funnel (impression →
@@ -39,14 +39,14 @@ defined( 'ABSPATH' ) || exit;
  * cart sync passes) never double-count:
  *
  *  - goal_view / goal_completed / upsell_impression / upsell_clicked are
- *    deduped per session+goal (+product) within a sliding window (24h);
+ *    deduped per session+mission (+product) within a sliding window (24h);
  *  - goal_progress is deduped within a short window (30 min) — significant
  *    cart moves still record, refresh noise does not;
  *  - order_paid / upsell_order are deduped per order (an order is
  *    attributed exactly once).
  *
  * Privacy (P33.1): rows carry only anonymous session ids (the Session
- * cookie), numeric aggregates (cart_value, goal_target, incremental_value)
+ * cookie), numeric aggregates (cart_value, mission_target, incremental_value)
  * and plugin/WooCommerce ids — never IPs, emails, addresses or payment
  * data. user_id is stored only when the shopper is logged in (an id, not
  * personal data), mirroring the Phase 16 Tracker.
@@ -70,10 +70,10 @@ final class RevenueTracker {
 	/**
 	 * Event type (revenue_events) — the admin recommendation feedback
 	 * loop (UPSELL_REFACTOR §41): recorded when an administrator applies a
-	 * goal-threshold recommendation (POST /revenue/goal-recommendations/
+	 * mission-threshold recommendation (POST /revenue/mission-recommendations/
 	 * apply). Meta carries the applied threshold and the previous target,
-	 * so future analysis can correlate "recommendation applied → goal
-	 * changed → goal performance" without any ML machinery.
+	 * so future analysis can correlate "recommendation applied → mission
+	 * changed → mission performance" without any ML machinery.
 	 */
 	const EVENT_RECOMMENDATION_APPLIED = 'recommendation_applied';
 
@@ -239,13 +239,13 @@ final class RevenueTracker {
 	 * Record a revenue event into revenue_events.
 	 *
 	 * Idempotent: the dedup window for the event type is checked before the
-	 * insert, so repeated calls for the same session+goal(+order) within
+	 * insert, so repeated calls for the same session+mission(+order) within
 	 * the window record nothing. Returns the row id (0 = deduped / gated
 	 * off / failed).
 	 *
 	 * @param string               $event_type One of the EVENT_* constants.
-	 * @param array<string, mixed> $context    goal_id, campaign_id, product_id,
-	 *                                         order_id, cart_value, goal_target,
+	 * @param array<string, mixed> $context    mission_id, campaign_id, product_id,
+	 *                                         order_id, cart_value, mission_target,
 	 *                                         incremental_value, session_id, meta.
 	 * @return int
 	 */
@@ -258,12 +258,12 @@ final class RevenueTracker {
 			? $context['session_id']
 			: $this->session->id();
 
-		$goal_id     = isset( $context['goal_id'] ) ? absint( $context['goal_id'] ) : 0;
+		$mission_id     = isset( $context['mission_id'] ) ? absint( $context['mission_id'] ) : 0;
 		$campaign_id = isset( $context['campaign_id'] ) ? absint( $context['campaign_id'] ) : 0;
 		$product_id  = isset( $context['product_id'] ) ? absint( $context['product_id'] ) : 0;
 		$order_id    = isset( $context['order_id'] ) ? absint( $context['order_id'] ) : 0;
 
-		if ( $this->is_duplicate( $event_type, $session_id, $goal_id, $order_id ) ) {
+		if ( $this->is_duplicate( $event_type, $session_id, $mission_id, $order_id ) ) {
 			return 0;
 		}
 
@@ -272,21 +272,21 @@ final class RevenueTracker {
 		$table = Schema::table( 'revenue_events' );
 
 		$cart_value   = isset( $context['cart_value'] ) ? round( (float) $context['cart_value'], 4 ) : null;
-		$goal_target  = isset( $context['goal_target'] ) ? round( (float) $context['goal_target'], 4 ) : null;
+		$mission_target  = isset( $context['mission_target'] ) ? round( (float) $context['mission_target'], 4 ) : null;
 		$incremental  = isset( $context['incremental_value'] ) ? round( (float) $context['incremental_value'], 4 ) : null;
 		$meta         = isset( $context['meta'] ) && is_array( $context['meta'] ) ? $this->sanitize_meta( $context['meta'] ) : array();
 		$user_id      = get_current_user_id();
 
 		$data = array(
 			'event_type'        => $event_type,
-			'goal_id'           => $goal_id > 0 ? $goal_id : null,
+			'mission_id'           => $mission_id > 0 ? $mission_id : null,
 			'campaign_id'       => $campaign_id > 0 ? $campaign_id : null,
 			'product_id'        => $product_id > 0 ? $product_id : null,
 			'order_id'          => $order_id > 0 ? $order_id : null,
 			'session_id'        => $session_id,
 			'user_id'           => $user_id > 0 ? $user_id : null,
 			'cart_value'        => $cart_value,
-			'goal_target'       => $goal_target,
+			'mission_target'       => $mission_target,
 			'incremental_value' => $incremental,
 			'meta'              => empty( $meta ) ? null : wp_json_encode( $meta ),
 			'created_at'        => current_time( 'mysql' ),
@@ -297,7 +297,7 @@ final class RevenueTracker {
 		$inserted = $wpdb->insert( $table, $data, $formats );
 
 		// FK resilience (mirrors Tracker): revenue_events references
-		// goals/campaigns with ON DELETE SET NULL, but a goal deleted
+		// missions/campaigns with ON DELETE SET NULL, but a mission deleted
 		// between the impression and this event report would make the
 		// INSERT fail and silently drop the event. Retry once without the
 		// FK ids so the event survives (the same outcome SET NULL implies
@@ -305,10 +305,10 @@ final class RevenueTracker {
 		// retry.
 		if (
 			! $inserted
-			&& ( $goal_id > 0 || $campaign_id > 0 )
+			&& ( $mission_id > 0 || $campaign_id > 0 )
 			&& false !== stripos( (string) $wpdb->last_error, 'foreign key' )
 		) {
-			$data['goal_id']     = null;
+			$data['mission_id']     = null;
 			$data['campaign_id'] = null;
 			$inserted = $wpdb->insert( $table, $data, $formats );
 		}
@@ -320,10 +320,10 @@ final class RevenueTracker {
 	 * Record an upsell interaction event into upsell_events.
 	 *
 	 * Same idempotency contract as record(): impression/clicked are deduped
-	 * per session+goal+product within 24h, order events once per order.
+	 * per session+mission+product within 24h, order events once per order.
 	 *
 	 * @param string               $event_type One of the EVENT_UPSELL_* constants.
-	 * @param array<string, mixed> $context    goal_id, product_id, order_id,
+	 * @param array<string, mixed> $context    mission_id, product_id, order_id,
 	 *                                         cart_value, session_id, meta.
 	 * @return int
 	 */
@@ -336,11 +336,11 @@ final class RevenueTracker {
 			? $context['session_id']
 			: $this->session->id();
 
-		$goal_id    = isset( $context['goal_id'] ) ? absint( $context['goal_id'] ) : 0;
+		$mission_id    = isset( $context['mission_id'] ) ? absint( $context['mission_id'] ) : 0;
 		$product_id = isset( $context['product_id'] ) ? absint( $context['product_id'] ) : 0;
 		$order_id   = isset( $context['order_id'] ) ? absint( $context['order_id'] ) : 0;
 
-		if ( $this->is_upsell_duplicate( $event_type, $session_id, $goal_id, $product_id, $order_id ) ) {
+		if ( $this->is_upsell_duplicate( $event_type, $session_id, $mission_id, $product_id, $order_id ) ) {
 			return 0;
 		}
 
@@ -354,7 +354,7 @@ final class RevenueTracker {
 
 		$data = array(
 			'event_type'  => $event_type,
-			'goal_id'     => $goal_id > 0 ? $goal_id : null,
+			'mission_id'     => $mission_id > 0 ? $mission_id : null,
 			'product_id'  => $product_id > 0 ? $product_id : null,
 			'order_id'    => $order_id > 0 ? $order_id : null,
 			'session_id'  => $session_id,
@@ -368,16 +368,16 @@ final class RevenueTracker {
 
 		$inserted = $wpdb->insert( $table, $data, $formats );
 
-		// FK resilience (mirrors record()): upsell_events references goals
-		// with ON DELETE SET NULL, so a goal deleted between the
+		// FK resilience (mirrors record()): upsell_events references missions
+		// with ON DELETE SET NULL, so a mission deleted between the
 		// impression and a click report would otherwise drop the event.
 		// Retry once without the FK ids on a genuine foreign-key failure.
 		if (
 			! $inserted
-			&& $goal_id > 0
+			&& $mission_id > 0
 			&& false !== stripos( (string) $wpdb->last_error, 'foreign key' )
 		) {
-			$data['goal_id'] = null;
+			$data['mission_id'] = null;
 			$inserted = $wpdb->insert( $table, $data, $formats );
 		}
 
@@ -396,17 +396,17 @@ final class RevenueTracker {
 	/**
 	 * Whether a duplicate revenue event exists within its dedup window.
 	 *
-	 * goal_view / goal_completed dedup per session+goal in 24h; progress
+	 * goal_view / goal_completed dedup per session+mission in 24h; progress
 	 * in 30 min; order events once per order. The query is a single
-	 * indexed lookup (session_id + goal_id + event_type, created_at).
+	 * indexed lookup (session_id + mission_id + event_type, created_at).
 	 *
 	 * @param string $event_type Event type.
 	 * @param string $session_id Session id.
-	 * @param int    $goal_id    Goal id.
+	 * @param int    $mission_id    Mission id.
 	 * @param int    $order_id   Order id.
 	 * @return bool
 	 */
-	protected function is_duplicate( $event_type, $session_id, $goal_id, $order_id ) {
+	protected function is_duplicate( $event_type, $session_id, $mission_id, $order_id ) {
 		global $wpdb;
 
 		$table = Schema::table( 'revenue_events' );
@@ -427,7 +427,7 @@ final class RevenueTracker {
 			return $count > 0;
 		}
 
-		// Cart-value snapshots carry no goal: dedup by session only, on the
+		// Cart-value snapshots carry no mission: dedup by session only, on the
 		// short progress window (a cart can legitimately move several times
 		// a day; the 30-minute window keeps refresh noise quiet).
 		if ( self::EVENT_CART_VALUE === $event_type ) {
@@ -446,8 +446,8 @@ final class RevenueTracker {
 			return $count > 0;
 		}
 
-		// Recommendation applies carry a goal but no order: dedup per
-		// session+goal within the daily window (an admin re-applying the
+		// Recommendation applies carry a mission but no order: dedup per
+		// session+mission within the daily window (an admin re-applying the
 		// same recommendation from a fresh page load records once a day —
 		// enough signal for the feedback loop without event spam).
 		if ( self::EVENT_RECOMMENDATION_APPLIED === $event_type ) {
@@ -456,10 +456,10 @@ final class RevenueTracker {
 			$count = (int) $wpdb->get_var(
 				$wpdb->prepare(
 					"SELECT COUNT(*) FROM {$table}
-					WHERE event_type = %s AND session_id = %s AND goal_id = %s AND created_at >= %s",
+					WHERE event_type = %s AND session_id = %s AND mission_id = %s AND created_at >= %s",
 					$event_type,
 					$session_id,
-					$goal_id > 0 ? $goal_id : null,
+					$mission_id > 0 ? $mission_id : null,
 					$cutoff
 				)
 			);
@@ -476,10 +476,10 @@ final class RevenueTracker {
 		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table}
-				WHERE event_type = %s AND session_id = %s AND goal_id = %s AND created_at >= %s",
+				WHERE event_type = %s AND session_id = %s AND mission_id = %s AND created_at >= %s",
 				$event_type,
 				$session_id,
-				$goal_id > 0 ? $goal_id : null,
+				$mission_id > 0 ? $mission_id : null,
 				$cutoff
 			)
 		);
@@ -490,17 +490,17 @@ final class RevenueTracker {
 	/**
 	 * Whether a duplicate upsell event exists within its dedup window.
 	 *
-	 * impression/clicked dedup per session+goal+product in 24h; order
+	 * impression/clicked dedup per session+mission+product in 24h; order
 	 * events once per order.
 	 *
 	 * @param string $event_type Event type.
 	 * @param string $session_id Session id.
-	 * @param int    $goal_id    Goal id.
+	 * @param int    $mission_id    Mission id.
 	 * @param int    $product_id Product id.
 	 * @param int    $order_id   Order id.
 	 * @return bool
 	 */
-	protected function is_upsell_duplicate( $event_type, $session_id, $goal_id, $product_id, $order_id ) {
+	protected function is_upsell_duplicate( $event_type, $session_id, $mission_id, $product_id, $order_id ) {
 		global $wpdb;
 
 		$table = Schema::table( 'upsell_events' );
@@ -526,10 +526,10 @@ final class RevenueTracker {
 		$count = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table}
-				WHERE event_type = %s AND session_id = %s AND goal_id = %s AND product_id = %s AND created_at >= %s",
+				WHERE event_type = %s AND session_id = %s AND mission_id = %s AND product_id = %s AND created_at >= %s",
 				$event_type,
 				$session_id,
-				$goal_id > 0 ? $goal_id : null,
+				$mission_id > 0 ? $mission_id : null,
 				$product_id > 0 ? $product_id : null,
 				$cutoff
 			)

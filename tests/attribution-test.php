@@ -16,17 +16,17 @@
  *    requires every line to have cost data (graceful)
  *  - profit impact: incremental × margin − reward cost − shipping; without
  *    margin data the profit is unavailable (revenue-only analytics)
- *  - order association: a paid order is attributed to the goals that
- *    influenced its session — progressed/completed goals are DIRECT (the
- *    incremental value is split across them), exposed-only goals are
+ *  - order association: a paid order is attributed to the missions that
+ *    influenced its session — progressed/completed missions are DIRECT (the
+ *    incremental value is split across them), exposed-only missions are
  *    ASSISTED (order total recorded, zero incremental); refunded/non
  *    revenue orders are skipped; re-processing is idempotent
  *  - metrics: funnel counts + completion/conversion rates, incremental
- *    cart value (peak − baseline per session), goal-driven (direct
- *    incremental) revenue, goal-assisted revenue (orders with only
- *    assisted rows), goal-influenced revenue (distinct orders), AOV
+ *    cart value (peak − baseline per session), mission-driven (direct
+ *    incremental) revenue, mission-assisted revenue (orders with only
+ *    assisted rows), mission-influenced revenue (distinct orders), AOV
  *    analysis (exposed vs store-wide, labeled observed impact), shipping
- *    stats and per-goal performance metrics
+ *    stats and per-mission performance metrics
  *
  * All writes happen inside a single database transaction that is rolled
  * back; the absence of residue is asserted afterwards. Store-wide AOV /
@@ -66,7 +66,7 @@ use FaraCart\Analytics\RevenueTracker;
 use FaraCart\Analytics\Session;
 use FaraCart\Database\Installer;
 use FaraCart\Database\Schema;
-use FaraCart\Goals\Goal;
+use FaraCart\Missions\Mission;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Settings\Settings;
 
@@ -123,34 +123,34 @@ check( 'order_status_completed hook registered by the engine', has_action( 'wooc
 // ---------------------------------------------------------------------------
 echo "\n== 2. Reward cost estimation ==\n";
 
-$goal_percent      = new Goal( array( 'id' => 1, 'reward_type' => 'percent_discount', 'reward_value' => 10 ) );
-$goal_percent_max  = new Goal( array( 'id' => 2, 'reward_type' => 'percent_discount', 'reward_value' => 10, 'reward_max_value' => 80 ) );
-$goal_fixed        = new Goal( array( 'id' => 3, 'reward_type' => 'fixed_discount', 'reward_value' => 50 ) );
-$goal_coupon_pct   = new Goal( array( 'id' => 4, 'reward_type' => 'coupon', 'reward_value' => 10, 'reward_max_value' => 100, 'reward_meta' => array( 'coupon_discount_type' => 'percent' ) ) );
-$goal_coupon_fixed = new Goal( array( 'id' => 5, 'reward_type' => 'coupon', 'reward_value' => 25, 'reward_meta' => array( 'coupon_discount_type' => 'fixed_cart' ) ) );
-$goal_shipping     = new Goal( array( 'id' => 6, 'reward_type' => 'free_shipping' ) );
-$goal_gift         = new Goal( array( 'id' => 7, 'reward_type' => 'free_gift', 'reward_meta' => array( 'gift_product_id' => 4242 ) ) );
-$goal_none         = new Goal( array( 'id' => 8, 'reward_type' => null ) );
+$mission_percent      = new Mission( array( 'id' => 1, 'reward_type' => 'percent_discount', 'reward_value' => 10 ) );
+$mission_percent_max  = new Mission( array( 'id' => 2, 'reward_type' => 'percent_discount', 'reward_value' => 10, 'reward_max_value' => 80 ) );
+$mission_fixed        = new Mission( array( 'id' => 3, 'reward_type' => 'fixed_discount', 'reward_value' => 50 ) );
+$mission_coupon_pct   = new Mission( array( 'id' => 4, 'reward_type' => 'coupon', 'reward_value' => 10, 'reward_max_value' => 100, 'reward_meta' => array( 'coupon_discount_type' => 'percent' ) ) );
+$mission_coupon_fixed = new Mission( array( 'id' => 5, 'reward_type' => 'coupon', 'reward_value' => 25, 'reward_meta' => array( 'coupon_discount_type' => 'fixed_cart' ) ) );
+$mission_shipping     = new Mission( array( 'id' => 6, 'reward_type' => 'free_shipping' ) );
+$mission_gift         = new Mission( array( 'id' => 7, 'reward_type' => 'free_gift', 'reward_meta' => array( 'gift_product_id' => 4242 ) ) );
+$mission_none         = new Mission( array( 'id' => 8, 'reward_type' => null ) );
 
-$pct   = $costs->estimate_reward_cost( $goal_percent, 1000 );
-$pctm  = $costs->estimate_reward_cost( $goal_percent_max, 1000 );
-$fixed = $costs->estimate_reward_cost( $goal_fixed, 1000 );
-$cpct  = $costs->estimate_reward_cost( $goal_coupon_pct, 1000 );
-$cfix  = $costs->estimate_reward_cost( $goal_coupon_fixed, 1000 );
+$pct   = $costs->estimate_reward_cost( $mission_percent, 1000 );
+$pctm  = $costs->estimate_reward_cost( $mission_percent_max, 1000 );
+$fixed = $costs->estimate_reward_cost( $mission_fixed, 1000 );
+$cpct  = $costs->estimate_reward_cost( $mission_coupon_pct, 1000 );
+$cfix  = $costs->estimate_reward_cost( $mission_coupon_fixed, 1000 );
 
 check( 'percent discount costs value% of order total', close( 100, $pct['estimated_cost'] ) && $pct['available'] );
 check( 'percent discount capped at reward max', close( 80, $pctm['estimated_cost'] ) );
 check( 'fixed discount costs its amount', close( 50, $fixed['estimated_cost'] ) );
 check( 'percent coupon capped at reward max', close( 100, $cpct['estimated_cost'] ) );
 check( 'fixed cart coupon costs its amount', close( 25, $cfix['estimated_cost'] ) );
-check( 'no-reward goal costs zero', close( 0, $costs->estimate_reward_cost( $goal_none, 1000 )['estimated_cost'] ) );
+check( 'no-reward mission costs zero', close( 0, $costs->estimate_reward_cost( $mission_none, 1000 )['estimated_cost'] ) );
 
-$ship_known = $costs->estimate_reward_cost( $goal_shipping, 1000, array( 'shipping_total' => 85 ) );
-$ship_unknown = $costs->estimate_reward_cost( $goal_shipping, 1000 );
+$ship_known = $costs->estimate_reward_cost( $mission_shipping, 1000, array( 'shipping_total' => 85 ) );
+$ship_unknown = $costs->estimate_reward_cost( $mission_shipping, 1000 );
 check( 'free shipping costs the order shipping total', close( 85, $ship_known['estimated_cost'] ) && $ship_known['available'] );
 check( 'free shipping without shipping data is unavailable', ! $ship_unknown['available'] && 0.0 === $ship_unknown['estimated_cost'] );
 
-$gift_unknown = $costs->estimate_reward_cost( $goal_gift, 1000 );
+$gift_unknown = $costs->estimate_reward_cost( $mission_gift, 1000 );
 check( 'free gift without product cost is unavailable', ! $gift_unknown['available'] );
 
 // ---------------------------------------------------------------------------
@@ -159,8 +159,8 @@ check( 'free gift without product cost is unavailable', ! $gift_unknown['availab
 echo "\n== 3. Margin, profit impact, attribution (rolled back) ==\n";
 
 $revenue_table = Schema::table( 'revenue_events' );
-$attrib_table  = Schema::table( 'goal_attribution' );
-$goals_table   = Schema::table( 'goals' );
+$attrib_table  = Schema::table( 'mission_attribution' );
+$missions_table   = Schema::table( 'missions' );
 
 $wpdb->query( 'START TRANSACTION' );
 
@@ -183,7 +183,7 @@ try {
 	check( 'product margin computed from cost data', null !== $margin && close( 600, $margin['margin'] ) && close( 0.6, $margin['margin_pct'] ) );
 
 	$gift_known = $costs->estimate_reward_cost(
-		new Goal( array( 'id' => 9, 'reward_type' => 'free_gift', 'reward_meta' => array( 'gift_product_id' => $gift_id ) ) ),
+		new Mission( array( 'id' => 9, 'reward_type' => 'free_gift', 'reward_meta' => array( 'gift_product_id' => $gift_id ) ) ),
 		1000
 	);
 	check( 'free gift costs the gift product cost', close( 400, $gift_known['estimated_cost'] ) && $gift_known['available'] );
@@ -204,21 +204,21 @@ try {
 	) );
 	check( 'profit without margin data is unavailable', ! $profit_none['available'] && null === $profit_none['estimated_profit'] && '' !== (string) $profit_none['reason'] );
 
-	// --- Fixture goals (must exist for the event FKs). ---
+	// --- Fixture missions (must exist for the event FKs). ---
 	foreach ( array(
 		array( 'id' => 101, 'reward_type' => 'percent_discount', 'reward_value' => 10, 'reward_max_value' => 50 ),
 		array( 'id' => 202 ),
 		array( 'id' => 303 ),
-	) as $goal_row ) {
-		$wpdb->insert( $goals_table, array(
-			'id'              => $goal_row['id'],
-			'name'            => 'P33 attribution goal ' . $goal_row['id'],
+	) as $mission_row ) {
+		$wpdb->insert( $missions_table, array(
+			'id'              => $mission_row['id'],
+			'name'            => 'P33 attribution mission ' . $mission_row['id'],
 			'status'          => 'active',
 			'type'            => 'amount',
 			'target'          => 1000000,
-			'reward_type'     => isset( $goal_row['reward_type'] ) ? $goal_row['reward_type'] : null,
-			'reward_value'    => isset( $goal_row['reward_value'] ) ? $goal_row['reward_value'] : null,
-			'reward_max_value'=> isset( $goal_row['reward_max_value'] ) ? $goal_row['reward_max_value'] : null,
+			'reward_type'     => isset( $mission_row['reward_type'] ) ? $mission_row['reward_type'] : null,
+			'reward_value'    => isset( $mission_row['reward_value'] ) ? $mission_row['reward_value'] : null,
+			'reward_max_value'=> isset( $mission_row['reward_max_value'] ) ? $mission_row['reward_max_value'] : null,
 			'created_at'      => current_time( 'mysql' ),
 			'updated_at'      => current_time( 'mysql' ),
 		) );
@@ -228,11 +228,11 @@ try {
 	$session_b = str_repeat( 'cd', 16 );
 
 	// --- Session funnel events (the Phase 33.1 tracker, deduped). ---
-	$tracker->record( 'goal_view', array( 'goal_id' => 101, 'cart_value' => 700000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_progress', array( 'goal_id' => 101, 'cart_value' => 900000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_completed', array( 'goal_id' => 101, 'cart_value' => 1050000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_view', array( 'goal_id' => 202, 'cart_value' => 800000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_view', array( 'goal_id' => 303, 'cart_value' => 750000, 'goal_target' => 1000000, 'session_id' => $session_b ) );
+	$tracker->record( 'goal_view', array( 'mission_id' => 101, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'goal_progress', array( 'mission_id' => 101, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'goal_completed', array( 'mission_id' => 101, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'goal_view', array( 'mission_id' => 202, 'cart_value' => 800000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'goal_view', array( 'mission_id' => 303, 'cart_value' => 750000, 'mission_target' => 1000000, 'session_id' => $session_b ) );
 
 	// --- Store-wide baseline BEFORE the fixture orders (leftover dev-DB
 	// orders must not skew the AOV / shipping assertions). ---
@@ -311,27 +311,27 @@ try {
 
 	$row = $wpdb->get_row(
 		$wpdb->prepare(
-			"SELECT model, order_total, incremental_value, goal_completed, session_id FROM {$attrib_table} WHERE order_id = %d AND goal_id = %d",
+			"SELECT model, order_total, incremental_value, mission_completed, session_id FROM {$attrib_table} WHERE order_id = %d AND mission_id = %d",
 			$order_direct,
 			101
 		),
 		ARRAY_A
 	);
-	check( 'progressed/completed goal attributed as direct', null !== $row && AttributionEngine::MODEL_DIRECT === $row['model'] );
+	check( 'progressed/completed mission attributed as direct', null !== $row && AttributionEngine::MODEL_DIRECT === $row['model'] );
 	check( 'direct row carries the full order total', null !== $row && close( 1050000, $row['order_total'] ) );
 	check( 'direct row carries the incremental value', null !== $row && close( 350000, $row['incremental_value'] ) );
-	check( 'direct row marks the goal completed', null !== $row && 1 === (int) $row['goal_completed'] );
+	check( 'direct row marks the mission completed', null !== $row && 1 === (int) $row['mission_completed'] );
 	check( 'direct row carries the session', null !== $row && $session_a === $row['session_id'] );
 
 	$assisted_row = $wpdb->get_row(
 		$wpdb->prepare(
-			"SELECT model, incremental_value, goal_completed FROM {$attrib_table} WHERE order_id = %d AND goal_id = %d",
+			"SELECT model, incremental_value, mission_completed FROM {$attrib_table} WHERE order_id = %d AND mission_id = %d",
 			$order_direct,
 			202
 		),
 		ARRAY_A
 	);
-	check( 'viewed-only goal attributed as assisted', null !== $assisted_row && AttributionEngine::MODEL_ASSISTED === $assisted_row['model'] );
+	check( 'viewed-only mission attributed as assisted', null !== $assisted_row && AttributionEngine::MODEL_ASSISTED === $assisted_row['model'] );
 	check( 'assisted row carries zero incremental value', null !== $assisted_row && close( 0, $assisted_row['incremental_value'] ) );
 	check( 'assisted row not marked completed', null !== $assisted_row && 0 === (int) $assisted_row['goal_completed'] );
 
@@ -394,34 +394,34 @@ try {
 	check( 'completion rate is completed/views', close( 0.3333, $funnel['completion_rate'] ) );
 	check( 'conversion rate is orders/completions', close( 2.0, $funnel['conversion_rate'] ) );
 
-	$funnel_101 = $engine->funnel( array( 'goal_id' => 101 ) );
-	check( 'per-goal funnel views', 1 === $funnel_101['views'] );
-	check( 'per-goal funnel completion rate', close( 1.0, $funnel_101['completion_rate'] ) );
-	check( 'per-goal funnel conversion rate', close( 1.0, $funnel_101['conversion_rate'] ) );
+	$funnel_101 = $engine->funnel( array( 'mission_id' => 101 ) );
+	check( 'per-mission funnel views', 1 === $funnel_101['views'] );
+	check( 'per-mission funnel completion rate', close( 1.0, $funnel_101['completion_rate'] ) );
+	check( 'per-mission funnel conversion rate', close( 1.0, $funnel_101['conversion_rate'] ) );
 
 	// --- Incremental cart value. ---
-	$incremental = $engine->incremental_cart_value( array( 'goal_id' => 101 ) );
+	$incremental = $engine->incremental_cart_value( array( 'mission_id' => 101 ) );
 	check( 'incremental cart value = peak − baseline', close( 350000, $incremental['average'] ) );
 	check( 'incremental cart value baseline captured', close( 700000, $incremental['average_baseline'] ) );
 	check( 'single-session sample flagged low sufficiency', 'low' === $incremental['data_sufficiency'] );
 
 	// --- Attribution summary. ---
 	$summary = $engine->attribution_summary();
-	check( 'goal-driven revenue = direct incremental', close( 350000, $summary['goal_driven_revenue'] ) );
-	check( 'goal-assisted revenue = pure-assisted orders', close( 800000, $summary['goal_assisted_revenue'] ) );
-	check( 'goal-influenced revenue = distinct order totals', close( 1850000, $summary['goal_influenced_revenue'] ) );
+	check( 'mission-driven revenue = direct incremental', close( 350000, $summary['mission_driven_revenue'] ) );
+	check( 'mission-assisted revenue = pure-assisted orders', close( 800000, $summary['mission_assisted_revenue'] ) );
+	check( 'mission-influenced revenue = distinct order totals', close( 1850000, $summary['mission_influenced_revenue'] ) );
 	check( 'summary counts two attributed orders', 2 === $summary['orders'] );
-	check( 'reward cost estimated from completed goals', close( 50, $summary['reward_cost'] ) && $summary['reward_cost_available'] );
+	check( 'reward cost estimated from completed missions', close( 50, $summary['reward_cost'] ) && $summary['reward_cost_available'] );
 	check( 'profit unavailable without margin data', ! $summary['profit_available'] && null === $summary['profit_impact'] && '' !== (string) $summary['profit_reason'] );
 
-	// --- Per-goal performance metrics. ---
-	$metrics = $engine->goal_metrics( 101 );
-	check( 'goal metrics expose the funnel', null !== $metrics && 1 === $metrics['views'] && 1 === $metrics['completed'] && 1 === $metrics['converted'] );
-	check( 'goal metrics expose attributed revenue', close( 350000, $metrics['attributed_revenue'] ) );
-	check( 'goal metrics expose average cart value', close( 700000, $metrics['average_cart_value'] ) );
-	check( 'goal metrics expose incremental cart value', close( 350000, $metrics['incremental_cart_value'] ) );
-	check( 'goal metrics expose reward cost', close( 50, $metrics['reward_cost'] ) );
-	check( 'goal metrics unknown goal is null', null === $engine->goal_metrics( 999999 ) );
+	// --- Per-mission performance metrics. ---
+	$metrics = $engine->mission_metrics( 101 );
+	check( 'mission metrics expose the funnel', null !== $metrics && 1 === $metrics['views'] && 1 === $metrics['completed'] && 1 === $metrics['converted'] );
+	check( 'mission metrics expose attributed revenue', close( 350000, $metrics['attributed_revenue'] ) );
+	check( 'mission metrics expose average cart value', close( 700000, $metrics['average_cart_value'] ) );
+	check( 'mission metrics expose incremental cart value', close( 350000, $metrics['incremental_cart_value'] ) );
+	check( 'mission metrics expose reward cost', close( 50, $metrics['reward_cost'] ) );
+	check( 'mission metrics unknown mission is null', null === $engine->mission_metrics( 999999 ) );
 
 	// --- AOV analysis (baseline-aware). ---
 	$aov = $engine->aov_analysis();

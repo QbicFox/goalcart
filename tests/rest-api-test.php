@@ -9,7 +9,7 @@
  *  - the `{ data, meta, pagination }` response envelope
  *  - permission callbacks (anonymous 403 on admin routes, public progress
  *    allowed) and REST arg-schema validation
- *  - goal CRUD + duplicate, the public /progress payload, search, and
+ *  - mission CRUD + duplicate, the public /progress payload, search, and
  *    settings — through direct handler calls and one end-to-end server
  *    dispatch
  *  - Phase 12 progress-template settings: sanitization of the template
@@ -19,7 +19,7 @@
  *    engine-rendered message (no unresolved placeholders) and the message
  *    state
  *
- * Read-only like the other suites: the only writes (goal rows, the
+ * Read-only like the other suites: the only writes (mission rows, the
  * settings option, rate-limit transients) happen inside a single
  * database transaction that is rolled back, and the absence of any
  * residue is asserted afterwards. No products or users are created.
@@ -53,7 +53,7 @@ require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use FaraCart\REST\CampaignsController;
 use FaraCart\REST\FrontendController;
-use FaraCart\REST\GoalsController;
+use FaraCart\REST\MissionsController;
 use FaraCart\REST\SearchController;
 use FaraCart\REST\SettingsController;
 
@@ -87,7 +87,7 @@ if ( ! did_action( 'faracart_rest_test_ready' ) ) {
 
 $container = \FaraCart\Plugin::instance()->container();
 
-$goals_ctrl     = $container->get( GoalsController::class );
+$missions_ctrl     = $container->get( MissionsController::class );
 $settings_ctrl  = $container->get( SettingsController::class );
 $search_ctrl    = $container->get( SearchController::class );
 $campaigns_ctrl = $container->get( CampaignsController::class );
@@ -102,9 +102,9 @@ $wpdb   = $GLOBALS['wpdb'];
 // ---------------------------------------------------------------------------
 echo "\n== 1. Route registration ==\n";
 
-check( 'GET /goals registered', route_exists( $routes, '/faracart/v1/goals' ) );
-check( 'GET /goals/{id} registered', route_exists( $routes, '/faracart/v1/goals/(?P<id>[\d]+)' ) );
-check( 'POST /goals/{id}/duplicate registered', route_exists( $routes, '/faracart/v1/goals/(?P<id>[\d]+)/duplicate' ) );
+check( 'GET /missions registered', route_exists( $routes, '/faracart/v1/missions' ) );
+check( 'GET /missions/{id} registered', route_exists( $routes, '/faracart/v1/missions/(?P<id>[\d]+)' ) );
+check( 'POST /missions/{id}/duplicate registered', route_exists( $routes, '/faracart/v1/missions/(?P<id>[\d]+)/duplicate' ) );
 check( '/settings registered', route_exists( $routes, '/faracart/v1/settings' ) );
 check( '/search/products registered', route_exists( $routes, '/faracart/v1/search/products' ) );
 check( '/search/categories registered', route_exists( $routes, '/faracart/v1/search/categories' ) );
@@ -119,7 +119,7 @@ check( '/progress registered', route_exists( $routes, '/faracart/v1/progress' ) 
 // ---------------------------------------------------------------------------
 echo "\n== 2. Input validation ==\n";
 
-$save = $goals_ctrl->save_args( true );
+$save = $missions_ctrl->save_args( true );
 
 // Enum/type/range checks are exercised through the REST schema validator.
 check( 'invalid status rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['status'], 'status' ) ) );
@@ -127,15 +127,15 @@ check( 'invalid type rejected', is_wp_error( rest_validate_value_from_schema( 'b
 check( 'invalid calculation_mode rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['calculation_mode'], 'calculation_mode' ) ) );
 check( 'invalid reward_type rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['reward_type'], 'reward_type' ) ) );
 check( 'negative target rejected', is_wp_error( rest_validate_value_from_schema( -5, $save['target'], 'target' ) ) );
-check( 'valid name accepted', true === rest_validate_value_from_schema( 'My goal', $save['name'], 'name' ) );
+check( 'valid name accepted', true === rest_validate_value_from_schema( 'My mission', $save['name'], 'name' ) );
 
 // Custom validate callbacks (datetime, campaign existence) are invoked by
 // the REST server during dispatch; exercised directly here.
-check( 'invalid starts_at rejected', false === $goals_ctrl->validate_datetime_param( '12/34/5678' ) );
-check( 'valid starts_at accepted', true === $goals_ctrl->validate_datetime_param( '2026-01-01' ) );
-check( 'null starts_at accepted', true === $goals_ctrl->validate_datetime_param( null ) );
-check( 'invalid campaign_id rejected', false === $goals_ctrl->validate_campaign( 999999 ) );
-check( 'zero campaign_id accepted', true === $goals_ctrl->validate_campaign( 0 ) );
+check( 'invalid starts_at rejected', false === $missions_ctrl->validate_datetime_param( '12/34/5678' ) );
+check( 'valid starts_at accepted', true === $missions_ctrl->validate_datetime_param( '2026-01-01' ) );
+check( 'null starts_at accepted', true === $missions_ctrl->validate_datetime_param( null ) );
+check( 'invalid campaign_id rejected', false === $missions_ctrl->validate_campaign( 999999 ) );
+check( 'zero campaign_id accepted', true === $missions_ctrl->validate_campaign( 0 ) );
 
 // ---------------------------------------------------------------------------
 // 3. Settings reads (read-only)
@@ -187,7 +187,7 @@ $data = $resp->get_data();
 check( 'campaign list returns envelope', isset( $data['data']['items'] ) && is_array( $data['data']['items'] ) );
 
 // Phase 9: the `ids` param narrows search to exactly the given ids
-// (the goal builder preloads saved product/category/coupon selections).
+// (the mission builder preloads saved product/category/coupon selections).
 $req = new \WP_REST_Request( 'GET', '/faracart/v1/search/products' );
 $req->set_param( 'ids', array( 99999999 ) );
 $resp = $search_ctrl->handle_products( $req );
@@ -231,13 +231,13 @@ try {
 	// 5.1 Anonymous users are rejected on admin routes (403). Dispatch
 	// wraps the WP_Error into a 403 WP_REST_Response (what the HTTP client
 	// actually receives).
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions' );
 	$resp = $server->dispatch( $req );
-	check( 'anonymous rejected on admin goals list (403)', 403 === $resp->get_status() );
+	check( 'anonymous rejected on admin missions list (403)', 403 === $resp->get_status() );
 
-	// 5.2 Create a goal.
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
-	$req->set_param( 'name', 'REST Test Goal' );
+	// 5.2 Create a mission.
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
+	$req->set_param( 'name', 'REST Test Mission' );
 	$req->set_param( 'description', 'Created by the REST test' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 1000 );
@@ -246,59 +246,59 @@ try {
 	$req->set_param( 'reward_value', 10 );
 	$req->set_param( 'categories', array( 5, 6 ) );
 	$req->set_param( 'display_settings', array(
-		'title'       => 'Templated goal',
+		'title'       => 'Templated mission',
 		'template_id' => 'template-2',
 		'message'     => 'Only {remaining} left!',
 	) );
 
-	$resp = $goals_ctrl->handle_create( $req );
+	$resp = $missions_ctrl->handle_create( $req );
 	$data = $resp->get_data();
 	check( 'create returns envelope', isset( $data['data']['id'] ) );
 
-	$goal_id = (int) $data['data']['id'];
-	$created_ids[] = $goal_id;
-	check( 'created goal id > 0', $goal_id > 0 );
-	check( 'created goal name matches', 'REST Test Goal' === $data['data']['name'] );
-	check( 'created goal target persisted', near( 1000, $data['data']['target'] ) );
-	check( 'created goal reward type persisted', 'percent_discount' === $data['data']['reward_type'] );
-	check( 'created goal categories persisted', array( 5, 6 ) === $data['data']['categories'] );
-	check( 'created goal display template persisted', 'template-2' === $data['data']['display_settings']['template_id'] );
+	$mission_id = (int) $data['data']['id'];
+	$created_ids[] = $mission_id;
+	check( 'created mission id > 0', $mission_id > 0 );
+	check( 'created mission name matches', 'REST Test Mission' === $data['data']['name'] );
+	check( 'created mission target persisted', near( 1000, $data['data']['target'] ) );
+	check( 'created mission reward type persisted', 'percent_discount' === $data['data']['reward_type'] );
+	check( 'created mission categories persisted', array( 5, 6 ) === $data['data']['categories'] );
+	check( 'created mission display template persisted', 'template-2' === $data['data']['display_settings']['template_id'] );
 
-	// 5.3 Get the created goal.
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals/' . $goal_id );
-	$req->set_param( 'id', $goal_id );
-	$resp = $goals_ctrl->handle_get( $req );
-	check( 'get returns the created goal', $goal_id === (int) $resp->get_data()['data']['id'] );
+	// 5.3 Get the created mission.
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions/' . $mission_id );
+	$req->set_param( 'id', $mission_id );
+	$resp = $missions_ctrl->handle_get( $req );
+	check( 'get returns the created mission', $mission_id === (int) $resp->get_data()['data']['id'] );
 
 	// 5.4 The list includes it, with pagination metadata.
-	$req = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
+	$req = new \WP_REST_Request( 'GET', '/faracart/v1/missions' );
 	$req->set_param( 'per_page', 50 );
-	$resp = $goals_ctrl->handle_index( $req );
+	$resp = $missions_ctrl->handle_index( $req );
 	$data = $resp->get_data();
 	$found = false;
-	foreach ( $data['data'] as $goal ) {
-		if ( (int) $goal['id'] === $goal_id ) {
+	foreach ( $data['data'] as $mission ) {
+		if ( (int) $mission['id'] === $mission_id ) {
 			$found = true;
 		}
 	}
-	check( 'index lists the created goal', $found );
+	check( 'index lists the created mission', $found );
 	check( 'index has pagination envelope', isset( $data['pagination']['total'], $data['pagination']['total_pages'] ) );
 
 	// 5.5 Duplicate it.
-	$req  = new \WP_REST_Request( 'POST', '/faracart/v1/goals/' . $goal_id . '/duplicate' );
-	$req->set_param( 'id', $goal_id );
-	$resp = $goals_ctrl->handle_duplicate( $req );
+	$req  = new \WP_REST_Request( 'POST', '/faracart/v1/missions/' . $mission_id . '/duplicate' );
+	$req->set_param( 'id', $mission_id );
+	$resp = $missions_ctrl->handle_duplicate( $req );
 	$copy = $resp->get_data()['data'];
 	$created_ids[] = (int) $copy['id'];
-	check( 'duplicate creates a new id', (int) $copy['id'] !== $goal_id );
+	check( 'duplicate creates a new id', (int) $copy['id'] !== $mission_id );
 	check( 'duplicate name has copy suffix', false !== strpos( $copy['name'], '(copy)' ) );
 	check( 'duplicate keeps the reward', 'percent_discount' === $copy['reward_type'] );
 
 	// 5.6 Update it (partial update: only target changes).
-	$req = new \WP_REST_Request( 'PUT', '/faracart/v1/goals/' . $goal_id );
-	$req->set_param( 'id', $goal_id );
+	$req = new \WP_REST_Request( 'PUT', '/faracart/v1/missions/' . $mission_id );
+	$req->set_param( 'id', $mission_id );
 	$req->set_param( 'target', 2500 );
-	$resp = $goals_ctrl->handle_update( $req );
+	$resp = $missions_ctrl->handle_update( $req );
 	check( 'update changes the target', near( 2500, $resp->get_data()['data']['target'] ) );
 
 	// 5.7 Public progress payload (P07-T03) against a live cart line.
@@ -317,15 +317,15 @@ try {
 
 	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/progress' );
 	$resp = $frontend_ctrl->handle_progress( $req, $cart );
-	$goals_out = $resp->get_data()['data']['goals'];
+	$missions_out = $resp->get_data()['data']['missions'];
 
 	$found = null;
-	foreach ( $goals_out as $entry ) {
-		if ( 'REST Test Goal' === $entry['goal_name'] ) {
+	foreach ( $missions_out as $entry ) {
+		if ( 'REST Test Mission' === $entry['mission_name'] ) {
 			$found = $entry;
 		}
 	}
-	check( 'progress includes the created goal', null !== $found );
+	check( 'progress includes the created mission', null !== $found );
 	check( 'progress current from cart line', null !== $found && near( 200, $found['current'] ) );
 	check( 'progress percentage (200/2500)', null !== $found && near( 8, $found['percentage'] ) );
 	check( 'progress completed false', null !== $found && false === $found['completed'] );
@@ -333,7 +333,7 @@ try {
 	check( 'progress reward shape', null !== $found && 'percent_discount' === $found['reward']['type'] );
 	check( 'progress icon key present', null !== $found && array_key_exists( 'icon', $found ) && '' === $found['icon'] );
 	check( 'progress template key present', null !== $found && array_key_exists( 'template', $found ) );
-	check( 'progress template from goal display settings', null !== $found && 'template-2' === $found['template'] );
+	check( 'progress template from mission display settings', null !== $found && 'template-2' === $found['template'] );
 	check( 'progress template normalized to enum', null !== $found && in_array(
 		$found['template'],
 		array( 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6' ),
@@ -349,33 +349,33 @@ try {
 	check( 'progress currency present', '' !== $resp->get_data()['data']['currency'] || is_string( $resp->get_data()['data']['currency'] ) );
 
 	// 5.8 Delete it.
-	$req  = new \WP_REST_Request( 'DELETE', '/faracart/v1/goals/' . $goal_id );
-	$req->set_param( 'id', $goal_id );
-	$resp = $goals_ctrl->handle_delete( $req );
+	$req  = new \WP_REST_Request( 'DELETE', '/faracart/v1/missions/' . $mission_id );
+	$req->set_param( 'id', $mission_id );
+	$resp = $missions_ctrl->handle_delete( $req );
 	check( 'delete reports deleted', true === $resp->get_data()['data']['deleted'] );
 
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals/' . $goal_id );
-	$req->set_param( 'id', $goal_id );
-	$resp = $goals_ctrl->handle_get( $req );
-	check( 'deleted goal returns 404', is_wp_error( $resp ) && 404 === $resp->get_error_data()['status'] );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions/' . $mission_id );
+	$req->set_param( 'id', $mission_id );
+	$resp = $missions_ctrl->handle_get( $req );
+	check( 'deleted mission returns 404', is_wp_error( $resp ) && 404 === $resp->get_error_data()['status'] );
 
 	// 5.9 Missing-resource errors are predictable (404, no write).
-	$req  = new \WP_REST_Request( 'DELETE', '/faracart/v1/goals/99999999' );
+	$req  = new \WP_REST_Request( 'DELETE', '/faracart/v1/missions/99999999' );
 	$req->set_param( 'id', 99999999 );
-	$resp = $goals_ctrl->handle_delete( $req );
-	check( 'delete of missing goal → 404', is_wp_error( $resp ) && 404 === $resp->get_error_data()['status'] );
+	$resp = $missions_ctrl->handle_delete( $req );
+	check( 'delete of missing mission → 404', is_wp_error( $resp ) && 404 === $resp->get_error_data()['status'] );
 
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals/99999999' );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions/99999999' );
 	$req->set_param( 'id', 99999999 );
-	$resp = $goals_ctrl->handle_get( $req );
-	check( 'get of missing goal → 404', is_wp_error( $resp ) && 404 === $resp->get_error_data()['status'] );
+	$resp = $missions_ctrl->handle_get( $req );
+	check( 'get of missing mission → 404', is_wp_error( $resp ) && 404 === $resp->get_error_data()['status'] );
 
 	// 5.10 End-to-end server dispatch of the public progress route.
 	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/progress' );
 	$resp = $server->dispatch( $req );
 	check( 'public progress dispatches (not an error)', ! is_wp_error( $resp ) );
 	$data = $resp->get_data();
-	check( 'dispatched progress has data.goals', isset( $data['data']['goals'] ) && is_array( $data['data']['goals'] ) );
+	check( 'dispatched progress has data.missions', isset( $data['data']['missions'] ) && is_array( $data['data']['missions'] ) );
 
 	// 5.11 Settings save success (rolled back with the transaction).
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
@@ -426,54 +426,54 @@ try {
 	check( 'created campaign id > 0', $campaign_id > 0 );
 	check( 'created campaign name matches', 'Summer Sale' === $data['data']['name'] );
 	check( 'created campaign priority persisted', 5 === $data['data']['priority'] );
-	check( 'created campaign has 0 milestones', 0 === $data['data']['goal_count'] );
+	check( 'created campaign has 0 milestones', 0 === $data['data']['mission_count'] );
 
 	// Name-less create fails predictably (repository returns 0 → 500).
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/campaigns' );
 	$resp = $campaigns_ctrl->handle_create( $req );
 	check( 'campaign create without name → 500', is_wp_error( $resp ) && 500 === $resp->get_error_data()['status'] );
 
-	// Assign two goals as milestones (ordered).
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
+	// Assign two missions as milestones (ordered).
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
 	$req->set_param( 'name', 'Campaign Milestone One' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 100 );
-	$resp = $goals_ctrl->handle_create( $req );
+	$resp = $missions_ctrl->handle_create( $req );
 	$milestone_one = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $milestone_one;
 
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
 	$req->set_param( 'name', 'Campaign Milestone Two' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 200 );
-	$resp = $goals_ctrl->handle_create( $req );
+	$resp = $missions_ctrl->handle_create( $req );
 	$milestone_two = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $milestone_two;
 
 	$req = new \WP_REST_Request( 'PUT', '/faracart/v1/campaigns/' . $campaign_id );
 	$req->set_param( 'id', $campaign_id );
-	$req->set_param( 'goals', array( $milestone_one, $milestone_two ) );
+	$req->set_param( 'missions', array( $milestone_one, $milestone_two ) );
 	$resp = $campaigns_ctrl->handle_update( $req );
 	$data = $resp->get_data();
-	check( 'campaign update returns envelope', isset( $data['data']['goals'] ) );
-	check( 'campaign has 2 milestones', 2 === $data['data']['goal_count'] );
-	check( 'milestone order one first', $milestone_one === $data['data']['goals'][0]['id'] );
-	check( 'milestone order two second', $milestone_two === $data['data']['goals'][1]['id'] );
-	check( 'milestone menu_order persisted', 1 === $data['data']['goals'][0]['menu_order'] );
+	check( 'campaign update returns envelope', isset( $data['data']['missions'] ) );
+	check( 'campaign has 2 milestones', 2 === $data['data']['mission_count'] );
+	check( 'milestone order one first', $milestone_one === $data['data']['missions'][0]['id'] );
+	check( 'milestone order two second', $milestone_two === $data['data']['missions'][1]['id'] );
+	check( 'milestone menu_order persisted', 1 === $data['data']['missions'][0]['menu_order'] );
 
 	// Reorder milestones (2 → 1).
 	$req = new \WP_REST_Request( 'PUT', '/faracart/v1/campaigns/' . $campaign_id );
 	$req->set_param( 'id', $campaign_id );
-	$req->set_param( 'goals', array( $milestone_two, $milestone_one ) );
+	$req->set_param( 'missions', array( $milestone_two, $milestone_one ) );
 	$resp = $campaigns_ctrl->handle_update( $req );
 	$data = $resp->get_data();
-	check( 'milestone reorder swaps order', $milestone_two === $data['data']['goals'][0]['id'] );
+	check( 'milestone reorder swaps order', $milestone_two === $data['data']['missions'][0]['id'] );
 
-	// Goal detail reflects the campaign assignment.
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals/' . $milestone_one );
+	// Mission detail reflects the campaign assignment.
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions/' . $milestone_one );
 	$req->set_param( 'id', $milestone_one );
-	$resp = $goals_ctrl->handle_get( $req );
-	check( 'goal kept campaign_id', $campaign_id === $resp->get_data()['data']['campaign_id'] );
+	$resp = $missions_ctrl->handle_get( $req );
+	check( 'mission kept campaign_id', $campaign_id === $resp->get_data()['data']['campaign_id'] );
 
 	// Duplicate the campaign: copy starts inactive, milestones copied.
 	$req  = new \WP_REST_Request( 'POST', '/faracart/v1/campaigns/' . $campaign_id . '/duplicate' );
@@ -484,10 +484,10 @@ try {
 	check( 'campaign duplicate creates a new id', (int) $copy['id'] !== $campaign_id );
 	check( 'campaign duplicate name has copy suffix', false !== strpos( $copy['name'], '(copy)' ) );
 	check( 'campaign duplicate starts inactive', 'inactive' === $copy['status'] );
-	check( 'campaign duplicate copied milestones', 2 === $copy['goal_count'] );
-	check( 'campaign duplicate keeps milestone order', $copy['goals'][0]['id'] !== $copy['goals'][1]['id'] );
+	check( 'campaign duplicate copied milestones', 2 === $copy['mission_count'] );
+	check( 'campaign duplicate keeps milestone order', $copy['missions'][0]['id'] !== $copy['missions'][1]['id'] );
 
-	// Deleting the original detaches its goals (they survive).
+	// Deleting the original detaches its missions (they survive).
 	$req  = new \WP_REST_Request( 'DELETE', '/faracart/v1/campaigns/' . $campaign_id );
 	$req->set_param( 'id', $campaign_id );
 	$resp = $campaigns_ctrl->handle_delete( $req );
@@ -517,44 +517,44 @@ try {
 	);
 	$campaign_id = (int) $wpdb->insert_id;
 
-	$repo  = $container->get( \FaraCart\Goals\GoalRepository::class );
-	$req   = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
-	$req->set_param( 'name', 'REST Campaign Goal' );
+	$repo  = $container->get( \FaraCart\Missions\MissionRepository::class );
+	$req   = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
+	$req->set_param( 'name', 'REST Campaign Mission' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 100 );
 	$req->set_param( 'campaign_id', $campaign_id );
-	$resp    = $goals_ctrl->handle_create( $req );
+	$resp    = $missions_ctrl->handle_create( $req );
 	$cg_id   = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $cg_id;
 
 	check( 'admin get shows stored status', 'active' === $repo->get( $cg_id )['status'] );
 	check( 'engine find folds inactive campaign', null !== $repo->find( $cg_id ) && false === $repo->find( $cg_id )->is_active() );
 
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals/' . $cg_id );
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions/' . $cg_id );
 	$req->set_param( 'id', $cg_id );
-	$resp = $goals_ctrl->handle_get( $req );
+	$resp = $missions_ctrl->handle_get( $req );
 	check( 'REST detail shows stored status', 'active' === $resp->get_data()['data']['status'] );
 	check( 'REST detail keeps campaign_id', $campaign_id === $resp->get_data()['data']['campaign_id'] );
 
 	// 5.15 Partial-update regression: a status-only toggle (exactly what
-	// the Goals/Campaigns list switches send) must NOT overwrite untouched
+	// the Missions/Campaigns list switches send) must NOT overwrite untouched
 	// fields. WP_REST_Server applies schema defaults to params the client
 	// did not send during sanitization, so a dispatched { status } toggle
 	// used to write target 0, campaign_id null, reward_type null, children
 	// [] … — the update schemas are default-free so only sent keys are
 	// written. Dispatched through the server (direct handler calls bypass
 	// sanitize_params and never saw the defaults).
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
-	$req->set_param( 'name', 'Toggle Regression Goal' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
+	$req->set_param( 'name', 'Toggle Regression Mission' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 1000 );
 	$req->set_param( 'reward_type', 'percent_discount' );
 	$req->set_param( 'reward_value', 10 );
 	$req->set_param( 'campaign_id', $campaign_id );
-	$resp = $goals_ctrl->handle_create( $req );
+	$resp = $missions_ctrl->handle_create( $req );
 	$toggle_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $toggle_id;
-	check( 'toggle regression goal created', $toggle_id > 0 );
+	check( 'toggle regression mission created', $toggle_id > 0 );
 
 	$admin_id = wp_insert_user( array(
 		'user_login' => 'faracart_toggle_admin_' . wp_rand( 1000, 9999 ),
@@ -566,21 +566,21 @@ try {
 
 	wp_set_current_user( (int) $admin_id );
 
-	$req = new \WP_REST_Request( 'PUT', '/faracart/v1/goals/' . $toggle_id );
+	$req = new \WP_REST_Request( 'PUT', '/faracart/v1/missions/' . $toggle_id );
 	$req->set_header( 'Content-Type', 'application/json' );
 	$req->set_body( wp_json_encode( array( 'status' => 'inactive' ) ) );
 	$resp = $server->dispatch( $req );
-	check( 'goal toggle dispatch succeeds (200)', 200 === $resp->get_status() );
+	check( 'mission toggle dispatch succeeds (200)', 200 === $resp->get_status() );
 
 	$data = $resp->get_data()['data'];
-	check( 'goal toggle sets status inactive', 'inactive' === $data['status'] );
-	check( 'goal toggle keeps the target (regression: was 0)', near( 1000, $data['target'] ) );
-	check( 'goal toggle keeps the reward type', 'percent_discount' === $data['reward_type'] );
-	check( 'goal toggle keeps the campaign assignment', $campaign_id === $data['campaign_id'] );
+	check( 'mission toggle sets status inactive', 'inactive' === $data['status'] );
+	check( 'mission toggle keeps the target (regression: was 0)', near( 1000, $data['target'] ) );
+	check( 'mission toggle keeps the reward type', 'percent_discount' === $data['reward_type'] );
+	check( 'mission toggle keeps the campaign assignment', $campaign_id === $data['campaign_id'] );
 
 	$stored = $repo->get( $toggle_id );
-	check( 'goal toggle persisted status', 'inactive' === $stored['status'] );
-	check( 'goal toggle persisted target', near( 1000, (float) $stored['target'] ) );
+	check( 'mission toggle persisted status', 'inactive' === $stored['status'] );
+	check( 'mission toggle persisted target', near( 1000, (float) $stored['target'] ) );
 
 	wp_set_current_user( 0 );
 
@@ -609,7 +609,7 @@ try {
 
 	// Composite conditions are part of the same bug class: the schema
 	// default children => [] used to wipe them on a status toggle.
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
 	$req->set_param( 'name', 'Toggle Regression Composite' );
 	$req->set_param( 'type', 'composite' );
 	$req->set_param( 'target', 10 );
@@ -618,14 +618,14 @@ try {
 		array( 'type' => 'amount', 'target' => 100, 'calculation_mode' => 'subtotal' ),
 		array( 'type' => 'quantity', 'target' => 4 ),
 	) );
-	$resp = $goals_ctrl->handle_create( $req );
+	$resp = $missions_ctrl->handle_create( $req );
 	$composite_id = (int) $resp->get_data()['data']['id'];
 	$created_ids[] = $composite_id;
-	check( 'composite regression goal created', $composite_id > 0 );
+	check( 'composite regression mission created', $composite_id > 0 );
 
 	wp_set_current_user( (int) $admin_id );
 
-	$req = new \WP_REST_Request( 'PUT', '/faracart/v1/goals/' . $composite_id );
+	$req = new \WP_REST_Request( 'PUT', '/faracart/v1/missions/' . $composite_id );
 	$req->set_header( 'Content-Type', 'application/json' );
 	$req->set_body( wp_json_encode( array( 'status' => 'inactive' ) ) );
 	$resp = $server->dispatch( $req );
@@ -645,11 +645,11 @@ try {
 // ---------------------------------------------------------------------------
 echo "\n== 6. Rollback verification ==\n";
 
-$goals_table = \FaraCart\Database\Schema::table( 'goals' );
+$missions_table = \FaraCart\Database\Schema::table( 'missions' );
 
 foreach ( $created_ids as $id ) {
-	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE id = %d", $id ) );
-	check( "rolled-back goal {$id} is gone", 0 === $count );
+	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$missions_table} WHERE id = %d", $id ) );
+	check( "rolled-back mission {$id} is gone", 0 === $count );
 }
 
 $campaigns_table = \FaraCart\Database\Schema::table( 'campaigns' );
@@ -662,8 +662,8 @@ foreach ( $created_campaign_ids as $id ) {
 $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$campaigns_table} WHERE name = %s", 'Summer Sale' ) );
 check( 'no rolled-back campaign remains by name', 0 === $count );
 
-$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE name = %s", 'REST Test Goal' ) );
-check( 'no rolled-back goal remains by name', 0 === $count );
+$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$missions_table} WHERE name = %s", 'REST Test Mission' ) );
+check( 'no rolled-back mission remains by name', 0 === $count );
 
 if ( ! is_wp_error( $admin_id ?? 0 ) && ( $admin_id ?? 0 ) > 0 ) {
 	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->users} WHERE ID = %d", (int) $admin_id ) );

@@ -7,9 +7,9 @@
 
 namespace FaraCart\Suggestions;
 
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -17,18 +17,18 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class SuggestionEngine
  *
- * Phase 14 (Smart Product Suggestions) — turns goal progress into product
- * recommendations that close the gap. Given a Goal + GoalResult + the
+ * Phase 14 (Smart Product Suggestions) — turns mission progress into product
+ * recommendations that close the gap. Given a Mission + MissionResult + the
  * CartContext it gathers candidate products from six sources, filters to
  * suggestible products (published, in stock, priced, not already in the
- * cart), ranks them by goal eligibility, relevance, WooCommerce-endorsed
+ * cart), ranks them by mission eligibility, relevance, WooCommerce-endorsed
  * sources and price proximity to the remaining amount, and returns a
  * capped list for the frontend payload.
  *
  * Sources (P14-T02), in candidate-gathering order:
  *
- *   1. manual          — the goal's own `products` (they count toward it)
- *   2. category        — products in the goal's `categories` (category goals)
+ *   1. manual          — the mission's own `products` (they count toward it)
+ *   2. category        — products in the mission's `categories` (category missions)
  *   3. upsell          — `_upsell_ids` of the cart's items
  *   4. cross_sell      — `_crosssell_ids` of the cart's items
  *   5. related         — wc_get_related_products() of the cart's items
@@ -36,14 +36,14 @@ defined( 'ABSPATH' ) || exit;
  *   7. best_seller     — top by total_sales (fallback filler, ranks low)
  *
  * Ranking (P14-T03): stock availability filters first; then a score is
- * built from goal eligibility (explicit products +3, goal category +2,
+ * built from mission eligibility (explicit products +3, mission category +2,
  * shares a cart item's category +1, WC-endorsed source +0.5) and, for
- * money goals, price proximity to `remaining` — products priced in the
+ * money missions, price proximity to `remaining` — products priced in the
  * 0.6–1.4× band score +2 (the spec's "prefer 150K–220K when 180K is
  * left"), cheaper items +0.75, and far-away expensive items nothing.
  *
  * Suggestions only make sense while there is a gap to close: completed or
- * ineligible goals return an empty list. The final list is filterable via
+ * ineligible missions return an empty list. The final list is filterable via
  * `faracart_suggestions` (Phase 28 developer API). Margin-aware and
  * AI-ranked recommendations remain roadmap futures (P14-T05).
  *
@@ -54,7 +54,7 @@ defined( 'ABSPATH' ) || exit;
 final class SuggestionEngine {
 
 	/**
-	 * Maximum suggestions returned per goal.
+	 * Maximum suggestions returned per mission.
 	 *
 	 * @var int
 	 */
@@ -123,28 +123,28 @@ final class SuggestionEngine {
 	}
 
 	/**
-	 * Suggest products that help reach the goal.
+	 * Suggest products that help reach the mission.
 	 *
-	 * @param Goal       $goal    Goal.
-	 * @param GoalResult $result  Evaluation result.
+	 * @param Mission       $mission    Mission.
+	 * @param MissionResult $result  Evaluation result.
 	 * @param CartContext $context Cart snapshot.
 	 * @return array<int, array<string, mixed>> Suggested products, ranked.
 	 */
-	public function suggest( Goal $goal, GoalResult $result, CartContext $context ) {
+	public function suggest( Mission $mission, MissionResult $result, CartContext $context ) {
 		if ( ! $result->eligible() || $result->completed() || $result->remaining() <= 0 ) {
 			return array();
 		}
 
-		$candidates = $this->candidates( $goal, $context );
+		$candidates = $this->candidates( $mission, $context );
 
 		if ( empty( $candidates ) ) {
 			return array();
 		}
 
 		$in_cart    = $this->cart_product_ids( $context );
-		$is_money   = $goal->is_money_goal();
+		$is_money   = $mission->is_money_mission();
 		$remaining  = (float) $result->remaining();
-		$excluded   = array_flip( $goal->excluded_products() );
+		$excluded   = array_flip( $mission->excluded_products() );
 
 		$scored = array();
 
@@ -160,7 +160,7 @@ final class SuggestionEngine {
 			$scored[] = array(
 				'product' => $product,
 				'source'  => $candidates[ $id ],
-				'score'   => $this->score( $product, $goal, $context, $candidates[ $id ], $is_money, $remaining ),
+				'score'   => $this->score( $product, $mission, $context, $candidates[ $id ], $is_money, $remaining ),
 			);
 		}
 
@@ -180,14 +180,14 @@ final class SuggestionEngine {
 		}
 
 		/**
-		 * Filters the suggestions for a goal before they reach the payload.
+		 * Filters the suggestions for a mission before they reach the payload.
 		 *
 		 * @param array      $items   Shaped suggestion items.
-		 * @param Goal       $goal    Goal.
-		 * @param GoalResult $result  Evaluation result.
+		 * @param Mission       $mission    Mission.
+		 * @param MissionResult $result  Evaluation result.
 		 * @param CartContext $context Cart snapshot.
 		 */
-		return (array) apply_filters( 'faracart_suggestions', $items, $goal, $result, $context );
+		return (array) apply_filters( 'faracart_suggestions', $items, $mission, $result, $context );
 	}
 
 	/**
@@ -195,11 +195,11 @@ final class SuggestionEngine {
 	 *
 	 * Each id keeps its first (highest-priority) source for the badge.
 	 *
-	 * @param Goal        $goal    Goal.
+	 * @param Mission        $mission    Mission.
 	 * @param CartContext $context Cart snapshot.
 	 * @return array<int, string> Product id => source key.
 	 */
-	protected function candidates( Goal $goal, CartContext $context ) {
+	protected function candidates( Mission $mission, CartContext $context ) {
 		$candidates = array();
 
 		$add = function ( array $ids, $source ) use ( &$candidates ) {
@@ -210,12 +210,12 @@ final class SuggestionEngine {
 			}
 		};
 
-		// 1. Manual: the goal's own products count toward it.
-		$add( $goal->products(), self::SOURCE_MANUAL );
+		// 1. Manual: the mission's own products count toward it.
+		$add( $mission->products(), self::SOURCE_MANUAL );
 
-		// 2. Category goals: products inside the goal's categories.
-		if ( ! empty( $goal->categories() ) ) {
-			$add( $this->category_product_ids( $goal->categories() ), self::SOURCE_CATEGORY );
+		// 2. Category missions: products inside the mission's categories.
+		if ( ! empty( $mission->categories() ) ) {
+			$add( $this->category_product_ids( $mission->categories() ), self::SOURCE_CATEGORY );
 		}
 
 		// 3–5. Cart items' upsells, cross-sells and related products.
@@ -247,24 +247,24 @@ final class SuggestionEngine {
 	 * Score a candidate product.
 	 *
 	 * @param \WC_Product $product   Product.
-	 * @param Goal        $goal      Goal.
+	 * @param Mission        $mission      Mission.
 	 * @param CartContext $context   Cart snapshot.
 	 * @param string      $source    Source key.
-	 * @param bool        $is_money  Whether the goal measures money.
-	 * @param float       $remaining Remaining amount to the goal.
+	 * @param bool        $is_money  Whether the mission measures money.
+	 * @param float       $remaining Remaining amount to the mission.
 	 * @return float
 	 */
-	protected function score( \WC_Product $product, Goal $goal, CartContext $context, $source, $is_money, $remaining ) {
+	protected function score( \WC_Product $product, Mission $mission, CartContext $context, $source, $is_money, $remaining ) {
 		$score = 0.0;
 		$id    = $product->get_id();
 
 		// Manual priority: explicitly selected products rank first.
-		if ( in_array( $id, $goal->products(), true ) ) {
+		if ( in_array( $id, $mission->products(), true ) ) {
 			$score += 3.0;
 		}
 
-		// Goal eligibility: the product counts toward the goal.
-		if ( $this->counts_toward_goal( $product, $goal ) ) {
+		// Mission eligibility: the product counts toward the mission.
+		if ( $this->counts_toward_mission( $product, $mission ) ) {
 			$score += 2.0;
 		}
 
@@ -358,24 +358,24 @@ final class SuggestionEngine {
 	}
 
 	/**
-	 * Whether the product counts toward the goal (eligibility bonus).
+	 * Whether the product counts toward the mission (eligibility bonus).
 	 *
 	 * @param \WC_Product $product Product.
-	 * @param Goal        $goal    Goal.
+	 * @param Mission        $mission    Mission.
 	 * @return bool
 	 */
-	protected function counts_toward_goal( \WC_Product $product, Goal $goal ) {
-		if ( in_array( $product->get_id(), $goal->products(), true ) ) {
+	protected function counts_toward_mission( \WC_Product $product, Mission $mission ) {
+		if ( in_array( $product->get_id(), $mission->products(), true ) ) {
 			return true;
 		}
 
-		if ( empty( $goal->categories() ) ) {
+		if ( empty( $mission->categories() ) ) {
 			return false;
 		}
 
 		$product_categories = $product->get_category_ids();
 
-		foreach ( $goal->categories() as $category_id ) {
+		foreach ( $mission->categories() as $category_id ) {
 			if ( in_array( (int) $category_id, $product_categories, true ) ) {
 				return true;
 			}

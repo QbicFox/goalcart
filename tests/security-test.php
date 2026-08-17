@@ -29,7 +29,7 @@
  *      day-by-day loop), and schema hygiene (expected indexes and the
  *      ON DELETE SET NULL foreign keys are present)
  *
- * Read-only like the other suites: the only writes (goal rows, tracked
+ * Read-only like the other suites: the only writes (mission rows, tracked
  * events, rate-limit transients) happen inside a single database
  * transaction that is rolled back, transient keys are deleted
  * explicitly, and the absence of any residue is asserted afterwards. No
@@ -65,11 +65,11 @@ require dirname( __DIR__ ) . '/ravis-faracart.php';
 use FaraCart\Analytics\AnalyticsRepository;
 use FaraCart\Analytics\Tracker;
 use FaraCart\Frontend\ProgressUI;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\Hooks\HookManager;
 use FaraCart\REST\BaseController;
 use FaraCart\REST\FrontendController;
-use FaraCart\REST\GoalsController;
+use FaraCart\REST\MissionsController;
 use FaraCart\REST\TrackController;
 
 $failures = 0;
@@ -94,7 +94,7 @@ if ( ! did_action( 'faracart_security_test_ready' ) ) {
 
 $container = \FaraCart\Plugin::instance()->container();
 
-$goals_ctrl     = $container->get( GoalsController::class );
+$missions_ctrl     = $container->get( MissionsController::class );
 $frontend_ctrl  = $container->get( FrontendController::class );
 $track_ctrl     = $container->get( TrackController::class );
 $settings       = $container->get( \FaraCart\Settings\Settings::class );
@@ -150,7 +150,7 @@ check( 'every faracart/v1 route has a permission callback', 0 === $missing && $p
 
 // Anonymous dispatch is rejected with 403 on every admin route.
 foreach ( array(
-	'GET /faracart/v1/goals',
+	'GET /faracart/v1/missions',
 	'GET /faracart/v1/settings',
 	'GET /faracart/v1/campaigns',
 	'GET /faracart/v1/analytics',
@@ -190,7 +190,7 @@ check( 'bad nonce rejected (403)', 403 === $resp->get_status() );
 // ---------------------------------------------------------------------------
 echo "\n== 3. Rate limiting (P22-T02) ==\n";
 
-$rl_req = new \WP_REST_Request( 'GET', '/faracart/v1/goals' );
+$rl_req = new \WP_REST_Request( 'GET', '/faracart/v1/missions' );
 
 check( 'admin limiter allows first request', true === $rate->call_rate_limit( $rl_req, 2, 600 ) );
 check( 'admin limiter allows second request', true === $rate->call_rate_limit( $rl_req, 2, 600 ) );
@@ -199,7 +199,7 @@ $third = $rate->call_rate_limit( $rl_req, 2, 600 );
 check( 'admin limiter blocks third request (429)', is_wp_error( $third ) && 429 === $third->get_error_data()['status'] );
 
 // Cleanup the admin bucket.
-$key = 'faracart_rl_' . md5( get_current_user_id() . '|/faracart/v1/goals' );
+$key = 'faracart_rl_' . md5( get_current_user_id() . '|/faracart/v1/missions' );
 delete_transient( $key );
 
 $ip_req = new \WP_REST_Request( 'GET', '/faracart/v1/progress' );
@@ -221,7 +221,7 @@ echo "\n== 4. Sanitization and escaping (P22-T01) ==\n";
 
 // Composite children are whitelisted recursively: unknown keys dropped,
 // strings sanitized, ids positive-int-cast, nested children recursed.
-$children = $goals_ctrl->sanitize_children(
+$children = $missions_ctrl->sanitize_children(
 	array(
 		array(
 			'name'        => '<b>Child</b>',
@@ -241,7 +241,7 @@ check( 'children name sanitized (no tags)', false === strpos( $children[0]['name
 check( 'children ids positive-int-cast', array( 1, 7 ) === $children[0]['categories'] );
 check( 'children recurse into nested children', isset( $children[0]['children'][0]['name'] ) && 'Grandchild' === $children[0]['children'][0]['name'] );
 check( 'children nested node sanitized', false === strpos( $children[0]['children'][0]['name'], '<' ) );
-check( 'non-array children collapses to empty', array() === $goals_ctrl->sanitize_children( 'bogus' ) );
+check( 'non-array children collapses to empty', array() === $missions_ctrl->sanitize_children( 'bogus' ) );
 
 // Widget container output is escaped: a hostile id cannot break out of
 // the attribute, and the configured CSS class is attribute-escaped.
@@ -262,7 +262,7 @@ check( 'widget variant normalized to full', false !== strpos( $ui->widget_contai
 // ---------------------------------------------------------------------------
 echo "\n== 5. Database hardening (P22-T04) ==\n";
 
-$goals_table = \FaraCart\Database\Schema::table( 'goals' );
+$missions_table = \FaraCart\Database\Schema::table( 'missions' );
 $created_ids = array();
 
 $wpdb->query( 'START TRANSACTION' );
@@ -270,13 +270,13 @@ $wpdb->query( 'START TRANSACTION' );
 try {
 	// 5.1 Injection-resistant filters: a crafted search/status neither
 	// errors nor widens the result set.
-	$repo = $container->get( GoalRepository::class );
+	$repo = $container->get( MissionRepository::class );
 
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
-	$req->set_param( 'name', 'Unique Security Test Goal' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
+	$req->set_param( 'name', 'Unique Security Test Mission' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 100 );
-	$resp = $goals_ctrl->handle_create( $req );
+	$resp = $missions_ctrl->handle_create( $req );
 	$created_ids[] = (int) $resp->get_data()['data']['id'];
 
 	$injected = $repo->all(
@@ -305,7 +305,7 @@ try {
 	$session = str_repeat( 'a', 32 );
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/track' );
 	$req->set_param( 'event_type', 'goal_progress' );
-	$req->set_param( 'goal_id', 0 );
+	$req->set_param( 'mission_id', 0 );
 	$req->set_param( 'campaign_id', 0 );
 	$req->set_param( 'product_id', 0 );
 	$req->set_param( 'cart_value', -500 );
@@ -363,29 +363,29 @@ $table_indexes = function ( $table ) use ( $wpdb ) {
 $campaigns_table = \FaraCart\Database\Schema::table( 'campaigns' );
 $events_table    = \FaraCart\Database\Schema::table( 'analytics_events' );
 
-$goal_indexes     = $table_indexes( $goals_table );
+$mission_indexes     = $table_indexes( $missions_table );
 $campaign_indexes = $table_indexes( $campaigns_table );
 $event_indexes    = $table_indexes( $events_table );
 
-check( 'goals table indexed on status', in_array( 'status', $goal_indexes, true ) );
-check( 'goals table indexed on type', in_array( 'type', $goal_indexes, true ) );
-check( 'goals table indexed on campaign_id', in_array( 'campaign_id', $goal_indexes, true ) );
-check( 'goals table indexed on priority', in_array( 'priority', $goal_indexes, true ) );
+check( 'missions table indexed on status', in_array( 'status', $mission_indexes, true ) );
+check( 'missions table indexed on type', in_array( 'type', $mission_indexes, true ) );
+check( 'missions table indexed on campaign_id', in_array( 'campaign_id', $mission_indexes, true ) );
+check( 'missions table indexed on priority', in_array( 'priority', $mission_indexes, true ) );
 check( 'campaigns table indexed on status', in_array( 'status', $campaign_indexes, true ) );
 check( 'campaigns table indexed on schedule', in_array( 'starts_at', $campaign_indexes, true ) && in_array( 'ends_at', $campaign_indexes, true ) );
 check( 'events table indexed on event_type', in_array( 'event_type', $event_indexes, true ) );
 check( 'events table indexed on session_id', in_array( 'session_id', $event_indexes, true ) );
 check( 'events table indexed on created_at', in_array( 'created_at', $event_indexes, true ) );
-check( 'events table composite goal_event index', in_array( 'goal_event', $event_indexes, true ) );
+check( 'events table composite mission_event index', in_array( 'mission_event', $event_indexes, true ) );
 
 // 5.5 The ON DELETE SET NULL foreign keys are present (safe deletion of
-// goals/campaigns never strands or cascades analytics history).
+// missions/campaigns never strands or cascades analytics history).
 $fk_rows = $wpdb->get_results(
 	$wpdb->prepare(
 		"SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
 		 WHERE CONSTRAINT_SCHEMA = %s AND TABLE_NAME IN (%s, %s, %s) AND CONSTRAINT_TYPE = 'FOREIGN KEY'",
 		$wpdb->dbname,
-		$goals_table,
+		$missions_table,
 		$campaigns_table,
 		$events_table
 	),
@@ -398,8 +398,8 @@ foreach ( (array) $fk_rows as $row ) {
 	$fk_names[] = $row['CONSTRAINT_NAME'];
 }
 
-check( 'goals→campaigns FK present', in_array( 'fk_faracart_goals_campaign', $fk_names, true ) );
-check( 'events→goals FK present', in_array( 'fk_faracart_analytics_goal', $fk_names, true ) );
+check( 'missions→campaigns FK present', in_array( 'fk_faracart_missions_campaign', $fk_names, true ) );
+check( 'events→missions FK present', in_array( 'fk_faracart_analytics_mission', $fk_names, true ) );
 check( 'events→campaigns FK present', in_array( 'fk_faracart_analytics_campaign', $fk_names, true ) );
 
 // ---------------------------------------------------------------------------
@@ -413,8 +413,8 @@ $option_before   = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$w
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
-	$req->set_param( 'name', 'Redaction Security Goal' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
+	$req->set_param( 'name', 'Redaction Security Mission' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 1000 );
 	$req->set_param( 'reward_type', 'coupon' );
@@ -437,15 +437,15 @@ try {
 		'limits',
 		array( 'uses_per_customer' => 1 )
 	);
-	$resp = $goals_ctrl->handle_create( $req );
-	$goal_id = (int) $resp->get_data()['data']['id'];
-	$created_ids[] = $goal_id;
+	$resp = $missions_ctrl->handle_create( $req );
+	$mission_id = (int) $resp->get_data()['data']['id'];
+	$created_ids[] = $mission_id;
 
 	// The admin detail payload (manage_options contract) may carry the
 	// full reward configuration...
-	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/goals/' . $goal_id );
-	$req->set_param( 'id', $goal_id );
-	$admin_payload = $goals_ctrl->handle_get( $req )->get_data()['data'];
+	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/missions/' . $mission_id );
+	$req->set_param( 'id', $mission_id );
+	$admin_payload = $missions_ctrl->handle_get( $req )->get_data()['data'];
 	check( 'admin detail keeps reward_meta', isset( $admin_payload['reward_meta']['coupon_code'] ) );
 
 	// ...but the public progress payload must never echo it.
@@ -551,15 +551,15 @@ check( 'frontend JS renders via textContent', false !== strpos( $frontend_js, 't
 echo "\n== 8. Rollback verification ==\n";
 
 foreach ( $created_ids as $id ) {
-	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE id = %d", $id ) );
-	check( "rolled-back goal {$id} is gone", 0 === $count );
+	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$missions_table} WHERE id = %d", $id ) );
+	check( "rolled-back mission {$id} is gone", 0 === $count );
 }
 
-$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE name = %s", 'Redaction Security Goal' ) );
-check( 'no redaction goal remains by name', 0 === $count );
+$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$missions_table} WHERE name = %s", 'Redaction Security Mission' ) );
+check( 'no redaction mission remains by name', 0 === $count );
 
-$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE name = %s", 'Unique Security Test Goal' ) );
-check( 'no injection-test goal remains by name', 0 === $count );
+$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$missions_table} WHERE name = %s", 'Unique Security Test Mission' ) );
+check( 'no injection-test mission remains by name', 0 === $count );
 
 $option_after = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $settings_option ) );
 check( 'settings option unchanged after rollback', $option_before === $option_after );

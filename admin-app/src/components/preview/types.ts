@@ -10,7 +10,7 @@ export type PreviewRewardState = 'auto' | 'locked' | 'unlocked';
 export type PreviewPreset = 'empty' | '25' | '50' | '75' | '100';
 
 /**
- * The preview control state shared by the goal and campaign preview
+ * The preview control state shared by the mission and campaign preview
  * panels. Only the preview-state preset remains user-selectable — the
  * simulated amount/quantity, reward state, device width and template
  * override are gone: the preview renders the form's own configuration
@@ -20,7 +20,7 @@ export interface PreviewControlsValue {
   preset: PreviewPreset;
 }
 
-/** The fraction of the (top) goal target each state preset simulates. */
+/** The fraction of the (top) mission target each state preset simulates. */
 export const PRESET_PERCENTS: Record<PreviewPreset, number> = {
   empty: 0,
   '25': 0.25,

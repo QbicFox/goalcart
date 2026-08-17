@@ -1,8 +1,8 @@
 import { apiFetch } from './client';
 import type {
   CostCoveragePayload,
-  GoalPerformancePayload,
-  GoalRecommendationsPayload,
+  MissionPerformancePayload,
+  MissionRecommendationsPayload,
   RecommendationApplyResult,
   RevenueAttributionPayload,
   RevenueOverviewPayload,
@@ -14,7 +14,7 @@ import type {
 export interface RevenueWindowParams {
   from?: string;
   to?: string;
-  goal_id?: number;
+  mission_id?: number;
 }
 
 /** Params for the upsell analytics list (Phase 33.5 analytics mode). */
@@ -22,9 +22,9 @@ export interface UpsellAnalyticsParams extends RevenueWindowParams {
   limit?: number;
 }
 
-/** Params for `GET /faracart/v1/revenue/goal-recommendations`. */
-export interface GoalRecommendationsParams {
-  goal_id?: number;
+/** Params for `GET /faracart/v1/revenue/mission-recommendations`. */
+export interface MissionRecommendationsParams {
+  mission_id?: number;
   reward_type?: string;
   reward_value?: number;
   reward_max_value?: number;
@@ -74,13 +74,13 @@ export async function fetchRevenueAttribution(
 }
 
 /**
- * Goal Performance rows from `GET /faracart/v1/revenue/goals`
- * (Phase 33.6): per-goal funnel + revenue metrics.
+ * Mission Performance rows from `GET /faracart/v1/revenue/missions`
+ * (Phase 33.6): per-mission funnel + revenue metrics.
  */
-export async function fetchGoalPerformance(
+export async function fetchMissionPerformance(
   params: RevenueWindowParams = {}
-): Promise<GoalPerformancePayload> {
-  return apiFetch<GoalPerformancePayload>(`/revenue/goals${toQuery(params)}`);
+): Promise<MissionPerformancePayload> {
+  return apiFetch<MissionPerformancePayload>(`/revenue/missions${toQuery(params)}`);
 }
 
 /**
@@ -109,32 +109,32 @@ export async function fetchUpsellProduct(
 }
 
 /**
- * Smart goal recommendation payload from
- * `GET /faracart/v1/revenue/goal-recommendations` (Phase 33.4/33.6).
+ * Smart mission recommendation payload from
+ * `GET /faracart/v1/revenue/mission-recommendations` (Phase 33.4/33.6).
  */
-export async function fetchGoalRecommendations(
-  params: GoalRecommendationsParams = {}
-): Promise<GoalRecommendationsPayload> {
-  return apiFetch<GoalRecommendationsPayload>(
-    `/revenue/goal-recommendations${toQuery(params)}`
+export async function fetchMissionRecommendations(
+  params: MissionRecommendationsParams = {}
+): Promise<MissionRecommendationsPayload> {
+  return apiFetch<MissionRecommendationsPayload>(
+    `/revenue/mission-recommendations${toQuery(params)}`
   );
 }
 
 /**
- * Apply a recommended threshold to a goal (UPSELL_REFACTOR §10/§41) via
- * `POST /faracart/v1/revenue/goal-recommendations/apply`. This is the only
- * write path for Recommendations — it changes only the goal's target,
+ * Apply a recommended threshold to a mission (UPSELL_REFACTOR §10/§41) via
+ * `POST /faracart/v1/revenue/mission-recommendations/apply`. This is the only
+ * write path for Recommendations — it changes only the mission's target,
  * records the feedback-loop event and invalidates the revenue caches.
  */
-export async function applyGoalRecommendation(
-  goalId: number,
+export async function applyMissionRecommendation(
+  missionId: number,
   threshold: number
 ): Promise<RecommendationApplyResult> {
   return apiFetch<RecommendationApplyResult>(
-    '/revenue/goal-recommendations/apply',
+    '/revenue/mission-recommendations/apply',
     {
       method: 'POST',
-      body: JSON.stringify({ goal_id: goalId, threshold }),
+      body: JSON.stringify({ mission_id: missionId, threshold }),
     }
   );
 }

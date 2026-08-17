@@ -7,7 +7,7 @@
 
 namespace FaraCart\Settings;
 
-use FaraCart\Goals\Goal;
+use FaraCart\Missions\Mission;
 use FaraCart\Hooks\HookManager;
 
 defined( 'ABSPATH' ) || exit;
@@ -17,8 +17,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * Loads, caches, and persists plugin settings in a single WordPress option.
  * Phase 18 (Settings) ships the full surface: general (currency display,
- * default goal behavior, default calculation basis), frontend (locations,
- * template, animation, mobile behavior), goal calculation (tax / discount /
+ * default mission behavior, default calculation basis), frontend (locations,
+ * template, animation, mobile behavior), mission calculation (tax / discount /
  * shipping / sale / virtual inclusion), performance (caching, analytics,
  * suggestions) and advanced (debug mode, logging, custom CSS, developer
  * hooks). Every default below preserves the pre-Phase-18 behavior, so
@@ -36,7 +36,7 @@ class Settings {
 	const OPTION_NAME = 'faracart_settings';
 
 	/**
-	 * The storefront goal template ids the frontend_template setting
+	 * The storefront mission template ids the frontend_template setting
 	 * accepts. Single source of truth shared by the REST schema
 	 * (SettingsController::save_args), the sanitizer and the read-time
 	 * self-heal, so the three can never drift apart. Only the six current
@@ -46,7 +46,7 @@ class Settings {
 	 *
 	 * @var array<int, string>
 	 */
-	const GOAL_TEMPLATES = array( 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6' );
+	const MISSION_TEMPLATES = array( 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6' );
 
 	/**
 	 * The storefront widget locations the frontend_locations setting
@@ -73,7 +73,7 @@ class Settings {
 	 * * The frontend_* keys are the Phase 12 progress-template surface
  * (template variant + appearance tokens consumed by the storefront
  * widgets and the Appearance admin page). Phase 18 adds the general /
- * goal-calculation / performance / advanced sections without touching
+ * mission-calculation / performance / advanced sections without touching
  * these.
  *
  * @var array<string, mixed>
@@ -88,7 +88,7 @@ class Settings {
 		// widgets, previews, server-rendered messages) — see currency().
 		'currency'              => '',
 		'currency_display'      => 'symbol',           // symbol | code | name
-		'default_goal_behavior' => 'all',              // all | first | closest
+		'default_mission_behavior' => 'all',              // all | first | closest
 		'conflict_resolution'   => 'cumulative',       // cumulative | best | first (Phase 26)
 		'calculation_mode'      => 'subtotal',         // subtotal | discounted_subtotal | total
 
@@ -106,10 +106,10 @@ class Settings {
 		'frontend_radius'       => 10,
 		'frontend_css_class'    => '',
 		'frontend_custom_css'   => '',
-		'frontend_countdown'    => true,               // Phase 32: live countdown chips on goals with an end time.
+		'frontend_countdown'    => true,               // Phase 32: live countdown chips on missions with an end time.
 		'frontend_celebrate'    => true,               // Phase 32: completion celebration animation.
 
-		// Floating widget (the floating goals/campaigns button + drawer).
+		// Floating widget (the floating missions/campaigns button + drawer).
 		// The position preset is the only position control — it picks a
 		// physical side/edge (RTL stable) and the drawer always opens
 		// toward the screen center from it; pixel offsets fine-tune the
@@ -135,7 +135,7 @@ class Settings {
 		'floating_icon'               => '',            // custom glyph/emoji ('' = default)
 		'floating_label'              => '',            // custom tooltip/label ('' = default)
 
-		// Goal Calculation (P18-T03). Each default preserves the
+		// Mission Calculation (P18-T03). Each default preserves the
 		// pre-Phase-18 engine behavior: taxes stay out of the subtotal
 		// bases, discounts count, shipping stays in the total basis, and
 		// sale / virtual items always count.
@@ -160,15 +160,15 @@ class Settings {
 		// legacy frontend_* surface above, so existing stores see no change
 		// until they configure a template explicitly.
 		'template_defaults' => array(
-			'goal'     => '', // '' = legacy frontend_template.
-			'campaign' => '', // '' = no campaign template (per-goal cards).
+			'mission'     => '', // '' = legacy frontend_template.
+			'campaign' => '', // '' = no campaign template (per-mission cards).
 		),
 		'template_settings' => array(
-			'goal'     => array(),
+			'mission'     => array(),
 			'campaign' => array(),
 		),
 		'template_versions' => array(
-			'goal'     => array(),
+			'mission'     => array(),
 			'campaign' => array(),
 		),
 
@@ -188,9 +188,9 @@ class Settings {
 	/** * Register settings hooks.
  *
  * Phase 18 wires the settings into behavior here: the store-wide default
- * money basis (calculation_mode) applies to any goal that does not pin
+ * money basis (calculation_mode) applies to any mission that does not pin
  * its own mode, through the faracart_default_calculation_mode filter
- * (Goal::default_calculation_mode). The remaining settings are read
+ * (Mission::default_calculation_mode). The remaining settings are read
  * directly by their consumers (ProgressUI, FrontendController,
  * CartIntegration, Tracker) through the same service instance.
  *
@@ -209,27 +209,27 @@ class Settings {
 	/**
 	 * Resolve the store-wide default calculation basis.
 	 *
-	 * Applies the Phase 18 `calculation_mode` setting to money-style goal
+	 * Applies the Phase 18 `calculation_mode` setting to money-style mission
 	 * types (amount, category, composite) that do not pin their own mode;
-	 * quantity/distinct-quantity/weight/product goals keep their type
+	 * quantity/distinct-quantity/weight/product missions keep their type
 	 * defaults (they measure items, not money).
 	 *
-	 * @param mixed  $mode Default mode from Goal::default_calculation_mode().
-	 * @param string $type Goal type.
+	 * @param mixed  $mode Default mode from Mission::default_calculation_mode().
+	 * @param string $type Mission type.
 	 * @return string
 	 */
 	public function apply_default_calculation_mode( $mode, $type ) {
 		if ( in_array(
 			(string) $type,
-			array( Goal::TYPE_QUANTITY, Goal::TYPE_DISTINCT_QUANTITY, Goal::TYPE_WEIGHT, Goal::TYPE_PRODUCT ),
+			array( Mission::TYPE_QUANTITY, Mission::TYPE_DISTINCT_QUANTITY, Mission::TYPE_WEIGHT, Mission::TYPE_PRODUCT ),
 			true
 		) ) {
 			return (string) $mode;
 		}
 
-		$configured = $this->get( 'calculation_mode', Goal::MODE_SUBTOTAL );
+		$configured = $this->get( 'calculation_mode', Mission::MODE_SUBTOTAL );
 
-		if ( in_array( $configured, array( Goal::MODE_SUBTOTAL, Goal::MODE_DISCOUNTED_SUBTOTAL, Goal::MODE_TOTAL ), true ) ) {
+		if ( in_array( $configured, array( Mission::MODE_SUBTOTAL, Mission::MODE_DISCOUNTED_SUBTOTAL, Mission::MODE_TOTAL ), true ) ) {
 			return $configured;
 		}
 
@@ -253,10 +253,10 @@ class Settings {
 			// an older version before the sync was removed) is served to the
 			// Settings page and rejected on the next save with a 400.
 			// Falling back to the default keeps every consumer schema-safe —
-			// the TemplateEngine already resolves template_defaults.goal
+			// the TemplateEngine already resolves template_defaults.mission
 			// before frontend_template, so the storefront template
 			// selection is unaffected.
-			if ( ! in_array( (string) $this->settings['frontend_template'], self::GOAL_TEMPLATES, true ) ) {
+			if ( ! in_array( (string) $this->settings['frontend_template'], self::MISSION_TEMPLATES, true ) ) {
 				$this->settings['frontend_template'] = $this->defaults['frontend_template'];
 			}
 
@@ -273,6 +273,20 @@ class Settings {
 			$this->settings['frontend_locations'] = $this->normalize_locations( $this->settings['frontend_locations'] );
 			$this->settings['floating_desktop']   = self::normalize_floating_position( $this->settings['floating_desktop'], $this->defaults['floating_desktop'] );
 			$this->settings['floating_mobile']    = self::normalize_floating_position( $this->settings['floating_mobile'], $this->defaults['floating_mobile'] );
+
+			// Terminology migration (Goal → Mission): stored settings written
+			// by pre-rename versions use the legacy 'goal' scope key and the
+			// default_goal_behavior key. Normalizing on read keeps the stored
+			// values reachable under the canonical names — the settings page
+			// echoes the served (normalized) values back on the next save,
+			// permanently migrating the option without losing data.
+			$this->settings['default_mission_behavior'] = $this->settings['default_goal_behavior'] ?? $this->defaults['default_mission_behavior'];
+
+			foreach ( array( 'template_defaults', 'template_settings', 'template_versions' ) as $group ) {
+				if ( isset( $this->settings[ $group ]['goal'] ) && ! isset( $this->settings[ $group ]['mission'] ) ) {
+					$this->settings[ $group ]['mission'] = $this->settings[ $group ]['goal'];
+				}
+			}
 		}
 
 		return $this->settings;

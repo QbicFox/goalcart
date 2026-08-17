@@ -25,9 +25,9 @@ Key findings:
 
 | Finding | Status |
 | --- | --- |
-| Purchased-order counts (distinct attributed orders) | **Already computed** — `funnel.converted`, `summary.orders`, per-goal `converted`, daily `conversions` |
+| Purchased-order counts (distinct attributed orders) | **Already computed** — `funnel.converted`, `summary.orders`, per-mission `converted`, daily `conversions` |
 | Purchase rate (`converted / completed`) | **Already computed** — `conversion_rate` (same semantic the spec requires) |
-| Attributed sales (direct/incremental) | **Already computed** — `goal_driven_revenue` / `incremental_revenue` |
+| Attributed sales (direct/incremental) | **Already computed** — `mission_driven_revenue` / `incremental_revenue` |
 | AOV impact with "observed, not causal" label | **Already computed** — `aov_analysis()` with `label: 'observed_impact'` |
 | Estimated profit + availability + reason | **Already computed** — `profit_impact`, `profit_available`, `profit_reason` |
 | Reward cost + shipping cost inputs | **Already computed** — `reward_cost`; shipping inside the profit model |
@@ -37,7 +37,7 @@ Key findings:
 | `/analytics` legacy endpoint with purchase/profit fields | **Missing** — only the revenue endpoints expose purchase/profit data (§37 extension) |
 | Deterministic plain-English insight cards | **Missing** — new frontend logic over existing data |
 | Simplified navigation / renamed concepts / progressive disclosure | **Missing** — frontend-only |
-| Goal detail drawer, advanced attribution drawer, funnel ending in "Purchased" | **Missing** — frontend-only (data exists) |
+| Mission detail drawer, advanced attribution drawer, funnel ending in "Purchased" | **Missing** — frontend-only (data exists) |
 | In-plugin product-cost configuration route | **Missing** — cost data is read only from WooCommerce product meta + `faracart_product_cost` filter (spec §10: link out / help panel, no fake DB) |
 
 Bottom line: no new analytics engine, no new attribution logic, no new order scans are
@@ -56,15 +56,15 @@ Storefront events                     Order lifecycle
   upsell_*  (RevenueTracker)           → AttributionEngine::attribute_order()
         │                                          │
         ▼                                          ▼
-  revenue_events (append-only log)     goal_attribution (per order+goal+model,
-        │                                UNIQUE order_goal_model — exactly once)
+  revenue_events (append-only log)     mission_attribution (per order+mission+model,
+        │                                UNIQUE order_mission_model — exactly once)
         ▼                                          ▼
   DailyAggregator (daily cron)     AttributionEngine reads
-  revenue_daily (per goal/day)     funnel / incremental_cart_value /
+  revenue_daily (per mission/day)     funnel / incremental_cart_value /
   upsell_stats (per product)       attribution_summary / aov_analysis /
-        │                          shipping_stats / goal_metrics / daily_metrics
+        │                          shipping_stats / mission_metrics / daily_metrics
         ▼                                          │
-  RevenueRepository (cached, generation-versioned transients) ◀── DailyAggregator + order/goal/product events invalidate
+  RevenueRepository (cached, generation-versioned transients) ◀── DailyAggregator + order/mission/product events invalidate
         │
         ▼
   REST: RevenueController (/revenue/*), AnalyticsController (/analytics),
@@ -85,10 +85,10 @@ are deliberately separate tables and must not be merged.
 
 | Table | Purpose | Relevant columns |
 | --- | --- | --- |
-| `analytics_events` | Phase 16 widget-interaction log | event_type, goal_id, session_id, cart_value |
-| `revenue_events` | Phase 33.1 raw revenue log | event_type, goal_id, order_id, session_id, cart_value, goal_target, incremental_value |
-| `goal_attribution` | Phase 33.2 per-order attribution | order_id, goal_id, model (direct/assisted), order_total, incremental_value, goal_completed |
-| `revenue_daily` | Phase 33.3 daily aggregates | report_date, goal_id, views, progressions, completions, conversions, revenue, incremental_revenue, reward_cost, estimated_profit |
+| `analytics_events` | Phase 16 widget-interaction log | event_type, mission_id, session_id, cart_value |
+| `revenue_events` | Phase 33.1 raw revenue log | event_type, mission_id, order_id, session_id, cart_value, mission_target, incremental_value |
+| `mission_attribution` | Phase 33.2 per-order attribution | order_id, mission_id, model (direct/assisted), order_total, incremental_value, mission_completed |
+| `revenue_daily` | Phase 33.3 daily aggregates | report_date, mission_id, views, progressions, completions, conversions, revenue, incremental_revenue, reward_cost, estimated_profit |
 | `upsell_events` | Phase 33.1 upsell interaction log | event_type, product_id, order_id, session_id |
 | `upsell_stats` | Phase 33.3 per-product aggregates | product_id, impressions, clicks, adds, orders, revenue |
 
@@ -103,13 +103,13 @@ All queries are indexed, `$wpdb->prepare`-bound, bounded
 | --- | --- | --- |
 | `GET /faracart/v1/revenue/overview` | `RevenueController` | summary + incremental_cart_value + aov + shipping + trend |
 | `GET /faracart/v1/revenue/attribution` | `RevenueController` | overview minus trend |
-| `GET /faracart/v1/revenue/goals` | `RevenueController` | `{ items: [per-goal metrics] }` |
-| `GET /faracart/v1/revenue/goal-recommendations` | `RecommendationsController` | recommendation engine payload |
+| `GET /faracart/v1/revenue/missions` | `RevenueController` | `{ items: [per-mission metrics] }` |
+| `GET /faracart/v1/revenue/mission-recommendations` | `RecommendationsController` | recommendation engine payload |
 | `GET /faracart/v1/revenue/upsells` (+`?analytics=1`) | `UpsellController` | ranking / analytics rows |
 | `GET /faracart/v1/revenue/upsells/{product_id}` | `UpsellController` | product score breakdown |
 | `GET /faracart/v1/analytics` | `AnalyticsController` | legacy Phase 17 dashboard payload |
 
-All revenue routes share the same arg schema: `from`/`to` (validated dates), `goal_id`
+All revenue routes share the same arg schema: `from`/`to` (validated dates), `mission_id`
 (≥ 0). Permissions: `manage_options` (filterable), per-user rate limited; public upsell
 track endpoint is nonce-guarded + per-IP rate limited.
 
@@ -118,14 +118,14 @@ track endpoint is nonce-guarded + per-IP rate limited.
 | Route | Component | Data source |
 | --- | --- | --- |
 | `/revenue` | `routes/RevenueOverview.tsx` | `fetchRevenueOverview` |
-| `/revenue/goals` | `routes/GoalPerformance.tsx` | `fetchGoalPerformance` |
+| `/revenue/missions` | `routes/MissionPerformance.tsx` | `fetchMissionPerformance` |
 | `/revenue/attribution` | `routes/AttributionDashboard.tsx` | `fetchRevenueAttribution` |
-| `/revenue/recommendations` | `routes/Recommendations.tsx` | `fetchGoalRecommendations` |
+| `/revenue/recommendations` | `routes/Recommendations.tsx` | `fetchMissionRecommendations` |
 | `/revenue/upsells` | `routes/UpsellAnalytics.tsx` | `fetchUpsellAnalytics` / `fetchUpsellProduct` |
 | `/analytics` | `routes/Analytics.tsx` | `fetchAnalytics` |
 
 Shared infra: `DateRangeContext` (+ `DateRangeFilter`), `RevenueToolbar` (date range +
-goal selector), `FunnelVisual`, `PageContainer`, `EmptyState`, `KpiCard` patterns,
+mission selector), `FunnelVisual`, `PageContainer`, `EmptyState`, `KpiCard` patterns,
 `lib/format.ts` (locale-aware currency/number/percent), MUI + Emotion RTL, `@wordpress/i18n`.
 
 ### 2.5 Existing i18n
@@ -142,13 +142,13 @@ goal selector), `FunnelVisual`, `PageContainer`, `EmptyState`, `KpiCard` pattern
 
 | Service | File | Reuse for |
 | --- | --- | --- |
-| `AttributionEngine` | `includes/Analytics/AttributionEngine.php` | All attribution/funnel/AOV/shipping/profit reads; `funnel()`, `attribution_summary()`, `incremental_cart_value()`, `aov_analysis()`, `shipping_stats()`, `goal_metrics()`, `daily_metrics()` |
-| `RevenueRepository` | `includes/Analytics/RevenueRepository.php` | Cached read layer — overview / goal performance / daily trend / recommendations / upsell analytics. **Never bypass its caching.** |
+| `AttributionEngine` | `includes/Analytics/AttributionEngine.php` | All attribution/funnel/AOV/shipping/profit reads; `funnel()`, `attribution_summary()`, `incremental_cart_value()`, `aov_analysis()`, `shipping_stats()`, `mission_metrics()`, `daily_metrics()` |
+| `RevenueRepository` | `includes/Analytics/RevenueRepository.php` | Cached read layer — overview / mission performance / daily trend / recommendations / upsell analytics. **Never bypass its caching.** |
 | `RewardCostEstimator` | `includes/Analytics/RewardCostEstimator.php` | Reward cost models, product cost/margin reads, `profit_impact()` formula, shipping total |
 | `DailyAggregator` | `includes/Analytics/DailyAggregator.php` | Pre-aggregated `revenue_daily` / `upsell_stats` |
 | `AnalyticsRepository` | `includes/Analytics/AnalyticsRepository.php` | Legacy `/analytics` metrics (keep for compatibility) |
 | `RevenueTracker` | `includes/Analytics/RevenueTracker.php` | Event constants + consent chain (do not duplicate event types) |
-| `GoalRecommendationEngine` | `includes/Analytics/GoalRecommendationEngine.php` | Smart recommendations (§33/34) |
+| `MissionRecommendationEngine` | `includes/Analytics/MissionRecommendationEngine.php` | Smart recommendations (§33/34) |
 | `UpsellRanker` | `includes/Analytics/UpsellRanker.php` | Upsell ranking/analytics (§35) |
 
 ---
@@ -158,28 +158,28 @@ goal selector), `FunnelVisual`, `PageContainer`, `EmptyState`, `KpiCard` pattern
 The spec's §18 definition `conversion_rate = converted / completions` **matches the
 existing implementation exactly** (`AttributionEngine::funnel()`:
 `conversion_rate = $completed > 0 ? converted / completed : null`). "Purchased" is the
-existing `converted` (distinct attributed orders), and "goal completion ≠ purchase" is
+existing `converted` (distinct attributed orders), and "mission completion ≠ purchase" is
 already the engine's core rule (`goal_completed` flag ≠ an associated order).
 
 | Requested metric (Improvement.md) | Existing field | Where |
 | --- | --- | --- |
 | Purchased Orders (store-wide) | `summary.orders` (= `funnel.converted`) | `RevenueRepository::overview()` → `summary` |
 | Purchased Orders (trend) | `trend[].conversions` | `RevenueRepository::daily_trend()` |
-| Purchased Orders (per goal) | `goal_metrics().converted` | `RevenueRepository::goal_performance()` |
-| Purchase Rate | `conversion_rate` (null when 0 completions — the spec's "—" rule already holds) | `funnel()`, `goal_metrics()` |
-| Completion Rate | `completion_rate` (completed/views) | `funnel()`, `goal_metrics()` |
-| Sales attributed to FaraCart | `goal_driven_revenue` (direct incremental) | `attribution_summary()` |
-| Assisted sales | `goal_assisted_revenue` | `attribution_summary()` |
-| Influenced sales | `goal_influenced_revenue` | `attribution_summary()` |
+| Purchased Orders (per mission) | `mission_metrics().converted` | `RevenueRepository::mission_performance()` |
+| Purchase Rate | `conversion_rate` (null when 0 completions — the spec's "—" rule already holds) | `funnel()`, `mission_metrics()` |
+| Completion Rate | `completion_rate` (completed/views) | `funnel()`, `mission_metrics()` |
+| Sales attributed to FaraCart | `mission_driven_revenue` (direct incremental) | `attribution_summary()` |
+| Assisted sales | `mission_assisted_revenue` | `attribution_summary()` |
+| Influenced sales | `mission_influenced_revenue` | `attribution_summary()` |
 | Incremental cart value | `incremental_cart_value.average` (+ baseline, sessions) | `incremental_cart_value()` |
 | AOV impact | `aov_analysis()` (`absolute_change`, `percentage_change`, `overall_aov`, `exposed_aov`, `non_exposed_aov`, `label: 'observed_impact'`) | `aov_analysis()` |
 | Reward cost | `summary.reward_cost` + `reward_cost_available` | `attribution_summary()` |
 | Shipping stats | `shipping_stats()` | overview payload |
 | Estimated profit | `summary.profit_impact` + `profit_available` + `profit_reason` | `attribution_summary()` |
-| Per-goal sales/profit | `goal_metrics().attributed_revenue`, `assisted_revenue`, `reward_cost`, `profit_impact` | `goal_metrics()` |
+| Per-mission sales/profit | `mission_metrics().attributed_revenue`, `assisted_revenue`, `reward_cost`, `profit_impact` | `mission_metrics()` |
 | Data sufficiency | `incremental_cart_value.data_sufficiency` (low/medium/high) | `incremental_cart_value()` |
 | Attribution window / model | `ATTRIBUTION_WINDOW` (30 days), `MODEL_DIRECT`/`MODEL_ASSISTED` | `AttributionEngine` constants |
-| Expected profit (recommendations) | `expected_profit` + `expected_profit_available` | `GoalRecommendationEngine` payload |
+| Expected profit (recommendations) | `expected_profit` + `expected_profit_available` | `MissionRecommendationEngine` payload |
 
 ---
 
@@ -212,7 +212,7 @@ profit_impact():
   `margin_pct`; recommendations carry `expected_profit`/`expected_profit_available`.
   Public (non-admin) upsell payloads **redact** margin/profit fields.
 - **UI today** — Revenue Overview shows `—` + `profit_reason`; Attribution Dashboard
-  shows the reason text; Goal Performance shows an `n/a` chip; Upsell Analytics hides
+  shows the reason text; Mission Performance shows an `n/a` chip; Upsell Analytics hides
   profit when unavailable.
 - **No in-plugin cost-configuration route exists** — `Settings` has no cost/margin
   fields; product costs come only from WooCommerce product meta or the
@@ -227,11 +227,11 @@ profit_impact():
 All additive; existing fields/routes are never removed or renamed.
 
 1. **Extend the legacy `GET /faracart/v1/analytics` summary** (§37) with, derived from
-   the existing `AttributionEngine` (goal-scoped by the same filters):
+   the existing `AttributionEngine` (mission-scoped by the same filters):
    - `progressed` (funnel `progressed`)
    - `purchased_orders` (= `funnel.converted`)
    - `purchase_rate` (= `conversion_rate`, null-safe)
-   - `attributed_sales` (= `goal_driven_revenue`)
+   - `attributed_sales` (= `mission_driven_revenue`)
    - `estimated_profit` / `profit_available` / `profit_reason`
    All computed from already-aggregated data — no new order scans, no new engine.
 2. **Machine-readable profit reason codes** (§39) — add a stable `profit_reason_code`
@@ -250,11 +250,11 @@ All additive; existing fields/routes are never removed or renamed.
 ### Tests to add in Phase 2/10 (mirroring `attribution-test.php` style)
 
 - Funnel: views/progressed/completed/purchased + completion & purchase rates
-- Purchase: 0 / 1 / multiple purchases; multiple goals; direct; assisted; mixed
+- Purchase: 0 / 1 / multiple purchases; multiple missions; direct; assisted; mixed
   direct+assisted; duplicate order events (idempotency)
 - Profit: complete / missing / partial cost data; zero; negative; reward cost;
   shipping cost; margin math
-- Date filtering (same range across metrics) and `goal_id` filtering
+- Date filtering (same range across metrics) and `mission_id` filtering
 - Permissions/security unchanged (admin-only, rate limits, schema validation)
 
 ---
@@ -263,9 +263,9 @@ All additive; existing fields/routes are never removed or renamed.
 
 ### 7.1 Navigation & naming (§3, §4)
 
-- Rename the user-facing section from "Revenue" to **"Sales Performance"** (or "Goal
+- Rename the user-facing section from "Revenue" to **"Sales Performance"** (or "Mission
   Cart Performance") — keep `revenue/*` routes and API names (backward compatible).
-- Restructure nav: Overview → Goals → Optimization (Recommendations + Upsell
+- Restructure nav: Overview → Missions → Optimization (Recommendations + Upsell
   Analytics). **Remove "Attribution" from primary navigation**; keep
   `/revenue/attribution` for backward compatibility and link to it from an
   "Advanced Attribution" expandable section.
@@ -273,30 +273,30 @@ All additive; existing fields/routes are never removed or renamed.
 ### 7.2 Revenue Overview (§5–§15, §49)
 
 - Four primary KPI cards, in order:
-  1. **Sales Attributed to FaraCart** — `goal_driven_revenue`, hint = `summary.orders`
+  1. **Sales Attributed to FaraCart** — `mission_driven_revenue`, hint = `summary.orders`
      purchased orders. Expandable "How is this calculated?" showing direct / assisted /
      influenced / incremental revenue + attribution methodology (from the same summary
      payload).
   2. **Average Basket Increase** — `aov.percentage_change` (+ absolute change on
-     expand), comparison rows (store avg / goal-exposed / difference), always labeled
+     expand), comparison rows (store avg / mission-exposed / difference), always labeled
      **"Observed impact"**.
-  3. **Purchased Orders** — `summary.orders` / `funnel.converted`, hint "after Goal
+  3. **Purchased Orders** — `summary.orders` / `funnel.converted`, hint "after Mission
      Cart interaction".
   4. **Estimated Profit** — `profit_impact` with the full data-state matrix (§13):
      available / unavailable (CTA + learn how) / limited / zero / negative.
 - Trend chart: default two series — **Sales** (`revenue`) + **Purchased Orders**
-  (`conversions`); toggles for Goal Completions (`completions`) and optional
+  (`conversions`); toggles for Mission Completions (`completions`) and optional
   Incremental Revenue (`incremental_revenue`).
 - 2–3 deterministic insight cards (§15) — derived client-side from the payload (best
-  goal by sales, purchases count, completion→purchase gap). No LLM.
+  mission by sales, purchases count, completion→purchase gap). No LLM.
 - Profit details drawer (§12) with sales / margin / reward cost / shipping /
   profit lines — all real backend values.
 - Advanced attribution drawer (§30/§47) hosting the current Attribution Dashboard
   content (direct/assisted/influenced, basket analysis, profit model, data quality).
 
-### 7.3 Goal Performance (§16–§20, §27)
+### 7.3 Mission Performance (§16–§20, §27)
 
-- Columns: Goal | Viewed | Progressed | Completed | **Purchased** | **Purchase Rate**
+- Columns: Mission | Viewed | Progressed | Completed | **Purchased** | **Purchase Rate**
   | **Sales** | **Profit** (keep completion rate as secondary/tooltip).
 - Rename labels: Converted → Purchased, Conversion → Purchase Rate, Est. Profit →
   Estimated Profit (with availability states).
@@ -306,13 +306,13 @@ All additive; existing fields/routes are never removed or renamed.
 
 ### 7.4 Analytics (§21–§29, §50)
 
-- Title → **"Goal Conversion & Purchase Analysis"**.
+- Title → **"Mission Conversion & Purchase Analysis"**.
 - KPI row: primary = Purchased Orders, Purchase Rate, Attributed Sales, Estimated
-  Profit; secondary = Goal Views, Goal Completions.
+  Profit; secondary = Mission Views, Mission Completions.
 - Funnel ends in **Purchased** (Views → Progressed → Completed → Purchased) with
   stage-to-stage percentages.
 - Purchase Analysis section + Completed-vs-Purchased comparison table (§25).
-- Goal comparison table sortable by Purchased / Purchase Rate / Sales / Profit /
+- Mission comparison table sortable by Purchased / Purchase Rate / Sales / Profit /
   Completion Rate, default sort = Attributed Sales.
 - Deterministic drop-off insights (§26) when data supports them.
 - Preserve the existing `/analytics` API compatibility; the extended summary fields
@@ -353,15 +353,15 @@ All additive; existing fields/routes are never removed or renamed.
 
 | Improvement.md request | Existing source | Change needed |
 | --- | --- | --- |
-| Sales Attributed to FaraCart | `summary.goal_driven_revenue` | label only |
+| Sales Attributed to FaraCart | `summary.mission_driven_revenue` | label only |
 | Average Basket Increase | `aov.percentage_change` / `absolute_change` | label + "Observed impact" |
-| Purchased Orders | `summary.orders` / `funnel.converted` / `trend[].conversions` / `goal.converted` | label ("Converted" → "Purchased") |
-| Purchase Rate | `funnel.conversion_rate` / `goal.conversion_rate` | label ("Conversion" → "Purchase Rate"); tooltip |
+| Purchased Orders | `summary.orders` / `funnel.converted` / `trend[].conversions` / `mission.converted` | label ("Converted" → "Purchased") |
+| Purchase Rate | `funnel.conversion_rate` / `mission.conversion_rate` | label ("Conversion" → "Purchase Rate"); tooltip |
 | Estimated Profit | `summary.profit_impact` (+ `profit_available`/`profit_reason`) | states UI; reason codes (backend, optional) |
 | Cost coverage | not exposed | new derived field (backend, optional) |
 | Insight cards / drop-off insights | derived from payload | new frontend logic |
 | Advanced attribution | existing Attribution Dashboard payload | move behind expandable |
-| Goal detail drawer | `goal_metrics()` row (all fields present) | frontend drawer |
+| Mission detail drawer | `mission_metrics()` row (all fields present) | frontend drawer |
 | Recommendations simplification | `expected_*` + `reasons` + `confidence` | presentation |
 | Upsell simplification | `orders`/`revenue`/`estimated_profit`/`conversion_rate` per row | column grouping |
 
@@ -375,7 +375,7 @@ All additive; existing fields/routes are never removed or renamed.
   metrics from already-aggregated attribution data.
 - Preserve: direct-vs-assisted precedence, distinct-order counting, attribution
   window, revenue-producing statuses (`processing`, `completed`), idempotency
-  (`order_goal_model`, `order_dedup`), bounded reads, per-user rate limits.
+  (`order_mission_model`, `order_dedup`), bounded reads, per-user rate limits.
 - Keep the exact profit formula; never invent costs/margins; label profit "estimated";
   never claim causality for AOV differences; never label completion as purchase.
 - Do not remove legacy `/analytics` fields (external consumers may depend on them).
@@ -389,7 +389,7 @@ All additive; existing fields/routes are never removed or renamed.
 | Phase 2 — Backend/data layer | none (additive fields only) | small, additive |
 | Phase 3 — Profit availability | none (cost sources already implemented; verify via tests) | verification + reason codes |
 | Phase 4 — Revenue Overview | none | frontend |
-| Phase 5 — Goal Performance | none | frontend |
+| Phase 5 — Mission Performance | none | frontend |
 | Phase 6 — Analytics redesign | Phase 2 (extended `/analytics` summary) | frontend + small backend |
 | Phase 7 — Recommendations | none | frontend |
 | Phase 8 — Upsell Analytics | none | frontend |

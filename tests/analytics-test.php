@@ -11,7 +11,7 @@
  *  - sessions: 32-hex ids, cookie validation
  *  - the event-type whitelist (P16-T02): all seven event types accepted,
  *    anything else rejected
- *  - recording: record() writes a row with goal/campaign/product ids,
+ *  - recording: record() writes a row with mission/campaign/product ids,
  *    cart value, session and scalar-only meta; user_id is NULL for guests
  *  - privacy (P16-T04): no PII columns are written (only aggregate
  *    numbers + ids + the anonymous session token)
@@ -23,7 +23,7 @@
  *    conversion only when the session saw a suggestion_impression for
  *    that product within the window
  *  - metrics (P16-T03): impressions, completions, completion rate,
- *    average cart value, revenue on completed goals, suggestion CTR and
+ *    average cart value, revenue on completed missions, suggestion CTR and
  *    suggestion add-to-cart rate — computed over seeded events
  *  - date-range filtering on the metrics
  *  - full rollback verification (no residue)
@@ -155,17 +155,17 @@ $seed_session = $sid;
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	// analytics_events carries real foreign keys to goals/campaigns, so the
+	// analytics_events carries real foreign keys to missions/campaigns, so the
 	// seeded events must reference rows that exist (mirrors production).
-	$goals_ctrl     = $container->get( \FaraCart\REST\GoalsController::class );
+	$missions_ctrl     = $container->get( \FaraCart\REST\MissionsController::class );
 	$campaigns_ctrl = $container->get( \FaraCart\REST\CampaignsController::class );
 
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
-	$req->set_param( 'name', 'Analytics Test Goal' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
+	$req->set_param( 'name', 'Analytics Test Mission' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 1000 );
-	$resp = $goals_ctrl->handle_create( $req );
-	$seed_goal_id = (int) $resp->get_data()['data']['id'];
+	$resp = $missions_ctrl->handle_create( $req );
+	$seed_mission_id = (int) $resp->get_data()['data']['id'];
 
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/campaigns' );
 	$req->set_param( 'name', 'Analytics Test Campaign' );
@@ -173,7 +173,7 @@ try {
 	$resp = $campaigns_ctrl->handle_create( $req );
 	$seed_campaign_id = (int) $resp->get_data()['data']['id'];
 
-	check( 'seed goal created', $seed_goal_id > 0 );
+	check( 'seed mission created', $seed_mission_id > 0 );
 	check( 'seed campaign created', $seed_campaign_id > 0 );
 	// 4.1 Master gate: disabled master toggle blocks recording.
 	$enabled_before = $settings->get( 'enabled', true );
@@ -198,7 +198,7 @@ try {
 	$event_id = $tracker->record(
 		Tracker::EVENT_GOAL_PROGRESS,
 		array(
-			'goal_id'     => $seed_goal_id,
+			'mission_id'     => $seed_mission_id,
 			'campaign_id' => $seed_campaign_id,
 			'product_id'  => 0,
 			'cart_value'  => 500.25,
@@ -210,7 +210,7 @@ try {
 
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$events_table} WHERE id = %d", $event_id ), ARRAY_A );
 	check( 'event row carries event_type', is_array( $row ) && Tracker::EVENT_GOAL_PROGRESS === $row['event_type'] );
-	check( 'event row carries goal_id', is_array( $row ) && $seed_goal_id === (int) $row['goal_id'] );
+	check( 'event row carries mission_id', is_array( $row ) && $seed_mission_id === (int) $row['mission_id'] );
 	check( 'event row carries campaign_id', is_array( $row ) && $seed_campaign_id === (int) $row['campaign_id'] );
 	check( 'event row carries cart_value', is_array( $row ) && near( 500.25, $row['cart_value'] ) );
 	check( 'event row carries session_id', is_array( $row ) && $seed_session === $row['session_id'] );
@@ -227,12 +227,12 @@ try {
 	check( 'no PII columns in events table', true === $no_pii );
 
 	// 4.6 Metrics (P16-T03) over seeded events.
-	// Seed: 4 goal impressions (cart 100, 200, 300, 0), 2 completions (one
+	// Seed: 4 mission impressions (cart 100, 200, 300, 0), 2 completions (one
 	// with reward), 3 suggestion impressions, 2 suggestion clicks, 1
 	// suggested_product_added.
 	foreach ( array( 100, 200, 300, 0 ) as $value ) {
 		$tracker->record( Tracker::EVENT_GOAL_IMPRESSION, array(
-			'goal_id'     => $seed_goal_id,
+			'mission_id'     => $seed_mission_id,
 			'campaign_id' => $seed_campaign_id,
 			'cart_value'  => $value,
 			'session_id'  => $seed_session,
@@ -240,13 +240,13 @@ try {
 	}
 
 	$tracker->record( Tracker::EVENT_GOAL_COMPLETED, array(
-		'goal_id'     => $seed_goal_id,
+		'mission_id'     => $seed_mission_id,
 		'campaign_id' => $seed_campaign_id,
 		'cart_value'  => 300,
 		'session_id'  => $seed_session,
 	) );
 	$tracker->record( Tracker::EVENT_REWARD_ACTIVATED, array(
-		'goal_id'     => $seed_goal_id,
+		'mission_id'     => $seed_mission_id,
 		'campaign_id' => $seed_campaign_id,
 		'cart_value'  => 500,
 		'session_id'  => $seed_session,
@@ -254,7 +254,7 @@ try {
 
 	for ( $i = 1; $i <= 3; $i++ ) {
 		$tracker->record( Tracker::EVENT_SUGGESTION_IMPRESSION, array(
-			'goal_id'    => $seed_goal_id,
+			'mission_id'    => $seed_mission_id,
 			'product_id' => $i,
 			'session_id' => $seed_session,
 		) );
@@ -262,14 +262,14 @@ try {
 
 	for ( $i = 1; $i <= 2; $i++ ) {
 		$tracker->record( Tracker::EVENT_SUGGESTION_CLICKED, array(
-			'goal_id'    => $seed_goal_id,
+			'mission_id'    => $seed_mission_id,
 			'product_id' => $i,
 			'session_id' => $seed_session,
 		) );
 	}
 
 	$tracker->record( Tracker::EVENT_SUGGESTED_PRODUCT_ADDED, array(
-		'goal_id'    => $seed_goal_id,
+		'mission_id'    => $seed_mission_id,
 		'product_id' => 1,
 		'session_id' => $seed_session,
 	) );
@@ -280,14 +280,14 @@ try {
 	// Impressions seeded with carts 100/200/300/0 — the 0-value (empty) cart
 	// is excluded from the engaged-cart average: (100+200+300)/3 = 200.
 	check( 'average cart value is 200', near( 200.0, $repo->average_cart_value() ) );
-	check( 'revenue on completed goals is 800', near( 800.0, $repo->revenue_associated_with_completed_goals() ) );
+	check( 'revenue on completed missions is 800', near( 800.0, $repo->revenue_associated_with_completed_missions() ) );
 	check( 'suggestion CTR is 0.6667', near( 0.6667, $repo->suggestion_ctr() ) );
 	check( 'suggestion add-to-cart rate is 0.5', near( 0.5, $repo->suggestion_add_to_cart_rate() ) );
 
-	// 4.7 Metrics respect campaign / goal filters (Phase 17 slices).
+	// 4.7 Metrics respect campaign / mission filters (Phase 17 slices).
 	check( 'impressions filtered by campaign', 4 === $repo->impressions( array( 'campaign_id' => $seed_campaign_id ) ) );
 	check( 'impressions filtered by other campaign', 0 === $repo->impressions( array( 'campaign_id' => 99 ) ) );
-	check( 'impressions filtered by goal', 4 === $repo->impressions( array( 'goal_id' => $seed_goal_id ) ) );
+	check( 'impressions filtered by mission', 4 === $repo->impressions( array( 'mission_id' => $seed_mission_id ) ) );
 	check( 'completions filtered by campaign', 2 === $repo->completions( array( 'campaign_id' => $seed_campaign_id ) ) );
 
 	// 4.8 Date-range filtering (from/to).
@@ -297,22 +297,22 @@ try {
 	check( 'impressions since yesterday include all', 4 === $repo->impressions( array( 'from' => $yesterday ) ) );
 
 	// 4.9 Rate metrics with empty denominators return 0 (no div-by-zero).
-	check( 'completion rate with no impressions is 0', 0.0 === $repo->completion_rate( array( 'goal_id' => 999999 ) ) );
-	check( 'CTR with no impressions is 0', 0.0 === $repo->suggestion_ctr( array( 'goal_id' => 999999 ) ) );
-	check( 'ATC rate with no clicks is 0', 0.0 === $repo->suggestion_add_to_cart_rate( array( 'goal_id' => 999999 ) ) );
-	check( 'avg cart value with no impressions is 0', 0.0 === $repo->average_cart_value( array( 'goal_id' => 999999 ) ) );
-	check( 'revenue with no completions is 0', 0.0 === $repo->revenue_associated_with_completed_goals( array( 'goal_id' => 999999 ) ) );
+	check( 'completion rate with no impressions is 0', 0.0 === $repo->completion_rate( array( 'mission_id' => 999999 ) ) );
+	check( 'CTR with no impressions is 0', 0.0 === $repo->suggestion_ctr( array( 'mission_id' => 999999 ) ) );
+	check( 'ATC rate with no clicks is 0', 0.0 === $repo->suggestion_add_to_cart_rate( array( 'mission_id' => 999999 ) ) );
+	check( 'avg cart value with no impressions is 0', 0.0 === $repo->average_cart_value( array( 'mission_id' => 999999 ) ) );
+	check( 'revenue with no completions is 0', 0.0 === $repo->revenue_associated_with_completed_missions( array( 'mission_id' => 999999 ) ) );
 
-	// 4.9b FK resilience: an event whose goal was deleted records without
+	// 4.9b FK resilience: an event whose mission was deleted records without
 	// the FK id instead of being dropped entirely (the FK's SET NULL
 	// semantics for the deleted row).
 	$ghost_id = $tracker->record( Tracker::EVENT_GOAL_PROGRESS, array(
-		'goal_id'    => 99999999,
+		'mission_id'    => 99999999,
 		'session_id' => $seed_session,
 	) );
-	check( 'deleted-goal event still records', $ghost_id > 0 );
+	check( 'deleted-mission event still records', $ghost_id > 0 );
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$events_table} WHERE id = %d", $ghost_id ), ARRAY_A );
-	check( 'deleted-goal event drops goal_id', is_array( $row ) && null === $row['goal_id'] );
+	check( 'deleted-mission event drops mission_id', is_array( $row ) && null === $row['mission_id'] );
 
 	// 4.10 Server-side attribution (suggested_product_added).
 	// A different session that saw the product suggested → attributed.
@@ -320,7 +320,7 @@ try {
 	// memo reset (reflection — the class keeps its public surface clean).
 	$other_session = str_repeat( 'ab', 16 );
 	$tracker->record( Tracker::EVENT_SUGGESTION_IMPRESSION, array(
-		'goal_id'    => $seed_goal_id,
+		'mission_id'    => $seed_mission_id,
 		'product_id' => 42,
 		'session_id' => $other_session,
 	) );
@@ -337,7 +337,7 @@ try {
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$events_table} WHERE id = %d", $conversion ), ARRAY_A );
 	check( 'conversion event type correct', is_array( $row ) && Tracker::EVENT_SUGGESTED_PRODUCT_ADDED === $row['event_type'] );
 	check( 'conversion carries product_id', is_array( $row ) && 42 === (int) $row['product_id'] );
-	check( 'conversion carries goal_id', is_array( $row ) && $seed_goal_id === (int) $row['goal_id'] );
+	check( 'conversion carries mission_id', is_array( $row ) && $seed_mission_id === (int) $row['mission_id'] );
 
 	// A product the session never saw is NOT attributed.
 	check( 'unseen product not attributed', 0 === $tracker->handle_add_to_cart( 'k2', 9999 ) );
@@ -375,7 +375,7 @@ try {
 	$good_nonce = wp_create_nonce( Tracker::TRACK_NONCE_ACTION );
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/track' );
 	$req->set_param( 'event_type', 'goal_progress' );
-	$req->set_param( 'goal_id', $seed_goal_id );
+	$req->set_param( 'mission_id', $seed_mission_id );
 	$req->set_param( 'cart_value', 250 );
 	$req->set_param( 'percentage', 50 );
 	$req->set_param( 'session_id', $seed_session );

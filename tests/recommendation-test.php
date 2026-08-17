@@ -1,11 +1,11 @@
 <?php
 /**
- * FaraCart Phase 33.4 tests (Smart Goal Recommendation).
+ * FaraCart Phase 33.4 tests (Smart Mission Recommendation).
  *
  * Boots WordPress, then exercises the Phase 33.4 deterministic
- * goal-threshold recommendation engine and its admin endpoint:
+ * mission-threshold recommendation engine and its admin endpoint:
  *
- *  - service wiring: GoalRecommendationEngine + RecommendationsController
+ *  - service wiring: MissionRecommendationEngine + RecommendationsController
  *    resolve from the container; the REST route registers
  *  - scoring math (unit, via reflection): reachability peak/decay, distance
  *    bands, economics viability, history normalization, confidence
@@ -20,7 +20,7 @@
  *    the enable filter disables; margin data absent → profit excluded and
  *    economics neutral; margin present (product with _cost) → profit
  *    computed and the reasons turn margin-aware
- *  - goal history: real funnel events + an attributed order feed the
+ *  - mission history: real funnel events + an attributed order feed the
  *    completion-rate history signal
  *  - caching: the payload is served through the generation-versioned
  *    transient, and invalidate() forces a recompute on the next read
@@ -71,13 +71,13 @@ unload_textdomain( 'faracart' );
 $GLOBALS['l10n_unloaded']['faracart'] = true;
 
 use FaraCart\Analytics\AttributionEngine;
-use FaraCart\Analytics\GoalRecommendationEngine;
+use FaraCart\Analytics\MissionRecommendationEngine;
 use FaraCart\Analytics\RevenueRepository;
 use FaraCart\Analytics\RewardCostEstimator;
 use FaraCart\Analytics\RevenueTracker;
 use FaraCart\Database\Installer;
 use FaraCart\Database\Schema;
-use FaraCart\Goals\Goal;
+use FaraCart\Missions\Mission;
 use FaraCart\Hooks\HookManager;
 use FaraCart\REST\RecommendationsController;
 use FaraCart\Settings\Settings;
@@ -106,7 +106,7 @@ Installer::maybe_create_tables();
 
 $container = \FaraCart\Plugin::instance()->container();
 
-$engine    = $container->get( GoalRecommendationEngine::class );
+$engine    = $container->get( MissionRecommendationEngine::class );
 $attrib    = $container->get( AttributionEngine::class );
 $costs     = $container->get( RewardCostEstimator::class );
 $tracker   = $container->get( RevenueTracker::class );
@@ -115,22 +115,22 @@ $settings  = $container->get( Settings::class );
 $wpdb      = $GLOBALS['wpdb'];
 
 $revenue_table = Schema::table( 'revenue_events' );
-$attrib_table  = Schema::table( 'goal_attribution' );
-$goals_table   = Schema::table( 'goals' );
+$attrib_table  = Schema::table( 'mission_attribution' );
+$missions_table   = Schema::table( 'missions' );
 
 // ---------------------------------------------------------------------------
 // 1. Service wiring
 // ---------------------------------------------------------------------------
 echo "\n== 1. Service wiring ==\n";
 
-check( 'GoalRecommendationEngine resolves from the container', $engine instanceof GoalRecommendationEngine );
+check( 'MissionRecommendationEngine resolves from the container', $engine instanceof MissionRecommendationEngine );
 check( 'RevenueRepository resolves from the container', $repo instanceof RevenueRepository );
 check( 'RecommendationsController resolves from the container', $container->get( RecommendationsController::class ) instanceof RecommendationsController );
 
 $controller = $container->get( RecommendationsController::class );
 $controller->register_routes();
 $routes = function_exists( 'rest_get_server' ) ? rest_get_server()->get_routes() : array();
-check( 'goal-recommendations REST route registered', isset( $routes['/faracart/v1/revenue/goal-recommendations'] ) );
+check( 'mission-recommendations REST route registered', isset( $routes['/faracart/v1/revenue/mission-recommendations'] ) );
 
 // The plugin boot already registered the controller through the hook
 // manager — assert the exact callback is on rest_api_init.
@@ -142,7 +142,7 @@ check( 'recommendations controller registered on rest_api_init', has_action( 're
 echo "\n== 2. Scoring math ==\n";
 
 $invoke = function ( $method, array $args ) use ( $engine ) {
-	$r = new ReflectionMethod( GoalRecommendationEngine::class, $method );
+	$r = new ReflectionMethod( MissionRecommendationEngine::class, $method );
 	$r->setAccessible( true );
 
 	return $r->invokeArgs( $engine, $args );
@@ -215,29 +215,29 @@ echo "\n== 3. Integration ==\n";
 // The fixture order creations legitimately invalidate the revenue cache
 // (order status changes fire the invalidation hook — by design), so the
 // cache version is captured before the transaction and asserted to return
-// to that exact baseline after the rollback. The goals row count is
-// captured the same way — live stores may hold any number of real goals,
+// to that exact baseline after the rollback. The missions row count is
+// captured the same way — live stores may hold any number of real missions,
 // so the suite asserts no drift rather than a hard-coded count.
 $version_start = (int) get_option( RevenueRepository::CACHE_VERSION_OPTION, 1 );
-$goals_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
+$missions_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}" );
 
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	// --- Fixture goals (for the goal-scoped recommendation + history). ---
+	// --- Fixture missions (for the mission-scoped recommendation + history). ---
 	foreach ( array(
 		array( 'id' => 101, 'reward_type' => 'percent_discount', 'reward_value' => 10 ),
 		array( 'id' => 202 ),
 		array( 'id' => 303 ),
-	) as $goal_row ) {
-		$wpdb->insert( $goals_table, array(
-			'id'              => $goal_row['id'],
-			'name'            => 'P33.4 goal ' . $goal_row['id'],
+	) as $mission_row ) {
+		$wpdb->insert( $missions_table, array(
+			'id'              => $mission_row['id'],
+			'name'            => 'P33.4 mission ' . $mission_row['id'],
 			'status'          => 'active',
 			'type'            => 'amount',
 			'target'          => 1000000,
-			'reward_type'     => isset( $goal_row['reward_type'] ) ? $goal_row['reward_type'] : null,
-			'reward_value'    => isset( $goal_row['reward_value'] ) ? $goal_row['reward_value'] : null,
+			'reward_type'     => isset( $mission_row['reward_type'] ) ? $mission_row['reward_type'] : null,
+			'reward_value'    => isset( $mission_row['reward_value'] ) ? $mission_row['reward_value'] : null,
 			'created_at'      => current_time( 'mysql' ),
 			'updated_at'      => current_time( 'mysql' ),
 		) );
@@ -382,7 +382,7 @@ try {
 	remove_all_filters( 'faracart_recommendations' );
 	check( 'payload filter can shape the result', ! empty( $filtered['filter_applied'] ) );
 
-	// --- Goal history (real funnel events + attribution). ---
+	// --- Mission history (real funnel events + attribution). ---
 	// 12 distinct valid 32-hex anonymous sessions (hex-only pairs — the
 	// tracker rejects non-hex session ids).
 	$sessions = array();
@@ -390,11 +390,11 @@ try {
 	for ( $i = 0; $i < 12; $i++ ) {
 		$session = str_repeat( sprintf( '%02d', $i ), 16 );
 		$sessions[] = $session;
-		$tracker->record( 'goal_view', array( 'goal_id' => 101, 'cart_value' => 500000, 'goal_target' => 1000000, 'session_id' => $session ) );
-		$tracker->record( 'goal_completed', array( 'goal_id' => 101, 'cart_value' => 700000, 'goal_target' => 1000000, 'session_id' => $session ) );
+		$tracker->record( 'goal_view', array( 'mission_id' => 101, 'cart_value' => 500000, 'mission_target' => 1000000, 'session_id' => $session ) );
+		$tracker->record( 'goal_completed', array( 'mission_id' => 101, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session ) );
 	}
 
-	// Backdate the events into the analysis window so the goal history
+	// Backdate the events into the analysis window so the mission history
 	// lands inside the same 2020-06-15 window as the orders.
 	$wpdb->query(
 		$wpdb->prepare(
@@ -404,7 +404,7 @@ try {
 		)
 	);
 
-	// Attribute one fixture order to goal 101 (completed → direct) so the
+	// Attribute one fixture order to mission 101 (completed → direct) so the
 	// funnel reports a conversion inside the window.
 	$written = $attrib->attribute_order( $order_ids[0], array(
 		'total'      => 400000,
@@ -413,18 +413,18 @@ try {
 		'session_id' => $sessions[0],
 		'date'       => '2020-06-15 10:00:00',
 	) );
-	check( 'history order attributed to goal 101', 1 === $written );
+	check( 'history order attributed to mission 101', 1 === $written );
 
-	$goal_rec = $engine->recommend( array_merge( $window, array( 'goal_id' => 101 ) ) );
+	$mission_rec = $engine->recommend( array_merge( $window, array( 'mission_id' => 101 ) ) );
 
-	check( 'goal-scoped recommendation available', ! empty( $goal_rec['available'] ) );
-	check( 'goal reward type feeds the recommendation', 'percent_discount' === $goal_rec['data']['reward_type'] );
-	check( 'goal history views recorded', 12 === (int) $goal_rec['data']['goal_history']['views'] );
-	check( 'goal history completion rate', close( 1.0, $goal_rec['data']['goal_history']['completion_rate'] ) );
-	check( 'goal history conversion counted', 1 === (int) $goal_rec['data']['goal_history']['converted'] );
-	check( 'history signal lifts the history factor', close( 100, $goal_rec['candidates'][0]['factors']['history_score'] ) );
-	check( 'history reason explains the completion rate', 1 === preg_match( '/Historical goal completion rate/', implode( ' ', $goal_rec['candidates'][0]['reasons'] ) ) );
-	check( 'discount reward cost estimated from the goal value', close( 0.1 * $goal_rec['candidates'][0]['threshold'], $goal_rec['candidates'][0]['factors']['reward_cost'] ) );
+	check( 'mission-scoped recommendation available', ! empty( $mission_rec['available'] ) );
+	check( 'mission reward type feeds the recommendation', 'percent_discount' === $mission_rec['data']['reward_type'] );
+	check( 'mission history views recorded', 12 === (int) $mission_rec['data']['mission_history']['views'] );
+	check( 'mission history completion rate', close( 1.0, $mission_rec['data']['mission_history']['completion_rate'] ) );
+	check( 'mission history conversion counted', 1 === (int) $mission_rec['data']['mission_history']['converted'] );
+	check( 'history signal lifts the history factor', close( 100, $mission_rec['candidates'][0]['factors']['history_score'] ) );
+	check( 'history reason explains the completion rate', 1 === preg_match( '/Historical mission completion rate/', implode( ' ', $mission_rec['candidates'][0]['reasons'] ) ) );
+	check( 'discount reward cost estimated from the mission value', close( 0.1 * $mission_rec['candidates'][0]['threshold'], $mission_rec['candidates'][0]['factors']['reward_cost'] ) );
 
 	// --- Margin-aware path (store-provided cost data). ---
 	$product_id = wp_insert_post( array(
@@ -452,21 +452,21 @@ try {
 	// --- Caching (generation-versioned transients). ---
 	$cache_args  = array_merge( $window, array( 'reward_type' => 'free_shipping' ) );
 	$version_before = (int) get_option( RevenueRepository::CACHE_VERSION_OPTION, 1 );
-	$key_before     = RevenueRepository::CACHE_PREFIX . $version_before . '_goal_recs_' . md5( wp_json_encode( $cache_args ) );
+	$key_before     = RevenueRepository::CACHE_PREFIX . $version_before . '_mission_recs_' . md5( wp_json_encode( $cache_args ) );
 
-	$cached = $repo->goal_recommendations( $cache_args );
+	$cached = $repo->mission_recommendations( $cache_args );
 	check( 'cached recommendation served through the transient', false !== get_transient( $key_before ) && ! empty( $cached['available'] ) );
 
 	$repo->invalidate();
 	$version_after = (int) get_option( RevenueRepository::CACHE_VERSION_OPTION, 1 );
 	check( 'invalidate bumps the cache generation', $version_after === $version_before + 1 );
 
-	$key_after = RevenueRepository::CACHE_PREFIX . $version_after . '_goal_recs_' . md5( wp_json_encode( $cache_args ) );
-	$fresh     = $repo->goal_recommendations( $cache_args );
+	$key_after = RevenueRepository::CACHE_PREFIX . $version_after . '_mission_recs_' . md5( wp_json_encode( $cache_args ) );
+	$fresh     = $repo->mission_recommendations( $cache_args );
 	check( 'fresh read recomputes on the new generation', false !== get_transient( $key_after ) && ! empty( $fresh['available'] ) );
 
 	add_filter( 'faracart_revenue_cache_enabled', '__return_false' );
-	$bypass = $repo->goal_recommendations( $cache_args );
+	$bypass = $repo->mission_recommendations( $cache_args );
 	remove_all_filters( 'faracart_revenue_cache_enabled' );
 	check( 'cache bypass still returns the recommendation', ! empty( $bypass['available'] ) );
 } finally {
@@ -485,7 +485,7 @@ echo "\n== 4. Rollback verification ==\n";
 
 check( 'no fixture events remain after rollback', 0 === (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$revenue_table} WHERE session_id IN (" . implode( ',', array_fill( 0, count( $sessions ), '%s' ) ) . ")", $sessions ) ) );
 check( 'no fixture attribution rows remain after rollback', 0 === (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$attrib_table} WHERE order_id = %d", $order_ids[0] ) ) );
-check( 'goals back to the pre-existing count', $goals_before === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" ) );
+check( 'missions back to the pre-existing count', $missions_before === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}" ) );
 
 $leftover = wc_get_orders( array(
 	'status'       => AttributionEngine::REVENUE_STATUSES,

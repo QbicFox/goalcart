@@ -7,9 +7,9 @@
 
 namespace FaraCart\Rewards\Applicators;
 
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\CartItem;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\CartItem;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Rewards\Reward;
 use FaraCart\Rewards\RewardApplicator;
 use FaraCart\Rewards\RewardResult;
@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
  * Discounts are applied through WooCommerce's public
  * 'woocommerce_cart_calculate_fees' pipeline as negative fees, so they are
  * recalculated on every totals pass, never persisted, and drop out
- * automatically the moment a goal becomes incomplete (no stale rewards).
+ * automatically the moment a mission becomes incomplete (no stale rewards).
  */
 abstract class AbstractDiscountApplicator implements RewardApplicator {
 
@@ -57,14 +57,14 @@ abstract class AbstractDiscountApplicator implements RewardApplicator {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function evaluate( Reward $reward, GoalResult $result, ?CartContext $context = null ) {
+	public function evaluate( Reward $reward, MissionResult $result, ?CartContext $context = null ) {
 		$amount = 0.0;
 
 		if ( null !== $context ) {
 			$amount = $this->compute_amount( $reward, $context );
 		}
 
-		return RewardResult::available( $reward, $result->goal()->id(), $amount );
+		return RewardResult::available( $reward, $result->mission()->id(), $amount );
 	}
 
 	/**
@@ -170,7 +170,7 @@ abstract class AbstractDiscountApplicator implements RewardApplicator {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function apply( Reward $reward, RewardResult $evaluation, \WC_Cart $cart, $goal_id ) {
+	public function apply( Reward $reward, RewardResult $evaluation, \WC_Cart $cart, $mission_id ) {
 		$amount = $evaluation->amount();
 
 		if ( $amount <= 0 ) {
@@ -179,8 +179,8 @@ abstract class AbstractDiscountApplicator implements RewardApplicator {
 
 		$cart->fees_api()->add_fee(
 			array(
-				'id'      => CartContext::OWN_FEE_PREFIX . (int) $goal_id,
-				'name'    => '' !== $reward->label() ? $reward->label() : __( 'Goal reward', 'faracart' ),
+				'id'      => CartContext::OWN_FEE_PREFIX . (int) $mission_id,
+				'name'    => '' !== $reward->label() ? $reward->label() : __( 'Mission reward', 'faracart' ),
 				'amount'  => -1 * $amount,
 				'taxable' => false,
 			)

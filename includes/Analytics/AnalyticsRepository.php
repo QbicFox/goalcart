@@ -21,8 +21,8 @@ defined( 'ABSPATH' ) || exit;
  *  - impressions                    goal_impression event count
  *  - completions                    goal_completed + reward_activated count
  *  - completion rate                completions / impressions
- *  - average cart value             AVG(cart_value) at goal impression
- *  - revenue on completed goals     SUM(cart_value) at completion events
+ *  - average cart value             AVG(cart_value) at mission impression
+ *  - revenue on completed missions     SUM(cart_value) at completion events
  *  - suggestion CTR                 suggestion_clicked / suggestion_impression
  *  - suggestion add-to-cart rate    suggested_product_added / suggestion_clicked
  *
@@ -32,13 +32,13 @@ defined( 'ABSPATH' ) || exit;
  *                                   buckets over a (default 30-day) window
  *  - top_campaigns()                per-campaign impressions, completions,
  *                                   revenue and completion rate
- *  - top_goals()                    per-goal impressions, completions,
+ *  - top_missions()                    per-mission impressions, completions,
  *                                   revenue and completion rate
  *  - top_suggested_products()       per-product suggestion impressions,
  *                                   clicks and conversions + derived rates
  *
- * Every query accepts the same filter set (date range, campaign, goal,
- * goal ids, reward type, product) so the dashboard can slice any metric
+ * Every query accepts the same filter set (date range, campaign, mission,
+ * mission ids, reward type, product) so the dashboard can slice any metric
  * without new SQL. Event types and reward types are always whitelisted,
  * filter values are bound through $wpdb->prepare, and table/column names
  * are plugin constants — no user input ever reaches the SQL string.
@@ -54,7 +54,7 @@ final class AnalyticsRepository {
 	 *
 	 * @param string               $event_type One of Tracker::EVENT_*.
 	 * @param array<string, mixed> $filters    Optional from/to, campaign_id,
-	 *                                         goal_id, goal_ids, product_id,
+	 *                                         mission_id, mission_ids, product_id,
 	 *                                         reward_type.
 	 * @return int
 	 */
@@ -74,7 +74,7 @@ final class AnalyticsRepository {
 	}
 
 	/**
-	 * Goal impressions.
+	 * Mission impressions.
 	 *
 	 * @param array<string, mixed> $filters Filters.
 	 * @return int
@@ -84,7 +84,7 @@ final class AnalyticsRepository {
 	}
 
 	/**
-	 * Completed goals (with or without a reward).
+	 * Completed missions (with or without a reward).
 	 *
 	 * @param array<string, mixed> $filters Filters.
 	 * @return int
@@ -111,9 +111,9 @@ final class AnalyticsRepository {
 	}
 
 	/**
-	 * Average cart value at goal impression.
+	 * Average cart value at mission impression.
 	 *
-	 * The average cart_value recorded when goal widgets were shown — the
+	 * The average cart_value recorded when mission widgets were shown — the
 	 * store's typical engaged-cart value. Only impressions of carts with a
 	 * positive value count (empty carts and legacy rows without one are
 	 * excluded rather than skewing the mean down).
@@ -134,16 +134,16 @@ final class AnalyticsRepository {
 	}
 
 	/**
-	 * Revenue associated with completed goals.
+	 * Revenue associated with completed missions.
 	 *
-	 * The sum of the cart values captured when goals were completed (the
-	 * cart was worth this much at the moment the goal was met), i.e. the
-	 * revenue the goal system can claim credit toward.
+	 * The sum of the cart values captured when missions were completed (the
+	 * cart was worth this much at the moment the mission was met), i.e. the
+	 * revenue the mission system can claim credit toward.
 	 *
 	 * @param array<string, mixed> $filters Filters.
 	 * @return float
 	 */
-	public function revenue_associated_with_completed_goals( array $filters = array() ) {
+	public function revenue_associated_with_completed_missions( array $filters = array() ) {
 		global $wpdb;
 
 		$parts  = $this->clauses( null, $filters );
@@ -330,31 +330,31 @@ final class AnalyticsRepository {
 	}
 
 	/**
-	 * Top goals by completion volume (Phase 17).
+	 * Top missions by completion volume (Phase 17).
 	 *
 	 * @param array<string, mixed> $filters Filters.
 	 * @param int                  $limit   Max entries (1–20).
 	 * @return array<int, array{id: int, name: string, impressions: int, completions: int, revenue: float, completion_rate: float}>
 	 */
-	public function top_goals( array $filters = array(), $limit = 5 ) {
+	public function top_missions( array $filters = array(), $limit = 5 ) {
 		global $wpdb;
 
 		$limit = max( 1, min( 20, (int) $limit ) );
 
 		$parts = $this->clauses( null, $filters, 'e' );
-		$parts['clauses'][] = 'e.goal_id IS NOT NULL';
+		$parts['clauses'][] = 'e.mission_id IS NOT NULL';
 
 		$events = Schema::table( 'analytics_events' );
-		$goals  = Schema::table( 'goals' );
+		$missions  = Schema::table( 'missions' );
 
-		$sql = "SELECT e.goal_id AS id, g.name AS name,
+		$sql = "SELECT e.mission_id AS id, g.name AS name,
 			SUM( CASE WHEN e.event_type = %s THEN 1 ELSE 0 END ) AS impressions,
 			SUM( CASE WHEN e.event_type IN (%s, %s) THEN 1 ELSE 0 END ) AS completions,
 			SUM( CASE WHEN e.event_type IN (%s, %s) THEN e.cart_value ELSE 0 END ) AS revenue
 			FROM {$events} e
-			INNER JOIN {$goals} g ON g.id = e.goal_id
+			INNER JOIN {$missions} g ON g.id = e.mission_id
 			WHERE " . implode( ' AND ', $parts['clauses'] ) . '
-			GROUP BY e.goal_id, g.name
+			GROUP BY e.mission_id, g.name
 			ORDER BY completions DESC, impressions DESC
 			LIMIT %d';
 
@@ -442,7 +442,7 @@ final class AnalyticsRepository {
 	}
 
 	/**
-	 * Normalize campaign/goal top rows into the shared payload shape.
+	 * Normalize campaign/mission top rows into the shared payload shape.
 	 *
 	 * @param array<int, array<string, mixed>> $rows Query rows.
 	 * @return array<int, array<string, mixed>>
@@ -477,7 +477,7 @@ final class AnalyticsRepository {
 	 *                                         null when the caller adds its
 	 *                                         own event clause.
 	 * @param array<string, mixed> $filters    Optional from/to, campaign_id,
-	 *                                         goal_id, goal_ids, product_id,
+	 *                                         mission_id, mission_ids, product_id,
 	 *                                         reward_type.
 	 * @param string               $alias      Optional table alias to qualify
 	 *                                         columns with (join queries).
@@ -535,18 +535,18 @@ final class AnalyticsRepository {
 			$values[]  = (int) $filters['campaign_id'];
 		}
 
-		if ( isset( $filters['goal_id'] ) && (int) $filters['goal_id'] > 0 ) {
-			$clauses[] = $col( 'goal_id' ) . ' = %d';
-			$values[]  = (int) $filters['goal_id'];
+		if ( isset( $filters['mission_id'] ) && (int) $filters['mission_id'] > 0 ) {
+			$clauses[] = $col( 'mission_id' ) . ' = %d';
+			$values[]  = (int) $filters['mission_id'];
 		}
 
-		if ( ! empty( $filters['goal_ids'] ) && is_array( $filters['goal_ids'] ) ) {
-			$ids = array_values( array_filter( array_map( 'absint', $filters['goal_ids'] ), function ( $id ) {
+		if ( ! empty( $filters['mission_ids'] ) && is_array( $filters['mission_ids'] ) ) {
+			$ids = array_values( array_filter( array_map( 'absint', $filters['mission_ids'] ), function ( $id ) {
 				return $id > 0;
 			} ) );
 
 			if ( ! empty( $ids ) ) {
-				$clauses[] = $col( 'goal_id' ) . ' IN (' . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+				$clauses[] = $col( 'mission_id' ) . ' IN (' . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')';
 				$values    = array_merge( $values, $ids );
 			}
 		}
@@ -556,12 +556,12 @@ final class AnalyticsRepository {
 			$values[]  = (int) $filters['product_id'];
 		}
 
-		// Reward filter: restrict to events whose goal carries the reward
+		// Reward filter: restrict to events whose mission carries the reward
 		// type. Whitelisted against Reward::types() and expressed as a
 		// subquery so every query (with or without joins) can use it.
 		if ( ! empty( $filters['reward_type'] ) && in_array( $filters['reward_type'], Reward::types(), true ) ) {
-			$goals_table = Schema::table( 'goals' );
-			$clauses[] = $col( 'goal_id' ) . " IN (SELECT id FROM {$goals_table} WHERE reward_type = %s)";
+			$missions_table = Schema::table( 'missions' );
+			$clauses[] = $col( 'mission_id' ) . " IN (SELECT id FROM {$missions_table} WHERE reward_type = %s)";
 			$values[]  = $filters['reward_type'];
 		}
 

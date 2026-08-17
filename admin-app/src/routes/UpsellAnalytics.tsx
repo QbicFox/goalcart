@@ -53,7 +53,7 @@ const COMPONENT_LABELS: Array<{ key: keyof UpsellComponentScores; label: string;
     key: 'price_gap',
     label: __('Price gap', 'faracart'),
     help: __(
-      'Products priced close to the amount remaining until the goal usually make a better suggestion.',
+      'Products priced close to the amount remaining until the mission usually make a better suggestion.',
       'faracart'
     ),
   },
@@ -282,7 +282,7 @@ function ProductDetailDialog({
  * The customer-facing recommendation system's admin report: the
  * top-products upsell table from `GET /faracart/v1/revenue/upsells?analytics=1`.
  * The first screen answers "which suggested products actually help
- * customers reach Goals and generate purchases and sales?" (§35): Product
+ * customers reach Missions and generate purchases and sales?" (§35): Product
  * / Purchased Orders / Sales / Estimated profit / Conversion are the
  * primary columns; the interaction funnel (impressions, clicks, adds, CTR,
  * add-to-cart rate) and the upsell score sit behind a "Show interaction
@@ -293,7 +293,7 @@ function ProductDetailDialog({
  */
 export default function UpsellAnalytics() {
   const { range } = useDateRange();
-  const [goalId, setGoalId] = useState<number>(0);
+  const [missionId, setMissionId] = useState<number>(0);
   const [limit, setLimit] = useState<number>(20);
   const [sortMode, setSortMode] = useState<SortMode>('top');
   const [showDetails, setShowDetails] = useState<boolean>(false);
@@ -301,12 +301,12 @@ export default function UpsellAnalytics() {
   const [page, setPage] = useState(0);
 
   const query = useQuery({
-    queryKey: ['revenue', 'upsell-analytics', { from: range.from, to: range.to, goalId, limit }],
+    queryKey: ['revenue', 'upsell-analytics', { from: range.from, to: range.to, missionId, limit }],
     queryFn: () =>
       fetchUpsellAnalytics({
         from: range.from,
         to: range.to,
-        goal_id: goalId || undefined,
+        mission_id: missionId || undefined,
         limit,
       }),
   });
@@ -336,11 +336,11 @@ export default function UpsellAnalytics() {
     <PageContainer
       title={__('Upsells', 'faracart')}
       description={__(
-        'Upsells shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product.',
+        'Upsells shows which products help customers reach Missions and generate additional sales — purchases, sales and estimated profit per product.',
         'faracart'
       )}
     >
-      <RevenueToolbar goalId={goalId} onGoalChange={setGoalId}>
+      <RevenueToolbar missionId={missionId} onMissionChange={setMissionId}>
         <TextField
           select
           label={__('Limit', 'faracart')}

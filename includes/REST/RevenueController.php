@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * the summaries:
  *
  *  - `GET /faracart/v1/revenue/overview` — the Revenue Overview page's
- *    data source: the attribution summary (goal-driven / assisted /
+ *    data source: the attribution summary (mission-driven / assisted /
  *    influenced revenue, orders, reward cost, profit impact, funnel),
  *    incremental cart value, AOV analysis, shipping stats and the daily
  *    trend series (revenue_daily + today's live bucket) over the window.
@@ -30,17 +30,17 @@ defined( 'ABSPATH' ) || exit;
  *    page's data source: the same overview payload (funnel + direct vs
  *    assisted models + incremental cart value + profit), without the
  *    trend series.
- *  - `GET /faracart/v1/revenue/goals` — the Goal Performance page's data
- *    source: per-goal metrics rows (funnel counts, completion/conversion
+ *  - `GET /faracart/v1/revenue/missions` — the Mission Performance page's data
+ *    source: per-mission metrics rows (funnel counts, completion/conversion
  *    rates, average + incremental cart value, attributed + assisted
- *    revenue, reward cost, profit impact) for every goal or one goal.
+ *    revenue, reward cost, profit impact) for every mission or one mission.
  *  - `GET /faracart/v1/revenue/cost-coverage` — Product Cost coverage
  *    (UPSELL_REFACTOR §25/§46): how much of the catalog carries cost
- *    data, so the Goal Optimization UI can show "842 / 1,000 products"
+ *    data, so the Mission Optimization UI can show "842 / 1,000 products"
  *    and explain why profit estimates may be unavailable.
  *
  * Optional args on every route: from / to (validated Y-m-d bounds),
- * goal_id (filter the metrics to one goal). All routes are admin-only
+ * mission_id (filter the metrics to one mission). All routes are admin-only
  * (manage_options, per-user rate limited — P07-T04) and every value is
  * validated through the REST arg schema before reaching the repository.
  */
@@ -111,10 +111,10 @@ class RevenueController extends BaseController {
 
 		register_rest_route(
 			self::NAMESPACE,
-			'/revenue/goals',
+			'/revenue/missions',
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'handle_goals' ),
+				'callback'            => array( $this, 'handle_missions' ),
 				'permission_callback' => $this->get_permission_callback(),
 				'args'                => $this->window_args(),
 			)
@@ -186,17 +186,17 @@ class RevenueController extends BaseController {
 	}
 
 	/**
-	 * Goal Performance payload: per-goal metrics rows.
+	 * Mission Performance payload: per-mission metrics rows.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
-	public function handle_goals( $request ) {
+	public function handle_missions( $request ) {
 		$args = $this->window_filters( $request );
 
 		return $this->success(
 			array(
-				'items' => $this->repository->goal_performance( $args ),
+				'items' => $this->repository->mission_performance( $args ),
 			),
 			array( 'applied' => $args )
 		);
@@ -212,7 +212,7 @@ class RevenueController extends BaseController {
 		return array(
 			'from'    => (string) $request->get_param( 'from' ),
 			'to'      => (string) $request->get_param( 'to' ),
-			'goal_id' => (int) $request->get_param( 'goal_id' ),
+			'mission_id' => (int) $request->get_param( 'mission_id' ),
 		);
 	}
 
@@ -233,7 +233,7 @@ class RevenueController extends BaseController {
 				'default'           => '',
 				'validate_callback' => array( $this, 'validate_datetime_param' ),
 			),
-			'goal_id' => array(
+			'mission_id' => array(
 				'type'    => 'integer',
 				'default' => 0,
 				'minimum' => 0,

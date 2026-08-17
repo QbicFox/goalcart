@@ -50,9 +50,9 @@ export interface ApiEnvelope<T> {
   };
 }
 
-export type GoalStatus = 'active' | 'inactive';
+export type MissionStatus = 'active' | 'inactive';
 
-export type GoalType =
+export type MissionType =
   | 'amount'
   | 'quantity'
   | 'distinct_quantity'
@@ -93,14 +93,14 @@ export interface DisplaySettingsInput {
   icon?: string;
   /** Legacy pre-engine template variant (kept for backward compatibility). */
   template?: string;
-  /** Pluggable template engine: the goal's own template id ('' = default). */
+  /** Pluggable template engine: the mission's own template id ('' = default). */
   template_id?: string;
-  /** Pluggable template engine: per-goal override of the template's appearance. */
+  /** Pluggable template engine: per-mission override of the template's appearance. */
   template_settings?: TemplateSettingsValue;
 }
 
 /** Pluggable template engine (Phase 12): one template scope. */
-export type TemplateScope = 'goal' | 'campaign';
+export type TemplateScope = 'mission' | 'campaign';
 
 /** Pluggable template engine: the field types a template schema accepts. */
 export type TemplateFieldType =
@@ -138,7 +138,7 @@ export interface TemplateDefinition {
 export interface TemplatesPayload {
   scopes: TemplateScope[];
   defaults: Record<TemplateScope, string>;
-  goal: TemplateDefinition[];
+  mission: TemplateDefinition[];
   campaign: TemplateDefinition[];
   versions: Record<TemplateScope, Record<string, number>>;
 }
@@ -146,7 +146,7 @@ export interface TemplatesPayload {
 /**
  * A campaign template group in the progress/preview payload — the
  * resolved campaign-scoped template that renders the whole milestone
- * group (e.g. the milestone chain) instead of per-goal cards.
+ * group (e.g. the milestone chain) instead of per-mission cards.
  */
 export interface ProgressCampaign {
   campaign_id: number;
@@ -157,9 +157,9 @@ export interface ProgressCampaign {
   countdown_end?: string;
 }
 
-/** A composite child config — a Goal::from_array() payload (Phase 4). */
-export interface GoalChildInput {
-  type: GoalType;
+/** A composite child config — a Mission::from_array() payload (Phase 4). */
+export interface MissionChildInput {
+  type: MissionType;
   target: number;
   calculation_mode: string;
   categories: number[];
@@ -170,16 +170,16 @@ export interface GoalChildInput {
 }
 
 /**
- * The payload accepted by `POST /goals` and `PUT /goals/{id}` (Phase 9
- * builder form model — mirrors the Goal REST payload without the
+ * The payload accepted by `POST /missions` and `PUT /missions/{id}` (Phase 9
+ * builder form model — mirrors the Mission REST payload without the
  * server-managed id/timestamps). Phase 32 adds the tag/attribute/brand
  * scopes and the customer/order/cart/shipping condition keys.
  */
-export interface GoalInput {
+export interface MissionInput {
   name: string;
   description: string;
-  status: GoalStatus;
-  type: GoalType;
+  status: MissionStatus;
+  type: MissionType;
   target: number;
   calculation_mode: string;
   categories: number[];
@@ -200,13 +200,13 @@ export interface GoalInput {
   schedule_start_time: string;
   schedule_end_time: string;
   operator: 'and' | 'or';
-  children: GoalChildInput[];
+  children: MissionChildInput[];
   reward_type: RewardType;
   reward_value: number | null;
   reward_max_value: number | null;
   reward_meta: RewardMetaInput;
   priority: number;
-  /** Mutually exclusive goal (Phase 26): when reached, lower-priority goals are skipped. */
+  /** Mutually exclusive mission (Phase 26): when reached, lower-priority missions are skipped. */
   exclusive: boolean;
   /** Per-user completion limit (Phase 36): null = unlimited. */
   max_completions_per_user: number | null;
@@ -216,16 +216,16 @@ export interface GoalInput {
 }
 
 /**
- * A goal as served by the Phase 7 REST API (`GET /faracart/v1/goals`).
- * Mirrors the Goal model's payload shape 1:1 (Phase 32 condition keys
+ * A mission as served by the Phase 7 REST API (`GET /faracart/v1/missions`).
+ * Mirrors the Mission model's payload shape 1:1 (Phase 32 condition keys
  * included).
  */
-export interface Goal {
+export interface Mission {
   id: number;
   name: string;
   description: string;
-  status: GoalStatus;
-  type: GoalType;
+  status: MissionStatus;
+  type: MissionType;
   target: number;
   calculation_mode: string;
   categories: number[];
@@ -252,7 +252,7 @@ export interface Goal {
   reward_max_value: number | null;
   reward_meta: RewardMetaInput;
   priority: number;
-  /** Mutually exclusive goal (Phase 26): when reached, lower-priority goals are skipped. */
+  /** Mutually exclusive mission (Phase 26): when reached, lower-priority missions are skipped. */
   exclusive: boolean;
   /** Per-user completion limit (Phase 36): null = unlimited. */
   max_completions_per_user: number | null;
@@ -300,15 +300,15 @@ export interface SuggestionProduct {
 }
 
 /**
- * One goal entry in the public `GET /progress` payload and the Phase 15
+ * One mission entry in the public `GET /progress` payload and the Phase 15
  * admin `POST /preview` payload (same shape, built by
- * `FrontendController::shape_goal()`).
+ * `FrontendController::shape_mission()`).
  */
-export interface ProgressGoal {
-  goal_id: number;
+export interface ProgressMission {
+  mission_id: number;
   campaign_id: number;
-  goal_name: string;
-  goal_type: GoalType;
+  mission_name: string;
+  mission_type: MissionType;
   is_money: boolean;
   icon: string;
   /** Resolved template id (item override → scope default → legacy → fallback). */
@@ -327,10 +327,10 @@ export interface ProgressGoal {
   reward_state: 'not_applicable' | 'locked' | 'unlocked';
   eligible: boolean;
   reason: string;
-  /** Phase 32 (countdown): the goal's deadline (ISO local, '' = none). */
+  /** Phase 32 (countdown): the mission's deadline (ISO local, '' = none). */
   countdown_end?: string;
   /**
-   * Phase 26 conflict resolution: whether this goal won its conflict and
+   * Phase 26 conflict resolution: whether this mission won its conflict and
    * may grant its reward, plus the machine-readable reason when suppressed
    * (lower_priority | exclusive | not_best | not_first).
    */
@@ -345,11 +345,11 @@ export interface PreviewSimulated {
 
 /**
  * The admin preview endpoint payload (`POST /faracart/v1/preview`,
- * Phase 15). Same per-goal shape as /progress, plus the simulated values
+ * Phase 15). Same per-mission shape as /progress, plus the simulated values
  * echoed back so the preview frame can label itself.
  */
 export interface PreviewPayload {
-  goals: ProgressGoal[];
+  missions: ProgressMission[];
   /** Campaign template groups (campaign-scoped templates, e.g. the chain). */
   campaigns: ProgressCampaign[];
   currency: string;
@@ -406,10 +406,10 @@ export interface SearchZone {
 }
 
 /** A milestone inside a campaign (Phase 10 payload shape). */
-export interface CampaignGoal {
+export interface CampaignMission {
   id: number;
   name: string;
-  type: GoalType;
+  type: MissionType;
   target: number;
   reward_type: RewardType;
   menu_order: number;
@@ -417,20 +417,20 @@ export interface CampaignGoal {
 
 /**
  * A campaign as served by the Phase 10 REST API
- * (`GET /faracart/v1/campaigns`). Groups goals into scheduled,
- * prioritized milestones (Phase 3 `campaigns` table + `goals.menu_order`).
+ * (`GET /faracart/v1/campaigns`). Groups missions into scheduled,
+ * prioritized milestones (Phase 3 `campaigns` table + `missions.menu_order`).
  */
 export interface Campaign {
   id: number;
   name: string;
   description: string;
-  status: GoalStatus;
+  status: MissionStatus;
   starts_at: string | null;
   ends_at: string | null;
   priority: number;
   display_rules: Record<string, unknown>;
-  goal_count: number;
-  goals: CampaignGoal[];
+  mission_count: number;
+  missions: CampaignMission[];
   created_at: string;
   updated_at: string;
 }
@@ -439,16 +439,16 @@ export interface Campaign {
 export interface CampaignInput {
   name: string;
   description: string;
-  status: GoalStatus;
+  status: MissionStatus;
   starts_at: string | null;
   ends_at: string | null;
   priority: number;
   display_rules: Record<string, unknown>;
-  /** Ordered goal ids — the campaign's milestone ordering. */
-  goals: number[];
+  /** Ordered mission ids — the campaign's milestone ordering. */
+  missions: number[];
 }
 
-/** Storefront goal template ids (the six design templates). */
+/** Storefront mission template ids (the six design templates). */
 export type FrontendTemplate =
   'template-1' | 'template-2' | 'template-3' | 'template-4' | 'template-5' | 'template-6';
 
@@ -458,13 +458,13 @@ export type FrontendLocation = 'cart' | 'mini-cart' | 'checkout' | 'shop' | 'pro
 /** Storefront currency display style (Phase 18, currency_display). */
 export type CurrencyDisplay = 'symbol' | 'code' | 'name';
 
-/** How multiple active goals are presented (Phase 18, default_goal_behavior). */
-export type GoalBehavior = 'all' | 'first' | 'closest';
+/** How multiple active missions are presented (Phase 18, default_mission_behavior). */
+export type MissionBehavior = 'all' | 'first' | 'closest';
 
 /**
- * How completed goals grant rewards when several compete (Phase 26,
+ * How completed missions grant rewards when several compete (Phase 26,
  * conflict_resolution): cumulative (all stack), best (only the most
- * valuable reward), first (only the highest-priority matching goal).
+ * valuable reward), first (only the highest-priority matching mission).
  */
 export type ConflictResolution = 'cumulative' | 'best' | 'first';
 
@@ -535,9 +535,9 @@ export interface CostCoveragePayload {
   cost_sources: CostSource[];
 }
 
-/** The result of applying a goal-threshold recommendation (§10). */
+/** The result of applying a mission-threshold recommendation (§10). */
 export interface RecommendationApplyResult {
-  goal_id: number;
+  mission_id: number;
   name: string;
   target: number;
   previous_target: number;
@@ -613,7 +613,7 @@ export interface AnalyticsTrendPoint {
   revenue: number;
 }
 
-/** One top campaign / top goal entry (same shape from the backend). */
+/** One top campaign / top mission entry (same shape from the backend). */
 export interface AnalyticsTopEntry {
   id: number;
   name: string;
@@ -642,20 +642,20 @@ export interface AnalyticsPayload {
   summary: AnalyticsSummary;
   trend: AnalyticsTrendPoint[];
   top_campaigns: AnalyticsTopEntry[];
-  top_goals: AnalyticsTopEntry[];
+  top_missions: AnalyticsTopEntry[];
   top_suggested_products: AnalyticsSuggestedProduct[];
   /**
-   * Phase 6 — per-goal purchase comparison rows (same shape as
-   * `/revenue/goals`, §27), sliced by the same filters. Null when the
+   * Phase 6 — per-mission purchase comparison rows (same shape as
+   * `/revenue/missions`, §27), sliced by the same filters. Null when the
    * active filter cannot be expressed in attribution (e.g. product_id).
    */
-  goal_comparison: GoalPerformanceRow[] | null;
+  mission_comparison: MissionPerformanceRow[] | null;
 }
 
 /**
  * The settings object persisted by the Phase 7 REST API
  * (`GET/POST /faracart/v1/settings`). Phase 18 ships the full surface:
- * general, frontend, goal calculation, performance and advanced.
+ * general, frontend, mission calculation, performance and advanced.
  *
  * The `frontend_*` keys are the Phase 12 progress-template + appearance
  * surface consumed by the storefront widgets and the Appearance page.
@@ -670,7 +670,7 @@ export interface FaraCartSettings {
    */
   currency: string;
   currency_display: CurrencyDisplay;
-  default_goal_behavior: GoalBehavior;
+  default_mission_behavior: MissionBehavior;
   conflict_resolution: ConflictResolution;
   calculation_mode: CalculationMode;
 
@@ -691,7 +691,7 @@ export interface FaraCartSettings {
   frontend_countdown: boolean;
   frontend_celebrate: boolean;
 
-  // Floating widget (floating goals/campaigns button + drawer). The
+  // Floating widget (floating missions/campaigns button + drawer). The
   // position preset is the only position control (physical sides, RTL
   // stable); pixel offsets fine-tune it. Mobile can reuse the desktop
   // position (floating_mobile_use_desktop) or pin its own so the button
@@ -716,7 +716,7 @@ export interface FaraCartSettings {
   template_settings: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
   template_versions: Record<TemplateScope, Record<string, number>>;
 
-  // Goal Calculation (P18-T03).
+  // Mission Calculation (P18-T03).
   calculation_include_tax: boolean;
   calculation_include_discount: boolean;
   calculation_include_shipping: boolean;
@@ -748,11 +748,11 @@ export interface DeveloperHook {
  *
  * Every payload mirrors the PHP shapes served by the Phase 33.3–33.5
  * repository reads (RevenueRepository) through the REST layer — the
- * overview / attribution / goal-performance endpoints (RevenueController)
- * and the existing goal-recommendations / upsells endpoints.
+ * overview / attribution / mission-performance endpoints (RevenueController)
+ * and the existing mission-recommendations / upsells endpoints.
  */
 
-/** The goal funnel counts + rates (attribution funnel, Phase 33.2). */
+/** The mission funnel counts + rates (attribution funnel, Phase 33.2). */
 export interface RevenueFunnel {
   views: number;
   progressed: number;
@@ -764,9 +764,9 @@ export interface RevenueFunnel {
 
 /** The attribution summary block of the revenue overview payload. */
 export interface RevenueSummary {
-  goal_driven_revenue: number;
-  goal_assisted_revenue: number;
-  goal_influenced_revenue: number;
+  mission_driven_revenue: number;
+  mission_assisted_revenue: number;
+  mission_influenced_revenue: number;
   orders: number;
   reward_cost: number;
   reward_cost_available: boolean;
@@ -793,7 +793,7 @@ export interface IncrementalCartValue {
   data_sufficiency: 'low' | 'medium' | 'high';
 }
 
-/** AOV comparison — goal-exposed vs store-wide (labeled observed impact). */
+/** AOV comparison — mission-exposed vs store-wide (labeled observed impact). */
 export interface AovAnalysis {
   overall_aov: number;
   exposed_aov: number;
@@ -854,9 +854,9 @@ export interface RevenueOverviewPayload {
  */
 export type RevenueAttributionPayload = Omit<RevenueOverviewPayload, 'trend'>;
 
-/** One Goal Performance row (`GET /faracart/v1/revenue/goals`). */
-export interface GoalPerformanceRow {
-  goal_id: number;
+/** One Mission Performance row (`GET /faracart/v1/revenue/missions`). */
+export interface MissionPerformanceRow {
+  mission_id: number;
   name: string;
   reward_type: RewardType;
   target: number;
@@ -888,9 +888,9 @@ export interface GoalPerformanceRow {
   cost_sources: CostSource[];
   store_has_cost_data: boolean;
   // UPSELL_REFACTOR §30/§32/§33 — Smart Upsell linkage: how many of this
-  // goal's completions were assisted by a product recommendation, the
+  // mission's completions were assisted by a product recommendation, the
   // assisted rate (assisted ÷ completed, null without completions), and
-  // the goal's full upsell funnel (impressions → clicks → adds →
+  // the mission's full upsell funnel (impressions → clicks → adds →
   // purchases) over the window.
   upsell_assisted: number;
   upsell_assisted_rate: number | null;
@@ -902,9 +902,9 @@ export interface GoalPerformanceRow {
   };
 }
 
-/** The `GET /faracart/v1/revenue/goals` payload. */
-export interface GoalPerformancePayload {
-  items: GoalPerformanceRow[];
+/** The `GET /faracart/v1/revenue/missions` payload. */
+export interface MissionPerformancePayload {
+  items: MissionPerformanceRow[];
 }
 
 /** One upsell analytics row (`GET /faracart/v1/revenue/upsells?analytics=1`). */
@@ -981,12 +981,12 @@ export interface UpsellRankingPayload {
   status: 'available' | 'unavailable';
   reason: string | null;
   context: {
-    goal_id: number;
+    mission_id: number;
     cart_value: number;
     remaining: number | null;
     cart: number[];
     limit: number;
-    goal_name: string;
+    mission_name: string;
   };
   candidates: number;
   weights: Record<string, number>;
@@ -995,12 +995,12 @@ export interface UpsellRankingPayload {
 }
 
 /**
- * The current performance of the goal being recommended for (UPSELL_REFACTOR
- * §9 — the "Current Goal" block of the recommendation detail). Built from
- * the same goal_metrics() the Goal Performance page reads, so the numbers
+ * The current performance of the mission being recommended for (UPSELL_REFACTOR
+ * §9 — the "Current Mission" block of the recommendation detail). Built from
+ * the same mission_metrics() the Mission Performance page reads, so the numbers
  * always agree with the analytics.
  */
-export interface RecommendationGoalHistory {
+export interface RecommendationMissionHistory {
   views: number;
   progressed: number;
   completed: number;
@@ -1020,7 +1020,7 @@ export interface RecommendationGoalHistory {
 
 /**
  * One AOV-relative order-value distribution bucket
- * (GoalRecommendationEngine::distribution()): `share` is a 0–1 rate of
+ * (MissionRecommendationEngine::distribution()): `share` is a 0–1 rate of
  * orders in this bucket (never a raw percentage), `min`/`max` are the
  * bucket edges in store currency (null for the open-ended outer buckets).
  */
@@ -1033,7 +1033,7 @@ export interface DistributionBucket {
   share: number;
 }
 
-/** The analyzed store data block of a goal recommendation. */
+/** The analyzed store data block of a mission recommendation. */
 export interface RecommendationData {
   aov: number;
   median: number;
@@ -1053,7 +1053,7 @@ export interface RecommendationData {
     with_cost?: number;
     reason?: string | null;
   } | null;
-  goal_history: RecommendationGoalHistory | null;
+  mission_history: RecommendationMissionHistory | null;
   reward_type: string | null;
 }
 
@@ -1099,18 +1099,18 @@ export interface RecommendationCandidate {
 }
 
 /**
- * The `GET /faracart/v1/revenue/goal-recommendations` payload — the
+ * The `GET /faracart/v1/revenue/mission-recommendations` payload — the
  * Recommendations page's data source (Phase 33.4; UICHANGES.md §40
  * label).
  */
-export interface GoalRecommendationsPayload {
+export interface MissionRecommendationsPayload {
   available: boolean;
   /**
-   * The goal the payload was computed for (null when unavailable). The
-   * page validates it against the selected goal before rendering — a
-   * recommendation can never belong to a different goal.
+   * The mission the payload was computed for (null when unavailable). The
+   * page validates it against the selected mission before rendering — a
+   * recommendation can never belong to a different mission.
    */
-  goal_id: number | null;
+  mission_id: number | null;
   status: string;
   insufficient_reason: string | null;
   window_days: number;

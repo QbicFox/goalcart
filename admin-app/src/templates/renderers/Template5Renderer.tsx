@@ -4,20 +4,20 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
 
-import type { GoalTemplateProps } from '../registry';
+import type { MissionTemplateProps } from '../registry';
 import { bool, num, str } from '../utils';
-import { GoalBar, goalPercent, remainingLabel } from './goalShared';
+import { MissionBar, missionPercent, remainingLabel } from './missionShared';
 
 /**
- * Template 5 — Compact Floating / Sticky Goal (Concept 08).
+ * Template 5 — Compact Floating / Sticky Mission (Concept 08).
  *
  * A compact dark sticky-style bar: icon, slim progress, remaining amount
  * and a small CTA. Deliberately compact — it must not behave like a
  * normal large card. The dark surface and green accent follow the
  * reference design.
  */
-export default function Template5Renderer({ goal, currency, settings, animation }: GoalTemplateProps) {
-  const percent = goalPercent(goal);
+export default function Template5Renderer({ mission, currency, settings, animation }: MissionTemplateProps) {
+  const percent = missionPercent(mission);
   const accent = str(settings, 'accent', '#4ade80');
   const bg = str(settings, 'bg', '#1e293b');
   const border = str(settings, 'border', '#334155');
@@ -52,9 +52,9 @@ export default function Template5Renderer({ goal, currency, settings, animation 
             flexShrink: 0,
           }}
         >
-          {String(goal.icon || '').trim() ? (
+          {String(mission.icon || '').trim() ? (
             <Box component="span" sx={{ fontSize: 13, lineHeight: 1 }} aria-hidden>
-              {goal.icon}
+              {mission.icon}
             </Box>
           ) : (
             <LocalShippingIcon sx={{ fontSize: 13, color: accent }} />
@@ -74,30 +74,30 @@ export default function Template5Renderer({ goal, currency, settings, animation 
               whiteSpace: 'nowrap',
             }}
           >
-            {goal.goal_name}
+            {mission.mission_name}
           </Typography>
-          {bool(settings, 'showRemaining', true) && !goal.completed && (
+          {bool(settings, 'showRemaining', true) && !mission.completed && (
             <Typography sx={{ fontSize: 12, color: muted, whiteSpace: 'nowrap' }}>
-              {remainingLabel(goal, currency)}
+              {remainingLabel(mission, currency)}
             </Typography>
           )}
-          {goal.completed && (
+          {mission.completed && (
             <Typography sx={{ fontSize: 12, fontWeight: 700, color: accent, whiteSpace: 'nowrap' }}>
               {__('Completed', 'faracart')} ✓
             </Typography>
           )}
         </Box>
-        <GoalBar
+        <MissionBar
           percent={percent}
-          completed={goal.completed}
+          completed={mission.completed}
           animation={animation}
           track={str(settings, 'trackColor', '#475569')}
           height={num(settings, 'barHeight', 6)}
-          color={goal.completed ? '#16a34a' : accent}
+          color={mission.completed ? '#16a34a' : accent}
         />
       </Box>
 
-      {bool(settings, 'showCta', true) && !goal.completed && (
+      {bool(settings, 'showCta', true) && !mission.completed && (
         <Button
           size="small"
           variant="contained"

@@ -8,8 +8,8 @@
 namespace FaraCart\Analytics;
 
 use FaraCart\Database\Schema;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Settings\Settings;
 
@@ -19,30 +19,30 @@ defined( 'ABSPATH' ) || exit;
  * Class AttributionEngine
  *
  * Phase 33.2 (Revenue Attribution) — turns the Phase 33.1 revenue event
- * funnel into per-order goal attribution and measurable revenue metrics.
+ * funnel into per-order mission attribution and measurable revenue metrics.
  *
  * Order association (P33.2): when an order becomes revenue-producing
  * (`woocommerce_payment_complete`, plus `woocommerce_order_status_completed`
  * as a backstop for manual transitions — both idempotent), the engine
  * records the order_paid event through the RevenueTracker and associates
- * the order with the goals that influenced its session:
+ * the order with the missions that influenced its session:
  *
- *  - direct   → the session progressed and/or completed the goal before
+ *  - direct   → the session progressed and/or completed the mission before
  *               ordering; the order's incremental value is attributed
- *               (split equally across the direct goals — deterministic,
+ *               (split equally across the direct missions — deterministic,
  *               never double counted)
- *  - assisted → the session was exposed to the goal (goal_view) but never
+ *  - assisted → the session was exposed to the mission (goal_view) but never
  *               progressed it; the order total is recorded as assisted
  *               revenue with zero incremental value
  *
- * Rows land in `goal_attribution` guarded by the order_goal_model unique
+ * Rows land in `mission_attribution` guarded by the order_mission_model unique
  * key, so re-processing (both hooks firing, cron replays) never duplicates
  * an order's attribution.
  *
  * Metrics (P33.2): funnel counts + completion/conversion rates, incremental
- * cart value (cart value after goal exposure − value at first exposure, per
- * session), goal-driven (direct incremental) revenue, goal-assisted
- * revenue, AOV analysis (store-wide vs goal-exposed orders — labeled
+ * cart value (cart value after mission exposure − value at first exposure, per
+ * session), mission-driven (direct incremental) revenue, mission-assisted
+ * revenue, AOV analysis (store-wide vs mission-exposed orders — labeled
  * "observed", never causality), reward cost (via RewardCostEstimator) and
  * estimated profit impact (graceful: unavailable without margin data).
  *
@@ -53,12 +53,12 @@ defined( 'ABSPATH' ) || exit;
  * Data accuracy (P33.2): only revenue-producing order statuses are
  * attributed (REVENUE_STATUSES — processing/completed per WooCommerce
  * convention); refunded/cancelled/failed orders are excluded; order_paid
- * and goal_attribution are each exactly-once per order by design.
+ * and mission_attribution are each exactly-once per order by design.
  */
 final class AttributionEngine {
 
 	/**
-	 * Attribution model constants (goal_attribution.model).
+	 * Attribution model constants (mission_attribution.model).
 	 */
 	const MODEL_DIRECT   = 'direct';
 	const MODEL_ASSISTED = 'assisted';
@@ -75,7 +75,7 @@ final class AttributionEngine {
 	/**
 	 * Lookback window for session-funnel association (seconds).
 	 *
-	 * Only goal events within this window before the order are attributed —
+	 * Only mission events within this window before the order are attributed —
 	 * a stale exposure (weeks old) does not count as influencing an order.
 	 *
 	 * @var int
@@ -128,18 +128,18 @@ final class AttributionEngine {
 	protected $costs;
 
 	/**
-	 * Goal repository (reward config + goal names for summaries).
+	 * Mission repository (reward config + mission names for summaries).
 	 *
-	 * @var GoalRepository
+	 * @var MissionRepository
 	 */
 	protected $repository;
 
 	/**
-	 * Per-request goal cache (id => Goal).
+	 * Per-request mission cache (id => Mission).
 	 *
-	 * @var array<int, Goal>
+	 * @var array<int, Mission>
 	 */
-	protected $goal_cache = array();
+	protected $mission_cache = array();
 
 	/**
 	 * Per-request cache of fetched orders (id => WC_Order|null).
@@ -163,9 +163,9 @@ final class AttributionEngine {
 	 * @param Session            $session    Session manager.
 	 * @param Settings           $settings   Plugin settings.
 	 * @param RewardCostEstimator $costs     Reward cost / profit estimator.
-	 * @param GoalRepository     $repository Goal repository.
+	 * @param MissionRepository     $repository Mission repository.
 	 */
-	public function __construct( RevenueTracker $tracker, Session $session, Settings $settings, RewardCostEstimator $costs, GoalRepository $repository ) {
+	public function __construct( RevenueTracker $tracker, Session $session, Settings $settings, RewardCostEstimator $costs, MissionRepository $repository ) {
 		$this->tracker    = $tracker;
 		$this->session    = $session;
 		$this->settings   = $settings;
@@ -185,7 +185,7 @@ final class AttributionEngine {
 
 		// Backstop: manual admin transitions straight to completed (COD,
 		// offline flows) never fire payment_complete. Both paths are
-		// idempotent — the order_paid dedup and the order_goal_model unique
+		// idempotent — the order_paid dedup and the order_mission_model unique
 		// key make double processing a no-op.
 		$hooks->add_action( 'woocommerce_order_status_completed', array( $this, 'handle_order_paid' ), 10, 1 );
 	}
@@ -228,11 +228,11 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * Attribute an order to the goals that influenced its session.
+	 * Attribute an order to the missions that influenced its session.
 	 *
 	 * Idempotent: re-running for the same order (both hooks, cron replays)
 	 * finds the recorded order_paid session and skips existing
-	 * goal_attribution rows via the order_goal_model unique key.
+	 * mission_attribution rows via the order_mission_model unique key.
 	 *
 	 * Accepts a WC_Order object or a plain data array (total, status,
 	 * user_id, shipping_total, date, session_id) so headless/tests can
@@ -288,22 +288,22 @@ final class AttributionEngine {
 		// 2. The session funnel before the order.
 		$funnel = $this->session_funnel( $session_id, $order_date );
 
-		if ( empty( $funnel['goals'] ) ) {
+		if ( empty( $funnel['missions'] ) ) {
 			return 0;
 		}
 
-		// 3. Model selection: progressed/completed goals are direct; goals
+		// 3. Model selection: progressed/completed missions are direct; missions
 		// with only exposure (goal_view) are assisted. The incremental
 		// amount is the order total above the cart value at first exposure,
-		// split equally across the direct goals (never double counted).
+		// split equally across the direct missions (never double counted).
 		$direct   = array();
 		$assisted = array();
 
-		foreach ( $funnel['goals'] as $goal_id => $goal_funnel ) {
-			if ( $goal_funnel['progressed'] || $goal_funnel['completed'] ) {
-				$direct[ (int) $goal_id ] = $goal_funnel;
+		foreach ( $funnel['missions'] as $mission_id => $mission_funnel ) {
+			if ( $mission_funnel['progressed'] || $mission_funnel['completed'] ) {
+				$direct[ (int) $mission_id ] = $mission_funnel;
 			} else {
-				$assisted[ (int) $goal_id ] = $goal_funnel;
+				$assisted[ (int) $mission_id ] = $mission_funnel;
 			}
 		}
 
@@ -319,24 +319,24 @@ final class AttributionEngine {
 		// 4. Write the attribution rows (idempotent via unique key).
 		$written = 0;
 
-		foreach ( $direct as $goal_id => $goal_funnel ) {
+		foreach ( $direct as $mission_id => $mission_funnel ) {
 			$written += $this->upsert_attribution(
 				$order_id,
-				$goal_id,
+				$mission_id,
 				$session_id,
 				$user_id,
 				self::MODEL_DIRECT,
 				$order_total,
 				$per_direct,
-				$goal_funnel['completed'] ? 1 : 0,
+				$mission_funnel['completed'] ? 1 : 0,
 				$order_date
 			);
 		}
 
-		foreach ( $assisted as $goal_id => $goal_funnel ) {
+		foreach ( $assisted as $mission_id => $mission_funnel ) {
 			$written += $this->upsert_attribution(
 				$order_id,
-				$goal_id,
+				$mission_id,
 				$session_id,
 				$user_id,
 				self::MODEL_ASSISTED,
@@ -398,7 +398,7 @@ final class AttributionEngine {
 	 *
 	 * Priority: the session recorded on the order_paid event (idempotent
 	 * re-runs keep the original session) → the live cookie session
-	 * (checkout-time attribution) → the most recent goal session of a
+	 * (checkout-time attribution) → the most recent mission session of a
 	 * logged-in user (cookie rotation fallback).
 	 *
 	 * @param int                 $order_id Order id.
@@ -453,20 +453,20 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * Load the session's goal funnel before an order.
+	 * Load the session's mission funnel before an order.
 	 *
 	 * Walks the session's revenue events (within the attribution window
 	 * before the order date) and returns the baseline cart value at first
 	 * exposure (null when no view event carried a cart value — a
 	 * measurable "before" does not exist, so no incremental is computed)
-	 * plus, per goal, whether it was viewed / progressed / completed.
+	 * plus, per mission, whether it was viewed / progressed / completed.
 	 *
 	 * @param string $session_id Anonymous session id.
 	 * @param string $order_date Order date ('Y-m-d H:i:s').
-	 * @return array{baseline: float|null, goals: array<int, array{viewed: bool, progressed: bool, completed: bool}>}
+	 * @return array{baseline: float|null, missions: array<int, array{viewed: bool, progressed: bool, completed: bool}>}
 	 */
 	protected function session_funnel( $session_id, $order_date ) {
-		$empty = array( 'baseline' => null, 'goals' => array() );
+		$empty = array( 'baseline' => null, 'missions' => array() );
 
 		if ( ! Session::is_valid( $session_id ) || '' === (string) $order_date ) {
 			return $empty;
@@ -479,7 +479,7 @@ final class AttributionEngine {
 
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT goal_id, event_type, cart_value
+				"SELECT mission_id, event_type, cart_value
 				 FROM {$events}
 				 WHERE session_id = %s AND event_type IN (%s, %s, %s)
 				   AND created_at >= %s AND created_at <= %s
@@ -498,19 +498,19 @@ final class AttributionEngine {
 			return $empty;
 		}
 
-		$goals   = array();
+		$missions   = array();
 		$baseline = null;
 
 		foreach ( $rows as $row ) {
-			$goal_id = (int) $row['goal_id'];
+			$mission_id = (int) $row['mission_id'];
 
-			if ( ! isset( $goals[ $goal_id ] ) ) {
-				$goals[ $goal_id ] = array( 'viewed' => false, 'progressed' => false, 'completed' => false );
+			if ( ! isset( $missions[ $mission_id ] ) ) {
+				$missions[ $mission_id ] = array( 'viewed' => false, 'progressed' => false, 'completed' => false );
 			}
 
 			switch ( $row['event_type'] ) {
 				case RevenueTracker::EVENT_GOAL_VIEW:
-					$goals[ $goal_id ]['viewed'] = true;
+					$missions[ $mission_id ]['viewed'] = true;
 
 					// Baseline = cart value at first exposure.
 					if ( null === $baseline && null !== $row['cart_value'] ) {
@@ -519,60 +519,60 @@ final class AttributionEngine {
 					break;
 
 				case RevenueTracker::EVENT_GOAL_PROGRESS:
-					$goals[ $goal_id ]['progressed'] = true;
+					$missions[ $mission_id ]['progressed'] = true;
 					break;
 
 				case RevenueTracker::EVENT_GOAL_COMPLETED:
-					$goals[ $goal_id ]['completed'] = true;
+					$missions[ $mission_id ]['completed'] = true;
 					break;
 			}
 		}
 
-		// Only goals the session was actually exposed to participate.
-		foreach ( $goals as $goal_id => $funnel ) {
+		// Only missions the session was actually exposed to participate.
+		foreach ( $missions as $mission_id => $funnel ) {
 			if ( ! $funnel['viewed'] ) {
-				unset( $goals[ $goal_id ] );
+				unset( $missions[ $mission_id ] );
 			}
 		}
 
 		return array(
 			'baseline' => $baseline,
-			'goals'    => $goals,
+			'missions'    => $missions,
 		);
 	}
 
 	/**
-	 * Insert a goal_attribution row, skipping duplicates.
+	 * Insert a mission_attribution row, skipping duplicates.
 	 *
-	 * The order_goal_model unique key makes this exactly-once per
-	 * (order, goal, model) — the concurrency-safe guard behind the
+	 * The order_mission_model unique key makes this exactly-once per
+	 * (order, mission, model) — the concurrency-safe guard behind the
 	 * idempotent attribution contract.
 	 *
 	 * @param int    $order_id      Order id.
-	 * @param int    $goal_id       Goal id.
+	 * @param int    $mission_id       Mission id.
 	 * @param string $session_id    Session id.
 	 * @param int    $user_id       User id (0 = guest).
 	 * @param string $model         self::MODEL_DIRECT|MODEL_ASSISTED.
 	 * @param float  $order_total   Order total.
 	 * @param float  $incremental   Attributed incremental value.
-	 * @param int    $goal_completed Whether the goal was completed pre-order.
+	 * @param int    $mission_completed Whether the mission was completed pre-order.
 	 * @param string $date          Created-at date.
 	 * @return int 1 when a row was written, 0 when deduped/failed.
 	 */
-	protected function upsert_attribution( $order_id, $goal_id, $session_id, $user_id, $model, $order_total, $incremental, $goal_completed, $date ) {
+	protected function upsert_attribution( $order_id, $mission_id, $session_id, $user_id, $model, $order_total, $incremental, $mission_completed, $date ) {
 		global $wpdb;
 
-		$table = Schema::table( 'goal_attribution' );
+		$table = Schema::table( 'mission_attribution' );
 
 		$data = array(
 			'order_id'         => (int) $order_id,
-			'goal_id'          => (int) $goal_id,
+			'mission_id'          => (int) $mission_id,
 			'session_id'       => $session_id,
 			'user_id'          => $user_id > 0 ? $user_id : null,
 			'model'            => $model,
 			'order_total'      => round( (float) $order_total, 4 ),
 			'incremental_value'=> round( (float) $incremental, 4 ),
-			'goal_completed'   => (int) $goal_completed,
+			'mission_completed' => (int) $mission_completed,
 			'created_at'       => '' !== (string) $date ? (string) $date : current_time( 'mysql' ),
 		);
 
@@ -580,7 +580,7 @@ final class AttributionEngine {
 
 		$inserted = $wpdb->insert( $table, $data, $formats );
 
-		// Success → 1 (a row written); the order_goal_model unique key hit
+		// Success → 1 (a row written); the order_mission_model unique key hit
 		// (or a genuine failure) → 0, keeping attribution idempotent. The
 		// count semantics let attribute_order() report rows written, not
 		// summed auto-increment ids.
@@ -588,17 +588,17 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * Funnel counts and rates for the goal funnel (views → progressed →
-	 * completed → converted), optionally per goal and within a date range.
+	 * Funnel counts and rates for the mission funnel (views → progressed →
+	 * completed → converted), optionally per mission and within a date range.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, from, to.
+	 * @param array<string, mixed> $args Optional: mission_id, from, to.
 	 * @return array<string, mixed>
 	 */
 	public function funnel( array $args = array() ) {
 		global $wpdb;
 
 		$events = Schema::table( 'revenue_events' );
-		$attrib = Schema::table( 'goal_attribution' );
+		$attrib = Schema::table( 'mission_attribution' );
 
 		list( $event_sql, $event_params ) = $this->revenue_where( $args );
 		list( $attrib_sql, $attrib_params ) = $this->attribution_where( $args );
@@ -639,13 +639,13 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * Incremental cart value: cart value after goal exposure minus the
+	 * Incremental cart value: cart value after mission exposure minus the
 	 * value at first exposure, averaged per session.
 	 *
 	 * Bounded (METRIC_MAX_ROWS, filterable) — the Phase 33.3 aggregator
 	 * pre-computes this daily for large stores.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, from, to.
+	 * @param array<string, mixed> $args Optional: mission_id, from, to.
 	 * @return array<string, mixed>
 	 */
 	public function incremental_cart_value( array $args = array() ) {
@@ -731,22 +731,22 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * Revenue attribution summary: goal-driven (direct incremental) revenue,
-	 * goal-assisted revenue, total goal-influenced revenue, reward cost and
+	 * Revenue attribution summary: mission-driven (direct incremental) revenue,
+	 * mission-assisted revenue, total mission-influenced revenue, reward cost and
 	 * estimated profit impact.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, from, to.
+	 * @param array<string, mixed> $args Optional: mission_id, from, to.
 	 * @return array<string, mixed>
 	 */
 	public function attribution_summary( array $args = array() ) {
 		global $wpdb;
 
-		$attrib = Schema::table( 'goal_attribution' );
+		$attrib = Schema::table( 'mission_attribution' );
 
 		list( $where, $params ) = $this->attribution_where( $args );
 
-		// Goal-driven revenue = sum of direct incremental value (additive
-		// across goals — it is the amount the goals moved the carts).
+		// Mission-driven revenue = sum of direct incremental value (additive
+		// across missions — it is the amount the missions moved the carts).
 		$direct_revenue = (float) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COALESCE(SUM(incremental_value), 0) FROM {$attrib} WHERE model = %s AND {$where}",
@@ -754,7 +754,7 @@ final class AttributionEngine {
 			)
 		);
 
-		// Goal-influenced revenue = sum of order totals of every order with
+		// Mission-influenced revenue = sum of order totals of every order with
 		// any attribution row (distinct orders — never double counted).
 		$influenced_revenue = (float) $wpdb->get_var(
 			$wpdb->prepare(
@@ -763,8 +763,8 @@ final class AttributionEngine {
 			)
 		);
 
-		// Goal-assisted revenue = order totals of orders whose attribution
-		// rows are ALL assisted (no direct row for any goal).
+		// Mission-assisted revenue = order totals of orders whose attribution
+		// rows are ALL assisted (no direct row for any mission).
 		$assisted_revenue = (float) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COALESCE(SUM(a.order_total), 0)
@@ -817,9 +817,9 @@ final class AttributionEngine {
 		);
 
 		return array(
-			'goal_driven_revenue'   => round( $direct_revenue, 4 ),
-			'goal_assisted_revenue' => round( $assisted_revenue, 4 ),
-			'goal_influenced_revenue' => round( $influenced_revenue, 4 ),
+			'mission_driven_revenue'   => round( $direct_revenue, 4 ),
+			'mission_assisted_revenue' => round( $assisted_revenue, 4 ),
+			'mission_influenced_revenue' => round( $influenced_revenue, 4 ),
 			'orders'                => $orders,
 			'reward_cost'           => $reward_cost['estimated_cost'],
 			'reward_cost_available' => $reward_cost['available'],
@@ -854,7 +854,7 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * Per-goal daily aggregate row (the revenue_daily row shape).
+	 * Per-mission daily aggregate row (the revenue_daily row shape).
 	 *
 	 * Consumed by the Phase 33.3 DailyAggregator so the aggregated table is
 	 * computed with the exact same definitions as the live reads
@@ -862,13 +862,13 @@ final class AttributionEngine {
 	 * pre-aggregated history consistent. The window (from/to) is typically
 	 * a single day.
 	 *
-	 * @param int                  $goal_id Goal id.
+	 * @param int                  $mission_id Mission id.
 	 * @param array<string, mixed> $args    Optional: from, to.
 	 * @return array{views: int, progressions: int, completions: int, conversions: int, revenue: float, incremental_revenue: float, reward_cost: float, reward_cost_available: bool, estimated_profit: float|null, profit_available: bool}
 	 */
-	public function daily_metrics( $goal_id, array $args = array() ) {
+	public function daily_metrics( $mission_id, array $args = array() ) {
 		$summary = $this->attribution_summary(
-			array_merge( $args, array( 'goal_id' => (int) $goal_id ) )
+			array_merge( $args, array( 'mission_id' => (int) $mission_id ) )
 		);
 
 		$funnel = $summary['funnel'];
@@ -878,10 +878,10 @@ final class AttributionEngine {
 			'progressions'         => $funnel['progressed'],
 			'completions'          => $funnel['completed'],
 			'conversions'          => $funnel['converted'],
-			// revenue = totals of the orders influenced by the goal that
+			// revenue = totals of the orders influenced by the mission that
 			// day; incremental_revenue = the direct (driven) increment.
-			'revenue'              => $summary['goal_influenced_revenue'],
-			'incremental_revenue'  => $summary['goal_driven_revenue'],
+			'revenue'              => $summary['mission_influenced_revenue'],
+			'incremental_revenue'  => $summary['mission_driven_revenue'],
 			'reward_cost'          => $summary['reward_cost'],
 			'reward_cost_available'=> $summary['reward_cost_available'],
 			'estimated_profit'     => $summary['profit_impact'],
@@ -890,38 +890,38 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * Per-goal metrics (the Goal Performance row shape).
+	 * Per-mission metrics (the Mission Performance row shape).
 	 *
-	 * @param int                   $goal_id Goal id.
+	 * @param int                   $mission_id Mission id.
 	 * @param array<string, mixed>  $args    Optional: from, to.
-	 * @return array<string, mixed>|null Null when the goal does not exist.
+	 * @return array<string, mixed>|null Null when the mission does not exist.
 	 */
-	public function goal_metrics( $goal_id, array $args = array() ) {
-		$goal = $this->goal( (int) $goal_id );
+	public function mission_metrics( $mission_id, array $args = array() ) {
+		$mission = $this->mission( (int) $mission_id );
 
-		if ( null === $goal ) {
+		if ( null === $mission ) {
 			return null;
 		}
 
-		$scoped = array_merge( $args, array( 'goal_id' => (int) $goal_id ) );
+		$scoped = array_merge( $args, array( 'mission_id' => (int) $mission_id ) );
 		$summary = $this->attribution_summary( $scoped );
 		$funnel  = $summary['funnel'];
 
-		// Incremental cart value scoped to the goal.
+		// Incremental cart value scoped to the mission.
 		$incremental = $this->incremental_cart_value( $scoped );
 
-		// Smart Upsell linkage (UPSELL_REFACTOR §29/§30/§31): the goal's
+		// Smart Upsell linkage (UPSELL_REFACTOR §29/§30/§31): the mission's
 		// upsell funnel (impressions/clicks/adds/purchases) plus the
 		// upsell-assisted completion count — completions whose session also
-		// saw a product recommendation for this goal. Only counted when the
-		// event linkage is reliable (same session + goal), never fabricated.
-		$upsell = $this->goal_upsell_stats( (int) $goal_id, $args );
+		// saw a product recommendation for this mission. Only counted when the
+		// event linkage is reliable (same session + mission), never fabricated.
+		$upsell = $this->mission_upsell_stats( (int) $mission_id, $args );
 
 		return array(
-			'goal_id'             => $goal->id(),
-			'name'                => $goal->name(),
-			'reward_type'         => $goal->reward_type(),
-			'target'              => $goal->target(),
+			'mission_id'             => $mission->id(),
+			'name'                => $mission->name(),
+			'reward_type'         => $mission->reward_type(),
+			'target'              => $mission->target(),
 			'views'               => $funnel['views'],
 			'progressed'          => $funnel['progressed'],
 			'completed'           => $funnel['completed'],
@@ -931,8 +931,8 @@ final class AttributionEngine {
 			'average_cart_value'  => $incremental['average_baseline'],
 			'incremental_cart_value' => $incremental['average'],
 			// Smart Upsell linkage (UPSELL_REFACTOR §30/§32/§33): how many of
-			// this goal's completions were assisted by a product
-			// recommendation, the assisted rate, and the full per-goal
+			// this mission's completions were assisted by a product
+			// recommendation, the assisted rate, and the full per-mission
 			// upsell funnel (impressions → clicks → adds → purchases).
 			'upsell_assisted'       => $upsell['assisted'],
 			'upsell_assisted_rate'  => $upsell['assisted_rate'],
@@ -942,17 +942,17 @@ final class AttributionEngine {
 				'adds'        => $upsell['adds'],
 				'orders'      => $upsell['orders'],
 			),
-			// Phase 5 (Goal Performance Redesign) — commercial-outcome and
+			// Phase 5 (Mission Performance Redesign) — commercial-outcome and
 			// detail-drawer fields. All derived from the already-computed
 			// attribution summary + incremental read above (Improvement.md
 			// §20): total influenced order value, the engine's attribution
 			// window, and the session-count data-sufficiency signal. Nothing
 			// new is queried.
-			'influenced_revenue'    => $summary['goal_influenced_revenue'],
+			'influenced_revenue'    => $summary['mission_influenced_revenue'],
 			'attribution_window_days' => (int) ( self::ATTRIBUTION_WINDOW / DAY_IN_SECONDS ),
 			'data_sufficiency'      => $incremental['data_sufficiency'],
-			'attributed_revenue'  => $summary['goal_driven_revenue'],
-			'assisted_revenue'    => $summary['goal_assisted_revenue'],
+			'attributed_revenue'  => $summary['mission_driven_revenue'],
+			'assisted_revenue'    => $summary['mission_assisted_revenue'],
 			'reward_cost'         => $summary['reward_cost'],
 			'reward_cost_available' => $summary['reward_cost_available'],
 			'profit_impact'       => $summary['profit_impact'],
@@ -967,29 +967,29 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * The goal's Smart Upsell linkage over the window.
+	 * The mission's Smart Upsell linkage over the window.
 	 *
-	 * Returns the per-goal upsell funnel counts (impressions / clicked /
+	 * Returns the per-mission upsell funnel counts (impressions / clicked /
 	 * added / upsell_order purchases from the raw upsell_events log — the
 	 * same source the Upsell Performance page reads, so the numbers always
 	 * agree) and the upsell-assisted completion count: distinct sessions
-	 * that completed the goal (a goal_completed revenue event in the
-	 * window) AND saw a product recommendation for that goal (any upsell
-	 * funnel event in the same session+goal). This is a reliable linkage —
-	 * both events are session-scoped and goal-scoped — so the metric is
+	 * that completed the mission (a goal_completed revenue event in the
+	 * window) AND saw a product recommendation for that mission (any upsell
+	 * funnel event in the same session+mission). This is a reliable linkage —
+	 * both events are session-scoped and mission-scoped — so the metric is
 	 * never fabricated (UPSELL_REFACTOR §30).
 	 *
-	 * @param int                   $goal_id Goal id.
+	 * @param int                   $mission_id Mission id.
 	 * @param array<string, mixed>  $args    Optional: from, to.
 	 * @return array{impressions: int, clicks: int, adds: int, orders: int, assisted: int, assisted_rate: float|null}
 	 */
-	protected function goal_upsell_stats( $goal_id, array $args ) {
+	protected function mission_upsell_stats( $mission_id, array $args ) {
 		global $wpdb;
 
 		$upsell = Schema::table( 'upsell_events' );
 		$revenue = Schema::table( 'revenue_events' );
 
-		// Window bounds for the funnel counts (upsell_events has no goal
+		// Window bounds for the funnel counts (upsell_events has no mission
 		// window helper of its own — same semantics as revenue_where).
 		$funnel_where  = '1=1';
 		$funnel_params = array();
@@ -1010,44 +1010,44 @@ final class AttributionEngine {
 		foreach ( $types as $key => $event_type ) {
 			$counts[ $key ] = (int) $wpdb->get_var(
 				$wpdb->prepare(
-					"SELECT COUNT(*) FROM {$upsell} WHERE goal_id = %d AND event_type = %s AND {$funnel_where}",
-					array_merge( array( (int) $goal_id, $event_type ), $funnel_params )
+					"SELECT COUNT(*) FROM {$upsell} WHERE mission_id = %d AND event_type = %s AND {$funnel_where}",
+					array_merge( array( (int) $mission_id, $event_type ), $funnel_params )
 				)
 			);
 		}
 
 		// Assisted completions: sessions with a goal_completed event that
-		// also saw a recommendation (impression/clicked/added) for the goal.
+		// also saw a recommendation (impression/clicked/added) for the mission.
 		// The window applies to the completion event (revenue_where); the
-		// upsell join is window-free but session+goal-scoped, which is the
+		// upsell join is window-free but session+mission-scoped, which is the
 		// reliable linkage the metric requires.
 		list( $event_sql, $event_params ) = $this->revenue_where( $args );
 
-		// The completion is always scoped to THIS goal (`r.goal_id = %d`) —
-		// the join pins the upsell side to the same goal via
-		// `u.goal_id = r.goal_id`, so a session counts only when it both
-		// completed this goal and saw a recommendation for this goal.
+		// The completion is always scoped to THIS mission (`r.mission_id = %d`) —
+		// the join pins the upsell side to the same mission via
+		// `u.mission_id = r.mission_id`, so a session counts only when it both
+		// completed this mission and saw a recommendation for this mission.
 		$assisted = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(DISTINCT r.session_id)
 				 FROM {$revenue} r
-				 INNER JOIN {$upsell} u ON u.session_id = r.session_id AND u.goal_id = r.goal_id
+				 INNER JOIN {$upsell} u ON u.session_id = r.session_id AND u.mission_id = r.mission_id
 				  AND u.event_type IN (%s, %s, %s)
-				 WHERE r.event_type = %s AND r.goal_id = %d AND {$event_sql}",
+				 WHERE r.event_type = %s AND r.mission_id = %d AND {$event_sql}",
 				array_merge(
 					array(
 						RevenueTracker::EVENT_UPSELL_IMPRESSION,
 						RevenueTracker::EVENT_UPSELL_CLICKED,
 						RevenueTracker::EVENT_UPSELL_ADDED,
 						RevenueTracker::EVENT_GOAL_COMPLETED,
-						(int) $goal_id,
+						(int) $mission_id,
 					),
 					$event_params
 				)
 			)
 		);
 
-		$completed = $this->goal_completions( (int) $goal_id, $args );
+		$completed = $this->mission_completions( (int) $mission_id, $args );
 
 		return array(
 			'impressions'   => $counts['impressions'],
@@ -1060,17 +1060,17 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * The goal's completion count over the window (revenue_events).
+	 * The mission's completion count over the window (revenue_events).
 	 *
-	 * Always scoped to the requested goal (`goal_id`), like the assisted
+	 * Always scoped to the requested mission (`mission_id`), like the assisted
 	 * count it is the denominator for — a store-wide completion count
-	 * would dilute the rate with unrelated goals.
+	 * would dilute the rate with unrelated missions.
 	 *
-	 * @param int                   $goal_id Goal id.
+	 * @param int                   $mission_id Mission id.
 	 * @param array<string, mixed>  $args    Optional: from, to.
 	 * @return int
 	 */
-	protected function goal_completions( $goal_id, array $args ) {
+	protected function mission_completions( $mission_id, array $args ) {
 		global $wpdb;
 
 		$events = Schema::table( 'revenue_events' );
@@ -1079,14 +1079,14 @@ final class AttributionEngine {
 
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$events} WHERE event_type = %s AND goal_id = %d AND {$where}",
-				array_merge( array( RevenueTracker::EVENT_GOAL_COMPLETED, (int) $goal_id ), $params )
+				"SELECT COUNT(*) FROM {$events} WHERE event_type = %s AND mission_id = %d AND {$where}",
+				array_merge( array( RevenueTracker::EVENT_GOAL_COMPLETED, (int) $mission_id ), $params )
 			)
 		);
 	}
 
 	/**
-	 * AOV analysis: store-wide AOV vs goal-exposed AOV (observed impact).
+	 * AOV analysis: store-wide AOV vs mission-exposed AOV (observed impact).
 	 *
 	 * Never claims causality — the returned label is 'observed_impact'. The
 	 * store-wide scan is paginated and capped (ORDER_SCAN_PAGES); when
@@ -1099,7 +1099,7 @@ final class AttributionEngine {
 	public function aov_analysis( array $args = array() ) {
 		global $wpdb;
 
-		$attrib = Schema::table( 'goal_attribution' );
+		$attrib = Schema::table( 'mission_attribution' );
 
 		list( $where, $params ) = $this->attribution_where( $args );
 
@@ -1161,7 +1161,7 @@ final class AttributionEngine {
 	/**
 	 * Shipping statistics over the store's orders in the window.
 	 *
-	 * Feeds the Phase 33.4 shipping-aware goal recommendations: average
+	 * Feeds the Phase 33.4 shipping-aware mission recommendations: average
 	 * shipping cost, free-shipping share and per-method averages.
 	 *
 	 * @param array<string, mixed> $args Optional: from, to.
@@ -1226,28 +1226,28 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * Estimated reward cost for the attributed (completed-goal) rows.
+	 * Estimated reward cost for the attributed (completed-mission) rows.
 	 *
-	 * Only completed goals grant rewards, so only rows with
-	 * goal_completed = 1 contribute. Bounded and per-goal cached.
+	 * Only completed missions grant rewards, so only rows with
+	 * mission_completed = 1 contribute. Bounded and per-mission cached.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, from, to.
+	 * @param array<string, mixed> $args Optional: mission_id, from, to.
 	 * @return array{estimated_cost: float, available: bool}
 	 */
 	protected function reward_cost_for_rows( array $args ) {
 		global $wpdb;
 
-		$attrib = Schema::table( 'goal_attribution' );
+		$attrib = Schema::table( 'mission_attribution' );
 		$limit  = (int) apply_filters( 'faracart_attribution_metric_rows', self::METRIC_MAX_ROWS );
 
 		list( $where, $params ) = $this->attribution_where( $args );
 
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT goal_id, order_id, order_total
+				"SELECT mission_id, order_id, order_total
 				 FROM {$attrib}
-				 WHERE goal_completed = 1 AND model = %s AND {$where}
-				 GROUP BY goal_id, order_id
+				 WHERE mission_completed = 1 AND model = %s AND {$where}
+				 GROUP BY mission_id, order_id
 				 ORDER BY order_id ASC
 				 LIMIT %d",
 				array_merge( array( self::MODEL_DIRECT ), $params, array( max( 1, $limit ) ) )
@@ -1263,9 +1263,9 @@ final class AttributionEngine {
 		$available      = 0;
 
 		foreach ( $rows as $row ) {
-			$goal = $this->goal( (int) $row['goal_id'] );
+			$mission = $this->mission( (int) $row['mission_id'] );
 
-			if ( null === $goal ) {
+			if ( null === $mission ) {
 				continue;
 			}
 
@@ -1276,7 +1276,7 @@ final class AttributionEngine {
 			}
 
 			$cost = $this->costs->estimate_reward_cost(
-				$goal,
+				$mission,
 				(float) $row['order_total'],
 				array(
 					'order_id'       => $order_id,
@@ -1313,7 +1313,7 @@ final class AttributionEngine {
 	 * counts just let the UI explain "estimated profit is calculated only
 	 * for orders with complete cost data".
 	 *
-	 * @param array<string, mixed> $args       Optional: goal_id, goal_ids,
+	 * @param array<string, mixed> $args       Optional: mission_id, mission_ids,
 	 *                                         from, to.
 	 * @param float                $reward_cost Pre-computed reward cost (avoids
 	 *                                          re-running the completed-rows
@@ -1328,7 +1328,7 @@ final class AttributionEngine {
 	protected function profit_impact_for_rows( array $args, $reward_cost = 0.0 ) {
 		global $wpdb;
 
-		$attrib = Schema::table( 'goal_attribution' );
+		$attrib = Schema::table( 'mission_attribution' );
 		$limit  = (int) apply_filters( 'faracart_attribution_metric_rows', self::METRIC_MAX_ROWS );
 
 		list( $where, $params ) = $this->attribution_where( $args );
@@ -1388,7 +1388,7 @@ final class AttributionEngine {
 	/**
 	 * Store-wide order totals within the window, as plain floats.
 	 *
-	 * Phase 33.4 (Smart Goal Recommendation) entry point: feeds the AOV /
+	 * Phase 33.4 (Smart Mission Recommendation) entry point: feeds the AOV /
 	 * median / order-distribution analyzers with the same bounded,
 	 * memoized store scan the AOV and shipping metrics already use — one
 	 * paginated pass per window, never a full-table load. Zero/negative
@@ -1532,29 +1532,29 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * Memoized goal lookup.
+	 * Memoized mission lookup.
 	 *
-	 * @param int $goal_id Goal id.
-	 * @return Goal|null
+	 * @param int $mission_id Mission id.
+	 * @return Mission|null
 	 */
-	protected function goal( $goal_id ) {
-		$goal_id = (int) $goal_id;
+	protected function mission( $mission_id ) {
+		$mission_id = (int) $mission_id;
 
-		if ( array_key_exists( $goal_id, $this->goal_cache ) ) {
-			return $this->goal_cache[ $goal_id ];
+		if ( array_key_exists( $mission_id, $this->mission_cache ) ) {
+			return $this->mission_cache[ $mission_id ];
 		}
 
-		$goal = $this->repository->find( $goal_id );
-		$this->goal_cache[ $goal_id ] = $goal ? $goal : null;
+		$mission = $this->repository->find( $mission_id );
+		$this->mission_cache[ $mission_id ] = $mission ? $mission : null;
 
-		return $this->goal_cache[ $goal_id ];
+		return $this->mission_cache[ $mission_id ];
 	}
 
 	/**
 	 * Whether the store carries any product cost data.
 	 *
 	 * Phase 3 availability metadata — delegates to the shared
-	 * RewardCostEstimator so every profit surface (summary, goal metrics,
+	 * RewardCostEstimator so every profit surface (summary, mission metrics,
 	 * empty windows) reports the same store-wide signal.
 	 *
 	 * @return bool
@@ -1564,21 +1564,21 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * WHERE clause for revenue_events reads (goal_id + date range).
+	 * WHERE clause for revenue_events reads (mission_id + date range).
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, goal_ids, from, to.
+	 * @param array<string, mixed> $args Optional: mission_id, mission_ids, from, to.
 	 * @return array{0: string, 1: array<int, mixed>}
 	 */
 	protected function revenue_where( array $args ) {
 		$where  = '1=1';
 		$params = array();
 
-		if ( ! empty( $args['goal_id'] ) ) {
-			$where .= ' AND goal_id = %d';
-			$params[] = (int) $args['goal_id'];
+		if ( ! empty( $args['mission_id'] ) ) {
+			$where .= ' AND mission_id = %d';
+			$params[] = (int) $args['mission_id'];
 		}
 
-		list( $where, $params ) = $this->append_goal_ids( $args, $where, $params );
+		list( $where, $params ) = $this->append_mission_ids( $args, $where, $params );
 
 		if ( ! empty( $args['from'] ) ) {
 			$where .= ' AND created_at >= %s';
@@ -1594,21 +1594,21 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * WHERE clause for goal_attribution reads (goal_id + date range).
+	 * WHERE clause for mission_attribution reads (mission_id + date range).
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, goal_ids, from, to.
+	 * @param array<string, mixed> $args Optional: mission_id, mission_ids, from, to.
 	 * @return array{0: string, 1: array<int, mixed>}
 	 */
 	protected function attribution_where( array $args ) {
 		$where  = '1=1';
 		$params = array();
 
-		if ( ! empty( $args['goal_id'] ) ) {
-			$where .= ' AND goal_id = %d';
-			$params[] = (int) $args['goal_id'];
+		if ( ! empty( $args['mission_id'] ) ) {
+			$where .= ' AND mission_id = %d';
+			$params[] = (int) $args['mission_id'];
 		}
 
-		list( $where, $params ) = $this->append_goal_ids( $args, $where, $params );
+		list( $where, $params ) = $this->append_mission_ids( $args, $where, $params );
 
 		if ( ! empty( $args['from'] ) ) {
 			$where .= ' AND created_at >= %s';
@@ -1624,24 +1624,24 @@ final class AttributionEngine {
 	}
 
 	/**
-	 * Append an explicit goal_ids IN-clause to a WHERE builder.
+	 * Append an explicit mission_ids IN-clause to a WHERE builder.
 	 *
-	 * Lets callers filter attribution reads by a set of goals (e.g. the
+	 * Lets callers filter attribution reads by a set of missions (e.g. the
 	 * campaign/reward-filtered purchase metrics on the legacy Analytics
-	 * endpoint) without changing the single-goal semantics. Bound through
+	 * endpoint) without changing the single-mission semantics. Bound through
 	 * $wpdb->prepare like every other value.
 	 *
-	 * @param array<string, mixed> $args   Args (may carry goal_ids).
+	 * @param array<string, mixed> $args   Args (may carry mission_ids).
 	 * @param string               $where  Current WHERE string.
 	 * @param array<int, mixed>    $params Current bound values.
 	 * @return array{0: string, 1: array<int, mixed>}
 	 */
-	protected function append_goal_ids( array $args, $where, array $params ) {
-		if ( empty( $args['goal_ids'] ) || ! is_array( $args['goal_ids'] ) ) {
+	protected function append_mission_ids( array $args, $where, array $params ) {
+		if ( empty( $args['mission_ids'] ) || ! is_array( $args['mission_ids'] ) ) {
 			return array( $where, $params );
 		}
 
-		$ids = array_values( array_filter( array_map( 'absint', $args['goal_ids'] ), function ( $id ) {
+		$ids = array_values( array_filter( array_map( 'absint', $args['mission_ids'] ), function ( $id ) {
 			return $id > 0;
 		} ) );
 
@@ -1649,7 +1649,7 @@ final class AttributionEngine {
 			return array( $where, $params );
 		}
 
-		$where .= ' AND goal_id IN (' . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+		$where .= ' AND mission_id IN (' . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')';
 		$params = array_merge( $params, $ids );
 
 		return array( $where, $params );

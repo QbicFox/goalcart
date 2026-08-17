@@ -65,15 +65,15 @@ function MetricCard({
  */
 export default function AttributionDashboard() {
   const { range } = useDateRange();
-  const [goalId, setGoalId] = useState<number>(0);
+  const [missionId, setMissionId] = useState<number>(0);
 
   const query = useQuery({
-    queryKey: ['revenue', 'attribution', { from: range.from, to: range.to, goalId }],
+    queryKey: ['revenue', 'attribution', { from: range.from, to: range.to, missionId }],
     queryFn: () =>
       fetchRevenueAttribution({
         from: range.from,
         to: range.to,
-        goal_id: goalId || undefined,
+        mission_id: missionId || undefined,
       }),
   });
 
@@ -90,7 +90,7 @@ export default function AttributionDashboard() {
         'faracart'
       )}
     >
-      <RevenueToolbar goalId={goalId} onGoalChange={setGoalId} />
+      <RevenueToolbar missionId={missionId} onMissionChange={setMissionId} />
 
       {query.isError && (
         <Alert severity="error" variant="outlined">
@@ -114,7 +114,7 @@ export default function AttributionDashboard() {
           icon={<CallSplitIcon fontSize="large" />}
           title={__('No attributed orders yet', 'faracart')}
           description={__(
-            'Orders are attributed once they reach a revenue-producing status. No goal-influenced orders were found in this range.',
+            'Orders are attributed once they reach a revenue-producing status. No mission-influenced orders were found in this range.',
             'faracart'
           )}
         />
@@ -124,22 +124,22 @@ export default function AttributionDashboard() {
             {/* UICHANGES.md §30 — user-facing terminology for the attribution
                 model: Direct revenue / Assisted revenue / Influenced sales
                 (the same labels the Sales Performance advanced section and
-                the Goal Detail drawer use). Never the internal field names. */}
+                the Mission Detail drawer use). Never the internal field names. */}
             <MetricCard
               label={__('Direct revenue', 'faracart')}
-              value={formatCurrency(summary.goal_driven_revenue)}
+              value={formatCurrency(summary.mission_driven_revenue)}
               icon={<PaymentsIcon fontSize="small" />}
               hint={__('Direct incremental value', 'faracart')}
             />
             <MetricCard
               label={__('Assisted revenue', 'faracart')}
-              value={formatCurrency(summary.goal_assisted_revenue)}
+              value={formatCurrency(summary.mission_assisted_revenue)}
               icon={<AccountTreeIcon fontSize="small" />}
               hint={__('Pure-assisted order totals', 'faracart')}
             />
             <MetricCard
               label={__('Influenced sales', 'faracart')}
-              value={formatCurrency(summary.goal_influenced_revenue)}
+              value={formatCurrency(summary.mission_influenced_revenue)}
               icon={<CallSplitIcon fontSize="small" />}
               hint={sprintf(
                 /* translators: 1: attributed orders. */

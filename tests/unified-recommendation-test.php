@@ -9,11 +9,11 @@
  * others:
  *
  *  - service wiring from the DI container
- *  - gates: completed / ineligible goals return no recommendations
- *  - BOTH strategies preserved: goal products + cart upsells land in
+ *  - gates: completed / ineligible missions return no recommendations
+ *  - BOTH strategies preserved: mission products + cart upsells land in
  *    both pools and merge into ONE item with source 'both' (deduped —
  *    never twice in the same block)
- *  - suggestion-only pool (quantity goal): the upsell half is skipped by
+ *  - suggestion-only pool (quantity mission): the upsell half is skipped by
  *    type, every item stays source 'suggestion' and is scored on the
  *    unified 0–100 scale through the ranker's normalized scorer
  *  - upsell-only pool: a candidate injected via the existing
@@ -28,7 +28,7 @@
  *  - the faracart_suggestions developer filter still applies
  *
  * The ranking sections pin `faracart_upsell_weights` to relevance-only
- * (the ranker's own developer filter) so fixture goal products always
+ * (the ranker's own developer filter) so fixture mission products always
  * outrank the LIVE catalog's best sellers — the same live-DB robustness
  * the other suites rely on.
  *
@@ -61,9 +61,9 @@ require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use FaraCart\Analytics\UpsellRanker;
 use FaraCart\Database\Installer;
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Recommendations\ProductRecommendationEngine;
 use FaraCart\Settings\Settings;
 use FaraCart\Suggestions\SuggestionEngine;
@@ -86,8 +86,8 @@ function check( $label, $cond ) {
 	}
 }
 
-function goal( array $data ) {
-	return new Goal( $data );
+function mission( array $data ) {
+	return new Mission( $data );
 }
 
 /**
@@ -158,7 +158,7 @@ function item_ids( array $items ) {
 
 /**
  * Pin the ranker to relevance-only scoring (the ranker's own developer
- * filter) so fixture goal products deterministically outrank the live
+ * filter) so fixture mission products deterministically outrank the live
  * catalog's best sellers — live-DB-robust ranking for the merge tests.
  *
  * @return void
@@ -203,7 +203,7 @@ $created = array();
 $wpdb->query( 'START TRANSACTION' );
 try {
 	// -----------------------------------------------------------------------
-	// Minimal catalog: no-padding + gates + item shape (fewer goal products
+	// Minimal catalog: no-padding + gates + item shape (fewer mission products
 	// than the default limit — the block must never invent fillers).
 	// -----------------------------------------------------------------------
 	echo "\n== 2. Minimal catalog: no padding & gates ==\n";
@@ -214,21 +214,21 @@ try {
 	$m2 = make_product( 'Mike Two', 35, array(), 'instock', 0 );
 	$created = array_merge( $created, array( $m1, $m2 ) );
 
-	$minimal_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping', 'products' => array( $m1, $m2 ) ) );
+	$minimal_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping', 'products' => array( $m1, $m2 ) ) );
 	$empty_cart   = new CartContext( array( 'subtotal' => 0, 'total' => 0 ) );
 
-	$minimal_items = $engine->recommend( $minimal_goal, new GoalResult( $minimal_goal, 0, 100 ), $empty_cart );
+	$minimal_items = $engine->recommend( $minimal_mission, new MissionResult( $minimal_mission, 0, 100 ), $empty_cart );
 	$minimal_ids   = item_ids( $minimal_items );
 
-	check( 'two goal products → exactly two items (no padding to the limit)', 2 === count( $minimal_items ) );
+	check( 'two mission products → exactly two items (no padding to the limit)', 2 === count( $minimal_items ) );
 	check( 'no duplicate products in one block', count( $minimal_ids ) === count( array_unique( $minimal_ids ) ) );
 
 	// Gates first.
-	$done = new GoalResult( $minimal_goal, 120, 100 );
-	check( 'completed goal → no recommendations', array() === $engine->recommend( $minimal_goal, $done, $empty_cart ) );
+	$done = new MissionResult( $minimal_mission, 120, 100 );
+	check( 'completed mission → no recommendations', array() === $engine->recommend( $minimal_mission, $done, $empty_cart ) );
 
-	$gone = GoalResult::ineligible( $minimal_goal, GoalResult::REASON_NO_MATCHING_ITEMS );
-	check( 'ineligible goal → no recommendations', array() === $engine->recommend( $minimal_goal, $gone, $empty_cart ) );
+	$gone = MissionResult::ineligible( $minimal_mission, MissionResult::REASON_NO_MATCHING_ITEMS );
+	check( 'ineligible mission → no recommendations', array() === $engine->recommend( $minimal_mission, $gone, $empty_cart ) );
 
 	// Item shape.
 	$first = $minimal_items[0];
@@ -248,7 +248,7 @@ try {
 	$p_a = make_product( 'Alpha', 40, array( $cat10 ) );
 	$created[] = $p_a;
 
-	// Goal manual products (both pools via the manual source). Hotel is
+	// Mission manual products (both pools via the manual source). Hotel is
 	// out of stock and must never surface.
 	$p_e = make_product( 'Echo', 55, array( $cat10 ), 'instock', 0, array() );
 	$p_f = make_product( 'Foxtrot', 90, array(), 'instock', 0 );
@@ -257,8 +257,8 @@ try {
 
 	update_post_meta( $p_a, '_upsell_ids', array( $p_e ) );
 
-	// Best-seller fillers (higher sales, outside the goal) — with the
-	// relevance-only weights they must never crowd the goal's products.
+	// Best-seller fillers (higher sales, outside the mission) — with the
+	// relevance-only weights they must never crowd the mission's products.
 	$fillers = array();
 	for ( $i = 1; $i <= 12; $i++ ) {
 		$fillers[] = make_product( 'Filler ' . $i, 10 + $i, array(), 'instock', 5 );
@@ -280,22 +280,22 @@ try {
 		),
 	) );
 
-	$goal = goal( array(
-		'type'     => Goal::TYPE_AMOUNT,
+	$mission = mission( array(
+		'type'     => Mission::TYPE_AMOUNT,
 		'target'   => 100,
 		'name'     => 'Free shipping',
 		'products' => array( $p_e, $p_f, $m1, $m2, $p_h ),
 	) );
 
-	$result = new GoalResult( $goal, 40, 100 ); // remaining 60
-	$items  = $engine->recommend( $goal, $result, $cart );
+	$result = new MissionResult( $mission, 40, 100 ); // remaining 60
+	$items  = $engine->recommend( $mission, $result, $cart );
 	$ids    = item_ids( $items );
 
-	check( 'progressing goal returns recommendations', ! empty( $items ) );
+	check( 'progressing mission returns recommendations', ! empty( $items ) );
 	check( 'result capped at the default limit (3)', count( $items ) <= ProductRecommendationEngine::DEFAULT_LIMIT );
-	check( 'goal products outrank live best sellers (top slots are the goal\'s)', 3 === count( $items ) );
+	check( 'mission products outrank live best sellers (top slots are the mission\'s)', 3 === count( $items ) );
 
-	// Echo (goal product + cart upsell) merges from BOTH engines into one
+	// Echo (mission product + cart upsell) merges from BOTH engines into one
 	// item with source 'both' — the core consolidation guarantee.
 	// (array_filter keeps original keys; reindex so [0] is always the hit.)
 	$echo_items = array_values( array_filter( $items, function ( $item ) use ( $p_e ) {
@@ -310,14 +310,14 @@ try {
 	// The merged score is the ranker's composite (the stronger, unified
 	// signal) — never a mismatched scale.
 	$ranker_payload = $ranker->rank( array(
-		// Same in-memory goal the unified engine hands over, so the
+		// Same in-memory mission the unified engine hands over, so the
 		// composite equals the merged score exactly.
-		'goal'       => $goal,
-		'goal_id'    => $goal->id(),
+		'mission'       => $mission,
+		'mission_id'    => $mission->id(),
 		'cart_value' => 40,
 		'remaining'  => 60,
 		'cart'       => array( $p_a ),
-		'exclude'    => $goal->excluded_products(),
+		'exclude'    => $mission->excluded_products(),
 		'limit'      => ProductRecommendationEngine::DEFAULT_LIMIT,
 	) );
 	$ranker_echo = null;
@@ -342,21 +342,21 @@ try {
 	}
 	check( 'every unified score stays on the 0–100 scale', $scores_ok );
 
-	// Determinism: the same goal + cart + catalog always yields the same
+	// Determinism: the same mission + cart + catalog always yields the same
 	// ranked list.
-	$again = $engine->recommend( $goal, $result, $cart );
+	$again = $engine->recommend( $mission, $result, $cart );
 	check( 'ranking is deterministic', item_ids( $items ) === item_ids( $again ) );
 
 	// -----------------------------------------------------------------------
-	// 4. Suggestion-only pool: quantity goals skip the upsell half by type.
+	// 4. Suggestion-only pool: quantity missions skip the upsell half by type.
 	// -----------------------------------------------------------------------
-	echo "\n== 4. Suggestion-only pool (quantity goal) ==\n";
+	echo "\n== 4. Suggestion-only pool (quantity mission) ==\n";
 
-	$qty_goal = goal( array( 'type' => Goal::TYPE_QUANTITY, 'target' => 10, 'calculation_mode' => Goal::MODE_QUANTITY, 'products' => array( $p_e, $p_f ) ) );
-	$qty_items = $engine->recommend( $qty_goal, new GoalResult( $qty_goal, 4, 10 ), $cart );
+	$qty_mission = mission( array( 'type' => Mission::TYPE_QUANTITY, 'target' => 10, 'calculation_mode' => Mission::MODE_QUANTITY, 'products' => array( $p_e, $p_f ) ) );
+	$qty_items = $engine->recommend( $qty_mission, new MissionResult( $qty_mission, 4, 10 ), $cart );
 	$qty_ids   = item_ids( $qty_items );
 
-	check( 'quantity goal still recommends (suggestion half)', in_array( $p_e, $qty_ids, true ) && in_array( $p_f, $qty_ids, true ) );
+	check( 'quantity mission still recommends (suggestion half)', in_array( $p_e, $qty_ids, true ) && in_array( $p_f, $qty_ids, true ) );
 
 	$all_suggestion = true;
 	$all_scaled     = true;
@@ -388,8 +388,8 @@ try {
 		return 10;
 	} );
 
-	$open_goal  = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping' ) );
-	$open_items = $engine->recommend( $open_goal, new GoalResult( $open_goal, 40, 100 ), $cart );
+	$open_mission  = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping' ) );
+	$open_items = $engine->recommend( $open_mission, new MissionResult( $open_mission, 40, 100 ), $cart );
 
 	$target_items = array_values( array_filter( $open_items, function ( $item ) use ( $p_t ) {
 		return (int) $item['id'] === $p_t;
@@ -411,14 +411,14 @@ try {
 	add_filter( 'faracart_frontend_upsell_limit', function () {
 		return 5;
 	} );
-	$wide_items = $engine->recommend( $goal, $result, $cart );
+	$wide_items = $engine->recommend( $mission, $result, $cart );
 	check( 'configured limit (5) respected without padding', 4 === count( $wide_items ) );
 	remove_all_filters( 'faracart_frontend_upsell_limit' );
 
 	add_filter( 'faracart_suggestions', function ( $items ) {
 		return array_slice( $items, 0, 1 ); // keep only the top recommendation
 	} );
-	$filtered = $engine->recommend( $goal, $result, $cart );
+	$filtered = $engine->recommend( $mission, $result, $cart );
 	check( 'faracart_suggestions developer filter still applies to the merged list', 1 === count( $filtered ) );
 	remove_all_filters( 'faracart_suggestions' );
 	remove_all_filters( 'faracart_upsell_weights' );

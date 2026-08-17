@@ -8,8 +8,8 @@
 namespace FaraCart\Campaigns;
 
 use FaraCart\Database\Schema;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionRepository;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -20,13 +20,13 @@ defined( 'ABSPATH' ) || exit;
  * extends the same table and repository with the full CRUD surface:
  *
  *  - `create()` / `update()` / `delete()` / `duplicate()`
- *  - milestone ordering: campaigns own goals through `goals.campaign_id`
- *    + `goals.menu_order`; `sync_goals()` assigns an ordered goal list and
- *    detaches goals that were removed
- *  - reads carry `goal_count` (list page) and `goals` (detail/builder)
+ *  - milestone ordering: campaigns own missions through `missions.campaign_id`
+ *    + `missions.menu_order`; `sync_missions()` assigns an ordered mission list and
+ *    detaches missions that were removed
+ *  - reads carry `mission_count` (list page) and `missions` (detail/builder)
  *
- * Deleting a campaign detaches its goals (explicitly, and via the
- * `fk_faracart_goals_campaign` ON DELETE SET NULL foreign key), so goal
+ * Deleting a campaign detaches its missions (explicitly, and via the
+ * `fk_faracart_missions_campaign` ON DELETE SET NULL foreign key), so mission
  * definitions survive and can be reused by other campaigns.
  */
 final class CampaignRepository {
@@ -40,11 +40,11 @@ final class CampaignRepository {
 		global $wpdb;
 
 		$table = Schema::table( 'campaigns' );
-		$goals = Schema::table( 'goals' );
+		$missions = Schema::table( 'missions' );
 
 		$rows = $wpdb->get_results(
 			"SELECT c.id, c.name, c.description, c.status, c.starts_at, c.ends_at, c.priority, c.display_rules, c.created_at, c.updated_at,
-			        (SELECT COUNT(*) FROM {$goals} g WHERE g.campaign_id = c.id) AS goal_count
+			        (SELECT COUNT(*) FROM {$missions} g WHERE g.campaign_id = c.id) AS mission_count
 			 FROM {$table} c
 			 ORDER BY c.priority ASC, c.id ASC",
 			ARRAY_A
@@ -53,7 +53,7 @@ final class CampaignRepository {
 		$rows = $this->normalize_rows( (array) $rows );
 
 		foreach ( $rows as &$row ) {
-			$row['goal_count'] = (int) $row['goal_count'];
+			$row['mission_count'] = (int) $row['mission_count'];
 		}
 		unset( $row );
 
@@ -87,8 +87,8 @@ final class CampaignRepository {
 
 		$rows = $this->normalize_rows( array( $row ) );
 		$row  = $rows[0];
-		$row['goals']      = $this->goals( (int) $row['id'] );
-		$row['goal_count'] = count( $row['goals'] );
+		$row['missions']      = $this->missions( (int) $row['id'] );
+		$row['mission_count'] = count( $row['missions'] );
 
 		return $row;
 	}
@@ -97,7 +97,7 @@ final class CampaignRepository {
 	 * Create a campaign from a validated payload.
 	 *
 	 * Accepts a superset of the campaigns table columns plus an optional
-	 * ordered `goals` array of goal ids (milestone ordering).
+	 * ordered `missions` array of mission ids (milestone ordering).
 	 *
 	 * @param array<string, mixed> $data Campaign payload.
 	 * @return int New campaign id, 0 on failure.
@@ -122,8 +122,8 @@ final class CampaignRepository {
 
 		$campaign_id = (int) $wpdb->insert_id;
 
-		if ( isset( $data['goals'] ) ) {
-			$this->sync_goals( $campaign_id, $data['goals'] );
+		if ( isset( $data['missions'] ) ) {
+			$this->sync_missions( $campaign_id, $data['missions'] );
 		}
 
 		return $campaign_id;
@@ -132,7 +132,7 @@ final class CampaignRepository {
 	/**
 	 * Update a campaign from a validated partial payload.
 	 *
-	 * Only the keys present in $data are written. An optional `goals`
+	 * Only the keys present in $data are written. An optional `missions`
 	 * array replaces the campaign's milestone membership.
 	 *
 	 * @param int                    $campaign_id Campaign id.
@@ -160,8 +160,8 @@ final class CampaignRepository {
 			}
 		}
 
-		if ( isset( $data['goals'] ) ) {
-			$this->sync_goals( (int) $campaign_id, $data['goals'] );
+		if ( isset( $data['missions'] ) ) {
+			$this->sync_missions( (int) $campaign_id, $data['missions'] );
 		}
 
 		return true;
@@ -170,7 +170,7 @@ final class CampaignRepository {
 	/**
 	 * Delete a campaign.
 	 *
-	 * Goals are detached (campaign_id → null, menu_order → 0) so they can
+	 * Missions are detached (campaign_id → null, menu_order → 0) so they can
 	 * be reused; analytics history survives via ON DELETE SET NULL.
 	 *
 	 * @param int $campaign_id Campaign id.
@@ -179,11 +179,11 @@ final class CampaignRepository {
 	public function delete( $campaign_id ) {
 		global $wpdb;
 
-		$goals = Schema::table( 'goals' );
+		$missions = Schema::table( 'missions' );
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$goals} SET campaign_id = NULL, menu_order = 0 WHERE campaign_id = %d",
+				"UPDATE {$missions} SET campaign_id = NULL, menu_order = 0 WHERE campaign_id = %d",
 				(int) $campaign_id
 			)
 		);
@@ -202,7 +202,7 @@ final class CampaignRepository {
 	 *
 	 * The copy starts INACTIVE so it never runs alongside the original
 	 * until the admin explicitly activates it. Its milestones are copied
-	 * as new goal rows (each named ' (copy)') preserving menu_order, so
+	 * as new mission rows (each named ' (copy)') preserving menu_order, so
 	 * the duplicate is a fully editable milestone set.
 	 *
 	 * @param int $campaign_id Campaign id.
@@ -216,7 +216,7 @@ final class CampaignRepository {
 			return 0;
 		}
 
-		$goals = $campaign['goals'];
+		$missions = $campaign['missions'];
 
 		$data = array(
 			'name'          => sprintf(
@@ -225,7 +225,7 @@ final class CampaignRepository {
 				$campaign['name']
 			),
 			'description'   => $campaign['description'],
-			'status'        => Goal::STATUS_INACTIVE,
+			'status'        => Mission::STATUS_INACTIVE,
 			'starts_at'     => $campaign['starts_at'],
 			'ends_at'       => $campaign['ends_at'],
 			'priority'      => $campaign['priority'],
@@ -238,17 +238,17 @@ final class CampaignRepository {
 			return 0;
 		}
 
-		// Copy each milestone as a new goal bound to the copy.
-		$goal_repo = new GoalRepository();
+		// Copy each milestone as a new mission bound to the copy.
+		$mission_repo = new MissionRepository();
 
-		foreach ( $goals as $goal ) {
-			$new_goal_id = $goal_repo->duplicate( (int) $goal['id'] );
+		foreach ( $missions as $mission ) {
+			$new_mission_id = $mission_repo->duplicate( (int) $mission['id'] );
 
-			if ( ! $new_goal_id ) {
+			if ( ! $new_mission_id ) {
 				continue;
 			}
 
-			$this->assign_goal( $copy_id, $new_goal_id, (int) $goal['menu_order'] );
+			$this->assign_mission( $copy_id, $new_mission_id, (int) $mission['menu_order'] );
 		}
 
 		return $copy_id;
@@ -261,15 +261,15 @@ final class CampaignRepository {
 	 * @return array<int, array<string, mixed>> Each: id, name, type,
 	 *                                         target, reward_type, menu_order.
 	 */
-	public function goals( $campaign_id ) {
+	public function missions( $campaign_id ) {
 		global $wpdb;
 
-		$goals = Schema::table( 'goals' );
+		$missions = Schema::table( 'missions' );
 
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, name, type, target, reward_type, menu_order
-				 FROM {$goals}
+				 FROM {$missions}
 				 WHERE campaign_id = %d
 				 ORDER BY menu_order ASC, id ASC",
 				(int) $campaign_id
@@ -294,54 +294,54 @@ final class CampaignRepository {
 	}
 
 	/**
-	 * Replace a campaign's milestone membership with an ordered goal list.
+	 * Replace a campaign's milestone membership with an ordered mission list.
 	 *
-	 * The given goal ids (in milestone order) become the campaign's goals
-	 * with menu_order 1..N; goals previously in this campaign that are no
+	 * The given mission ids (in milestone order) become the campaign's missions
+	 * with menu_order 1..N; missions previously in this campaign that are no
 	 * longer listed are detached.
 	 *
 	 * @param int   $campaign_id Campaign id.
-	 * @param mixed $goal_ids    Ordered goal ids (validated ints).
+	 * @param mixed $mission_ids    Ordered mission ids (validated ints).
 	 * @return void
 	 */
-	protected function sync_goals( $campaign_id, $goal_ids ) {
+	protected function sync_missions( $campaign_id, $mission_ids ) {
 		global $wpdb;
 
-		$goals = Schema::table( 'goals' );
+		$missions = Schema::table( 'missions' );
 
-		$keep = $this->positive_ints( $goal_ids );
+		$keep = $this->positive_ints( $mission_ids );
 
-		// Detach goals that were in this campaign but are no longer listed.
+		// Detach missions that were in this campaign but are no longer listed.
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$goals} SET campaign_id = NULL, menu_order = 0 WHERE campaign_id = %d",
+				"UPDATE {$missions} SET campaign_id = NULL, menu_order = 0 WHERE campaign_id = %d",
 				$campaign_id
 			)
 		);
 
-		foreach ( array_values( $keep ) as $index => $goal_id ) {
-			$this->assign_goal( $campaign_id, $goal_id, $index + 1 );
+		foreach ( array_values( $keep ) as $index => $mission_id ) {
+			$this->assign_mission( $campaign_id, $mission_id, $index + 1 );
 		}
 	}
 
 	/**
-	 * Bind a single goal to a campaign at a milestone position.
+	 * Bind a single mission to a campaign at a milestone position.
 	 *
 	 * @param int $campaign_id Campaign id.
-	 * @param int $goal_id     Goal id.
+	 * @param int $mission_id     Mission id.
 	 * @param int $menu_order  Milestone position (1-based).
 	 * @return void
 	 */
-	protected function assign_goal( $campaign_id, $goal_id, $menu_order ) {
+	protected function assign_mission( $campaign_id, $mission_id, $menu_order ) {
 		global $wpdb;
 
 		$wpdb->update(
-			Schema::table( 'goals' ),
+			Schema::table( 'missions' ),
 			array(
 				'campaign_id' => $campaign_id,
 				'menu_order'  => $menu_order,
 			),
-			array( 'id' => (int) $goal_id ),
+			array( 'id' => (int) $mission_id ),
 			array( '%d', '%d' ),
 			array( '%d' )
 		);

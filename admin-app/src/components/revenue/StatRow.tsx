@@ -10,7 +10,7 @@ interface StatRowProps {
 /**
  * One label/value row for the revenue/analytics detail panels — the
  * shared implementation of the per-page AttributionRow / DetailRow /
- * StatRow copies (RevenueOverview, GoalPerformance, Analytics). Renders
+ * StatRow copies (RevenueOverview, MissionPerformance, Analytics). Renders
  * the label left, the value right, and an optional plain-English
  * explanation below.
  */

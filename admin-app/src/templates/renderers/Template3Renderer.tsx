@@ -6,28 +6,28 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
 
-import type { GoalTemplateProps } from '../registry';
+import type { MissionTemplateProps } from '../registry';
 import { bool, num, str } from '../utils';
-import { GoalIcon, formatGoalAmount, goalPercent } from './goalShared';
+import { MissionIcon, formatMissionAmount, missionPercent } from './missionShared';
 
 /**
  * Template 3 — Circular Progress (Concept 03).
  *
- * A circular gauge with the percentage centered inside, beside the goal
+ * A circular gauge with the percentage centered inside, beside the mission
  * icon, title, description and the current/remaining amounts, plus a CTA.
  * Uses MUI CircularProgress (the project's own component) rather than
  * hand-rolled SVG. The completed state draws a full green ring with a
  * check.
  */
-export default function Template3Renderer({ goal, currency, settings, animation }: GoalTemplateProps) {
-  const percent = goalPercent(goal);
+export default function Template3Renderer({ mission, currency, settings, animation }: MissionTemplateProps) {
+  const percent = missionPercent(mission);
   const accent = str(settings, 'accent', '#6366f1');
   const text = str(settings, 'text', '#1f2937');
   const muted = str(settings, 'secondaryText', '#6b7280');
   const size = num(settings, 'ringSize', 100);
   const thickness = num(settings, 'strokeWidth', 8);
 
-  if (goal.completed) {
+  if (mission.completed) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         <Box sx={{ position: 'relative', width: size * 0.8, height: size * 0.8, flexShrink: 0 }}>
@@ -54,7 +54,7 @@ export default function Template3Renderer({ goal, currency, settings, animation 
           <Typography sx={{ fontSize: 14, fontWeight: 800, color: '#166534' }}>
             {__('Congratulations!', 'faracart')} 🎉
           </Typography>
-          <Typography sx={{ fontSize: 12, color: '#15803d' }}>{goal.goal_name}</Typography>
+          <Typography sx={{ fontSize: 12, color: '#15803d' }}>{mission.mission_name}</Typography>
         </Box>
       </Box>
     );
@@ -103,10 +103,10 @@ export default function Template3Renderer({ goal, currency, settings, animation 
           )}
         </Box>
 
-        {/* Goal info */}
+        {/* Mission info */}
         <Box sx={{ flex: '1 1 auto', minWidth: 0 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
-            <GoalIcon goal={goal} FallbackIcon={LocalShippingIcon} color={accent} size={18} />
+            <MissionIcon mission={mission} FallbackIcon={LocalShippingIcon} color={accent} size={18} />
             <Typography
               sx={{
                 fontSize: 14,
@@ -117,12 +117,12 @@ export default function Template3Renderer({ goal, currency, settings, animation 
                 whiteSpace: 'nowrap',
               }}
             >
-              {goal.goal_name}
+              {mission.mission_name}
             </Typography>
           </Box>
           {showDescription && (
             <Typography sx={{ fontSize: 12, color: muted, mb: 1 }}>
-              {sprintfWithGoal(goal, currency)}
+              {sprintfWithMission(mission, currency)}
             </Typography>
           )}
           {bool(settings, 'showAmounts', true) && (
@@ -130,13 +130,13 @@ export default function Template3Renderer({ goal, currency, settings, animation 
               <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
                 <Typography sx={{ fontSize: 12, color: muted }}>{__('Paid', 'faracart')}</Typography>
                 <Typography sx={{ fontSize: 12, fontWeight: 700, color: text }}>
-                  {formatGoalAmount(goal, goal.current, currency)}
+                  {formatMissionAmount(mission, mission.current, currency)}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
                 <Typography sx={{ fontSize: 12, color: muted }}>{__('Remaining', 'faracart')}</Typography>
                 <Typography sx={{ fontSize: 12, fontWeight: 700, color: accent }}>
-                  {formatGoalAmount(goal, goal.remaining, currency)}
+                  {formatMissionAmount(mission, mission.remaining, currency)}
                 </Typography>
               </Box>
             </Box>
@@ -147,7 +147,7 @@ export default function Template3Renderer({ goal, currency, settings, animation 
       {bool(settings, 'showCta', true) && (
         <Button
           component="a"
-          href={(goal.suggestions ?? [])[0]?.permalink}
+          href={(mission.suggestions ?? [])[0]?.permalink}
           target="_blank"
           rel="noreferrer"
           fullWidth
@@ -172,7 +172,7 @@ export default function Template3Renderer({ goal, currency, settings, animation 
   );
 }
 
-/** A goal description derived from the target, e.g. "With a purchase of 2,000,000". */
-function sprintfWithGoal(goal: GoalTemplateProps['goal'], currency: string): string {
-  return `${__('With a purchase of', 'faracart')} ${formatGoalAmount(goal, goal.target, currency)}`;
+/** A mission description derived from the target, e.g. "With a purchase of 2,000,000". */
+function sprintfWithMission(mission: MissionTemplateProps['mission'], currency: string): string {
+  return `${__('With a purchase of', 'faracart')} ${formatMissionAmount(mission, mission.target, currency)}`;
 }

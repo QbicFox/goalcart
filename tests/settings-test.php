@@ -1,23 +1,23 @@
 <?php
 /**
  * FaraCart settings tests (P18-T01 General / P18-T02 Frontend /
- * P18-T03 Goal Calculation / P18-T04 Performance / P18-T05 Advanced).
+ * P18-T03 Mission Calculation / P18-T04 Performance / P18-T05 Advanced).
  *
  * Boots WordPress and exercises the Phase 18 settings surface:
  *
  *  - defaults: every new setting key ships with the documented default
  *    (each preserves the pre-Phase-18 behavior)
  *  - the REST schema covers the new keys (enums for currency display /
- *    goal behavior / calculation mode / mobile, the location enum,
+ *    mission behavior / calculation mode / mobile, the location enum,
  *    booleans) and the sanitizer normalizes invalid values
- *  - goal calculation (P18-T03): CartContext::from_cart honors
+ *  - mission calculation (P18-T03): CartContext::from_cart honors
  *    include_tax / include_discount / include_shipping / include_sale /
  *    include_virtual, and CartIntegration applies the settings
- *  - the store-wide calculation mode filter (amount goals follow it,
- *    quantity-style goals stay untouched)
+ *  - the store-wide calculation mode filter (amount missions follow it,
+ *    quantity-style missions stay untouched)
  *  - frontend (P18-T02): locations follow the frontend_locations setting,
  *    and the frontend config carries currencyDisplay + mobile
- *  - general (P18-T01): default_goal_behavior (all | first | closest)
+ *  - general (P18-T01): default_mission_behavior (all | first | closest)
  *    narrows the progress payload, and the progress cache serves the
  *    stored payload (P18-T04 performance caching)
  *  - performance (P18-T04): the analytics toggle gates the tracker and
@@ -26,7 +26,7 @@
  *    reference, and the Logger respects logging_enabled + debug_mode
  *
  * Settings flips are in-memory and restored; the only real writes
- * (goals, the settings option, the progress-cache transient, the debug
+ * (missions, the settings option, the progress-cache transient, the debug
  * log file) are rolled back / removed, and residue is asserted.
  *
  * Run: php tests/settings-test.php   (from the plugin directory)
@@ -60,9 +60,9 @@ use FaraCart\Admin\AssetLoader;
 use FaraCart\Analytics\Tracker;
 use FaraCart\Cart\CartIntegration;
 use FaraCart\Frontend\ProgressUI;
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalEngine;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionEngine;
 use FaraCart\REST\FrontendController;
 use FaraCart\REST\SettingsController;
 use FaraCart\Settings\Settings;
@@ -137,7 +137,7 @@ $ui          = $container->get( ProgressUI::class );
 $ci          = $container->get( CartIntegration::class );
 $frontend    = $container->get( FrontendController::class );
 $tracker     = $container->get( Tracker::class );
-$engine      = $container->get( GoalEngine::class );
+$engine      = $container->get( MissionEngine::class );
 
 // Snapshot the in-memory settings so every section can restore them.
 $all_before = $settings->all();
@@ -160,7 +160,7 @@ $d = $settings->defaults();
 
 check( 'currency defaults to empty (store currency)', '' === $d['currency'] );
 check( 'currency_display defaults to symbol', 'symbol' === $d['currency_display'] );
-check( 'default_goal_behavior defaults to all', 'all' === $d['default_goal_behavior'] );
+check( 'default_mission_behavior defaults to all', 'all' === $d['default_mission_behavior'] );
 check( 'conflict_resolution defaults to cumulative', 'cumulative' === $d['conflict_resolution'] );
 check( 'calculation_mode defaults to subtotal', 'subtotal' === $d['calculation_mode'] );
 check( 'frontend_locations defaults to five locations', 5 === count( $d['frontend_locations'] ) );
@@ -178,15 +178,15 @@ check( 'debug_mode defaults false', false === $d['debug_mode'] );
 check( 'logging_enabled defaults false', false === $d['logging_enabled'] );
 check( 'developer_hooks defaults true', true === $d['developer_hooks'] );
 
-// Store-wide calculation mode: amount goals follow it, quantity-style
-// goals keep their type default.
-check( 'default mode subtotal for amount', 'subtotal' === Goal::default_calculation_mode( 'amount' ) );
+// Store-wide calculation mode: amount missions follow it, quantity-style
+// missions keep their type default.
+check( 'default mode subtotal for amount', 'subtotal' === Mission::default_calculation_mode( 'amount' ) );
 
 $settings->set( 'calculation_mode', 'total' );
-check( 'store mode applies to amount goals', 'total' === Goal::default_calculation_mode( 'amount' ) );
-check( 'store mode applies to category goals', 'total' === Goal::default_calculation_mode( 'category' ) );
-check( 'quantity goals keep their default', 'subtotal' === Goal::default_calculation_mode( 'quantity' ) );
-check( 'product goals keep quantity', 'quantity' === Goal::default_calculation_mode( 'product' ) );
+check( 'store mode applies to amount missions', 'total' === Mission::default_calculation_mode( 'amount' ) );
+check( 'store mode applies to category missions', 'total' === Mission::default_calculation_mode( 'category' ) );
+check( 'quantity missions keep their default', 'subtotal' === Mission::default_calculation_mode( 'quantity' ) );
+check( 'product missions keep quantity', 'quantity' === Mission::default_calculation_mode( 'product' ) );
 $settings->set( 'calculation_mode', 'subtotal' );
 
 // ---------------------------------------------------------------------------
@@ -204,9 +204,9 @@ check( 'currency schema is a string', 'string' === $save['currency']['type'] );
 check( 'currency accepts a 3-letter code', true === rest_validate_value_from_schema( 'IRR', $save['currency'], 'currency' ) );
 check( 'currency rejects a number', is_wp_error( rest_validate_value_from_schema( 123, $save['currency'], 'currency' ) ) );
 
-check( 'default_goal_behavior schema enum', isset( $save['default_goal_behavior']['enum'] ) );
-check( 'invalid behavior rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['default_goal_behavior'], 'default_goal_behavior' ) ) );
-check( 'valid behavior accepted', true === rest_validate_value_from_schema( 'closest', $save['default_goal_behavior'], 'default_goal_behavior' ) );
+check( 'default_mission_behavior schema enum', isset( $save['default_mission_behavior']['enum'] ) );
+check( 'invalid behavior rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['default_mission_behavior'], 'default_mission_behavior' ) ) );
+check( 'valid behavior accepted', true === rest_validate_value_from_schema( 'closest', $save['default_mission_behavior'], 'default_mission_behavior' ) );
 
 check( 'conflict_resolution schema enum', isset( $save['conflict_resolution']['enum'] ) );
 check( 'invalid conflict mode rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['conflict_resolution'], 'conflict_resolution' ) ) );
@@ -241,7 +241,7 @@ try {
 	$req->set_param( 'currency_display', 'bogus' );
 	$req->set_param( 'currency', 'irt' );
 	$req->set_param( 'currency_invalid', 'bogus!' );
-	$req->set_param( 'default_goal_behavior', 'bogus' );
+	$req->set_param( 'default_mission_behavior', 'bogus' );
 	$req->set_param( 'conflict_resolution', 'bogus' );
 	$req->set_param( 'calculation_mode', 'bogus' );
 	$req->set_param( 'frontend_position', 'bogus' );
@@ -271,7 +271,7 @@ try {
 	check( 'invalid currency code falls back to store currency', '' === $resp2->get_data()['data']['currency'] );
 
 	check( 'invalid currency falls back to symbol', 'symbol' === $data['currency_display'] );
-	check( 'invalid behavior falls back to all', 'all' === $data['default_goal_behavior'] );
+	check( 'invalid behavior falls back to all', 'all' === $data['default_mission_behavior'] );
 	check( 'invalid conflict mode falls back to cumulative', 'cumulative' === $data['conflict_resolution'] );
 	check( 'invalid mode falls back to subtotal', 'subtotal' === $data['calculation_mode'] );
 	check( 'invalid position falls back to top', 'top' === $data['frontend_position'] );
@@ -395,29 +395,29 @@ try {
 $settings->set_many( $all_before );
 
 // ---------------------------------------------------------------------------
-// 3. Goal calculation toggles (P18-T03)
+// 3. Mission calculation toggles (P18-T03)
 // ---------------------------------------------------------------------------
-echo "\n== 3. Goal calculation ==\n";
+echo "\n== 3. Mission calculation ==\n";
 
 // 3.1 include_tax: line taxes fold into the subtotal-style bases.
 $tax_cart = new \WC_Cart();
 $tax_cart->cart_contents['t1'] = cart_line( 't1', 0, 0, 1, 200.0, 180.0, null, 20.0 );
 
 $ctx = CartContext::from_cart( $tax_cart );
-check( 'tax excluded from subtotal by default', near( 200, $ctx->amount( Goal::MODE_SUBTOTAL ) ) );
-check( 'tax excluded from discounted by default', near( 180, $ctx->amount( Goal::MODE_DISCOUNTED_SUBTOTAL ) ) );
+check( 'tax excluded from subtotal by default', near( 200, $ctx->amount( Mission::MODE_SUBTOTAL ) ) );
+check( 'tax excluded from discounted by default', near( 180, $ctx->amount( Mission::MODE_DISCOUNTED_SUBTOTAL ) ) );
 
 $ctx = CartContext::from_cart( $tax_cart, array( 'include_tax' => true ) );
-check( 'include_tax adds to subtotal', near( 220, $ctx->amount( Goal::MODE_SUBTOTAL ) ) );
-check( 'include_tax adds to discounted', near( 200, $ctx->amount( Goal::MODE_DISCOUNTED_SUBTOTAL ) ) );
+check( 'include_tax adds to subtotal', near( 220, $ctx->amount( Mission::MODE_SUBTOTAL ) ) );
+check( 'include_tax adds to discounted', near( 200, $ctx->amount( Mission::MODE_DISCOUNTED_SUBTOTAL ) ) );
 check( 'item carries line_tax', near( 20, $ctx->items()[0]->line_tax() ) );
 
 // 3.2 include_discount: when off the discounted basis ignores discounts.
 $ctx = CartContext::from_cart( $tax_cart, array( 'include_discount' => false ) );
-check( 'discounts excluded from discounted basis', near( 200, $ctx->amount( Goal::MODE_DISCOUNTED_SUBTOTAL ) ) );
+check( 'discounts excluded from discounted basis', near( 200, $ctx->amount( Mission::MODE_DISCOUNTED_SUBTOTAL ) ) );
 
 $ctx = CartContext::from_cart( $tax_cart, array( 'include_tax' => true, 'include_discount' => false ) );
-check( 'discount + tax both applied', near( 220, $ctx->amount( Goal::MODE_DISCOUNTED_SUBTOTAL ) ) );
+check( 'discount + tax both applied', near( 220, $ctx->amount( Mission::MODE_DISCOUNTED_SUBTOTAL ) ) );
 
 // 3.3 include_shipping: the total basis keeps or drops shipping.
 $ship_cart = new \WC_Cart();
@@ -431,13 +431,13 @@ $totals['total']          = 190.0;
 $ref->setValue( $ship_cart, $totals );
 
 $ctx = CartContext::from_cart( $ship_cart );
-check( 'shipping stays in total by default', near( 190, $ctx->amount( Goal::MODE_TOTAL ) ) );
+check( 'shipping stays in total by default', near( 190, $ctx->amount( Mission::MODE_TOTAL ) ) );
 
 $ctx = CartContext::from_cart( $ship_cart, array( 'include_shipping' => false ) );
-check( 'include_shipping off drops shipping', near( 180, $ctx->amount( Goal::MODE_TOTAL ) ) );
+check( 'include_shipping off drops shipping', near( 180, $ctx->amount( Mission::MODE_TOTAL ) ) );
 
 $ctx = CartContext::from_cart( $ship_cart, array( 'exclude_shipping' => true ) );
-check( 'legacy exclude_shipping still wins', near( 180, $ctx->amount( Goal::MODE_TOTAL ) ) );
+check( 'legacy exclude_shipping still wins', near( 180, $ctx->amount( Mission::MODE_TOTAL ) ) );
 
 // 3.4 include_sale: products on sale are dropped from the snapshot.
 $sale_product = new \WC_Product_Simple();
@@ -450,12 +450,12 @@ $sale_cart->cart_contents['n1'] = cart_line( 'n1', 0, 0, 1, 200.0, 200.0 );
 $sale_cart->cart_contents['s2'] = cart_line( 's2', 0, 0, 1, 100.0, 80.0, $sale_product );
 
 $ctx = CartContext::from_cart( $sale_cart );
-check( 'sale items count by default', near( 300, $ctx->amount( Goal::MODE_SUBTOTAL ) ) && 2 === count( $ctx->items() ) );
+check( 'sale items count by default', near( 300, $ctx->amount( Mission::MODE_SUBTOTAL ) ) && 2 === count( $ctx->items() ) );
 
 $ctx = CartContext::from_cart( $sale_cart, array( 'include_sale' => false ) );
-check( 'sale items dropped when excluded', near( 200, $ctx->amount( Goal::MODE_SUBTOTAL ) ) );
+check( 'sale items dropped when excluded', near( 200, $ctx->amount( Mission::MODE_SUBTOTAL ) ) );
 check( 'dropped sale item leaves one line', 1 === count( $ctx->items() ) );
-check( 'total rebased onto remaining lines', near( 200, $ctx->amount( Goal::MODE_TOTAL ) ) );
+check( 'total rebased onto remaining lines', near( 200, $ctx->amount( Mission::MODE_TOTAL ) ) );
 
 // 3.5 include_virtual: virtual/downloadable products are dropped.
 $virtual_product = new \WC_Product_Simple();
@@ -467,10 +467,10 @@ $virtual_cart->cart_contents['n2'] = cart_line( 'n2', 0, 0, 1, 200.0, 200.0 );
 $virtual_cart->cart_contents['v1'] = cart_line( 'v1', 0, 0, 1, 100.0, 100.0, $virtual_product );
 
 $ctx = CartContext::from_cart( $virtual_cart );
-check( 'virtual items count by default', near( 300, $ctx->amount( Goal::MODE_SUBTOTAL ) ) && 2 === count( $ctx->items() ) );
+check( 'virtual items count by default', near( 300, $ctx->amount( Mission::MODE_SUBTOTAL ) ) && 2 === count( $ctx->items() ) );
 
 $ctx = CartContext::from_cart( $virtual_cart, array( 'include_virtual' => false ) );
-check( 'virtual items dropped when excluded', near( 200, $ctx->amount( Goal::MODE_SUBTOTAL ) ) );
+check( 'virtual items dropped when excluded', near( 200, $ctx->amount( Mission::MODE_SUBTOTAL ) ) );
 check( 'dropped virtual item leaves one line', 1 === count( $ctx->items() ) );
 
 // 3.6 CartIntegration applies the settings to the live-cart snapshot.
@@ -480,8 +480,8 @@ $calc_cart->cart_contents['c1'] = cart_line( 'c1', 0, 0, 1, 200.0, 180.0, null, 
 $settings->set( 'calculation_include_tax', true );
 $settings->set( 'calculation_include_discount', false );
 $ctx = $ci->context( $calc_cart );
-check( 'integration applies include_tax', near( 220, $ctx->amount( Goal::MODE_SUBTOTAL ) ) );
-check( 'integration applies include_discount', near( 220, $ctx->amount( Goal::MODE_DISCOUNTED_SUBTOTAL ) ) );
+check( 'integration applies include_tax', near( 220, $ctx->amount( Mission::MODE_SUBTOTAL ) ) );
+check( 'integration applies include_discount', near( 220, $ctx->amount( Mission::MODE_DISCOUNTED_SUBTOTAL ) ) );
 $settings->set_many( $all_before );
 
 // ---------------------------------------------------------------------------
@@ -543,27 +543,27 @@ $settings->set( 'currency', '' );
 check( 'boot currency follows the store currency again', $store_currency === ( new AssetLoader( $settings ) )->boot_data()['currency'] );
 
 // ---------------------------------------------------------------------------
-// 5. Goal behavior + progress caching (P18-T01 / P18-T04)
+// 5. Mission behavior + progress caching (P18-T01 / P18-T04)
 // ---------------------------------------------------------------------------
-echo "\n== 5. Goal behavior & caching (rolled back) ==\n";
+echo "\n== 5. Mission behavior & caching (rolled back) ==\n";
 
-$goals_table = \FaraCart\Database\Schema::table( 'goals' );
-$goals_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
+$missions_table = \FaraCart\Database\Schema::table( 'missions' );
+$missions_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}" );
 $wpdb->query( 'START TRANSACTION' );
 
 $seeded_ids = array();
 
 try {
-	// Drop pre-existing goals inside the transaction (this dev database
-	// ships with a leftover active goal) so the behavior checks below see
-	// exactly the two seeded goals; the rollback restores every deleted
+	// Drop pre-existing missions inside the transaction (this dev database
+	// ships with a leftover active mission) so the behavior checks below see
+	// exactly the two seeded missions; the rollback restores every deleted
 	// row, which the count check after the transaction verifies.
-	$wpdb->query( "DELETE FROM {$goals_table}" );
-	// Two active amount goals, ordered by id (priority ties).
+	$wpdb->query( "DELETE FROM {$missions_table}" );
+	// Two active amount missions, ordered by id (priority ties).
 	$wpdb->insert(
-		$goals_table,
+		$missions_table,
 		array(
-			'name'             => 'Settings Goal A',
+			'name'             => 'Settings Mission A',
 			'description'      => '',
 			'status'           => 'active',
 			'type'             => 'amount',
@@ -574,13 +574,13 @@ try {
 			'updated_at'       => current_time( 'mysql' ),
 		)
 	);
-	$goal_a = (int) $wpdb->insert_id;
-	$seeded_ids[] = $goal_a;
+	$mission_a = (int) $wpdb->insert_id;
+	$seeded_ids[] = $mission_a;
 
 	$wpdb->insert(
-		$goals_table,
+		$missions_table,
 		array(
-			'name'             => 'Settings Goal B',
+			'name'             => 'Settings Mission B',
 			'description'      => '',
 			'status'           => 'active',
 			'type'             => 'amount',
@@ -591,36 +591,36 @@ try {
 			'updated_at'       => current_time( 'mysql' ),
 		)
 	);
-	$goal_b = (int) $wpdb->insert_id;
-	$seeded_ids[] = $goal_b;
+	$mission_b = (int) $wpdb->insert_id;
+	$seeded_ids[] = $mission_b;
 
 	$cart = WC()->cart;
 	$cart->cart_contents['st1'] = cart_line( 'st1', 0, 0, 2, 200.0, 200.0 );
 
 	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/progress' );
 
-	// 'all' (default): both goals in the payload.
-	$settings->set( 'default_goal_behavior', 'all' );
+	// 'all' (default): both missions in the payload.
+	$settings->set( 'default_mission_behavior', 'all' );
 	$resp = $frontend->handle_progress( $req, $cart );
 	$data = $resp->get_data()['data'];
-	check( 'all behavior returns both goals', 2 === count( $data['goals'] ) );
+	check( 'all behavior returns both missions', 2 === count( $data['missions'] ) );
 
-	// 'first': only the first (id-ordered) goal.
-	$settings->set( 'default_goal_behavior', 'first' );
+	// 'first': only the first (id-ordered) mission.
+	$settings->set( 'default_mission_behavior', 'first' );
 	$resp = $frontend->handle_progress( $req, $cart );
 	$data = $resp->get_data()['data'];
-	check( 'first behavior returns one goal', 1 === count( $data['goals'] ) );
-	check( 'first behavior keeps the first goal', 'Settings Goal A' === $data['goals'][0]['goal_name'] );
+	check( 'first behavior returns one mission', 1 === count( $data['missions'] ) );
+	check( 'first behavior keeps the first mission', 'Settings Mission A' === $data['missions'][0]['mission_name'] );
 
-	// 'closest': the eligible goal with the highest percentage (B: 200/200).
-	$settings->set( 'default_goal_behavior', 'closest' );
+	// 'closest': the eligible mission with the highest percentage (B: 200/200).
+	$settings->set( 'default_mission_behavior', 'closest' );
 	$resp = $frontend->handle_progress( $req, $cart );
 	$data = $resp->get_data()['data'];
-	check( 'closest behavior returns one goal', 1 === count( $data['goals'] ) );
-	check( 'closest behavior picks goal B', 'Settings Goal B' === $data['goals'][0]['goal_name'] );
-	check( 'closest goal is completed', true === $data['goals'][0]['completed'] );
+	check( 'closest behavior returns one mission', 1 === count( $data['missions'] ) );
+	check( 'closest behavior picks mission B', 'Settings Mission B' === $data['missions'][0]['mission_name'] );
+	check( 'closest mission is completed', true === $data['missions'][0]['completed'] );
 
-	$settings->set( 'default_goal_behavior', 'all' );
+	$settings->set( 'default_mission_behavior', 'all' );
 
 	// Deterministic baseline for the tracking-nonce assertions below: the
 	// stored option may hold non-default values, so pin the toggles the
@@ -638,7 +638,7 @@ try {
 	// another shopper's counts (the container's CompletionService resolves
 	// the same anonymous session the controller reads).
 	$context = $ci->context( $cart );
-	$identity = $container->get( \FaraCart\Goals\CompletionService::class )->context_identity( $context );
+	$identity = $container->get( \FaraCart\Missions\CompletionService::class )->context_identity( $context );
 	$cache_key = 'faracart_progress_' . md5( wp_json_encode( array(
 		'ctx'         => array(
 			$context->subtotal(),
@@ -648,7 +648,7 @@ try {
 			$context->total_weight(),
 		),
 		'identity'    => $identity,
-		'goals'       => array( $goal_a, $goal_b ),
+		'missions'       => array( $mission_a, $mission_b ),
 		'behavior'    => 'all',
 		'conflict'    => 'cumulative',
 		'suggestions' => true,
@@ -665,7 +665,7 @@ try {
 	$settings->set( 'performance_caching', true );
 	$resp = $frontend->handle_progress( $req, $cart );
 	$cached = get_transient( $cache_key );
-	check( 'cache written when caching on', is_array( $cached ) && 2 === count( $cached['data']['goals'] ) );
+	check( 'cache written when caching on', is_array( $cached ) && 2 === count( $cached['data']['missions'] ) );
 	// The self-healing tracking nonce is never stored in the cache (it is
 	// regenerated fresh on every read), so a cached payload can never
 	// serve a stale or another user's nonce.
@@ -674,14 +674,14 @@ try {
 	// The read path serves the stored payload (sentinel overwrite), with a
 	// fresh tracking nonce injected on top.
 	$sentinel = array(
-		'data' => array( 'goals' => array(), 'currency' => 'USD' ),
-		'meta' => array( 'total_goals' => 0 ),
+		'data' => array( 'missions' => array(), 'currency' => 'USD' ),
+		'meta' => array( 'total_missions' => 0 ),
 	);
 	set_transient( $cache_key, $sentinel, 10 );
 	$resp          = $frontend->handle_progress( $req, $cart );
 	$served        = $resp->get_data();
 	$sentinel_nonce = isset( $served['data']['tracking_nonce'] ) ? (string) $served['data']['tracking_nonce'] : '';
-	check( 'cached payload served on read', $served['data']['goals'] === $sentinel['data']['goals'] && $served['data']['currency'] === $sentinel['data']['currency'] && $served['meta'] === $sentinel['meta'] );
+	check( 'cached payload served on read', $served['data']['missions'] === $sentinel['data']['missions'] && $served['data']['currency'] === $sentinel['data']['currency'] && $served['meta'] === $sentinel['meta'] );
 	check( 'cached payload gets a fresh tracking nonce', '' !== $sentinel_nonce && false !== wp_verify_nonce( $sentinel_nonce, Tracker::TRACK_NONCE_ACTION ) );
 
 	delete_transient( $cache_key );
@@ -693,12 +693,12 @@ try {
 }
 
 foreach ( $seeded_ids as $id ) {
-	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE id = %d", $id ) );
-	check( "rolled-back goal {$id} is gone", 0 === $count );
+	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$missions_table} WHERE id = %d", $id ) );
+	check( "rolled-back mission {$id} is gone", 0 === $count );
 }
 
-$goals_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
-check( 'pre-existing goals restored on rollback', $goals_before === $goals_after );
+$missions_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}" );
+check( 'pre-existing missions restored on rollback', $missions_before === $missions_after );
 
 check( 'caching transient cleaned up', false === get_transient( $cache_key ) );
 $settings->set_many( $all_before );
@@ -711,9 +711,9 @@ echo "\n== 6. Performance toggles ==\n";
 $wpdb->query( 'START TRANSACTION' );	try {
 	$product_id = make_product( 'Settings Suggested Product', 50 );
 
-	$goal = new Goal( array(
+	$mission = new Mission( array(
 		'id'              => 1,
-		'name'            => 'Suggestion Settings Goal',
+		'name'            => 'Suggestion Settings Mission',
 		'status'          => 'active',
 		'type'            => 'amount',
 		'target'          => 100,
@@ -722,25 +722,25 @@ $wpdb->query( 'START TRANSACTION' );	try {
 	) );
 
 	$ctx = new CartContext( array( 'subtotal' => 40, 'total' => 40, 'items' => array() ) );
-	$result = $engine->evaluate( $goal, $ctx );
+	$result = $engine->evaluate( $mission, $ctx );
 
 	$settings->set( 'performance_suggestions', true );
-	$shaped = $frontend->shape_goal( $goal, $result, $ctx );
+	$shaped = $frontend->shape_mission( $mission, $result, $ctx );
 	$suggestion_ids = array_map( function ( $item ) {
 		return (int) $item['id'];
 	}, $shaped['suggestions'] );
 	// The site ships other products, so the best-seller fallback may fill
 	// the list — what matters is that the explicitly selected product is
-	// present and ranks first (manual +3, counts-toward-goal +2, price
+	// present and ranks first (manual +3, counts-toward-mission +2, price
 	// proximity).
 	check( 'suggestions present by default', ! empty( $suggestion_ids ) && $product_id === $suggestion_ids[0] );
 
 	$settings->set( 'performance_suggestions', false );
-	$shaped = $frontend->shape_goal( $goal, $result, $ctx );
+	$shaped = $frontend->shape_mission( $mission, $result, $ctx );
 	check( 'suggestions gated off by setting', array() === $shaped['suggestions'] );
 
 	add_filter( 'faracart_suggestions_enabled', '__return_true' );
-	$shaped = $frontend->shape_goal( $goal, $result, $ctx );
+	$shaped = $frontend->shape_mission( $mission, $result, $ctx );
 	$suggestion_ids = array_map( function ( $item ) {
 		return (int) $item['id'];
 	}, $shaped['suggestions'] );

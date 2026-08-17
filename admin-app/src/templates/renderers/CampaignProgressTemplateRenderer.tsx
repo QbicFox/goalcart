@@ -16,7 +16,7 @@ import type { CampaignTemplateProps } from '../registry';
  */
 export default function CampaignProgressTemplateRenderer({
   campaign,
-  goals,
+  missions,
   settings,
   animation,
 }: CampaignTemplateProps) {
@@ -29,14 +29,14 @@ export default function CampaignProgressTemplateRenderer({
   const border = str(settings, 'border', '#dcdcde');
   const radius = settings.radius === undefined ? 10 : Number(settings.radius) || 0;
 
-  let top: (typeof goals)[number] | null = null;
-  for (const goal of goals) {
-    if (!top || goal.target > top.target) {
-      top = goal;
+  let top: (typeof missions)[number] | null = null;
+  for (const mission of missions) {
+    if (!top || mission.target > top.target) {
+      top = mission;
     }
   }
 
-  const done = goals.filter((goal) => goal.completed).length;
+  const done = missions.filter((mission) => mission.completed).length;
 
   return (
     <Box
@@ -53,18 +53,18 @@ export default function CampaignProgressTemplateRenderer({
       )}
       {showCounter && (
         <Typography sx={{ fontSize: 13, color: '#646970', mb: 0.75 }}>
-          {formatNumber(done)} / {formatNumber(goals.length)}
+          {formatNumber(done)} / {formatNumber(missions.length)}
         </Typography>
       )}
       {top && (
         <TemplateBar settings={settings} percent={top.percentage} completed={top.completed} animation={animation} />
       )}
-      {showRewards && goals.some((goal) => goal.reward?.type) && (
+      {showRewards && missions.some((mission) => mission.reward?.type) && (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mt: 0.75 }}>
-          {goals.map((goal, index) =>
-            goal.reward?.type ? (
+          {missions.map((mission, index) =>
+            mission.reward?.type ? (
               <Box
-                key={goal.goal_id || index}
+                key={mission.mission_id || index}
                 component="span"
                 sx={{
                   display: 'inline-flex',
@@ -73,11 +73,11 @@ export default function CampaignProgressTemplateRenderer({
                   borderRadius: 999,
                   fontSize: 11,
                   fontWeight: 600,
-                  background: goal.completed ? 'rgba(0,163,42,0.12)' : 'rgba(34,113,177,0.10)',
-                  color: goal.completed ? '#007017' : accent,
+                  background: mission.completed ? 'rgba(0,163,42,0.12)' : 'rgba(34,113,177,0.10)',
+                  color: mission.completed ? '#007017' : accent,
                 }}
               >
-                {rewardLabel(goal.reward)}
+                {rewardLabel(mission.reward)}
               </Box>
             ) : null
           )}

@@ -48,13 +48,13 @@ import {
 
 import { fetchAnalytics } from '../api/analytics';
 import { fetchCampaigns } from '../api/campaigns';
-import { fetchGoals } from '../api/goals';
+import { fetchMissions } from '../api/missions';
 import { searchProducts } from '../api/search';
 import { getBootData } from '../boot';
 import DateRangeFilter from '../components/date-range/DateRangeFilter';
 import EmptyState from '../components/EmptyState';
 import NumberPagination from '../components/NumberPagination';
-import EntityAutocomplete from '../components/goal-builder/EntityAutocomplete';
+import EntityAutocomplete from '../components/mission-builder/EntityAutocomplete';
 import EstimatedProfitCard from '../components/revenue/EstimatedProfitCard';
 import FunnelVisual from '../components/revenue/FunnelVisual';
 import StatRow from '../components/revenue/StatRow';
@@ -67,7 +67,7 @@ import {
   formatPercent,
   formatPercentValue,
 } from '../lib/format';
-import type { AnalyticsRewardFilter, AnalyticsSummary, GoalPerformanceRow } from '../types';
+import type { AnalyticsRewardFilter, AnalyticsSummary, MissionPerformanceRow } from '../types';
 
 /** Chart palette — WP admin blues + semantic accents. */
 const COLORS = {
@@ -177,7 +177,7 @@ interface ComparisonColumn {
 }
 
 const COMPARISON_COLUMNS: ComparisonColumn[] = [
-  { key: 'name', label: __('Goal', 'faracart'), align: 'left' },
+  { key: 'name', label: __('Mission', 'faracart'), align: 'left' },
   { key: 'views', label: __('Views', 'faracart'), align: 'right' },
   { key: 'completed', label: __('Completed', 'faracart'), align: 'right' },
   {
@@ -185,7 +185,7 @@ const COMPARISON_COLUMNS: ComparisonColumn[] = [
     label: __('Purchased', 'faracart'),
     align: 'right',
     tooltip: __(
-      'A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion.',
+      'A qualifying WooCommerce order was actually associated with this mission — a purchase, not a mission completion.',
       'faracart'
     ),
   },
@@ -194,7 +194,7 @@ const COMPARISON_COLUMNS: ComparisonColumn[] = [
     label: __('Purchase Rate', 'faracart'),
     align: 'right',
     tooltip: __(
-      'Percentage of completed goals that were followed by an attributed purchase.',
+      'Percentage of completed missions that were followed by an attributed purchase.',
       'faracart'
     ),
   },
@@ -203,7 +203,7 @@ const COMPARISON_COLUMNS: ComparisonColumn[] = [
     label: __('Sales', 'faracart'),
     align: 'right',
     tooltip: __(
-      'Sales attributed to FaraCart — the incremental order value driven by this goal.',
+      'Sales attributed to FaraCart — the incremental order value driven by this mission.',
       'faracart'
     ),
   },
@@ -219,7 +219,7 @@ const COMPARISON_COLUMNS: ComparisonColumn[] = [
 ];
 
 /** Numeric sort value — unavailable profit/rate sorts last, never first. */
-function comparisonSortValue(row: GoalPerformanceRow, key: ComparisonSortKey): number | string {
+function comparisonSortValue(row: MissionPerformanceRow, key: ComparisonSortKey): number | string {
   if (key === 'profit_impact') {
     return row.profit_available && row.profit_impact !== null
       ? row.profit_impact
@@ -240,7 +240,7 @@ interface Insight {
 
 /** Deterministic drop-off / outcome insights (§26) — only shown when the
  *  data supports them, never claiming causality. */
-function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow[]): Insight[] {
+function buildInsights(summary: AnalyticsSummary, comparison: MissionPerformanceRow[]): Insight[] {
   const insights: Insight[] = [];
   const funnel = summary.funnel;
 
@@ -248,7 +248,7 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
     return insights;
   }
 
-  // Largest drop-off: customers who saw a goal but never progressed.
+  // Largest drop-off: customers who saw a mission but never progressed.
   if (funnel.views > 0 && funnel.progressed < funnel.views) {
     const dropOff = (funnel.views - funnel.progressed) / funnel.views;
     insights.push({
@@ -256,7 +256,7 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
       title: __('Largest drop-off', 'faracart'),
       body: sprintf(
         /* translators: 1: percentage. */
-        __('%1$s of customers who viewed a goal did not progress toward it.', 'faracart'),
+        __('%1$s of customers who viewed a mission did not progress toward it.', 'faracart'),
         formatPercent(dropOff)
       ),
     });
@@ -271,7 +271,7 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
         body: sprintf(
           /* translators: 1: percentage. */
           __(
-            'Completion is strong, but purchase conversion is weak — only %1$s of completed goals were followed by an attributed purchase.',
+            'Completion is strong, but purchase conversion is weak — only %1$s of completed missions were followed by an attributed purchase.',
             'faracart'
           ),
           formatPercent(funnel.conversion_rate)
@@ -283,7 +283,7 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
         title: __('Purchases', 'faracart'),
         body: sprintf(
           /* translators: 1: percentage. */
-          __('%1$s of completed goals were followed by an attributed purchase.', 'faracart'),
+          __('%1$s of completed missions were followed by an attributed purchase.', 'faracart'),
           formatPercent(funnel.conversion_rate)
         ),
       });
@@ -299,7 +299,7 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
         icon: <LeaderboardIcon fontSize="small" />,
         title: __('Best performer', 'faracart'),
         body: sprintf(
-          /* translators: 1: goal name, 2: attributed sales amount. */
+          /* translators: 1: mission name, 2: attributed sales amount. */
           __('%1$s generated the highest attributed sales (%2$s).', 'faracart'),
           best.name,
           formatCurrency(best.attributed_revenue)
@@ -337,12 +337,12 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
 }
 
 /**
- * Analytics — Goal Conversion & Purchase Analysis (Phase 6 redesign of
+ * Analytics — Mission Conversion & Purchase Analysis (Phase 6 redesign of
  * the Phase 17 dashboard).
  *
- * Answers "what happens after customers see and complete my goals?" — the
+ * Answers "what happens after customers see and complete my missions?" — the
  * purchase funnel (views → progressed → completed → purchased, §23), the
- * completion-vs-purchase comparison (§25), per-goal purchase outcomes
+ * completion-vs-purchase comparison (§25), per-mission purchase outcomes
  * (§27), deterministic drop-off insights (§26) and the advanced
  * attribution details behind an expander (§30). The legacy interaction
  * metrics (trend chart, top campaigns, top suggested products) are
@@ -355,7 +355,7 @@ function buildInsights(summary: AnalyticsSummary, comparison: GoalPerformanceRow
 export default function Analytics() {
   const { range } = useDateRange();
   const [campaignId, setCampaignId] = useState<number>(0);
-  const [goalId, setGoalId] = useState<number>(0);
+  const [missionId, setMissionId] = useState<number>(0);
   const [reward, setReward] = useState<AnalyticsRewardFilter>('');
   const [productId, setProductId] = useState<number>(0);
   const [sortKey, setSortKey] = useState<ComparisonSortKey>('attributed_revenue');
@@ -366,14 +366,14 @@ export default function Analytics() {
   const analyticsQuery = useQuery({
     queryKey: [
       'analytics',
-      { from: range.from, to: range.to, campaignId, goalId, reward, productId },
+      { from: range.from, to: range.to, campaignId, missionId, reward, productId },
     ],
     queryFn: () =>
       fetchAnalytics({
         from: range.from,
         to: range.to,
         campaign_id: campaignId || undefined,
-        goal_id: goalId || undefined,
+        mission_id: missionId || undefined,
         reward: reward || undefined,
         product_id: productId || undefined,
       }),
@@ -385,9 +385,9 @@ export default function Analytics() {
     queryFn: () => fetchCampaigns(),
   });
 
-  const goalsQuery = useQuery({
-    queryKey: ['goals', 'filter-options'],
-    queryFn: () => fetchGoals({ per_page: 100 }),
+  const missionsQuery = useQuery({
+    queryKey: ['missions', 'filter-options'],
+    queryFn: () => fetchMissions({ per_page: 100 }),
   });
 
   const data = analyticsQuery.data;
@@ -416,7 +416,7 @@ export default function Analytics() {
     !(funnel && (funnel.views > 0 || funnel.converted > 0));
 
   // §44 — "No purchases yet" is distinct from "no analytics data": customers
-  // interacted with goals but no attributed purchase was recorded.
+  // interacted with missions but no attributed purchase was recorded.
   const hasNoPurchases =
     !analyticsQuery.isLoading &&
     !analyticsQuery.isError &&
@@ -436,7 +436,7 @@ export default function Analytics() {
   );
 
   const comparison = useMemo(() => {
-    const rows = data?.goal_comparison ?? [];
+    const rows = data?.mission_comparison ?? [];
     const copy = [...rows];
     const direction = sortDir === 'asc' ? 1 : -1;
 
@@ -463,7 +463,7 @@ export default function Analytics() {
     return copy;
   }, [data, sortKey, sortDir]);
 
-  // Pagination for the goal comparison table.
+  // Pagination for the mission comparison table.
   const COMPARISON_PER_PAGE = 10;
   const comparisonPageCount = Math.max(1, Math.ceil(comparison.length / COMPARISON_PER_PAGE));
   const safeComparisonPage = Math.min(comparisonPage, comparisonPageCount - 1);
@@ -473,7 +473,7 @@ export default function Analytics() {
   );
 
   const insights = useMemo(
-    () => (data && summary ? buildInsights(summary, data.goal_comparison ?? []) : []),
+    () => (data && summary ? buildInsights(summary, data.mission_comparison ?? []) : []),
     [data, summary]
   );
 
@@ -498,9 +498,9 @@ export default function Analytics() {
 
   return (
     <PageContainer
-      title={__('Goal Conversion & Purchase Analysis', 'faracart')}
+      title={__('Mission Conversion & Purchase Analysis', 'faracart')}
       description={__(
-        'What happens after customers see and complete your goals — purchases, sales and profit.',
+        'What happens after customers see and complete your missions — purchases, sales and profit.',
         'faracart'
       )}
     >
@@ -531,16 +531,16 @@ export default function Analytics() {
 
         <TextField
           select
-          label={__('Goal', 'faracart')}
+          label={__('Mission', 'faracart')}
           size="small"
           sx={{ minWidth: 190, flexGrow: { lg: 1 } }}
-          value={goalId}
-          onChange={(event) => setGoalId(Number(event.target.value))}
+          value={missionId}
+          onChange={(event) => setMissionId(Number(event.target.value))}
         >
-          <MenuItem value={0}>{__('All goals', 'faracart')}</MenuItem>
-          {(goalsQuery.data?.items ?? []).map((goal) => (
-            <MenuItem key={goal.id} value={goal.id}>
-              {goal.name}
+          <MenuItem value={0}>{__('All missions', 'faracart')}</MenuItem>
+          {(missionsQuery.data?.items ?? []).map((mission) => (
+            <MenuItem key={mission.id} value={mission.id}>
+              {mission.name}
             </MenuItem>
           ))}
         </TextField>
@@ -612,7 +612,7 @@ export default function Analytics() {
           icon={<InsightsIcon fontSize="large" />}
           title={__('No sales data yet', 'faracart')}
           description={__(
-            'Once customers start interacting with your goals, FaraCart will show purchases, sales and profit insights here.',
+            'Once customers start interacting with your missions, FaraCart will show purchases, sales and profit insights here.',
             'faracart'
           )}
         />
@@ -621,7 +621,7 @@ export default function Analytics() {
           icon={<ShoppingCartCheckoutIcon fontSize="large" />}
           title={__('No purchases yet', 'faracart')}
           description={__(
-            'Customers are interacting with your goals, but no attributed purchases have been recorded for this period.',
+            'Customers are interacting with your missions, but no attributed purchases have been recorded for this period.',
             'faracart'
           )}
         />
@@ -630,7 +630,7 @@ export default function Analytics() {
           {purchaseUnavailable && (
             <Alert severity="info" variant="outlined">
               {__(
-                'Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and goal comparison.',
+                'Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and mission comparison.',
                 'faracart'
               )}
             </Alert>
@@ -650,7 +650,7 @@ export default function Analytics() {
               icon={<ShoppingCartCheckoutIcon fontSize="small" />}
               hint={__('after FaraCart interaction', 'faracart')}
               tooltip={__(
-                'Distinct orders associated with a goal — a purchase, not a goal completion.',
+                'Distinct orders associated with a mission — a purchase, not a mission completion.',
                 'faracart'
               )}
             />
@@ -659,7 +659,7 @@ export default function Analytics() {
               value={summary.purchase_rate === null ? '—' : formatPercent(summary.purchase_rate)}
               icon={<PercentIcon fontSize="small" />}
               tooltip={__(
-                'Percentage of completed goals that were followed by an attributed purchase.',
+                'Percentage of completed missions that were followed by an attributed purchase.',
                 'faracart'
               )}
             />
@@ -671,7 +671,7 @@ export default function Analytics() {
               icon={<PaymentsIcon fontSize="small" />}
               hint={__('Sales attributed to FaraCart', 'faracart')}
               tooltip={__(
-                'The incremental order value from orders where customers interacted with a goal before purchasing.',
+                'The incremental order value from orders where customers interacted with a mission before purchasing.',
                 'faracart'
               )}
             />
@@ -687,7 +687,7 @@ export default function Analytics() {
             />
           </Box>
 
-          {/* Secondary KPIs (§22): goal views + completions. */}
+          {/* Secondary KPIs (§22): mission views + completions. */}
           <Box
             sx={{
               display: 'grid',
@@ -696,17 +696,17 @@ export default function Analytics() {
             }}
           >
             <KpiCard
-              label={__('Goal Views', 'faracart')}
+              label={__('Mission Views', 'faracart')}
               value={funnel ? formatNumber(funnel.views) : '—'}
               icon={<VisibilityIcon fontSize="small" />}
-              tooltip={__('How many times goal widgets were seen.', 'faracart')}
+              tooltip={__('How many times mission widgets were seen.', 'faracart')}
             />
             <KpiCard
-              label={__('Goal Completions', 'faracart')}
+              label={__('Mission Completions', 'faracart')}
               value={funnel ? formatNumber(funnel.completed) : '—'}
               icon={<CheckCircleOutlineOutlinedIcon fontSize="small" />}
               tooltip={__(
-                'How many times customers reached a goal target. Completion is not the same as purchase.',
+                'How many times customers reached a mission target. Completion is not the same as purchase.',
                 'faracart'
               )}
             />
@@ -732,7 +732,7 @@ export default function Analytics() {
                 />
                 <Typography variant="caption" color="text.secondary" component="p" sx={{ mt: 1 }}>
                   {__(
-                    'A completion means the customer reached the goal target. A purchase means a qualifying order was actually associated with the goal.',
+                    'A completion means the customer reached the mission target. A purchase means a qualifying order was actually associated with the mission.',
                     'faracart'
                   )}
                 </Typography>
@@ -749,7 +749,7 @@ export default function Analytics() {
                 </Typography>
                 <Stack spacing={1}>
                   <StatRow
-                    label={__('Goals Completed', 'faracart')}
+                    label={__('Missions Completed', 'faracart')}
                     value={formatNumber(funnel.completed)}
                   />
                   <StatRow
@@ -761,7 +761,7 @@ export default function Analytics() {
                     value={
                       funnel.conversion_rate === null ? '—' : formatPercent(funnel.conversion_rate)
                     }
-                    explanation={__('Purchased orders ÷ completed goals.', 'faracart')}
+                    explanation={__('Purchased orders ÷ completed missions.', 'faracart')}
                   />
                   <Divider />
                   <StatRow
@@ -804,18 +804,18 @@ export default function Analytics() {
             </Card>
           )}
 
-          {/* Goal comparison (§27): sortable purchase outcomes per goal. */}
-          {data.goal_comparison !== null && (
+          {/* Mission comparison (§27): sortable purchase outcomes per mission. */}
+          {data.mission_comparison !== null && (
             <Card variant="outlined">
               <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
                 <Box sx={{ p: 2, pb: 1 }}>
                   <Typography variant="h6" component="h3">
-                    {__('Goal Comparison', 'faracart')}
+                    {__('Mission Comparison', 'faracart')}
                   </Typography>
                 </Box>
-                {data.goal_comparison.length === 0 ? (
+                {data.mission_comparison.length === 0 ? (
                   <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
-                    {__('No goal purchase activity in this range.', 'faracart')}
+                    {__('No mission purchase activity in this range.', 'faracart')}
                   </Typography>
                 ) : (
                   <>
@@ -852,7 +852,7 @@ export default function Analytics() {
                         </TableHead>
                         <TableBody>
                           {pagedComparison.map((row) => (
-                            <TableRow key={row.goal_id} hover>
+                            <TableRow key={row.mission_id} hover>
                               <TableCell sx={{ fontWeight: 600 }}>{row.name}</TableCell>
                               <TableCell align="right">{formatNumber(row.views)}</TableCell>
                               <TableCell align="right">{formatNumber(row.completed)}</TableCell>
@@ -954,7 +954,7 @@ export default function Analytics() {
                         : formatCurrency(summary.attributed_sales)
                     }
                     explanation={__(
-                      'Revenue from the incremental value of orders where customers progressed toward or completed a goal before ordering.',
+                      'Revenue from the incremental value of orders where customers progressed toward or completed a mission before ordering.',
                       'faracart'
                     )}
                   />
@@ -964,7 +964,7 @@ export default function Analytics() {
                       summary.assisted_sales === null ? '—' : formatCurrency(summary.assisted_sales)
                     }
                     explanation={__(
-                      'Order totals from orders that were only exposed to a goal, never progressed.',
+                      'Order totals from orders that were only exposed to a mission, never progressed.',
                       'faracart'
                     )}
                   />
@@ -976,7 +976,7 @@ export default function Analytics() {
                         : formatCurrency(summary.influenced_sales)
                     }
                     explanation={__(
-                      'Order totals of every order associated with a goal — distinct orders, never double counted.',
+                      'Order totals of every order associated with a mission — distinct orders, never double counted.',
                       'faracart'
                     )}
                   />
@@ -984,7 +984,7 @@ export default function Analytics() {
                     label={__('Attributed orders', 'faracart')}
                     value={funnel ? formatNumber(funnel.converted) : '—'}
                     explanation={__(
-                      'Distinct orders associated with a goal in the selected period.',
+                      'Distinct orders associated with a mission in the selected period.',
                       'faracart'
                     )}
                   />
@@ -992,7 +992,7 @@ export default function Analytics() {
                     label={__('Attribution window', 'faracart')}
                     value={__('30 days before the order', 'faracart')}
                     explanation={__(
-                      'Only goal events within this window before an order are attributed to it.',
+                      'Only mission events within this window before an order are attributed to it.',
                       'faracart'
                     )}
                   />

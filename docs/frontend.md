@@ -51,32 +51,32 @@ mini-cart fragment refreshes.
 
 ## Components (`assets/js/frontend.js`)
 
-Each widget renders **every eligible goal as its own card**, stacked in a
-shared `.faracart-widget__goals` wrapper — a campaign's milestones each
+Each widget renders **every eligible mission as its own card**, stacked in a
+shared `.faracart-widget__missions` wrapper — a campaign's milestones each
 get a full card instead of one featured card + a tiny ladder:
 
-- **GoalContainer** — one goal's card; `full` = reward chip + progress +
+- **MissionContainer** — one mission's card; `full` = reward chip + progress +
   message + unified recommendations, `compact` = progress + message +
   reward chip.
 - **ProgressBar** — percentage fill bar (animated, logical-property
   based so it fills right-to-left on RTL sites).
-- **GoalMessage** — the goal's progress message (rendered by the Phase 13
+- **MissionMessage** — the mission's progress message (rendered by the Phase 13
   MessageEngine).
 - **RewardStatus** — locked 🔒 / unlocked ✓ reward chip, labels
   localized server-side (`frontend_config()` → `labels`).
 - **UnifiedRecommendations** — one customer-facing product panel that
-  renders the goal's merged, deduplicated, ranked recommendations
+  renders the mission's merged, deduplicated, ranked recommendations
   (Suggestions + Upsells consolidation: the Phase 14 SuggestionEngine
   and the Phase 33.5 UpsellRanker are merged into ONE list by the
-  `ProductRecommendationEngine`). Money goals with an open gap fall back
+  `ProductRecommendationEngine`). Money missions with an open gap fall back
   to the public rank endpoint when the payload carries nothing.
-- **StickyGoalBar** — fixed bottom bar with the featured goal's progress
-  (the first eligible one — a slim bar keeps a single goal at a glance)
+- **StickyMissionBar** — fixed bottom bar with the featured mission's progress
+  (the first eligible one — a slim bar keeps a single mission at a glance)
   and a dismiss button; hidden when the cart has no progress to show.
 
-There is no cross-goal ladder anymore: every goal is its own card, each
-rendering through its resolved design template. Ineligible goals never
-render a card, and when no goals are eligible the container is hidden
+There is no cross-mission ladder anymore: every mission is its own card, each
+rendering through its resolved design template. Ineligible missions never
+render a card, and when no missions are eligible the container is hidden
 (`faracart-widget--empty`) instead of showing a broken bar.
 
 ## Refresh & events
@@ -160,10 +160,10 @@ layers are asserted by `tests/frontend-test.php`.
 
 # Dynamic Messaging (Phase 13)
 
-Every progress message — the widget's `GoalMessage`, the sticky bar copy,
+Every progress message — the widget's `MissionMessage`, the sticky bar copy,
 the milestone labels — is rendered server-side by
-`FaraCart\Goals\MessageEngine` (`includes/Goals/MessageEngine.php`), a
-stateless, database-free template engine fed a `Goal` + `GoalResult`.
+`FaraCart\Missions\MessageEngine` (`includes/Missions/MessageEngine.php`), a
+stateless, database-free template engine fed a `Mission` + `MissionResult`.
 The `GET /faracart/v1/progress` payload exposes the result as `message`
 plus the raw `state` for styling.
 
@@ -171,37 +171,37 @@ plus the raw `state` for styling.
 
 | State | When | Default copy |
 |---|---|---|
-| `inactive` | goal not active (status / campaign folded) | “This offer is not active right now.” |
-| `unavailable` | goal cannot apply to this cart (no matching items, out of schedule, invalid target) | “This offer is not available for your cart.” |
-| `progressing` | eligible, below 80% | “Only {remaining} left to reach your goal” |
+| `inactive` | mission not active (status / campaign folded) | “This offer is not active right now.” |
+| `unavailable` | mission cannot apply to this cart (no matching items, out of schedule, invalid target) | “This offer is not available for your cart.” |
+| `progressing` | eligible, below 80% | “Only {remaining} left to reach your mission” |
 | `nearly_complete` | eligible, ≥ 80% | “Almost there! Only {remaining} left” |
-| `completed` | target reached, no reward configured | “You reached your goal!” |
+| `completed` | target reached, no reward configured | “You reached your mission!” |
 | `reward_activated` | target reached with a reward | “Reward unlocked: {reward}” |
 
 ## Variables
 
 ```text
 {current}  {target}  {remaining}  {percentage}
-{quantity} {remaining_quantity}  {reward}  {goal_name}  {campaign_name}
+{quantity} {remaining_quantity}  {reward}  {mission_name}  {campaign_name}
 ```
 
-- Money-based goals format `current`/`target`/`remaining` as currency
+- Money-based missions format `current`/`target`/`remaining` as currency
   (`wc_price` when WooCommerce is active); quantity, weight and
-  distinct-quantity goals format plain locale numbers (the type-aware
-  `is_money` check — quantity-type goals default to the subtotal mode, so
+  distinct-quantity missions format plain locale numbers (the type-aware
+  `is_money` check — quantity-type missions default to the subtotal mode, so
   the type is what decides).
 - `quantity`/`remaining_quantity` come from the cart (the controller
   passes the cart's total quantity) and fall back to current/remaining for
-  quantity-mode goals.
+  quantity-mode missions.
 - `reward` is value-aware (“10% discount”, “Fixed $20.00 off”).
-- `campaign_name` is folded into the goal by the repository's campaign
-  join (`Goal::campaign_name()`).
+- `campaign_name` is folded into the mission by the repository's campaign
+  join (`Mission::campaign_name()`).
 - Unknown placeholders are left untouched — a template can never render
   empty tokens or throw.
 
 ## Templates
 
-The goal builder's Display settings override the per-state defaults:
+The mission builder's Display settings override the per-state defaults:
 `display_settings.message` drives progress copy (progressing + nearly
 complete), `display_settings.completed_message` drives completion copy
 (completed + reward activated). Example:
@@ -221,14 +221,14 @@ can highlight near-completion (`faracart-state--nearly_complete`) etc.
 The widget body is rendered by a **pluggable template engine**: each
 template is a registered, self-describing unit (stable id, scope,
 settings schema, version) with its own layout, and templates are scoped
-independently for Goals and Campaigns. See `includes/Templates/`
+independently for Missions and Campaigns. See `includes/Templates/`
 (`Template` contract, `TemplateRegistry`, `TemplateEngine`) and
 `docs/REFERENCE_ARCHITECTURE.md` §11.13.
 
 ## Built-in templates
 
 The six design templates (`template-1` … `template-6`) replace the
-original Phase 12 Goal variants. Retired ids (`basic` / `percentage` /
+original Phase 12 Mission variants. Retired ids (`basic` / `percentage` /
 `milestone` / `card` / `ring`) are no longer registered and are never
 mapped to a current template — a persisted old id falls back to the
 scope default / store-wide template. The two Campaign templates are
@@ -236,44 +236,44 @@ unchanged.
 
 | Variant | Scope | Layout |
 |---|---|---|
-| `template-1` | goal | Classic progress card — icon badge, goal label + title, percentage chip, bar, current/remaining amounts, CTA; completed + expired states (`t1Panel()`) |
-| `template-2` | goal | Minimal inline cart goal — compact strip (small icon, title, remaining, slim bar, small CTA) meant to sit between cart content and totals (`t2Panel()`) |
-| `template-3` | goal | Circular progress — percentage inside a ring beside icon, title, description, amounts and a CTA (`t3Panel()`) |
-| `template-4` | goal | Product recommendation + goal — gradient progress header plus the goal's recommended products with add-to-cart buttons (`t4Panel()`) |
-| `template-5` | goal | Compact floating / sticky goal — dark slim bar with icon, progress, remaining and a CTA (`t5Panel()`) |
-| `template-6` | goal | Premium / elegant e-commerce style — gold accents, elegant progress with a marker dot, amounts and a refined CTA (`t6Panel()`) |
-| `milestone_chain` | campaign | The campaign's milestones as one connected ladder — dots, names, targets and rewards — with an overall progress bar (`campaignChain()`); the campaign renders as a unit instead of per-goal cards |
+| `template-1` | mission | Classic progress card — icon badge, mission label + title, percentage chip, bar, current/remaining amounts, CTA; completed + expired states (`t1Panel()`) |
+| `template-2` | mission | Minimal inline cart mission — compact strip (small icon, title, remaining, slim bar, small CTA) meant to sit between cart content and totals (`t2Panel()`) |
+| `template-3` | mission | Circular progress — percentage inside a ring beside icon, title, description, amounts and a CTA (`t3Panel()`) |
+| `template-4` | mission | Product recommendation + mission — gradient progress header plus the mission's recommended products with add-to-cart buttons (`t4Panel()`) |
+| `template-5` | mission | Compact floating / sticky mission — dark slim bar with icon, progress, remaining and a CTA (`t5Panel()`) |
+| `template-6` | mission | Premium / elegant e-commerce style — gold accents, elegant progress with a marker dot, amounts and a refined CTA (`t6Panel()`) |
+| `milestone_chain` | campaign | The campaign's milestones as one connected ladder — dots, names, targets and rewards — with an overall progress bar (`campaignChain()`); the campaign renders as a unit instead of per-mission cards |
 | `campaign_progress` | campaign | One overall progress bar for the whole campaign with a milestone counter (`campaignProgress()`) |
 
 In JS terms the shared flow (message, reward chip, suggestions, sticky
 bar) stays identical — only `templateBody()` swaps the core visual per
 variant (`t1Panel` … `t6Panel`), and a campaign group with a configured
 campaign template renders through `campaignChain()` /
-`campaignProgress()` instead of per-goal cards. The card icon comes
-from the goal's Display settings (`display_settings.icon`, served in
+`campaignProgress()` instead of per-mission cards. The card icon comes
+from the mission's Display settings (`display_settings.icon`, served in
 the progress payload as `icon`); each template falls back to its own
-MUI-style fallback glyph when a goal has no icon. Compact widgets keep
-their slim footprint — every eligible goal still gets its own compact
+MUI-style fallback glyph when a mission has no icon. Compact widgets keep
+their slim footprint — every eligible mission still gets its own compact
 card, stacked with a tighter gap.
 
 ## Resolution
 
-The engine resolves each goal's effective template + appearance
+The engine resolves each mission's effective template + appearance
 **server-side** and ships it in the progress payload (`template` +
 `template_settings`); campaign groups ship under `campaigns` (only for
 campaigns with a configured campaign template). The JS never
 re-resolves — it renders exactly what the engine resolved:
 
 1. **item override** — `display_settings.template_id` +
-   `template_settings` (the Goal Builder's Display section; a campaign's
+   `template_settings` (the Mission Builder's Display section; a campaign's
    `display_rules` analogously),
 2. **scope default** — the Appearance page's per-scope default template
    and its stored default appearance (`template_defaults` /
    `template_settings` in the settings option),
 3. **store-wide fallback** — the `frontend_template` + `frontend_*`
-   appearance tokens (goals only),
-4. **hardcoded fallback** — `template-1` for goals; a campaign without
-a template renders per-goal cards (the pre-engine behavior).
+   appearance tokens (missions only),
+4. **hardcoded fallback** — `template-1` for missions; a campaign without
+a template renders per-mission cards (the pre-engine behavior).
 
 A stored template id that is no longer registered (an old Phase 12 id
 such as `card`, or a removed template) falls back to the scope default
@@ -288,10 +288,10 @@ filter still override the store-wide variant (`ProgressUI::template()`).
 Every template exposes its own **settings schema** (colors, radius, bar
 height, animation, content toggles, CSS class, custom CSS — genuinely
 different per template). The Appearance page (per-scope defaults),
-Goal Builder and Campaign Builder all render the settings form
+Mission Builder and Campaign Builder all render the settings form
 **generically from the schema** (`admin-app/src/templates/SchemaForm.tsx`),
 so a new template automatically gets a working settings UI. The
-storefront applies each goal's resolved settings as per-card CSS custom
+storefront applies each mission's resolved settings as per-card CSS custom
 properties (`--faracart-accent`, `--faracart-bg`, `--faracart-border`,
 `--faracart-text`, `--faracart-radius`, `--faracart-bar-height`, …) via
 `style.setProperty()` and appends any custom CSS per card. Every value
@@ -316,7 +316,7 @@ to the same inline style block (`ProgressUI::appearance_css()`).
 
 # Analytics Events (Phase 16)
 
-The storefront widgets report goal-cart analytics events to
+The storefront widgets report mission-cart analytics events to
 `POST /faracart/v1/track` (see `docs/api.md` §3). Tracking is baked into
 `assets/js/frontend.js` — no separate tracker file — with the same
 must-never-throw contract as the widgets: a failed or missing report can
@@ -348,21 +348,21 @@ into a `faracart_invalid_nonce` (403).
 
 | Event | When | Dedup |
 |---|---|---|
-| `goal_impression` | an eligible goal renders in a widget | once per goal per page session |
-| `goal_progress` | the goal's percentage changes | per goal + percentage |
-| `goal_completed` | a goal without a reward reaches 100% | once per goal per page session |
-| `reward_activated` | a goal with a reward reaches 100% | once per goal per page session |
-| `suggestion_impression` | a suggested product renders | once per goal + product per page session |
+| `goal_impression` | an eligible mission renders in a widget | once per mission per page session |
+| `goal_progress` | the mission's percentage changes | per mission + percentage |
+| `goal_completed` | a mission without a reward reaches 100% | once per mission per page session |
+| `reward_activated` | a mission with a reward reaches 100% | once per mission per page session |
+| `suggestion_impression` | a suggested product renders | once per mission + product per page session |
 | `suggestion_clicked` | a suggestion link is clicked | every click (delegated listener) |
 
-`cart_value` is the first money goal's current value at event time;
+`cart_value` is the first money mission's current value at event time;
 `goal_progress` carries the rounded `percentage` in `meta`. Suggestion
 clicks are reported through a delegated `document.body` click listener
-using the `data-faracart-suggestion-id` / `data-faracart-goal-id`
+using the `data-faracart-suggestion-id` / `data-faracart-mission-id`
 attributes the widget puts on each suggestion link.
 
-`goal_impression` is deliberately gated on an *eligible* goal rendering —
-no payload fetch, no ineligible goal, no bot-poll, no event. Reports use
+`goal_impression` is deliberately gated on an *eligible* mission rendering —
+no payload fetch, no ineligible mission, no bot-poll, no event. Reports use
 `navigator.sendBeacon` when available (so they survive page unload) with
 an XHR fallback, and the events fire on every widget refresh, deduped
 per page session so cart updates don't spam the funnel.
@@ -390,8 +390,8 @@ The widget's **UnifiedRecommendations** panel is served by
 (`includes/Recommendations/ProductRecommendationEngine.php`) — the
 single customer-facing recommendation layer that merges the Phase 14
 SuggestionEngine and the Phase 33.5 UpsellRanker into ONE ranked,
-deduplicated list, evaluated server-side per goal and shipped in the
-`/progress` payload as `goal.suggestions`. Each item carries a
+deduplicated list, evaluated server-side per mission and shipped in the
+`/progress` payload as `mission.suggestions`. Each item carries a
 `source` attribution (`suggestion` | `upsell` | `both`) so the
 storefront's existing tracking funnels stay separate without exposing
 the strategy to the shopper; `score` carries the unified 0–100 rank.
@@ -406,15 +406,15 @@ entity text.
 
 The suggestion half gathers candidates from, in order of priority:
 
-1. the goal's own `products` (they count toward it)
-2. products in the goal's `categories` (category goals)
+1. the mission's own `products` (they count toward it)
+2. products in the mission's `categories` (category missions)
 3. the cart items' upsells (`_upsell_ids`)
 4. the cart items' cross-sells (`_crosssell_ids`)
 5. `wc_get_related_products()` of the cart items
 6. the shopper's `woocommerce_recently_viewed` cookie
 7. best sellers by `total_sales` (low-scoring fallback filler)
 
-The upsell half adds the ranker's own candidates (goal manual +
+The upsell half adds the ranker's own candidates (mission manual +
 historical funnel + category + cart-endorsed + taxonomy matches + best
 sellers) and scores every candidate on the SAME normalized 0–100 scale
 (`score_product`), so the two halves never compare incompatible scores.
@@ -426,13 +426,13 @@ then lower price, then id (deterministic).
 
 Never recommended: out-of-stock, unpublished or unpriced products, the
 cart's own items, `excluded_products`, and ghost/missing ids. Completed
-or ineligible goals — or a closed gap — return no recommendations.
+or ineligible missions — or a closed gap — return no recommendations.
 Weak candidates that score 0 under the merged weights are dropped, so
 the panel never pads to the configured limit (`faracart_frontend_upsell_limit`, 1–6, default 3):
-fewer strong candidates → fewer items. Money goals with an open gap
+fewer strong candidates → fewer items. Money missions with an open gap
 fall back to the public rank endpoint (`/faracart/v1/upsell/rank`) when
 the payload carried nothing; the list is filterable via the existing
-`faracart_suggestions` filter (4 args: items, goal, result, context).
+`faracart_suggestions` filter (4 args: items, mission, result, context).
 
 ---
 
@@ -453,15 +453,15 @@ assets/js/frontend.js                   upsellPanel component + add-to-cart
 assets/css/frontend.css                 scoped panel styles (mobile strip)
 ```
 
-The storefront sends only `goal_id` + `limit`. The server resolves the
-goal (explicit id, else the featured active money goal), builds the
-same `CartContext` the progress widgets evaluate on, runs the goal
-through the shared `GoalEngine` and derives the remaining gap as
+The storefront sends only `mission_id` + `limit`. The server resolves the
+mission (explicit id, else the featured active money mission), builds the
+same `CartContext` the progress widgets evaluate on, runs the mission
+through the shared `MissionEngine` and derives the remaining gap as
 target − current cart value — **server-side, never trusted from the
 client** (explicit `cart` / `cart_value` / `remaining` args exist for
 tests and embedded consumers only). The deterministic `UpsellRanker`
 runs directly (no per-cart transient churn), so every Phase 33.5
-degradation holds: no goal / closed gap / disabled / no candidates →
+degradation holds: no mission / closed gap / disabled / no candidates →
 an unavailable payload with a reason, never a fabricated list. The
 payload is catalog data only (name, price, image, score breakdowns,
 reasons) — no PII, no secrets, per-IP rate limited like `/progress`,
@@ -474,11 +474,11 @@ keeps them behind manage_options).
 
 ## Panel behavior
 
-- Renders for money goals with `remaining > 0` that are not completed;
+- Renders for money missions with `remaining > 0` that are not completed;
   hidden entirely when the plugin/analytics toggles are off (the
   `cfg.upsells.enabled` gate mirrors the ranker's
   `faracart_upsells_enabled` gate).
-- Results are cached client-side per `goal:remaining`, so a cart-change
+- Results are cached client-side per `mission:remaining`, so a cart-change
   re-render with an unchanged gap reuses the last ranking; a network
   failure drops the panel entirely (never a broken half-render).
 - **Add to cart** uses WooCommerce's own public `?wc-ajax=add_to_cart`
@@ -493,7 +493,7 @@ keeps them behind manage_options).
 
 The panel reports through the Phase 33.5 public
 `POST /faracart/v1/upsell/track` route (reusing the Phase 16 tracking
-nonce + session id): `upsell_impression` once per goal+product per
+nonce + session id): `upsell_impression` once per mission+product per
 session, `upsell_clicked` on the product link and the add button, and
 `upsell_added` after a successful add. These feed `upsell_events` → the
 `DailyAggregator` → `upsell_stats`, closing the historical-learning loop
@@ -514,7 +514,7 @@ a theme.
 # Admin Preview System (Phase 15)
 
 Administrators can see the **exact customer experience before
-publishing**: the preview buttons on the Goals and Campaigns lists open a
+publishing**: the preview buttons on the Missions and Campaigns lists open a
 dialog that evaluates the real engine against a **simulated cart** and
 renders the real storefront widget (React mirror of `assets/js/frontend.js`)
 at the chosen device width.
@@ -522,39 +522,39 @@ at the chosen device width.
 ## Backend — `POST /faracart/v1/preview` (admin-only)
 
 `FaraCart\REST\PreviewController` (`includes/REST/PreviewController.php`)
-accepts `goal_id` XOR `campaign_id` plus a `simulated` object
+accepts `mission_id` XOR `campaign_id` plus a `simulated` object
 (`{ amount, quantity }`), builds a **synthetic `CartContext`** (one
 simulated cart line carrying the amount / quantity / weight / categories /
 product id — so amount, quantity, distinct-quantity, category, product and
-weight goals all evaluate honestly; composite goals union their children's
-constraints), runs it through the GoalEngine + MessageEngine +
-SuggestionEngine, and returns the **same per-goal payload shape as the
+weight missions all evaluate honestly; composite missions union their children's
+constraints), runs it through the MissionEngine + MessageEngine +
+SuggestionEngine, and returns the **same per-mission payload shape as the
 public `/progress` endpoint** (built by the shared
-`FrontendController::shape_goal()`, so the two can never drift).
+`FrontendController::shape_mission()`, so the two can never drift).
 
 Preview **never touches the real WooCommerce cart**: no cart is loaded, no
 session is touched, no fees or coupons are applied. It also **ignores
-publish gating** on purpose — goals are evaluated as active and
-in-schedule — so drafts, inactive goals and scheduled campaigns can be
+publish gating** on purpose — missions are evaluated as active and
+in-schedule — so drafts, inactive missions and scheduled campaigns can be
 seen before they go live.
 
 ## Preview States
 
-- empty cart · 25% · 50% · 75% · completed (single goals; anchored to the
-goal target)
+- empty cart · 25% · 50% · 75% · completed (single missions; anchored to the
+mission target)
 - multiple milestones (campaigns; anchored to the top milestone target, so
 mid states naturally show several completed rungs)
 
 ## Preview Controls
 
-- **Simulated cart amount** — drives money-based goals (subtotal / total).
+- **Simulated cart amount** — drives money-based missions (subtotal / total).
 - **Simulated quantity** — drives quantity, distinct-quantity and weight
-goals.
+missions.
 - **Simulated reward** — auto (from completion) / locked / unlocked chip
 state.
 - **Device width** — mobile (375px) / tablet (768px) / desktop (1280px)
 preview frame.
-- **Template** — any registered Goal template (goal preview) or
+- **Template** — any registered Mission template (mission preview) or
   Campaign template (campaign preview); empty = the payload's resolved
 template + settings (the engine's resolution order, identical to the
 storefront).
@@ -578,7 +578,7 @@ admin-app/src/
 ├── main.tsx                     entry: createRoot + AppProviders + App
 ├── App.tsx                      createHashRouter (data router) + lazy routes
 ├── boot.ts                      getBootData() — window.faracart
-├── types.ts                     boot data + Goal / Settings / envelope types
+├── types.ts                     boot data + Mission / Settings / envelope types
 ├── theme/index.ts               WP-admin MUI theme (RTL-aware)
 ├── providers/
 │   ├── AppProviders.tsx         theme + Emotion cache + TanStack Query +
@@ -591,7 +591,7 @@ admin-app/src/
 │   └── DateRangeContext.tsx     global range provider + useDateRange()
 ├── api/
 │   ├── client.ts                apiFetch: X-WP-Nonce + envelope unwrap
-│   ├── goals.ts                 typed goal CRUD + duplicate
+│   ├── missions.ts                 typed mission CRUD + duplicate
 │   ├── campaigns.ts             typed campaign CRUD + duplicate
 │   ├── search.ts                typed /search/{products,categories,coupons}
 │   ├── settings.ts              typed GET/POST /settings
@@ -605,7 +605,7 @@ admin-app/src/
 │   ├── ConfirmDialog.tsx        reusable destructive-action dialog
 │   ├── EmptyState.tsx           no-data panel
 │   ├── ErrorBoundary.tsx        render-error fallback with retry
-│   ├── GoalPreviewDialog.tsx    server-driven goal preview (Phase 15)
+│   ├── MissionPreviewDialog.tsx    server-driven mission preview (Phase 15)
 │   ├── CampaignPreviewDialog.tsx  server-driven campaign preview (Phase 15)
 │   ├── preview/                 Phase 15 admin preview system
 │   │   ├── PreviewWidget.tsx    React mirror of the storefront widget
@@ -613,21 +613,21 @@ admin-app/src/
 │   │   │                        device width/template controls
 │   │   ├── usePreviewDialog.ts  shared preview state + queries hook
 │   │   └── types.ts             control types, tokens, device widths
-│   ├── goal-builder/            Phase 9 builder sections
+│   ├── mission-builder/            Phase 9 builder sections
 │   │   ├── SectionCard.tsx      titled section wrapper
 │   │   ├── EntityAutocomplete.tsx  debounced async search picker
-│   │   ├── GoalTypePicker.tsx   goal type selector cards
-│   │   ├── goalTypes.tsx        shared GOAL_TYPES definitions
-│   │   ├── TargetFields.tsx     dynamic target by goal type
-│   │   ├── CompositeChildrenEditor.tsx  AND/OR child goals
+│   │   ├── MissionTypePicker.tsx   mission type selector cards
+│   │   ├── missionTypes.tsx        shared MISSION_TYPES definitions
+│   │   ├── TargetFields.tsx     dynamic target by mission type
+│   │   ├── CompositeChildrenEditor.tsx  AND/OR child missions
 │   │   ├── RewardFields.tsx     dynamic reward configuration
 │   │   ├── ConditionFields.tsx  excluded products + schedule
 │   │   └── DisplayFields.tsx    message/template/icon
 │   └── PageContainer.tsx        shared page header + content wrapper
 └── routes/
-    ├── Dashboard.tsx            live goal summary (REST-backed)
-    ├── Goals.tsx                full goal CRUD list (Phase 9)
-    ├── GoalBuilder.tsx          goal create/edit builder (Phase 9)
+    ├── Dashboard.tsx            live mission summary (REST-backed)
+    ├── Missions.tsx                full mission CRUD list (Phase 9)
+    ├── MissionBuilder.tsx          mission create/edit builder (Phase 9)
     ├── Campaigns.tsx            full campaign CRUD list (Phase 10)
     ├── CampaignBuilder.tsx      campaign builder: basics, schedule, priority,
     │                            milestone ordering (Phase 10)
@@ -682,7 +682,7 @@ and only the content area scrolls.
 (Phase 2 nonce strategy), parses the Phase 7 `{ data, meta, pagination }`
 envelope, throws typed `ApiError`s (network errors included), and
 optionally returns the full envelope when pagination metadata is needed.
-Typed per-resource modules (`api/goals.ts`, `api/settings.ts`) consume
+Typed per-resource modules (`api/missions.ts`, `api/settings.ts`) consume
 it.
 
 ## Shared components
@@ -699,14 +699,14 @@ it.
 
 | Page | Phase 8 status | Full implementation |
 |---|---|---|
-| Dashboard | live summary: goal counts, currency, version | 16–17 (analytics) |
-| Goals | full goal CRUD list (search/filter/pagination, edit, duplicate, enable/disable, delete, preview) | 9 (Goal Management UI) |
-| GoalBuilder | — | 9 (Goal Builder, `/goals/new` + `/goals/:id/edit`) |
+| Dashboard | live summary: mission counts, currency, version | 16–17 (analytics) |
+| Missions | full mission CRUD list (search/filter/pagination, edit, duplicate, enable/disable, delete, preview) | 9 (Mission Management UI) |
+| MissionBuilder | — | 9 (Mission Builder, `/missions/new` + `/missions/:id/edit`) |
 | Campaigns | full campaign CRUD list (milestones, status, priority, schedule, edit, duplicate, enable/disable, delete, preview) | 10 (Campaign Builder) |
 | CampaignBuilder | — | 10 (Campaign Builder, `/campaigns/new` + `/campaigns/:id/edit`) |
-| Analytics | full dashboard: date-range + campaign/goal/reward/product filters, 7 KPI cards, daily trend chart, top campaigns / top goals / top suggested products | 17 (Analytics Dashboard) |
-| Appearance | full (pluggable template engine): per-scope default picker (Goals / Campaigns) with live thumbnails, per-template schema-driven appearance forms, live preview, reset to defaults | 12 (Progress Templates) |
-| Settings | full: General / Frontend / Goal Calculation / Performance / Advanced five-tab form (react-hook-form) | 18 (Settings) |
+| Analytics | full dashboard: date-range + campaign/mission/reward/product filters, 7 KPI cards, daily trend chart, top campaigns / top missions / top suggested products | 17 (Analytics Dashboard) |
+| Appearance | full (pluggable template engine): per-scope default picker (Missions / Campaigns) with live thumbnails, per-template schema-driven appearance forms, live preview, reset to defaults | 12 (Progress Templates) |
+| Settings | full: General / Frontend / Mission Calculation / Performance / Advanced five-tab form (react-hook-form) | 18 (Settings) |
 
 ## Settings Page (Phase 18)
 
@@ -716,16 +716,16 @@ react-hook-form + zod-less schema validation and saved through `POST
 /faracart/v1/settings`:
 
 - **General** — master enable/disable, full-screen dashboard, currency
-  display (`symbol` | `code` | `name`), default goal behavior (`all` |
+  display (`symbol` | `code` | `name`), default mission behavior (`all` |
   `first` | `closest`) and the store-wide default calculation mode
   (`subtotal` | `discounted_subtotal` | `total`).
 - **Frontend** — display locations (checkbox chips for cart / mini-cart /
   checkout / shop / product / sticky), mobile behavior (`show` | `hide`),
   template, animation and the bar-height / color / radius / CSS surface
   shared with the Appearance page.
-- **Goal Calculation** — five inclusion toggles: tax, discount,
+- **Mission Calculation** — five inclusion toggles: tax, discount,
   shipping, sale items and virtual items (each default preserves the
-  pre-Phase-18 engine behavior; see `docs/goal-engine.md`).
+  pre-Phase-18 engine behavior; see `docs/mission-engine.md`).
 - **Performance** — progress caching (10 s transient), analytics
   tracking and product suggestions toggles.
 - **Advanced** — debug mode, file logging (with the live log path shown
@@ -746,8 +746,8 @@ measurement dashboard, served by the single admin endpoint
 **Filters** — the toolbar shares one date range through
 `DateRangeProvider` (wired inside the data router in `App.tsx`, so it
 syncs the `?preset=`/`?from=`/`?to=` hash params and persists to
-localStorage) plus campaign / goal / reward selects (options from the
-existing `/campaigns` + `/goals` list endpoints) and a product filter via
+localStorage) plus campaign / mission / reward selects (options from the
+existing `/campaigns` + `/missions` list endpoints) and a product filter via
 the reusable `EntityAutocomplete`. Every change refetches the whole
 payload (the query key embeds the range + filters).
 
@@ -761,7 +761,7 @@ rate (all zero-denominator guarded server-side).
   axis, a revenue line on the right (compact axis labels), legend and
   localized tooltips; the series is zero-filled over the whole window
 - **Top campaigns** — a horizontal bar chart of completions
-- **Top goals** — a ranked list with completion-rate progress bars
+- **Top missions** — a ranked list with completion-rate progress bars
 - **Top suggested products** — a table of impressions / clicks / added
   (+ a success chip for converters) / CTR / add-to-cart rate
 

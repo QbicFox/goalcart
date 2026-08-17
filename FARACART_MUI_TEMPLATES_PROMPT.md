@@ -1,8 +1,8 @@
-# FaraCart — Replace Goal Templates with New MUI Templates
+# FaraCart — Replace Mission Templates with New MUI Templates
 
 ## Objective
 
-Replace the existing FaraCart goal-template system with the six new templates defined in:
+Replace the existing FaraCart mission-template system with the six new templates defined in:
 
 `01-FaraCart - UI Exploration Boar.html`
 
@@ -19,7 +19,7 @@ Do not keep the old templates.
 Before changing any code:
 
 1. Scan the entire FaraCart project.
-2. Locate the current goal-template system.
+2. Locate the current mission-template system.
 3. Identify:
    - Existing template components
    - Template registry
@@ -46,10 +46,10 @@ The HTML contains six relevant designs:
 | New ID | User-facing name | Source concept |
 |---|---|---|
 | `template-1` | قالب ۱ | Concept 01 — Classic Progress Card |
-| `template-2` | قالب ۲ | Concept 02 — Minimal Inline Cart Goal |
+| `template-2` | قالب ۲ | Concept 02 — Minimal Inline Cart Mission |
 | `template-3` | قالب ۳ | Concept 03 — Circular Progress |
-| `template-4` | قالب ۴ | Concept 07 — Product Recommendation + Goal |
-| `template-5` | قالب ۵ | Concept 08 — Compact Floating / Sticky Goal |
+| `template-4` | قالب ۴ | Concept 07 — Product Recommendation + Mission |
+| `template-5` | قالب ۵ | Concept 08 — Compact Floating / Sticky Mission |
 | `template-6` | قالب ۶ | Concept 09 — Premium / Elegant E-commerce Style |
 
 The only user-facing names must be:
@@ -85,7 +85,7 @@ Do not merely hide the old templates.
 
 After the migration, the user must only be able to select the six new templates.
 
-If old template IDs are persisted in existing goals, inspect the current IDs and implement an appropriate migration/fallback mapping instead of guessing.
+If old template IDs are persisted in existing missions, inspect the current IDs and implement an appropriate migration/fallback mapping instead of guessing.
 
 ---
 
@@ -97,9 +97,9 @@ Source:
 
 Implement:
 
-- Goal icon
-- Goal label
-- Goal title
+- Mission icon
+- Mission label
+- Mission title
 - Progress percentage
 - Horizontal progress bar
 - Current amount
@@ -118,13 +118,13 @@ The visual structure should closely follow the HTML reference.
 
 Source:
 
-`Concept 02 — Minimal Inline Cart Goal`
+`Concept 02 — Minimal Inline Cart Mission`
 
 Implement:
 
 - Very compact inline layout
-- Goal icon
-- Goal title
+- Mission icon
+- Mission title
 - Remaining amount
 - Compact progress bar
 - Compact CTA
@@ -148,9 +148,9 @@ Implement:
 
 - Circular progress
 - Percentage inside the circle
-- Goal icon
-- Goal title
-- Goal description
+- Mission icon
+- Mission title
+- Mission description
 - Current amount
 - Remaining amount
 - CTA
@@ -166,11 +166,11 @@ Use the existing MUI theme and RTL configuration.
 
 Source:
 
-`Concept 07 — Product Recommendation + Goal`
+`Concept 07 — Product Recommendation + Mission`
 
 Implement:
 
-- Goal progress header
+- Mission progress header
 - Progress bar
 - Remaining amount
 - Recommendation heading
@@ -192,13 +192,13 @@ Do not implement a second recommendation engine.
 
 Source:
 
-`Concept 08 — Compact Floating / Sticky Goal`
+`Concept 08 — Compact Floating / Sticky Mission`
 
 Implement:
 
-- Compact sticky goal bar
+- Compact sticky mission bar
 - Dark visual style
-- Goal icon
+- Mission icon
 - Progress
 - Remaining amount
 - CTA
@@ -220,8 +220,8 @@ Implement:
 
 - Premium/elegant visual language
 - Gold/accent styling
-- Goal title
-- Goal description
+- Mission title
+- Mission description
 - Elegant progress bar
 - Current amount
 - Remaining amount
@@ -287,7 +287,7 @@ Do not duplicate FaraCart business logic inside individual templates.
 
 Do not independently calculate:
 
-- Goal progress
+- Mission progress
 - Current amount
 - Remaining amount
 - Target amount
@@ -298,7 +298,7 @@ Do not independently calculate:
 
 Reuse the project's existing logic, hooks, selectors, services and data structures.
 
-If the project already has a goal/template interface, extend it instead of creating a competing architecture.
+If the project already has a mission/template interface, extend it instead of creating a competing architecture.
 
 ---
 
@@ -312,8 +312,8 @@ Examples of values that must remain dynamic:
 - 1,650,000 تومان
 - 350,000 تومان
 - 2,000,000 تومان
-- Goal title
-- Goal description
+- Mission title
+- Mission description
 - Product names
 - Product prices
 - Product images
@@ -324,7 +324,7 @@ Do not create a second currency formatter if one already exists.
 
 ---
 
-# 13. Goal States
+# 13. Mission States
 
 Respect the existing FaraCart state model.
 
@@ -461,7 +461,7 @@ Use one clean template registry.
 Conceptually:
 
 ```ts
-const goalTemplates = [
+const missionTemplates = [
   {
     id: 'template-1',
     name: 'قالب ۱',
@@ -508,14 +508,14 @@ Follow the existing FaraCart folder conventions.
 A possible structure is:
 
 ```text
-goal-templates/
+mission-templates/
 ├── Template1.tsx
 ├── Template2.tsx
 ├── Template3.tsx
 ├── Template4.tsx
 ├── Template5.tsx
 ├── Template6.tsx
-├── GoalTemplateRenderer.tsx
+├── MissionTemplateRenderer.tsx
 ├── templateRegistry.ts
 └── previewData.ts
 ```
@@ -524,10 +524,10 @@ Use the actual project structure if it already has an established convention.
 
 If several templates share UI, create small reusable components such as:
 
-- GoalProgressBar
-- GoalStatusBadge
-- GoalAmountSummary
-- GoalCTA
+- MissionProgressBar
+- MissionStatusBadge
+- MissionAmountSummary
+- MissionCTA
 - RecommendedProductItem
 
 Do not over-abstract the designs.
@@ -589,12 +589,12 @@ Ensure:
 
 ---
 
-# 23. Existing Goal Data / Persistence
+# 23. Existing Mission Data / Persistence
 
 Before changing IDs, inspect whether old template IDs are already stored in:
 
 - WordPress options
-- Goal metadata
+- Mission metadata
 - Database records
 - REST/API responses
 - Redux/state
@@ -633,7 +633,7 @@ The old templates must not remain active or selectable.
 
 Do not unnecessarily change:
 
-- Goal calculations
+- Mission calculations
 - Revenue calculations
 - Analytics
 - Recommendation algorithms
@@ -641,7 +641,7 @@ Do not unnecessarily change:
 - Cart calculations
 - Database schema
 - API contracts
-- Goal creation/editing logic
+- Mission creation/editing logic
 
 Only modify them if technically required for template integration.
 
@@ -668,9 +668,9 @@ Pay attention to:
 - Visual density
 - Responsive behavior
 
-The goal is not to mechanically convert Tailwind to JSX.
+The mission is not to mechanically convert Tailwind to JSX.
 
-The goal is to recreate the same design using native React + MUI patterns.
+The mission is to recreate the same design using native React + MUI patterns.
 
 ---
 
@@ -730,11 +730,11 @@ The final code should look like a properly designed React/MUI implementation.
 
 ## Data
 
-- [x] Goal data is dynamic
+- [x] Mission data is dynamic
 - [x] Progress is dynamic
 - [x] Amounts are dynamic
-- [x] Goal title is dynamic
-- [x] Goal status is dynamic
+- [x] Mission title is dynamic
+- [x] Mission status is dynamic
 - [x] Product recommendations are dynamic
 - [x] No hard-coded demo values in production
 
@@ -782,13 +782,13 @@ The final code should look like a properly designed React/MUI implementation.
 
 # 29. Final Result
 
-After completion, FaraCart must have exactly six selectable goal templates:
+After completion, FaraCart must have exactly six selectable mission templates:
 
 1. **قالب ۱** — Classic Progress Card
-2. **قالب ۲** — Minimal Inline Cart Goal
+2. **قالب ۲** — Minimal Inline Cart Mission
 3. **قالب ۳** — Circular Progress
-4. **قالب ۴** — Product Recommendation + Goal
-5. **قالب ۵** — Compact Floating / Sticky Goal
+4. **قالب ۴** — Product Recommendation + Mission
+5. **قالب ۵** — Compact Floating / Sticky Mission
 6. **قالب ۶** — Premium / Elegant E-commerce Style
 
 The six templates must be reusable React/MUI components integrated with the existing FaraCart architecture.
@@ -830,7 +830,7 @@ Requirements:
 
 6. Where a template supports multiple states, the dashboard preview should allow the relevant state to be previewed if the existing admin architecture supports state previews.
 
-7. Preview data must never affect real goal data.
+7. Preview data must never affect real mission data.
 
 8. The preview must correctly work with:
    - RTL
@@ -878,19 +878,19 @@ The objective is to give store owners meaningful control over the appearance wit
 
 Separate:
 
-### Goal/business settings
+### Mission/business settings
 
 From:
 
 ### Template/appearance settings
 
-Do not mix visual configuration with goal business logic.
+Do not mix visual configuration with mission business logic.
 
 For example:
 
-- Goal target amount → business setting
-- Goal condition → business setting
-- Goal completion logic → business setting
+- Mission target amount → business setting
+- Mission condition → business setting
+- Mission completion logic → business setting
 - Card border radius → appearance setting
 - Progress color → appearance setting
 - Button color → appearance setting
@@ -977,7 +977,7 @@ Potential settings:
 
 ---
 
-## قالب ۲ — Minimal Inline Cart Goal
+## قالب ۲ — Minimal Inline Cart Mission
 
 Potential settings:
 
@@ -1013,7 +1013,7 @@ Do not expose settings that would make the circular design visually inconsistent
 
 ---
 
-## قالب ۴ — Product Recommendation + Goal
+## قالب ۴ — Product Recommendation + Mission
 
 Potential settings:
 
@@ -1033,7 +1033,7 @@ Do not turn this into a recommendation-engine configuration screen.
 
 ---
 
-## قالب ۵ — Compact Floating / Sticky Goal
+## قالب ۵ — Compact Floating / Sticky Mission
 
 Potential settings:
 
@@ -1082,7 +1082,7 @@ Create a scalable appearance configuration architecture.
 Conceptually:
 
 ```ts
-interface GoalTemplateAppearance {
+interface MissionTemplateAppearance {
   primaryColor?: string;
   backgroundColor?: string;
   textColor?: string;
@@ -1194,13 +1194,13 @@ Appearance settings must be persisted using the existing FaraCart configuration/
 
 Before implementing persistence:
 
-1. Find how existing goal/template settings are stored.
+1. Find how existing mission/template settings are stored.
 2. Reuse that mechanism.
 3. Do not introduce an unrelated storage system.
 
-Appearance configuration must remain associated with the selected goal/template appropriately.
+Appearance configuration must remain associated with the selected mission/template appropriately.
 
-If each goal can have its own template, appearance settings must not accidentally become global unless the existing product architecture explicitly defines them as global.
+If each mission can have its own template, appearance settings must not accidentally become global unless the existing product architecture explicitly defines them as global.
 
 If the project already supports global template defaults, preserve that concept where appropriate.
 
@@ -1253,7 +1253,7 @@ After implementing appearance settings, test each template with:
 5. Custom progress color
 6. Custom button color
 7. Any template-specific settings
-8. Different goal states
+8. Different mission states
 9. Mobile preview
 10. RTL
 
@@ -1285,12 +1285,12 @@ Before finishing, verify:
 
 ---
 
-# 42. Final Architecture Goal
+# 42. Final Architecture Mission
 
 The final system should conceptually follow this architecture:
 
 ```text
-                    Goal Template
+                    Mission Template
                          │
               ┌──────────┴──────────┐
               │                     │
@@ -1318,10 +1318,10 @@ After completion, FaraCart must have:
 ### Six templates
 
 1. **قالب ۱** — Classic Progress Card
-2. **قالب ۲** — Minimal Inline Cart Goal
+2. **قالب ۲** — Minimal Inline Cart Mission
 3. **قالب ۳** — Circular Progress
-4. **قالب ۴** — Product Recommendation + Goal
-5. **قالب ۵** — Compact Floating / Sticky Goal
+4. **قالب ۴** — Product Recommendation + Mission
+5. **قالب ۵** — Compact Floating / Sticky Mission
 6. **قالب ۶** — Premium / Elegant E-commerce Style
 
 ### And for each template

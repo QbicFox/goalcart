@@ -1,0 +1,417 @@
+<?php
+/**
+ * Dynamic message template engine for FaraCart.
+ *
+ * @package FaraCart
+ */
+
+namespace FaraCart\Missions;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class MessageEngine
+ *
+ * Phase 13 (Dynamic Messaging) — a reusable, UI-independent message
+ * template engine. Given a Mission + MissionResult it decides the message
+ * state (inactive / unavailable / progressing / nearly complete /
+ * completed / reward activated) and renders a localized message from a
+ * template, substituting variables such as:
+ *
+ * ```text
+ * {current}  {target}  {remaining}  {percentage}
+ * {quantity} {remaining_quantity}  {reward}  {mission_name}  {campaign_name}
+ * ```
+ *
+ * Template selection: the mission's Display settings
+ * (`display_settings.message` for progress, `display_settings.completed_message`
+ * for completion) win when set; otherwise a localized default per state
+ * applies. Unknown placeholders are left untouched (never a throw), and
+ * every value is formatted locale-aware (currency via `wc_price` when
+ * WooCommerce is active, plain numbers via `number_format_i18n`).
+ *
+ * The engine is stateless and database-free (Phase 4 contract) — callers
+ * supply the Mission + MissionResult. The frontend controller (Phase 7) renders
+ * every progress message through this service.
+ */
+final class MessageEngine {
+
+	/**
+	 * Display currency unit override ('' = the WooCommerce store currency).
+	 *
+	 * Resolved by Settings::currency() and injected by the container, so
+	 * server-rendered message amounts (e.g. "Only {remaining} left") are
+	 * labelled with the same currency the storefront widgets and the admin
+	 * dashboard use. Empty keeps wc_price's store-currency behavior, so
+	 * bare constructions (tests) and stores without a configured override
+	 * render exactly as before.
+	 *
+	 * @var string
+	 */
+	protected $currency;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param string $currency Display currency code ('' = store currency).
+	 */
+	public function __construct( $currency = '' ) {
+		$this->currency = strtoupper( trim( (string) $currency ) );
+	}
+
+	/**
+	 * Message states.
+	 */
+	const STATE_INACTIVE          = 'inactive';
+	const STATE_UNAVAILABLE       = 'unavailable';
+	const STATE_PROGRESSING       = 'progressing';
+	const STATE_NEARLY_COMPLETE   = 'nearly_complete';
+	const STATE_COMPLETED         = 'completed';
+	const STATE_REWARD_ACTIVATED  = 'reward_activated';
+	const STATE_COMPLETION_LIMIT  = 'completion_limit_reached';
+
+	/**
+	 * The progress percentage at or above which a mission is "nearly complete".
+	 *
+	 * @var float
+	 */
+	const NEARLY_COMPLETE_PERCENTAGE = 80.0;
+
+	/**
+	 * All supported placeholder variables, in substitution order.
+	 *
+	 * @var string[]
+	 */
+	const VARIABLES = array(
+		'current',
+		'target',
+		'remaining',
+		'percentage',
+		'quantity',
+		'remaining_quantity',
+		'reward',
+		'mission_name',
+		'campaign_name',
+		// Legacy alias: {goal_name} templates written before the Goal →
+		// Mission rename still resolve (the canonical placeholder is
+		// {mission_name}).
+		'goal_name',
+	);
+
+	/**
+	 * The message state for a mission evaluation.
+	 *
+	 * State semantics (P13-T03):
+	 *  - inactive          mission is not active (status/campaign folded)
+	 *  - unavailable       mission cannot apply to this cart/shopper
+	 *  - completion_limit_reached
+	 *                      the shopper already completed this mission the
+	 *                      configured maximum number of times (Phase 36)
+	 *  - progressing       eligible, target not reached, below the
+	 *                      "nearly complete" threshold
+	 *  - nearly_complete   eligible, >= NEARLY_COMPLETE_PERCENTAGE
+	 *  - completed         target reached, no reward configured
+	 *  - reward_activated  target reached and a reward is configured
+	 *
+	 * @param Mission                     $mission       Mission.
+	 * @param MissionResult               $result     Evaluation result.
+	 * @param array<string, mixed>|null $completion Optional completion status
+	 *                      (completion_limit / completion_count /
+	 *                      remaining_completions / can_complete, Phase 36);
+	 *                      when it says the shopper cannot complete the mission
+	 *                      again, the limit state wins over every
+	 *                      progress/completion state (the mission is no longer
+	 *                      actionable for them).
+	 * @return string One of the STATE_* constants.
+	 */
+	public function state( Mission $mission, MissionResult $result, $completion = null ) {
+		if ( ! $result->eligible() ) {
+			return MissionResult::REASON_MISSION_INACTIVE === $result->reason()
+				? self::STATE_INACTIVE
+				: self::STATE_UNAVAILABLE;
+		}
+
+		if ( is_array( $completion ) && empty( $completion['can_complete'] ) ) {
+			return self::STATE_COMPLETION_LIMIT;
+		}
+
+		if ( $result->completed() ) {
+			return empty( $mission->reward_type() )
+				? self::STATE_COMPLETED
+				: self::STATE_REWARD_ACTIVATED;
+		}
+
+		return $result->percentage() >= self::NEARLY_COMPLETE_PERCENTAGE
+			? self::STATE_NEARLY_COMPLETE
+			: self::STATE_PROGRESSING;
+	}
+
+	/**
+	 * Render the message for a mission evaluation.
+	 *
+	 * @param Mission                     $mission       Mission.
+	 * @param MissionResult               $result     Evaluation result.
+	 * @param array<string, mixed>     $extra      Extra variables (quantity,
+	 *                                      remaining_quantity, campaign_name
+	 *                                      overrides). Values may be ints,
+	 *                                      floats or strings; formatted by
+	 *                                      the engine.
+	 * @param array<string, mixed>|null $completion Optional completion status
+	 *                                      (Phase 36) forwarded to state().
+	 * @return string
+	 */
+	public function message( Mission $mission, MissionResult $result, array $extra = array(), $completion = null ) {
+		$state    = $this->state( $mission, $result, $completion );
+		$template = $this->template( $mission, $state );
+
+		return $this->render( $template, $mission, $result, $extra );
+	}
+
+	/**
+	 * The message template for a state.
+	 *
+	 * The mission's Display settings override the per-state defaults:
+	 * `display_settings.message` drives progress copy (progressing +
+	 * nearly complete), `display_settings.completed_message` drives
+	 * completion copy (completed + reward activated).
+	 *
+	 * @param Mission   $mission  Mission.
+	 * @param string $state STATE_* constant.
+	 * @return string
+	 */
+	public function template( Mission $mission, $state ) {
+		$display = $mission->display_settings();
+		$message = isset( $display['message'] ) && is_string( $display['message'] ) ? trim( $display['message'] ) : '';
+		$done    = isset( $display['completed_message'] ) && is_string( $display['completed_message'] ) ? trim( $display['completed_message'] ) : '';
+
+		switch ( $state ) {
+			case self::STATE_INACTIVE:
+				return __( 'This offer is not active right now.', 'faracart' );
+
+			case self::STATE_UNAVAILABLE:
+				return __( 'This offer is not available for your cart.', 'faracart' );
+
+			// Phase 36 (per-user completion limit): the shopper already
+			// completed this mission the configured maximum number of times —
+			// the plain "you've done this" copy, never the reward-unlocked
+			// claim (no reward can be granted again). The per-mission Display
+			// `completed_message` override deliberately does NOT apply here:
+			// it celebrates a fresh completion, which this is not.
+			case self::STATE_COMPLETION_LIMIT:
+				return __( 'You have already completed this mission.', 'faracart' );
+
+			case self::STATE_NEARLY_COMPLETE:
+				return '' !== $message
+					? $message
+					: __( 'Almost there! Only {remaining} left', 'faracart' );
+
+			case self::STATE_COMPLETED:
+			case self::STATE_REWARD_ACTIVATED:
+				if ( '' !== $done ) {
+					return $done;
+				}
+
+				if ( self::STATE_REWARD_ACTIVATED === $state ) {
+					return __( 'Reward unlocked: {reward}', 'faracart' );
+				}
+
+				return __( 'You reached your mission!', 'faracart' );
+
+			case self::STATE_PROGRESSING:
+			default:
+				return '' !== $message
+					? $message
+					: __( 'Only {remaining} left to reach your mission', 'faracart' );
+		}
+	}
+
+	/**
+	 * The variable map for a mission evaluation.
+	 *
+	 * Money-based missions format current/target/remaining as currency; every
+	 * other basis (quantity, weight, distinct quantity) formats plain
+	 * locale-aware numbers. `quantity` / `remaining_quantity` come from the
+	 * optional extra values, or fall back to the current/remaining for
+	 * quantity-mode missions. `campaign_name` comes from the mission (the
+	 * repository folds it in) or an extra override.
+	 *
+	 * @param Mission                  $mission   Mission.
+	 * @param MissionResult            $result Evaluation result.
+	 * @param array<string, mixed>  $extra  Extra variables.
+	 * @return array<string, string> Placeholder => formatted value.
+	 */
+	public function variables( Mission $mission, MissionResult $result, array $extra = array() ) {
+		$is_money = $this->is_money_mission( $mission );
+
+		$format = function ( $value ) use ( $is_money ) {
+			return $this->format_number( (float) $value, $is_money );
+		};
+
+		$quantity = isset( $extra['quantity'] ) ? $extra['quantity'] : null;
+		$remaining_quantity = isset( $extra['remaining_quantity'] ) ? $extra['remaining_quantity'] : null;
+
+		if ( Mission::MODE_QUANTITY === $mission->calculation_mode() ) {
+			$quantity           = null === $quantity ? $result->current() : $quantity;
+			$remaining_quantity = null === $remaining_quantity ? $result->remaining() : $remaining_quantity;
+		}
+
+		$campaign_name = (string) $mission->campaign_name();
+
+		if ( '' === $campaign_name && isset( $extra['campaign_name'] ) ) {
+			$campaign_name = (string) $extra['campaign_name'];
+		}
+
+		return array(
+			'current'            => $format( $result->current() ),
+			'target'             => $format( $result->target() ),
+			'remaining'          => $format( $result->remaining() ),
+			'percentage'         => (string) number_format_i18n( $result->percentage(), 0 ),
+			'quantity'           => $this->format_number( (float) $quantity, false ),
+			'remaining_quantity' => $this->format_number( (float) $remaining_quantity, false ),
+			'reward'             => $this->reward_label( $mission ),
+			'mission_name'       => $mission->name(),
+			// Legacy alias for {goal_name} templates (see VARIABLES).
+			'goal_name'          => $mission->name(),
+			'campaign_name'      => $campaign_name,
+		);
+	}
+
+	/**
+	 * Substitute the known placeholders in a template.
+	 *
+	 * Unknown placeholders (typos, future variables) are left as-is so a
+	 * template can never render empty tokens the author did not intend.
+	 *
+	 * @param string                $template Template with {placeholders}.
+	 * @param Mission                  $mission     Mission.
+	 * @param MissionResult            $result   Evaluation result.
+	 * @param array<string, mixed>  $extra    Extra variables.
+	 * @return string
+	 */
+	public function render( $template, Mission $mission, MissionResult $result, array $extra = array() ) {
+		$template = (string) $template;
+
+		if ( '' === $template ) {
+			return '';
+		}
+
+		$variables = $this->variables( $mission, $result, $extra );
+
+		// Only the documented VARIABLES set is ever substituted, so a
+		// template can never pick up an undocumented placeholder.
+		$search  = array();
+		$replace = array();
+
+		foreach ( self::VARIABLES as $key ) {
+			if ( ! array_key_exists( $key, $variables ) ) {
+				continue;
+			}
+
+			$search[]  = '{' . $key . '}';
+			$replace[] = (string) $variables[ $key ];
+		}
+
+		return str_replace( $search, $replace, $template );
+	}
+
+	/**
+	 * The localized reward label for a mission.
+	 *
+	 * Value-aware where it reads naturally ("10% discount", "Fixed $20
+	 * off"); falls back to a bare type label for rewards without a value.
+	 *
+	 * @param Mission $mission Mission.
+	 * @return string
+	 */
+	public function reward_label( Mission $mission ) {
+		$type  = $mission->reward_type();
+		$value = $mission->reward_value();
+
+		switch ( $type ) {
+			case 'free_shipping':
+				return __( 'Free shipping', 'faracart' );
+
+			case 'percent_discount':
+				return null === $value
+					? __( 'Percentage discount', 'faracart' )
+					: sprintf(
+						/* translators: %d: discount percentage. */
+						__( '%d%% discount', 'faracart' ),
+						(int) round( (float) $value )
+					);
+
+			case 'fixed_discount':
+				if ( null === $value ) {
+					return __( 'Fixed discount', 'faracart' );
+				}
+
+				return sprintf(
+					/* translators: %s: formatted discount amount. */
+					__( 'Fixed %s off', 'faracart' ),
+					$this->format_number( (float) $value, true )
+				);
+
+			case 'free_gift':
+				return __( 'Free gift', 'faracart' );
+
+			case 'coupon':
+				return __( 'Coupon', 'faracart' );
+
+			default:
+				return '';
+		}
+	}
+
+	/**
+	 * Whether a mission's progress is measured in money.
+	 *
+	 * Delegates to the single source of truth (Mission::is_money_mission) so
+	 * message numbers and widget labels never drift from the payload flag.
+	 *
+	 * @param Mission $mission Mission.
+	 * @return bool
+	 */
+	protected function is_money_mission( Mission $mission ) {
+		return $mission->is_money_mission();
+	}
+
+	/**
+	 * Format a number: currency when money, plain locale number otherwise.
+	 *
+	 * Money values use `wc_price` so the store's price format, position
+	 * and currency symbol apply. The result is plain text (messages and
+	 * reward labels are inserted into the DOM via `textContent`, never
+	 * parsed as HTML), so the symbol's markup must be stripped AND its
+	 * entities decoded — WooCommerce ships symbols like the IRT
+	 * "\u062A\u0648\u0645\u0627\u0646" as an HTML entity
+	 * (`&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;`), which would otherwise
+	 * render to the shopper as literal entity text.
+	 *
+	 * @param float  $value   Number.
+	 * @param bool   $is_money Whether to format as currency.
+	 * @return string
+	 */
+	protected function format_number( $value, $is_money ) {
+		if ( $is_money && function_exists( 'wc_price' ) ) {
+			$args = array();
+
+			// The configured display currency overrides the store currency
+			// for this single wc_price call (never a global change): wc_price
+			// falls back to get_woocommerce_currency() when empty.
+			if ( '' !== $this->currency ) {
+				$args['currency'] = $this->currency;
+			}
+
+			return html_entity_decode(
+				wp_strip_all_tags( wc_price( (float) $value, $args ) ),
+				ENT_QUOTES,
+				'UTF-8'
+			);
+		}
+
+		// Currency without WooCommerce: 2 decimals, locale-aware.
+		$decimals = $is_money ? 2 : 0;
+
+		return (string) number_format_i18n( (float) $value, $decimals );
+	}
+}

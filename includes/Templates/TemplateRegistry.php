@@ -9,12 +9,12 @@ namespace FaraCart\Templates;
 
 use FaraCart\Templates\Campaign\CampaignProgressTemplate;
 use FaraCart\Templates\Campaign\MilestoneChainTemplate;
-use FaraCart\Templates\Goal\Template1;
-use FaraCart\Templates\Goal\Template2;
-use FaraCart\Templates\Goal\Template3;
-use FaraCart\Templates\Goal\Template4;
-use FaraCart\Templates\Goal\Template5;
-use FaraCart\Templates\Goal\Template6;
+use FaraCart\Templates\Mission\Template1;
+use FaraCart\Templates\Mission\Template2;
+use FaraCart\Templates\Mission\Template3;
+use FaraCart\Templates\Mission\Template4;
+use FaraCart\Templates\Mission\Template5;
+use FaraCart\Templates\Mission\Template6;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * Class TemplateRegistry
  *
  * Maps template ids to template classes and resolves them lazily — the
- * same convention as GoalEvaluatorRegistry (Phase 4) and
+ * same convention as MissionEvaluatorRegistry (Phase 4) and
  * RewardApplicatorRegistry (Phase 5). The class map is filterable through
  * `faracart_template_classes`, so a future template (including third-party
  * templates from the Phase 28 developer API) registers by adding an entry
@@ -40,9 +40,9 @@ class TemplateRegistry {
 	 * Default template id => class map.
 	 *
 	 * The six design templates (template-1 … template-6 — the Classic
-	 * Progress Card, Minimal Inline Cart Goal, Circular Progress, Product
-	 * Recommendation + Goal, Compact Floating / Sticky Goal and Premium /
-	 * Elegant E-commerce Style) replace the original Phase 12 Goal
+	 * Progress Card, Minimal Inline Cart Mission, Circular Progress, Product
+	 * Recommendation + Mission, Compact Floating / Sticky Mission and Premium /
+	 * Elegant E-commerce Style) replace the original Phase 12 Mission
 	 * templates (basic, percentage, milestone, card) and the Ring gauge.
 	 * The old ids are no longer registered and are never mapped — a
 	 * persisted old id falls back to the scope default / store-wide
@@ -153,9 +153,9 @@ class TemplateRegistry {
 	}
 
 	/**
-	 * All templates usable in a scope (goal | campaign | 'both' included).
+	 * All templates usable in a scope (mission | campaign | 'both' included).
 	 *
-	 * @param string $scope TemplateEngine::SCOPE_GOAL | SCOPE_CAMPAIGN.
+	 * @param string $scope TemplateEngine::SCOPE_MISSION | SCOPE_CAMPAIGN.
 	 * @return Template[]
 	 */
 	public function for_scope( $scope ) {

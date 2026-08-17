@@ -8,12 +8,12 @@
  * others:
  *
  *  - service wiring from the DI container
- *  - gates: completed / ineligible goals return no suggestions
- *  - sources: manual (goal products), category, cart upsells /
+ *  - gates: completed / ineligible missions return no suggestions
+ *  - sources: manual (mission products), category, cart upsells /
  *    cross-sells / related, best sellers (fallback)
  *  - stock availability filter (out-of-stock excluded)
  *  - cart items never suggested back
- *  - ranking: goal eligibility + price proximity to the remaining amount
+ *  - ranking: mission eligibility + price proximity to the remaining amount
  *  - cap at MAX_SUGGESTIONS, dedupe across sources, ghost ids skipped
  *  - the faracart_suggestions filter
  *
@@ -44,9 +44,9 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Suggestions\SuggestionEngine;
 
 $failures = 0;
@@ -63,8 +63,8 @@ function check( $label, $cond ) {
 	}
 }
 
-function goal( array $data ) {
-	return new Goal( $data );
+function mission( array $data ) {
+	return new Mission( $data );
 }
 
 /**
@@ -164,24 +164,24 @@ $wpdb->query( 'START TRANSACTION' );	try {
 		),
 	) );
 
-	$goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping' ) );
+	$mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping' ) );
 
 	// Gates first.
-	$done = new GoalResult( $goal, 120, 100 );
-	check( 'completed goal → no suggestions', array() === $engine->suggest( $goal, $done, $cart ) );
+	$done = new MissionResult( $mission, 120, 100 );
+	check( 'completed mission → no suggestions', array() === $engine->suggest( $mission, $done, $cart ) );
 
-	$gone = GoalResult::ineligible( $goal, GoalResult::REASON_NO_MATCHING_ITEMS );
-	check( 'ineligible goal → no suggestions', array() === $engine->suggest( $goal, $gone, $cart ) );
+	$gone = MissionResult::ineligible( $mission, MissionResult::REASON_NO_MATCHING_ITEMS );
+	check( 'ineligible mission → no suggestions', array() === $engine->suggest( $mission, $gone, $cart ) );
 
 	// -----------------------------------------------------------------------
-	// 2. Sources + ranking on a progressing goal (remaining 60).
+	// 2. Sources + ranking on a progressing mission (remaining 60).
 	// -----------------------------------------------------------------------
 	echo "\n== 2. Sources & ranking ==\n";
 
-	$result = new GoalResult( $goal, 40, 100 ); // remaining 60
-	$items  = $engine->suggest( $goal, $result, $cart );
+	$result = new MissionResult( $mission, 40, 100 ); // remaining 60
+	$items  = $engine->suggest( $mission, $result, $cart );
 
-	check( 'progressing goal returns suggestions', ! empty( $items ) );
+	check( 'progressing mission returns suggestions', ! empty( $items ) );
 	check( 'suggestions capped at MAX_SUGGESTIONS', count( $items ) <= SuggestionEngine::MAX_SUGGESTIONS );
 
 	$ids = array_map( function ( $item ) {
@@ -219,18 +219,18 @@ $wpdb->query( 'START TRANSACTION' );	try {
 	check( 'upsell item tagged with source', $p_e === (int) $items[0]['id'] && SuggestionEngine::SOURCE_UPSELL === $items[0]['source'] );
 
 	// -----------------------------------------------------------------------
-	// 3. Category goal (empty cart): category products are the pool.
+	// 3. Category mission (empty cart): category products are the pool.
 	// -----------------------------------------------------------------------
-	echo "\n== 3. Category goal ==\n";
+	echo "\n== 3. Category mission ==\n";
 
 	$empty = new CartContext( array( 'subtotal' => 0, 'total' => 0 ) );
-	$cat_goal = goal( array( 'type' => Goal::TYPE_CATEGORY, 'target' => 100, 'categories' => array( $cat10 ) ) );
-	$cat_items = $engine->suggest( $cat_goal, new GoalResult( $cat_goal, 40, 100 ), $empty );
+	$cat_mission = mission( array( 'type' => Mission::TYPE_CATEGORY, 'target' => 100, 'categories' => array( $cat10 ) ) );
+	$cat_items = $engine->suggest( $cat_mission, new MissionResult( $cat_mission, 40, 100 ), $empty );
 	$cat_ids = array_map( function ( $item ) {
 		return (int) $item['id'];
 	}, $cat_items );
 
-	check( 'category goal suggests in-category products', in_array( $p_a, $cat_ids, true ) && in_array( $p_e, $cat_ids, true ) );
+	check( 'category mission suggests in-category products', in_array( $p_a, $cat_ids, true ) && in_array( $p_e, $cat_ids, true ) );
 	check( 'out-of-stock in-category product still excluded', ! in_array( $p_b, $cat_ids, true ) );
 
 	// -----------------------------------------------------------------------
@@ -238,40 +238,40 @@ $wpdb->query( 'START TRANSACTION' );	try {
 	// -----------------------------------------------------------------------
 	echo "\n== 4. Manual & exclusions ==\n";
 
-	$manual_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'products' => array( $p_d ) ) );
-	$manual_items = $engine->suggest( $manual_goal, new GoalResult( $manual_goal, 40, 100 ), $cart );
+	$manual_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'products' => array( $p_d ) ) );
+	$manual_items = $engine->suggest( $manual_mission, new MissionResult( $manual_mission, 40, 100 ), $cart );
 	$manual_ids = array_map( function ( $item ) {
 		return (int) $item['id'];
 	}, $manual_items );
 
 	check( 'explicitly selected product suggested first', isset( $manual_ids[0] ) && $p_d === $manual_ids[0] );
 
-	$excl_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'excluded_products' => array( $p_e ) ) );
-	$excl_items = $engine->suggest( $excl_goal, new GoalResult( $excl_goal, 40, 100 ), $cart );
+	$excl_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'excluded_products' => array( $p_e ) ) );
+	$excl_items = $engine->suggest( $excl_mission, new MissionResult( $excl_mission, 40, 100 ), $cart );
 	$excl_ids = array_map( function ( $item ) {
 		return (int) $item['id'];
 	}, $excl_items );
 	check( 'excluded product never suggested', ! in_array( $p_e, $excl_ids, true ) );
 
 	// -----------------------------------------------------------------------
-	// 5. Quantity goal: no price banding, no throw.
+	// 5. Quantity mission: no price banding, no throw.
 	// -----------------------------------------------------------------------
-	echo "\n== 5. Quantity goal ==\n";
+	echo "\n== 5. Quantity mission ==\n";
 
-	$qty_goal = goal( array( 'type' => Goal::TYPE_QUANTITY, 'target' => 10, 'calculation_mode' => Goal::MODE_QUANTITY ) );
-	$qty_items = $engine->suggest( $qty_goal, new GoalResult( $qty_goal, 4, 10 ), $cart );
-	check( 'quantity goal suggests without price banding', is_array( $qty_items ) && ! empty( $qty_items ) );
+	$qty_mission = mission( array( 'type' => Mission::TYPE_QUANTITY, 'target' => 10, 'calculation_mode' => Mission::MODE_QUANTITY ) );
+	$qty_items = $engine->suggest( $qty_mission, new MissionResult( $qty_mission, 4, 10 ), $cart );
+	check( 'quantity mission suggests without price banding', is_array( $qty_items ) && ! empty( $qty_items ) );
 
 	// -----------------------------------------------------------------------
 	// 6. faracart_suggestions filter.
 	// -----------------------------------------------------------------------
 	echo "\n== 6. Filter ==\n";
 
-	add_filter( 'faracart_suggestions', function ( $items, $filter_goal, $filter_result, $filter_context ) {
+	add_filter( 'faracart_suggestions', function ( $items, $filter_mission, $filter_result, $filter_context ) {
 		return array_slice( $items, 0, 1 ); // keep only the top suggestion
 	}, 10, 4 );
 
-	$filtered = $engine->suggest( $goal, $result, $cart );
+	$filtered = $engine->suggest( $mission, $result, $cart );
 	check( 'faracart_suggestions filter applied', 1 === count( $filtered ) );
 	remove_all_filters( 'faracart_suggestions' );
 } finally {

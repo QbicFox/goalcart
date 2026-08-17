@@ -8,8 +8,8 @@
 namespace FaraCart\Analytics;
 
 use FaraCart\Database\Schema;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Settings\Settings;
 
@@ -20,25 +20,25 @@ defined( 'ABSPATH' ) || exit;
  *
  * Phase 33.5 (Smart Upsell) — the deterministic ranking engine that
  * answers "which products should be recommended to help this customer
- * reach the goal?" with a fully transparent, weighted composite score.
+ * reach the mission?" with a fully transparent, weighted composite score.
  * No LLM/AI: every component is computed from the store's product data,
- * the live cart/goal context and the historical upsell funnel
+ * the live cart/mission context and the historical upsell funnel
  * (P33-25 → P33-36).
  *
  * Pipeline (P33.5):
  *
- *  1. Candidate collection (P33-26) — from the goal's own products, the
- *     goal's categories, the cart items' WooCommerce-endorsed sources
+ *  1. Candidate collection (P33-26) — from the mission's own products, the
+ *     mission's categories, the cart items' WooCommerce-endorsed sources
  *     (upsells / cross-sells / related), products sharing a category or
  *     tag with the cart, best sellers, and products historically
- *     recommended for the goal. Out-of-stock / private / draft /
- *     already-in-cart / goal-excluded products never reach scoring.
+ *     recommended for the mission. Out-of-stock / private / draft /
+ *     already-in-cart / mission-excluded products never reach scoring.
  *  2. Six normalized (0–100) component scores with filterable weights
  *     (`faracart_upsell_weights`, defaults per P33-33):
  *
  *       price_gap  25% — how well the price fits the remaining gap
  *                         (tolerates small overshoots, P33-27/36)
- *       relevance  25% — category/tag/WC-source/goal-eligibility overlap
+ *       relevance  25% — category/tag/WC-source/mission-eligibility overlap
  *                         with the cart (P33-28)
  *       popularity 15% — units sold + rating, bounded (P33-30)
  *       inventory  10% — healthy stock preferred (P33-29)
@@ -65,7 +65,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Graceful degradation (P33-51): no margin data → margin neutral 50 and
  * profit excluded; no historical data → conversion neutral 50; no
- * remaining gap (goal reached / not a money goal) → price gap neutral 50;
+ * remaining gap (mission reached / not a money mission) → price gap neutral 50;
  * no candidates → unavailable with a reason — never a fabricated list.
  *
  * Extensibility (P33-60): the public rank() contract is the frontend
@@ -159,9 +159,9 @@ final class UpsellRanker {
 	protected $costs;
 
 	/**
-	 * Goal repository (goal lookup for eligibility/reward context).
+	 * Mission repository (mission lookup for eligibility/reward context).
 	 *
-	 * @var GoalRepository
+	 * @var MissionRepository
 	 */
 	protected $repository;
 
@@ -198,10 +198,10 @@ final class UpsellRanker {
 	 *
 	 * @param RevenueTracker      $tracker    Revenue event tracker.
 	 * @param RewardCostEstimator $costs      Reward cost / margin estimator.
-	 * @param GoalRepository      $repository Goal repository.
+	 * @param MissionRepository      $repository Mission repository.
 	 * @param Settings|null       $settings   Settings instance.
 	 */
-	public function __construct( RevenueTracker $tracker, RewardCostEstimator $costs, GoalRepository $repository, ?Settings $settings = null ) {
+	public function __construct( RevenueTracker $tracker, RewardCostEstimator $costs, MissionRepository $repository, ?Settings $settings = null ) {
 		$this->tracker    = $tracker;
 		$this->costs      = $costs;
 		$this->repository = $repository;
@@ -247,14 +247,14 @@ final class UpsellRanker {
 	}
 
 	/**
-	 * Rank products that help close the remaining goal gap.
+	 * Rank products that help close the remaining mission gap.
 	 *
-	 * Deterministic: the same cart + goal + catalog always yields the same
+	 * Deterministic: the same cart + mission + catalog always yields the same
 	 * ranking. Never writes anything — the historical events are recorded
 	 * by the tracker endpoint and the order hooks, never here.
 	 *
-	 * @param array<string, mixed> $args Optional: goal_id, goal (an already
-	 *                                   loaded Goal instance), cart_value,
+	 * @param array<string, mixed> $args Optional: mission_id, mission (an already
+	 *                                   loaded Mission instance), cart_value,
 	 *                                   remaining, cart (product ids),
 	 *                                   limit, exclude.
 	 * @return array<string, mixed> The ranking payload.
@@ -277,29 +277,29 @@ final class UpsellRanker {
 			return $unavailable( __( 'Smart upsells are disabled.', 'faracart' ) );
 		}
 
-		// Prefer an already-loaded goal (the unified engine hands its
-		// in-memory Goal over so unpersisted/fresh goals rank correctly);
+		// Prefer an already-loaded mission (the unified engine hands its
+		// in-memory Mission over so unpersisted/fresh missions rank correctly);
 		// fall back to resolving from the repository by id for the REST
 		// endpoint and other id-only callers.
-		$goal = ( isset( $args['goal'] ) && $args['goal'] instanceof Goal )
-			? $args['goal']
-			: $this->resolve_goal( $args );
-		$remaining = $this->remaining( $args, $goal );
+		$mission = ( isset( $args['mission'] ) && $args['mission'] instanceof Mission )
+			? $args['mission']
+			: $this->resolve_mission( $args );
+		$remaining = $this->remaining( $args, $mission );
 
 		// No measurable money gap → nothing to close with priced products.
 		if ( null === $remaining || $remaining <= 0 ) {
 			return $unavailable(
 				null === $remaining
-					? __( 'A goal target or an explicit remaining amount is required to rank upsells.', 'faracart' )
-					: __( 'The goal gap is already closed — no upsells needed.', 'faracart' )
+					? __( 'A mission target or an explicit remaining amount is required to rank upsells.', 'faracart' )
+					: __( 'The mission gap is already closed — no upsells needed.', 'faracart' )
 			);
 		}
 
 		$cart    = $this->cart_ids( $args );
-		$exclude = $this->exclude_ids( $args, $goal );
+		$exclude = $this->exclude_ids( $args, $mission );
 
 		// 1. Candidate products (bounded, deduped, source-annotated).
-		$candidates = $this->candidates( $goal, $cart );
+		$candidates = $this->candidates( $mission, $cart );
 
 		/**
 		 * Filters the candidate product ids before scoring.
@@ -311,7 +311,7 @@ final class UpsellRanker {
 		$candidates = (array) apply_filters( 'faracart_upsell_candidates', $candidates, $args, $this );
 
 		if ( empty( $candidates ) ) {
-			return $unavailable( __( 'No candidate products could be collected for this cart and goal.', 'faracart' ) );
+			return $unavailable( __( 'No candidate products could be collected for this cart and mission.', 'faracart' ) );
 		}
 
 		// 2. Score every candidate.
@@ -326,7 +326,7 @@ final class UpsellRanker {
 				continue;
 			}
 
-			$scored[] = $this->score_product( $product, $candidates[ $id ], $remaining, $cart, $goal );
+			$scored[] = $this->score_product( $product, $candidates[ $id ], $remaining, $cart, $mission );
 		}
 
 		// 3. Rank: score desc; ties → lower price first, then id (deterministic).
@@ -351,7 +351,7 @@ final class UpsellRanker {
 			'available'   => true,
 			'status'      => 'available',
 			'reason'      => null,
-			'context'     => $this->context( $args, $remaining, $goal ),
+			'context'     => $this->context( $args, $remaining, $mission ),
 			'candidates'  => count( $candidates ),
 			'weights'     => $this->score_weights(),
 			'recommendations' => array_slice( $scored, 0, $limit ),
@@ -379,10 +379,10 @@ final class UpsellRanker {
 	 * @param string                  $source    Primary source key.
 	 * @param float|null              $remaining Remaining gap (null = neutral price gap).
 	 * @param int[]                   $cart      Product ids in the cart.
-	 * @param Goal|null               $goal      Goal (optional).
+	 * @param Mission|null               $mission      Mission (optional).
 	 * @return array<string, mixed>
 	 */
-	public function score_product( \WC_Product $product, $source = self::SOURCE_POPULAR, $remaining = null, array $cart = array(), $goal = null ) {
+	public function score_product( \WC_Product $product, $source = self::SOURCE_POPULAR, $remaining = null, array $cart = array(), $mission = null ) {
 		$id    = (int) $product->get_id();
 		$stats = $this->product_stats( $id );
 		$margin = $this->costs->product_margin( $id );
@@ -390,7 +390,7 @@ final class UpsellRanker {
 		$price = '' !== $product->get_price() ? (float) $product->get_price() : null;
 
 		$price_gap = $this->price_gap_score( $price, $remaining );
-		$relevance = $this->relevance_score( $product, $source, $cart, $goal );
+		$relevance = $this->relevance_score( $product, $source, $cart, $mission );
 		$popularity = $this->popularity_score( $product, $stats );
 		$inventory = $this->inventory_score( $product );
 		$margin_score = $this->margin_score( $margin );
@@ -485,13 +485,13 @@ final class UpsellRanker {
 	 * One product's upsell score breakdown + historical stats (Phase 33.5).
 	 *
 	 * The per-product endpoint's data source: the product is scored through
-	 * the same component math as rank() (in the given cart/goal context, or
+	 * the same component math as rank() (in the given cart/mission context, or
 	 * standalone when no context args are passed) and the historical
 	 * upsell_stats row is attached. Null when the product does not exist or
 	 * cannot be ranked (private / draft / out of stock).
 	 *
 	 * @param int                  $product_id Product id.
-	 * @param array<string, mixed> $args       Optional: goal_id, cart_value,
+	 * @param array<string, mixed> $args       Optional: mission_id, cart_value,
 	 *                                         remaining, cart.
 	 * @return array<string, mixed>|null
 	 */
@@ -503,11 +503,11 @@ final class UpsellRanker {
 			return null;
 		}
 
-		$goal      = $this->resolve_goal( $args );
-		$remaining = $this->remaining( $args, $goal );
+		$mission      = $this->resolve_mission( $args );
+		$remaining = $this->remaining( $args, $mission );
 		$cart      = $this->cart_ids( $args );
 
-		return $this->score_product( $product, self::SOURCE_POPULAR, $remaining, $cart, $goal );
+		return $this->score_product( $product, self::SOURCE_POPULAR, $remaining, $cart, $mission );
 	}
 
 	/**
@@ -561,7 +561,7 @@ final class UpsellRanker {
 
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT product_id, MAX(goal_id) AS goal_id FROM {$events}
+				"SELECT product_id, MAX(mission_id) AS mission_id FROM {$events}
 				 WHERE session_id = %s AND event_type IN (%s, %s, %s)
 				   AND product_id IS NOT NULL AND created_at >= %s AND created_at <= %s
 				 GROUP BY product_id",
@@ -584,16 +584,16 @@ final class UpsellRanker {
 				continue;
 			}
 
-			// Carry the goal the recommendation funnel belonged to, so
-			// goal-scoped upsell analytics count the order too.
-			$goal_id = (int) $row['goal_id'];
+			// Carry the mission the recommendation funnel belonged to, so
+			// mission-scoped upsell analytics count the order too.
+			$mission_id = (int) $row['mission_id'];
 
 			$written += $this->tracker->record_upsell(
 				RevenueTracker::EVENT_UPSELL_ORDER,
 				array(
 					'order_id'   => $order_id,
 					'product_id' => $product_id,
-					'goal_id'    => $goal_id > 0 ? $goal_id : 0,
+					'mission_id'    => $mission_id > 0 ? $mission_id : 0,
 					'session_id' => $session_id,
 					'cart_value' => $total,
 				)
@@ -608,55 +608,55 @@ final class UpsellRanker {
 	 *
 	 * @param array<string, mixed> $args      Original args.
 	 * @param float|null           $remaining Resolved remaining gap.
-	 * @param Goal|null            $goal      Resolved goal.
+	 * @param Mission|null            $mission      Resolved mission.
 	 * @return array<string, mixed>
 	 */
-	protected function context( array $args, $remaining = null, $goal = null ) {
+	protected function context( array $args, $remaining = null, $mission = null ) {
 		return array(
-			'goal_id'    => isset( $args['goal_id'] ) ? (int) $args['goal_id'] : 0,
+			'mission_id'    => isset( $args['mission_id'] ) ? (int) $args['mission_id'] : 0,
 			'cart_value' => isset( $args['cart_value'] ) ? round( (float) $args['cart_value'], 4 ) : 0.0,
 			'remaining'  => null !== $remaining ? round( (float) $remaining, 4 ) : null,
 			'cart'       => $this->cart_ids( $args ),
 			'limit'      => isset( $args['limit'] ) ? max( 1, min( 10, (int) $args['limit'] ) ) : self::MAX_RESULTS,
-			'goal_name'  => null !== $goal ? $goal->name() : '',
+			'mission_name'  => null !== $mission ? $mission->name() : '',
 		);
 	}
 
 	/**
-	 * Resolve the goal for a request.
+	 * Resolve the mission for a request.
 	 *
 	 * @param array<string, mixed> $args Request args.
-	 * @return Goal|null
+	 * @return Mission|null
 	 */
-	protected function resolve_goal( array $args ) {
-		if ( empty( $args['goal_id'] ) ) {
+	protected function resolve_mission( array $args ) {
+		if ( empty( $args['mission_id'] ) ) {
 			return null;
 		}
 
-		return $this->repository->find( (int) $args['goal_id'] );
+		return $this->repository->find( (int) $args['mission_id'] );
 	}
 
 	/**
 	 * The remaining money gap to close.
 	 *
-	 * Priority: explicit `remaining` arg → money goal target − cart value
-	 * → null (no gap computable). Non-money goals (quantity / weight /
+	 * Priority: explicit `remaining` arg → money mission target − cart value
+	 * → null (no gap computable). Non-money missions (quantity / weight /
 	 * distinct-quantity) have no money gap, so the price-gap component
 	 * degrades to neutral.
 	 *
 	 * @param array<string, mixed> $args Request args.
-	 * @param Goal|null            $goal Resolved goal.
+	 * @param Mission|null            $mission Resolved mission.
 	 * @return float|null
 	 */
-	protected function remaining( array $args, $goal ) {
+	protected function remaining( array $args, $mission ) {
 		if ( isset( $args['remaining'] ) && is_numeric( $args['remaining'] ) ) {
 			return max( 0.0, (float) $args['remaining'] );
 		}
 
-		if ( null !== $goal && $goal->is_money_goal() ) {
+		if ( null !== $mission && $mission->is_money_mission() ) {
 			$cart_value = isset( $args['cart_value'] ) ? (float) $args['cart_value'] : 0.0;
 
-			return max( 0.0, $goal->target() - $cart_value );
+			return max( 0.0, $mission->target() - $cart_value );
 		}
 
 		return null;
@@ -677,13 +677,13 @@ final class UpsellRanker {
 	}
 
 	/**
-	 * Product ids to exclude (explicit + goal-excluded).
+	 * Product ids to exclude (explicit + mission-excluded).
 	 *
 	 * @param array<string, mixed> $args Request args.
-	 * @param Goal|null            $goal Resolved goal.
+	 * @param Mission|null            $mission Resolved mission.
 	 * @return array<int, true>
 	 */
-	protected function exclude_ids( array $args, $goal ) {
+	protected function exclude_ids( array $args, $mission ) {
 		$exclude = array();
 
 		foreach ( (array) ( isset( $args['exclude'] ) && is_array( $args['exclude'] ) ? $args['exclude'] : array() ) as $id ) {
@@ -694,8 +694,8 @@ final class UpsellRanker {
 			}
 		}
 
-		if ( null !== $goal ) {
-			foreach ( $goal->excluded_products() as $id ) {
+		if ( null !== $mission ) {
+			foreach ( $mission->excluded_products() as $id ) {
 				$exclude[ (int) $id ] = true;
 			}
 		}
@@ -709,10 +709,10 @@ final class UpsellRanker {
 	 * Each id keeps its first (highest-priority) source for the badge and
 	 * the relevance signal. Sources, in priority order:
 	 *
-	 *  1. manual          — the goal's own products (they count toward it)
-	 *  2. historical      — products previously recommended for this goal
-	 *                       (upsell_events funnel for the goal)
-	 *  3. category        — products inside the goal's categories
+	 *  1. manual          — the mission's own products (they count toward it)
+	 *  2. historical      — products previously recommended for this mission
+	 *                       (upsell_events funnel for the mission)
+	 *  3. category        — products inside the mission's categories
 	 *  4. upsell          — the cart items' _upsell_ids
 	 *  5. cross_sell      — the cart items' _crosssell_ids
 	 *  6. related         — wc_get_related_products() of the cart items
@@ -720,11 +720,11 @@ final class UpsellRanker {
 	 *  8. tag_match       — products sharing a tag with the cart
 	 *  9. popular         — best sellers (low-priority filler)
 	 *
-	 * @param Goal|null $goal Goal (optional).
+	 * @param Mission|null $mission Mission (optional).
 	 * @param int[]     $cart Product ids in the cart.
 	 * @return array<int, string> Product id => source key.
 	 */
-	protected function candidates( $goal, array $cart ) {
+	protected function candidates( $mission, array $cart ) {
 		$candidates = array();
 
 		$add = function ( array $ids, $source ) use ( &$candidates ) {
@@ -735,20 +735,20 @@ final class UpsellRanker {
 			}
 		};
 
-		// 1. Manual: the goal's own products count toward it.
-		if ( null !== $goal ) {
-			$add( $goal->products(), self::SOURCE_MANUAL );
+		// 1. Manual: the mission's own products count toward it.
+		if ( null !== $mission ) {
+			$add( $mission->products(), self::SOURCE_MANUAL );
 		}
 
 		// 2. Historical: products the store already recommended for this
-		// goal (its upsell funnel — the P33-35 learning signal).
-		if ( null !== $goal && $goal->id() > 0 ) {
-			$add( $this->historical_ids( $goal->id() ), self::SOURCE_HISTORICAL );
+		// mission (its upsell funnel — the P33-35 learning signal).
+		if ( null !== $mission && $mission->id() > 0 ) {
+			$add( $this->historical_ids( $mission->id() ), self::SOURCE_HISTORICAL );
 		}
 
-		// 3. Category: products inside the goal's categories.
-		if ( null !== $goal && ! empty( $goal->categories() ) ) {
-			$add( $this->taxonomy_product_ids( 'product_cat', $goal->categories() ), self::SOURCE_CATEGORY );
+		// 3. Category: products inside the mission's categories.
+		if ( null !== $mission && ! empty( $mission->categories() ) ) {
+			$add( $this->taxonomy_product_ids( 'product_cat', $mission->categories() ), self::SOURCE_CATEGORY );
 		}
 
 		// 4–6. Cart items' WooCommerce-endorsed sources.
@@ -788,15 +788,15 @@ final class UpsellRanker {
 	}
 
 	/**
-	 * Products historically recommended for a goal (its upsell funnel).
+	 * Products historically recommended for a mission (its upsell funnel).
 	 *
-	 * Reads the raw upsell_events log for the goal — impressions, clicks
+	 * Reads the raw upsell_events log for the mission — impressions, clicks
 	 * and adds are all "shown before" signals — newest first, bounded.
 	 *
-	 * @param int $goal_id Goal id.
+	 * @param int $mission_id Mission id.
 	 * @return int[]
 	 */
-	protected function historical_ids( $goal_id ) {
+	protected function historical_ids( $mission_id ) {
 		global $wpdb;
 
 		$events = Schema::table( 'upsell_events' );
@@ -804,10 +804,10 @@ final class UpsellRanker {
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT product_id FROM {$events}
-				 WHERE goal_id = %d AND event_type IN (%s, %s, %s) AND product_id IS NOT NULL
+				 WHERE mission_id = %d AND event_type IN (%s, %s, %s) AND product_id IS NOT NULL
 				 ORDER BY id DESC
 				 LIMIT 20",
-				(int) $goal_id,
+				(int) $mission_id,
 				RevenueTracker::EVENT_UPSELL_IMPRESSION,
 				RevenueTracker::EVENT_UPSELL_CLICKED,
 				RevenueTracker::EVENT_UPSELL_ADDED
@@ -964,11 +964,11 @@ final class UpsellRanker {
 	}
 
 	/**
-	 * Relevance score (P33-28): how related the product is to the goal
+	 * Relevance score (P33-28): how related the product is to the mission
 	 * and the cart contents.
 	 *
-	 * Signals (additive, capped at 100): goal eligibility (manual
-	 * products +55, counts-toward-goal via its categories +35),
+	 * Signals (additive, capped at 100): mission eligibility (manual
+	 * products +55, counts-toward-mission via its categories +35),
 	 * category overlap with the cart (+30), tag overlap (+20), and the
 	 * WooCommerce-endorsed source trust bonus (upsell/cross-sell/related
 	 * +15). No signals → a low baseline (the product is still a possible
@@ -977,17 +977,17 @@ final class UpsellRanker {
 	 * @param \WC_Product $product Product.
 	 * @param string      $source  Primary source key.
 	 * @param int[]       $cart    Cart product ids.
-	 * @param Goal|null   $goal    Goal.
+	 * @param Mission|null   $mission    Mission.
 	 * @return float 0–100.
 	 */
-	protected function relevance_score( \WC_Product $product, $source, array $cart, $goal ) {
+	protected function relevance_score( \WC_Product $product, $source, array $cart, $mission ) {
 		$score = 0.0;
 		$id    = (int) $product->get_id();
 
-		// Goal eligibility — the strongest relevance signal.
-		if ( null !== $goal && in_array( $id, $goal->products(), true ) ) {
+		// Mission eligibility — the strongest relevance signal.
+		if ( null !== $mission && in_array( $id, $mission->products(), true ) ) {
 			$score += 55.0;
-		} elseif ( null !== $goal && $this->counts_toward_goal( $product, $goal ) ) {
+		} elseif ( null !== $mission && $this->counts_toward_mission( $product, $mission ) ) {
 			$score += 35.0;
 		}
 
@@ -1173,9 +1173,9 @@ final class UpsellRanker {
 		}
 
 		if ( $relevance >= 80.0 ) {
-			$reasons[] = __( 'Highly relevant to the goal and the current cart contents.', 'faracart' );
+			$reasons[] = __( 'Highly relevant to the mission and the current cart contents.', 'faracart' );
 		} elseif ( $relevance >= 40.0 ) {
-			$reasons[] = __( 'Relevant to the goal or the current cart contents.', 'faracart' );
+			$reasons[] = __( 'Relevant to the mission or the current cart contents.', 'faracart' );
 		}
 
 		if ( (float) $product->get_total_sales() > 0 ) {
@@ -1216,7 +1216,7 @@ final class UpsellRanker {
 		}
 
 		if ( empty( $cart ) ) {
-			$reasons[] = __( 'No cart contents provided — relevance scored from the goal only.', 'faracart' );
+			$reasons[] = __( 'No cart contents provided — relevance scored from the mission only.', 'faracart' );
 		}
 
 		return $reasons;
@@ -1230,9 +1230,9 @@ final class UpsellRanker {
 	 */
 	protected function source_label( $source ) {
 		$labels = array(
-			self::SOURCE_MANUAL         => __( 'manually selected for this goal', 'faracart' ),
-			self::SOURCE_HISTORICAL     => __( 'previously recommended for this goal', 'faracart' ),
-			self::SOURCE_CATEGORY       => __( "inside the goal's categories", 'faracart' ),
+			self::SOURCE_MANUAL         => __( 'manually selected for this mission', 'faracart' ),
+			self::SOURCE_HISTORICAL     => __( 'previously recommended for this mission', 'faracart' ),
+			self::SOURCE_CATEGORY       => __( "inside the mission's categories", 'faracart' ),
 			self::SOURCE_UPSELL         => __( 'WooCommerce upsell of a cart item', 'faracart' ),
 			self::SOURCE_CROSS_SELL     => __( 'WooCommerce cross-sell of a cart item', 'faracart' ),
 			self::SOURCE_RELATED        => __( 'related to a cart item', 'faracart' ),
@@ -1245,22 +1245,22 @@ final class UpsellRanker {
 	}
 
 	/**
-	 * Whether the product counts toward the goal (category/product goals).
+	 * Whether the product counts toward the mission (category/product missions).
 	 *
 	 * @param \WC_Product $product Product.
-	 * @param Goal        $goal    Goal.
+	 * @param Mission        $mission    Mission.
 	 * @return bool
 	 */
-	protected function counts_toward_goal( \WC_Product $product, Goal $goal ) {
-		if ( in_array( (int) $product->get_id(), $goal->products(), true ) ) {
+	protected function counts_toward_mission( \WC_Product $product, Mission $mission ) {
+		if ( in_array( (int) $product->get_id(), $mission->products(), true ) ) {
 			return true;
 		}
 
-		if ( empty( $goal->categories() ) ) {
+		if ( empty( $mission->categories() ) ) {
 			return false;
 		}
 
-		return count( array_intersect( array_map( 'intval', $product->get_category_ids() ), $goal->categories() ) ) > 0;
+		return count( array_intersect( array_map( 'intval', $product->get_category_ids() ), $mission->categories() ) ) > 0;
 	}
 
 	/**

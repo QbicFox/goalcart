@@ -9,7 +9,7 @@
  *    completion rate (completed/views) and purchase rate
  *    (purchased/completed — null when there is no completion denominator)
  *  - purchase states: no purchases / one / multiple purchases; multiple
- *    goals; direct; assisted; mixed direct + assisted (distinct order
+ *    missions; direct; assisted; mixed direct + assisted (distinct order
  *    counting — never double counted); direct+direct incremental split;
  *    duplicate order events (idempotent re-attribution)
  *  - profit states: complete cost data (available), no cost data
@@ -23,14 +23,14 @@
  *  - profit metadata: stable reason codes (§39), profit_details building
  *    blocks (§12), human reason strings
  *  - date filtering: every metric respects the same from/to window
- *  - goal filtering: goal_id, goal_ids, campaign_id and reward_type
+ *  - mission filtering: mission_id, mission_ids, campaign_id and reward_type
  *    resolution on the /analytics purchase summary; product_id is
  *    unsupported in attribution → null (never a fabricated number)
  *  - API: the legacy /analytics summary is extended with the purchase /
  *    profit fields while every pre-existing field stays intact (§37)
  *
  * All writes happen inside a single database transaction that is rolled
- * back; absence of residue is asserted afterwards. Fixtures use goal ids
+ * back; absence of residue is asserted afterwards. Fixtures use mission ids
  * 501–512, sessions s01–s20 and products with the P2. prefix, so they
  * never collide with live store traffic or other suites' residue.
  *
@@ -67,7 +67,7 @@ use FaraCart\Analytics\RevenueTracker;
 use FaraCart\Analytics\RewardCostEstimator;
 use FaraCart\Database\Installer;
 use FaraCart\Database\Schema;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\REST\AnalyticsController;
 use FaraCart\Settings\Settings;
 
@@ -99,14 +99,14 @@ $engine    = $container->get( AttributionEngine::class );
 $tracker   = $container->get( RevenueTracker::class );
 $costs     = $container->get( RewardCostEstimator::class );
 $settings  = $container->get( Settings::class );
-$goals_repo = $container->get( GoalRepository::class );
+$missions_repo = $container->get( MissionRepository::class );
 $repo      = $container->get( RevenueRepository::class );
 $analytics_ctrl = $container->get( AnalyticsController::class );
 $wpdb      = $GLOBALS['wpdb'];
 
 $revenue_table = Schema::table( 'revenue_events' );
-$attrib_table  = Schema::table( 'goal_attribution' );
-$goals_table   = Schema::table( 'goals' );
+$attrib_table  = Schema::table( 'mission_attribution' );
+$missions_table   = Schema::table( 'missions' );
 $campaigns_table = Schema::table( 'campaigns' );
 
 // ---------------------------------------------------------------------------
@@ -142,7 +142,7 @@ echo "\n== 2. Purchase & profit metrics (rolled back) ==\n";
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	// --- Fixture goals (must exist for the event/attribution FKs). ---
+	// --- Fixture missions (must exist for the event/attribution FKs). ---
 	foreach ( array(
 		501 => array( 'percent_discount', 10, 50 ),  // full-cost profit scenario
 		502 => array( 'free_shipping', null, null ), // no-cost scenario
@@ -150,16 +150,16 @@ try {
 		504 => array( 'percent_discount', 10, 50 ),  // zero-profit scenario
 		505 => array( 'percent_discount', 10, 50 ),  // negative-profit scenario
 		506 => array( 'percent_discount', 10, 50 ),  // completed but never purchased
-		507 => array( 'percent_discount', 10, 50 ),  // direct goal of a mixed order
-		508 => array( 'free_shipping', null, null ), // assisted goal of the same order
+		507 => array( 'percent_discount', 10, 50 ),  // direct mission of a mixed order
+		508 => array( 'free_shipping', null, null ), // assisted mission of the same order
 		509 => array( 'percent_discount', 10, 50 ),  // direct+direct split (campaign)
 		510 => array( 'percent_discount', 10, 50 ),  // direct+direct split (campaign)
 		511 => array( 'percent_discount', 10, 50 ),  // date-filtering scenario
 		512 => array( 'percent_discount', 10, 50 ),  // no completions → null purchase rate
-	) as $goal_id => $reward ) {
-		$wpdb->insert( $goals_table, array(
-			'id'               => $goal_id,
-			'name'             => 'P2 purchase goal ' . $goal_id,
+	) as $mission_id => $reward ) {
+		$wpdb->insert( $missions_table, array(
+			'id'               => $mission_id,
+			'name'             => 'P2 purchase mission ' . $mission_id,
 			'status'           => 'active',
 			'type'             => 'amount',
 			'target'           => 1000000,
@@ -171,7 +171,7 @@ try {
 		) );
 	}
 
-	// A campaign that owns goals 509 + 510 (for campaign-filter resolution).
+	// A campaign that owns missions 509 + 510 (for campaign-filter resolution).
 	$wpdb->insert( $campaigns_table, array(
 		'name'       => 'P2 campaign',
 		'status'     => 'active',
@@ -179,8 +179,8 @@ try {
 		'updated_at' => current_time( 'mysql' ),
 	) );
 	$campaign_id = (int) $wpdb->insert_id;
-	$wpdb->update( $goals_table, array( 'campaign_id' => $campaign_id ), array( 'id' => 509 ) );
-	$wpdb->update( $goals_table, array( 'campaign_id' => $campaign_id ), array( 'id' => 510 ) );
+	$wpdb->update( $missions_table, array( 'campaign_id' => $campaign_id ), array( 'id' => 509 ) );
+	$wpdb->update( $missions_table, array( 'campaign_id' => $campaign_id ), array( 'id' => 510 ) );
 
 	// --- Fixture products: costed + plain. ---
 	$make_product = function ( $title, $price, $cost = null ) {
@@ -212,11 +212,11 @@ try {
 		return sprintf( '%02d', $i ) . str_repeat( 'ab', 15 );
 	};
 
-	$record = function ( $type, $goal_id, $sess, $cart ) use ( $tracker ) {
+	$record = function ( $type, $mission_id, $sess, $cart ) use ( $tracker ) {
 		$tracker->record( $type, array(
-			'goal_id'     => $goal_id,
+			'mission_id'     => $mission_id,
 			'cart_value'  => $cart,
-			'goal_target' => 1000000,
+			'mission_target' => 1000000,
 			'session_id'  => $sess,
 		) );
 	};
@@ -247,7 +247,7 @@ try {
 	// tracking off (so creating an order never self-attributes through the
 	// payment/status hooks), exactly like the attribution-test fixtures.
 
-	// --- Scenario A: full cost data (goal 501). ---
+	// --- Scenario A: full cost data (mission 501). ---
 	$s1 = $session( 1 );
 	$record( 'goal_view', 501, $s1, 600 );
 	$record( 'goal_progress', 501, $s1, 800 );
@@ -256,12 +256,12 @@ try {
 	$record( 'goal_view', 501, $s2, 1500 );
 	$record( 'goal_completed', 501, $s2, 2000 );
 
-	// --- Scenario B: no cost data (goal 502). ---
+	// --- Scenario B: no cost data (mission 502). ---
 	$s3 = $session( 3 );
 	$record( 'goal_view', 502, $s3, 500 );
 	$record( 'goal_completed', 502, $s3, 1000 );
 
-	// --- Scenario C: partial cost data (goal 503). ---
+	// --- Scenario C: partial cost data (mission 503). ---
 	$s4 = $session( 4 );
 	$record( 'goal_view', 503, $s4, 600 );
 	$record( 'goal_completed', 503, $s4, 1000 );
@@ -269,46 +269,46 @@ try {
 	$record( 'goal_view', 503, $s5, 600 );
 	$record( 'goal_completed', 503, $s5, 1000 );
 
-	// --- Scenario D: zero profit (goal 504). ---
+	// --- Scenario D: zero profit (mission 504). ---
 	$s6 = $session( 6 );
 	$record( 'goal_view', 504, $s6, 500 );
 	$record( 'goal_completed', 504, $s6, 1000 );
 
-	// --- Scenario E: negative profit (goal 505). ---
+	// --- Scenario E: negative profit (mission 505). ---
 	$s7 = $session( 7 );
 	$record( 'goal_view', 505, $s7, 500 );
 	$record( 'goal_completed', 505, $s7, 1000 );
 
-	// --- Scenario F: completed but never purchased (goal 506). ---
+	// --- Scenario F: completed but never purchased (mission 506). ---
 	$s8 = $session( 8 );
 	$record( 'goal_view', 506, $s8, 400 );
 	$s9 = $session( 9 );
 	$record( 'goal_view', 506, $s9, 500 );
 	$record( 'goal_completed', 506, $s9, 900 );
 
-	// --- Scenario G: mixed direct + assisted (goals 507/508). ---
+	// --- Scenario G: mixed direct + assisted (missions 507/508). ---
 	$s11 = $session( 11 );
 	$record( 'goal_view', 507, $s11, 700 );
 	$record( 'goal_progress', 507, $s11, 900 );
 	$record( 'goal_view', 508, $s11, 700 );
 
-	// --- Scenario H: direct+direct incremental split (goals 509/510). ---
+	// --- Scenario H: direct+direct incremental split (missions 509/510). ---
 	$s12 = $session( 12 );
 	$record( 'goal_view', 509, $s12, 600 );
 	$record( 'goal_progress', 509, $s12, 800 );
 	$record( 'goal_view', 510, $s12, 600 );
 	$record( 'goal_progress', 510, $s12, 800 );
 
-	// --- Scenario I: date filtering (goal 511, backdated). ---
+	// --- Scenario I: date filtering (mission 511, backdated). ---
 	$s13 = $session( 13 );
 	$record( 'goal_view', 511, $s13, 500 );
 	$record( 'goal_completed', 511, $s13, 1000 );
 
-	// --- Scenario J: no completions → null purchase rate (goal 512). ---
+	// --- Scenario J: no completions → null purchase rate (mission 512). ---
 	$s10 = $session( 10 );
 	$record( 'goal_view', 512, $s10, 300 );
 
-	// Backdate the goal-511 events so the funnel respects the January window
+	// Backdate the mission-511 events so the funnel respects the January window
 	// (the tracker stamps current_time; the engine reads stored dates).
 	$wpdb->update(
 		$revenue_table,
@@ -352,7 +352,7 @@ try {
 	// -----------------------------------------------------------------------
 	echo "\n== 3. Funnel & purchase metrics ==\n";
 
-	$funnel = $engine->funnel( array( 'goal_id' => 501 ) );
+	$funnel = $engine->funnel( array( 'mission_id' => 501 ) );
 	check( 'funnel views = 2', 2 === $funnel['views'] );
 	check( 'funnel progressed = 1', 1 === $funnel['progressed'] );
 	check( 'funnel completed = 2', 2 === $funnel['completed'] );
@@ -361,20 +361,20 @@ try {
 	check( 'purchase rate = purchased/completed', close( 1.0, $funnel['conversion_rate'] ) );
 
 	// Completed but never purchased → purchase rate 0% (a real denominator).
-	$funnel_506 = $engine->funnel( array( 'goal_id' => 506 ) );
+	$funnel_506 = $engine->funnel( array( 'mission_id' => 506 ) );
 	check( '506 views = 2', 2 === $funnel_506['views'] );
 	check( '506 completed = 1', 1 === $funnel_506['completed'] );
 	check( '506 purchased = 0', 0 === $funnel_506['converted'] );
 	check( '506 purchase rate = 0 (not null)', 0.0 === $funnel_506['conversion_rate'] );
 
 	// No completions at all → purchase rate is null (no denominator, "—").
-	$funnel_512 = $engine->funnel( array( 'goal_id' => 512 ) );
+	$funnel_512 = $engine->funnel( array( 'mission_id' => 512 ) );
 	check( '512 has no completions', 0 === $funnel_512['completed'] );
 	check( '512 purchase rate is null (no denominator)', null === $funnel_512['conversion_rate'] );
 
 	// Distinct order counting: one order with direct + assisted rows counts
-	// once across both goals.
-	$mixed = $engine->funnel( array( 'goal_ids' => array( 507, 508 ) ) );
+	// once across both missions.
+	$mixed = $engine->funnel( array( 'mission_ids' => array( 507, 508 ) ) );
 	check( 'mixed funnel views = 2', 2 === $mixed['views'] );
 	check( 'mixed funnel purchased = 1 distinct order', 1 === $mixed['converted'] );
 
@@ -392,10 +392,10 @@ try {
 
 	// Full cost data → available, reward cost included (regression: the
 	// pre-computed reward cost used to be zeroed inside the profit model).
-	$summary_a = $engine->attribution_summary( array( 'goal_id' => 501 ) );
+	$summary_a = $engine->attribution_summary( array( 'mission_id' => 501 ) );
 	check( 'A purchased orders = 2', 2 === $summary_a['orders'] );
-	check( 'A attributed sales = direct incremental', close( 900, $summary_a['goal_driven_revenue'] ) );
-	check( 'A reward cost from completed goals', close( 100, $summary_a['reward_cost'] ) );
+	check( 'A attributed sales = direct incremental', close( 900, $summary_a['mission_driven_revenue'] ) );
+	check( 'A reward cost from completed missions', close( 100, $summary_a['reward_cost'] ) );
 	check( 'A profit available', true === $summary_a['profit_available'] );
 	check( 'A profit = incremental×margin − reward − shipping', close( 207.5, $summary_a['profit_impact'] ) );
 	check( 'A reason code = available', 'available' === $summary_a['profit_reason_code'] );
@@ -406,7 +406,7 @@ try {
 	check( 'A cost coverage 2/2 = 100%', 2 === $summary_a['cost_coverage']['attributed_orders'] && 2 === $summary_a['cost_coverage']['orders_with_cost_data'] && close( 100, $summary_a['cost_coverage']['coverage_pct'] ) );
 
 	// No cost data → unavailable with the stable code + human reason.
-	$summary_b = $engine->attribution_summary( array( 'goal_id' => 502 ) );
+	$summary_b = $engine->attribution_summary( array( 'mission_id' => 502 ) );
 	check( 'B purchased orders = 1', 1 === $summary_b['orders'] );
 	check( 'B profit unavailable', false === $summary_b['profit_available'] && null === $summary_b['profit_impact'] );
 	check( 'B reason code = missing_product_cost', 'missing_product_cost' === $summary_b['profit_reason_code'] );
@@ -415,58 +415,58 @@ try {
 	check( 'B details margin null', null === $summary_b['profit_details']['margin_pct'] );
 
 	// Partial cost data → profit still computed, flagged incomplete.
-	$summary_c = $engine->attribution_summary( array( 'goal_id' => 503 ) );
+	$summary_c = $engine->attribution_summary( array( 'mission_id' => 503 ) );
 	check( 'C purchased orders = 2', 2 === $summary_c['orders'] );
 	check( 'C reason code = incomplete_product_cost', 'incomplete_product_cost' === $summary_c['profit_reason_code'] );
 	check( 'C profit still computed (1 of 2 orders costed)', true === $summary_c['profit_available'] && close( 180, $summary_c['profit_impact'] ) );
 	check( 'C coverage 1/2 = 50%', 1 === $summary_c['cost_coverage']['orders_with_cost_data'] && close( 50, $summary_c['cost_coverage']['coverage_pct'] ) );
 
 	// Zero profit is 0 — never treated as unavailable.
-	$summary_d = $engine->attribution_summary( array( 'goal_id' => 504 ) );
+	$summary_d = $engine->attribution_summary( array( 'mission_id' => 504 ) );
 	check( 'D profit = 0 (zero, not unavailable)', true === $summary_d['profit_available'] && null !== $summary_d['profit_impact'] && close( 0, $summary_d['profit_impact'] ) );
 	check( 'D reason code = available', 'available' === $summary_d['profit_reason_code'] );
 
 	// Negative profit is supported and never hidden.
-	$summary_e = $engine->attribution_summary( array( 'goal_id' => 505 ) );
+	$summary_e = $engine->attribution_summary( array( 'mission_id' => 505 ) );
 	check( 'E profit negative', true === $summary_e['profit_available'] && close( -200, $summary_e['profit_impact'] ) );
 
 	// -----------------------------------------------------------------------
-	// 5. Goal-level purchase metrics + mixed/split attribution
+	// 5. Mission-level purchase metrics + mixed/split attribution
 	// -----------------------------------------------------------------------
-	echo "\n== 5. Goal-level metrics ==\n";
+	echo "\n== 5. Mission-level metrics ==\n";
 
-	$g507 = $engine->goal_metrics( 507 );
-	check( 'goal 507 purchased = 1', 1 === $g507['converted'] );
-	check( 'goal 507 attributed sales = 350', close( 350, $g507['attributed_revenue'] ) );
+	$g507 = $engine->mission_metrics( 507 );
+	check( 'mission 507 purchased = 1', 1 === $g507['converted'] );
+	check( 'mission 507 attributed sales = 350', close( 350, $g507['attributed_revenue'] ) );
 	// 507 was progressed but never completed → purchase rate has no
 	// denominator and reads "—" (Improvement.md §18), never 0% or 100%.
-	check( 'goal 507 purchase rate null (no completions)', null === $g507['conversion_rate'] );
+	check( 'mission 507 purchase rate null (no completions)', null === $g507['conversion_rate'] );
 
-	$g508 = $engine->goal_metrics( 508 );
-	check( 'goal 508 purchased = 1 (order associated)', 1 === $g508['converted'] );
-	check( 'goal 508 assisted revenue = 0 (direct precedence)', close( 0, $g508['assisted_revenue'] ) );
-	check( 'goal 508 goal metrics carry reason code', isset( $g508['profit_reason_code'] ) && '' !== $g508['profit_reason_code'] );
+	$g508 = $engine->mission_metrics( 508 );
+	check( 'mission 508 purchased = 1 (order associated)', 1 === $g508['converted'] );
+	check( 'mission 508 assisted revenue = 0 (direct precedence)', close( 0, $g508['assisted_revenue'] ) );
+	check( 'mission 508 mission metrics carry reason code', isset( $g508['profit_reason_code'] ) && '' !== $g508['profit_reason_code'] );
 
-	// Direct+direct incremental split across goals 509/510.
-	$split = $engine->attribution_summary( array( 'goal_ids' => array( 509, 510 ) ) );
-	check( 'split attributed sales = full increment', close( 400, $split['goal_driven_revenue'] ) );
+	// Direct+direct incremental split across missions 509/510.
+	$split = $engine->attribution_summary( array( 'mission_ids' => array( 509, 510 ) ) );
+	check( 'split attributed sales = full increment', close( 400, $split['mission_driven_revenue'] ) );
 	check( 'split purchased orders = 1', 1 === $split['orders'] );
-	check( 'goal 509 share = 200', close( 200, $engine->attribution_summary( array( 'goal_id' => 509 ) )['goal_driven_revenue'] ) );
-	check( 'goal 510 share = 200', close( 200, $engine->attribution_summary( array( 'goal_id' => 510 ) )['goal_driven_revenue'] ) );
+	check( 'mission 509 share = 200', close( 200, $engine->attribution_summary( array( 'mission_id' => 509 ) )['mission_driven_revenue'] ) );
+	check( 'mission 510 share = 200', close( 200, $engine->attribution_summary( array( 'mission_id' => 510 ) )['mission_driven_revenue'] ) );
 
 	// -----------------------------------------------------------------------
 	// 6. Date filtering
 	// -----------------------------------------------------------------------
 	echo "\n== 6. Date filtering ==\n";
 
-	$jan = $engine->funnel( array( 'goal_id' => 511, 'from' => '2026-01-01', 'to' => '2026-01-31' ) );
+	$jan = $engine->funnel( array( 'mission_id' => 511, 'from' => '2026-01-01', 'to' => '2026-01-31' ) );
 	check( 'January window sees the backdated funnel', 1 === $jan['views'] && 1 === $jan['completed'] && 1 === $jan['converted'] );
 
 	$today = date( 'Y-m-d' );
-	$now_window = $engine->funnel( array( 'goal_id' => 511, 'from' => $today, 'to' => $today ) );
+	$now_window = $engine->funnel( array( 'mission_id' => 511, 'from' => $today, 'to' => $today ) );
 	check( 'today window excludes the January order', 0 === $now_window['views'] && 0 === $now_window['converted'] );
 
-	$summary_a_window = $engine->attribution_summary( array( 'goal_id' => 501, 'from' => $today, 'to' => $today ) );
+	$summary_a_window = $engine->attribution_summary( array( 'mission_id' => 501, 'from' => $today, 'to' => $today ) );
 	check( 'summary respects the same date range', 2 === $summary_a_window['orders'] && close( 207.5, $summary_a_window['profit_impact'] ) );
 
 	// -----------------------------------------------------------------------
@@ -475,7 +475,7 @@ try {
 	echo "\n== 7. /analytics extension ==\n";
 
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
-	$req->set_param( 'goal_id', 501 );
+	$req->set_param( 'mission_id', 501 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$data = $resp->get_data();
 
@@ -511,7 +511,7 @@ try {
 	check( 'product filter → profit_available false', false === $sum['profit_available'] );
 	check( 'product filter → legacy impressions still present', array_key_exists( 'impressions', $sum ) );
 
-	// Campaign filter resolves to the campaign's goal ids (509 + 510).
+	// Campaign filter resolves to the campaign's mission ids (509 + 510).
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'campaign_id', $campaign_id );
 	$resp = $analytics_ctrl->handle_get( $req );
@@ -519,7 +519,7 @@ try {
 	check( 'campaign filter → attributed_sales 400', close( 400, $sum['attributed_sales'] ) );
 	check( 'campaign filter → purchased_orders 1', 1 === (int) $sum['purchased_orders'] );
 
-	// Reward filter resolves to the goals carrying that reward type.
+	// Reward filter resolves to the missions carrying that reward type.
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'reward', 'free_shipping' );
 	$resp = $analytics_ctrl->handle_get( $req );
@@ -527,22 +527,22 @@ try {
 	check( 'reward filter → attributed_sales 500', close( 500, $sum['attributed_sales'] ) );
 	check( 'reward filter → purchased_orders 2', 2 === (int) $sum['purchased_orders'] );
 
-	// A reward filter that resolves to no goals → honest empty summary.
+	// A reward filter that resolves to no missions → honest empty summary.
 	$none = $repo->purchase_summary( array( 'reward_type' => 'free_gift' ) );
-	check( 'reward filter resolving to no goals → 0 orders', 0 === (int) $none['orders'] );
-	check( 'reward filter resolving to no goals → insufficient_data', 'insufficient_data' === $none['profit_reason_code'] );
+	check( 'reward filter resolving to no missions → 0 orders', 0 === (int) $none['orders'] );
+	check( 'reward filter resolving to no missions → insufficient_data', 'insufficient_data' === $none['profit_reason_code'] );
 
-	// goal_ids filter passes through to the attribution layer.
-	$multi = $repo->purchase_summary( array( 'goal_ids' => array( 501, 502 ) ) );
-	check( 'goal_ids summary → purchased 3', 3 === (int) $multi['orders'] );
-	check( 'goal_ids summary → attributed sales 1400', close( 1400, $multi['goal_driven_revenue'] ) );
+	// mission_ids filter passes through to the attribution layer.
+	$multi = $repo->purchase_summary( array( 'mission_ids' => array( 501, 502 ) ) );
+	check( 'mission_ids summary → purchased 3', 3 === (int) $multi['orders'] );
+	check( 'mission_ids summary → attributed sales 1400', close( 1400, $multi['mission_driven_revenue'] ) );
 
-	// A filter that resolves to no goals → honest empty summary, never a
+	// A filter that resolves to no missions → honest empty summary, never a
 	// store-wide fallback for the wrong filter.
-	$empty = $repo->purchase_summary( array( 'goal_id' => 999999 ) );
-	check( 'unmatched goal filter → 0 orders', 0 === (int) $empty['orders'] );
-	check( 'unmatched goal filter → reason code insufficient_data', 'insufficient_data' === $empty['profit_reason_code'] );
-	check( 'unmatched goal filter → profit unavailable', false === $empty['profit_available'] && null === $empty['profit_impact'] );
+	$empty = $repo->purchase_summary( array( 'mission_id' => 999999 ) );
+	check( 'unmatched mission filter → 0 orders', 0 === (int) $empty['orders'] );
+	check( 'unmatched mission filter → reason code insufficient_data', 'insufficient_data' === $empty['profit_reason_code'] );
+	check( 'unmatched mission filter → profit unavailable', false === $empty['profit_available'] && null === $empty['profit_impact'] );
 
 	$wpdb->query( 'ROLLBACK' );
 } catch ( \Throwable $e ) {
@@ -564,8 +564,8 @@ $revenue_after = (int) $wpdb->get_var(
 );
 check( 'no test events remain after rollback', 0 === $revenue_after );
 
-$goals_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table} WHERE id BETWEEN 501 AND 512" );
-check( 'no test goals remain after rollback', 0 === $goals_after );
+$missions_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table} WHERE id BETWEEN 501 AND 512" );
+check( 'no test missions remain after rollback', 0 === $missions_after );
 
 $campaigns_after = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$campaigns_table} WHERE name = %s", 'P2 campaign' ) );
 check( 'no test campaign remains after rollback', 0 === $campaigns_after );

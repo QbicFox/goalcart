@@ -4,20 +4,20 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
 
-import type { GoalTemplateProps } from '../registry';
+import type { MissionTemplateProps } from '../registry';
 import { bool, num, str } from '../utils';
-import { GoalBar, GoalIcon, goalPercent, remainingLabel } from './goalShared';
+import { MissionBar, MissionIcon, missionPercent, remainingLabel } from './missionShared';
 
 /**
- * Template 2 — Minimal Inline Cart Goal (Concept 02).
+ * Template 2 — Minimal Inline Cart Mission (Concept 02).
  *
- * A very compact inline strip: small icon, goal title, remaining amount,
+ * A very compact inline strip: small icon, mission title, remaining amount,
  * a slim progress bar and a compact CTA. Designed to sit between the cart
  * content and the totals, so its vertical height stays small — it must
  * never become a normal large card.
  */
-export default function Template2Renderer({ goal, currency, settings, animation }: GoalTemplateProps) {
-  const percent = goalPercent(goal);
+export default function Template2Renderer({ mission, currency, settings, animation }: MissionTemplateProps) {
+  const percent = missionPercent(mission);
   const accent = str(settings, 'accent', '#6366f1');
   const text = str(settings, 'text', '#312e81');
   const muted = str(settings, 'secondaryText', '#6366f1');
@@ -25,8 +25,8 @@ export default function Template2Renderer({ goal, currency, settings, animation 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
       {bool(settings, 'showIcon', true) && (
-        <GoalIcon
-          goal={goal}
+        <MissionIcon
+          mission={mission}
           FallbackIcon={LocalShippingIcon}
           color={accent}
           size={20}
@@ -46,31 +46,31 @@ export default function Template2Renderer({ goal, currency, settings, animation 
                 whiteSpace: 'nowrap',
               }}
             >
-              {goal.goal_name}
+              {mission.mission_name}
             </Typography>
           )}
-          {bool(settings, 'showRemaining', true) && !goal.completed && (
+          {bool(settings, 'showRemaining', true) && !mission.completed && (
             <Typography sx={{ fontSize: 12, fontWeight: 700, color: muted, whiteSpace: 'nowrap' }}>
-              {remainingLabel(goal, currency)}
+              {remainingLabel(mission, currency)}
             </Typography>
           )}
-          {goal.completed && (
+          {mission.completed && (
             <Typography sx={{ fontSize: 12, fontWeight: 700, color: '#16a34a', whiteSpace: 'nowrap' }}>
               {__('Completed', 'faracart')} ✓
             </Typography>
           )}
         </Box>
-        <GoalBar
+        <MissionBar
           percent={percent}
-          completed={goal.completed}
+          completed={mission.completed}
           animation={animation}
-          track={goal.completed ? '#bbf7d0' : '#c7d2fe'}
+          track={mission.completed ? '#bbf7d0' : '#c7d2fe'}
           height={num(settings, 'barHeight', 6)}
-          color={goal.completed ? '#16a34a' : accent}
+          color={mission.completed ? '#16a34a' : accent}
         />
       </Box>
 
-      {bool(settings, 'showCta', true) && !goal.completed && (
+      {bool(settings, 'showCta', true) && !mission.completed && (
         <Button
           size="small"
           variant="contained"

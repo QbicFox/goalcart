@@ -14,7 +14,7 @@ import type {
 import { PRESET_PERCENTS } from './types';
 import type { PreviewControlsValue, PreviewPreset } from './types';
 
-/** What a target needs to derive per goal/campaign preview. */
+/** What a target needs to derive per mission/campaign preview. */
 export interface PreviewDerivation {
   /** Amount/quantity a state preset fraction should simulate. */
   targetsFor: (fraction: number) => { amount: number; quantity: number };
@@ -39,7 +39,7 @@ export interface PreviewState {
 }
 
 interface UsePreviewOptions<T> {
-  /** The goal/campaign being previewed (its values change as the form edits). */
+  /** The mission/campaign being previewed (its values change as the form edits). */
   target: T;
   /** Derive the preview behavior from the current target. */
   derive: (target: T) => PreviewDerivation;
@@ -110,14 +110,14 @@ export function usePreview<T>({ target, derive }: UsePreviewOptions<T>): Preview
   const previewQuery = useQuery({
     // The scope-default template ids ride on the key: when the global /
     // default template changes (Appearance page), the preview refetches
-    // so a goal or campaign without its own template reflects the new
+    // so a mission or campaign without its own template reflects the new
     // default — never a stale one.
     queryKey: [
       'preview',
       debounced.payloadKey,
       debounced.amount,
       debounced.quantity,
-      templatesQuery.data?.defaults?.goal ?? '',
+      templatesQuery.data?.defaults?.mission ?? '',
       templatesQuery.data?.defaults?.campaign ?? '',
     ],
     queryFn: () => {

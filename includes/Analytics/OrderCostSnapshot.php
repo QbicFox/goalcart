@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * The read side lives in RewardCostEstimator (order_item_unit_cost() /
  * order_margin_stats()), which prefers the snapshot over the live
- * product cost — so estimated profit, goal economics and the upsell
+ * product cost — so estimated profit, mission economics and the upsell
  * margin scorer all inherit historical stability automatically.
  *
  * The hook (`woocommerce_checkout_create_order_line_item`) fires for

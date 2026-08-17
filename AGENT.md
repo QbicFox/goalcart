@@ -2,7 +2,7 @@
 
 **Document Type:** Execution Roadmap  
 **Language:** English  
-**Primary Goal:** Build a production-ready WooCommerce plugin that increases Average Order Value (AOV) by showing cart goals, progress bars, rewards, milestones, and smart product suggestions.  
+**Primary Mission:** Build a production-ready WooCommerce plugin that increases Average Order Value (AOV) by showing cart missions, progress bars, rewards, milestones, and smart product suggestions.  
 **Reference Plugin:** `/home/qbicfox/public_html/woo-app/wp-content/plugins/wooinsights`  
 **Admin UI:** React + TypeScript  
 **Implementation Model:** Phase-by-phase, task-by-task execution by an AI coding agent.
@@ -274,7 +274,7 @@ Define FaraCart as a revenue-optimization engine, not merely a progress-bar widg
 
 ## Core Product Concepts
 
-### Goal
+### Mission
 
 A target the customer can reach.
 
@@ -291,7 +291,7 @@ Examples:
 
 ### Reward
 
-The benefit unlocked by completing a goal.
+The benefit unlocked by completing a mission.
 
 Examples:
 
@@ -304,25 +304,25 @@ Examples:
 
 ### Campaign
 
-A collection of goals active under specific conditions and schedules.
+A collection of missions active under specific conditions and schedules.
 
 ### Progress
 
-Current state relative to a goal.
+Current state relative to a mission.
 
 ### Suggestion
 
-A product recommendation designed to help the customer reach a goal.
+A product recommendation designed to help the customer reach a mission.
 
 ## Initial MVP Scope
 
 Implement:
 
-- amount goal
-- quantity goal
-- category goal
-- multiple goals
-- milestone goals
+- amount mission
+- quantity mission
+- category mission
+- multiple missions
+- milestone missions
 - free shipping reward
 - percentage discount
 - fixed discount
@@ -399,7 +399,7 @@ Design a maintainable persistence layer.
 
 ## Recommended Domain Entities
 
-### Goal
+### Mission
 
 Fields should support:
 
@@ -426,14 +426,14 @@ Support:
 - start date
 - end date
 - priority
-- goals
+- missions
 - display rules
 
 ### Analytics Event
 
 Support:
 
-- goal/campaign ID
+- mission/campaign ID
 - event type
 - session/customer identifier where appropriate
 - cart/order context
@@ -451,7 +451,7 @@ Support:
 
 ---
 
-# Phase 4 — Goal Engine
+# Phase 4 — Mission Engine
 
 **Phase Weight:** 7%  
 **Phase Progress:** 100%  
@@ -472,16 +472,16 @@ The engine should conceptually support:
 ```text
 CartContext
     ↓
-GoalEvaluator
+MissionEvaluator
     ↓
-GoalResult
+MissionResult
     ↓
 ProgressCalculator
 ```
 
-## Goal Types
+## Mission Types
 
-### Amount Goal
+### Amount Mission
 
 Examples:
 
@@ -490,31 +490,31 @@ Examples:
 - discounted subtotal
 - configurable calculation basis
 
-### Quantity Goal
+### Quantity Mission
 
 Total item quantity.
 
-### Distinct Quantity Goal
+### Distinct Quantity Mission
 
 Number of unique products/SKUs.
 
-### Category Goal
+### Category Mission
 
 Amount or quantity restricted to one or more categories.
 
-### Product Goal
+### Product Mission
 
 Specific products or variations.
 
-### Weight Goal
+### Weight Mission
 
 Based on WooCommerce product/cart weight.
 
-### Composite Goal
+### Composite Mission
 
 AND/OR combinations of conditions.
 
-## Goal Result
+## Mission Result
 
 Every evaluator should produce a consistent result containing concepts such as:
 
@@ -562,7 +562,7 @@ Phase 5: ████████████████████ 100%
 
 ## Objective
 
-Decouple rewards from goal calculation.
+Decouple rewards from mission calculation.
 
 ## Reward Types
 
@@ -615,7 +615,7 @@ Prevent:
 
 - duplicate rewards
 - reward loops
-- reward persistence after goal becomes incomplete
+- reward persistence after mission becomes incomplete
 - invalid coupon application
 - unintended stacking
 - reward application to excluded products
@@ -623,7 +623,7 @@ Prevent:
 ### Free gift reward bugs (Phase 5 bug fix)
 
 Three free-gift defects were fixed in the reward engine (`RewardEngine`,
-`FreeGiftApplicator`) — no goal/reward calculation semantics changed:
+`FreeGiftApplicator`) — no mission/reward calculation semantics changed:
 
 - **Gift quantity is now locked to 1 on every path (Bug A).** Root cause:
   the classic cart-page display lock (`woocommerce_cart_item_quantity`)
@@ -635,25 +635,25 @@ Three free-gift defects were fixed in the reward engine (`RewardEngine`,
   funnel through it — and a `woocommerce_store_api_product_quantity_editable`
   filter marks gift lines quantity-fixed so the Blocks cart renders a
   fixed “1” instead of an editable stepper.
-- **Gifts are now removed when the granting goal stops qualifying (Bug
+- **Gifts are now removed when the granting mission stops qualifying (Bug
   B).** Root cause: `reconcile_gifts()` only revoked session-tracked
   gifts, so any divergence between the session and the cart (session
   expiry, restored persistent cart) left a stale gift forever. Removal is
   now a two-path sweep: the pre-existing session-driven loop (covers
-  goals that vanish from `active_goals()` — deactivation/expiry) plus a
-  cart-scan that revokes goal-marked lines whose goal was evaluated this
+  missions that vanish from `active_missions()` — deactivation/expiry) plus a
+  cart-scan that revokes mission-marked lines whose mission was evaluated this
   pass but is no longer desired (or carries a different product). The
-  scan is scoped to evaluated goals so nested totals passes (WC fires
+  scan is scoped to evaluated missions so nested totals passes (WC fires
   `calculate_totals` from `woocommerce_add_to_cart` mid-reconcile) and
   stale caches can never sweep a valid gift; customer-added lines of the
-  same product (no goal marker) always survive. Selectable (choose-mode)
+  same product (no mission marker) always survive. Selectable (choose-mode)
   choices are recovered from the cart when the session record is lost.
 - **Selectable (choose) mode works (Bug C).** Root cause:
-  `FreeGiftApplicator::apply()` treated any line for the goal as
+  `FreeGiftApplicator::apply()` treated any line for the mission as
   idempotent regardless of product, so re-selecting a candidate reported
   success without replacing the old gift. `apply()` is now product-aware
   and `add_chosen_gift()` swaps the previous selection before adding —
-  exactly one gift line per goal, re-selection replaces rather than
+  exactly one gift line per mission, re-selection replaces rather than
   duplicates, and losing eligibility revokes the chosen gift (the picker
   re-prompts on the next completion).
 - **Removal permission is now per mode.** The gift add-mode is stamped on
@@ -661,7 +661,7 @@ Three free-gift defects were fixed in the reward engine (`RewardEngine`,
   lines); the remove link is hidden only for mandatory (automatic) gifts
   — selectable (choose-mode) gifts keep theirs (their removal is
   respected server-side; mandatory removal is rejected by re-adding
-  while the goal still grants, which is also the Blocks-cart
+  while the mission still grants, which is also the Blocks-cart
   enforcement). Legacy unstamped lines fall back to a repository lookup,
   then conservative mandatory.
 
@@ -673,12 +673,12 @@ still pass.
 
 ### Gift add-mode surface (Phase 5 / Phase 32 change)
 
-The `optional` gift add mode was removed from `gift_add_mode`. The Goal
+The `optional` gift add mode was removed from `gift_add_mode`. The Mission
 Builder's gift-mode select now offers only `automatic` (silently add the
 single configured gift — mandatory, non-removable) and `choose` (shopper
 picks one gift from the `gift_products` list); `Reward::GIFT_OPTIONAL`
 and the `'optional'` union member were deleted and `docs/rewards.md`
-updated. Legacy goals that still store `gift_add_mode = 'optional'`
+updated. Legacy missions that still store `gift_add_mode = 'optional'`
 normalize to `automatic` at the `Reward` model boundary
 (`Reward::__construct`), so the value can never surface in the UI, the
 REST payloads, or the engine again and their gifts behave as mandatory
@@ -722,7 +722,7 @@ Create a single reliable source of truth for current cart state.
 
 ## Cart Context
 
-Create a normalized context containing only information required by the Goal Engine.
+Create a normalized context containing only information required by the Mission Engine.
 
 Avoid querying products repeatedly.
 
@@ -759,12 +759,12 @@ Expose a clean API to the React admin and frontend components.
 
 Endpoints for:
 
-- goals list
-- goal details
-- create goal
-- update goal
-- delete goal
-- duplicate goal
+- missions list
+- mission details
+- create mission
+- update mission
+- delete mission
+- duplicate mission
 - campaigns
 - settings
 - analytics
@@ -838,7 +838,7 @@ Initial navigation:
 
 ```text
 Dashboard
-Goals
+Missions
 Campaigns
 Analytics
 Settings
@@ -849,7 +849,7 @@ Follow the exact visual/structural conventions of the reference plugin wherever 
 
 ---
 
-# Phase 9 — Goal Management UI
+# Phase 9 — Mission Management UI
 
 **Phase Weight:** 4%  
 **Phase Progress:** 100%  
@@ -861,9 +861,9 @@ Phase 9: ████████████████████ 100%
 
 ## Objective
 
-Create a professional Goal CRUD experience.
+Create a professional Mission CRUD experience.
 
-## Goal List
+## Mission List
 
 Columns:
 
@@ -885,7 +885,7 @@ Actions:
 - delete
 - preview
 
-## Goal Builder
+## Mission Builder
 
 Sections:
 
@@ -895,7 +895,7 @@ Sections:
 - internal description
 - status
 
-### Goal Type
+### Mission Type
 
 - amount
 - quantity
@@ -947,7 +947,7 @@ Phase 10: ████████████████████ 100%
 
 ## Objective
 
-Allow multiple goals to work as a campaign.
+Allow multiple missions to work as a campaign.
 
 Example:
 
@@ -963,7 +963,7 @@ Campaign: Summer Sale
 ## Features
 
 - campaign CRUD
-- goal ordering
+- mission ordering
 - milestone ordering
 - activation
 - scheduling
@@ -997,20 +997,20 @@ Conceptually:
 
 ```text
 FaraCart
-├── GoalContainer
+├── MissionContainer
 ├── ProgressBar
-├── GoalMessage
-├── GoalMilestones
+├── MissionMessage
+├── MissionMilestones
 ├── RewardStatus
 ├── SuggestionList
-└── StickyGoalBar
+└── StickyMissionBar
 ```
 
 Each card body renders through the Phase 12 template engine: the
-progress payload carries every goal's resolved template + settings, so
+progress payload carries every mission's resolved template + settings, so
 the JS renders exactly what the engine resolved. Campaigns with a
 campaign template render their milestone group as one connected chain
-instead of per-goal cards.
+instead of per-mission cards.
 
 ## Display Locations
 
@@ -1042,7 +1042,7 @@ one 700 ms follow-up after the session write lands; a supersede guard
 (epoch + abort of the in-flight XHR) stops a stale response from
 overwriting fresher progress; a subtle `faracart-widget--updating` dim
 (never a blank/flash) shows while a cart-change refresh is in flight.
-Purely presentational wiring — no change to goal/reward calculation,
+Purely presentational wiring — no change to mission/reward calculation,
 REST, or caching (`performance_caching` was already keyed by the cart
 snapshot). Verified: `node --check`, `php -l` and
 `tests/frontend-test.php` (98 checks) all pass.
@@ -1065,26 +1065,26 @@ The fixed Phase 12 template list was replaced by a **pluggable template
 engine** — a registration, not a rewrite, for future templates. Every
 template implements the `Template` contract
 (`includes/Templates/Template.php`): a stable `id` (persisted, never
-renamed), translated `label` + `description`, a `scope` (goal | campaign
+renamed), translated `label` + `description`, a `scope` (mission | campaign
 | both), a settings `schema` (field type, default, validation rules,
 label, group) and a `version`. Templates register through
 `TemplateRegistry` (lazy, filterable via the
 `faracart_template_classes` class map — the same convention as
-`GoalEvaluatorRegistry` / `RewardApplicatorRegistry`), so adding a fifth
-Goal template or a second Campaign template is one class + one filter
+`MissionEvaluatorRegistry` / `RewardApplicatorRegistry`), so adding a fifth
+Mission template or a second Campaign template is one class + one filter
 entry — no changes to the Settings UI, the builders, the REST layer or
 the preview system.
 
-Templates are scoped **independently for Goals and Campaigns**: the four
-originals below are the built-in Goal templates; `milestone_chain` is
+Templates are scoped **independently for Missions and Campaigns**: the four
+originals below are the built-in Mission templates; `milestone_chain` is
 the first Campaign template (the campaign renders as a connected
-milestone ladder instead of per-goal cards). The backend is the source
+milestone ladder instead of per-mission cards). The backend is the source
 of truth for which templates exist and their schemas (`GET
 /faracart/v1/templates`); the React app only supplies the rendering
 components, keyed by the same ids
 (`admin-app/src/templates/registry.tsx`).
 
-## Templates (built-in Goal templates)
+## Templates (built-in Mission templates)
 
 ### Basic
 
@@ -1121,17 +1121,17 @@ A configurable card containing:
 ## Resolution & settings
 
 `TemplateEngine` resolves the effective template + settings for every
-goal and campaign — identically for the live storefront and the Phase 15
+mission and campaign — identically for the live storefront and the Phase 15
 preview:
 
 1. **item override** — `display_settings.template_id` +
    `template_settings` (campaigns: `display_rules`),
 2. **scope default** — `template_defaults[scope]` + the stored
    per-template default appearance `template_settings[scope][template_id]`,
-3. **store-wide fallback** (goals only) — `frontend_template` + the
+3. **store-wide fallback** (missions only) — `frontend_template` + the
    `frontend_*` appearance tokens,
-4. **hardcoded fallback** — `template-1` for goals; a campaign without a
-   template renders per-goal cards (the pre-engine behavior).
+4. **hardcoded fallback** — `template-1` for missions; a campaign without a
+   template renders per-mission cards (the pre-engine behavior).
 
 A stored `template_id` that is no longer registered (an old Phase 12 id
 such as `card`, or a removed template) falls back to the scope default
@@ -1140,18 +1140,18 @@ template. Every settings value is sanitized server-side against the
 template's schema (colors, ranges, enums, tag-free CSS, unknown keys
 dropped); the settings form is generated generically from the schema
 (`admin-app/src/templates/SchemaForm.tsx`), so a new template
-automatically gets a working settings UI. Goals and Campaigns save
+automatically gets a working settings UI. Missions and Campaigns save
 endpoints validate `template_id` + `template_settings` server-side.
 
 ### Template settings presentation (UI refinement of P12/P18)
 
 Purely presentational: the Appearance screen's two-card layout (image-radio
-picker + one accordion per template) was replaced by a Goal/Campaign tab
+picker + one accordion per template) was replaced by a Mission/Campaign tab
 bar with a single per-tab template dropdown. Each tab lists only that
 scope's registered templates by name (sourced from the same
 `GET /faracart/v1/templates` payload), defaults to the scope's current
 default template, and mounts only the selected template's live preview +
-schema-driven appearance panel (the Goal/Campaign Builder override
+schema-driven appearance panel (the Mission/Campaign Builder override
 screens already used the equivalent dropdown + panel pattern). No change
 to the template contract, registry, storage shape, REST payloads or
 validation; save semantics (`template_defaults` + `template_settings`,
@@ -1160,19 +1160,19 @@ divergence-only persistence) are byte-identical to before.
 ### Campaign preview fix (Appearance page)
 
 Bug fix in the same presentational layer: the Appearance page's campaign
-live-preview showed three plain goal cards instead of the selected
+live-preview showed three plain mission cards instead of the selected
 campaign template (milestone chain / campaign progress). The sample
 milestones were built with `campaign_id: 0` while the sample campaign
 carries `campaign_id: 999`, so `PreviewWidget`'s grouping never joined
 them into the campaign and the campaign renderer was never mounted.
 The page now stamps the sample campaign's id onto its sample milestones
-(`campaign_id: campaign.campaign_id`). The campaign/Goal preview dialogs
+(`campaign_id: campaign.campaign_id`). The campaign/Mission preview dialogs
 render the same way once the campaign group reaches `PreviewWidget`; the
 Campaign dialog additionally synthesizes the campaign group itself
 (campaign id + name + the forced template id + settings) when a template
 is forced in the dialog, so the chosen campaign template (e.g. the
 milestone chain) renders even for a campaign that has no template
-configured — the goal-card `templateOverride` path cannot express a
+configured — the mission-card `templateOverride` path cannot express a
 campaign-scope template. `tests/frontend-test.php` gained source-scan
 guards for both.
 
@@ -1204,7 +1204,7 @@ Support relevant variables such as:
 {quantity}
 {remaining_quantity}
 {reward}
-{goal_name}
+{mission_name}
 {campaign_name}
 ```
 
@@ -1254,7 +1254,7 @@ Turn FaraCart into an actual revenue optimization feature.
 Initial ranking can consider:
 
 1. stock availability
-2. goal eligibility
+2. mission eligibility
 3. price proximity to remaining amount
 4. product relevance
 5. manual priority
@@ -1348,7 +1348,7 @@ At minimum:
 - completions
 - completion rate
 - average cart value
-- revenue associated with completed goals
+- revenue associated with completed missions
 - suggestion CTR
 - suggestion add-to-cart rate
 
@@ -1372,20 +1372,20 @@ Phase 17: ████████████████████ 100%
 
 Display:
 
-- total goal impressions
-- completed goals
+- total mission impressions
+- completed missions
 - completion rate
 - revenue influenced
 - AOV
 - top campaigns
-- top goals
+- top missions
 - top suggested products
 
 ## Filters
 
 - date range
 - campaign
-- goal
+- mission
 - reward
 - product/category where applicable
 
@@ -1409,7 +1409,7 @@ Phase 18: ████████████████████ 100%
 
 - enable/disable
 - currency display
-- default goal behavior
+- default mission behavior
 - calculation mode
 
 ## Frontend
@@ -1420,7 +1420,7 @@ Phase 18: ████████████████████ 100%
 - mobile behavior
 - sticky bar
 
-## Goal Calculation
+## Mission Calculation
 
 - tax inclusion
 - discount inclusion
@@ -1555,7 +1555,7 @@ All four areas were audited and verified end-to-end by the new
   neither error nor widen results — verified), the analytics date-range
   clamp caps any trend window at 366 days, and the schema hygiene audit
   found that **dbDelta cannot add indexes to existing tables**: the
-  composite analytics keys (`goal_event`, `campaign_event`) declared in the
+  composite analytics keys (`mission_event`, `campaign_event`) declared in the
   schema were missing on upgraded installs. `Schema::indexes()` now
   centralizes the index set and `Installer::maybe_add_indexes()` applies
   missing keys idempotently (the foreign-key pattern); DB version bumped to
@@ -1615,7 +1615,7 @@ Phase 23: ████████████████████ 100%
 ## WooCommerce Frontend
 
 - avoid expensive calculations on every render
-- cache goal evaluation within a request
+- cache mission evaluation within a request
 - avoid repeated product queries
 - avoid repeated database calls
 - update only changed UI fragments
@@ -1669,7 +1669,7 @@ Test:
 Test:
 
 - progress rendering
-- goal builder
+- mission builder
 - validation
 - API loading
 - error states
@@ -1683,15 +1683,15 @@ Scenarios:
 1. Empty cart.
 2. Add product.
 3. Progress updates.
-4. Goal completion.
+4. Mission completion.
 5. Reward activation.
 6. Remove product.
-7. Goal becomes incomplete.
+7. Mission becomes incomplete.
 8. Coupon changes total.
 9. Shipping changes.
 10. Guest checkout.
 11. Logged-in checkout.
-12. Multiple goals.
+12. Multiple missions.
 13. Milestone progression.
 14. Product suggestion click.
 15. Mobile rendering.
@@ -1707,7 +1707,7 @@ The agent must explicitly test:
 - cart total one unit above target
 - target = 0
 - empty cart
-- product deleted after goal creation
+- product deleted after mission creation
 - category deleted
 - reward product out of stock
 - reward product deleted
@@ -1715,7 +1715,7 @@ The agent must explicitly test:
 - campaign not started
 - overlapping campaigns
 - overlapping rewards
-- conflicting goals
+- conflicting missions
 - duplicate rewards
 - multiple tabs
 - AJAX race conditions
@@ -1741,8 +1741,8 @@ The agent must explicitly test:
 Phase 26: ████████████████████ 100%
 ```
 
-When multiple goals/campaigns are active, the plugin behaves deterministically.
-Implemented in `includes/Goals/ConflictResolver.php`, the single authoritative
+When multiple missions/campaigns are active, the plugin behaves deterministically.
+Implemented in `includes/Missions/ConflictResolver.php`, the single authoritative
 rule shared by the live cart (`RewardEngine::sync_cart()`) and the display paths
 (`FrontendController` / `PreviewController`), so the reward granted and the
 reward displayed can never drift.
@@ -1750,25 +1750,25 @@ reward displayed can never drift.
 Support (all implemented, documented in `docs/conflicts.md`):
 
 - **priority** — deterministic order `COALESCE(campaigns.priority, 10) ASC,
-  goals.priority ASC, goals.id ASC`; campaign priority outranks any goal
-  inside it, standalone goals compete at campaign priority 10.
-- **mutually exclusive goals** — `goals.exclusive` (DB `0.3.0`): a completed
-  exclusive goal suppresses every lower-priority completed goal, resolved
+  missions.priority ASC, missions.id ASC`; campaign priority outranks any mission
+  inside it, standalone missions compete at campaign priority 10.
+- **mutually exclusive missions** — `missions.exclusive` (DB `0.3.0`): a completed
+  exclusive mission suppresses every lower-priority completed mission, resolved
   before mode selection so no mode can undo it.
 - **cumulative rewards** — the default `conflict_resolution` mode: every
-  completed goal grants, subject to the existing per-reward stacking rules
+  completed mission grants, subject to the existing per-reward stacking rules
   (exactly the pre-Phase-26 behavior).
 - **best reward** — only the highest-value reward grants (`not_best`):
   computed discount amount on the live cart when available, deterministic
   static score otherwise, ties broken by priority then id.
-- **first matching goal** — only the first completed goal in priority order
+- **first matching mission** — only the first completed mission in priority order
   grants (`not_first`).
 - **campaign priority** — campaigns are the primary sort key for resolution.
 
 The admin UI communicates the behavior everywhere: Settings → General
-Conflict resolution picker, goal builder → Priority & conflicts (priority +
-Exclusive toggle), Goals list Exclusive chip, campaign priority in the
-campaign builder, and a "Blocked — …" conflict chip in the goal/campaign
+Conflict resolution picker, mission builder → Priority & conflicts (priority +
+Exclusive toggle), Missions list Exclusive chip, campaign priority in the
+campaign builder, and a "Blocked — …" conflict chip in the mission/campaign
 preview; the storefront renders a suppressed reward as locked and tracks
 `goal_completed` instead of `reward_activated` for it.
 
@@ -1831,14 +1831,14 @@ Provide documented hooks/actions/filters.
 Examples conceptually:
 
 ```text
-goal_cart_before_evaluate
-goal_cart_after_evaluate
-goal_cart_goal_completed
-goal_cart_reward_activated
-goal_cart_before_render
-goal_cart_after_render
-goal_cart_suggestions
-goal_cart_calculation_context
+mission_cart_before_evaluate
+mission_cart_after_evaluate
+mission_cart_mission_completed
+mission_cart_reward_activated
+mission_cart_before_render
+mission_cart_after_render
+mission_cart_suggestions
+mission_cart_calculation_context
 ```
 
 Exact naming must follow the plugin's namespace and conventions.
@@ -1852,7 +1852,7 @@ Create:
 ```text
 docs/
 ├── architecture.md
-├── goals.md
+├── missions.md
 ├── rewards.md
 ├── campaigns.md
 ├── frontend.md
@@ -1961,9 +1961,9 @@ After MVP stability, implement:
 - campaign templates ✅
 - advanced conditional rules ✅
 - customer roles ✅
-- first-order goals ✅
-- VIP goals ✅
-- shipping-zone goals ✅
+- first-order missions ✅
+- VIP missions ✅
+- shipping-zone missions ✅
 - brand/tag/attribute conditions ✅
 - scheduled campaigns ✅
 - celebration animations ✅
@@ -1972,7 +1972,7 @@ After MVP stability, implement:
 
 ## Objective
 
-Turn the MVP into a competitive V2: customer- and context-aware goals,
+Turn the MVP into a competitive V2: customer- and context-aware missions,
 shopper-chosen gifts, deadline urgency (countdowns), celebration
 moments, richer campaign presentation and smarter suggestions.
 
@@ -2000,7 +2000,7 @@ checks — new `live_cart()` public-access checks for the guest, logged-in
 and pre-init states) plus container-wiring guards in
 `tests/reward-test.php` (124 checks).
 
-**Countdown** — goals and campaign groups ship a `countdown_end` ISO
+**Countdown** — missions and campaign groups ship a `countdown_end` ISO
 timestamp; the storefront runs a single global ticker that rewrites
 `[data-faracart-end]` readouts every second (locale-aware digits). Gated
 by the `frontend_countdown` setting; the sticky bar has its own
@@ -2013,17 +2013,17 @@ one progress readout with a milestone counter. Registered in
 `TemplateRegistry` alongside `milestone_chain`.
 
 **Advanced conditional rules / customer roles / customer state** — the
-Goal model now carries `customer_roles`, `customer_state`, `first_order`,
+Mission model now carries `customer_roles`, `customer_state`, `first_order`,
 `vip` (+ `vip_min_spend` / `vip_min_orders`), `shipping_zones`,
 `cart_coupons`, `cart_min_items`, and recurring `schedule_days` /
-`schedule_start_time` / `schedule_end_time`. `GoalEngine::conditions_reason()`
+`schedule_start_time` / `schedule_end_time`. `MissionEngine::conditions_reason()`
 checks them against the CartContext snapshot (user id, guest flag, applied
 coupons, shipping zone id, item count) with first-order/VIP customer
-history via public WC helpers. New GoalResult reasons:
+history via public WC helpers. New MissionResult reasons:
 `customer_conditions`, `first_order_only`, `vip_only`, `shipping_zone`,
 `cart_conditions`.
 
-**Brand/tag/attribute conditions** — three new goal types
+**Brand/tag/attribute conditions** — three new mission types
 (`tag` / `attribute` / `brand`) evaluated by `TagEvaluator`,
 `AttributeEvaluator` and `BrandEvaluator` against per-item tags and
 attribute taxonomies preloaded by `CartIntegration` in the same batched
@@ -2032,11 +2032,11 @@ way as categories. Search endpoints: `/search/tags`, `/search/attributes`,
 
 **Scheduled campaigns** — campaigns fold recurring day/time rules from
 `display_rules.schedule_days / schedule_start_time / schedule_end_time`
-onto milestones that lack their own (`GoalRepository::fold_campaign()`),
+onto milestones that lack their own (`MissionRepository::fold_campaign()`),
 so one window schedules every milestone. The Campaign Builder gained a
 Recurring schedule section.
 
-**Celebration animations** — a one-per-goal-per-session confetti burst +
+**Celebration animations** — a one-per-mission-per-session confetti burst +
 card pulse (`celebrate()`), gated by the `frontend_celebrate` setting.
 
 **Advanced sticky bar** — position (bottom/top), behavior
@@ -2050,7 +2050,7 @@ weighting price proximity vs. popularity (sales/rating) data.
 
 ## Definition of Done
 
-- New goal types evaluate correctly with the Phase 32 conditions
+- New mission types evaluate correctly with the Phase 32 conditions
   (`tests/phase32-test.php`: 54 checks).
 - Free-gift choose mode is configured, persisted and reconciled.
 - Countdown / celebration / sticky / ranking surfaces are settings-driven.
@@ -2077,12 +2077,12 @@ Phase 33: ████████████████████ 100%
 Measure:
 
 - incremental cart value
-- goal-driven revenue
+- mission-driven revenue
 - AOV change
 - reward cost
 - estimated profit impact
 
-## Smart Goal Recommendation
+## Smart Mission Recommendation
 
 Use store data to recommend thresholds.
 
@@ -2114,10 +2114,10 @@ AI features are optional and must not become a dependency for the core plugin.
 Potential features:
 
 - generate campaign copy
-- recommend goal thresholds
+- recommend mission thresholds
 - recommend rewards
 - recommend products
-- analyze goal performance
+- analyze mission performance
 - suggest campaign improvements
 
 Core FaraCart functionality must work without AI.
@@ -2167,7 +2167,7 @@ Check:
 
 ### Product
 
-- goals
+- missions
 - rewards
 - campaigns
 - progress
@@ -2261,8 +2261,8 @@ This is the authoritative task-level progress register. Each task is represented
 | P03-T03 | 3 | Database Rules | 33.33% | [x] | 100% | 1.00% |
 | P04-T01 | 4 | Objective | 20.00% | [x] | 100% | 1.40% |
 | P04-T02 | 4 | Architecture | 20.00% | [x] | 100% | 1.40% |
-| P04-T03 | 4 | Goal Types | 20.00% | [x] | 100% | 1.40% |
-| P04-T04 | 4 | Goal Result | 20.00% | [x] | 100% | 1.40% |
+| P04-T03 | 4 | Mission Types | 20.00% | [x] | 100% | 1.40% |
+| P04-T04 | 4 | Mission Result | 20.00% | [x] | 100% | 1.40% |
 | P04-T05 | 4 | Edge Cases | 20.00% | [x] | 100% | 1.40% |
 | P05-T01 | 5 | Objective | 33.33% | [x] | 100% | 1.6667% |
 | P05-T02 | 5 | Reward Types | 33.33% | [x] | 100% | 1.6667% |
@@ -2279,8 +2279,8 @@ This is the authoritative task-level progress register. Each task is represented
 | P08-T02 | 8 | Required | 33.33% | [x] | 100% | 1.3333% |
 | P08-T03 | 8 | Admin Pages | 33.33% | [x] | 100% | 1.3333% |
 | P09-T01 | 9 | Objective | 33.33% | [x] | 100% | 1.3333% |
-| P09-T02 | 9 | Goal List | 33.33% | [x] | 100% | 1.3333% |
-| P09-T03 | 9 | Goal Builder | 33.33% | [x] | 100% | 1.3333% |
+| P09-T02 | 9 | Mission List | 33.33% | [x] | 100% | 1.3333% |
+| P09-T03 | 9 | Mission Builder | 33.33% | [x] | 100% | 1.3333% |
 | P10-T01 | 10 | Objective | 50.00% | [x] | 100% | 1.00% |
 | P10-T02 | 10 | Features | 50.00% | [x] | 100% | 1.00% |
 | P11-T01 | 11 | Objective | 33.33% | [x] | 100% | 1.3333% |
@@ -2309,7 +2309,7 @@ This is the authoritative task-level progress register. Each task is represented
 | P17-T03 | 17 | Charts | 33.33% | [x] | 100% | 0.6667% |
 | P18-T01 | 18 | General | 20.00% | [x] | 100% | 0.40% |
 | P18-T02 | 18 | Frontend | 20.00% | [x] | 100% | 0.40% |
-| P18-T03 | 18 | Goal Calculation | 20.00% | [x] | 100% | 0.40% |
+| P18-T03 | 18 | Mission Calculation | 20.00% | [x] | 100% | 0.40% |
 | P18-T04 | 18 | Performance | 20.00% | [x] | 100% | 0.40% |
 | P18-T05 | 18 | Advanced | 20.00% | [x] | 100% | 0.40% |
 | P19-T01 | 19 | Must Test | 50.00% | [x] | 100% | 1.00% |
@@ -2323,7 +2323,7 @@ This is the authoritative task-level progress register. Each task is represented
 | P23-T03 | 23 | Admin | 33.33% | [x] | 100% | 1.00% |
 | P26-T01 | 26 | Objective & Deterministic Order | 25.00% | [x] | 100% | 0.50% |
 | P26-T02 | 26 | Resolution Modes (cumulative / best / first) | 25.00% | [x] | 100% | 0.50% |
-| P26-T03 | 26 | Mutually Exclusive Goals | 25.00% | [x] | 100% | 0.50% |
+| P26-T03 | 26 | Mutually Exclusive Missions | 25.00% | [x] | 100% | 0.50% |
 | P26-T04 | 26 | Admin UI Communication | 25.00% | [x] | 100% | 0.50% |
 | P27-T01 | 27 | WordPress Translation Functions & Text Domain | 25.00% | [x] | 100% | 0.25% |
 | P27-T02 | 27 | POT Generation & Build Pipeline | 25.00% | [x] | 100% | 0.25% |
@@ -2342,9 +2342,9 @@ This is the authoritative task-level progress register. Each task is represented
 | P32-T03 | 32 | Campaign templates | 7.69% | [x] | 100% | 0.2308% |
 | P32-T04 | 32 | Advanced conditional rules | 7.69% | [x] | 100% | 0.2308% |
 | P32-T05 | 32 | Customer roles | 7.69% | [x] | 100% | 0.2308% |
-| P32-T06 | 32 | First-order goals | 7.69% | [x] | 100% | 0.2308% |
-| P32-T07 | 32 | VIP goals | 7.69% | [x] | 100% | 0.2308% |
-| P32-T08 | 32 | Shipping-zone goals | 7.69% | [x] | 100% | 0.2308% |
+| P32-T06 | 32 | First-order missions | 7.69% | [x] | 100% | 0.2308% |
+| P32-T07 | 32 | VIP missions | 7.69% | [x] | 100% | 0.2308% |
+| P32-T08 | 32 | Shipping-zone missions | 7.69% | [x] | 100% | 0.2308% |
 | P32-T09 | 32 | Brand/tag/attribute conditions | 7.69% | [x] | 100% | 0.2308% |
 | P32-T10 | 32 | Scheduled campaigns | 7.69% | [x] | 100% | 0.2308% |
 | P32-T11 | 32 | Celebration animations | 7.69% | [x] | 100% | 0.2308% |
@@ -2353,12 +2353,12 @@ This is the authoritative task-level progress register. Each task is represented
 | P33-T01 | 33 | 33.1 Analytics Foundation | 12.50% | [x] | 100% | 0.3750% |
 | P33-T02 | 33 | 33.2 Revenue Attribution | 12.50% | [x] | 100% | 0.3750% |
 | P33-T03 | 33 | 33.3 Aggregation & Performance | 12.50% | [x] | 100% | 0.3750% |
-| P33-T04 | 33 | 33.4 Smart Goal Recommendation | 12.50% | [x] | 100% | 0.3750% |
+| P33-T04 | 33 | 33.4 Smart Mission Recommendation | 12.50% | [x] | 100% | 0.3750% |
 | P33-T05 | 33 | 33.5 Smart Upsell | 12.50% | [x] | 100% | 0.3750% |
 | P33-T06 | 33 | 33.6 React Admin | 12.50% | [x] | 100% | 0.3750% |
 | P33-T07 | 33 | 33.7 Frontend Upsell Integration | 12.50% | [x] | 100% | 0.3750% |
 | P33-T08 | 33 | 33.8 Testing & Optimization | 12.50% | [x] | 100% | 0.3750% |
-| P35-T01 | 35 | Goals | 16.67% | [ ] | 0% | 0.00% |
+| P35-T01 | 35 | Missions | 16.67% | [ ] | 0% | 0.00% |
 | P35-T02 | 35 | Rewards | 16.67% | [ ] | 0% | 0.00% |
 | P35-T03 | 35 | Frontend | 16.67% | [ ] | 0% | 0.00% |
 | P35-T04 | 35 | Admin | 16.67% | [ ] | 0% | 0.00% |
@@ -2370,7 +2370,7 @@ This is the authoritative task-level progress register. Each task is represented
 When a task is completed, update the corresponding row:
 
 ```text
-| P04-T02 | 4 | Goal Types | 20.00% | [x] | 100% | 1.40% |
+| P04-T02 | 4 | Mission Types | 20.00% | [x] | 100% | 1.40% |
 ```
 
 Then recalculate:
@@ -2459,12 +2459,12 @@ The first production release is complete when all of the following work is compl
 Phase 35: ░░░░░░░░░░░░░░░░░░░░ 0%
 ```
 
-## Goals
+## Missions
 
 - amount
 - quantity
 - category
-- multiple goals
+- multiple missions
 - milestones
 
 ## Rewards
@@ -2485,8 +2485,8 @@ Phase 35: ░░░░░░░░░░░░░░░░░░░░ 0%
 ## Admin
 
 - React dashboard
-- goals CRUD
-- goal builder
+- missions CRUD
+- mission builder
 - campaign basics
 - settings
 - preview
@@ -2521,7 +2521,7 @@ Prioritize:
 9. Analytics dashboard.
 10. A/B testing.
 11. Revenue attribution.
-12. Smart goal recommendation.
+12. Smart mission recommendation.
 13. Margin-aware recommendations.
 14. AI campaign optimization.
 
@@ -2539,7 +2539,7 @@ Every major feature should therefore be evaluated against:
 
 - Does it reduce friction?
 - Does it make the next purchase step obvious?
-- Does it increase goal completion?
+- Does it increase mission completion?
 - Does it increase cart value?
 - Does it improve conversion?
 - Does it preserve performance?

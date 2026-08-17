@@ -223,14 +223,14 @@ check( 'frontend JS cache-busts the progress poll', false !== strpos( $frontend_
 
 check( 'frontend JS adopts the payload tracking nonce', false !== strpos( $frontend_js, 'tracking_nonce' ) && false !== strpos( $frontend_js, 'tracking.nonce' ) );
 
-// Every eligible goal renders as its own stacked card — a campaign's
+// Every eligible mission renders as its own stacked card — a campaign's
 // milestones each get a full card instead of one featured card + a tiny
-// ladder. The stack wrapper, the per-goal loop and the ineligible skip
+// ladder. The stack wrapper, the per-mission loop and the ineligible skip
 // are all asserted on the source so a regression back to the
 // featured-only render cannot slip through.
-check( 'frontend JS stacks one card per eligible goal', false !== strpos( $frontend_js, 'faracart-widget__goals' ) && false !== strpos( $frontend_js, 'for ( var i = 0; i < goals.length; i++ )' ) );
-check( 'frontend JS skips ineligible goals when rendering', false !== strpos( $frontend_js, 'goal.eligible === false' ) && false !== strpos( $frontend_js, 'continue;' ) );
-check( 'frontend JS renders each goal card with its own template', false !== strpos( $frontend_js, 'goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) )' ) );
+check( 'frontend JS stacks one card per eligible mission', false !== strpos( $frontend_js, 'faracart-widget__missions' ) && false !== strpos( $frontend_js, 'for ( var i = 0; i < missions.length; i++ )' ) );
+check( 'frontend JS skips ineligible missions when rendering', false !== strpos( $frontend_js, 'mission.eligible === false' ) && false !== strpos( $frontend_js, 'continue;' ) );
+check( 'frontend JS renders each mission card with its own template', false !== strpos( $frontend_js, 'missionContainer( mission, data.currency || cfg.currency, variant, widgetTemplate( container, mission ) )' ) );
 
 // Live cart-change refresh (Phase 11): every WooCommerce cart-mutation
 // signal must reach the widgets through ONE centralized bridge — the
@@ -422,9 +422,9 @@ echo "\n== 8. Templates & appearance ==\n";
 
 // The Appearance admin screen's campaign live-preview stamps the sample
 // campaign id onto its sample milestones — without it PreviewWidget's
-// grouping (goal.campaign_id -> campaign) never joins them and the
+// grouping (mission.campaign_id -> campaign) never joins them and the
 // campaign template (milestone chain / campaign progress) never
-// renders: the merchant would see three plain basic goal cards instead
+// renders: the merchant would see three plain basic mission cards instead
 // of the campaign readout. Source-scanned so that regression cannot
 // slip through silently.
 $appearance_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/routes/Appearance.tsx' );
@@ -437,15 +437,15 @@ check( 'Appearance campaign preview stamps the sample campaign id on milestones'
 // override (which would let the preview drift from the storefront) or a
 // device-width/simulation control cannot silently come back.
 $preview_panel_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/components/preview/PreviewPanel.tsx' );
-check( 'Goal preview renders the payload-resolved template', false !== strpos( $preview_panel_tsx, 'goals[0]?.template' ) );
+check( 'Mission preview renders the payload-resolved template', false !== strpos( $preview_panel_tsx, 'missions[0]?.template' ) );
 check( 'Campaign preview renders the payload-resolved template', false !== strpos( $preview_panel_tsx, 'campaigns?.[0]?.template' ) );
 check( 'Preview panel has no forced template override', false === strpos( $preview_panel_tsx, 'templateOverride' ) );
 check( 'Preview panel has no device-width frame', false === strpos( $preview_panel_tsx, 'DEVICE_WIDTHS' ) && false === strpos( $preview_panel_tsx, 'frameWidth' ) );
-// A goal whose form target is still 0 (a fresh or cleared target) would
+// A mission whose form target is still 0 (a fresh or cleared target) would
 // evaluate server-side as trivially complete (target <= 0 -> 100%) — the
 // preview must not claim a fake "100% complete" card for an unsaved
 // draft. Source-scanned so the configuring hint cannot silently drop.
-check( 'Goal preview shows a hint for target-less goals', false !== strpos( $preview_panel_tsx, 'target <= 0' ) && false !== strpos( $preview_panel_tsx, 'Set a target to preview progress.' ) );
+check( 'Mission preview shows a hint for target-less missions', false !== strpos( $preview_panel_tsx, 'target <= 0' ) && false !== strpos( $preview_panel_tsx, 'Set a target to preview progress.' ) );
 
 // The preview controls expose no simulation inputs or template selector —
 // the preview consumes the form's own configuration (selected template /

@@ -8,13 +8,13 @@
 namespace FaraCart\REST;
 
 use FaraCart\Campaigns\CampaignRepository;
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\CartItem;
-use FaraCart\Goals\ConflictResolver;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalEngine;
-use FaraCart\Goals\GoalRepository;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\CartItem;
+use FaraCart\Missions\ConflictResolver;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionEngine;
+use FaraCart\Missions\MissionRepository;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Rewards\RewardEngine;
 use FaraCart\Rewards\RewardResult;
@@ -29,9 +29,9 @@ defined( 'ABSPATH' ) || exit;
  * Phase 15 (Admin Preview System): lets administrators see the customer
  * experience before publishing.
  *
- *  - `POST /faracart/v1/preview` — evaluates a goal (or a campaign's
- *    milestone goals) against a SIMULATED cart and returns the exact same
- *    per-goal payload shape as the public `GET /progress` endpoint, so the
+ *  - `POST /faracart/v1/preview` — evaluates a mission (or a campaign's
+ *    milestone missions) against a SIMULATED cart and returns the exact same
+ *    per-mission payload shape as the public `GET /progress` endpoint, so the
  *    admin React preview renders the real storefront widget (templates,
  *    messages, rewards, suggestions) without publishing anything.
  *
@@ -39,15 +39,15 @@ defined( 'ABSPATH' ) || exit;
  * is built purely from the request's `simulated` values (cart amount and
  * item quantity), and the engine / message / suggestion services are all
  * pure — no cart is loaded, no session is touched, no fees or coupons are
- * applied. Publish gating is ignored on purpose (the goal is previewed as
- * active and in-schedule) so drafts, inactive goals and scheduled
+ * applied. Publish gating is ignored on purpose (the mission is previewed as
+ * active and in-schedule) so drafts, inactive missions and scheduled
  * campaigns can be seen before they go live.
  *
  * Simulation fidelity (documented trade-off): a single synthetic cart line
  * carries the simulated amount, quantity, weight, categories and product
- * id, so amount/quantity/distinct-quantity/category/weight goals evaluate
- * honestly; product goals use the first configured product id; composite
- * goals union their children's constraints (a product child beyond the
+ * id, so amount/quantity/distinct-quantity/category/weight missions evaluate
+ * honestly; product missions use the first configured product id; composite
+ * missions union their children's constraints (a product child beyond the
  * first cannot be represented by one line and is approximated).
  *
  * Security (P07-T04, mirrored): admin-only — `manage_options` capability
@@ -69,18 +69,18 @@ class PreviewController extends BaseController {
 	const PREVIEW_RATE_LIMIT_COUNT = 300;
 
 	/**
-	 * Goal engine instance.
+	 * Mission engine instance.
 	 *
-	 * @var GoalEngine
+	 * @var MissionEngine
 	 */
 	protected $engine;
 
 	/**
-	 * Goal repository instance (stored rows, for preview goal loading).
+	 * Mission repository instance (stored rows, for preview mission loading).
 	 *
-	 * @var GoalRepository
+	 * @var MissionRepository
 	 */
-	protected $goals;
+	protected $missions;
 
 	/**
 	 * Campaign repository instance (milestone loading).
@@ -91,7 +91,7 @@ class PreviewController extends BaseController {
 
 	/**
 	 * Frontend controller (shared payload shaping — message, suggestions,
-	 * reward, icon, template all flow through shape_goal()).
+	 * reward, icon, template all flow through shape_mission()).
 	 *
 	 * @var FrontendController
 	 */
@@ -126,18 +126,18 @@ class PreviewController extends BaseController {
 	/**
 	 * Constructor.
 	 *
-	 * @param GoalEngine         $engine       Goal engine.
-	 * @param GoalRepository     $goals        Goal repository.
+	 * @param MissionEngine         $engine       Mission engine.
+	 * @param MissionRepository     $missions        Mission repository.
 	 * @param CampaignRepository $campaigns    Campaign repository.
-	 * @param FrontendController $frontend     Frontend controller (shape_goal).
+	 * @param FrontendController $frontend     Frontend controller (shape_mission).
 	 * @param Settings           $settings     Settings service.
 	 * @param RewardEngine|null  $reward_engine Reward engine (Phase 26
 	 *                                          display/grant parity).
 	 * @param TemplateEngine|null $templates   Template engine (optional).
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CampaignRepository $campaigns, FrontendController $frontend, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null ) {
+	public function __construct( MissionEngine $engine, MissionRepository $missions, CampaignRepository $campaigns, FrontendController $frontend, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null ) {
 		$this->engine        = $engine;
-		$this->goals         = $goals;
+		$this->missions         = $missions;
 		$this->campaigns     = $campaigns;
 		$this->frontend      = $frontend;
 		$this->settings      = $settings;
@@ -224,7 +224,7 @@ class PreviewController extends BaseController {
 	 */
 	public function preview_args() {
 		return array(
-			'goal_id' => array(
+			'mission_id' => array(
 				'type'    => 'integer',
 				'default' => 0,
 				'minimum' => 0,
@@ -234,14 +234,14 @@ class PreviewController extends BaseController {
 				'default' => 0,
 				'minimum' => 0,
 			),
-			// Unsaved form state (builder live preview): a GoalInput-shaped
-			// goal or a CampaignInput-shaped campaign may be submitted
+			// Unsaved form state (builder live preview): a MissionInput-shaped
+			// mission or a CampaignInput-shaped campaign may be submitted
 			// instead of (or alongside) the saved ids, so the builder can
 			// preview the current form values before they are persisted.
 			// When both a saved id and a payload are present, the payload
 			// wins (it reflects the latest unsaved edits); an existing
-			// goal's row is still merged underneath for campaign context.
-			'goal' => array(
+			// mission's row is still merged underneath for campaign context.
+			'mission' => array(
 				'type'                 => 'object',
 				'default'              => array(),
 				'additionalProperties' => true,
@@ -266,33 +266,33 @@ class PreviewController extends BaseController {
 	/**
 	 * Handle a preview read.
 	 *
-	 * Exactly one of goal_id / campaign_id is required. Evaluates the
-	 * target goal(s) against the simulated cart and returns the shared
-	 * progress payload shape (`goals`, `currency`, plus the `simulated`
+	 * Exactly one of mission_id / campaign_id is required. Evaluates the
+	 * target mission(s) against the simulated cart and returns the shared
+	 * progress payload shape (`missions`, `currency`, plus the `simulated`
 	 * values echoed back so the UI can label the frame).
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function handle_preview( $request ) {
-		$goal_id          = (int) $request->get_param( 'goal_id' );
+		$mission_id          = (int) $request->get_param( 'mission_id' );
 		$campaign_id      = (int) $request->get_param( 'campaign_id' );
-		$goal_payload     = $request->get_param( 'goal' );
+		$mission_payload     = $request->get_param( 'mission' );
 		$campaign_payload = $request->get_param( 'campaign' );
 
-		$goal_payload     = is_array( $goal_payload ) && ! empty( $goal_payload ) ? $goal_payload : array();
+		$mission_payload     = is_array( $mission_payload ) && ! empty( $mission_payload ) ? $mission_payload : array();
 		$campaign_payload = is_array( $campaign_payload ) && ! empty( $campaign_payload ) ? $campaign_payload : array();
 
-		// Exactly one target: a goal (saved id and/or unsaved form payload —
+		// Exactly one target: a mission (saved id and/or unsaved form payload —
 		// the payload wins for edited fields) or a campaign (same rule).
-		// Mixing a goal and a campaign (or providing neither) is invalid.
-		$goal_target     = $goal_id > 0 || ! empty( $goal_payload );
+		// Mixing a mission and a campaign (or providing neither) is invalid.
+		$mission_target     = $mission_id > 0 || ! empty( $mission_payload );
 		$campaign_target = $campaign_id > 0 || ! empty( $campaign_payload );
 
-		if ( $goal_target === $campaign_target ) {
+		if ( $mission_target === $campaign_target ) {
 			return $this->error(
 				'faracart_preview_target_required',
-				__( 'Provide exactly one of goal_id, campaign_id, goal or campaign to preview.', 'faracart' ),
+				__( 'Provide exactly one of mission_id, campaign_id, mission or campaign to preview.', 'faracart' ),
 				400
 			);
 		}
@@ -306,12 +306,12 @@ class PreviewController extends BaseController {
 		$amount   = isset( $simulated['amount'] ) ? (float) $simulated['amount'] : 0.0;
 		$quantity = isset( $simulated['quantity'] ) ? (float) $simulated['quantity'] : 0.0;
 
-		$goals = $this->resolve_goals( $goal_id, $campaign_id, $goal_payload, $campaign_payload );
+		$missions = $this->resolve_missions( $mission_id, $campaign_id, $mission_payload, $campaign_payload );
 
-		if ( empty( $goals ) ) {
+		if ( empty( $missions ) ) {
 			return $this->error(
 				'faracart_preview_not_found',
-				__( 'The goal or campaign could not be found.', 'faracart' ),
+				__( 'The mission or campaign could not be found.', 'faracart' ),
 				404
 			);
 		}
@@ -322,12 +322,12 @@ class PreviewController extends BaseController {
 		// priority / exclusive / mode rules — before the payload is shaped.
 		$evaluated = array();
 
-		foreach ( $goals as $goal ) {
-			$context = $this->simulated_context( $goal, $amount, $quantity );
-			$result  = $this->engine->evaluate( $goal, $context );
+		foreach ( $missions as $mission ) {
+			$context = $this->simulated_context( $mission, $amount, $quantity );
+			$result  = $this->engine->evaluate( $mission, $context );
 
 			$evaluated[] = array(
-				'goal'    => $goal,
+				'mission'    => $mission,
 				'result'  => $result,
 				'context' => $context,
 			);
@@ -338,24 +338,24 @@ class PreviewController extends BaseController {
 		$items = array();
 
 		foreach ( $evaluated as $entry ) {
-			$items[] = $this->frontend->shape_goal(
-				$entry['goal'],
+			$items[] = $this->frontend->shape_mission(
+				$entry['mission'],
 				$entry['result'],
 				$entry['context'],
 				array( 'quantity' => $entry['context']->total_quantity() ),
 				true, // Admin preview: expose the full reward meta (manage_options-gated).
-				$this->conflict_for( $resolution, $entry['goal'] )
+				$this->conflict_for( $resolution, $entry['mission'] )
 			);
 		}
 
 		return $this->success(
 			array(
-				'goals'    => $items,
+				'missions'    => $items,
 				// Campaign template group (pluggable engine) — mirrors the
 				// live /progress payload so the preview renders a configured
 				// campaign template (e.g. the milestone chain) exactly like
 				// the storefront.
-				'campaigns' => $this->campaign_groups( $goal_id, $campaign_id, $campaign_payload ),
+				'campaigns' => $this->campaign_groups( $mission_id, $campaign_id, $campaign_payload ),
 				'currency' => $this->settings->currency(),
 				'simulated' => array(
 					'amount'   => $amount,
@@ -363,15 +363,15 @@ class PreviewController extends BaseController {
 				),
 			),
 			array(
-				'mode' => ( $campaign_id > 0 || ! empty( $campaign_payload ) ) ? 'campaign' : 'goal',
+				'mode' => ( $campaign_id > 0 || ! empty( $campaign_payload ) ) ? 'campaign' : 'mission',
 			)
 		);
 	}
 
 	/**
-	 * Resolve conflict winners among the previewed goals.
+	 * Resolve conflict winners among the previewed missions.
 	 *
-	 * Same contract as the reward engine (Phase 26): completed goals that
+	 * Same contract as the reward engine (Phase 26): completed missions that
 	 * carry a reward compete under the configured resolution mode — 'best'
 	 * compares the real computed reward amounts on each milestone's
 	 * simulated cart — and the per-reward stacking safety applies to the
@@ -379,30 +379,30 @@ class PreviewController extends BaseController {
 	 * exactly what the live cart would grant.
 	 *
 	 * @param array<int, array<string, mixed>> $evaluated Entries with
-	 *                             'goal', 'result' and 'context' keys.
-	 * @return array<int, string> goal_id => ConflictResolver::REASON_*.
+	 *                             'mission', 'result' and 'context' keys.
+	 * @return array<int, string> mission_id => ConflictResolver::REASON_*.
 	 */
 	protected function resolve_conflicts( array $evaluated ) {
-		$goals   = array();
+		$missions   = array();
 		$results = array();
 		$scores  = array();
 		$rewards = array();
 
 		foreach ( $evaluated as $entry ) {
-			$goal   = $entry['goal'];
+			$mission   = $entry['mission'];
 			$result = $entry['result'];
 
-			$goals[] = $goal;
+			$missions[] = $mission;
 
-			if ( ! $result->eligible() || GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+			if ( ! $result->eligible() || MissionResult::REWARD_UNLOCKED !== $result->reward_state() ) {
 				continue;
 			}
 
-			if ( empty( $goal->reward_type() ) ) {
+			if ( empty( $mission->reward_type() ) ) {
 				continue;
 			}
 
-			$results[ $goal->id() ] = $result;
+			$results[ $mission->id() ] = $result;
 
 			// The reward is evaluated WITHOUT the stacking guard (empty
 			// already_applied pass), exactly like RewardEngine::sync_cart()
@@ -414,34 +414,34 @@ class PreviewController extends BaseController {
 					array( 'cart' => $entry['context'] )
 				);
 
-				$rewards[ $goal->id() ] = $reward_result;
+				$rewards[ $mission->id() ] = $reward_result;
 
 				if ( RewardResult::STATE_AVAILABLE === $reward_result->state() ) {
-					$scores[ $goal->id() ] = $reward_result->amount();
+					$scores[ $mission->id() ] = $reward_result->amount();
 				}
 			}
 		}
 
 		$mode       = (string) $this->settings->get( 'conflict_resolution', ConflictResolver::MODE_CUMULATIVE );
 		$resolver   = new ConflictResolver();
-		$resolution = $resolver->resolve( $goals, $results, $mode, $scores );
+		$resolution = $resolver->resolve( $missions, $results, $mode, $scores );
 
 		if ( null !== $this->reward_engine ) {
-			$resolution = $resolver->apply_stacking( $goals, $resolution, $rewards );
+			$resolution = $resolver->apply_stacking( $missions, $resolution, $rewards );
 		}
 
 		return $resolution;
 	}
 
 	/**
-	 * The per-goal conflict payload fragment (mirrors the frontend path).
+	 * The per-mission conflict payload fragment (mirrors the frontend path).
 	 *
-	 * @param array<int, string> $resolution goal_id => reason.
-	 * @param Goal               $goal       Goal.
+	 * @param array<int, string> $resolution mission_id => reason.
+	 * @param Mission               $mission       Mission.
 	 * @return array<string, mixed>
 	 */
-	protected function conflict_for( array $resolution, Goal $goal ) {
-		$reason = isset( $resolution[ $goal->id() ] ) ? $resolution[ $goal->id() ] : ConflictResolver::REASON_NONE;
+	protected function conflict_for( array $resolution, Mission $mission ) {
+		$reason = isset( $resolution[ $mission->id() ] ) ? $resolution[ $mission->id() ] : ConflictResolver::REASON_NONE;
 
 		return array(
 			'resolved' => ConflictResolver::REASON_NONE === $reason,
@@ -454,16 +454,16 @@ class PreviewController extends BaseController {
 	 *
 	 * Mirrors FrontendController::campaign_groups(): a single-entry list
 	 * for campaign previews (resolved from the submitted display_rules —
-	 * the stored row or the unsaved form payload), and empty for goal
+	 * the stored row or the unsaved form payload), and empty for mission
 	 * previews — so the preview resolves the campaign template + settings
 	 * identically to the live frontend.
 	 *
-	 * @param int                    $goal_id          Goal id (0 when previewing a campaign).
-	 * @param int                    $campaign_id      Campaign id (0 when previewing a goal).
+	 * @param int                    $mission_id          Mission id (0 when previewing a campaign).
+	 * @param int                    $campaign_id      Campaign id (0 when previewing a mission).
 	 * @param array<string, mixed>   $campaign_payload Unsaved campaign form state ('' for saved-id previews).
 	 * @return array<int, array<string, mixed>>
 	 */
-	protected function campaign_groups( $goal_id, $campaign_id, array $campaign_payload = array() ) {
+	protected function campaign_groups( $mission_id, $campaign_id, array $campaign_payload = array() ) {
 		if ( $campaign_id <= 0 && empty( $campaign_payload ) ) {
 			return array();
 		}
@@ -493,7 +493,7 @@ class PreviewController extends BaseController {
 
 	/**
 	 * The stable group id shared by the campaign group and its milestone
-	 * goal rows. A saved campaign uses its own id; an unsaved campaign
+	 * mission rows. A saved campaign uses its own id; an unsaved campaign
 	 * form (no id yet) uses a synthetic negative id so PreviewWidget's
 	 * campaign grouping still matches the milestone rows.
 	 *
@@ -518,42 +518,42 @@ class PreviewController extends BaseController {
 	}
 
 	/**
-	 * Load the preview goals, forced into their "published" state.
+	 * Load the preview missions, forced into their "published" state.
 	 *
-	 * Single-goal mode returns one Goal (from the stored row or the
+	 * Single-mission mode returns one Mission (from the stored row or the
 	 * unsaved form payload, merged when both are present); campaign mode
-	 * returns every milestone goal in menu order (with the campaign name
+	 * returns every milestone mission in menu order (with the campaign name
 	 * folded in for the {campaign_name} message variable). Empty array
-	 * when the target does not exist or has no goals.
+	 * when the target does not exist or has no missions.
 	 *
-	 * @param int                  $goal_id          Goal id (0 when previewing a campaign or a new goal).
-	 * @param int                  $campaign_id      Campaign id (0 when previewing a goal or a new campaign).
-	 * @param array<string, mixed> $goal_payload     Unsaved goal form state.
+	 * @param int                  $mission_id          Mission id (0 when previewing a campaign or a new mission).
+	 * @param int                  $campaign_id      Campaign id (0 when previewing a mission or a new campaign).
+	 * @param array<string, mixed> $mission_payload     Unsaved mission form state.
 	 * @param array<string, mixed> $campaign_payload Unsaved campaign form state.
-	 * @return Goal[]
+	 * @return Mission[]
 	 */
-	protected function resolve_goals( $goal_id, $campaign_id, array $goal_payload = array(), array $campaign_payload = array() ) {
-		$goals = array();
+	protected function resolve_missions( $mission_id, $campaign_id, array $mission_payload = array(), array $campaign_payload = array() ) {
+		$missions = array();
 
 		if ( $campaign_id > 0 || ! empty( $campaign_payload ) ) {
 			$campaign = ! empty( $campaign_payload ) ? $campaign_payload : $this->campaigns->get( $campaign_id );
 
 			if ( ! is_array( $campaign ) || empty( $campaign ) ) {
-				return $goals;
+				return $missions;
 		}
 
 			$group_id = $this->campaign_group_id( $campaign_id, $campaign_payload );
 			$name     = isset( $campaign['name'] ) ? (string) $campaign['name'] : '';
-			$goals_in = isset( $campaign['goals'] ) && is_array( $campaign['goals'] ) ? $campaign['goals'] : array();
+			$missions_in = isset( $campaign['missions'] ) && is_array( $campaign['missions'] ) ? $campaign['missions'] : array();
 
-			foreach ( $goals_in as $milestone ) {
-				// The campaign form submits ordered goal ids; the stored row
+			foreach ( $missions_in as $milestone ) {
+				// The campaign form submits ordered mission ids; the stored row
 				// carries {id, ...} entries — accept both.
 				$milestone_id = is_array( $milestone )
 					? (int) ( isset( $milestone['id'] ) ? $milestone['id'] : 0 )
 					: (int) $milestone;
 
-				$row = $this->goals->get( $milestone_id );
+				$row = $this->missions->get( $milestone_id );
 
 				if ( ! is_array( $row ) ) {
 					continue;
@@ -561,55 +561,55 @@ class PreviewController extends BaseController {
 
 				// The submitted campaign owns the previewed milestone rows,
 				// so the payload's campaign group (and the campaign template)
-				// can always be associated, even when the goals are not yet
+				// can always be associated, even when the missions are not yet
 				// stored under this campaign.
 				$row['campaign_id'] = $group_id;
 
-				$goal = $this->preview_goal( $row, $name );
+				$mission = $this->preview_mission( $row, $name );
 
-				if ( $goal ) {
-					$goals[] = $goal;
+				if ( $mission ) {
+					$missions[] = $mission;
 				}
 			}
 
-			return $goals;
+			return $missions;
 		}
 
-		if ( ! empty( $goal_payload ) ) {
+		if ( ! empty( $mission_payload ) ) {
 			// Unsaved form state: the payload wins for the edited fields,
 			// the stored row underneath keeps the id + campaign context
-			// when editing an existing goal.
-			$row = $goal_id > 0 ? $this->goals->get( $goal_id ) : null;
-			$row = is_array( $row ) ? array_merge( $row, $goal_payload ) : $goal_payload;
+			// when editing an existing mission.
+			$row = $mission_id > 0 ? $this->missions->get( $mission_id ) : null;
+			$row = is_array( $row ) ? array_merge( $row, $mission_payload ) : $mission_payload;
 
-			$goal = $this->preview_goal( $row );
+			$mission = $this->preview_mission( $row );
 
-			return $goal ? array( $goal ) : array();
+			return $mission ? array( $mission ) : array();
 		}
 
-		$goal = $this->preview_goal( $this->goals->get( $goal_id ) );
+		$mission = $this->preview_mission( $this->missions->get( $mission_id ) );
 
-		return $goal ? array( $goal ) : array();
+		return $mission ? array( $mission ) : array();
 	}
 
 	/**
-	 * Build a preview Goal from a stored repository row.
+	 * Build a preview Mission from a stored repository row.
 	 *
 	 * Publish gating is intentionally ignored (Phase 15 objective: see the
-	 * customer experience BEFORE publishing): the goal is forced active and
-	 * its schedule cleared, so drafts, inactive goals and scheduled
+	 * customer experience BEFORE publishing): the mission is forced active and
+	 * its schedule cleared, so drafts, inactive missions and scheduled
 	 * campaigns evaluate as they will once live.
 	 *
-	 * @param mixed  $row           Stored goal row (array) or null.
+	 * @param mixed  $row           Stored mission row (array) or null.
 	 * @param string $campaign_name Campaign name to fold in ('' for singles).
-	 * @return Goal|null Null when the row does not exist.
+	 * @return Mission|null Null when the row does not exist.
 	 */
-	protected function preview_goal( $row, $campaign_name = '' ) {
+	protected function preview_mission( $row, $campaign_name = '' ) {
 		if ( ! is_array( $row ) || empty( $row ) ) {
 			return null;
 		}
 
-		$row['status']     = Goal::STATUS_ACTIVE;
+		$row['status']     = Mission::STATUS_ACTIVE;
 		$row['starts_at']  = null;
 		$row['ends_at']    = null;
 
@@ -617,7 +617,7 @@ class PreviewController extends BaseController {
 			$row['campaign_name'] = $campaign_name;
 		}
 
-		return new Goal( $row );
+		return new Mission( $row );
 	}
 
 	/**
@@ -629,18 +629,18 @@ class PreviewController extends BaseController {
 	 * is exercised end-to-end — eligibility, progress math, message engine,
 	 * suggestions — against a context that never came from a real cart.
 	 *
-	 * @param Goal  $goal     Goal being previewed.
+	 * @param Mission  $mission     Mission being previewed.
 	 * @param float $amount   Simulated cart amount (money basis).
 	 * @param float $quantity Simulated item quantity (count basis).
 	 * @return CartContext
 	 */
-	protected function simulated_context( Goal $goal, $amount, $quantity ) {
+	protected function simulated_context( Mission $mission, $amount, $quantity ) {
 		$amount   = max( 0.0, (float) $amount );
 		$quantity = max( 0.0, (float) $quantity );
 		$items    = array();
 
-		switch ( $goal->type() ) {
-			case Goal::TYPE_QUANTITY:
+		switch ( $mission->type() ) {
+			case Mission::TYPE_QUANTITY:
 				$items[] = $this->simulated_item(
 					array(
 						'quantity'      => $quantity,
@@ -651,7 +651,7 @@ class PreviewController extends BaseController {
 				);
 				break;
 
-			case Goal::TYPE_DISTINCT_QUANTITY:
+			case Mission::TYPE_DISTINCT_QUANTITY:
 				// One unique product per simulated unit (capped so a huge
 				// simulated quantity cannot balloon the payload).
 				$count = (int) ceil( $quantity );
@@ -660,10 +660,10 @@ class PreviewController extends BaseController {
 				}
 				break;
 
-			case Goal::TYPE_CATEGORY:
+			case Mission::TYPE_CATEGORY:
 				$items[] = $this->simulated_item(
 					array(
-						'categories'    => $goal->categories(),
+						'categories'    => $mission->categories(),
 						'quantity'      => $quantity,
 						'line_subtotal' => $amount,
 						'line_total'    => $amount,
@@ -672,8 +672,8 @@ class PreviewController extends BaseController {
 				);
 				break;
 
-			case Goal::TYPE_PRODUCT:
-				$products = $goal->products();
+			case Mission::TYPE_PRODUCT:
+				$products = $mission->products();
 				$items[] = $this->simulated_item(
 					array(
 						'product_id'    => ! empty( $products ) ? (int) $products[0] : 0,
@@ -685,7 +685,7 @@ class PreviewController extends BaseController {
 				);
 				break;
 
-			case Goal::TYPE_WEIGHT:
+			case Mission::TYPE_WEIGHT:
 				$items[] = $this->simulated_item(
 					array(
 						'weight'        => $quantity,
@@ -695,8 +695,8 @@ class PreviewController extends BaseController {
 				);
 				break;
 
-			case Goal::TYPE_COMPOSITE:
-				$items[] = $this->composite_item( $goal, $amount, $quantity );
+			case Mission::TYPE_COMPOSITE:
+				$items[] = $this->composite_item( $mission, $amount, $quantity );
 				break;
 
 			default:
@@ -724,7 +724,7 @@ class PreviewController extends BaseController {
 	}
 
 	/**
-	 * The synthetic line for a composite goal.
+	 * The synthetic line for a composite mission.
 	 *
 	 * Unions the children's constraints onto a single line: categories of
 	 * every category child, the first product child's id, the simulated
@@ -733,22 +733,22 @@ class PreviewController extends BaseController {
 	 * children beyond the first cannot share one line and are approximated
 	 * (documented trade-off).
 	 *
-	 * @param Goal  $goal     Composite goal.
+	 * @param Mission  $mission     Composite mission.
 	 * @param float $amount   Simulated amount.
 	 * @param float $quantity Simulated quantity.
 	 * @return CartItem
 	 */
-	protected function composite_item( Goal $goal, $amount, $quantity ) {
+	protected function composite_item( Mission $mission, $amount, $quantity ) {
 		$categories = array();
 		$products   = array();
 		$weight     = 0.0;
 
-		foreach ( $goal->children() as $child_data ) {
+		foreach ( $mission->children() as $child_data ) {
 			if ( ! is_array( $child_data ) ) {
 				continue;
 			}
 
-			$child = new Goal( $child_data );
+			$child = new Mission( $child_data );
 
 			foreach ( $child->categories() as $id ) {
 				$categories[ (int) $id ] = true;
@@ -758,7 +758,7 @@ class PreviewController extends BaseController {
 				$products[ (int) $id ] = true;
 			}
 
-			if ( Goal::TYPE_WEIGHT === $child->type() ) {
+			if ( Mission::TYPE_WEIGHT === $child->type() ) {
 				$weight = (float) $quantity;
 			}
 		}

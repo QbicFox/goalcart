@@ -7,7 +7,7 @@
 
 namespace FaraCart\Templates;
 
-use FaraCart\Goals\Goal;
+use FaraCart\Missions\Mission;
 use FaraCart\Settings\Settings;
 
 defined( 'ABSPATH' ) || exit;
@@ -16,20 +16,20 @@ defined( 'ABSPATH' ) || exit;
  * Class TemplateEngine
  *
  * The single place that resolves *which* template + settings render for a
- * goal or a campaign, and the single validator for template settings.
+ * mission or a campaign, and the single validator for template settings.
  *
  * Resolution order (same for the live storefront and the admin preview,
  * so what a merchant previews is what customers see):
  *
- *   1. item override  — goal display_settings / campaign display_rules:
+ *   1. item override  — mission display_settings / campaign display_rules:
  *      `template_id` + `template_settings`
  *   2. scope default  — plugin settings `template_defaults[scope]` plus
  *      the stored per-template default appearance
  *      `template_settings[scope][template_id]`
- *   3. store-wide fallback (goals only) — the Appearance setting
+ *   3. store-wide fallback (missions only) — the Appearance setting
  *      `frontend_template` + the `frontend_*` appearance tokens
- *   4. hardcoded fallback — `template-1` (goals only; campaigns with no
- *      template render per-goal cards, the pre-engine behavior)
+ *   4. hardcoded fallback — `template-1` (missions only; campaigns with no
+ *      template render per-mission cards, the pre-engine behavior)
  *
  * If a stored template_id is not registered (e.g. an old Phase 12 id
  * such as 'card', or a template that was removed), resolution falls back
@@ -44,11 +44,11 @@ defined( 'ABSPATH' ) || exit;
 final class TemplateEngine {
 
 	/**
-	 * Goal scope.
+	 * Mission scope.
 	 *
 	 * @var string
 	 */
-	const SCOPE_GOAL = 'goal';
+	const SCOPE_MISSION = 'mission';
 
 	/**
 	 * Campaign scope.
@@ -58,11 +58,11 @@ final class TemplateEngine {
 	const SCOPE_CAMPAIGN = 'campaign';
 
 	/**
-	 * Hardcoded fallback template for goals.
+	 * Hardcoded fallback template for missions.
 	 *
 	 * @var string
 	 */
-	const FALLBACK_GOAL = 'template-1';
+	const FALLBACK_MISSION = 'template-1';
 
 	/**
 	 * Template registry instance.
@@ -99,16 +99,16 @@ final class TemplateEngine {
 	}
 
 	/**
-	 * Resolve the effective template + settings for a goal.
+	 * Resolve the effective template + settings for a mission.
 	 *
-	 * @param Goal $goal Goal.
+	 * @param Mission $mission Mission.
 	 * @return array{template_id: string, settings: array<string, mixed>}
 	 */
-	public function resolve_goal( Goal $goal ) {
-		$display    = $goal->display_settings();
-		$store_wide = (string) $this->settings->get( 'frontend_template', self::FALLBACK_GOAL );
+	public function resolve_mission( Mission $mission ) {
+		$display    = $mission->display_settings();
+		$store_wide = (string) $this->settings->get( 'frontend_template', self::FALLBACK_MISSION );
 
-		return $this->resolve( self::SCOPE_GOAL, is_array( $display ) ? $display : array(), $store_wide );
+		return $this->resolve( self::SCOPE_MISSION, is_array( $display ) ? $display : array(), $store_wide );
 	}
 
 	/**
@@ -124,10 +124,10 @@ final class TemplateEngine {
 	/**
 	 * Core resolution.
 	 *
-	 * @param string $scope            SCOPE_GOAL | SCOPE_CAMPAIGN.
+	 * @param string $scope            SCOPE_MISSION | SCOPE_CAMPAIGN.
 	 * @param array  $display          Item display config (display_settings /
 	 *                                 display_rules).
-	 * @param string $store_wide_template Store-wide goal template ('' for
+	 * @param string $store_wide_template Store-wide mission template ('' for
 	 *                                 campaigns, which have no store-wide
 	 *                                 template setting).
 	 * @return array{template_id: string, settings: array<string, mixed>}
@@ -135,7 +135,7 @@ final class TemplateEngine {
 	public function resolve( $scope, array $display, $store_wide_template = '' ) {
 		$template_id = '';
 
-		// 1. Item override: the goal/campaign pins its own template.
+		// 1. Item override: the mission/campaign pins its own template.
 		$override    = isset( $display['template_id'] ) ? (string) $display['template_id'] : '';
 		$template_id = $this->normalize_template_id( $scope, $override );
 
@@ -146,17 +146,17 @@ final class TemplateEngine {
 			$template_id = isset( $defaults[ $scope ] ) ? $this->normalize_template_id( $scope, $defaults[ $scope ] ) : '';
 		}
 
-		// 3. Store-wide fallback (goal scope only): the Appearance template
-		// setting keeps working for goals that pin no template of their
+		// 3. Store-wide fallback (mission scope only): the Appearance template
+		// setting keeps working for missions that pin no template of their
 		// own.
-		if ( '' === $template_id && self::SCOPE_GOAL === $scope ) {
+		if ( '' === $template_id && self::SCOPE_MISSION === $scope ) {
 			$template_id = $this->normalize_template_id( $scope, $store_wide_template );
 		}
 
-		// 4. Hardcoded fallback: 'template-1' for goals; campaigns without
-		// a template render per-goal cards (the pre-engine behavior).
-		if ( '' === $template_id && self::SCOPE_GOAL === $scope ) {
-			$template_id = self::FALLBACK_GOAL;
+		// 4. Hardcoded fallback: 'template-1' for missions; campaigns without
+		// a template render per-mission cards (the pre-engine behavior).
+		if ( '' === $template_id && self::SCOPE_MISSION === $scope ) {
+			$template_id = self::FALLBACK_MISSION;
 		}
 
 		if ( '' === $template_id ) {
@@ -177,7 +177,7 @@ final class TemplateEngine {
 	/**
 	 * Whether a template id is registered and usable in a scope.
 	 *
-	 * @param string $scope SCOPE_GOAL | SCOPE_CAMPAIGN.
+	 * @param string $scope SCOPE_MISSION | SCOPE_CAMPAIGN.
 	 * @param mixed  $id    Candidate template id.
 	 * @return bool
 	 */
@@ -200,7 +200,7 @@ final class TemplateEngine {
 	 * '' so resolution falls through to the scope default / store-wide
 	 * value / hardcoded fallback. Old template ids are never translated.
 	 *
-	 * @param string $scope SCOPE_GOAL | SCOPE_CAMPAIGN.
+	 * @param string $scope SCOPE_MISSION | SCOPE_CAMPAIGN.
 	 * @param mixed  $id    Candidate template id.
 	 * @return string
 	 */
@@ -241,7 +241,7 @@ final class TemplateEngine {
 	/**
 	 * Sanitize a settings payload for a whole scope (Settings REST save).
 	 *
-	 * @param string $scope SCOPE_GOAL | SCOPE_CAMPAIGN.
+	 * @param string $scope SCOPE_MISSION | SCOPE_CAMPAIGN.
 	 * @param mixed  $raw   Raw [ template_id => settings ] map.
 	 * @return array<string, array<string, mixed>> Cleaned template => settings map.
 	 */
@@ -271,7 +271,7 @@ final class TemplateEngine {
 	public function versions() {
 		$versions = array();
 
-		foreach ( array( self::SCOPE_GOAL, self::SCOPE_CAMPAIGN ) as $scope ) {
+		foreach ( array( self::SCOPE_MISSION, self::SCOPE_CAMPAIGN ) as $scope ) {
 			$versions[ $scope ] = array();
 
 			foreach ( $this->registry->for_scope( $scope ) as $template ) {
@@ -283,8 +283,8 @@ final class TemplateEngine {
 	}
 
 	/**
-	 * The scope default template ids (goals always resolve; campaigns may
-	 * be '' = no campaign template → per-goal cards).
+	 * The scope default template ids (missions always resolve; campaigns may
+	 * be '' = no campaign template → per-mission cards).
 	 *
 	 * @return array<string, string>
 	 */
@@ -293,7 +293,7 @@ final class TemplateEngine {
 		$defaults = is_array( $defaults ) ? $defaults : array();
 
 		return array(
-			self::SCOPE_GOAL     => $this->resolve_goal_default_id( $defaults ),
+			self::SCOPE_MISSION     => $this->resolve_mission_default_id( $defaults ),
 			self::SCOPE_CAMPAIGN => isset( $defaults[ self::SCOPE_CAMPAIGN ] )
 				? $this->normalize_template_id( self::SCOPE_CAMPAIGN, $defaults[ self::SCOPE_CAMPAIGN ] )
 				: '',
@@ -307,11 +307,11 @@ final class TemplateEngine {
 	 */
 	public function data() {
 		$data = array(
-			'scopes'   => array( self::SCOPE_GOAL, self::SCOPE_CAMPAIGN ),
+			'scopes'   => array( self::SCOPE_MISSION, self::SCOPE_CAMPAIGN ),
 			'defaults' => $this->default_ids(),
 		);
 
-		foreach ( array( self::SCOPE_GOAL, self::SCOPE_CAMPAIGN ) as $scope ) {
+		foreach ( array( self::SCOPE_MISSION, self::SCOPE_CAMPAIGN ) as $scope ) {
 			$definitions = array();
 
 			foreach ( $this->registry->for_scope( $scope ) as $template ) {
@@ -353,7 +353,7 @@ final class TemplateEngine {
 	/**
 	 * The effective settings a template would render with right now.
 	 *
-	 * @param string   $scope    SCOPE_GOAL | SCOPE_CAMPAIGN.
+	 * @param string   $scope    SCOPE_MISSION | SCOPE_CAMPAIGN.
 	 * @param Template $template Template instance.
 	 * @return array<string, mixed>
 	 */
@@ -368,7 +368,7 @@ final class TemplateEngine {
 	/**
 	 * Merge the effective settings layers for a template.
 	 *
-	 * @param string   $scope    SCOPE_GOAL | SCOPE_CAMPAIGN.
+	 * @param string   $scope    SCOPE_MISSION | SCOPE_CAMPAIGN.
 	 * @param Template $template Template instance.
 	 * @param array    $display  Item display config.
 	 * @return array<string, mixed>
@@ -452,23 +452,23 @@ final class TemplateEngine {
 	}
 
 	/**
-	 * Resolve the goal-scope default template id.
+	 * Resolve the mission-scope default template id.
 	 *
 	 * @param array<string, mixed> $defaults template_defaults setting.
 	 * @return string
 	 */
-	protected function resolve_goal_default_id( array $defaults ) {
-		if ( isset( $defaults[ self::SCOPE_GOAL ] ) ) {
-			$id = $this->normalize_template_id( self::SCOPE_GOAL, $defaults[ self::SCOPE_GOAL ] );
+	protected function resolve_mission_default_id( array $defaults ) {
+		if ( isset( $defaults[ self::SCOPE_MISSION ] ) ) {
+			$id = $this->normalize_template_id( self::SCOPE_MISSION, $defaults[ self::SCOPE_MISSION ] );
 
 			if ( '' !== $id ) {
 				return $id;
 			}
 		}
 
-		$legacy = $this->normalize_template_id( self::SCOPE_GOAL, $this->settings->get( 'frontend_template', self::FALLBACK_GOAL ) );
+		$legacy = $this->normalize_template_id( self::SCOPE_MISSION, $this->settings->get( 'frontend_template', self::FALLBACK_MISSION ) );
 
-		return '' !== $legacy ? $legacy : self::FALLBACK_GOAL;
+		return '' !== $legacy ? $legacy : self::FALLBACK_MISSION;
 	}
 
 	/**

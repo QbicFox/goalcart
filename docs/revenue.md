@@ -2,9 +2,9 @@
 
 > **Phase 33 / Tasks P33-T02.** Turns the Phase 33.1 revenue event funnel
 > (`goal_view` → `goal_progress` → `goal_completed` → `order_paid`) into
-> per-order goal attribution and measurable revenue metrics. Services:
+> per-order mission attribution and measurable revenue metrics. Services:
 > `FaraCart\Analytics\AttributionEngine` and
-> `FaraCart\Analytics\RewardCostEstimator`. Storage: `goal_attribution`
+> `FaraCart\Analytics\RewardCostEstimator`. Storage: `mission_attribution`
 > (per-order attribution rows); raw input stays in `revenue_events`.
 
 ---
@@ -12,35 +12,35 @@
 ## 1. Order association
 
 When an order becomes revenue-producing, the engine attributes it to the
-goals that influenced the ordering session:
+missions that influenced the ordering session:
 
 - **Hooks** — `woocommerce_payment_complete` (gateways) plus
   `woocommerce_order_status_completed` (backstop for manual transitions).
   Both are idempotent: the order_paid event is deduped per order and the
-  `order_goal_model` unique key makes re-processing a no-op.
+  `order_mission_model` unique key makes re-processing a no-op.
 - **Revenue-producing statuses** — `processing` and `completed` only
   (`AttributionEngine::REVENUE_STATUSES`, per WooCommerce convention).
   Refunded, cancelled, failed and on-hold orders are never attributed.
 - **Session resolution** — the session recorded on the order_paid event,
   then the live cookie session, then (logged-in users) the most recent
-  goal session for that user.
-- **Lookback** — only goal events within 30 days before the order count
+  mission session for that user.
+- **Lookback** — only mission events within 30 days before the order count
   (`ATTRIBUTION_WINDOW`); a stale exposure does not influence an order.
 
 ## 2. Attribution models
 
 | Model | Condition | Row |
 |---|---|---|
-| `direct` | the session progressed and/or completed the goal before ordering | carries the attributed **incremental value** |
-| `assisted` | the session only viewed the goal | order total recorded, **zero incremental value** |
+| `direct` | the session progressed and/or completed the mission before ordering | carries the attributed **incremental value** |
+| `assisted` | the session only viewed the mission | order total recorded, **zero incremental value** |
 
-**Incremental value** = `max(0, order_total − cart value at first goal
-exposure)` — how much the customer added after seeing the goal. When
-several goals are direct on one order, the incremental value is split
+**Incremental value** = `max(0, order_total − cart value at first mission
+exposure)` — how much the customer added after seeing the mission. When
+several missions are direct on one order, the incremental value is split
 equally across them (deterministic, never double counted).
 
-**Goal completion** — a `goal_completed` event in the session marks the
-attribution row `goal_completed = 1` (a completion is *not* a conversion;
+**Mission completion** — a `goal_completed` event in the session marks the
+attribution row `mission_completed = 1` (a completion is *not* a conversion;
 only an associated order is).
 
 ## 3. Metrics
@@ -55,7 +55,7 @@ pre-computes the same numbers daily.
 ```text
 views → progressed → completed → converted
 completion_rate = completed / views
-conversion_rate = converted / completions     (orders associated with the goal)
+conversion_rate = converted / completions     (orders associated with the mission)
 ```
 
 ### Incremental cart value (`incremental_cart_value()`)
@@ -68,30 +68,30 @@ Per session: `cart value after exposure − cart value at first exposure`
 ### Revenue summary (`attribution_summary()`)
 
 ```text
-goal_driven_revenue    = SUM(direct incremental_value)        (additive)
-goal_assisted_revenue  = SUM(order_total of pure-assisted orders)
-goal_influenced_revenue= SUM(order_total of distinct attributed orders)
+mission_driven_revenue    = SUM(direct incremental_value)        (additive)
+mission_assisted_revenue  = SUM(order_total of pure-assisted orders)
+mission_influenced_revenue= SUM(order_total of distinct attributed orders)
 ```
 
-An order with both a direct and an assisted goal counts only as direct in
-the summary totals (no double counting); `goal_influenced_revenue` is the
+An order with both a direct and an assisted mission counts only as direct in
+the summary totals (no double counting); `mission_influenced_revenue` is the
 union.
 
 ### AOV analysis (`aov_analysis()`)
 
-Compares the goal-exposed orders' average against the store-wide average
+Compares the mission-exposed orders' average against the store-wide average
 (paginated WC order scan) and reports absolute + percentage change. The
 result is labeled **observed impact** — never causality.
 
 ### Shipping stats (`shipping_stats()`)
 
 Average shipping cost, orders with/without shipping, and per-method
-averages — the input for the Phase 33.4 shipping-aware goal
+averages — the input for the Phase 33.4 shipping-aware mission
 recommendations.
 
 ## 4. Reward cost
 
-`RewardCostEstimator::estimate_reward_cost( Goal, order_total, context )`
+`RewardCostEstimator::estimate_reward_cost( Mission, order_total, context )`
 returns `{ estimated_cost, available, basis, type }`:
 
 | Reward | Cost model | Needs store data? |
@@ -155,11 +155,11 @@ the existing attribution reads — no new engine, no new order scans:
   with `progressed`, `purchased_orders`, `purchase_rate`,
   `attributed_sales`, `estimated_profit`, `profit_available`,
   `profit_reason`, `profit_reason_code`, `cost_coverage` and
-  `profit_details` — same date range, same goal filters, served through
+  `profit_details` — same date range, same mission filters, served through
   the cached `RevenueRepository::purchase_summary()`. Filter mapping:
-  `goal_id` / `goal_ids` pass through; `campaign_id` and `reward_type`
-  resolve to the matching goal ids
-  (`GoalRepository::ids_by_campaign()` / `ids_by_reward_type()`);
+  `mission_id` / `mission_ids` pass through; `campaign_id` and `reward_type`
+  resolve to the matching mission ids
+  (`MissionRepository::ids_by_campaign()` / `ids_by_reward_type()`);
   `product_id` is unsupported in attribution and yields `null` purchase
   fields (never a fabricated number). The pre-existing Phase 17 fields
   are untouched.
@@ -206,7 +206,7 @@ Every attribution summary additionally carries:
   "no cost data anywhere — set up product costs" from "some orders lack
   cost data — coverage X%".
 
-Both keys are mirrored in `GoalPerformanceRow`, the `/analytics` summary
+Both keys are mirrored in `MissionPerformanceRow`, the `/analytics` summary
 (`null` when the filter cannot be expressed in attribution) and the
 zeroed empty summary.
 
@@ -218,9 +218,9 @@ estimates as facts:
 
 ```text
 Internal                User-facing
-goal_driven_revenue     Sales Attributed to FaraCart
-goal_assisted_revenue   Assisted Sales
-goal_influenced_revenue Influenced Sales
+mission_driven_revenue     Sales Attributed to FaraCart
+mission_assisted_revenue   Assisted Sales
+mission_influenced_revenue Influenced Sales
 incremental_revenue     Additional Sales Value
 converted               Purchased Orders
 conversion_rate         Purchase Rate
@@ -235,7 +235,7 @@ Reward Cost          — estimated cost of granted rewards
 
 Two rates stay deliberately distinct everywhere: **Completion Rate**
 (`completed / views`) and **Purchase Rate** (`purchased / completed`) — a
-goal completion is never presented as a purchase (`UICHANGES.md` §22/§31).
+mission completion is never presented as a purchase (`UICHANGES.md` §22/§31).
 
 ## 7. Feature flags & developer hooks
 
@@ -256,12 +256,12 @@ goal completion is never presented as a purchase (`UICHANGES.md` §22/§31).
 
 ---
 
-# FaraCart — Smart Goal Recommendation (Phase 33.4)
+# FaraCart — Smart Mission Recommendation (Phase 33.4)
 
-`GoalRecommendationEngine` (`includes/Analytics/`) answers *"what
+`MissionRecommendationEngine` (`includes/Analytics/`) answers *"what
 threshold should this store use?"* with a fully deterministic,
 explainable analysis of the store's own order data — no LLM/AI. The
-engine is pure computation: it never writes, never modifies a goal, and
+engine is pure computation: it never writes, never modifies a mission, and
 caching/invalidation live in the Phase 33.3 `RevenueRepository`.
 
 ## 1. Inputs (analyzers)
@@ -272,7 +272,7 @@ caching/invalidation live in the Phase 33.3 `RevenueRepository`.
 | Order distribution | AOV-relative buckets `<0.5×` → `>1.5×` over the scanned totals | always |
 | Shipping | `AttributionEngine::shipping_stats()` (average + free share) | per-store |
 | Margin | newest catalog products sampled through `faracart_product_cost` (average margin %) | only when the store stores product costs |
-| Current goal performance | attribution funnel (views/completed/converted + rates) when `goal_id` is given | per goal |
+| Current mission performance | attribution funnel (views/completed/converted + rates) when `mission_id` is given | per mission |
 
 Window: 7–180 days (default 90, the spec's preferred stability window);
 an explicit `from`/`to` range overrides `window_days`.
@@ -281,7 +281,7 @@ an explicit `from`/`to` range overrides `window_days`.
 
 Candidate thresholds are generated around the AOV (`0.9× … 1.5×`),
 plus shipping-aware additions (`AOV + average shipping`,
-`median + average shipping`) for free-shipping goals — all filterable
+`median + average shipping`) for free-shipping missions — all filterable
 via `faracart_recommendation_candidates`. Each candidate is scored on
 four normalized (0–100) components with filterable weights
 (`faracart_recommendation_weights`, defaults in `SCORE_WEIGHTS`):
@@ -295,7 +295,7 @@ four normalized (0–100) components with filterable weights
   threshold; neutral 50 when margin/reward data is missing (never a
   guessed number).
 - **History (15%)** — the store's own completion rate (neutral without
-  ≥10 goal views).
+  ≥10 mission views).
 
 Every candidate exposes `factors` (the raw sub-scores) and `reasons`
 (plain-English bullets derived from the actual numbers) so the admin UI
@@ -306,7 +306,7 @@ can always show *why* a threshold was chosen.
 Confidence = data-volume tier (`basic` 50–199 orders / `reliable`
 200–999 / `high_confidence` 1000+, minimum filterable via
 `faracart_recommendation_min_orders`) adjusted by order-value
-consistency (CV), margin/shipping availability, goal-history depth and
+consistency (CV), margin/shipping availability, mission-history depth and
 whether economics had its data — clamped 40–95 (heuristics, never
 statistical certainty). Expected impact is derived deterministically:
 `expected_aov_impact` (reachable share × gap %), `expected_completion_rate`
@@ -316,33 +316,33 @@ layer — excluded without margin data.
 
 ## 4. API & caching
 
-- `GET /faracart/v1/revenue/goal-recommendations` (admin-only) — args:
-  `goal_id` (required — the Recommendations page always analyzes exactly
-  one selected goal, never an "all goals" context; a `goal_id` that no
+- `GET /faracart/v1/revenue/mission-recommendations` (admin-only) — args:
+  `mission_id` (required — the Recommendations page always analyzes exactly
+  one selected mission, never an "all missions" context; a `mission_id` that no
   longer resolves returns unavailable instead of silently recommending
-  for a deleted goal), `reward_type` (whitelist, optional), `reward_value`
+  for a deleted mission), `reward_type` (whitelist, optional), `reward_value`
   / `reward_max_value` / `reward_meta` (reward config overrides for
   advanced callers), `window_days`, `from`, `to`. Returns the analysis,
   the ranked candidates (score, confidence, expected impact, reasons,
-  factors), the top `recommendation` and `goal_id` (so the UI can
-  validate the payload belongs to the selected goal).
-- `POST /faracart/v1/revenue/goal-recommendations/apply` (admin-only,
-  UPSELL_REFACTOR §10/§41) — the only write path: `goal_id` +
-  `threshold` applies a chosen threshold to an existing goal (never any
-  other Goal setting), records the `recommendation_applied`
+  factors), the top `recommendation` and `mission_id` (so the UI can
+  validate the payload belongs to the selected mission).
+- `POST /faracart/v1/revenue/mission-recommendations/apply` (admin-only,
+  UPSELL_REFACTOR §10/§41) — the only write path: `mission_id` +
+  `threshold` applies a chosen threshold to an existing mission (never any
+  other Mission setting), records the `recommendation_applied`
   feedback-loop event (old target + applied threshold, deduped daily
-  per goal) and invalidates the revenue caches. The engine itself never
-  modifies a goal — applying is an explicit, permission-checked admin
+  per mission) and invalidates the revenue caches. The engine itself never
+  modifies a mission — applying is an explicit, permission-checked admin
   action.
 - `GET /faracart/v1/revenue/cost-coverage` (admin-only, §25/§46) —
   catalog product-cost coverage (`costed_products` / `total_products` /
   `coverage_pct` / `has_cost_data`) so the Recommendations UI can
   explain why profit estimates may be unavailable.
-- Served through `RevenueRepository::goal_recommendations()` — the same
+- Served through `RevenueRepository::mission_recommendations()` — the same
   generation-versioned transients; the existing invalidation (order
-  payment/status, goal CRUD, product saves, aggregation) already keeps
+  payment/status, mission CRUD, product saves, aggregation) already keeps
   recommendations fresh. TTL: `faracart_recommendation_cache_ttl`.
-- **Safety:** the engine never changes a goal. Applying a recommendation
+- **Safety:** the engine never changes a mission. Applying a recommendation
   is an explicit admin action through the apply endpoint.
 
 ## 5. Graceful degradation
@@ -357,7 +357,7 @@ layer — excluded without margin data.
 ## 6. Extensibility (future AI/ML)
 
 The public `recommend()` payload is the frontend contract. A future
-`MLGoalRecommendationEngine` can replace the deterministic class behind
+`MLMissionRecommendationEngine` can replace the deterministic class behind
 that same shape without touching the REST layer or the admin UI (P33-60).
 
 ---
@@ -365,7 +365,7 @@ that same shape without touching the REST layer or the admin UI (P33-60).
 # FaraCart — Smart Upsell Ranking (Phase 33.5)
 
 `UpsellRanker` (`includes/Analytics/`) answers *"which products should
-this shopper add to reach the goal?"* with a fully transparent,
+this shopper add to reach the mission?"* with a fully transparent,
 deterministic weighted ranking — no LLM/AI. Every product exposes its
 component scores, raw factors, historical conversion stats and
 plain-English reasons, so the admin UI and the storefront can always
@@ -373,13 +373,13 @@ show *why* a product was recommended.
 
 ## 1. Pipeline
 
-1. **Candidates (P33-26)** — the goal's own products (`manual`),
-   products historically recommended for the goal (`historical`),
-   products in the goal's categories (`category`), the cart items'
+1. **Candidates (P33-26)** — the mission's own products (`manual`),
+   products historically recommended for the mission (`historical`),
+   products in the mission's categories (`category`), the cart items'
    WooCommerce-endorsed sources (`upsell` / `cross_sell` / `related`),
    products sharing a category or tag with the cart (`category_match` /
    `tag_match`) and best sellers (`popular`). Bounded to 60 candidates;
-   out-of-stock / private / draft / already-in-cart / goal-excluded
+   out-of-stock / private / draft / already-in-cart / mission-excluded
    products never reach scoring.
 2. **Six normalized (0–100) component scores** with filterable weights
    (`faracart_upsell_weights`, defaults below).
@@ -390,8 +390,8 @@ show *why* a product was recommended.
 
 | Component | Default weight | Signal |
 | --- | --- | --- |
-| `price_gap` | 25% | how well the price fits the remaining goal gap — sweet band `[0.75×, 1.30×]` scores 100 (small overshoots tolerated, P33-27/36), hard decay to 0 at 3×; neutral 50 without a price/gap |
-| `relevance` | 25% | goal eligibility (manual products +55, counts-toward-goal +35), category overlap with the cart (+30), tag overlap (+20), WC-endorsed source trust (+15) |
+| `price_gap` | 25% | how well the price fits the remaining mission gap — sweet band `[0.75×, 1.30×]` scores 100 (small overshoots tolerated, P33-27/36), hard decay to 0 at 3×; neutral 50 without a price/gap |
+| `relevance` | 25% | mission eligibility (manual products +55, counts-toward-mission +35), category overlap with the cart (+30), tag overlap (+20), WC-endorsed source trust (+15) |
 | `popularity` | 15% | units sold (bounded at 100) + average rating |
 | `inventory` | 10% | stock >20 → 100, 5–20 → 70, 1–4 → 40, backorder → 20; unmanaged stock → neutral 70 |
 | `margin` | 15% | only when the store provides product cost data (never invented); neutral 50 otherwise |
@@ -407,7 +407,7 @@ zero the other components.
 The storefront reports upsell interactions through
 `POST /faracart/v1/upsell/track` (public, privacy-safe session ids) into
 the Phase 33.1 `upsell_events` log: `upsell_impression` (deduped per
-session+goal+product within 24h), `upsell_clicked`, `upsell_added` and
+session+mission+product within 24h), `upsell_clicked`, `upsell_added` and
 `upsell_order`. When a paid order completes, `attribute_order()` resolves
 the ordering session (the `order_paid` event's session, then the live
 cookie, then the user's recent revenue session) and records one
@@ -419,7 +419,7 @@ historical scoring, no black-box model.
 
 ## 4. Graceful degradation (P33-51)
 
-- No goal / no remaining gap → `available: false` with a reason (never a
+- No mission / no remaining gap → `available: false` with a reason (never a
   fabricated list); a closed gap is explicit.
 - Disabled via `faracart_upsells_enabled` → unavailable with a reason.
 - No margin data → margin neutral 50, `profit_available: false`,
@@ -430,14 +430,14 @@ historical scoring, no black-box model.
 ## 5. API & caching
 
 - `GET /faracart/v1/revenue/upsells` (admin) — the ranked products for a
-  cart + goal context (`goal_id`, `cart_value`, `remaining`, `cart`,
+  cart + mission context (`mission_id`, `cart_value`, `remaining`, `cart`,
   `limit`), including weights, context echo and per-product breakdowns.
 - `GET /faracart/v1/revenue/upsells/{product_id}` (admin) — one product's
   score breakdown + historical stats (null for unknown products).
 - Both are served through `RevenueRepository::upsell_ranking()` /
   `upsell_product_detail()` — the same generation-versioned transients
   as every other revenue read; the existing invalidation (order
-  payment/status, goal CRUD, product saves, aggregation) keeps rankings
+  payment/status, mission CRUD, product saves, aggregation) keeps rankings
   fresh. `RevenueRepository::upsell_analytics()` powers the admin
   top-products table over a window (impressions/clicks/adds/orders/
   revenue/profit/score).
@@ -459,8 +459,8 @@ without touching the REST layer or the admin UI (P33-60).
 The admin analytics area is **Sales Performance** (`UICHANGES.md` §4/§6):
 one primary analytics destination answering "is FaraCart helping my
 store sell more profitably?" — the Overview (four business KPI cards,
-trend, funnel, insights) and the Goal Performance comparison table —
-plus the **Optimization** engines (Recommendations for better Goal
+trend, funnel, insights) and the Mission Performance comparison table —
+plus the **Optimization** engines (Recommendations for better Mission
 targets, Upsells for product recommendations). The legacy `Analytics`
 and Attribution Dashboard pages stay reachable by URL for backward
 compatibility but are not primary navigation items (§25/§26/§39).
@@ -475,17 +475,17 @@ new uncached queries.
 | Page | Route | REST endpoint | Repository read |
 | --- | --- | --- | --- |
 | Overview (Sales Performance) | `/revenue` | `GET /revenue/overview` | `overview()` + `daily_trend()` |
-| Goal Performance | `/revenue/goals` | `GET /revenue/goals` | `goal_performance()` |
+| Mission Performance | `/revenue/missions` | `GET /revenue/missions` | `mission_performance()` |
 | Attribution Dashboard (legacy, not in primary nav) | `/revenue/attribution` | `GET /revenue/attribution` | `overview()` |
-| Recommendations | `/optimization/goals` | `GET /revenue/goal-recommendations` + `POST /revenue/goal-recommendations/apply` | `goal_recommendations()` |
+| Recommendations | `/optimization/missions` | `GET /revenue/mission-recommendations` + `POST /revenue/mission-recommendations/apply` | `mission_recommendations()` |
 | Upsells | `/optimization/upsells` | `GET /revenue/upsells?analytics=1` + `GET /revenue/upsells/{id}` | `upsell_analytics()` / `upsell_product_detail()` |
 
 `/revenue/recommendations` and `/revenue/upsells` redirect to the
 Optimization routes so bookmarked URLs keep working (§39). The revenue
-routes (`/revenue/overview`, `/revenue/attribution`, `/revenue/goals`)
+routes (`/revenue/overview`, `/revenue/attribution`, `/revenue/missions`)
 live in the admin-only `RevenueController`
 (`includes/REST/RevenueController.php`) — manage_options-gated, per-user
-rate limited, `from`/`to`/`goal_id` validated through the arg schema, and
+rate limited, `from`/`to`/`mission_id` validated through the arg schema, and
 served through the same generation-versioned transients as every other
 revenue read.
 
@@ -499,18 +499,18 @@ and Estimated Profit (every data state, never a fabricated number).
 Below the KPIs:
 
 - **Daily revenue trend** — defaults to Attributed Sales + Purchased
-  Orders (Goal Completions toggle; Additional Sales Value behind the
+  Orders (Mission Completions toggle; Additional Sales Value behind the
   Advanced toggle), zero-filled over the window, today's live bucket
   merged (`revenue_daily` + `AttributionEngine`).
 - **The canonical funnel** (`UICHANGES.md` §18) — views → progressed →
   completed → purchased with the percentage each stage carries from the
   previous one, so the largest drop-off reads at a glance. This is the
   only store-wide copy of the funnel; the same funnel appears again only
-  scoped to a single goal in the Goal Detail drawer.
+  scoped to a single mission in the Mission Detail drawer.
 - **Deterministic business insights** (§17) — 2–3 plain-English cards
   derived from the actual payload (purchases influenced, basket change,
   completion→purchase drop-off, profit) — never an LLM, never causality.
-- **AOV impact panel** — store-wide vs goal-exposed vs non-exposed AOV
+- **AOV impact panel** — store-wide vs mission-exposed vs non-exposed AOV
   with absolute + percentage change, labeled *observed impact* (never
   causality).
 - **Shipping panel** — average shipping, free-shipping share, orders
@@ -519,15 +519,15 @@ Below the KPIs:
   sales, incremental cart value, attribution window and the
   observed-impact disclaimer behind an accordion.
 
-## 3. Goal Performance
+## 3. Mission Performance
 
-One row per goal: funnel counts (views → progressed → completed →
+One row per mission: funnel counts (views → progressed → completed →
 converted), completion/conversion rates, average + incremental cart
 value, attributed + assisted revenue, reward cost and profit impact.
 Since the UPSELL_REFACTOR pass, each row also carries
 `upsell_assisted` / `upsell_assisted_rate` (completions whose session
 also engaged the smart-upsell panel — the "suggested products helped
-close the goal" signal, computed as distinct sessions in the goal's
+close the mission" signal, computed as distinct sessions in the mission's
 completion funnel that also have an upsell interaction). The
 Recommendations drawer section and the Upsells page surface this same
 signal. Rows expand into the funnel visual + detail panel.
@@ -540,7 +540,7 @@ model revenue cards (plus distinct order count), incremental cart value
 profit-impact panel — which shows its `profit_reason` instead of a
 number when the store provides no margin data (revenue-only analytics).
 
-## 5. Recommendations (Goal Recommendation UI)
+## 5. Recommendations (Mission Recommendation UI)
 
 The Phase 33.4 payload rendered with the simplified presentation
 (`Improvement.md` §33–§34 / `UICHANGES.md` §40) — the same engine, the
@@ -551,7 +551,7 @@ same endpoint, a business-first layout:
   threshold) and the payload still carries `candidates[]` plus the
   selected `recommendation` (= `scored[0]`, the best); the page renders
   **only that one** — never a list of competing candidates. The card
-  shows the recommended goal target up front, a **"Confidence: High /
+  shows the recommended mission target up front, a **"Confidence: High /
   Medium / Low"** label (tiered from the raw 0–100 score, which stays
   hidden), the **expected impact** as "+8% – +14% average basket value",
   the expected profit with the §34 unavailable state ("Not available —
@@ -573,12 +573,12 @@ same endpoint, a business-first layout:
   non-finite / missing inputs as "—" so a 0 denominator can never
   surface as `NaN%` / `Infinity%` anywhere.
 - **Apply / View details / Dismiss** on the card. **Apply** goes through
-  the dedicated `POST /revenue/goal-recommendations/apply` endpoint
-  (confirm dialog → one `goal_id` + `threshold` write — the engine never
-  modifies a goal, P33-53), which records the `recommendation_applied`
+  the dedicated `POST /revenue/mission-recommendations/apply` endpoint
+  (confirm dialog → one `mission_id` + `threshold` write — the engine never
+  modifies a mission, P33-53), which records the `recommendation_applied`
   feedback-loop event and invalidates the revenue caches. The selected
-  goal's own current performance (its funnel + `upsell_assisted`
-  completion count from `goal_history`) is shown on the card.
+  mission's own current performance (its funnel + `upsell_assisted`
+  completion count from `mission_history`) is shown on the card.
 - **Product-cost coverage** — a banner ties the Profit estimates to the
   catalog coverage (`GET /revenue/cost-coverage`: "x / y products carry
   cost data"), so "Not available" is explained instead of appearing
@@ -618,8 +618,8 @@ unavailable / partial / zero / negative states, never a blank card:
 
 - **Distinct empty states (§44)** — "No sales data yet" (no FaraCart
   interactions at all) is different from "No purchases yet" (customers
-  interact with goals but no attributed purchase was recorded in the
-  period). The Sales Performance page and the Goal Conversion & Purchase
+  interact with missions but no attributed purchase was recorded in the
+  period). The Sales Performance page and the Mission Conversion & Purchase
   Analysis page each branch on the funnel: `views === 0 && orders === 0`
   shows the first; `views > 0 && orders === 0` shows the second with
   its own §44 copy and icon.
@@ -649,7 +649,7 @@ unavailable / partial / zero / negative states, never a blank card:
 `UICHANGES.md` is the authoritative UX specification for this area
 (replaces the earlier `Improvement.md` initiative): the information
 architecture (§4), the four-KPI overview (§7–§15), the canonical funnel
-(§18), the commercial goal table (§19–§23), the Goal Detail drawer
+(§18), the commercial mission table (§19–§23), the Mission Detail drawer
 (§24), progressive disclosure of advanced attribution (§26–§28), the
 metric ownership map (§29), user-facing terminology (§30) and the
 empty/data states (§32–§33). The backend attribution model, profit

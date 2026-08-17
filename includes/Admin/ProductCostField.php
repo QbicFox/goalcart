@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * Class ProductCostField
  *
  * UPSELL_REFACTOR §19/§20 — adds a "Product cost" field to the WooCommerce
- * product editor (simple products AND per-variation), stored under Goal
+ * product editor (simple products AND per-variation), stored under Mission
  * Cart's own namespaced meta key (`_faracart_product_cost`) so it never
  * overloads unrelated WooCommerce fields and never duplicates an existing
  * cost source.
@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Reads flow through the normal RewardCostEstimator chain
  * (`_faracart_product_cost` → `_cost` → `_wc_cog_cost`), so once a cost
- * is saved here, Estimated Profit, Goal economics and the upsell margin
+ * is saved here, Estimated Profit, Mission economics and the upsell margin
  * scorer all pick it up with no further configuration.
  */
 final class ProductCostField {
@@ -73,7 +73,7 @@ final class ProductCostField {
 			array(
 				'id'                => RewardCostEstimator::PRODUCT_COST_META,
 				'label'             => __( 'Product cost', 'faracart' ) . ' (' . __( 'FaraCart', 'faracart' ) . ')',
-				'description'       => __( 'The unit cost FaraCart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown.', 'faracart' ),
+				'description'       => __( 'The unit cost FaraCart uses for Estimated Profit, Mission economics and upsell margin scoring. Leave empty when unknown.', 'faracart' ),
 				'desc_tip'          => true,
 				'type'              => 'number',
 				'custom_attributes' => array(

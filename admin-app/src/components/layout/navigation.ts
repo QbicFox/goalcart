@@ -31,7 +31,7 @@ export interface NavSection {
  * Sales Performance is the single primary analytics destination — it
  * answers "is FaraCart helping my store sell more profitably?" with
  * business outcomes. Optimization holds the two "what should I change?"
- * engines: Recommendations (choose better Goal targets) and Upsells
+ * engines: Recommendations (choose better Mission targets) and Upsells
  * (which products to recommend).
  *
  * The legacy Analytics page (/analytics) and Attribution Dashboard
@@ -44,7 +44,7 @@ export const NAV_SECTIONS: NavSection[] = [
     title: __('FaraCart', 'faracart'),
     items: [
       { path: '/dashboard', label: __('Dashboard', 'faracart'), icon: DashboardIcon },
-      { path: '/goals', label: __('Goals', 'faracart'), icon: FlagIcon },
+      { path: '/missions', label: __('Missions', 'faracart'), icon: FlagIcon },
       { path: '/campaigns', label: __('Campaigns', 'faracart'), icon: CampaignIcon },
     ],
   },
@@ -52,13 +52,13 @@ export const NAV_SECTIONS: NavSection[] = [
     title: __('Sales Performance', 'faracart'),
     items: [
       { path: '/revenue', label: __('Overview', 'faracart'), icon: BarChartIcon },
-      { path: '/revenue/goals', label: __('Goal Performance', 'faracart'), icon: LeaderboardIcon },
+      { path: '/revenue/missions', label: __('Mission Performance', 'faracart'), icon: LeaderboardIcon },
     ],
   },
   {
     title: __('Optimization', 'faracart'),
     items: [
-      { path: '/optimization/goals', label: __('Recommendations', 'faracart'), icon: TipsAndUpdatesIcon },
+      { path: '/optimization/missions', label: __('Recommendations', 'faracart'), icon: TipsAndUpdatesIcon },
       { path: '/optimization/upsells', label: __('Upsells', 'faracart'), icon: TrendingUpIcon },
     ],
   },

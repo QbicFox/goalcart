@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * Template registry endpoints (pluggable template engine):
  *
  *  - `GET /faracart/v1/templates` — every registered template grouped by
- *    scope (goal / campaign) with its settings schema, the current scope
+ *    scope (mission / campaign) with its settings schema, the current scope
  *    defaults, and the effective default appearance per template. The
  *    React admin app reads this to render the template pickers and the
  *    schema-driven settings forms; the backend stays the source of truth

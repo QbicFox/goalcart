@@ -35,7 +35,7 @@ require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use FaraCart\Cart\CartIntegration;
-use FaraCart\Goals\CartContext;
+use FaraCart\Missions\CartContext;
 
 $failures = 0;
 $checks   = 0;
@@ -117,7 +117,7 @@ $fresh = new CartIntegration();
 
 $a = $fresh->context( $cart, array( 'exclude_shipping' => true ) );
 check( 'first build reads line-item subtotal', near( $a->subtotal(), 200 ) );
-check( 'first build reads line-item total basis', near( $a->amount( \FaraCart\Goals\Goal::MODE_TOTAL ), 180 ) );
+check( 'first build reads line-item total basis', near( $a->amount( \FaraCart\Missions\Mission::MODE_TOTAL ), 180 ) );
 
 $b = $fresh->context( $cart, array( 'exclude_shipping' => true ) );
 check( 'second build is memoized (same instance)', $a === $b );

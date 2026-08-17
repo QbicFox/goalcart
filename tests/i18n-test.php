@@ -138,17 +138,16 @@ check(
 echo "\n== 1b. fa_IR storefront translation ==\n";
 
 $fa_po       = read_source( $root . '/languages/faracart-fa_IR.po' );
-$fa_jed      = read_source( $root . '/languages/faracart-fa_IR-faracart-admin.json' );
-$fa_expected = array(
-	'Free shipping'                            => 'ارسال رایگان',
-	'Percentage discount'                      => 'تخفیف درصدی',
-	'Fixed discount'                           => 'تخفیف ثابت',
-	'Free gift'                                => 'هدیه رایگان',
-	'Coupon'                                   => 'کوپن',
-	'Goal reward'                              => 'پاداش هدف',
-	'You reached your goal!'                   => 'به هدف خود رسیدید!',
-	'Only {remaining} left to reach your goal' => 'تنها {remaining} تا رسیدن به هدف شما باقی مانده است',
-);
+$fa_jed      = read_source( $root . '/languages/faracart-fa_IR-faracart-admin.json' );	$fa_expected = array(
+		'Free shipping'                            => 'ارسال رایگان',
+		'Percentage discount'                      => 'تخفیف درصدی',
+		'Fixed discount'                           => 'تخفیف ثابت',
+		'Free gift'                                => 'هدیه رایگان',
+		'Coupon'                                   => 'کوپن',
+		'Mission reward'                           => 'پاداش ماموریت',
+		'You reached your mission!'                => 'ماموریت خود را تکمیل کردید!',
+		'Only {remaining} left to reach your mission' => 'تنها {remaining} تا تکمیل ماموریت شما باقی مانده است',
+	);
 
 check( 'fa_IR .po exists', is_file( $root . '/languages/faracart-fa_IR.po' ) );
 
@@ -225,7 +224,7 @@ foreach ( preg_split( "/\n\n/", $pot_all ) as $block ) {
 
 check( 'fa_IR translates every admin dashboard string', $admin_total === $admin_done && $admin_total > 0 );
 check( 'fa_IR .po has no duplicate msgids', count( $po_msgid_raw ) === count( array_unique( $po_msgid_raw ) ) );
-check( 'fa_IR admin JED carries dashboard labels', false !== strpos( $fa_jed, 'داشبورد' ) && false !== strpos( $fa_jed, 'افزودن هدف' ) );
+check( 'fa_IR admin JED carries dashboard labels', false !== strpos( $fa_jed, 'داشبورد' ) && false !== strpos( $fa_jed, 'افزودن ماموریت' ) );
 
 // ---------------------------------------------------------------------------
 // 2. POT pipeline
@@ -236,17 +235,15 @@ $pot = read_source( $root . '/languages/faracart.pot' );
 check( 'POT file exists', is_file( $root . '/languages/faracart.pot' ) );
 check( 'POT declares Content-Type charset UTF-8', false !== strpos( $pot, 'Content-Type: text/plain; charset=UTF-8' ) );
 check( 'POT declares Plural-Forms', false !== strpos( $pot, 'Plural-Forms: nplurals=2; plural=(n != 1);' ) );
-check( 'POT declares X-Domain faracart', false !== strpos( $pot, 'X-Domain: faracart' ) );
-
-foreach ( array(
-	'PHP string sampled'       => 'The goal could not be found.',
-	'PHP message-engine string' => 'Only {remaining} left to reach your goal',
-	'PHP reward label'         => 'Free shipping',
-	'Admin React string'       => 'Dashboard',
-	'Admin builder string'     => 'Add goal',
-	'Admin preview string'     => 'Could not load the preview.',
-	'Admin date-range string'  => 'Date range',
-) as $label => $needle ) {
+check( 'POT declares X-Domain faracart', false !== strpos( $pot, 'X-Domain: faracart' ) );	foreach ( array(
+		'PHP string sampled'       => 'The mission could not be found.',
+		'PHP message-engine string' => 'Only {remaining} left to reach your mission',
+		'PHP reward label'         => 'Free shipping',
+		'Admin React string'       => 'Dashboard',
+		'Admin builder string'     => 'Add mission',
+		'Admin preview string'     => 'Could not load the preview.',
+		'Admin date-range string'  => 'Date range',
+	) as $label => $needle ) {
 	check( "POT contains {$label}", false !== strpos( $pot, 'msgid "' . $needle . '"' ) );
 }
 
@@ -347,7 +344,7 @@ $frontend_css = read_source( $root . '/assets/css/frontend.css' );
 // top/center/bottom) that must keep their visual result in RTL — the
 // admin picks a side explicitly, so it must not flip like a logical
 // start/end would. Strip that block before the check.
-$floating_marker = '/* ------------------------------------------------------------------ *' . "\n * Floating widget (floating goals/campaigns button + drawer)";
+$floating_marker = '/* ------------------------------------------------------------------ *' . "\n * Floating widget (floating missions/campaigns button + drawer)";
 $floating_start  = strpos( $frontend_css, $floating_marker );
 
 if ( false !== $floating_start ) {

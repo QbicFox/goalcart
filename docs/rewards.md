@@ -1,9 +1,9 @@
 # FaraCart — Reward Engine
 
-> **Phase 5 / Tasks P05-T01–T03.** The reward layer that turns goal completion into
-> real cart value. Rewards are fully decoupled from goal calculation: the GoalEngine
-> (Phase 4) computes a `GoalResult` and the RewardEngine turns that result into a
-> `RewardResult` using the goal's reward configuration, then applies it to the live
+> **Phase 5 / Tasks P05-T01–T03.** The reward layer that turns mission completion into
+> real cart value. Rewards are fully decoupled from mission calculation: the MissionEngine
+> (Phase 4) computes a `MissionResult` and the RewardEngine turns that result into a
+> `RewardResult` using the mission's reward configuration, then applies it to the live
 > WooCommerce cart through public hooks. This document explains the pipeline, the
 > reward types, the safety guarantees, and how the WooCommerce integration works.
 
@@ -11,9 +11,9 @@
 
 ## 1. Objective (P05-T01)
 
-Rewards are **decoupled from goal calculation**: the reward layer never evaluates a
-goal and the goal engine never applies a reward. The two layers meet at the
-`GoalResult` / `RewardResult` boundary, so rewards can be changed, stacked, and
+Rewards are **decoupled from mission calculation**: the reward layer never evaluates a
+mission and the mission engine never applies a reward. The two layers meet at the
+`MissionResult` / `RewardResult` boundary, so rewards can be changed, stacked, and
 safety-checked independently of the math.
 
 The same engine serves the frontend widget, AJAX refreshes, the REST API, and
@@ -23,9 +23,9 @@ grants.
 ## 2. Architecture (P05-T02)
 
 ```text
-GoalResult           goal evaluation (Phase 4)
+MissionResult           mission evaluation (Phase 4)
     ↓
-Reward               typed accessors over the goal's reward columns + reward_meta
+Reward               typed accessors over the mission's reward columns + reward_meta
     ↓
 RewardEngine         eligibility, stacking, and state resolution
     ↓
@@ -38,18 +38,18 @@ WooCommerce hooks    fees / package rates / coupons / gifts on the live cart
 
 | Class | Role |
 |---|---|
-| `Rewards\Reward` | Immutable reward value object derived from a Goal (type, value, max value, label, stacking, eligible/excluded products & categories, shipping zone/method filters, gift product & mode, coupon settings). |
+| `Rewards\Reward` | Immutable reward value object derived from a Mission (type, value, max value, label, stacking, eligible/excluded products & categories, shipping zone/method filters, gift product & mode, coupon settings). |
 | `Rewards\RewardResult` | The 5-state result object (`not_applicable`, `locked`, `available`, `applied`, `blocked`) + reasons, immutable. |
 | `Rewards\RewardApplicator` | Interface (`supports()`, `evaluate()`, `apply()`); `evaluate()` is the pure, WooCommerce-independent step. |
 | `Rewards\Applicators\*` | The five applicators: free shipping, percentage discount, fixed discount, free gift, coupon. |
 | `Rewards\RewardApplicatorRegistry` | Maps reward type → applicator class, resolves lazily, filterable via `faracart_reward_applicator_classes`. |
 | `Rewards\RewardSafety` | Pure, testable safety rules: stacking, coupon existence, gift availability, deterministic generated coupon codes. |
-| `Rewards\RewardEngine` | Facade: evaluates a GoalResult into a RewardResult and syncs rewards to the live WC cart (session-tracked, re-entrancy-guarded). |
-| `Goals\GoalRepository` | Loads active goals (with campaign gating) once per request for the cart sync. |
+| `Rewards\RewardEngine` | Facade: evaluates a MissionResult into a RewardResult and syncs rewards to the live WC cart (session-tracked, re-entrancy-guarded). |
+| `Missions\MissionRepository` | Loads active missions (with campaign gating) once per request for the cart sync. |
 
 `RewardEngine` is registered in the DI container (`Plugin::reward_engine()`); the
-repository (`Plugin::goal_engine()`'s sibling) is `GoalRepository` via
-`Plugin::container()->get( GoalRepository::class )`.
+repository (`Plugin::mission_engine()`'s sibling) is `MissionRepository` via
+`Plugin::container()->get( MissionRepository::class )`.
 
 ### Extension point
 
@@ -67,10 +67,10 @@ add_filter( 'faracart_reward_applicator_classes', function ( $classes ) {
 | `free_shipping` | optional `shipping_zone_ids`, `shipping_method_ids` (`flat_rate` or `flat_rate:3`) | Rates in matching packages are zeroed via `woocommerce_package_rates`; with no restrictions every rate goes free. Store shipping settings are never altered. |
 | `percent_discount` | `reward_value` (%), optional `reward_max_value` cap, eligible products/categories, excluded products | Negative cart fee (`woocommerce_cart_calculate_fees`), applied to the eligible after-discount base, never exceeding the base. |
 | `fixed_discount` | `reward_value` (amount), eligible/excluded products & categories | Negative cart fee, clamped to the eligible value. |
-| `free_gift` | `gift_product_id`, `gift_add_mode` (`automatic` \| `choose`) | Automatic: gift line added with `faracart_gift` cart data, price zeroed during totals, removed when the goal becomes incomplete. Choose: the shopper picks one gift from the configured `gift_products` list through the storefront picker (`POST /faracart/v1/gift`); the chosen product is added free, exactly one per goal. |
-| `coupon` | `coupon_code` (existing) or `coupon_generate` (from `reward_value`, `max_value`, eligible/excluded rules) | Existing coupons are validated then applied; generated coupons are deterministic per goal (`FARACART-…`), persisted, individual-use by default, and cleaned up on uninstall. |
+| `free_gift` | `gift_product_id`, `gift_add_mode` (`automatic` \| `choose`) | Automatic: gift line added with `faracart_gift` cart data, price zeroed during totals, removed when the mission becomes incomplete. Choose: the shopper picks one gift from the configured `gift_products` list through the storefront picker (`POST /faracart/v1/gift`); the chosen product is added free, exactly one per mission. |
+| `coupon` | `coupon_code` (existing) or `coupon_generate` (from `reward_value`, `max_value`, eligible/excluded rules) | Existing coupons are validated then applied; generated coupons are deterministic per mission (`FARACART-…`), persisted, individual-use by default, and cleaned up on uninstall. |
 
-Reward config lives in the goal's `reward_type` / `reward_value` /
+Reward config lives in the mission's `reward_type` / `reward_value` /
 `reward_max_value` columns plus the JSON `reward_meta` column (see
 `docs/database.md` §1.1).
 
@@ -80,8 +80,8 @@ Every evaluation produces exactly these states (see `RewardResult::to_array()`):
 
 | State | Meaning |
 |---|---|
-| `not_applicable` | No reward applies (goal ineligible, no reward configured, unknown reward type) — carries a `reason`. |
-| `locked` | Goal eligible but target not reached — reward stays locked. |
+| `not_applicable` | No reward applies (mission ineligible, no reward configured, unknown reward type) — carries a `reason`. |
+| `locked` | Mission eligible but target not reached — reward stays locked. |
 | `available` | Target reached; the reward may be granted. Computed `amount` and `meta` are attached when a `CartContext` is supplied. |
 | `applied` | The reward has actually been applied to the live cart (reserved for analytics). |
 | `blocked` | Target reached but a safety rule prevents granting — carries a `reason` (`stacking`, `invalid_coupon`, `gift_unavailable`, …). |
@@ -92,7 +92,7 @@ Every evaluation produces exactly these states (see `RewardResult::to_array()`):
 |---|---|
 | Duplicate rewards | A non-stacking reward may only be the first of its type per pass; `stacking='stack'` rewards combine explicitly. |
 | Reward loops | Reconciliation is idempotent (it only touches coupons/gifts this engine applied) and `CartContext` subtracts the engine's own discount fees from the `total` basis — reward mutations can never re-trigger evaluation. |
-| Stale rewards | Every totals pass re-evaluates from scratch and reconciles what is applied; coupons and automatic gifts granted by the engine are removed the moment a goal becomes incomplete — including without any cart change (schedule expiry, admin deactivation); discount fees drop out automatically. |
+| Stale rewards | Every totals pass re-evaluates from scratch and reconciles what is applied; coupons and automatic gifts granted by the engine are removed the moment a mission becomes incomplete — including without any cart change (schedule expiry, admin deactivation); discount fees drop out automatically. |
 | Invalid coupon application | Codes are validated against WooCommerce before application; generated coupons are created through the public `WC_Coupon` API only. |
 | Unintended stacking | `RewardSafety::stacking_allows()` blocks same-type duplicates; generated coupon rewards are `individual_use` unless `stacking='stack'`. |
 | Excluded products | Discount bases and generated-coupon product/category rules exclude them; a fixed discount can never exceed the eligible value. |
@@ -102,7 +102,7 @@ Every evaluation produces exactly these states (see `RewardResult::to_array()`):
 | Hook | Priority | Behavior |
 |---|---|---|
 | `woocommerce_before_calculate_totals` | 10 | `zero_gift_prices()` — automatic gift lines contribute 0 to every totals pass. |
-| `woocommerce_before_calculate_totals` | 100 | `sync_cart()` — evaluate active goals, reconcile coupons/gifts. Runs at most once per totals pass (re-entrancy guard) and only mutates the cart when the shopper's fingerprint changed. |
+| `woocommerce_before_calculate_totals` | 100 | `sync_cart()` — evaluate active missions, reconcile coupons/gifts. Runs at most once per totals pass (re-entrancy guard) and only mutates the cart when the shopper's fingerprint changed. |
 | `woocommerce_cart_calculate_fees` | 20 | `apply_discount_fees()` — rebuild percentage/fixed discount fees from the per-request evaluation cache. |
 | `woocommerce_package_rates` | 100 | `apply_free_shipping()` — stateless; when no free-shipping reward is active every rate passes through untouched. |
 
@@ -110,12 +110,12 @@ Every evaluation produces exactly these states (see `RewardResult::to_array()`):
 which fires *after* `WC_Cart::reset_totals()` has zeroed the cart's aggregate
 getters. `CartContext::from_cart()` therefore computes the money bases from the cart
 **line items** (which always carry their values) and only falls back to the aggregate
-getters when they are non-zero, so subtotal/discounted-subtotal goals stay honest on
+getters when they are non-zero, so subtotal/discounted-subtotal missions stay honest on
 the live cart. The grand `total` falls back to the after-discount line value while
 totals are reset; the tax component is a Phase 6 refinement (shipping is excluded for
 reward evaluation anyway).
 
-The engine only touches what it granted: applied coupons are tracked per goal in the
+The engine only touches what it granted: applied coupons are tracked per mission in the
 session (`faracart_applied_coupons`), automatic gifts in `faracart_gift_goals`, and
 session writes are skipped when the value did not change (no per-pass session
 churn). The shopper's own coupons are never removed.
@@ -126,8 +126,8 @@ All verified by `tests/reward-test.php` (72 checks, run with `php tests/reward-t
 
 | Edge case | Behavior |
 |---|---|
-| Goal without reward | `not_applicable` / `no_reward` |
-| Inactive / out-of-schedule goal | `not_applicable` (goal-level ineligibility) |
+| Mission without reward | `not_applicable` / `no_reward` |
+| Inactive / out-of-schedule mission | `not_applicable` (mission-level ineligibility) |
 | Target not reached | `locked` |
 | Unknown reward type | `not_applicable` / `unknown_type` (registry never throws) |
 | Duplicate non-stacking type | `blocked` / `stacking` |
@@ -138,7 +138,7 @@ All verified by `tests/reward-test.php` (72 checks, run with `php tests/reward-t
 | Coupon: no config / nonexistent code | `blocked` / `invalid_coupon` |
 | Coupon: generate mode | `available` |
 | Gift: missing / unavailable product | `blocked` / `gift_unavailable` |
-| Zero-target goal with reward | Unlocked → `available` |
+| Zero-target mission with reward | Unlocked → `available` |
 | Free shipping rate filtering | Unrestricted zeroes all rates; method/instance-restricted zeroes only the configured instance; no active reward leaves rates untouched |
 | WC hook wiring | The four integration hooks are live with their declared priorities after boot |
 | `from_cart` money bases | Derived from line items, so they stay correct while WC has reset the aggregate totals (the state during `woocommerce_before_calculate_totals`) |
@@ -151,10 +151,10 @@ and testable without a database.
 
 | Decision | Rationale |
 |---|---|
-| Reward value object derived from the goal | MVP embeds one reward per goal (`docs/database.md`); a standalone rewards table can be extracted later without breaking this layer. |
+| Reward value object derived from the mission | MVP embeds one reward per mission (`docs/database.md`); a standalone rewards table can be extracted later without breaking this layer. |
 | Registry + filter, not a hard-coded switch | New reward types ship as applicator classes without touching the engine. |
-| Fees for discounts, not coupons | Fees are recalculated every totals pass, never persisted, and drop out automatically when a goal stops being available. |
-| Session-tracked reversal | The engine knows exactly which coupons/gifts it granted and removes only those — stale rewards can never outlive an incomplete goal, even without a cart change. |
+| Fees for discounts, not coupons | Fees are recalculated every totals pass, never persisted, and drop out automatically when a mission stops being available. |
+| Session-tracked reversal | The engine knows exactly which coupons/gifts it granted and removes only those — stale rewards can never outlive an incomplete mission, even without a cart change. |
 | Line-item money bases | WC zeroes the aggregate totals before `woocommerce_before_calculate_totals` fires, so evaluation uses the always-current line data instead. |
-| Deterministic generated coupon codes | The same goal always maps to the same coupon (idempotent generation, cleaned up on uninstall). |
+| Deterministic generated coupon codes | The same mission always maps to the same coupon (idempotent generation, cleaned up on uninstall). |
 | Read-only tests | The test suite boots WordPress but never creates products, activates the plugin, or writes to the database. |

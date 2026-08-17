@@ -8,13 +8,13 @@
 namespace FaraCart\Rewards;
 
 use FaraCart\Cart\CartIntegration;
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\CompletionService;
-use FaraCart\Goals\ConflictResolver;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalEngine;
-use FaraCart\Goals\GoalRepository;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\CompletionService;
+use FaraCart\Missions\ConflictResolver;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionEngine;
+use FaraCart\Missions\MissionRepository;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Settings\Settings;
 
@@ -23,9 +23,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class RewardEngine
  *
- * Decouples rewards from goal calculation (P05-T01): the GoalEngine
- * computes a GoalResult and this engine turns it into a RewardResult using
- * the goal's Reward configuration. Pure evaluation (evaluate()) never
+ * Decouples rewards from mission calculation (P05-T01): the MissionEngine
+ * computes a MissionResult and this engine turns it into a RewardResult using
+ * the mission's Reward configuration. Pure evaluation (evaluate()) never
  * touches the database or the cart; the WooCommerce integration
  * (sync_cart and the fee/shipping callbacks) grants and reverts rewards on
  * the live cart.
@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
  * WooCommerce integration points (all public hooks):
  *  - 'woocommerce_before_calculate_totals'  clamp gift lines to qty 1
  *                                           (authoritative server-side)
- *  - 'woocommerce_before_calculate_totals'  evaluate goals + reconcile
+ *  - 'woocommerce_before_calculate_totals'  evaluate missions + reconcile
  *                                           coupons/automatic gifts
  *  - 'woocommerce_before_calculate_totals'  zero automatic-gift prices
  *  - 'woocommerce_cart_calculate_fees'      apply percentage/fixed fees
@@ -47,7 +47,7 @@ defined( 'ABSPATH' ) || exit;
 	 *                                           enforcement is server-side via
 	 *                                           clamp_gift_quantities)
 	 *  - 'woocommerce_cart_item_removed'        re-add a mandatory gift line a
-	 *                                           shopper removed while its goal
+	 *                                           shopper removed while its mission
 	 *                                           still grants it (Blocks carts
 	 *                                           always render a remove control;
 	 *                                           the re-add there is the
@@ -62,25 +62,25 @@ defined( 'ABSPATH' ) || exit;
  *                               mutations never re-trigger evaluation
  *  - stale rewards           -> every totals pass re-evaluates and
  *                               reconciles; coupons and gifts granted by
- *                               this engine are removed the moment a goal
+ *                               this engine are removed the moment a mission
  *                               becomes incomplete, even without a cart
  *                               change (schedule expiry, admin
  *                               deactivation). Gift removal scans the
- *                               live cart (goal-marked lines), not just
+ *                               live cart (mission-marked lines), not just
  *                               the session record, so a stale gift can
- *                               never outlive its granting goal.
+ *                               never outlive its granting mission.
  *  - invalid coupons         -> validated before application
  *  - excluded products       -> discount bases exclude them (applicators)
  *
  * Conflict resolution (Phase 26) is enforced here and in ConflictResolver:
- *  - deterministic order     -> active_goals() sorts by campaign
- *                               priority, then goal priority, then id
- *  - cumulative mode         -> every completed goal grants (default)
+ *  - deterministic order     -> active_missions() sorts by campaign
+ *                               priority, then mission priority, then id
+ *  - cumulative mode         -> every completed mission grants (default)
  *  - best / first modes      -> only the best reward / the first matching
- *                               goal grants; losers are blocked with a
+ *                               mission grants; losers are blocked with a
  *                               resolution reason
- *  - mutually exclusive goals-> a completed exclusive goal suppresses
- *                               every lower-priority goal
+ *  - mutually exclusive missions-> a completed exclusive mission suppresses
+ *                               every lower-priority mission
  */
 final class RewardEngine {
 
@@ -91,16 +91,16 @@ final class RewardEngine {
 	const SESSION_GIFTS   = 'faracart_gift_goals';
 
 	/**
-	 * Goal engine used to evaluate goals against the cart.
+	 * Mission engine used to evaluate missions against the cart.
 	 *
-	 * @var GoalEngine
+	 * @var MissionEngine
 	 */
 	protected $engine;
 
 	/**
-	 * Goal repository (active goals). Null disables the WC sync.
+	 * Mission repository (active missions). Null disables the WC sync.
 	 *
-	 * @var GoalRepository|null
+	 * @var MissionRepository|null
 	 */
 	protected $repository;
 
@@ -127,8 +127,8 @@ final class RewardEngine {
 
 	/**
 	 * Conflict resolver (Phase 26): deterministic winner selection when
-	 * multiple goals complete — cumulative / best / first modes plus
-	 * mutually exclusive goals.
+	 * multiple missions complete — cumulative / best / first modes plus
+	 * mutually exclusive missions.
 	 *
 	 * @var ConflictResolver
 	 */
@@ -136,7 +136,7 @@ final class RewardEngine {
 
 	/**
 	 * Per-user completion limit service (Phase 36). When injected, an
-	 * exhausted goal (completion count >= its per-user limit) drops out of
+	 * exhausted mission (completion count >= its per-user limit) drops out of
 	 * evaluation entirely — it can never grant a reward, and any reward it
 	 * previously granted is revoked by the normal reconcile pass. Null in
 	 * bare/test constructions keeps the pre-limit behavior.
@@ -146,7 +146,7 @@ final class RewardEngine {
 	protected $completions;
 
 	/**
-	 * Reward results for the current request: goal_id => RewardResult.
+	 * Reward results for the current request: mission_id => RewardResult.
 	 *
 	 * @var array<int, RewardResult>|null
 	 */
@@ -171,8 +171,8 @@ final class RewardEngine {
 	/**
 	 * Constructor.
 	 *
-	 * @param GoalEngine|null        $engine           Goal engine.
-	 * @param GoalRepository|null    $repository       Goal repository.
+	 * @param MissionEngine|null        $engine           Mission engine.
+	 * @param MissionRepository|null    $repository       Mission repository.
 	 * @param Settings|null          $settings         Plugin settings.
 	 * @param CartIntegration|null   $cart_integration Cart integration service.
 	 * @param ConflictResolver|null  $resolver         Conflict resolver (Phase 26).
@@ -181,8 +181,8 @@ final class RewardEngine {
 	 *                                                  disables the limit gate
 	 *                                                  (bare/test constructions).
 	 */
-	public function __construct( ?GoalEngine $engine = null, ?GoalRepository $repository = null, ?Settings $settings = null, ?CartIntegration $cart_integration = null, ?ConflictResolver $resolver = null, ?CompletionService $completions = null ) {
-		$this->engine           = null !== $engine ? $engine : new GoalEngine();
+	public function __construct( ?MissionEngine $engine = null, ?MissionRepository $repository = null, ?Settings $settings = null, ?CartIntegration $cart_integration = null, ?ConflictResolver $resolver = null, ?CompletionService $completions = null ) {
+		$this->engine           = null !== $engine ? $engine : new MissionEngine();
 		$this->repository       = $repository;
 		$this->settings         = $settings;
 		$this->registry         = new RewardApplicatorRegistry();
@@ -216,7 +216,7 @@ final class RewardEngine {
 
 		// Mandatory (automatic-mode) gifts are shopper-proof: the remove
 		// link is hidden, the quantity is locked to 1, and a removed gift
-		// line is restored on the spot while its goal still grants it.
+		// line is restored on the spot while its mission still grants it.
 		// Selectable (choose-mode) gifts keep their remove control (their
 		// removal is respected server-side) but still cannot change
 		// quantity. The quantity lock is display-only on the classic cart
@@ -227,7 +227,7 @@ final class RewardEngine {
 	}
 
 	/**
-	 * Evaluate the reward for a goal result.
+	 * Evaluate the reward for a mission result.
 	 *
 	 * Pure: no database access, no cart mutation. `opts` may carry:
 	 *  - 'already_applied': string[] of reward types already granted in this
@@ -235,35 +235,35 @@ final class RewardEngine {
 	 *  - 'cart': CartContext snapshot (lets discount applicators compute
 	 *    concrete amounts)
 	 *
-	 * @param GoalResult        $result Goal evaluation result.
+	 * @param MissionResult        $result Mission evaluation result.
 	 * @param array<string, mixed> $opts   Evaluation options.
 	 * @return RewardResult
 	 */
-	public function evaluate( GoalResult $result, array $opts = array() ) {
-		$goal   = $result->goal();
-		$reward = Reward::from_goal( $goal );
-		$goal_id = $goal->id();
+	public function evaluate( MissionResult $result, array $opts = array() ) {
+		$mission   = $result->mission();
+		$reward = Reward::from_mission( $mission );
+		$mission_id = $mission->id();
 
-		if ( ! $result->eligible() || GoalResult::REWARD_NOT_APPLICABLE === $result->reward_state() ) {
-			return RewardResult::not_applicable( $reward, $goal_id );
+		if ( ! $result->eligible() || MissionResult::REWARD_NOT_APPLICABLE === $result->reward_state() ) {
+			return RewardResult::not_applicable( $reward, $mission_id );
 		}
 
 		if ( ! $reward->has_config() ) {
-			return RewardResult::not_applicable( $reward, $goal_id, RewardResult::REASON_NO_REWARD );
+			return RewardResult::not_applicable( $reward, $mission_id, RewardResult::REASON_NO_REWARD );
 		}
 
 		if ( ! $this->registry->supports( $reward->type() ) ) {
-			return RewardResult::not_applicable( $reward, $goal_id, RewardResult::REASON_UNKNOWN_TYPE );
+			return RewardResult::not_applicable( $reward, $mission_id, RewardResult::REASON_UNKNOWN_TYPE );
 		}
 
-		if ( GoalResult::REWARD_LOCKED === $result->reward_state() ) {
-			return RewardResult::locked( $reward, $goal_id );
+		if ( MissionResult::REWARD_LOCKED === $result->reward_state() ) {
+			return RewardResult::locked( $reward, $mission_id );
 		}
 
 		$already = isset( $opts['already_applied'] ) && is_array( $opts['already_applied'] ) ? $opts['already_applied'] : array();
 
 		if ( ! RewardSafety::stacking_allows( $reward, $already ) ) {
-			return RewardResult::blocked( $reward, $goal_id, RewardResult::REASON_STACKING );
+			return RewardResult::blocked( $reward, $mission_id, RewardResult::REASON_STACKING );
 		}
 
 		$applicator = $this->registry->applicator( $reward->type() );
@@ -273,30 +273,30 @@ final class RewardEngine {
 	}
 
 	/**
-	 * Evaluate a goal's reward against a cart snapshot (convenience wrapper).
+	 * Evaluate a mission's reward against a cart snapshot (convenience wrapper).
 	 *
-	 * @param Goal        $goal    Goal.
+	 * @param Mission        $mission    Mission.
 	 * @param CartContext $context Cart snapshot.
 	 * @param string|null $now     Reference time for schedule checks.
 	 * @return RewardResult
 	 */
-	public function evaluate_goal( Goal $goal, CartContext $context, $now = null ) {
-		return $this->evaluate( $this->engine->evaluate( $goal, $context, $now ) );
+	public function evaluate_mission( Mission $mission, CartContext $context, $now = null ) {
+		return $this->evaluate( $this->engine->evaluate( $mission, $context, $now ) );
 	}
 
 	/**
-	 * WooCommerce cart sync: evaluate active goals and reconcile rewards.
+	 * WooCommerce cart sync: evaluate active missions and reconcile rewards.
 	 *
 	 * Hooked to 'woocommerce_before_calculate_totals' at priority 100. Runs
 	 * at most once per totals pass (re-entrancy guard). Evaluation uses the
 	 * line-item bases in CartContext, which stay valid while WC has reset
 	 * the cart aggregates; reconciliation runs on every pass but is
-	 * idempotent (it only touches rewards this engine applied), so a goal
+	 * idempotent (it only touches rewards this engine applied), so a mission
 	 * that becomes incomplete without any cart change — schedule expiry,
 	 * admin deactivation — has its coupon/gift revoked immediately.
 	 *
 	 * @param \WC_Cart|null $cart Live cart.
-	 * @return array<int, RewardResult> Reward results (goal_id => result).
+	 * @return array<int, RewardResult> Reward results (mission_id => result).
 	 */
 	public function sync_cart( $cart = null ) {
 		if ( $this->syncing ) {
@@ -345,37 +345,37 @@ final class RewardEngine {
 				? $this->cart_integration->context( $cart, array( 'exclude_shipping' => true ) )
 				: CartContext::from_cart( $cart, array( 'exclude_shipping' => true ) );
 
-			$goals = $this->repository->active_goals();
+			$missions = $this->repository->active_missions();
 
-			// Phase 36 (per-user completion limit): an exhausted goal (this
+			// Phase 36 (per-user completion limit): an exhausted mission (this
 			// identity already completed it the configured maximum times) is
 			// dropped before evaluation, so it can never grant its reward.
-			// Unlimited goals (the default for every existing goal) pass
+			// Unlimited missions (the default for every existing mission) pass
 			// through without a single count query.
 			if ( null !== $this->completions ) {
-				$goals = $this->completions->available_goals( $goals, $context );
+				$missions = $this->completions->available_missions( $missions, $context );
 			}
 
-			// Pass 1 — evaluate every completed goal's reward WITHOUT the
+			// Pass 1 — evaluate every completed mission's reward WITHOUT the
 			// stacking guard: the conflict-resolution pass decides the
 			// winners first, then stacking applies at grant time in
 			// priority order (unchanged for cumulative mode). The computed
 			// reward amount (scores) lets 'best' compare real discount
 			// values on the current cart.
-			$goal_results   = array();
+			$mission_results   = array();
 			$reward_results = array();
 			$scores         = array();
 
-			foreach ( $goals as $goal ) {
-				$result = $this->engine->evaluate( $goal, $context );
+			foreach ( $missions as $mission ) {
+				$result = $this->engine->evaluate( $mission, $context );
 
-				if ( ! $result->eligible() || GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+				if ( ! $result->eligible() || MissionResult::REWARD_UNLOCKED !== $result->reward_state() ) {
 					continue;
 				}
 
-				// Only goals with a reward configured compete for grants;
-				// reward-less goals grant nothing in any mode.
-				if ( empty( $goal->reward_type() ) ) {
+				// Only missions with a reward configured compete for grants;
+				// reward-less missions grant nothing in any mode.
+				if ( empty( $mission->reward_type() ) ) {
 					continue;
 				}
 
@@ -387,50 +387,50 @@ final class RewardEngine {
 					)
 				);
 
-				$goal_results[ $goal->id() ]   = $result;
-				$reward_results[ $goal->id() ] = $reward_result;
+				$mission_results[ $mission->id() ]   = $result;
+				$reward_results[ $mission->id() ] = $reward_result;
 
 				if ( RewardResult::STATE_AVAILABLE === $reward_result->state() ) {
-					$scores[ $goal->id() ] = $reward_result->amount();
+					$scores[ $mission->id() ] = $reward_result->amount();
 				}
 			}
 
 			$resolution = $this->resolver->resolve(
-				$goals,
-				$goal_results,
+				$missions,
+				$mission_results,
 				$this->conflict_mode(),
 				$scores
 			);
 
 			// Pass 2 — grant in priority order: winners apply subject to
-			// stacking; suppressed goals are blocked with their resolution
+			// stacking; suppressed missions are blocked with their resolution
 			// reason so the payload communicates exactly why.
 			$results         = array();
 			$already_applied = array();
 
-			foreach ( $goals as $goal ) {
-				$goal_id = (int) $goal->id();
+			foreach ( $missions as $mission ) {
+				$mission_id = (int) $mission->id();
 
-				if ( ! isset( $reward_results[ $goal_id ] ) ) {
+				if ( ! isset( $reward_results[ $mission_id ] ) ) {
 					continue;
 				}
 
-				$reason = isset( $resolution[ $goal_id ] ) ? $resolution[ $goal_id ] : ConflictResolver::REASON_NONE;
+				$reason = isset( $resolution[ $mission_id ] ) ? $resolution[ $mission_id ] : ConflictResolver::REASON_NONE;
 
 				if ( ConflictResolver::REASON_NONE !== $reason ) {
-					$results[ $goal_id ] = RewardResult::blocked( $reward_results[ $goal_id ]->reward(), $goal_id, $reason );
+					$results[ $mission_id ] = RewardResult::blocked( $reward_results[ $mission_id ]->reward(), $mission_id, $reason );
 					continue;
 				}
 
-				$reward_result = $reward_results[ $goal_id ];
+				$reward_result = $reward_results[ $mission_id ];
 
 				if ( RewardResult::STATE_NOT_APPLICABLE === $reward_result->state() ) {
-					$results[ $goal_id ] = $reward_result;
+					$results[ $mission_id ] = $reward_result;
 					continue;
 				}
 
 				if ( ! RewardSafety::stacking_allows( $reward_result->reward(), $already_applied ) ) {
-					$results[ $goal_id ] = RewardResult::blocked( $reward_result->reward(), $goal_id, RewardResult::REASON_STACKING );
+					$results[ $mission_id ] = RewardResult::blocked( $reward_result->reward(), $mission_id, RewardResult::REASON_STACKING );
 					continue;
 				}
 
@@ -438,7 +438,7 @@ final class RewardEngine {
 					$already_applied[] = $reward_result->type();
 				}
 
-				$results[ $goal_id ] = $reward_result;
+				$results[ $mission_id ] = $reward_result;
 			}
 
 			$this->results_cache = $results;
@@ -447,9 +447,9 @@ final class RewardEngine {
 			// both methods are idempotent — they compare the desired reward
 			// set against what this engine previously applied and only
 			// mutate when they differ — so the stale-reward guarantee holds
-			// even for goals that stop qualifying without a cart mutation.
+			// even for missions that stop qualifying without a cart mutation.
 			$this->reconcile_coupons( $cart, $results );
-			$this->reconcile_gifts( $cart, $results, $goals );
+			$this->reconcile_gifts( $cart, $results, $missions );
 
 			// A gift added by reconcile_gifts in THIS pass must already be
 			// free — the priority-10 zeroing hook ran before the gift
@@ -552,17 +552,17 @@ final class RewardEngine {
 	}
 
 	/**
-	 * Apply percentage/fixed discount fees for completed goals.
+	 * Apply percentage/fixed discount fees for completed missions.
 	 *
 	 * Hooked to 'woocommerce_cart_calculate_fees'. Fees are rebuilt from the
 	 * per-request evaluation cache on every totals pass and drop out
-	 * automatically when a goal stops being available.
+	 * automatically when a mission stops being available.
 	 *
 	 * @param \WC_Cart $cart Live cart.
 	 * @return void
 	 */
 	public function apply_discount_fees( \WC_Cart $cart ) {
-		foreach ( $this->cached_results() as $goal_id => $reward_result ) {
+		foreach ( $this->cached_results() as $mission_id => $reward_result ) {
 			if ( RewardResult::STATE_AVAILABLE !== $reward_result->state() ) {
 				continue;
 			}
@@ -571,12 +571,12 @@ final class RewardEngine {
 				continue;
 			}
 
-			$this->registry->applicator( $reward_result->type() )->apply( $reward_result->reward(), $reward_result, $cart, $goal_id );
+			$this->registry->applicator( $reward_result->type() )->apply( $reward_result->reward(), $reward_result, $cart, $mission_id );
 		}
 	}
 
 	/**
-	 * Apply free shipping to the package rates for completed goals.
+	 * Apply free shipping to the package rates for completed missions.
 	 *
 	 * Hooked to 'woocommerce_package_rates'. Stateless: when no free-shipping
 	 * reward is active every rate passes through untouched.
@@ -617,28 +617,28 @@ final class RewardEngine {
 
 		$desired = array();
 
-		foreach ( $results as $goal_id => $reward_result ) {
+		foreach ( $results as $mission_id => $reward_result ) {
 			if ( Reward::TYPE_COUPON !== $reward_result->type() || RewardResult::STATE_AVAILABLE !== $reward_result->state() ) {
 				continue;
 			}
 
 			/** @var CouponApplicator $applicator */
 			$applicator = $this->registry->applicator( Reward::TYPE_COUPON );
-			$code       = $applicator->resolve_coupon_code( $reward_result->reward(), $goal_id );
+			$code       = $applicator->resolve_coupon_code( $reward_result->reward(), $mission_id );
 
 			if ( '' === $code ) {
 				continue;
 			}
 
-			if ( $applicator->apply( $reward_result->reward(), $reward_result, $cart, $goal_id ) ) {
-				$desired[ (int) $goal_id ] = $code;
+			if ( $applicator->apply( $reward_result->reward(), $reward_result, $cart, $mission_id ) ) {
+				$desired[ (int) $mission_id ] = $code;
 			}
 		}
 
-		// Remove exactly the coupons this engine applied whose goals are no
+		// Remove exactly the coupons this engine applied whose missions are no
 		// longer complete — the shopper's own coupons are never touched.
-		foreach ( $applied as $goal_id => $code ) {
-			if ( isset( $desired[ (int) $goal_id ] ) ) {
+		foreach ( $applied as $mission_id => $code ) {
+			if ( isset( $desired[ (int) $mission_id ] ) ) {
 				continue;
 			}
 
@@ -651,38 +651,38 @@ final class RewardEngine {
 	}
 
 	/**
-	 * Add automatic gifts of completed goals; remove stale gift lines;
-	 * keep shopper-chosen gifts while their goal still grants them.
+	 * Add automatic gifts of completed missions; remove stale gift lines;
+	 * keep shopper-chosen gifts while their mission still grants them.
 	 *
-	 * Automatic gifts are added for the goal's configured product.
+	 * Automatic gifts are added for the mission's configured product.
 	 * Choose-mode gifts are left to the shopper — but a gift the shopper
 	 * already chose (via the public gift endpoint) is kept as long as the
-	 * goal still grants it AND the chosen product is still in the gift
+	 * mission still grants it AND the chosen product is still in the gift
 	 * list; a re-configured reward revokes the stale line.
 	 *
 	 * Stale gift lines are removed by scanning the live cart for
-	 * goal-marked lines, not just the session record: a gift whose
-	 * granting goal is no longer in the desired set (or whose product is
+	 * mission-marked lines, not just the session record: a gift whose
+	 * granting mission is no longer in the desired set (or whose product is
 	 * no longer the desired one) is revoked even when the session and the
 	 * persisted cart diverge (session expiry, restored persistent cart,
 	 * direct Store API tampering). Only engine-marked lines are ever
 	 * touched, so a customer-added line of the same product — which
-	 * carries no goal marker — always survives, and each line is keyed to
-	 * exactly one goal so a gift still granted by a different, still-met
-	 * goal is left alone.
+	 * carries no mission marker — always survives, and each line is keyed to
+	 * exactly one mission so a gift still granted by a different, still-met
+	 * mission is left alone.
 	 *
-	 * The session payload is a map goal_id => product_id (older installs
-	 * stored a plain goal-id list; those entries are treated as
-	 * goal_id => null and reconciled normally).
+	 * The session payload is a map mission_id => product_id (older installs
+	 * stored a plain mission-id list; those entries are treated as
+	 * mission_id => null and reconciled normally).
 	 *
 	 * @param \WC_Cart                 $cart    Live cart.
 	 * @param array<int, RewardResult> $results Reward results.
-	 * @param Goal[]                   $goals   Goals evaluated this pass
+	 * @param Mission[]                   $missions   Missions evaluated this pass
 	 *                                          (the authoritative set the
 	 *                                          cart-scan is scoped to).
 	 * @return void
 	 */
-	protected function reconcile_gifts( \WC_Cart $cart, array $results, array $goals ) {
+	protected function reconcile_gifts( \WC_Cart $cart, array $results, array $missions ) {
 		$applied = $this->session_get( self::SESSION_GIFTS );
 		$applied = is_array( $applied ) ? $applied : array();
 
@@ -699,7 +699,7 @@ final class RewardEngine {
 
 		$desired = array();
 
-		foreach ( $results as $goal_id => $reward_result ) {
+		foreach ( $results as $mission_id => $reward_result ) {
 			if ( Reward::TYPE_FREE_GIFT !== $reward_result->type() || RewardResult::STATE_AVAILABLE !== $reward_result->state() ) {
 				continue;
 			}
@@ -710,8 +710,8 @@ final class RewardEngine {
 			$applicator = $this->registry->applicator( Reward::TYPE_FREE_GIFT );
 
 			if ( $reward->is_gift_automatic() ) {
-				if ( $applicator->apply( $reward, $reward_result, $cart, $goal_id ) ) {
-					$desired[ (int) $goal_id ] = (int) $reward->gift_product_id();
+				if ( $applicator->apply( $reward, $reward_result, $cart, $mission_id ) ) {
+					$desired[ (int) $mission_id ] = (int) $reward->gift_product_id();
 				}
 
 				continue;
@@ -720,14 +720,14 @@ final class RewardEngine {
 			// Choose mode: keep a previously chosen gift while it is still
 			// allowed by the current reward configuration. If the session
 			// record was lost (session expiry, restored persistent cart)
-			// the choice is recovered from the goal-marked line already in
+			// the choice is recovered from the mission-marked line already in
 			// the cart, so a validly chosen gift is never swept just
 			// because the session is empty.
-			$chosen = isset( $applied_map[ (int) $goal_id ] ) ? (int) $applied_map[ (int) $goal_id ] : 0;
+			$chosen = isset( $applied_map[ (int) $mission_id ] ) ? (int) $applied_map[ (int) $mission_id ] : 0;
 
 			if ( $chosen <= 0 ) {
 				foreach ( $cart->get_cart() as $item ) {
-					if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id ) {
+					if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id ) {
 						$chosen = isset( $item['faracart_gift_product'] ) ? (int) $item['faracart_gift_product'] : 0;
 						break;
 					}
@@ -735,7 +735,7 @@ final class RewardEngine {
 			}
 
 			if ( $chosen > 0 && $reward->is_gift_allowed( $chosen ) && RewardSafety::gift_product_available( $chosen ) ) {
-				$desired[ (int) $goal_id ] = $chosen;
+				$desired[ (int) $mission_id ] = $chosen;
 			}
 		}
 
@@ -743,13 +743,13 @@ final class RewardEngine {
 		// marker (added before this fix) has its add-mode stamped now, so
 		// the per-mode remove-link policy applies without a repository
 		// lookup and the line no longer looks mandatory by default.
-		foreach ( $desired as $goal_id => $product_id ) {
+		foreach ( $desired as $mission_id => $product_id ) {
 			foreach ( $cart->get_cart() as $key => $item ) {
-				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id && ! isset( $item['faracart_gift_mode'] ) ) {
+				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id && ! isset( $item['faracart_gift_mode'] ) ) {
 					$mode = Reward::GIFT_AUTOMATIC;
 
-					if ( isset( $results[ (int) $goal_id ] ) && $results[ (int) $goal_id ]->reward() instanceof Reward ) {
-						$mode = $results[ (int) $goal_id ]->reward()->gift_add_mode();
+					if ( isset( $results[ (int) $mission_id ] ) && $results[ (int) $mission_id ]->reward() instanceof Reward ) {
+						$mode = $results[ (int) $mission_id ]->reward()->gift_add_mode();
 					}
 
 					$cart->cart_contents[ $key ]['faracart_gift_mode'] = $mode;
@@ -759,36 +759,36 @@ final class RewardEngine {
 		}
 
 		// Path 1 — session-driven removal: revoke gifts this engine
-		// previously granted whose goals are no longer desired. Covers
-		// goals that vanished from active_goals() entirely (admin
+		// previously granted whose missions are no longer desired. Covers
+		// missions that vanished from active_missions() entirely (admin
 		// deactivation, schedule expiry) where no evaluation happened
 		// this pass.
-		foreach ( $applied_map as $goal_id => $product_id ) {
-			if ( isset( $desired[ (int) $goal_id ] ) && ( null === $product_id || (int) $desired[ (int) $goal_id ] === (int) $product_id ) ) {
+		foreach ( $applied_map as $mission_id => $product_id ) {
+			if ( isset( $desired[ (int) $mission_id ] ) && ( null === $product_id || (int) $desired[ (int) $mission_id ] === (int) $product_id ) ) {
 				continue;
 			}
 
-			$this->remove_gift_line( $cart, (int) $goal_id );
+			$this->remove_gift_line( $cart, (int) $mission_id );
 		}
 
-		// Path 2 — cart-scan, scoped to the goals evaluated this pass: a
-		// goal-marked line is revoked only when the engine actually saw
-		// its granting goal this pass and no longer wants it (the goal
+		// Path 2 — cart-scan, scoped to the missions evaluated this pass: a
+		// mission-marked line is revoked only when the engine actually saw
+		// its granting mission this pass and no longer wants it (the mission
 		// stopped qualifying, or the reward was re-configured to a
-		// different product). Lines whose goal was not evaluated this
+		// different product). Lines whose mission was not evaluated this
 		// pass are out of scope — the engine never removes a gift it
 		// cannot vouch for (stale caches and nested totals passes
 		// triggered by add_to_cart mid-reconcile are harmless).
-		$desired_by_goal = array();
+		$desired_by_mission = array();
 
-		foreach ( $desired as $goal_id => $product_id ) {
-			$desired_by_goal[ (int) $goal_id ] = (int) $product_id;
+		foreach ( $desired as $mission_id => $product_id ) {
+			$desired_by_mission[ (int) $mission_id ] = (int) $product_id;
 		}
 
 		$considered = array();
 
-		foreach ( $goals as $goal ) {
-			$considered[ (int) $goal->id() ] = true;
+		foreach ( $missions as $mission ) {
+			$considered[ (int) $mission->id() ] = true;
 		}
 
 		foreach ( $cart->get_cart() as $key => $item ) {
@@ -796,11 +796,11 @@ final class RewardEngine {
 				continue;
 			}
 
-			$gift_goal    = (int) $item['faracart_gift_goal'];
+			$gift_mission    = (int) $item['faracart_gift_goal'];
 			$gift_product = isset( $item['faracart_gift_product'] ) ? (int) $item['faracart_gift_product'] : 0;
 
-			if ( ! isset( $desired_by_goal[ $gift_goal ] ) || $desired_by_goal[ $gift_goal ] !== $gift_product ) {
-				$this->remove_gift_line( $cart, $gift_goal );
+			if ( ! isset( $desired_by_mission[ $gift_mission ] ) || $desired_by_mission[ $gift_mission ] !== $gift_product ) {
+				$this->remove_gift_line( $cart, $gift_mission );
 			}
 		}
 
@@ -808,29 +808,29 @@ final class RewardEngine {
 	}
 
 	/**
-	 * Add the shopper's chosen gift for a completed goal (Phase 32).
+	 * Add the shopper's chosen gift for a completed mission (Phase 32).
 	 *
-	 * Called by the public gift endpoint. The goal must currently be
+	 * Called by the public gift endpoint. The mission must currently be
 	 * completed AND grant a free-gift reward whose gift list allows the
 	 * chosen product; the gift is added free (faracart markers) and
-	 * session-tracked so a goal that stops qualifying revokes it.
+	 * session-tracked so a mission that stops qualifying revokes it.
 	 *
-	 * @param int       $goal_id    Goal id.
+	 * @param int       $mission_id    Mission id.
 	 * @param int       $product_id Chosen gift product id.
 	 * @param \WC_Cart  $cart       Live cart.
 	 * @return bool
 	 */
-	public function add_chosen_gift( $goal_id, $product_id, \WC_Cart $cart ) {
-		$goal_id    = (int) $goal_id;
+	public function add_chosen_gift( $mission_id, $product_id, \WC_Cart $cart ) {
+		$mission_id    = (int) $mission_id;
 		$product_id = (int) $product_id;
 
 		if ( null === $this->repository ) {
 			return false;
 		}
 
-		$goal = $this->repository->find( $goal_id );
+		$mission = $this->repository->find( $mission_id );
 
-		if ( ! $goal ) {
+		if ( ! $mission ) {
 			return false;
 		}
 
@@ -838,21 +838,21 @@ final class RewardEngine {
 			? $this->cart_integration->context( $cart )
 			: CartContext::from_cart( $cart );
 
-		$result = $this->engine->evaluate( $goal, $context );
+		$result = $this->engine->evaluate( $mission, $context );
 
-		if ( ! $result->eligible() || GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+		if ( ! $result->eligible() || MissionResult::REWARD_UNLOCKED !== $result->reward_state() ) {
 			return false;
 		}
 
-		// Phase 36 (per-user completion limit): an exhausted goal must not
+		// Phase 36 (per-user completion limit): an exhausted mission must not
 		// grant its gift — the same authoritative gate the cart sync
-		// applies (an identity that already completed the goal the
+		// applies (an identity that already completed the mission the
 		// configured maximum times cannot claim another reward).
-		if ( null !== $this->completions && ! $this->completions->context_allows( $goal, $context ) ) {
+		if ( null !== $this->completions && ! $this->completions->context_allows( $mission, $context ) ) {
 			return false;
 		}
 
-		$reward = Reward::from_goal( $goal );
+		$reward = Reward::from_mission( $mission );
 
 		if ( Reward::TYPE_FREE_GIFT !== $reward->type()
 			|| $reward->is_gift_automatic()
@@ -861,19 +861,19 @@ final class RewardEngine {
 			return false;
 		}
 
-		// Replace a previous selection: a goal may only ever carry ONE
+		// Replace a previous selection: a mission may only ever carry ONE
 		// gift line, so re-choosing a different candidate swaps it instead
 		// of stacking a second gift. The engine-removal flag suppresses the
 		// restore handler so the stale line stays gone.
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( empty( $item['faracart_gift_goal'] ) || (int) $item['faracart_gift_goal'] !== $goal_id ) {
+			if ( empty( $item['faracart_gift_goal'] ) || (int) $item['faracart_gift_goal'] !== $mission_id ) {
 				continue;
 			}
 
 			$current = isset( $item['faracart_gift_product'] ) ? (int) $item['faracart_gift_product'] : 0;
 
 			if ( $current !== $product_id ) {
-				$this->remove_gift_line( $cart, $goal_id );
+				$this->remove_gift_line( $cart, $mission_id );
 			}
 
 			break;
@@ -882,7 +882,7 @@ final class RewardEngine {
 		/** @var FreeGiftApplicator $applicator */
 		$applicator = $this->registry->applicator( Reward::TYPE_FREE_GIFT );
 
-		if ( ! $applicator->apply( $reward, RewardResult::available( $reward, $goal_id ), $cart, $goal_id, $product_id ) ) {
+		if ( ! $applicator->apply( $reward, RewardResult::available( $reward, $mission_id ), $cart, $mission_id, $product_id ) ) {
 			return false;
 		}
 
@@ -900,7 +900,7 @@ final class RewardEngine {
 			}
 		}
 
-		$applied_map[ $goal_id ] = $product_id;
+		$applied_map[ $mission_id ] = $product_id;
 
 		$this->session_set( self::SESSION_GIFTS, $applied_map );
 
@@ -929,7 +929,7 @@ final class RewardEngine {
 
 		if ( is_array( $gifts ) ) {
 			foreach ( $gifts as $key => $value ) {
-				// Legacy list form: values are goal ids; map form: keys are.
+				// Legacy list form: values are mission ids; map form: keys are.
 				$this->remove_gift_line( $cart, is_numeric( $key ) ? $value : $key );
 			}
 		}
@@ -939,22 +939,22 @@ final class RewardEngine {
 	}
 
 	/**
-	 * Remove the automatic gift line for a goal from the cart.
+	 * Remove the automatic gift line for a mission from the cart.
 	 *
 	 * The engine-removal flag is set around the mutation so the
 	 * 'woocommerce_cart_item_removed' handler (restore_removed_gift) never
 	 * re-adds a gift the engine deliberately revoked.
 	 *
 	 * @param \WC_Cart $cart    Live cart.
-	 * @param int      $goal_id Goal id.
+	 * @param int      $mission_id Mission id.
 	 * @return void
 	 */
-	protected function remove_gift_line( \WC_Cart $cart, $goal_id ) {
+	protected function remove_gift_line( \WC_Cart $cart, $mission_id ) {
 		$this->removing_gift = true;
 
 		try {
 			foreach ( $cart->get_cart() as $key => $item ) {
-				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id ) {
+				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id ) {
 					$cart->remove_cart_item( $key );
 				}
 			}
@@ -986,7 +986,7 @@ final class RewardEngine {
 	 *
 	 * The add mode is stamped on the line at add time
 	 * ('faracart_gift_mode'); legacy lines without the stamp fall back to
-	 * a repository lookup of the granting goal, then to the conservative
+	 * a repository lookup of the granting mission, then to the conservative
 	 * automatic default (an unrecognised gift line stays shopper-proof
 	 * until the engine re-adds it with a stamped mode).
 	 *
@@ -1009,10 +1009,10 @@ final class RewardEngine {
 		}
 
 		if ( ! empty( $item['faracart_gift_goal'] ) && null !== $this->repository ) {
-			$goal = $this->repository->find( (int) $item['faracart_gift_goal'] );
+			$mission = $this->repository->find( (int) $item['faracart_gift_goal'] );
 
-			if ( $goal ) {
-				return Reward::from_goal( $goal )->is_gift_automatic();
+			if ( $mission ) {
+				return Reward::from_mission( $mission )->is_gift_automatic();
 			}
 		}
 
@@ -1048,10 +1048,10 @@ final class RewardEngine {
 	 *
 	 * Hooked to 'woocommerce_cart_item_removed'. Shoppers cannot keep an
 	 * earned gift out of the cart: when a gift line is removed while its
-	 * goal is still active and still grants an automatic free-gift reward
+	 * mission is still active and still grants an automatic free-gift reward
 	 * with an available product, the line is restored immediately. apply()
-	 * is idempotent (the goal marker is re-checked on the line), and the
-	 * next totals pass reconciles if the goal stops qualifying. The engine's
+	 * is idempotent (the mission marker is re-checked on the line), and the
+	 * next totals pass reconciles if the mission stops qualifying. The engine's
 	 * own revocations (stale rewards, empty cart, disabled plugin) are
 	 * skipped via the removing_gift flag.
 	 *
@@ -1076,27 +1076,27 @@ final class RewardEngine {
 			return;
 		}
 
-		$goal_id = (int) $removed['faracart_gift_goal'];
-		$goal    = $this->repository->find( $goal_id );
+		$mission_id = (int) $removed['faracart_gift_goal'];
+		$mission    = $this->repository->find( $mission_id );
 
-		if ( ! $goal || ! $goal->is_active() ) {
+		if ( ! $mission || ! $mission->is_active() ) {
 			return;
 		}
 
-		// The goal must be currently met — a removed gift line for a
-		// still-active goal whose cart no longer qualifies must NOT be
-		// re-added. Re-evaluate the goal against the live cart (the same
+		// The mission must be currently met — a removed gift line for a
+		// still-active mission whose cart no longer qualifies must NOT be
+		// re-added. Re-evaluate the mission against the live cart (the same
 		// path sync_cart uses) to confirm the shopper still qualifies.
 		$context = null !== $this->cart_integration
 			? $this->cart_integration->context( $cart )
-			: \FaraCart\Goals\CartContext::from_cart( $cart );
-		$result  = $this->engine->evaluate( $goal, $context );
+			: \FaraCart\Missions\CartContext::from_cart( $cart );
+		$result  = $this->engine->evaluate( $mission, $context );
 
-		if ( ! $result->eligible() || \FaraCart\Goals\GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+		if ( ! $result->eligible() || \FaraCart\Missions\MissionResult::REWARD_UNLOCKED !== $result->reward_state() ) {
 			return;
 		}
 
-		$reward = Reward::from_goal( $goal );
+		$reward = Reward::from_mission( $mission );
 
 		if ( Reward::TYPE_FREE_GIFT !== $reward->type()
 			|| ! $reward->is_gift_automatic()
@@ -1107,9 +1107,9 @@ final class RewardEngine {
 
 		$this->registry->applicator( Reward::TYPE_FREE_GIFT )->apply(
 			$reward,
-			RewardResult::available( $reward, $goal_id ),
+			RewardResult::available( $reward, $mission_id ),
 			$cart,
-			$goal_id
+			$mission_id
 		);
 
 		// The restored line is re-added at the product price; zero it right

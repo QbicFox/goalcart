@@ -13,7 +13,7 @@
 Every consumer of cart state (the reward engine today; the REST layer and
 frontend in later phases) reads the **same snapshot** from one service:
 `Cart\CartIntegration::context()`. It converts the live WooCommerce cart into the
-normalized `Goals\CartContext` the goal engine needs, so a shopper sees the same
+normalized `Missions\CartContext` the mission engine needs, so a shopper sees the same
 numbers everywhere and nothing rebuilds the snapshot redundantly.
 
 ## 2. Architecture (P06-T02)
@@ -25,7 +25,7 @@ CartIntegration::context()   single source of truth, memoized per request
     │  ├─ load_categories()  one batched term query (variations → parent)
     │  └─ CartContext::from_cart()
     ↓
-CartContext (goals engine snapshot)
+CartContext (missions engine snapshot)
     ↓
 RewardEngine / REST / frontend consumers
 ```
@@ -33,7 +33,7 @@ RewardEngine / REST / frontend consumers
 | Piece | Role |
 |---|---|
 | `Cart\CartIntegration` | Request-level memoized `context()`; lifecycle invalidation hooks; batched category preloading. Registered as a DI singleton (`Plugin::cart_integration()`). |
-| `Goals\CartContext::from_cart()` | Pure-ish WC adapter; accepts the preloaded category map and resolves variation categories from the parent product. |
+| `Missions\CartContext::from_cart()` | Pure-ish WC adapter; accepts the preloaded category map and resolves variation categories from the parent product. |
 | `Rewards\RewardEngine` | Consumes `CartIntegration::context()` for its per-pass evaluation (falls back to a direct build when constructed without the service, e.g. in tests). |
 
 ### Lifecycle hooks (all invalidate the memoized context)
@@ -57,7 +57,7 @@ the Store API shipping-rate route is hooked explicitly.
 
 ## 3. Cart Context (P06-T03)
 
-- The memoized `CartContext` carries only the fields the Goal Engine reads
+- The memoized `CartContext` carries only the fields the Mission Engine reads
   (totals by basis, items, quantities, weights, categories, user/guest flags).
 - **Category preloading:** `CartIntegration::load_categories()` collects every
   line's canonical product id and resolves them with **one**
@@ -66,7 +66,7 @@ the Store API shipping-rate route is hooked explicitly.
   repeated builds stay cheap.
 - **Variations:** categories are resolved from the **parent** product (the
   WooCommerce convention — categories live on the parent, not the variation),
-  so category goals count variations correctly. The canonical id is the cart
+  so category missions count variations correctly. The canonical id is the cart
   item's `product_id` (the parent id for variation lines).
 - `from_cart()` falls back to per-item `wp_get_post_terms()` when no preloaded
   map is supplied (headless/tests), keeping the adapter self-sufficient.
@@ -76,10 +76,10 @@ the Store API shipping-rate route is hooked explicitly.
 | Requirement | Implementation |
 |---|---|
 | Memoization | `context()` caches the built `CartContext` per request, keyed by the shopper-controlled line data + args. |
-| Request-level caching | The cache is an instance property (one request = one PHP execution); `GoalRepository::active_goals()` and `GoalEngine` stay per-request cached. |
+| Request-level caching | The cache is an instance property (one request = one PHP execution); `MissionRepository::active_missions()` and `MissionEngine` stay per-request cached. |
 | Object cache | Category preloading uses `wp_get_object_terms()`, whose results WP stores in the object cache. |
 | WooCommerce cart data | Everything is derived from the live cart (no duplicated storage). |
-| Indexed queries | Goal lookups use the indexed `status`/`priority` columns (`docs/database.md`). |
+| Indexed queries | Mission lookups use the indexed `status`/`priority` columns (`docs/database.md`). |
 | Preloaded data | Categories are batched per build, not loaded per item. |
 
 Verified on the live store: a 6-item cart builds its context in **1 query**
@@ -118,5 +118,5 @@ variation lines.
 | One memoized service, not static calls | Consumers share a single snapshot and the caching work; later phases (REST, frontend) reuse it instead of re-adapting the cart. |
 | Cache key includes line values | A totals pass that updates line totals (coupon discounts) naturally changes the key, so cached snapshots are never stale w.r.t. what the shopper sees. |
 | Invalidation, not per-read freshness checks | WC already fires a precise lifecycle hook for every mutation; hooking them is simpler and covers Blocks for free. |
-| Parent-based variation categories | Matches WooCommerce's data model; category goals would otherwise silently miss variations. |
+| Parent-based variation categories | Matches WooCommerce's data model; category missions would otherwise silently miss variations. |
 | Backward-compatible engine | `RewardEngine` still works without the service (tests/headless), so the Phase 5 test suite is untouched. |

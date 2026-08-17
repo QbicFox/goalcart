@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-17T08:10:50Z\n"
+"POT-Creation-Date: 2026-08-17T10:27:30Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,20 +17,21 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:85
 #: admin-app/src/routes/CampaignBuilder.tsx:43
-#: admin-app/src/routes/Goals.tsx:43
+#: admin-app/src/routes/Missions.tsx:43
 #: admin-app/src/templates/rewardLabel.ts:9
 msgid "% discount"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:134
+#: admin-app/src/components/mission-builder/RewardFields.tsx:134
 msgid "% off the eligible cart value"
 msgstr ""
 
 #: admin-app/src/components/preview/PreviewPanel.tsx:66
+#: admin-app/src/routes/Appearance.tsx:226
 msgid "%1$d/%2$d milestones"
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:80
+#: admin-app/src/routes/Missions.tsx:80
 msgid "%1$s (%2$s)"
 msgstr ""
 
@@ -52,11 +53,11 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:286
 #: admin-app/src/routes/RevenueOverview.tsx:128
-msgid "%1$s of completed goals were followed by an attributed purchase."
+msgid "%1$s of completed missions were followed by an attributed purchase."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:259
-msgid "%1$s of customers who viewed a goal did not progress toward it."
+msgid "%1$s of customers who viewed a mission did not progress toward it."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1007
@@ -75,25 +76,26 @@ msgstr ""
 msgid "%d days"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:618
+#: admin-app/src/routes/MissionPerformance.tsx:618
 msgid "%d days before the order"
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:113
+#: admin-app/src/routes/Missions.tsx:113
 msgid "%d times"
 msgstr ""
 
 #: admin-app/src/templates/rewardLabel.ts:22
-#: includes/Goals/MessageEngine.php:333
+#: includes/Missions/MessageEngine.php:339
 msgid "%d%% discount"
 msgstr ""
 
 #: admin-app/src/components/preview/PreviewPanel.tsx:70
+#: admin-app/src/routes/Appearance.tsx:230
 msgid "%d%% progress"
 msgstr ""
 
 #: includes/Campaigns/CampaignRepository.php:224
-#: includes/Goals/GoalRepository.php:411
+#: includes/Missions/MissionRepository.php:414
 msgid "%s (copy)"
 msgstr ""
 
@@ -109,12 +111,12 @@ msgstr ""
 msgid "%s is your top performer"
 msgstr ""
 
-#: admin-app/src/templates/renderers/goalShared.tsx:30
+#: admin-app/src/templates/renderers/missionShared.tsx:30
 #: includes/Frontend/ProgressUI.php:1044
 msgid "%s left"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:706
+#: includes/Analytics/MissionRecommendationEngine.php:706
 msgid "%s of existing orders are within reach of this threshold (below it by up to %s%%)."
 msgstr ""
 
@@ -122,31 +124,31 @@ msgstr ""
 msgid "%s purchased orders"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:67
+#: admin-app/src/components/mission-builder/TargetFields.tsx:67
 msgid "(amount)"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:65
+#: admin-app/src/components/mission-builder/TargetFields.tsx:65
 msgid "(items)"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:62
+#: admin-app/src/components/mission-builder/TargetFields.tsx:62
 msgid "(weight units)"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:823
+#: includes/Analytics/MissionRecommendationEngine.php:823
 msgid "0.5–0.75× AOV"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:824
+#: includes/Analytics/MissionRecommendationEngine.php:824
 msgid "0.75–1.0× AOV"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:825
+#: includes/Analytics/MissionRecommendationEngine.php:825
 msgid "1.0–1.5× AOV"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:123
+#: admin-app/src/routes/Appearance.tsx:139
 msgid "10% off"
 msgstr ""
 
@@ -155,22 +157,22 @@ msgstr ""
 msgid "30 days before the order"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:822
+#: includes/Analytics/MissionRecommendationEngine.php:822
 msgid "< 0.5× AOV"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:826
+#: includes/Analytics/MissionRecommendationEngine.php:826
 msgid "> 1.5× AOV"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:582
-msgid "A business summary of your Goals and Smart Upsells."
+msgid "A business summary of your Missions and Smart Upsells."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:734
-#: admin-app/src/routes/GoalPerformance.tsx:461
+#: admin-app/src/routes/MissionPerformance.tsx:461
 #: admin-app/src/routes/RevenueOverview.tsx:197
-msgid "A completion means the customer reached the goal target. A purchase means a qualifying order was actually associated with the goal."
+msgid "A completion means the customer reached the mission target. A purchase means a qualifying order was actually associated with the mission."
 msgstr ""
 
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:48
@@ -181,36 +183,36 @@ msgstr ""
 msgid "A custom glyph/emoji shown inside the button (leave empty for the default cart icon)."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:360
+#: admin-app/src/components/mission-builder/RewardFields.tsx:360
 msgid "A deterministic coupon is created per customer."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:917
-msgid "A floating goals/campaigns button with a progress drawer — always reachable while shopping."
+msgid "A floating missions/campaigns button with a progress drawer — always reachable while shopping."
 msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:293
-msgid "A goal target or an explicit remaining amount is required to rank upsells."
+msgid "A mission target or an explicit remaining amount is required to rank upsells."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:483
+#: admin-app/src/routes/MissionBuilder.tsx:483
 msgid "A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:187
-#: admin-app/src/routes/GoalPerformance.tsx:76
-msgid "A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion."
+#: admin-app/src/routes/MissionPerformance.tsx:76
+msgid "A qualifying WooCommerce order was actually associated with this mission — a purchase, not a mission completion."
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:487
 msgid "A start later than the end means “after start OR before end” (crosses midnight)."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:384
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:384
 msgid "A window that crosses midnight (e.g. 22:00–06:00) counts the hours after start and before end."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:400
+#: admin-app/src/routes/MissionBuilder.tsx:400
 msgid "AND (all children required)"
 msgstr ""
 
@@ -224,34 +226,34 @@ msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:100
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:119
-#: includes/Templates/Goal/Template1.php:69
-#: includes/Templates/Goal/Template2.php:70
-#: includes/Templates/Goal/Template4.php:70
-#: includes/Templates/Goal/Template5.php:69
+#: includes/Templates/Mission/Template1.php:69
+#: includes/Templates/Mission/Template2.php:70
+#: includes/Templates/Mission/Template4.php:70
+#: includes/Templates/Mission/Template5.php:69
 msgid "Accent color"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:174
-#: admin-app/src/routes/Goals.tsx:288
+#: admin-app/src/routes/Missions.tsx:288
 msgid "Actions"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:379
 #: admin-app/src/routes/Campaigns.tsx:44
-#: admin-app/src/routes/GoalBuilder.tsx:356
-#: admin-app/src/routes/Goals.tsx:61
-#: admin-app/src/routes/Goals.tsx:247
+#: admin-app/src/routes/MissionBuilder.tsx:356
+#: admin-app/src/routes/Missions.tsx:61
+#: admin-app/src/routes/Missions.tsx:247
 msgid "Active"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:91
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:119
-#: admin-app/src/templates/renderers/goalShared.tsx:317
+#: admin-app/src/templates/renderers/missionShared.tsx:317
 #: includes/Frontend/ProgressUI.php:1045
 msgid "Add"
 msgstr ""
 
-#: admin-app/src/templates/renderers/goalShared.tsx:39
+#: admin-app/src/templates/renderers/missionShared.tsx:39
 #: includes/Frontend/ProgressUI.php:1046
 msgid "Add %s more"
 msgstr ""
@@ -260,7 +262,7 @@ msgstr ""
 msgid "Add a milestone"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:37
+#: admin-app/src/components/mission-builder/RewardFields.tsx:37
 msgid "Add automatically"
 msgstr ""
 
@@ -269,7 +271,7 @@ msgstr ""
 msgid "Add campaign"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:177
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:177
 msgid "Add condition"
 msgstr ""
 
@@ -277,18 +279,18 @@ msgstr ""
 msgid "Add costs"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:300
-#: admin-app/src/routes/Goals.tsx:201
-msgid "Add goal"
-msgstr ""
-
 #: admin-app/src/routes/Settings.tsx:730
 msgid "Add line taxes to the subtotal-style money bases."
 msgstr ""
 
+#: admin-app/src/routes/MissionBuilder.tsx:300
+#: admin-app/src/routes/Missions.tsx:201
+msgid "Add mission"
+msgstr ""
+
 #: admin-app/src/routes/Analytics.tsx:798
-#: admin-app/src/routes/GoalPerformance.tsx:365
-#: admin-app/src/routes/GoalPerformance.tsx:835
+#: admin-app/src/routes/MissionPerformance.tsx:365
+#: admin-app/src/routes/MissionPerformance.tsx:835
 msgid "Add product cost data to estimate profit."
 msgstr ""
 
@@ -307,7 +309,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:103
 #: includes/Frontend/ProgressUI.php:1049
-msgid "Add these products to reach your goal faster:"
+msgid "Add these products to reach your mission faster:"
 msgstr ""
 
 #: includes/Frontend/ProgressUI.php:519
@@ -318,8 +320,8 @@ msgstr ""
 msgid "Add your first campaign"
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:271
-msgid "Add your first goal"
+#: admin-app/src/routes/Missions.tsx:271
+msgid "Add your first mission"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1219
@@ -333,7 +335,7 @@ msgid "Added"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:300
-#: admin-app/src/routes/GoalPerformance.tsx:513
+#: admin-app/src/routes/MissionPerformance.tsx:513
 msgid "Added to cart"
 msgstr ""
 
@@ -350,7 +352,7 @@ msgstr ""
 msgid "Adds"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:602
+#: admin-app/src/routes/MissionPerformance.tsx:602
 #: admin-app/src/routes/RevenueOverview.tsx:440
 #: admin-app/src/routes/Settings.tsx:531
 #: admin-app/src/routes/Settings.tsx:832
@@ -358,18 +360,18 @@ msgstr ""
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:153
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:166
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:172
-#: includes/Templates/Goal/Template1.php:196
-#: includes/Templates/Goal/Template1.php:202
-#: includes/Templates/Goal/Template2.php:167
-#: includes/Templates/Goal/Template2.php:173
-#: includes/Templates/Goal/Template3.php:182
-#: includes/Templates/Goal/Template3.php:188
-#: includes/Templates/Goal/Template4.php:169
-#: includes/Templates/Goal/Template4.php:175
-#: includes/Templates/Goal/Template5.php:174
-#: includes/Templates/Goal/Template5.php:180
-#: includes/Templates/Goal/Template6.php:162
-#: includes/Templates/Goal/Template6.php:168
+#: includes/Templates/Mission/Template1.php:196
+#: includes/Templates/Mission/Template1.php:202
+#: includes/Templates/Mission/Template2.php:167
+#: includes/Templates/Mission/Template2.php:173
+#: includes/Templates/Mission/Template3.php:182
+#: includes/Templates/Mission/Template3.php:188
+#: includes/Templates/Mission/Template4.php:169
+#: includes/Templates/Mission/Template4.php:175
+#: includes/Templates/Mission/Template5.php:174
+#: includes/Templates/Mission/Template5.php:180
+#: includes/Templates/Mission/Template6.php:162
+#: includes/Templates/Mission/Template6.php:168
 msgid "Advanced"
 msgstr ""
 
@@ -381,7 +383,7 @@ msgstr ""
 msgid "Advanced attribution"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:549
+#: admin-app/src/routes/MissionPerformance.tsx:549
 msgid "Advanced attribution details"
 msgstr ""
 
@@ -395,11 +397,11 @@ msgstr ""
 
 #: admin-app/src/components/revenue/RevenueToolbar.tsx:68
 #: admin-app/src/routes/Analytics.tsx:540
-msgid "All goals"
+msgid "All missions"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:615
-msgid "All goals are already milestones of this campaign."
+msgid "All missions are already milestones of this campaign."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:570
@@ -410,15 +412,15 @@ msgstr ""
 msgid "All rewards"
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:246
+#: admin-app/src/routes/Missions.tsx:246
 msgid "All statuses"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:131
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:131
 msgid "Allowed customer roles"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:260
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:260
 msgid "Allowed shipping zones"
 msgstr ""
 
@@ -430,7 +432,7 @@ msgstr ""
 msgid "Almost there! Only %s left"
 msgstr ""
 
-#: includes/Goals/MessageEngine.php:202
+#: includes/Missions/MessageEngine.php:206
 msgid "Almost there! Only {remaining} left"
 msgstr ""
 
@@ -438,16 +440,16 @@ msgstr ""
 msgid "Already at share"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:27
-#: admin-app/src/routes/Goals.tsx:50
+#: admin-app/src/components/mission-builder/missionTypes.tsx:27
+#: admin-app/src/routes/Missions.tsx:50
 msgid "Amount"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:131
+#: admin-app/src/routes/MissionPerformance.tsx:131
 msgid "Analysis is based on a healthy number of customer sessions."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:127
+#: admin-app/src/routes/MissionPerformance.tsx:127
 msgid "Analysis is based on a moderate number of customer sessions."
 msgstr ""
 
@@ -469,12 +471,12 @@ msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:140
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:159
-#: includes/Templates/Goal/Template1.php:189
-#: includes/Templates/Goal/Template2.php:160
-#: includes/Templates/Goal/Template3.php:175
-#: includes/Templates/Goal/Template4.php:162
-#: includes/Templates/Goal/Template5.php:167
-#: includes/Templates/Goal/Template6.php:155
+#: includes/Templates/Mission/Template1.php:189
+#: includes/Templates/Mission/Template2.php:160
+#: includes/Templates/Mission/Template3.php:175
+#: includes/Templates/Mission/Template4.php:162
+#: includes/Templates/Mission/Template5.php:167
+#: includes/Templates/Mission/Template6.php:155
 msgid "Animate progress updates"
 msgstr ""
 
@@ -483,13 +485,13 @@ msgid "Animate the button and drawer"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:68
-#: admin-app/src/routes/Appearance.tsx:538
-#: admin-app/src/routes/Appearance.tsx:556
-#: admin-app/src/routes/Appearance.tsx:581
+#: admin-app/src/routes/Appearance.tsx:607
+#: admin-app/src/routes/Appearance.tsx:625
+#: admin-app/src/routes/Appearance.tsx:650
 msgid "Appearance"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:385
+#: admin-app/src/routes/Appearance.tsx:454
 msgid "Appearance saved."
 msgstr ""
 
@@ -499,16 +501,16 @@ msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:155
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:174
-#: includes/Templates/Goal/Template1.php:204
-#: includes/Templates/Goal/Template2.php:175
-#: includes/Templates/Goal/Template3.php:190
-#: includes/Templates/Goal/Template4.php:177
-#: includes/Templates/Goal/Template5.php:182
-#: includes/Templates/Goal/Template6.php:170
+#: includes/Templates/Mission/Template1.php:204
+#: includes/Templates/Mission/Template2.php:175
+#: includes/Templates/Mission/Template3.php:190
+#: includes/Templates/Mission/Template4.php:177
+#: includes/Templates/Mission/Template5.php:182
+#: includes/Templates/Mission/Template6.php:170
 msgid "Appended to the widget styles. Applied only while this template renders."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:323
+#: admin-app/src/routes/MissionPerformance.tsx:323
 #: admin-app/src/routes/Recommendations.tsx:734
 msgid "Apply"
 msgstr ""
@@ -517,52 +519,52 @@ msgstr ""
 msgid "Apply range"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:299
+#: admin-app/src/routes/MissionPerformance.tsx:299
 #: admin-app/src/routes/Recommendations.tsx:343
 msgid "Apply recommendation"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:307
+#: admin-app/src/routes/MissionPerformance.tsx:307
 #: admin-app/src/routes/Recommendations.tsx:706
 msgid "Apply recommendation?"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:302
-#: admin-app/src/routes/GoalPerformance.tsx:521
+#: admin-app/src/routes/MissionPerformance.tsx:521
 msgid "Assisted completions"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:525
+#: admin-app/src/routes/MissionPerformance.tsx:525
 msgid "Assisted rate"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:962
 #: admin-app/src/routes/AttributionDashboard.tsx:135
-#: admin-app/src/routes/GoalPerformance.tsx:562
+#: admin-app/src/routes/MissionPerformance.tsx:562
 #: admin-app/src/routes/RevenueOverview.tsx:599
 #: admin-app/src/routes/RevenueOverview.tsx:672
 msgid "Assisted revenue"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:435
-msgid "At least one of these coupon codes must be applied for the goal to count."
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:435
+msgid "At least one of these coupon codes must be applied for the mission to count."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:75
+#: admin-app/src/components/mission-builder/missionTypes.tsx:75
 msgid "Attribute"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:667
 #: admin-app/src/routes/Analytics.tsx:768
 #: admin-app/src/routes/Dashboard.tsx:221
-#: admin-app/src/routes/GoalPerformance.tsx:433
+#: admin-app/src/routes/MissionPerformance.tsx:433
 #: admin-app/src/routes/RevenueOverview.tsx:166
 #: admin-app/src/routes/RevenueOverview.tsx:520
 msgid "Attributed Sales"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:984
-#: admin-app/src/routes/GoalPerformance.tsx:636
+#: admin-app/src/routes/MissionPerformance.tsx:636
 #: admin-app/src/routes/RevenueOverview.tsx:624
 msgid "Attributed orders"
 msgstr ""
@@ -572,16 +574,16 @@ msgstr ""
 msgid "Attributed sales"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:199
+#: admin-app/src/components/mission-builder/TargetFields.tsx:199
 msgid "Attributes"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:607
+#: admin-app/src/routes/MissionPerformance.tsx:607
 msgid "Attribution model"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:992
-#: admin-app/src/routes/GoalPerformance.tsx:615
+#: admin-app/src/routes/MissionPerformance.tsx:615
 #: admin-app/src/routes/RevenueOverview.tsx:632
 msgid "Attribution window"
 msgstr ""
@@ -610,13 +612,13 @@ msgstr ""
 msgid "Average basket"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:628
+#: admin-app/src/routes/MissionPerformance.tsx:628
 msgid "Average basket increase"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:580
+#: admin-app/src/routes/MissionPerformance.tsx:580
 #: admin-app/src/routes/RevenueOverview.tsx:617
-msgid "Average cart value after goal exposure minus the value at first exposure, per session."
+msgid "Average cart value after mission exposure minus the value at first exposure, per session."
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:167
@@ -627,7 +629,7 @@ msgstr ""
 msgid "Average order value"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:713
+#: includes/Analytics/MissionRecommendationEngine.php:713
 msgid "Average order value is %s over %d orders."
 msgstr ""
 
@@ -635,8 +637,8 @@ msgstr ""
 msgid "Average order value of the attributed purchased orders."
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:721
-msgid "Average shipping cost is %s — a free-shipping goal absorbs this cost."
+#: includes/Analytics/MissionRecommendationEngine.php:721
+msgid "Average shipping cost is %s — a free-shipping mission absorbs this cost."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:422
@@ -659,17 +661,17 @@ msgstr ""
 msgid "Back to campaigns"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:307
-msgid "Back to goals"
+#: admin-app/src/routes/MissionBuilder.tsx:307
+msgid "Back to missions"
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:106
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:125
-#: includes/Templates/Goal/Template1.php:87
-#: includes/Templates/Goal/Template2.php:76
-#: includes/Templates/Goal/Template3.php:81
-#: includes/Templates/Goal/Template4.php:82
-#: includes/Templates/Goal/Template6.php:81
+#: includes/Templates/Mission/Template1.php:87
+#: includes/Templates/Mission/Template2.php:76
+#: includes/Templates/Mission/Template3.php:81
+#: includes/Templates/Mission/Template4.php:82
+#: includes/Templates/Mission/Template6.php:81
 msgid "Background"
 msgstr ""
 
@@ -677,37 +679,37 @@ msgstr ""
 msgid "Balanced"
 msgstr ""
 
-#: includes/Templates/Goal/Template5.php:75
+#: includes/Templates/Mission/Template5.php:75
 msgid "Bar background"
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:132
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:151
-#: includes/Templates/Goal/Template1.php:119
-#: includes/Templates/Goal/Template2.php:108
-#: includes/Templates/Goal/Template4.php:114
-#: includes/Templates/Goal/Template5.php:113
-#: includes/Templates/Goal/Template6.php:113
+#: includes/Templates/Mission/Template1.php:119
+#: includes/Templates/Mission/Template2.php:108
+#: includes/Templates/Mission/Template4.php:114
+#: includes/Templates/Mission/Template5.php:113
+#: includes/Templates/Mission/Template6.php:113
 msgid "Bar height (px)"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:83
+#: admin-app/src/routes/Appearance.tsx:105
 msgid "Baseball cap"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:340
-#: admin-app/src/routes/GoalBuilder.tsx:317
+#: admin-app/src/routes/MissionBuilder.tsx:317
 msgid "Basic information"
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:141
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:160
-#: includes/Templates/Goal/Template1.php:190
-#: includes/Templates/Goal/Template2.php:161
-#: includes/Templates/Goal/Template3.php:176
-#: includes/Templates/Goal/Template4.php:163
-#: includes/Templates/Goal/Template5.php:168
-#: includes/Templates/Goal/Template6.php:156
+#: includes/Templates/Mission/Template1.php:190
+#: includes/Templates/Mission/Template2.php:161
+#: includes/Templates/Mission/Template3.php:176
+#: includes/Templates/Mission/Template4.php:163
+#: includes/Templates/Mission/Template5.php:168
+#: includes/Templates/Mission/Template6.php:156
 msgid "Behavior"
 msgstr ""
 
@@ -724,17 +726,17 @@ msgid "Best reward only"
 msgstr ""
 
 #: admin-app/src/components/preview/PreviewWidget.tsx:43
-msgid "Blocked by an exclusive goal"
+msgid "Blocked by an exclusive mission"
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:112
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:131
-#: includes/Templates/Goal/Template1.php:93
-#: includes/Templates/Goal/Template2.php:82
-#: includes/Templates/Goal/Template3.php:87
-#: includes/Templates/Goal/Template4.php:88
-#: includes/Templates/Goal/Template5.php:81
-#: includes/Templates/Goal/Template6.php:87
+#: includes/Templates/Mission/Template1.php:93
+#: includes/Templates/Mission/Template2.php:82
+#: includes/Templates/Mission/Template3.php:87
+#: includes/Templates/Mission/Template4.php:88
+#: includes/Templates/Mission/Template5.php:81
+#: includes/Templates/Mission/Template6.php:87
 msgid "Border"
 msgstr ""
 
@@ -750,41 +752,41 @@ msgstr ""
 msgid "Bottom right"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:81
+#: admin-app/src/components/mission-builder/missionTypes.tsx:81
 msgid "Brand"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:214
+#: admin-app/src/components/mission-builder/TargetFields.tsx:214
 msgid "Brand attribute"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:128
-#: includes/Templates/Goal/Template1.php:134
-#: includes/Templates/Goal/Template1.php:140
-#: includes/Templates/Goal/Template2.php:117
-#: includes/Templates/Goal/Template2.php:123
-#: includes/Templates/Goal/Template2.php:129
-#: includes/Templates/Goal/Template3.php:130
-#: includes/Templates/Goal/Template3.php:136
-#: includes/Templates/Goal/Template3.php:142
-#: includes/Templates/Goal/Template4.php:123
-#: includes/Templates/Goal/Template4.php:129
-#: includes/Templates/Goal/Template4.php:135
-#: includes/Templates/Goal/Template5.php:122
-#: includes/Templates/Goal/Template5.php:128
-#: includes/Templates/Goal/Template5.php:134
-#: includes/Templates/Goal/Template6.php:122
-#: includes/Templates/Goal/Template6.php:128
-#: includes/Templates/Goal/Template6.php:134
+#: includes/Templates/Mission/Template1.php:128
+#: includes/Templates/Mission/Template1.php:134
+#: includes/Templates/Mission/Template1.php:140
+#: includes/Templates/Mission/Template2.php:117
+#: includes/Templates/Mission/Template2.php:123
+#: includes/Templates/Mission/Template2.php:129
+#: includes/Templates/Mission/Template3.php:130
+#: includes/Templates/Mission/Template3.php:136
+#: includes/Templates/Mission/Template3.php:142
+#: includes/Templates/Mission/Template4.php:123
+#: includes/Templates/Mission/Template4.php:129
+#: includes/Templates/Mission/Template4.php:135
+#: includes/Templates/Mission/Template5.php:122
+#: includes/Templates/Mission/Template5.php:128
+#: includes/Templates/Mission/Template5.php:134
+#: includes/Templates/Mission/Template6.php:122
+#: includes/Templates/Mission/Template6.php:128
+#: includes/Templates/Mission/Template6.php:134
 msgid "Button"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:127
-#: includes/Templates/Goal/Template2.php:116
-#: includes/Templates/Goal/Template3.php:129
-#: includes/Templates/Goal/Template4.php:122
-#: includes/Templates/Goal/Template5.php:121
-#: includes/Templates/Goal/Template6.php:121
+#: includes/Templates/Mission/Template1.php:127
+#: includes/Templates/Mission/Template2.php:116
+#: includes/Templates/Mission/Template3.php:129
+#: includes/Templates/Mission/Template4.php:122
+#: includes/Templates/Mission/Template5.php:121
+#: includes/Templates/Mission/Template6.php:121
 msgid "Button color"
 msgstr ""
 
@@ -796,9 +798,9 @@ msgstr ""
 msgid "Button label / tooltip"
 msgstr ""
 
-#: includes/Templates/Goal/Template2.php:128
-#: includes/Templates/Goal/Template4.php:134
-#: includes/Templates/Goal/Template5.php:133
+#: includes/Templates/Mission/Template2.php:128
+#: includes/Templates/Mission/Template4.php:134
+#: includes/Templates/Mission/Template5.php:133
 msgid "Button radius (px)"
 msgstr ""
 
@@ -806,18 +808,18 @@ msgstr ""
 msgid "Button size (px)"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:139
-#: includes/Templates/Goal/Template3.php:141
-#: includes/Templates/Goal/Template6.php:133
+#: includes/Templates/Mission/Template1.php:139
+#: includes/Templates/Mission/Template3.php:141
+#: includes/Templates/Mission/Template6.php:133
 msgid "Button style"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:133
-#: includes/Templates/Goal/Template2.php:122
-#: includes/Templates/Goal/Template3.php:135
-#: includes/Templates/Goal/Template4.php:128
-#: includes/Templates/Goal/Template5.php:127
-#: includes/Templates/Goal/Template6.php:127
+#: includes/Templates/Mission/Template1.php:133
+#: includes/Templates/Mission/Template2.php:122
+#: includes/Templates/Mission/Template3.php:135
+#: includes/Templates/Mission/Template4.php:128
+#: includes/Templates/Mission/Template5.php:127
+#: includes/Templates/Mission/Template6.php:127
 msgid "Button text color"
 msgstr ""
 
@@ -834,8 +836,8 @@ msgstr ""
 msgid "Caching and what the storefront measures."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:118
-#: admin-app/src/components/goal-builder/TargetFields.tsx:136
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:118
+#: admin-app/src/components/mission-builder/TargetFields.tsx:136
 msgid "Calculate against"
 msgstr ""
 
@@ -844,11 +846,11 @@ msgid "Calculation mode"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:518
-#: admin-app/src/routes/Appearance.tsx:611
+#: admin-app/src/routes/Appearance.tsx:680
 msgid "Campaign"
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:321
+#: admin-app/src/routes/Missions.tsx:321
 msgid "Campaign #%d"
 msgstr ""
 
@@ -860,9 +862,9 @@ msgstr ""
 msgid "Campaign progress"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:626
-#: admin-app/src/routes/Appearance.tsx:646
-#: admin-app/src/routes/Appearance.tsx:653
+#: admin-app/src/routes/Appearance.tsx:695
+#: admin-app/src/routes/Appearance.tsx:715
+#: admin-app/src/routes/Appearance.tsx:722
 #: admin-app/src/routes/CampaignBuilder.tsx:707
 msgid "Campaign template"
 msgstr ""
@@ -873,53 +875,53 @@ msgid "Campaigns"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:149
-msgid "Campaigns bundle multiple goals into scheduled, prioritized milestones. Create your first campaign to group goals around an event or season."
+msgid "Campaigns bundle multiple missions into scheduled, prioritized milestones. Create your first campaign to group missions around an event or season."
 msgstr ""
 
 #: admin-app/src/components/ConfirmDialog.tsx:59
 #: admin-app/src/routes/CampaignBuilder.tsx:286
-#: admin-app/src/routes/GoalBuilder.tsx:262
+#: admin-app/src/routes/MissionBuilder.tsx:262
 msgid "Cancel"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:149
+#: admin-app/src/components/mission-builder/RewardFields.tsx:149
 msgid "Cap the discount at this amount."
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:149
+#: includes/Templates/Mission/Template1.php:149
 msgid "Card density"
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:198
-msgid "Cart goals drive the storefront progress bars and rewards."
+#: admin-app/src/routes/Missions.tsx:198
+msgid "Cart missions drive the storefront progress bars and rewards."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:158
 msgid "Cart page"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:274
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:274
 msgid "Cart state"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:28
-#: admin-app/src/components/goal-builder/TargetFields.tsx:24
-#: admin-app/src/components/goal-builder/TargetFields.tsx:30
-#: admin-app/src/components/goal-builder/TargetFields.tsx:36
-#: admin-app/src/components/goal-builder/TargetFields.tsx:43
-#: admin-app/src/components/goal-builder/TargetFields.tsx:49
-#: admin-app/src/components/goal-builder/TargetFields.tsx:55
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:28
+#: admin-app/src/components/mission-builder/TargetFields.tsx:24
+#: admin-app/src/components/mission-builder/TargetFields.tsx:30
+#: admin-app/src/components/mission-builder/TargetFields.tsx:36
+#: admin-app/src/components/mission-builder/TargetFields.tsx:43
+#: admin-app/src/components/mission-builder/TargetFields.tsx:49
+#: admin-app/src/components/mission-builder/TargetFields.tsx:55
 #: admin-app/src/routes/Settings.tsx:621
 msgid "Cart total (incl. tax & shipping)"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:153
-#: admin-app/src/components/goal-builder/TargetFields.tsx:154
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:153
+#: admin-app/src/components/mission-builder/TargetFields.tsx:154
 msgid "Categories"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:45
-#: admin-app/src/routes/Goals.tsx:53
+#: admin-app/src/components/mission-builder/missionTypes.tsx:45
+#: admin-app/src/routes/Missions.tsx:53
 msgid "Category"
 msgstr ""
 
@@ -943,11 +945,11 @@ msgstr ""
 msgid "Checkout"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:81
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:81
 msgid "Child type"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:387
+#: admin-app/src/routes/MissionBuilder.tsx:387
 msgid "Children are evaluated against the same cart. AND requires every child, OR completes at the best child."
 msgstr ""
 
@@ -955,11 +957,11 @@ msgstr ""
 msgid "Choose a start and end date."
 msgstr ""
 
-#: includes/Templates/Goal/Template3.php:45
-msgid "Circular gauge — percentage ring with the goal details beside it."
+#: includes/Templates/Mission/Template3.php:45
+msgid "Circular gauge — percentage ring with the mission details beside it."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:73
+#: admin-app/src/routes/Appearance.tsx:95
 msgid "Classic cotton t-shirt"
 msgstr ""
 
@@ -969,7 +971,7 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1216
 #: admin-app/src/routes/Dashboard.tsx:299
-#: admin-app/src/routes/GoalPerformance.tsx:509
+#: admin-app/src/routes/MissionPerformance.tsx:509
 #: admin-app/src/routes/UpsellAnalytics.tsx:486
 msgid "Clicks"
 msgstr ""
@@ -983,7 +985,7 @@ msgid "Collapse all"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:796
-msgid "Collect goal and suggestion events. Keep the goals running while turning event collection off."
+msgid "Collect mission and suggestion events. Keep the missions running while turning event collection off."
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:101
@@ -997,58 +999,58 @@ msgstr ""
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:126
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:132
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:138
-#: includes/Templates/Goal/Template1.php:70
-#: includes/Templates/Goal/Template1.php:76
-#: includes/Templates/Goal/Template1.php:82
-#: includes/Templates/Goal/Template1.php:88
-#: includes/Templates/Goal/Template1.php:94
-#: includes/Templates/Goal/Template1.php:100
-#: includes/Templates/Goal/Template1.php:106
-#: includes/Templates/Goal/Template2.php:71
-#: includes/Templates/Goal/Template2.php:77
-#: includes/Templates/Goal/Template2.php:83
-#: includes/Templates/Goal/Template2.php:89
-#: includes/Templates/Goal/Template2.php:95
-#: includes/Templates/Goal/Template3.php:70
-#: includes/Templates/Goal/Template3.php:76
-#: includes/Templates/Goal/Template3.php:82
-#: includes/Templates/Goal/Template3.php:88
-#: includes/Templates/Goal/Template3.php:94
-#: includes/Templates/Goal/Template3.php:100
-#: includes/Templates/Goal/Template4.php:71
-#: includes/Templates/Goal/Template4.php:77
-#: includes/Templates/Goal/Template4.php:83
-#: includes/Templates/Goal/Template4.php:89
-#: includes/Templates/Goal/Template4.php:95
-#: includes/Templates/Goal/Template4.php:101
-#: includes/Templates/Goal/Template5.php:70
-#: includes/Templates/Goal/Template5.php:76
-#: includes/Templates/Goal/Template5.php:82
-#: includes/Templates/Goal/Template5.php:88
-#: includes/Templates/Goal/Template5.php:94
-#: includes/Templates/Goal/Template5.php:100
-#: includes/Templates/Goal/Template6.php:70
-#: includes/Templates/Goal/Template6.php:76
-#: includes/Templates/Goal/Template6.php:82
-#: includes/Templates/Goal/Template6.php:88
-#: includes/Templates/Goal/Template6.php:94
-#: includes/Templates/Goal/Template6.php:100
+#: includes/Templates/Mission/Template1.php:70
+#: includes/Templates/Mission/Template1.php:76
+#: includes/Templates/Mission/Template1.php:82
+#: includes/Templates/Mission/Template1.php:88
+#: includes/Templates/Mission/Template1.php:94
+#: includes/Templates/Mission/Template1.php:100
+#: includes/Templates/Mission/Template1.php:106
+#: includes/Templates/Mission/Template2.php:71
+#: includes/Templates/Mission/Template2.php:77
+#: includes/Templates/Mission/Template2.php:83
+#: includes/Templates/Mission/Template2.php:89
+#: includes/Templates/Mission/Template2.php:95
+#: includes/Templates/Mission/Template3.php:70
+#: includes/Templates/Mission/Template3.php:76
+#: includes/Templates/Mission/Template3.php:82
+#: includes/Templates/Mission/Template3.php:88
+#: includes/Templates/Mission/Template3.php:94
+#: includes/Templates/Mission/Template3.php:100
+#: includes/Templates/Mission/Template4.php:71
+#: includes/Templates/Mission/Template4.php:77
+#: includes/Templates/Mission/Template4.php:83
+#: includes/Templates/Mission/Template4.php:89
+#: includes/Templates/Mission/Template4.php:95
+#: includes/Templates/Mission/Template4.php:101
+#: includes/Templates/Mission/Template5.php:70
+#: includes/Templates/Mission/Template5.php:76
+#: includes/Templates/Mission/Template5.php:82
+#: includes/Templates/Mission/Template5.php:88
+#: includes/Templates/Mission/Template5.php:94
+#: includes/Templates/Mission/Template5.php:100
+#: includes/Templates/Mission/Template6.php:70
+#: includes/Templates/Mission/Template6.php:76
+#: includes/Templates/Mission/Template6.php:82
+#: includes/Templates/Mission/Template6.php:88
+#: includes/Templates/Mission/Template6.php:94
+#: includes/Templates/Mission/Template6.php:100
 msgid "Colors"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:64
-msgid "Combine child goals with AND/OR logic."
+#: admin-app/src/components/mission-builder/missionTypes.tsx:64
+msgid "Combine child missions with AND/OR logic."
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:153
+#: includes/Templates/Mission/Template1.php:153
 msgid "Comfortable"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:154
+#: includes/Templates/Mission/Template1.php:154
 msgid "Compact"
 msgstr ""
 
-#: includes/Templates/Goal/Template5.php:45
+#: includes/Templates/Mission/Template5.php:45
 msgid "Compact dark bar — icon, progress, remaining amount and a small CTA."
 msgstr ""
 
@@ -1066,8 +1068,8 @@ msgstr ""
 
 #: admin-app/src/components/revenue/FunnelVisual.tsx:25
 #: admin-app/src/routes/Analytics.tsx:182
-#: admin-app/src/routes/GoalPerformance.tsx:71
-#: admin-app/src/routes/GoalPerformance.tsx:426
+#: admin-app/src/routes/MissionPerformance.tsx:71
+#: admin-app/src/routes/MissionPerformance.tsx:426
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:59
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:82
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:86
@@ -1075,20 +1077,20 @@ msgstr ""
 msgid "Completed"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:155
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:155
 msgid "Completed message"
 msgstr ""
 
 #: admin-app/src/components/revenue/FunnelVisual.tsx:127
-#: admin-app/src/routes/Goals.tsx:287
+#: admin-app/src/routes/Missions.tsx:287
 msgid "Completion"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:273
-msgid "Completion is strong, but purchase conversion is weak — only %1$s of completed goals were followed by an attributed purchase."
+msgid "Completion is strong, but purchase conversion is weak — only %1$s of completed missions were followed by an attributed purchase."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:441
+#: admin-app/src/routes/MissionBuilder.tsx:441
 msgid "Completion limit"
 msgstr ""
 
@@ -1101,20 +1103,20 @@ msgstr ""
 msgid "Completions"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:94
-msgid "Completions where the customer also saw a product recommendation for this goal in the same session (UPSELL_REFACTOR §30)."
+#: admin-app/src/routes/MissionPerformance.tsx:94
+msgid "Completions where the customer also saw a product recommendation for this mission in the same session (UPSELL_REFACTOR §30)."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:63
-#: admin-app/src/routes/Goals.tsx:56
+#: admin-app/src/components/mission-builder/missionTypes.tsx:63
+#: admin-app/src/routes/Missions.tsx:56
 msgid "Composite"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:386
+#: admin-app/src/routes/MissionBuilder.tsx:386
 msgid "Composite conditions"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:422
+#: admin-app/src/routes/MissionBuilder.tsx:422
 msgid "Conditions"
 msgstr ""
 
@@ -1123,7 +1125,7 @@ msgstr ""
 msgid "Confidence"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:273
+#: admin-app/src/routes/MissionPerformance.tsx:273
 msgid "Confidence: %1$s"
 msgstr ""
 
@@ -1152,26 +1154,26 @@ msgstr ""
 msgid "Connector line color"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:160
-#: includes/Templates/Goal/Template1.php:166
-#: includes/Templates/Goal/Template1.php:172
-#: includes/Templates/Goal/Template1.php:178
-#: includes/Templates/Goal/Template1.php:184
-#: includes/Templates/Goal/Template2.php:137
-#: includes/Templates/Goal/Template2.php:143
-#: includes/Templates/Goal/Template2.php:149
-#: includes/Templates/Goal/Template2.php:155
-#: includes/Templates/Goal/Template3.php:152
-#: includes/Templates/Goal/Template3.php:158
-#: includes/Templates/Goal/Template3.php:164
-#: includes/Templates/Goal/Template3.php:170
-#: includes/Templates/Goal/Template4.php:151
-#: includes/Templates/Goal/Template4.php:157
-#: includes/Templates/Goal/Template5.php:150
-#: includes/Templates/Goal/Template5.php:156
-#: includes/Templates/Goal/Template5.php:162
-#: includes/Templates/Goal/Template6.php:144
-#: includes/Templates/Goal/Template6.php:150
+#: includes/Templates/Mission/Template1.php:160
+#: includes/Templates/Mission/Template1.php:166
+#: includes/Templates/Mission/Template1.php:172
+#: includes/Templates/Mission/Template1.php:178
+#: includes/Templates/Mission/Template1.php:184
+#: includes/Templates/Mission/Template2.php:137
+#: includes/Templates/Mission/Template2.php:143
+#: includes/Templates/Mission/Template2.php:149
+#: includes/Templates/Mission/Template2.php:155
+#: includes/Templates/Mission/Template3.php:152
+#: includes/Templates/Mission/Template3.php:158
+#: includes/Templates/Mission/Template3.php:164
+#: includes/Templates/Mission/Template3.php:170
+#: includes/Templates/Mission/Template4.php:151
+#: includes/Templates/Mission/Template4.php:157
+#: includes/Templates/Mission/Template5.php:150
+#: includes/Templates/Mission/Template5.php:156
+#: includes/Templates/Mission/Template5.php:162
+#: includes/Templates/Mission/Template6.php:144
+#: includes/Templates/Mission/Template6.php:150
 msgid "Content"
 msgstr ""
 
@@ -1183,12 +1185,12 @@ msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:124
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:143
-#: includes/Templates/Goal/Template1.php:111
-#: includes/Templates/Goal/Template2.php:100
-#: includes/Templates/Goal/Template3.php:121
-#: includes/Templates/Goal/Template4.php:106
-#: includes/Templates/Goal/Template5.php:105
-#: includes/Templates/Goal/Template6.php:105
+#: includes/Templates/Mission/Template1.php:111
+#: includes/Templates/Mission/Template2.php:100
+#: includes/Templates/Mission/Template3.php:121
+#: includes/Templates/Mission/Template4.php:106
+#: includes/Templates/Mission/Template5.php:105
+#: includes/Templates/Mission/Template6.php:105
 msgid "Corner radius (px)"
 msgstr ""
 
@@ -1208,12 +1210,12 @@ msgstr ""
 msgid "Cost per unit (FaraCart)"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:473
+#: admin-app/src/routes/MissionPerformance.tsx:473
 msgid "Costs"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:738
-msgid "Could not load goal performance."
+#: admin-app/src/routes/MissionPerformance.tsx:738
+msgid "Could not load mission performance."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:630
@@ -1236,19 +1238,19 @@ msgstr ""
 msgid "Could not load the campaigns."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:292
-msgid "Could not load the goal."
+#: admin-app/src/routes/MissionBuilder.tsx:292
+msgid "Could not load the mission."
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:209
-msgid "Could not load the goals."
+#: admin-app/src/routes/Missions.tsx:209
+msgid "Could not load the missions."
 msgstr ""
 
 #: admin-app/src/components/preview/PreviewPanel.tsx:95
 msgid "Could not load the preview."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:565
+#: admin-app/src/routes/Appearance.tsx:634
 msgid "Could not load the progress templates."
 msgstr ""
 
@@ -1264,7 +1266,7 @@ msgstr ""
 msgid "Could not load upsell analytics."
 msgstr ""
 
-#: includes/REST/TrackController.php:253
+#: includes/REST/TrackController.php:268
 msgid "Could not record the event."
 msgstr ""
 
@@ -1276,42 +1278,42 @@ msgstr ""
 msgid "Countdown timer"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:28
+#: admin-app/src/components/mission-builder/RewardFields.tsx:28
 #: admin-app/src/routes/Analytics.tsx:88
 #: admin-app/src/routes/CampaignBuilder.tsx:46
-#: admin-app/src/routes/Goals.tsx:46
+#: admin-app/src/routes/Missions.tsx:46
 #: admin-app/src/templates/rewardLabel.ts:12
 #: includes/Frontend/ProgressUI.php:1034
-#: includes/Goals/MessageEngine.php:352
+#: includes/Missions/MessageEngine.php:358
 msgid "Coupon"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:398
+#: admin-app/src/components/mission-builder/RewardFields.tsx:398
 msgid "Coupon cap (optional)"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:372
+#: admin-app/src/components/mission-builder/RewardFields.tsx:372
 msgid "Coupon discount type"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:388
+#: admin-app/src/components/mission-builder/RewardFields.tsx:388
 msgid "Coupon value"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:477
-msgid "Create Goal"
+msgid "Create Mission"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:283
 msgid "Create campaign"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:259
-msgid "Create goal"
+#: admin-app/src/routes/MissionBuilder.tsx:259
+msgid "Create mission"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:425
-msgid "Create your first Goal"
+msgid "Create your first Mission"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:590
@@ -1323,16 +1325,16 @@ msgid "Currency"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:196
-msgid "Current goal"
+msgid "Current mission"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:256
+#: admin-app/src/routes/MissionPerformance.tsx:256
 #: admin-app/src/routes/Recommendations.tsx:199
 msgid "Current target"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:313
-msgid "Current target %1$s → recommended target %2$s? This changes a production goal — the action is not reversible from here."
+#: admin-app/src/routes/MissionPerformance.tsx:313
+msgid "Current target %1$s → recommended target %2$s? This changes a production mission — the action is not reversible from here."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:714
@@ -1342,12 +1344,12 @@ msgstr ""
 #: admin-app/src/routes/Settings.tsx:878
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:152
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:171
-#: includes/Templates/Goal/Template1.php:201
-#: includes/Templates/Goal/Template2.php:172
-#: includes/Templates/Goal/Template3.php:187
-#: includes/Templates/Goal/Template4.php:174
-#: includes/Templates/Goal/Template5.php:179
-#: includes/Templates/Goal/Template6.php:167
+#: includes/Templates/Mission/Template1.php:201
+#: includes/Templates/Mission/Template2.php:172
+#: includes/Templates/Mission/Template3.php:187
+#: includes/Templates/Mission/Template4.php:174
+#: includes/Templates/Mission/Template5.php:179
+#: includes/Templates/Mission/Template6.php:167
 msgid "Custom CSS"
 msgstr ""
 
@@ -1356,26 +1358,26 @@ msgid "Custom range…"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:720
-#: admin-app/src/routes/GoalPerformance.tsx:446
+#: admin-app/src/routes/MissionPerformance.tsx:446
 #: admin-app/src/routes/RevenueOverview.tsx:183
 msgid "Customer Journey"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:38
+#: admin-app/src/components/mission-builder/RewardFields.tsx:38
 msgid "Customer picks from a list"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:431
+#: admin-app/src/routes/MissionBuilder.tsx:431
 msgid "Customer-facing copy and template for the progress widget."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:114
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:114
 msgid "Customers"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:623
 #: admin-app/src/routes/RevenueOverview.tsx:329
-msgid "Customers are interacting with your goals, but no attributed purchases have been recorded for this period."
+msgid "Customers are interacting with your missions, but no attributed purchases have been recorded for this period."
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:105
@@ -1386,17 +1388,17 @@ msgstr ""
 msgid "Customers interacting with FaraCart spent %1$s more per order on average (observed impact)."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:609
-msgid "Customers who progressed or completed the goal before ordering are direct; exposure-only sessions are assisted."
+#: admin-app/src/routes/MissionPerformance.tsx:609
+msgid "Customers who progressed or completed the mission before ordering are direct; exposure-only sessions are assisted."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:539
-#: admin-app/src/routes/Appearance.tsx:557
+#: admin-app/src/routes/Appearance.tsx:608
+#: admin-app/src/routes/Appearance.tsx:626
 msgid "Customize how the cart progress UI looks on your storefront."
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:173
-msgid "Daily attributed sales and goal completions trend"
+msgid "Daily attributed sales and mission completions trend"
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:459
@@ -1420,7 +1422,7 @@ msgid "Dashboard"
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:199
-#: admin-app/src/routes/GoalPerformance.tsx:623
+#: admin-app/src/routes/MissionPerformance.tsx:623
 #: admin-app/src/routes/Recommendations.tsx:433
 msgid "Data sufficiency"
 msgstr ""
@@ -1433,11 +1435,11 @@ msgstr ""
 msgid "Date range filter"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:374
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:374
 msgid "Day window ends"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:364
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:364
 msgid "Day window starts"
 msgstr ""
 
@@ -1449,8 +1451,8 @@ msgstr ""
 msgid "Debugging, logging and the developer surface."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:82
-msgid "Default (goal templates)"
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:82
+msgid "Default (mission templates)"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:713
@@ -1458,26 +1460,26 @@ msgid "Default (no campaign template)"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:568
-msgid "Default goal behavior"
+msgid "Default mission behavior"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:606
-msgid "Default money basis for goals that do not set their own."
+msgid "Default money basis for missions that do not set their own."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:301
+#: admin-app/src/routes/MissionBuilder.tsx:301
 msgid "Define what shoppers need to reach and what they earn for getting there."
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:256
 #: admin-app/src/routes/Campaigns.tsx:298
-#: admin-app/src/routes/Goals.tsx:415
-#: admin-app/src/routes/Goals.tsx:473
+#: admin-app/src/routes/Missions.tsx:415
+#: admin-app/src/routes/Missions.tsx:473
 msgid "Delete"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:260
-#: admin-app/src/routes/Goals.tsx:419
+#: admin-app/src/routes/Missions.tsx:419
 msgid "Delete %s"
 msgstr ""
 
@@ -1485,12 +1487,12 @@ msgstr ""
 msgid "Delete this campaign?"
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:463
-msgid "Delete this goal?"
+#: admin-app/src/routes/Missions.tsx:463
+msgid "Delete this mission?"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:359
-#: admin-app/src/routes/GoalBuilder.tsx:336
+#: admin-app/src/routes/MissionBuilder.tsx:336
 msgid "Description"
 msgstr ""
 
@@ -1510,7 +1512,7 @@ msgstr ""
 msgid "Difference"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:608
+#: admin-app/src/routes/MissionPerformance.tsx:608
 msgid "Direct & assisted"
 msgstr ""
 
@@ -1520,40 +1522,40 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:950
 #: admin-app/src/routes/AttributionDashboard.tsx:129
-#: admin-app/src/routes/GoalPerformance.tsx:554
+#: admin-app/src/routes/MissionPerformance.tsx:554
 #: admin-app/src/routes/RevenueOverview.tsx:591
 #: admin-app/src/routes/RevenueOverview.tsx:668
 msgid "Direct revenue"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:586
-msgid "Direct revenue is the incremental amount this goal moved — it is a slice of the influenced total, not an extra value on top of it."
+#: admin-app/src/routes/MissionPerformance.tsx:586
+msgid "Direct revenue is the incremental amount this mission moved — it is a slice of the influenced total, not an extra value on top of it."
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:201
-#: admin-app/src/routes/Goals.tsx:338
+#: admin-app/src/routes/Missions.tsx:338
 msgid "Disable"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:529
+#: admin-app/src/routes/Appearance.tsx:598
 msgid "Discard changes"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:126
+#: admin-app/src/components/mission-builder/RewardFields.tsx:126
 msgid "Discount amount"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:125
+#: admin-app/src/components/mission-builder/RewardFields.tsx:125
 msgid "Discount percentage"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:27
-#: admin-app/src/components/goal-builder/TargetFields.tsx:23
-#: admin-app/src/components/goal-builder/TargetFields.tsx:29
-#: admin-app/src/components/goal-builder/TargetFields.tsx:35
-#: admin-app/src/components/goal-builder/TargetFields.tsx:42
-#: admin-app/src/components/goal-builder/TargetFields.tsx:48
-#: admin-app/src/components/goal-builder/TargetFields.tsx:54
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:27
+#: admin-app/src/components/mission-builder/TargetFields.tsx:23
+#: admin-app/src/components/mission-builder/TargetFields.tsx:29
+#: admin-app/src/components/mission-builder/TargetFields.tsx:35
+#: admin-app/src/components/mission-builder/TargetFields.tsx:42
+#: admin-app/src/components/mission-builder/TargetFields.tsx:48
+#: admin-app/src/components/mission-builder/TargetFields.tsx:54
 #: admin-app/src/routes/Settings.tsx:617
 msgid "Discounted subtotal"
 msgstr ""
@@ -1563,7 +1565,7 @@ msgid "Dismiss"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:498
-#: admin-app/src/routes/GoalBuilder.tsx:430
+#: admin-app/src/routes/MissionBuilder.tsx:430
 #: admin-app/src/routes/Settings.tsx:1017
 msgid "Display"
 msgstr ""
@@ -1593,39 +1595,39 @@ msgid "Distance from the chosen side (0–200)."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:986
-msgid "Distinct orders associated with a goal in the selected period."
+msgid "Distinct orders associated with a mission in the selected period."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:652
-msgid "Distinct orders associated with a goal — a purchase, not a goal completion."
+msgid "Distinct orders associated with a mission — a purchase, not a mission completion."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:638
-msgid "Distinct orders associated with this goal in the selected period."
+#: admin-app/src/routes/MissionPerformance.tsx:638
+msgid "Distinct orders associated with this mission in the selected period."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:39
-#: admin-app/src/routes/Goals.tsx:52
+#: admin-app/src/components/mission-builder/missionTypes.tsx:39
+#: admin-app/src/routes/Missions.tsx:52
 msgid "Distinct quantity"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:246
-#: admin-app/src/routes/Goals.tsx:405
+#: admin-app/src/routes/Missions.tsx:405
 msgid "Duplicate"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:249
-#: admin-app/src/routes/Goals.tsx:408
+#: admin-app/src/routes/Missions.tsx:408
 msgid "Duplicate %s"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:93
-#: admin-app/src/routes/Goals.tsx:176
+#: admin-app/src/routes/Missions.tsx:176
 msgid "Duplicated “%s”."
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:383
-msgid "Each shopper may complete this goal at most %d times."
+#: admin-app/src/routes/Missions.tsx:383
+msgid "Each shopper may complete this mission at most %d times."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:155
@@ -1633,12 +1635,12 @@ msgid "Economics"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:237
-#: admin-app/src/routes/Goals.tsx:396
+#: admin-app/src/routes/Missions.tsx:396
 msgid "Edit"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:240
-#: admin-app/src/routes/Goals.tsx:399
+#: admin-app/src/routes/Missions.tsx:399
 msgid "Edit %s"
 msgstr ""
 
@@ -1648,21 +1650,21 @@ msgstr ""
 msgid "Edit campaign"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:271
-#: admin-app/src/routes/GoalBuilder.tsx:286
-#: admin-app/src/routes/GoalBuilder.tsx:300
-msgid "Edit goal"
+#: admin-app/src/routes/MissionBuilder.tsx:271
+#: admin-app/src/routes/MissionBuilder.tsx:286
+#: admin-app/src/routes/MissionBuilder.tsx:300
+msgid "Edit mission"
 msgstr ""
 
 #: admin-app/src/components/layout/AdminLayout.tsx:417
 msgid "Edit profile"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:169
+#: admin-app/src/components/mission-builder/RewardFields.tsx:169
 msgid "Eligible categories (optional)"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:162
+#: admin-app/src/components/mission-builder/RewardFields.tsx:162
 msgid "Eligible products (optional)"
 msgstr ""
 
@@ -1671,7 +1673,7 @@ msgid "Empty cart"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:202
-#: admin-app/src/routes/Goals.tsx:339
+#: admin-app/src/routes/Missions.tsx:339
 msgid "Enable"
 msgstr ""
 
@@ -1687,7 +1689,7 @@ msgstr ""
 msgid "Ended"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:326
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:326
 #: admin-app/src/routes/CampaignBuilder.tsx:410
 msgid "Ends at"
 msgstr ""
@@ -1703,8 +1705,8 @@ msgstr ""
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:93
 #: admin-app/src/routes/Analytics.tsx:212
 #: admin-app/src/routes/Analytics.tsx:788
-#: admin-app/src/routes/GoalPerformance.tsx:110
-#: admin-app/src/routes/GoalPerformance.tsx:437
+#: admin-app/src/routes/MissionPerformance.tsx:110
+#: admin-app/src/routes/MissionPerformance.tsx:437
 msgid "Estimated Profit"
 msgstr ""
 
@@ -1736,17 +1738,17 @@ msgstr ""
 msgid "Estimated reward cost"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:729
+#: includes/Analytics/MissionRecommendationEngine.php:729
 msgid "Estimated reward cost at this threshold is %s."
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:113
-#: admin-app/src/routes/GoalPerformance.tsx:363
+#: admin-app/src/routes/MissionPerformance.tsx:363
 msgid "Estimated, not guaranteed"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:214
-#: admin-app/src/routes/GoalPerformance.tsx:112
+#: admin-app/src/routes/MissionPerformance.tsx:112
 msgid "Estimated, not guaranteed — based on available product cost, reward and shipping data."
 msgstr ""
 
@@ -1754,43 +1756,43 @@ msgstr ""
 msgid "Estimated, not guaranteed."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:83
+#: admin-app/src/components/mission-builder/TargetFields.tsx:83
 msgid "Example: if the target is 10 items, a cart with 7 items is 70% of the way there."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:77
+#: admin-app/src/components/mission-builder/TargetFields.tsx:77
 msgid "Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:88
+#: admin-app/src/components/mission-builder/TargetFields.tsx:88
 msgid "Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:99
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:99
 msgid "Excluded products"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:180
+#: admin-app/src/components/mission-builder/RewardFields.tsx:180
 msgid "Excluded products (optional)"
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:308
+#: admin-app/src/routes/Missions.tsx:308
 msgid "Exclusive"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:532
+#: admin-app/src/routes/MissionBuilder.tsx:532
 msgid "Exclusive (mutually exclusive)"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:296
+#: admin-app/src/components/mission-builder/RewardFields.tsx:296
 msgid "Exclusive rewards never combine."
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:302
-msgid "Exclusive: when this goal is reached, lower-priority goals are skipped."
+#: admin-app/src/routes/Missions.tsx:302
+msgid "Exclusive: when this mission is reached, lower-priority missions are skipped."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:434
+#: admin-app/src/components/mission-builder/RewardFields.tsx:434
 msgid "Existing coupon code"
 msgstr ""
 
@@ -1818,12 +1820,12 @@ msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:146
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:165
-#: includes/Templates/Goal/Template1.php:195
-#: includes/Templates/Goal/Template2.php:166
-#: includes/Templates/Goal/Template3.php:181
-#: includes/Templates/Goal/Template4.php:168
-#: includes/Templates/Goal/Template5.php:173
-#: includes/Templates/Goal/Template6.php:161
+#: includes/Templates/Mission/Template1.php:195
+#: includes/Templates/Mission/Template2.php:166
+#: includes/Templates/Mission/Template3.php:181
+#: includes/Templates/Mission/Template4.php:168
+#: includes/Templates/Mission/Template5.php:173
+#: includes/Templates/Mission/Template6.php:161
 msgid "Extra CSS class"
 msgstr ""
 
@@ -1879,30 +1881,30 @@ msgid "Finish today — your reward is waiting"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:594
-msgid "First matching goal only"
+msgid "First matching mission only"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:191
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:191
 msgid "First order only"
 msgstr ""
 
 #: admin-app/src/templates/rewardLabel.ts:30
-#: includes/Goals/MessageEngine.php:344
+#: includes/Missions/MessageEngine.php:350
 msgid "Fixed %s off"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:43
-#: admin-app/src/components/goal-builder/RewardFields.tsx:135
+#: admin-app/src/components/mission-builder/RewardFields.tsx:43
+#: admin-app/src/components/mission-builder/RewardFields.tsx:135
 msgid "Fixed amount off"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:26
+#: admin-app/src/components/mission-builder/RewardFields.tsx:26
 #: admin-app/src/routes/Analytics.tsx:86
 #: admin-app/src/routes/CampaignBuilder.tsx:44
-#: admin-app/src/routes/Goals.tsx:44
+#: admin-app/src/routes/Missions.tsx:44
 #: admin-app/src/templates/rewardLabel.ts:10
 #: includes/Frontend/ProgressUI.php:1032
-#: includes/Goals/MessageEngine.php:339
+#: includes/Missions/MessageEngine.php:345
 msgid "Fixed discount"
 msgstr ""
 
@@ -1914,34 +1916,34 @@ msgstr ""
 msgid "Floating widget"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:27
+#: admin-app/src/components/mission-builder/RewardFields.tsx:27
 #: admin-app/src/routes/Analytics.tsx:87
-#: admin-app/src/routes/Appearance.tsx:114
+#: admin-app/src/routes/Appearance.tsx:133
 #: admin-app/src/routes/CampaignBuilder.tsx:45
-#: admin-app/src/routes/Goals.tsx:45
+#: admin-app/src/routes/Missions.tsx:45
 #: admin-app/src/templates/rewardLabel.ts:11
 #: includes/Frontend/ProgressUI.php:1033
-#: includes/Goals/MessageEngine.php:349
+#: includes/Missions/MessageEngine.php:355
 msgid "Free gift"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:24
+#: admin-app/src/components/mission-builder/RewardFields.tsx:24
 #: admin-app/src/routes/Analytics.tsx:84
-#: admin-app/src/routes/Appearance.tsx:53
-#: admin-app/src/routes/Appearance.tsx:105
+#: admin-app/src/routes/Appearance.tsx:69
+#: admin-app/src/routes/Appearance.tsx:127
 #: admin-app/src/routes/CampaignBuilder.tsx:42
-#: admin-app/src/routes/Goals.tsx:42
+#: admin-app/src/routes/Missions.tsx:42
 #: admin-app/src/templates/rewardLabel.ts:8
 #: includes/Frontend/ProgressUI.php:1030
-#: includes/Goals/MessageEngine.php:326
+#: includes/Missions/MessageEngine.php:332
 msgid "Free shipping"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:68
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:68
 msgid "Free shipping unlocked"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:29
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:29
 msgid "Fri"
 msgstr ""
 
@@ -1967,7 +1969,7 @@ msgstr ""
 msgid "General"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:357
+#: admin-app/src/components/mission-builder/RewardFields.tsx:357
 msgid "Generate a coupon from these rules"
 msgstr ""
 
@@ -1975,15 +1977,15 @@ msgstr ""
 msgid "Gift added to your cart"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:246
+#: admin-app/src/components/mission-builder/RewardFields.tsx:246
 msgid "Gift mode"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:234
+#: admin-app/src/components/mission-builder/RewardFields.tsx:234
 msgid "Gift product"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:217
+#: admin-app/src/components/mission-builder/RewardFields.tsx:217
 msgid "Gift products (customer picks one)"
 msgstr ""
 
@@ -1991,111 +1993,15 @@ msgstr ""
 msgid "Give the campaign a name."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:330
-msgid "Give the goal a name."
+#: admin-app/src/routes/MissionBuilder.tsx:330
+msgid "Give the mission a name."
 msgstr ""
 
-#: admin-app/src/components/revenue/RevenueToolbar.tsx:57
-#: admin-app/src/routes/Analytics.tsx:180
-#: admin-app/src/routes/Analytics.tsx:534
-#: admin-app/src/routes/Appearance.tsx:604
-#: admin-app/src/routes/GoalPerformance.tsx:68
-msgid "Goal"
-msgstr ""
-
-#: admin-app/src/routes/Settings.tsx:528
-#: admin-app/src/routes/Settings.tsx:719
-msgid "Goal Calculation"
-msgstr ""
-
-#: admin-app/src/routes/Analytics.tsx:813
-msgid "Goal Comparison"
-msgstr ""
-
-#: admin-app/src/routes/Analytics.tsx:705
-#: admin-app/src/routes/Dashboard.tsx:214
-#: admin-app/src/routes/Dashboard.tsx:652
-#: admin-app/src/routes/RevenueOverview.tsx:168
-#: admin-app/src/routes/RevenueOverview.tsx:500
-msgid "Goal Completions"
-msgstr ""
-
-#: admin-app/src/routes/Analytics.tsx:501
-msgid "Goal Conversion & Purchase Analysis"
-msgstr ""
-
-#: admin-app/src/components/layout/navigation.ts:55
-#: admin-app/src/routes/Dashboard.tsx:240
-#: admin-app/src/routes/GoalPerformance.tsx:726
-msgid "Goal Performance"
-msgstr ""
-
-#: admin-app/src/routes/Analytics.tsx:699
-msgid "Goal Views"
-msgstr ""
-
-#: admin-app/src/templates/renderers/Template1Renderer.tsx:94
-#: includes/Frontend/ProgressUI.php:1051
-msgid "Goal completed"
-msgstr ""
-
-#: admin-app/src/routes/GoalBuilder.tsx:287
-msgid "Goal editor"
-msgstr ""
-
-#: admin-app/src/components/revenue/FunnelVisual.tsx:63
-msgid "Goal funnel: views, progressed, completed, purchased"
-msgstr ""
-
-#: admin-app/src/routes/GoalPerformance.tsx:377
-msgid "Goal performance details"
-msgstr ""
-
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:160
-msgid "Goal reached — your reward is unlocked!"
-msgstr ""
-
-#: includes/Rewards/Applicators/AbstractDiscountApplicator.php:183
-msgid "Goal reward"
-msgstr ""
-
-#: admin-app/src/routes/GoalPerformance.tsx:225
-#: admin-app/src/routes/Recommendations.tsx:578
-msgid "Goal target updated."
-msgstr ""
-
-#: admin-app/src/routes/Appearance.tsx:627
-#: admin-app/src/routes/Appearance.tsx:647
-#: admin-app/src/routes/Appearance.tsx:654
-msgid "Goal template"
-msgstr ""
-
-#: admin-app/src/routes/GoalBuilder.tsx:369
-msgid "Goal type"
-msgstr ""
-
-#: admin-app/src/routes/RevenueOverview.tsx:710
-msgid "Goal-exposed"
-msgstr ""
-
-#: admin-app/src/components/layout/navigation.ts:47
-#: admin-app/src/routes/Goals.tsx:197
-msgid "Goals"
-msgstr ""
-
-#: admin-app/src/routes/Analytics.tsx:752
-msgid "Goals Completed"
-msgstr ""
-
-#: admin-app/src/routes/Goals.tsx:261
-msgid "Goals define what you want shoppers to reach — a cart amount, quantity, category spend and more. Create your first goal to start."
-msgstr ""
-
-#: includes/Templates/Goal/Template6.php:69
+#: includes/Templates/Mission/Template6.php:69
 msgid "Gold accent color"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:130
+#: admin-app/src/routes/MissionPerformance.tsx:130
 #: admin-app/src/routes/Recommendations.tsx:49
 msgid "Good data"
 msgstr ""
@@ -2105,18 +2011,18 @@ msgid "Good performance"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:324
-msgid "Group goals into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds."
+msgid "Group missions into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds."
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:118
-msgid "Group goals into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M."
+msgid "Group missions into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:156
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:156
 msgid "Guests (not logged in)"
 msgstr ""
 
-#: includes/Templates/Goal/Template4.php:76
+#: includes/Templates/Mission/Template4.php:76
 msgid "Header color"
 msgstr ""
 
@@ -2140,7 +2046,7 @@ msgstr ""
 msgid "Hide the WordPress admin chrome and let the dashboard fill the whole browser window."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:152
+#: admin-app/src/routes/MissionPerformance.tsx:152
 #: admin-app/src/routes/Recommendations.tsx:38
 msgid "High"
 msgstr ""
@@ -2150,11 +2056,11 @@ msgid "Highest margin"
 msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:1176
-msgid "Highly relevant to the goal and the current cart contents."
+msgid "Highly relevant to the mission and the current cart contents."
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:751
-msgid "Historical goal completion rate is %s."
+#: includes/Analytics/MissionRecommendationEngine.php:751
+msgid "Historical mission completion rate is %s."
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:254
@@ -2178,7 +2084,7 @@ msgid "How Estimated Profit becomes available"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:583
-msgid "How completed goals grant rewards when several compete: combine them, grant only the highest-priority matching goal, or grant only the best reward. Per-goal exclusive flags and priorities are respected in every mode."
+msgid "How completed missions grant rewards when several compete: combine them, grant only the highest-priority matching mission, or grant only the best reward. Per-mission exclusive flags and priorities are respected in every mode."
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:285
@@ -2191,19 +2097,19 @@ msgid "How is this calculated?"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:708
-msgid "How many times customers reached a goal target. Completion is not the same as purchase."
+msgid "How many times customers reached a mission target. Completion is not the same as purchase."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:702
-msgid "How many times goal widgets were seen."
+msgid "How many times mission widgets were seen."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:442
-msgid "How many times the same shopper may complete this goal. Each completion cycle grants the reward once; after the limit is reached the goal no longer appears as completable for that shopper."
+#: admin-app/src/routes/MissionBuilder.tsx:442
+msgid "How many times the same shopper may complete this mission. Each completion cycle grants the reward once; after the limit is reached the mission no longer appears as completable for that shopper."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:569
-msgid "How multiple active goals are presented when the shopper has no campaign."
+msgid "How multiple active missions are presented when the shopper has no campaign."
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:89
@@ -2219,11 +2125,11 @@ msgid "How suggested products are ordered (Phase 32 advanced upsell ranking)."
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:499
-msgid "How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own goal card."
+msgid "How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own mission card."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:505
-msgid "How this goal competes when several goals are active. Lower priority numbers win first; a goal inside a campaign is also ordered by its campaign priority."
+#: admin-app/src/routes/MissionBuilder.tsx:505
+msgid "How this mission competes when several missions are active. Lower priority numbers win first; a mission inside a campaign is also ordered by its campaign priority."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:144
@@ -2234,28 +2140,28 @@ msgstr ""
 msgid "IRT — Iranian toman"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:167
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:167
 msgid "Icon"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:75
+#: includes/Templates/Mission/Template1.php:75
 msgid "Icon background"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:81
+#: includes/Templates/Mission/Template1.php:81
 msgid "Icon color"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1108
 #: admin-app/src/routes/Analytics.tsx:1215
 #: admin-app/src/routes/Dashboard.tsx:298
-#: admin-app/src/routes/GoalPerformance.tsx:505
+#: admin-app/src/routes/MissionPerformance.tsx:505
 #: admin-app/src/routes/UpsellAnalytics.tsx:485
 msgid "Impressions"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:596
-msgid "Improve your Goals using store performance data — which target and reward configuration to use, and why."
+msgid "Improve your Missions using store performance data — which target and reward configuration to use, and why."
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:76
@@ -2263,17 +2169,17 @@ msgid "In-stock products are prioritized."
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:46
-#: admin-app/src/routes/Goals.tsx:63
-#: admin-app/src/routes/Goals.tsx:248
+#: admin-app/src/routes/Missions.tsx:63
+#: admin-app/src/routes/Missions.tsx:248
 msgid "Inactive"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:382
-msgid "Inactive campaigns never evaluate their goals on the storefront."
+msgid "Inactive campaigns never evaluate their missions on the storefront."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:359
-msgid "Inactive goals never evaluate on the storefront."
+#: admin-app/src/routes/MissionBuilder.tsx:359
+msgid "Inactive missions never evaluate on the storefront."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:738
@@ -2297,37 +2203,37 @@ msgid "Include virtual products"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:439
-msgid "Increase cart value with Goals and Smart Upsells."
+msgid "Increase cart value with Missions and Smart Upsells."
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:162
-#: admin-app/src/routes/GoalPerformance.tsx:578
+#: admin-app/src/routes/MissionPerformance.tsx:578
 #: admin-app/src/routes/RevenueOverview.tsx:615
 msgid "Incremental cart value"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:735
+#: includes/Analytics/MissionRecommendationEngine.php:735
 msgid "Incremental margin at this threshold covers the reward cost."
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:736
+#: includes/Analytics/MissionRecommendationEngine.php:736
 msgid "Incremental margin at this threshold does not fully cover the reward cost."
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:680
-msgid "Incremental revenue is the direct revenue shown above — the additional order value the goals moved. Attribution follows the FaraCart model: progressed/completed goals are direct, exposure-only goals are assisted, and every associated order is counted once."
+msgid "Incremental revenue is the direct revenue shown above — the additional order value the missions moved. Attribution follows the FaraCart model: progressed/completed missions are direct, exposure-only missions are assisted, and every associated order is counted once."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:972
 #: admin-app/src/routes/AttributionDashboard.tsx:141
-#: admin-app/src/routes/GoalPerformance.tsx:570
+#: admin-app/src/routes/MissionPerformance.tsx:570
 #: admin-app/src/routes/RevenueOverview.tsx:607
 #: admin-app/src/routes/RevenueOverview.tsx:676
 msgid "Influenced sales"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:354
-#: admin-app/src/routes/GoalBuilder.tsx:331
+#: admin-app/src/routes/MissionBuilder.tsx:331
 msgid "Internal name shown in the admin."
 msgstr ""
 
@@ -2335,8 +2241,8 @@ msgstr ""
 msgid "Internal notes about this campaign."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:341
-msgid "Internal notes about this goal."
+#: admin-app/src/routes/MissionBuilder.tsx:341
+msgid "Internal notes about this mission."
 msgstr ""
 
 #: includes/REST/GiftController.php:129
@@ -2347,7 +2253,7 @@ msgstr ""
 msgid "Invalid product id."
 msgstr ""
 
-#: includes/REST/TrackController.php:174
+#: includes/REST/TrackController.php:182
 #: includes/REST/UpsellController.php:213
 msgid "Invalid tracking nonce."
 msgstr ""
@@ -2386,9 +2292,9 @@ msgstr ""
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:84
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:90
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:96
-#: includes/Templates/Goal/Template1.php:150
-#: includes/Templates/Goal/Template4.php:143
-#: includes/Templates/Goal/Template5.php:142
+#: includes/Templates/Mission/Template1.php:150
+#: includes/Templates/Mission/Template4.php:143
+#: includes/Templates/Mission/Template5.php:142
 msgid "Layout"
 msgstr ""
 
@@ -2396,20 +2302,20 @@ msgstr ""
 msgid "Learn how"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:333
-msgid "Leave both empty to run the goal at all times. Local site time is used."
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:333
+msgid "Leave both empty to run the mission at all times. Local site time is used."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:175
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:175
 msgid "Leave both unchecked to allow everyone."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:132
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:132
 msgid "Leave empty to allow every role. Guests never match a role restriction."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:166
-#: admin-app/src/components/goal-builder/RewardFields.tsx:173
+#: admin-app/src/components/mission-builder/RewardFields.tsx:166
+#: admin-app/src/components/mission-builder/RewardFields.tsx:173
 msgid "Leave empty to apply to the whole cart."
 msgstr ""
 
@@ -2417,7 +2323,7 @@ msgstr ""
 msgid "Limit"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:122
+#: admin-app/src/routes/MissionPerformance.tsx:122
 #: admin-app/src/routes/Recommendations.tsx:54
 msgid "Limited data"
 msgstr ""
@@ -2430,7 +2336,7 @@ msgstr ""
 msgid "Limited stock remaining."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:728
+#: admin-app/src/routes/Appearance.tsx:797
 msgid "Live preview"
 msgstr ""
 
@@ -2446,8 +2352,8 @@ msgstr ""
 msgid "Loading the campaign…"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:272
-msgid "Loading the goal…"
+#: admin-app/src/routes/MissionBuilder.tsx:272
+msgid "Loading the mission…"
 msgstr ""
 
 #: includes/REST/SearchController.php:409
@@ -2458,11 +2364,11 @@ msgstr ""
 msgid "Log file"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:172
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:172
 msgid "Logged-in customers"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:216
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:216
 msgid "Logged-in customers whose lifetime spend and order count meet the thresholds below."
 msgstr ""
 
@@ -2470,13 +2376,13 @@ msgstr ""
 msgid "Logging"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:157
+#: admin-app/src/routes/MissionPerformance.tsx:157
 #: admin-app/src/routes/Recommendations.tsx:43
 msgid "Low"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:422
-#: admin-app/src/routes/GoalBuilder.tsx:517
+#: admin-app/src/routes/MissionBuilder.tsx:517
 msgid "Lower numbers win conflicts."
 msgstr ""
 
@@ -2488,8 +2394,8 @@ msgstr ""
 msgid "Main navigation"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:193
-msgid "Makes every shipping rate free once the goal is reached. Zone/method-specific rules are configured in a later phase."
+#: admin-app/src/components/mission-builder/RewardFields.tsx:193
+msgid "Makes every shipping rate free once the mission is reached. Zone/method-specific rules are configured in a later phase."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:673
@@ -2509,7 +2415,7 @@ msgstr ""
 msgid "Master toggle, display and default behavior."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:144
+#: admin-app/src/components/mission-builder/RewardFields.tsx:144
 msgid "Maximum discount"
 msgstr ""
 
@@ -2521,12 +2427,12 @@ msgstr ""
 msgid "Median ratio"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:155
+#: admin-app/src/routes/MissionPerformance.tsx:155
 #: admin-app/src/routes/Recommendations.tsx:41
 msgid "Medium"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:139
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:139
 msgid "Message (in progress)"
 msgstr ""
 
@@ -2543,20 +2449,116 @@ msgstr ""
 msgid "Mini cart"
 msgstr ""
 
-#: includes/Templates/Goal/Template2.php:46
+#: includes/Templates/Mission/Template2.php:46
 msgid "Minimal inline strip — icon, title, remaining amount and a slim bar."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:240
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:240
 msgid "Minimum completed orders"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:278
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:278
 msgid "Minimum items in cart"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:229
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:229
 msgid "Minimum lifetime spend"
+msgstr ""
+
+#: admin-app/src/components/revenue/RevenueToolbar.tsx:57
+#: admin-app/src/routes/Analytics.tsx:180
+#: admin-app/src/routes/Analytics.tsx:534
+#: admin-app/src/routes/Appearance.tsx:673
+#: admin-app/src/routes/MissionPerformance.tsx:68
+msgid "Mission"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:528
+#: admin-app/src/routes/Settings.tsx:719
+msgid "Mission Calculation"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:813
+msgid "Mission Comparison"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:705
+#: admin-app/src/routes/Dashboard.tsx:214
+#: admin-app/src/routes/Dashboard.tsx:652
+#: admin-app/src/routes/RevenueOverview.tsx:168
+#: admin-app/src/routes/RevenueOverview.tsx:500
+msgid "Mission Completions"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:501
+msgid "Mission Conversion & Purchase Analysis"
+msgstr ""
+
+#: admin-app/src/components/layout/navigation.ts:55
+#: admin-app/src/routes/Dashboard.tsx:240
+#: admin-app/src/routes/MissionPerformance.tsx:726
+msgid "Mission Performance"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:699
+msgid "Mission Views"
+msgstr ""
+
+#: admin-app/src/templates/renderers/Template1Renderer.tsx:94
+#: includes/Frontend/ProgressUI.php:1051
+msgid "Mission completed"
+msgstr ""
+
+#: admin-app/src/routes/MissionBuilder.tsx:287
+msgid "Mission editor"
+msgstr ""
+
+#: admin-app/src/components/revenue/FunnelVisual.tsx:63
+msgid "Mission funnel: views, progressed, completed, purchased"
+msgstr ""
+
+#: admin-app/src/routes/MissionPerformance.tsx:377
+msgid "Mission performance details"
+msgstr ""
+
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:160
+msgid "Mission reached — your reward is unlocked!"
+msgstr ""
+
+#: includes/Rewards/Applicators/AbstractDiscountApplicator.php:183
+msgid "Mission reward"
+msgstr ""
+
+#: admin-app/src/routes/MissionPerformance.tsx:225
+#: admin-app/src/routes/Recommendations.tsx:578
+msgid "Mission target updated."
+msgstr ""
+
+#: admin-app/src/routes/Appearance.tsx:696
+#: admin-app/src/routes/Appearance.tsx:716
+#: admin-app/src/routes/Appearance.tsx:723
+msgid "Mission template"
+msgstr ""
+
+#: admin-app/src/routes/MissionBuilder.tsx:369
+msgid "Mission type"
+msgstr ""
+
+#: admin-app/src/routes/RevenueOverview.tsx:710
+msgid "Mission-exposed"
+msgstr ""
+
+#: admin-app/src/components/layout/navigation.ts:47
+#: admin-app/src/routes/Missions.tsx:197
+msgid "Missions"
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:752
+msgid "Missions Completed"
+msgstr ""
+
+#: admin-app/src/routes/Missions.tsx:261
+msgid "Missions define what you want shoppers to reach — a cart amount, quantity, category spend and more. Create your first mission to start."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:290
@@ -2571,12 +2573,12 @@ msgstr ""
 msgid "Mobile reuses the desktop position. Turn the toggle above off to configure a separate mobile position."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:126
+#: admin-app/src/routes/MissionPerformance.tsx:126
 #: admin-app/src/routes/Recommendations.tsx:52
 msgid "Moderate data"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:25
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:25
 msgid "Mon"
 msgstr ""
 
@@ -2584,7 +2586,7 @@ msgstr ""
 msgid "Monday"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:123
+#: admin-app/src/routes/MissionPerformance.tsx:123
 msgid "More customer activity is needed for a more reliable analysis."
 msgstr ""
 
@@ -2602,8 +2604,8 @@ msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:345
 #: admin-app/src/routes/Campaigns.tsx:169
-#: admin-app/src/routes/GoalBuilder.tsx:322
-#: admin-app/src/routes/Goals.tsx:281
+#: admin-app/src/routes/MissionBuilder.tsx:322
+#: admin-app/src/routes/Missions.tsx:281
 msgid "Name"
 msgstr ""
 
@@ -2611,7 +2613,7 @@ msgstr ""
 msgid "Next month"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:32
+#: admin-app/src/components/mission-builder/RewardFields.tsx:32
 msgid "No (exclusive)"
 msgstr ""
 
@@ -2623,12 +2625,12 @@ msgstr ""
 msgid "No campaign activity in this range."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:666
+#: admin-app/src/routes/Appearance.tsx:735
 msgid "No campaign template"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:161
-msgid "No campaign template selected — each milestone renders as its own goal card on the storefront."
+#: admin-app/src/routes/Appearance.tsx:181
+msgid "No campaign template selected — each milestone renders as its own mission card on the storefront."
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:148
@@ -2636,43 +2638,19 @@ msgid "No campaigns yet"
 msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:314
-msgid "No candidate products could be collected for this cart and goal."
+msgid "No candidate products could be collected for this cart and mission."
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:297
+#: includes/Analytics/MissionRecommendationEngine.php:297
 msgid "No candidate thresholds could be generated from the order data."
 msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:1219
-msgid "No cart contents provided — relevance scored from the goal only."
+msgid "No cart contents provided — relevance scored from the mission only."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:65
-msgid "No child goals yet. Add at least one condition to build the composite goal."
-msgstr ""
-
-#: admin-app/src/routes/GoalPerformance.tsx:750
-msgid "No goal performance yet"
-msgstr ""
-
-#: admin-app/src/routes/Dashboard.tsx:254
-msgid "No goal performance yet."
-msgstr ""
-
-#: admin-app/src/routes/Analytics.tsx:818
-msgid "No goal purchase activity in this range."
-msgstr ""
-
-#: admin-app/src/routes/Goals.tsx:438
-msgid "No goals match your search."
-msgstr ""
-
-#: admin-app/src/routes/Goals.tsx:260
-msgid "No goals yet"
-msgstr ""
-
-#: admin-app/src/routes/CampaignBuilder.tsx:614
-msgid "No goals yet — create a goal on the Goals page first."
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:65
+msgid "No child missions yet. Add at least one condition to build the composite mission."
 msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:1215
@@ -2681,6 +2659,30 @@ msgstr ""
 
 #: admin-app/src/components/preview/PreviewPanel.tsx:100
 msgid "No milestones in this campaign yet."
+msgstr ""
+
+#: admin-app/src/routes/MissionPerformance.tsx:750
+msgid "No mission performance yet"
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:254
+msgid "No mission performance yet."
+msgstr ""
+
+#: admin-app/src/routes/Analytics.tsx:818
+msgid "No mission purchase activity in this range."
+msgstr ""
+
+#: admin-app/src/routes/Missions.tsx:438
+msgid "No missions match your search."
+msgstr ""
+
+#: admin-app/src/routes/Missions.tsx:260
+msgid "No missions yet"
+msgstr ""
+
+#: admin-app/src/routes/CampaignBuilder.tsx:614
+msgid "No missions yet — create a mission on the Missions page first."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:622
@@ -2692,8 +2694,8 @@ msgstr ""
 msgid "No recommendation available"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:250
-msgid "No recommendation is available for this goal yet."
+#: admin-app/src/routes/MissionPerformance.tsx:250
+msgid "No recommendation is available for this mission yet."
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:109
@@ -2702,7 +2704,7 @@ msgstr ""
 msgid "No recommendations available right now."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:23
+#: admin-app/src/components/mission-builder/RewardFields.tsx:23
 #: admin-app/src/routes/CampaignBuilder.tsx:639
 msgid "No reward"
 msgstr ""
@@ -2724,7 +2726,7 @@ msgstr ""
 msgid "No suggestion activity in this range."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:679
+#: admin-app/src/routes/Appearance.tsx:748
 msgid "No templates are registered for this scope yet. Add one on the backend template registry."
 msgstr ""
 
@@ -2732,13 +2734,13 @@ msgstr ""
 msgid "No upsell activity yet"
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:69
+#: admin-app/src/routes/Missions.tsx:69
 #: admin-app/src/routes/Recommendations.tsx:202
 msgid "None"
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:103
-#: admin-app/src/routes/GoalPerformance.tsx:358
+#: admin-app/src/routes/MissionPerformance.tsx:358
 #: admin-app/src/routes/Recommendations.tsx:191
 #: admin-app/src/routes/Recommendations.tsx:303
 msgid "Not available"
@@ -2749,7 +2751,7 @@ msgid "Not enough attributed order data to estimate profit yet."
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:115
-#: admin-app/src/routes/GoalPerformance.tsx:841
+#: admin-app/src/routes/MissionPerformance.tsx:841
 msgid "Not enough attributed order data yet."
 msgstr ""
 
@@ -2757,11 +2759,11 @@ msgstr ""
 msgid "Not enough data for a reliable recommendation."
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:266
+#: includes/Analytics/MissionRecommendationEngine.php:266
 msgid "Not enough order data for a reliable recommendation (%d orders in the window; at least %d required)."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:401
+#: admin-app/src/routes/MissionBuilder.tsx:401
 msgid "OR (any child completes)"
 msgstr ""
 
@@ -2769,7 +2771,7 @@ msgstr ""
 msgid "Observed impact"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:630
+#: admin-app/src/routes/MissionPerformance.tsx:630
 msgid "Observed impact — incremental cart value relative to the baseline. It does not prove that FaraCart caused the difference."
 msgstr ""
 
@@ -2777,11 +2779,11 @@ msgstr ""
 msgid "Observed impact — this comparison does not prove that FaraCart caused the difference."
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:108
+#: admin-app/src/routes/Missions.tsx:108
 msgid "Once"
 msgstr ""
 
-#: includes/Database/Installer.php:154
+#: includes/Database/Installer.php:393
 msgid "Once Weekly"
 msgstr ""
 
@@ -2790,19 +2792,19 @@ msgid "Once cost data exists, Estimated Profit becomes available automatically."
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:614
-msgid "Once customers interact with your Goals, performance data will appear here."
+msgid "Once customers interact with your Missions, performance data will appear here."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:614
-msgid "Once customers start interacting with your goals, FaraCart will show purchases, sales and profit insights here."
+msgid "Once customers start interacting with your missions, FaraCart will show purchases, sales and profit insights here."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:751
-msgid "Once customers start interacting with your goals, FaraCart will show purchases, sales and profit per goal here."
+#: admin-app/src/routes/MissionPerformance.tsx:751
+msgid "Once customers start interacting with your missions, FaraCart will show purchases, sales and profit per mission here."
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:320
-msgid "Once customers start interacting with your goals, FaraCart will show sales, purchases and profit insights here."
+msgid "Once customers start interacting with your missions, FaraCart will show sales, purchases and profit insights here."
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:47
@@ -2810,51 +2812,51 @@ msgid "One overall progress bar for the whole campaign, with a milestone counter
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:118
-msgid "Only %1$s of completed goals were followed by an attributed purchase."
+msgid "Only %1$s of completed missions were followed by an attributed purchase."
 msgstr ""
 
-#: admin-app/src/templates/renderers/goalShared.tsx:294
+#: admin-app/src/templates/renderers/missionShared.tsx:294
 #: includes/Frontend/ProgressUI.php:1048
 msgid "Only %s"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:65
-msgid "Only %s left to reach your goal"
+#: admin-app/src/routes/Appearance.tsx:87
+msgid "Only %s left to reach your mission"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:126
-msgid "Only %s of completed goals were followed by a purchase. Review your goal targets."
+msgid "Only %s of completed missions were followed by a purchase. Review your mission targets."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:994
-msgid "Only goal events within this window before an order are attributed to it."
+msgid "Only mission events within this window before an order are attributed to it."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:304
-msgid "Only products carrying any of these tags count toward the goal. Leave empty to count every product."
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:304
+msgid "Only products carrying any of these tags count toward the mission. Leave empty to count every product."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:188
+#: admin-app/src/components/mission-builder/TargetFields.tsx:188
 msgid "Only products carrying any of these tags count toward the target."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:158
+#: admin-app/src/components/mission-builder/TargetFields.tsx:158
 msgid "Only products in these categories count toward the target."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:194
-msgid "Only shoppers with no completed orders see this goal. Guests always qualify."
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:194
+msgid "Only shoppers with no completed orders see this mission. Guests always qualify."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:173
+#: admin-app/src/components/mission-builder/TargetFields.tsx:173
 msgid "Only these products count toward the target. Variations are matched by their parent product."
 msgstr ""
 
-#: includes/Goals/MessageEngine.php:220
-msgid "Only {remaining} left to reach your goal"
+#: includes/Missions/MessageEngine.php:224
+msgid "Only {remaining} left to reach your mission"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:144
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:144
 msgid "Only {remaining} left to unlock {reward}!"
 msgstr ""
 
@@ -2862,7 +2864,7 @@ msgstr ""
 msgid "Open navigation"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:814
+#: admin-app/src/routes/MissionPerformance.tsx:814
 msgid "Open performance details for %s"
 msgstr ""
 
@@ -2870,7 +2872,7 @@ msgstr ""
 msgid "Open your products"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:394
+#: admin-app/src/routes/MissionBuilder.tsx:394
 msgid "Operator"
 msgstr ""
 
@@ -2887,15 +2889,15 @@ msgid "Optimization opportunity"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:436
-msgid "Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Goals inherit these rules unless they pin their own."
+msgid "Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Missions inherit these rules unless they pin their own."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:148
-#: admin-app/src/components/goal-builder/RewardFields.tsx:402
+#: admin-app/src/components/mission-builder/RewardFields.tsx:148
+#: admin-app/src/components/mission-builder/RewardFields.tsx:402
 msgid "Optional cap"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:171
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:171
 msgid "Optional icon shown next to the progress bar."
 msgstr ""
 
@@ -2905,20 +2907,20 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:966
 #: admin-app/src/routes/RevenueOverview.tsx:601
-msgid "Order totals from orders that were only exposed to a goal, never progressed."
+msgid "Order totals from orders that were only exposed to a mission, never progressed."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:564
-msgid "Order totals from orders that were only exposed to this goal, never progressed."
+#: admin-app/src/routes/MissionPerformance.tsx:564
+msgid "Order totals from orders that were only exposed to this mission, never progressed."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:978
 #: admin-app/src/routes/RevenueOverview.tsx:609
-msgid "Order totals of every order associated with a goal — distinct orders, never double counted."
+msgid "Order totals of every order associated with a mission — distinct orders, never double counted."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:572
-msgid "Order totals of every order associated with this goal — distinct orders, never double counted."
+#: admin-app/src/routes/MissionPerformance.tsx:572
+msgid "Order totals of every order associated with this mission — distinct orders, never double counted."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:446
@@ -2934,12 +2936,12 @@ msgid "Orders analyzed"
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:116
-msgid "Orders are attributed once they reach a revenue-producing status. No goal-influenced orders were found in this range."
+msgid "Orders are attributed once they reach a revenue-producing status. No mission-influenced orders were found in this range."
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:144
-#: includes/Templates/Goal/Template3.php:146
-#: includes/Templates/Goal/Template6.php:138
+#: includes/Templates/Mission/Template1.php:144
+#: includes/Templates/Mission/Template3.php:146
+#: includes/Templates/Mission/Template6.php:138
 msgid "Outline"
 msgstr ""
 
@@ -2970,19 +2972,19 @@ msgstr ""
 msgid "Percentage"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:25
+#: admin-app/src/components/mission-builder/RewardFields.tsx:25
 #: includes/Frontend/ProgressUI.php:1031
-#: includes/Goals/MessageEngine.php:330
+#: includes/Missions/MessageEngine.php:336
 msgid "Percentage discount"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:196
 #: admin-app/src/routes/Analytics.tsx:661
-#: admin-app/src/routes/GoalPerformance.tsx:85
-msgid "Percentage of completed goals that were followed by an attributed purchase."
+#: admin-app/src/routes/MissionPerformance.tsx:85
+msgid "Percentage of completed missions that were followed by an attributed purchase."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:42
+#: admin-app/src/components/mission-builder/RewardFields.tsx:42
 msgid "Percentage off"
 msgstr ""
 
@@ -2991,12 +2993,12 @@ msgstr ""
 msgid "Performance"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:415
+#: admin-app/src/routes/MissionPerformance.tsx:415
 msgid "Performance Summary"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:582
-msgid "Pick the default progress template and tune its appearance — separately for Goals and Campaigns."
+#: admin-app/src/routes/Appearance.tsx:651
+msgid "Pick the default progress template and tune its appearance — separately for Missions and Campaigns."
 msgstr ""
 
 #: includes/Frontend/ProgressUI.php:1037
@@ -3004,11 +3006,11 @@ msgid "Pick your free gift"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:706
-msgid "Play a confetti burst when a goal is reached (Phase 32)."
+msgid "Play a confetti burst when a mission is reached (Phase 32)."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:624
-msgid "Please select another goal."
+msgid "Please select another mission."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:480
@@ -3040,7 +3042,7 @@ msgstr ""
 msgid "Position preset"
 msgstr ""
 
-#: includes/Templates/Goal/Template6.php:45
+#: includes/Templates/Mission/Template6.php:45
 msgid "Premium card — gold accents, elegant progress and a refined call-to-action."
 msgstr ""
 
@@ -3068,30 +3070,30 @@ msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:418
 #: admin-app/src/routes/Campaigns.tsx:172
-#: admin-app/src/routes/GoalBuilder.tsx:512
-#: admin-app/src/routes/Goals.tsx:285
+#: admin-app/src/routes/MissionBuilder.tsx:512
+#: admin-app/src/routes/Missions.tsx:285
 msgid "Priority"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:504
+#: admin-app/src/routes/MissionBuilder.tsx:504
 msgid "Priority & conflicts"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:245
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:245
 msgid "Processing + completed orders."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:51
+#: admin-app/src/components/mission-builder/missionTypes.tsx:51
 #: admin-app/src/routes/Analytics.tsx:565
 #: admin-app/src/routes/Analytics.tsx:1214
-#: admin-app/src/routes/Goals.tsx:54
+#: admin-app/src/routes/Missions.tsx:54
 #: admin-app/src/routes/UpsellAnalytics.tsx:154
 #: admin-app/src/routes/UpsellAnalytics.tsx:478
 msgid "Product"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:680
-msgid "Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Goal economics."
+msgid "Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Mission economics."
 msgstr ""
 
 #: includes/Admin/ProductCostField.php:75
@@ -3111,11 +3113,11 @@ msgstr ""
 msgid "Product cost must come from WooCommerce or your product-cost data. FaraCart reads, in order:"
 msgstr ""
 
-#: includes/Templates/Goal/Template4.php:142
+#: includes/Templates/Mission/Template4.php:142
 msgid "Product image size (px)"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:743
+#: includes/Analytics/MissionRecommendationEngine.php:743
 msgid "Product margin data is not available — profit estimates are excluded."
 msgstr ""
 
@@ -3131,30 +3133,30 @@ msgstr ""
 msgid "Product suggestions"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:297
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:297
 msgid "Product tags"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:164
-#: admin-app/src/components/goal-builder/TargetFields.tsx:169
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:164
+#: admin-app/src/components/mission-builder/TargetFields.tsx:169
 #: admin-app/src/routes/UpsellAnalytics.tsx:435
 msgid "Products"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:203
+#: admin-app/src/components/mission-builder/TargetFields.tsx:203
 msgid "Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target."
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:55
-msgid "Products priced close to the amount remaining until the goal usually make a better suggestion."
+msgid "Products priced close to the amount remaining until the mission usually make a better suggestion."
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:71
 msgid "Products purchased more often in your store rank higher."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:498
-msgid "Products recommended to customers who were working toward this goal."
+#: admin-app/src/routes/MissionPerformance.tsx:498
+msgid "Products recommended to customers who were working toward this mission."
 msgstr ""
 
 #: includes/Frontend/ProgressUI.php:518
@@ -3162,10 +3164,10 @@ msgid "Products suggested for you"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:687
-msgid "Profit estimates need product cost data. Add product costs on your products to enable Goal economics."
+msgid "Profit estimates need product cost data. Add product costs on your products to enable Mission economics."
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:745
+#: includes/Analytics/MissionRecommendationEngine.php:745
 msgid "Profit impact could not be estimated for this threshold."
 msgstr ""
 
@@ -3183,30 +3185,30 @@ msgstr ""
 msgid "Progress"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:45
+#: includes/Templates/Mission/Template1.php:45
 msgid "Progress card with icon, title, percentage, amounts and a call-to-action."
 msgstr ""
 
-#: includes/Templates/Goal/Template6.php:75
+#: includes/Templates/Mission/Template6.php:75
 msgid "Progress color"
 msgstr ""
 
-#: includes/Templates/Goal/Template4.php:46
+#: includes/Templates/Mission/Template4.php:46
 msgid "Progress header plus recommended products with add-to-cart buttons."
 msgstr ""
 
-#: includes/Templates/Goal/Template5.php:99
+#: includes/Templates/Mission/Template5.php:99
 msgid "Progress track color"
 msgstr ""
 
 #: admin-app/src/components/revenue/FunnelVisual.tsx:24
-#: admin-app/src/routes/GoalPerformance.tsx:70
-#: admin-app/src/routes/GoalPerformance.tsx:425
+#: admin-app/src/routes/MissionPerformance.tsx:70
+#: admin-app/src/routes/MissionPerformance.tsx:425
 msgid "Progressed"
 msgstr ""
 
 #: includes/REST/PreviewController.php:295
-msgid "Provide exactly one of goal_id, campaign_id, goal or campaign to preview."
+msgid "Provide exactly one of mission_id, campaign_id, mission or campaign to preview."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:748
@@ -3217,12 +3219,12 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:658
 #: admin-app/src/routes/Analytics.tsx:760
 #: admin-app/src/routes/Dashboard.tsx:670
-#: admin-app/src/routes/GoalPerformance.tsx:83
+#: admin-app/src/routes/MissionPerformance.tsx:83
 msgid "Purchase Rate"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:632
-msgid "Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and goal comparison."
+msgid "Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and mission comparison."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:270
@@ -3236,9 +3238,9 @@ msgstr ""
 
 #: admin-app/src/components/revenue/FunnelVisual.tsx:26
 #: admin-app/src/routes/Analytics.tsx:185
-#: admin-app/src/routes/GoalPerformance.tsx:74
-#: admin-app/src/routes/GoalPerformance.tsx:428
-#: admin-app/src/routes/GoalPerformance.tsx:517
+#: admin-app/src/routes/MissionPerformance.tsx:74
+#: admin-app/src/routes/MissionPerformance.tsx:428
+#: admin-app/src/routes/MissionPerformance.tsx:517
 msgid "Purchased"
 msgstr ""
 
@@ -3256,7 +3258,7 @@ msgid "Purchased Orders"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:764
-msgid "Purchased orders ÷ completed goals."
+msgid "Purchased orders ÷ completed missions."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:283
@@ -3269,14 +3271,14 @@ msgstr ""
 msgid "Pure-assisted order totals"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:25
-#: admin-app/src/components/goal-builder/TargetFields.tsx:27
-#: admin-app/src/components/goal-builder/TargetFields.tsx:33
-#: admin-app/src/components/goal-builder/TargetFields.tsx:40
-#: admin-app/src/components/goal-builder/TargetFields.tsx:46
-#: admin-app/src/components/goal-builder/TargetFields.tsx:52
-#: admin-app/src/components/goal-builder/goalTypes.tsx:33
-#: admin-app/src/routes/Goals.tsx:51
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:25
+#: admin-app/src/components/mission-builder/TargetFields.tsx:27
+#: admin-app/src/components/mission-builder/TargetFields.tsx:33
+#: admin-app/src/components/mission-builder/TargetFields.tsx:40
+#: admin-app/src/components/mission-builder/TargetFields.tsx:46
+#: admin-app/src/components/mission-builder/TargetFields.tsx:52
+#: admin-app/src/components/mission-builder/missionTypes.tsx:33
+#: admin-app/src/routes/Missions.tsx:51
 msgid "Quantity"
 msgstr ""
 
@@ -3284,39 +3286,39 @@ msgstr ""
 msgid "Raw interaction metrics from the event log — impressions, completions, revenue and suggestions."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:28
+#: admin-app/src/components/mission-builder/missionTypes.tsx:28
 msgid "Reach a cart amount — subtotal, total or discounted subtotal."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:40
+#: admin-app/src/components/mission-builder/missionTypes.tsx:40
 msgid "Reach a number of distinct products in the cart."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:58
+#: admin-app/src/components/mission-builder/missionTypes.tsx:58
 msgid "Reach a total cart weight."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:34
+#: admin-app/src/components/mission-builder/missionTypes.tsx:34
 msgid "Reach a total item quantity in the cart."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:46
+#: admin-app/src/components/mission-builder/missionTypes.tsx:46
 msgid "Reach an amount or quantity across chosen categories."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:76
+#: admin-app/src/components/mission-builder/missionTypes.tsx:76
 msgid "Reach an amount or quantity across products with chosen attributes."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:70
+#: admin-app/src/components/mission-builder/missionTypes.tsx:70
 msgid "Reach an amount or quantity across products with chosen tags."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:82
+#: admin-app/src/components/mission-builder/missionTypes.tsx:82
 msgid "Reach an amount or quantity of one brand (a product attribute)."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:52
+#: admin-app/src/components/mission-builder/missionTypes.tsx:52
 msgid "Reach an amount or quantity of specific products."
 msgstr ""
 
@@ -3337,20 +3339,20 @@ msgid "Reached dot color"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:61
-#: admin-app/src/routes/GoalPerformance.tsx:240
+#: admin-app/src/routes/MissionPerformance.tsx:240
 #: admin-app/src/routes/Recommendations.tsx:595
 msgid "Recommendations"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:603
-msgid "Recommendations helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells."
+msgid "Recommendations helps you choose better Mission targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:269
-msgid "Recommended Goal Target"
+msgid "Recommended Mission Target"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:260
+#: admin-app/src/routes/MissionPerformance.tsx:260
 msgid "Recommended target"
 msgstr ""
 
@@ -3368,7 +3370,7 @@ msgid "Relevance"
 msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:1178
-msgid "Relevant to the goal or the current cart contents."
+msgid "Relevant to the mission or the current cart contents."
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:137
@@ -3381,30 +3383,30 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:136
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:141
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:136
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:141
 msgid "Remove condition"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:343
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:343
 #: admin-app/src/routes/CampaignBuilder.tsx:450
 msgid "Repeat on days (optional)"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:434
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:434
 msgid "Required coupons in cart"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:300
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:300
 msgid "Required product tags"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:276
+#: admin-app/src/routes/Appearance.tsx:341
 msgid "Reset to template defaults"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:423
-msgid "Restrictions and schedule for this goal."
+#: admin-app/src/routes/MissionBuilder.tsx:423
+msgid "Restrictions and schedule for this mission."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1097
@@ -3418,7 +3420,7 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:956
 #: admin-app/src/routes/RevenueOverview.tsx:593
-msgid "Revenue from the incremental value of orders where customers progressed toward or completed a goal before ordering."
+msgid "Revenue from the incremental value of orders where customers progressed toward or completed a mission before ordering."
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:239
@@ -3430,8 +3432,8 @@ msgid "Review"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:550
-#: admin-app/src/routes/GoalBuilder.tsx:414
-#: admin-app/src/routes/Goals.tsx:283
+#: admin-app/src/routes/MissionBuilder.tsx:414
+#: admin-app/src/routes/Missions.tsx:283
 #: admin-app/src/routes/Recommendations.tsx:201
 msgid "Reward"
 msgstr ""
@@ -3440,19 +3442,19 @@ msgstr ""
 msgid "Reward cost"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:739
+#: includes/Analytics/MissionRecommendationEngine.php:739
 msgid "Reward cost cannot be estimated from the available data — economics scored neutral."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:280
+#: admin-app/src/components/mission-builder/RewardFields.tsx:280
 msgid "Reward label"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:104
+#: admin-app/src/components/mission-builder/RewardFields.tsx:104
 msgid "Reward type"
 msgstr ""
 
-#: includes/Goals/MessageEngine.php:211
+#: includes/Missions/MessageEngine.php:215
 msgid "Reward unlocked: {reward}"
 msgstr ""
 
@@ -3460,20 +3462,20 @@ msgstr ""
 msgid "Rewards and shipping costs were higher than the estimated incremental margin."
 msgstr ""
 
-#: includes/Templates/Goal/Template3.php:106
-#: includes/Templates/Goal/Template3.php:114
+#: includes/Templates/Mission/Template3.php:106
+#: includes/Templates/Mission/Template3.php:114
 msgid "Ring"
 msgstr ""
 
-#: includes/Templates/Goal/Template3.php:69
+#: includes/Templates/Mission/Template3.php:69
 msgid "Ring color"
 msgstr ""
 
-#: includes/Templates/Goal/Template3.php:105
+#: includes/Templates/Mission/Template3.php:105
 msgid "Ring size (px)"
 msgstr ""
 
-#: includes/Templates/Goal/Template3.php:113
+#: includes/Templates/Mission/Template3.php:113
 msgid "Ring thickness (px)"
 msgstr ""
 
@@ -3482,14 +3484,14 @@ msgid "Rows per page"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:203
-#: admin-app/src/routes/GoalPerformance.tsx:101
+#: admin-app/src/routes/MissionPerformance.tsx:101
 #: admin-app/src/routes/UpsellAnalytics.tsx:455
 #: admin-app/src/routes/UpsellAnalytics.tsx:480
 msgid "Sales"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:687
-msgid "Sales & Goal Performance"
+msgid "Sales & Mission Performance"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:630
@@ -3511,19 +3513,19 @@ msgid "Sales attributed to FaraCart"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:205
-#: admin-app/src/routes/GoalPerformance.tsx:103
-msgid "Sales attributed to FaraCart — the incremental order value driven by this goal."
+#: admin-app/src/routes/MissionPerformance.tsx:103
+msgid "Sales attributed to FaraCart — the incremental order value driven by this mission."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:774
 msgid "Sales generated after FaraCart interaction."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:194
+#: admin-app/src/routes/Appearance.tsx:207
 msgid "Sample campaign"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:30
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:30
 msgid "Sat"
 msgstr ""
 
@@ -3531,12 +3533,12 @@ msgstr ""
 msgid "Saturday"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:520
+#: admin-app/src/routes/Appearance.tsx:589
 msgid "Save appearance"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:282
-#: admin-app/src/routes/GoalBuilder.tsx:258
+#: admin-app/src/routes/MissionBuilder.tsx:258
 msgid "Save changes"
 msgstr ""
 
@@ -3544,16 +3546,16 @@ msgstr ""
 msgid "Save settings"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:519
+#: admin-app/src/routes/Appearance.tsx:588
 #: admin-app/src/routes/CampaignBuilder.tsx:280
-#: admin-app/src/routes/GoalBuilder.tsx:256
+#: admin-app/src/routes/MissionBuilder.tsx:256
 #: admin-app/src/routes/Settings.tsx:471
 msgid "Saving…"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:314
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:314
 #: admin-app/src/routes/Campaigns.tsx:173
-#: admin-app/src/routes/Goals.tsx:286
+#: admin-app/src/routes/Missions.tsx:286
 msgid "Schedule"
 msgstr ""
 
@@ -3574,46 +3576,46 @@ msgstr ""
 msgid "Scoring factors"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/EntityAutocomplete.tsx:161
+#: admin-app/src/components/mission-builder/EntityAutocomplete.tsx:161
 msgid "Search and select…"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:325
+#: admin-app/src/components/mission-builder/TargetFields.tsx:325
 msgid "Search attributes…"
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:216
-msgid "Search goals"
+#: admin-app/src/routes/Missions.tsx:216
+msgid "Search missions"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/EntityAutocomplete.tsx:161
+#: admin-app/src/components/mission-builder/EntityAutocomplete.tsx:161
 msgid "Search…"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:105
-#: includes/Templates/Goal/Template2.php:94
-#: includes/Templates/Goal/Template3.php:99
-#: includes/Templates/Goal/Template4.php:100
-#: includes/Templates/Goal/Template5.php:93
-#: includes/Templates/Goal/Template6.php:99
+#: includes/Templates/Mission/Template1.php:105
+#: includes/Templates/Mission/Template2.php:94
+#: includes/Templates/Mission/Template3.php:99
+#: includes/Templates/Mission/Template4.php:100
+#: includes/Templates/Mission/Template5.php:93
+#: includes/Templates/Mission/Template6.php:99
 msgid "Secondary text"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:207
+#: admin-app/src/components/mission-builder/RewardFields.tsx:207
 msgid "Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront."
 msgstr ""
 
 #: admin-app/src/components/revenue/RevenueToolbar.tsx:65
 #: admin-app/src/routes/Recommendations.tsx:614
-msgid "Select a goal"
+msgid "Select a mission"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:572
-msgid "Select a goal to apply the recommendation to."
+msgid "Select a mission to apply the recommendation to."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:787
-msgid "Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer goal evaluations, at the cost of a brief staleness window after cart changes."
+msgid "Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer mission evaluations, at the cost of a brief staleness window after cart changes."
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:191
@@ -3625,7 +3627,7 @@ msgid "Set a target to preview progress."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:726
-msgid "Set the goal target to %s?"
+msgid "Set the mission target to %s?"
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:134
@@ -3643,7 +3645,7 @@ msgstr ""
 msgid "Settings saved."
 msgstr ""
 
-#: includes/Templates/Goal/Template5.php:141
+#: includes/Templates/Mission/Template5.php:141
 msgid "Shadow intensity"
 msgstr ""
 
@@ -3651,17 +3653,17 @@ msgstr ""
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:133
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:144
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:152
-#: includes/Templates/Goal/Template1.php:112
-#: includes/Templates/Goal/Template1.php:120
-#: includes/Templates/Goal/Template2.php:101
-#: includes/Templates/Goal/Template2.php:109
-#: includes/Templates/Goal/Template3.php:122
-#: includes/Templates/Goal/Template4.php:107
-#: includes/Templates/Goal/Template4.php:115
-#: includes/Templates/Goal/Template5.php:106
-#: includes/Templates/Goal/Template5.php:114
-#: includes/Templates/Goal/Template6.php:106
-#: includes/Templates/Goal/Template6.php:114
+#: includes/Templates/Mission/Template1.php:112
+#: includes/Templates/Mission/Template1.php:120
+#: includes/Templates/Mission/Template2.php:101
+#: includes/Templates/Mission/Template2.php:109
+#: includes/Templates/Mission/Template3.php:122
+#: includes/Templates/Mission/Template4.php:107
+#: includes/Templates/Mission/Template4.php:115
+#: includes/Templates/Mission/Template5.php:106
+#: includes/Templates/Mission/Template5.php:114
+#: includes/Templates/Mission/Template6.php:106
+#: includes/Templates/Mission/Template6.php:114
 msgid "Shape"
 msgstr ""
 
@@ -3669,7 +3671,7 @@ msgstr ""
 msgid "Shipping cost"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:257
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:257
 msgid "Shipping destination"
 msgstr ""
 
@@ -3680,15 +3682,15 @@ msgstr ""
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:129
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:65
 #: includes/Frontend/ProgressUI.php:1040
-msgid "Shopping goal"
+msgid "Shopping mission"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:697
-msgid "Show a live countdown to the goal/campaign deadline (Phase 32)."
+msgid "Show a live countdown to the mission/campaign deadline (Phase 32)."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:574
-msgid "Show all goals"
+msgid "Show all missions"
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:82
@@ -3696,7 +3698,7 @@ msgid "Show campaign name"
 msgstr ""
 
 #: includes/Frontend/ProgressUI.php:210
-msgid "Show cart goals, progress and rewards (FaraCart)."
+msgid "Show cart missions, progress and rewards (FaraCart)."
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:395
@@ -3730,65 +3732,65 @@ msgid "Show on mobile"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:805
-msgid "Show recommended products that help reach the goal."
+msgid "Show recommended products that help reach the mission."
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:171
-#: includes/Templates/Goal/Template3.php:163
-#: includes/Templates/Goal/Template6.php:143
+#: includes/Templates/Mission/Template1.php:171
+#: includes/Templates/Mission/Template3.php:163
+#: includes/Templates/Mission/Template6.php:143
 msgid "Show the amounts"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:183
-#: includes/Templates/Goal/Template2.php:154
-#: includes/Templates/Goal/Template3.php:169
-#: includes/Templates/Goal/Template5.php:161
-#: includes/Templates/Goal/Template6.php:149
+#: includes/Templates/Mission/Template1.php:183
+#: includes/Templates/Mission/Template2.php:154
+#: includes/Templates/Mission/Template3.php:169
+#: includes/Templates/Mission/Template5.php:161
+#: includes/Templates/Mission/Template6.php:149
 msgid "Show the call-to-action"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:576
-msgid "Show the closest goal only"
+msgid "Show the closest mission only"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:575
-msgid "Show the first goal only"
+msgid "Show the first mission only"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:927
-msgid "Show the floating button on widget pages whenever the cart has an eligible goal."
+msgid "Show the floating button on widget pages whenever the cart has an eligible mission."
 msgstr ""
 
-#: includes/Templates/Goal/Template3.php:157
-msgid "Show the goal description"
-msgstr ""
-
-#: includes/Templates/Goal/Template2.php:142
-msgid "Show the goal title"
-msgstr ""
-
-#: includes/Templates/Goal/Template1.php:159
-#: includes/Templates/Goal/Template2.php:136
-#: includes/Templates/Goal/Template5.php:149
+#: includes/Templates/Mission/Template1.php:159
+#: includes/Templates/Mission/Template2.php:136
+#: includes/Templates/Mission/Template5.php:149
 msgid "Show the icon"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:165
+#: includes/Templates/Mission/Template3.php:157
+msgid "Show the mission description"
+msgstr ""
+
+#: includes/Templates/Mission/Template2.php:142
+msgid "Show the mission title"
+msgstr ""
+
+#: includes/Templates/Mission/Template1.php:165
 msgid "Show the percentage"
 msgstr ""
 
-#: includes/Templates/Goal/Template3.php:151
+#: includes/Templates/Mission/Template3.php:151
 msgid "Show the percentage in the center"
 msgstr ""
 
-#: includes/Templates/Goal/Template4.php:150
+#: includes/Templates/Mission/Template4.php:150
 msgid "Show the recommendation heading"
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:177
-#: includes/Templates/Goal/Template2.php:148
-#: includes/Templates/Goal/Template4.php:156
-#: includes/Templates/Goal/Template5.php:155
+#: includes/Templates/Mission/Template1.php:177
+#: includes/Templates/Mission/Template2.php:148
+#: includes/Templates/Mission/Template4.php:156
+#: includes/Templates/Mission/Template5.php:155
 msgid "Show the remaining amount"
 msgstr ""
 
@@ -3800,7 +3802,7 @@ msgstr ""
 msgid "Showing %d–%d of %d"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:284
+#: admin-app/src/components/mission-builder/RewardFields.tsx:284
 msgid "Shown to the customer (fee/coupon name)."
 msgstr ""
 
@@ -3813,7 +3815,7 @@ msgid "Skipped by a conflict"
 msgstr ""
 
 #: admin-app/src/components/preview/PreviewWidget.tsx:45
-msgid "Skipped — a higher-priority goal wins"
+msgid "Skipped — a higher-priority mission wins"
 msgstr ""
 
 #: admin-app/src/components/preview/PreviewWidget.tsx:47
@@ -3829,11 +3831,11 @@ msgid "Slide the progress-bar fill on updates."
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:139
-msgid "Smart Upsells assisted %s goal completions this period."
+msgid "Smart Upsells assisted %s mission completions this period."
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:226
-msgid "Smart goal recommendations are disabled."
+#: includes/Analytics/MissionRecommendationEngine.php:226
+msgid "Smart mission recommendations are disabled."
 msgstr ""
 
 #: includes/Analytics/RevenueRepository.php:677
@@ -3848,13 +3850,13 @@ msgstr ""
 msgid "Smooth open/close transitions for the floating button and its drawer."
 msgstr ""
 
-#: includes/Templates/Goal/Template1.php:143
-#: includes/Templates/Goal/Template3.php:145
-#: includes/Templates/Goal/Template6.php:137
+#: includes/Templates/Mission/Template1.php:143
+#: includes/Templates/Mission/Template3.php:145
+#: includes/Templates/Mission/Template6.php:137
 msgid "Solid"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:837
+#: admin-app/src/routes/MissionPerformance.tsx:837
 msgid "Some orders do not have complete cost information."
 msgstr ""
 
@@ -3870,7 +3872,7 @@ msgstr ""
 msgid "Source: %s."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:292
+#: admin-app/src/components/mission-builder/RewardFields.tsx:292
 msgid "Stack with other rewards?"
 msgstr ""
 
@@ -3878,14 +3880,14 @@ msgstr ""
 msgid "Start collecting performance data"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:319
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:319
 #: admin-app/src/routes/CampaignBuilder.tsx:403
 msgid "Starts at"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:171
-#: admin-app/src/routes/Goals.tsx:237
-#: admin-app/src/routes/Goals.tsx:284
+#: admin-app/src/routes/Missions.tsx:237
+#: admin-app/src/routes/Missions.tsx:284
 msgid "Status"
 msgstr ""
 
@@ -3901,13 +3903,13 @@ msgstr ""
 msgid "Store-wide progress widget variant."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:26
-#: admin-app/src/components/goal-builder/TargetFields.tsx:22
-#: admin-app/src/components/goal-builder/TargetFields.tsx:28
-#: admin-app/src/components/goal-builder/TargetFields.tsx:34
-#: admin-app/src/components/goal-builder/TargetFields.tsx:41
-#: admin-app/src/components/goal-builder/TargetFields.tsx:47
-#: admin-app/src/components/goal-builder/TargetFields.tsx:53
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:26
+#: admin-app/src/components/mission-builder/TargetFields.tsx:22
+#: admin-app/src/components/mission-builder/TargetFields.tsx:28
+#: admin-app/src/components/mission-builder/TargetFields.tsx:34
+#: admin-app/src/components/mission-builder/TargetFields.tsx:41
+#: admin-app/src/components/mission-builder/TargetFields.tsx:47
+#: admin-app/src/components/mission-builder/TargetFields.tsx:53
 #: admin-app/src/routes/Settings.tsx:613
 msgid "Subtotal (before discounts)"
 msgstr ""
@@ -3916,7 +3918,7 @@ msgstr ""
 msgid "Suggestion ranking"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:31
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:31
 msgid "Sun"
 msgstr ""
 
@@ -3924,82 +3926,82 @@ msgstr ""
 msgid "Sunday"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:145
-msgid "Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {goal_name}."
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:145
+msgid "Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {mission_name}."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:69
+#: admin-app/src/components/mission-builder/missionTypes.tsx:69
 msgid "Tag"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:184
+#: admin-app/src/components/mission-builder/TargetFields.tsx:184
 msgid "Tags"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/CompositeChildrenEditor.tsx:102
-#: admin-app/src/components/goal-builder/TargetFields.tsx:122
-#: admin-app/src/routes/GoalBuilder.tsx:377
+#: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:102
+#: admin-app/src/components/mission-builder/TargetFields.tsx:122
+#: admin-app/src/routes/MissionBuilder.tsx:377
 msgid "Target"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:405
+#: admin-app/src/routes/MissionPerformance.tsx:405
 msgid "Target: %s"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:76
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:76
 #: admin-app/src/routes/Settings.tsx:663
 msgid "Template"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:666
-#: includes/Templates/Goal/Template1.php:38
+#: includes/Templates/Mission/Template1.php:38
 msgid "Template 1"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:667
-#: includes/Templates/Goal/Template2.php:39
+#: includes/Templates/Mission/Template2.php:39
 msgid "Template 2"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:668
-#: includes/Templates/Goal/Template3.php:38
+#: includes/Templates/Mission/Template3.php:38
 msgid "Template 3"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:669
-#: includes/Templates/Goal/Template4.php:39
+#: includes/Templates/Mission/Template4.php:39
 msgid "Template 4"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:670
-#: includes/Templates/Goal/Template5.php:38
+#: includes/Templates/Mission/Template5.php:38
 msgid "Template 5"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:671
-#: includes/Templates/Goal/Template6.php:38
+#: includes/Templates/Mission/Template6.php:38
 msgid "Template 6"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:247
+#: admin-app/src/routes/Appearance.tsx:312
 msgid "Template appearance"
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:597
+#: admin-app/src/routes/Appearance.tsx:666
 msgid "Template scope"
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:118
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:137
-#: includes/Templates/Goal/Template1.php:99
-#: includes/Templates/Goal/Template2.php:88
-#: includes/Templates/Goal/Template3.php:93
-#: includes/Templates/Goal/Template4.php:94
-#: includes/Templates/Goal/Template6.php:93
+#: includes/Templates/Mission/Template1.php:99
+#: includes/Templates/Mission/Template2.php:88
+#: includes/Templates/Mission/Template3.php:93
+#: includes/Templates/Mission/Template4.php:94
+#: includes/Templates/Mission/Template6.php:93
 msgid "Text"
 msgstr ""
 
-#: includes/Templates/Goal/Template5.php:87
+#: includes/Templates/Mission/Template5.php:87
 msgid "Text color"
 msgstr ""
 
@@ -4070,7 +4072,7 @@ msgstr ""
 msgid "The campaign was updated."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:284
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:284
 msgid "The cart must contain at least this many items."
 msgstr ""
 
@@ -4078,19 +4080,19 @@ msgstr ""
 msgid "The currency unit shown on FaraCart amounts. “Auto” follows the store currency."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:225
-msgid "The customer chooses one free gift from this list once the goal is reached. The first product is the storefront default."
+#: admin-app/src/components/mission-builder/RewardFields.tsx:225
+msgid "The customer chooses one free gift from this list once the mission is reached. The first product is the storefront default."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:635
-msgid "The default template for every goal that does not pin its own on the Goal Builder."
+#: admin-app/src/routes/Appearance.tsx:704
+msgid "The default template for every mission that does not pin its own on the Mission Builder."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:631
+#: admin-app/src/routes/Appearance.tsx:700
 msgid "The default template that renders a whole campaign on the storefront (e.g. the milestone chain)."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:184
+#: admin-app/src/components/mission-builder/RewardFields.tsx:184
 msgid "The discount never applies to these products."
 msgstr ""
 
@@ -4102,76 +4104,76 @@ msgstr ""
 msgid "The funnel and the direct vs assisted models behind FaraCart’s attributed revenue."
 msgstr ""
 
-#: includes/REST/GoalsController.php:222
-msgid "The goal could not be created."
-msgstr ""
-
-#: includes/REST/GoalsController.php:279
-msgid "The goal could not be deleted."
-msgstr ""
-
-#: includes/REST/GoalsController.php:314
-msgid "The goal could not be duplicated."
-msgstr ""
-
-#: includes/REST/GoalsController.php:202
-#: includes/REST/GoalsController.php:243
-#: includes/REST/GoalsController.php:271
-#: includes/REST/GoalsController.php:304
-#: includes/REST/RecommendationsController.php:149
-msgid "The goal could not be found."
-msgstr ""
-
-#: includes/REST/GoalsController.php:251
-msgid "The goal could not be updated."
-msgstr ""
-
-#: includes/Analytics/UpsellRanker.php:294
-msgid "The goal gap is already closed — no upsells needed."
-msgstr ""
-
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:264
-msgid "The goal only applies when the cart ships to one of these zones. Leave empty for every zone."
-msgstr ""
-
-#: includes/REST/PreviewController.php:314
-msgid "The goal or campaign could not be found."
-msgstr ""
-
-#: admin-app/src/routes/Goals.tsx:186
-msgid "The goal status was updated."
-msgstr ""
-
-#: admin-app/src/routes/GoalBuilder.tsx:190
-msgid "The goal was created."
-msgstr ""
-
-#: admin-app/src/routes/Goals.tsx:163
-msgid "The goal was deleted."
-msgstr ""
-
-#: admin-app/src/routes/GoalBuilder.tsx:190
-msgid "The goal was updated."
-msgstr ""
-
 #: admin-app/src/routes/CampaignBuilder.tsx:341
 msgid "The identity and lifecycle of the campaign."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:673
-msgid "The incremental order value from orders where customers interacted with a goal before purchasing."
+msgid "The incremental order value from orders where customers interacted with a mission before purchasing."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:556
-msgid "The incremental order value from orders where customers progressed or completed this goal before ordering."
+#: admin-app/src/routes/MissionPerformance.tsx:556
+msgid "The incremental order value from orders where customers progressed or completed this mission before ordering."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:318
-msgid "The internal identity of the goal."
+#: admin-app/src/routes/MissionBuilder.tsx:318
+msgid "The internal identity of the mission."
+msgstr ""
+
+#: includes/REST/MissionsController.php:244
+msgid "The mission could not be created."
+msgstr ""
+
+#: includes/REST/MissionsController.php:301
+msgid "The mission could not be deleted."
+msgstr ""
+
+#: includes/REST/MissionsController.php:336
+msgid "The mission could not be duplicated."
+msgstr ""
+
+#: includes/REST/MissionsController.php:224
+#: includes/REST/MissionsController.php:265
+#: includes/REST/MissionsController.php:293
+#: includes/REST/MissionsController.php:326
+#: includes/REST/RecommendationsController.php:149
+msgid "The mission could not be found."
+msgstr ""
+
+#: includes/REST/MissionsController.php:273
+msgid "The mission could not be updated."
+msgstr ""
+
+#: includes/Analytics/UpsellRanker.php:294
+msgid "The mission gap is already closed — no upsells needed."
+msgstr ""
+
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:264
+msgid "The mission only applies when the cart ships to one of these zones. Leave empty for every zone."
+msgstr ""
+
+#: includes/REST/PreviewController.php:314
+msgid "The mission or campaign could not be found."
+msgstr ""
+
+#: admin-app/src/routes/Missions.tsx:186
+msgid "The mission status was updated."
+msgstr ""
+
+#: admin-app/src/routes/MissionBuilder.tsx:190
+msgid "The mission was created."
+msgstr ""
+
+#: admin-app/src/routes/Missions.tsx:163
+msgid "The mission was deleted."
+msgstr ""
+
+#: admin-app/src/routes/MissionBuilder.tsx:190
+msgid "The mission was updated."
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:513
-msgid "The ordered goals of the campaign. Shoppers unlock each goal in order as their cart grows."
+msgid "The ordered missions of the campaign. Shoppers unlock each mission in order as their cart grows."
 msgstr ""
 
 #: admin-app/src/routes/NotFound.tsx:17
@@ -4182,11 +4184,11 @@ msgstr ""
 msgid "The plugin’s public actions and filters — a reference for theme and plugin developers."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:239
+#: admin-app/src/components/mission-builder/RewardFields.tsx:239
 msgid "The product added to the cart as a gift."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:218
+#: admin-app/src/components/mission-builder/TargetFields.tsx:218
 msgid "The product attribute that identifies the brand (typically pa_brand)."
 msgstr ""
 
@@ -4207,71 +4209,71 @@ msgid "The round button diameter (32–96)."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:623
-msgid "The selected goal could not be found"
+msgid "The selected mission could not be found"
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:238
-msgid "The selected goal could not be found."
+#: includes/Analytics/MissionRecommendationEngine.php:238
+msgid "The selected mission could not be found."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:467
-msgid "The shopper may complete this goal as many times as they want (default for existing goals)."
+#: admin-app/src/routes/MissionBuilder.tsx:467
+msgid "The shopper may complete this mission as many times as they want (default for existing missions)."
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:377
-msgid "The shopper may complete this goal as many times as they want."
+#: admin-app/src/routes/Missions.tsx:377
+msgid "The shopper may complete this mission as many times as they want."
 msgstr ""
 
-#: admin-app/src/routes/Appearance.tsx:688
+#: admin-app/src/routes/Appearance.tsx:757
 msgid "The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/TargetFields.tsx:127
+#: admin-app/src/components/mission-builder/TargetFields.tsx:127
 msgid "The threshold shoppers need to reach"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:378
+#: admin-app/src/routes/MissionBuilder.tsx:378
 msgid "The threshold shoppers need to reach."
 msgstr ""
 
 #: includes/Admin/ProductCostField.php:76
-msgid "The unit cost FaraCart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown."
+msgid "The unit cost FaraCart uses for Estimated Profit, Mission economics and upsell margin scoring. Leave empty when unknown."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1023
 msgid "These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:103
-msgid "These products never count toward the goal, even when they would otherwise qualify."
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:103
+msgid "These products never count toward the mission, even when they would otherwise qualify."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:730
-msgid "This changes a production goal — the action is not reversible from here."
+msgid "This changes a production mission — the action is not reversible from here."
 msgstr ""
 
 #: includes/REST/GiftController.php:170
-msgid "This gift is no longer available for the goal."
-msgstr ""
-
-#: admin-app/src/templates/renderers/Template1Renderer.tsx:52
-#: includes/Frontend/ProgressUI.php:1054
-msgid "This goal has ended"
+msgid "This gift is no longer available for the mission."
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:191
 msgid "This is an analytical estimate based on available WooCommerce cost and order data. It is not accounting profit."
 msgstr ""
 
+#: admin-app/src/templates/renderers/Template1Renderer.tsx:52
+#: includes/Frontend/ProgressUI.php:1054
+msgid "This mission has ended"
+msgstr ""
+
 #: admin-app/src/date-range/dateRange.ts:110
 msgid "This month"
 msgstr ""
 
-#: includes/Goals/MessageEngine.php:185
+#: includes/Missions/MessageEngine.php:189
 msgid "This offer is not active right now."
 msgstr ""
 
-#: includes/Goals/MessageEngine.php:188
+#: includes/Missions/MessageEngine.php:192
 msgid "This offer is not available for your cart."
 msgstr ""
 
@@ -4279,11 +4281,11 @@ msgstr ""
 msgid "This product could not be scored."
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:698
+#: includes/Analytics/MissionRecommendationEngine.php:698
 msgid "This threshold is %s above the median order value (%s)."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:28
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:28
 msgid "Thu"
 msgstr ""
 
@@ -4291,16 +4293,16 @@ msgstr ""
 msgid "Thursday"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:477
+#: admin-app/src/routes/MissionBuilder.tsx:477
 msgid "Times each user can complete"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:65
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:65
 msgid "Title"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:615
-msgid "To see the best optimization recommendation for a goal, first choose one of your store goals."
+msgid "To see the best optimization recommendation for a mission, first choose one of your store missions."
 msgstr ""
 
 #: admin-app/src/date-range/dateRange.ts:102
@@ -4308,7 +4310,7 @@ msgid "Today"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:218
-#: admin-app/src/routes/Goals.tsx:355
+#: admin-app/src/routes/Missions.tsx:355
 msgid "Toggle %s"
 msgstr ""
 
@@ -4353,15 +4355,15 @@ msgstr ""
 msgid "Total lift"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:234
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:234
 msgid "Total paid across all orders."
 msgstr ""
 
-#: includes/Templates/Goal/Template3.php:75
+#: includes/Templates/Mission/Template3.php:75
 msgid "Track color"
 msgstr ""
 
-#: includes/REST/TrackController.php:198
+#: includes/REST/TrackController.php:206
 #: includes/REST/UpsellController.php:242
 #: includes/REST/UpsellController.php:264
 #: includes/REST/UpsellController.php:295
@@ -4377,7 +4379,7 @@ msgstr ""
 msgid "Try again"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:26
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:26
 msgid "Tue"
 msgstr ""
 
@@ -4386,18 +4388,18 @@ msgid "Tuesday"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:550
-msgid "Turn the storefront goals, rewards and progress bars on or off."
+msgid "Turn the storefront missions, rewards and progress bars on or off."
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:282
+#: admin-app/src/routes/Missions.tsx:282
 msgid "Type"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:435
+#: admin-app/src/components/mission-builder/RewardFields.tsx:435
 msgid "Type or pick an existing coupon."
 msgstr ""
 
-#: includes/REST/TrackController.php:210
+#: includes/REST/TrackController.php:218
 msgid "Unknown event type."
 msgstr ""
 
@@ -4409,8 +4411,8 @@ msgstr ""
 msgid "Unknown upsell event type."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:464
-#: admin-app/src/routes/Goals.tsx:104
+#: admin-app/src/routes/MissionBuilder.tsx:464
+#: admin-app/src/routes/Missions.tsx:104
 msgid "Unlimited"
 msgstr ""
 
@@ -4426,7 +4428,7 @@ msgstr ""
 msgid "Upsell impressions and orders are recorded once the storefront reports them. Widen the date range or check that tracking is enabled."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:92
+#: admin-app/src/routes/MissionPerformance.tsx:92
 msgid "Upsell-assisted"
 msgstr ""
 
@@ -4435,7 +4437,7 @@ msgid "Upsell-assisted completions"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:62
-#: admin-app/src/routes/GoalPerformance.tsx:496
+#: admin-app/src/routes/MissionPerformance.tsx:496
 #: admin-app/src/routes/UpsellAnalytics.tsx:337
 msgid "Upsells"
 msgstr ""
@@ -4445,10 +4447,10 @@ msgid "Upsells are assisting completions"
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:338
-msgid "Upsells shows which products help customers reach Goals and generate additional sales — purchases, sales and estimated profit per product."
+msgid "Upsells shows which products help customers reach Missions and generate additional sales — purchases, sales and estimated profit per product."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:125
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:125
 #: admin-app/src/routes/CampaignBuilder.tsx:750
 msgid "Use global default"
 msgstr ""
@@ -4461,7 +4463,7 @@ msgstr ""
 msgid "User menu"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:213
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:213
 msgid "VIP customers only"
 msgstr ""
 
@@ -4486,7 +4488,7 @@ msgid "View details"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:159
-msgid "View goals"
+msgid "View missions"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:142
@@ -4505,11 +4507,11 @@ msgid "View store"
 msgstr ""
 
 #: includes/Frontend/ProgressUI.php:556
-msgid "View your cart goals"
+msgid "View your cart missions"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:69
-#: admin-app/src/routes/GoalPerformance.tsx:424
+#: admin-app/src/routes/MissionPerformance.tsx:69
+#: admin-app/src/routes/MissionPerformance.tsx:424
 msgid "Viewed"
 msgstr ""
 
@@ -4519,10 +4521,10 @@ msgid "Views"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:604
-msgid "We couldn’t load your analytics. Your Goals are still working normally."
+msgid "We couldn’t load your analytics. Your Missions are still working normally."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/ConditionFields.tsx:27
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:27
 msgid "Wed"
 msgstr ""
 
@@ -4530,8 +4532,8 @@ msgstr ""
 msgid "Wednesday"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/goalTypes.tsx:57
-#: admin-app/src/routes/Goals.tsx:55
+#: admin-app/src/components/mission-builder/missionTypes.tsx:57
+#: admin-app/src/routes/Missions.tsx:55
 msgid "Weight"
 msgstr ""
 
@@ -4544,19 +4546,19 @@ msgid "What happened?"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:502
-msgid "What happens after customers see and complete your goals — purchases, sales and profit."
+msgid "What happens after customers see and complete your missions — purchases, sales and profit."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:242
-msgid "What target should this goal use — based on real store data."
+#: admin-app/src/routes/MissionPerformance.tsx:242
+msgid "What target should this mission use — based on real store data."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:415
-msgid "What the customer earns when the goal is reached."
+#: admin-app/src/routes/MissionBuilder.tsx:415
+msgid "What the customer earns when the mission is reached."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:370
-msgid "What the goal measures."
+#: admin-app/src/routes/MissionBuilder.tsx:370
+msgid "What the mission measures."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:739
@@ -4564,11 +4566,11 @@ msgid "When off, cart coupons and discounts do not reduce the discounted-subtota
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:757
-msgid "When off, products currently on sale are excluded from every goal."
+msgid "When off, products currently on sale are excluded from every mission."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:766
-msgid "When off, virtual and downloadable products are excluded from every goal."
+msgid "When off, virtual and downloadable products are excluded from every mission."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:965
@@ -4587,8 +4589,8 @@ msgstr ""
 msgid "When the campaign runs, and how it competes with other campaigns."
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:535
-msgid "When this goal is reached, every lower-priority goal is skipped and never grants its reward. Higher-priority goals are unaffected."
+#: admin-app/src/routes/MissionBuilder.tsx:535
+msgid "When this mission is reached, every lower-priority mission is skipped and never grants its reward. Higher-priority missions are unaffected."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:643
@@ -4604,18 +4606,18 @@ msgid "Whether the widgets render on small screens (≤782px)."
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:720
-msgid "Which cart money counts toward goals. Defaults match the storefront behavior before these options existed."
+msgid "Which cart money counts toward missions. Defaults match the storefront behavior before these options existed."
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:727
-msgid "Which goals generated purchases, sales and profit? Completion is not the same as purchase."
+#: admin-app/src/routes/MissionPerformance.tsx:727
+msgid "Which missions generated purchases, sales and profit? Completion is not the same as purchase."
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:240
 msgid "Why this product"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:281
+#: admin-app/src/routes/MissionPerformance.tsx:281
 #: admin-app/src/routes/Recommendations.tsx:316
 msgid "Why?"
 msgstr ""
@@ -4645,7 +4647,7 @@ msgstr ""
 msgid "WooCommerce must be installed and activated."
 msgstr ""
 
-#: includes/Analytics/GoalRecommendationEngine.php:257
+#: includes/Analytics/MissionRecommendationEngine.php:257
 msgid "WooCommerce order data is not available — no recommendation can be computed."
 msgstr ""
 
@@ -4669,7 +4671,7 @@ msgstr ""
 msgid "Write errors (and debug entries when debug mode is on) to a log file."
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:33
+#: admin-app/src/components/mission-builder/RewardFields.tsx:33
 msgid "Yes (stack with other rewards)"
 msgstr ""
 
@@ -4682,12 +4684,13 @@ msgstr ""
 msgid "You are not allowed to access this endpoint."
 msgstr ""
 
-#: includes/Goals/MessageEngine.php:197
-msgid "You have already completed this goal."
+#: includes/Missions/MessageEngine.php:201
+msgid "You have already completed this mission."
 msgstr ""
 
-#: includes/Goals/MessageEngine.php:214
-msgid "You reached your goal!"
+#: admin-app/src/routes/Appearance.tsx:86
+#: includes/Missions/MessageEngine.php:218
+msgid "You reached your mission!"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:613
@@ -4704,7 +4707,7 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:651
 #: admin-app/src/routes/Dashboard.tsx:667
-#: admin-app/src/routes/GoalPerformance.tsx:430
+#: admin-app/src/routes/MissionPerformance.tsx:430
 #: admin-app/src/routes/RevenueOverview.tsx:383
 msgid "after FaraCart interaction"
 msgstr ""
@@ -4721,7 +4724,7 @@ msgstr ""
 msgid "best seller"
 msgstr ""
 
-#: admin-app/src/routes/GoalBuilder.tsx:326
+#: admin-app/src/routes/MissionBuilder.tsx:326
 msgid "e.g. Free shipping over 500K"
 msgstr ""
 
@@ -4729,27 +4732,27 @@ msgstr ""
 msgid "e.g. Summer Sale"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/RewardFields.tsx:283
+#: admin-app/src/components/mission-builder/RewardFields.tsx:283
 msgid "e.g. Summer free shipping"
 msgstr ""
 
-#: admin-app/src/components/goal-builder/DisplayFields.tsx:170
+#: admin-app/src/components/mission-builder/DisplayFields.tsx:170
 msgid "e.g. 🎁 or a dashicon name"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:679
-msgid "goal-exposed customers"
-msgstr ""
-
 #: includes/Analytics/UpsellRanker.php:1235
-msgid "inside the goal's categories"
+msgid "inside the mission's categories"
 msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:1233
-msgid "manually selected for this goal"
+msgid "manually selected for this mission"
 msgstr ""
 
-#: admin-app/src/routes/GoalPerformance.tsx:529
+#: admin-app/src/routes/Dashboard.tsx:679
+msgid "mission-exposed customers"
+msgstr ""
+
+#: admin-app/src/routes/MissionPerformance.tsx:529
 msgid "of completions that saw a recommendation"
 msgstr ""
 
@@ -4758,11 +4761,11 @@ msgid "partially"
 msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:1234
-msgid "previously recommended for this goal"
+msgid "previously recommended for this mission"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:673
-msgid "purchases per completed goal"
+msgid "purchases per completed mission"
 msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:1238
@@ -4786,10 +4789,10 @@ msgid "vs previous period"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:290
-msgid "“%s” will be permanently deleted. Its goals are kept and detached — they can be reused by other campaigns."
+msgid "“%s” will be permanently deleted. Its missions are kept and detached — they can be reused by other campaigns."
 msgstr ""
 
-#: admin-app/src/routes/Goals.tsx:468
+#: admin-app/src/routes/Missions.tsx:468
 msgid "“%s” will be permanently deleted. This cannot be undone."
 msgstr ""
 

@@ -112,7 +112,7 @@ export function formatShortDay(dateStr: string): string {
   }
 }
 
-/** Short human schedule label for a goal's starts_at/ends_at pair. */
+/** Short human schedule label for a mission's starts_at/ends_at pair. */
 export function formatSchedule(startsAt: string | null, endsAt: string | null): string {
   const day = (value: string | null) => (value ? value.slice(0, 10) : '');
 

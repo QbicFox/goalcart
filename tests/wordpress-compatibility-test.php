@@ -143,8 +143,8 @@ echo "\n== 4. Multisite behavior ==\n";
 
 global $wpdb;
 
-check( 'Schema::table uses the per-site $wpdb->prefix', false !== strpos( Schema::table( 'goals' ), $wpdb->prefix ) );
-check( 'table includes the plugin prefix', false !== strpos( Schema::table( 'goals' ), 'faracart_goals' ) );
+check( 'Schema::table uses the per-site $wpdb->prefix', false !== strpos( Schema::table( 'missions' ), $wpdb->prefix ) );
+check( 'table includes the plugin prefix', false !== strpos( Schema::table( 'missions' ), 'faracart_missions' ) );
 check( 'SQLite option-suffixed tables not used (options path is per-site)', function_exists( 'add_option' ) );
 
 // Options are per-site by default in WordPress; the plugin stores its

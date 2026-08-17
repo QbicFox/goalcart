@@ -16,8 +16,8 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, type ReactElement } from 'react';
 
-import { fetchGoals } from '../api/goals';
-import { applyGoalRecommendation, fetchCostCoverage, fetchGoalRecommendations } from '../api/revenue';
+import { fetchMissions } from '../api/missions';
+import { applyMissionRecommendation, fetchCostCoverage, fetchMissionRecommendations } from '../api/revenue';
 import { getBootData } from '../boot';
 import ConfirmDialog from '../components/ConfirmDialog';
 import EmptyState from '../components/EmptyState';
@@ -27,7 +27,7 @@ import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { useDateRange } from '../date-range/DateRangeContext';
 import { formatCurrency, formatNumber, formatPercent, formatPercentValue } from '../lib/format';
 import { REWARD_LABELS } from '../templates/rewardLabel';
-import type { CostCoveragePayload, GoalRecommendationsPayload, RecommendationCandidate, RecommendationGoalHistory } from '../types';
+import type { CostCoveragePayload, MissionRecommendationsPayload, RecommendationCandidate, RecommendationMissionHistory } from '../types';
 
 /**
  * Business-friendly confidence label (Improvement.md §33 — the raw 0–100
@@ -176,11 +176,11 @@ function AdvancedDetails({ candidate }: { candidate: RecommendationCandidate }) 
 }
 
 /**
- * The "Current Goal" block of the recommendation detail (UPSELL_REFACTOR
+ * The "Current Mission" block of the recommendation detail (UPSELL_REFACTOR
  * §9): current threshold, reward, completion + purchase rates, attributed
  * sales and estimated profit — all real analytics data, never fabricated.
  */
-function CurrentGoalBlock({ history }: { history: RecommendationGoalHistory | null }) {
+function CurrentMissionBlock({ history }: { history: RecommendationMissionHistory | null }) {
   if (!history) {
     return null;
   }
@@ -193,7 +193,7 @@ function CurrentGoalBlock({ history }: { history: RecommendationGoalHistory | nu
   return (
     <Box sx={{ mb: 2 }}>
       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-        {__('Current goal', 'faracart')}
+        {__('Current mission', 'faracart')}
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 1.5, mt: 1 }}>
         <StatBox label={__('Current target', 'faracart')} value={formatCurrency(history.current_target)} />
@@ -223,19 +223,19 @@ function CurrentGoalBlock({ history }: { history: RecommendationGoalHistory | nu
 /** The primary recommendation card (§33) — business outcome first. */
 function TopRecommendationCard({
   candidate,
-  goalId,
-  goalName,
-  goalHistory,
+  missionId,
+  missionName,
+  missionHistory,
   detailsOpen,
   onToggleDetails,
   onApply,
   onDismiss,
 }: {
   candidate: RecommendationCandidate;
-  goalId: number;
-  /** The selected goal's name — makes it unmistakable which goal the card belongs to. */
-  goalName: string | null;
-  goalHistory: RecommendationGoalHistory | null;
+  missionId: number;
+  /** The selected mission's name — makes it unmistakable which mission the card belongs to. */
+  missionName: string | null;
+  missionHistory: RecommendationMissionHistory | null;
   detailsOpen: boolean;
   onToggleDetails: () => void;
   onApply: (candidate: RecommendationCandidate) => void;
@@ -253,12 +253,12 @@ function TopRecommendationCard({
         label={__('Top recommendation', 'faracart')}
         sx={{ position: 'absolute', top: -12, insetInlineStart: 16 }}
       />
-      {goalName && (
+      {missionName && (
         <Chip
           size="small"
           variant="outlined"
           color="primary"
-          label={goalName}
+          label={missionName}
           sx={{ position: 'absolute', top: -12, insetInlineEnd: 16 }}
         />
       )}
@@ -266,7 +266,7 @@ function TopRecommendationCard({
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'flex-end' }}>
         <Box sx={{ minWidth: 190 }}>
           <Typography variant="caption" color="text.secondary">
-            {__('Recommended Goal Target', 'faracart')}
+            {__('Recommended Mission Target', 'faracart')}
           </Typography>
           <Typography variant="h4" component="p" sx={{ m: 0, fontWeight: 700 }}>
             {formatCurrency(candidate.threshold)}
@@ -326,7 +326,7 @@ function TopRecommendationCard({
 
       <Collapse in={detailsOpen} timeout="auto" unmountOnExit>
         <Box sx={{ mt: 1.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
-          <CurrentGoalBlock history={goalHistory} />
+          <CurrentMissionBlock history={missionHistory} />
           <AdvancedDetails candidate={candidate} />
         </Box>
       </Collapse>
@@ -337,7 +337,7 @@ function TopRecommendationCard({
         <Button
           variant="contained"
           startIcon={<CheckCircleOutlineOutlinedIcon />}
-          disabled={goalId < 1}
+          disabled={missionId < 1}
           onClick={() => onApply(candidate)}
         >
           {__('Apply recommendation', 'faracart')}
@@ -354,7 +354,7 @@ function TopRecommendationCard({
 }
 
 /** The analyzed store data (§33 keeps the context behind the "why"). */
-function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
+function AnalyzedData({ payload }: { payload: MissionRecommendationsPayload }) {
   const data = payload.data;
 
   if (!data) {
@@ -471,80 +471,80 @@ function AnalyzedData({ payload }: { payload: GoalRecommendationsPayload }) {
  * Recommendations (Phase 33.4 engine — UPSELL_REFACTOR §4/§5/§8;
  * UICHANGES.md §40 label).
  *
- * The admin-facing surface that answers "what Goal configuration should
- * I use?" — the `GET /faracart/v1/revenue/goal-recommendations` payload:
+ * The admin-facing surface that answers "what Mission configuration should
+ * I use?" — the `GET /faracart/v1/revenue/mission-recommendations` payload:
  * analyzed store data plus the single best recommendation. The backend
  * engine generates and ranks every eligible candidate deterministically
  * (score desc, ties → lower threshold) and returns the best one as
  * `recommendation`; this page renders ONLY that one — never a list of
  * competing candidates (UICHANGES.md Best-Recommendation UX). It
- * recommends Goal targets and reward economics only — never products
+ * recommends Mission targets and reward economics only — never products
  * (product recommendations belong to Upsells, §11/§59). The card answers
- * "what threshold should I use and why?" (§9: Current Goal → Recommended
- * Goal → Why?), the raw scoring details live behind the Advanced details
+ * "what threshold should I use and why?" (§9: Current Mission → Recommended
+ * Mission → Why?), the raw scoring details live behind the Advanced details
  * expander, and an unavailable expected profit explains how to enable it
  * (§24). Applying is always an explicit admin action (ConfirmDialog → the
- * dedicated apply endpoint, which changes only the goal target and
+ * dedicated apply endpoint, which changes only the mission target and
  * records the feedback-loop event) — the engine itself never modifies a
- * goal (§10/§41).
+ * mission (§10/§41).
  *
- * Goal selection is REQUIRED: the page opens with no goal selected and
+ * Mission selection is REQUIRED: the page opens with no mission selected and
  * shows an instruction state (the API is not called, no fake loading),
- * the admin picks exactly one goal, and the analysis runs only for that
- * goal (`goal_id` is required by the endpoint and echoed back for
- * ownership validation). There is no "all goals" mode and no reward-type
- * filter — reward type stays part of each goal's data model, it is just
- * never an independent page-level filter. Switching goals clears the
- * previous goal's card before the new one loads, so a stale
- * recommendation can never survive a goal change.
+ * the admin picks exactly one mission, and the analysis runs only for that
+ * mission (`mission_id` is required by the endpoint and echoed back for
+ * ownership validation). There is no "all missions" mode and no reward-type
+ * filter — reward type stays part of each mission's data model, it is just
+ * never an independent page-level filter. Switching missions clears the
+ * previous mission's card before the new one loads, so a stale
+ * recommendation can never survive a mission change.
  */
 export default function Recommendations() {
   const { range } = useDateRange();
   const queryClient = useQueryClient();
   const { notify } = useSnackbar();
 
-  // Goal selection is REQUIRED (0 = no goal selected): the page never
-  // analyzes an "all goals" context and never picks a goal automatically.
-  const [goalId, setGoalId] = useState<number>(0);
+  // Mission selection is REQUIRED (0 = no mission selected): the page never
+  // analyzes an "all missions" context and never picks a mission automatically.
+  const [missionId, setMissionId] = useState<number>(0);
   const [applyTarget, setApplyTarget] = useState<RecommendationCandidate | null>(null);
   const [topDismissed, setTopDismissed] = useState<boolean>(false);
   const [showTopDetails, setShowTopDetails] = useState<boolean>(false);
 
-  // The store's goals (same query key RevenueToolbar uses, so it is a
-  // shared cache): validates that the selected goal still exists and
+  // The store's missions (same query key RevenueToolbar uses, so it is a
+  // shared cache): validates that the selected mission still exists and
   // supplies its name for the UI.
-  const goalsQuery = useQuery({
-    queryKey: ['goals', 'revenue-filter-options'],
-    queryFn: () => fetchGoals({ per_page: 100 }),
+  const missionsQuery = useQuery({
+    queryKey: ['missions', 'revenue-filter-options'],
+    queryFn: () => fetchMissions({ per_page: 100 }),
   });
 
-  const selectedGoal = (goalsQuery.data?.items ?? []).find((goal) => goal.id === goalId) ?? null;
+  const selectedMission = (missionsQuery.data?.items ?? []).find((mission) => mission.id === missionId) ?? null;
 
-  // A selected goal id that no longer exists (deleted/archived) is
+  // A selected mission id that no longer exists (deleted/archived) is
   // invalid — never show recommendations (or a fake loading state) for it.
-  const goalMissing = goalId > 0 && goalsQuery.isSuccess && selectedGoal === null;
+  const missionMissing = missionId > 0 && missionsQuery.isSuccess && selectedMission === null;
 
-  const handleGoalChange = (nextGoalId: number) => {
-    setGoalId(nextGoalId);
-    // Clear every goal-scoped UI state so a previous goal's card, details
-    // or apply dialog can never linger while the new goal loads.
+  const handleMissionChange = (nextMissionId: number) => {
+    setMissionId(nextMissionId);
+    // Clear every mission-scoped UI state so a previous mission's card, details
+    // or apply dialog can never linger while the new mission loads.
     setTopDismissed(false);
     setShowTopDetails(false);
     setApplyTarget(null);
   };
 
   const query = useQuery({
-    queryKey: ['revenue', 'recommendations', { from: range.from, to: range.to, goalId }],
+    queryKey: ['revenue', 'recommendations', { from: range.from, to: range.to, missionId }],
     queryFn: () =>
-      fetchGoalRecommendations({
+      fetchMissionRecommendations({
         from: range.from,
         to: range.to,
-        goal_id: goalId,
+        mission_id: missionId,
         window_days: 90,
       }),
-    // No recommendations without a selected goal: the API is not called
-    // (and no fake loading state shown) until a valid goal is chosen.
-    enabled: goalId > 0 && !goalMissing,
+    // No recommendations without a selected mission: the API is not called
+    // (and no fake loading state shown) until a valid mission is chosen.
+    enabled: missionId > 0 && !missionMissing,
   });
 
   // Product-cost coverage (UPSELL_REFACTOR §24/§25/§26): when the store
@@ -558,26 +558,26 @@ export default function Recommendations() {
 
   const payload = query.data;
   const top = payload?.recommendation;
-  const goalHistory = payload?.data?.goal_history ?? null;
+  const missionHistory = payload?.data?.mission_history ?? null;
   const coverage: CostCoveragePayload | undefined = coverageQuery.data;
 
-  // Ownership guard: a payload must belong to the selected goal — if the
-  // response's goal_id does not match, the recommendation is invalid and
+  // Ownership guard: a payload must belong to the selected mission — if the
+  // response's mission_id does not match, the recommendation is invalid and
   // is never rendered.
-  const ownsGoal = payload ? payload.goal_id === goalId : false;
+  const ownsMission = payload ? payload.mission_id === missionId : false;
 
   const applyMutation = useMutation({
     mutationFn: async (target: number) => {
-      if (goalId < 1) {
-        throw new Error(__('Select a goal to apply the recommendation to.', 'faracart'));
+      if (missionId < 1) {
+        throw new Error(__('Select a mission to apply the recommendation to.', 'faracart'));
       }
 
-      await applyGoalRecommendation(goalId, target);
+      await applyMissionRecommendation(missionId, target);
     },
     onSuccess: () => {
-      notify(__('Goal target updated.', 'faracart'));
+      notify(__('Mission target updated.', 'faracart'));
       setApplyTarget(null);
-      queryClient.invalidateQueries({ queryKey: ['goals'] });
+      queryClient.invalidateQueries({ queryKey: ['missions'] });
       queryClient.invalidateQueries({ queryKey: ['revenue'] });
     },
     onError: (error: Error) => {
@@ -594,34 +594,34 @@ export default function Recommendations() {
     <PageContainer
       title={__('Recommendations', 'faracart')}
       description={__(
-        'Improve your Goals using store performance data — which target and reward configuration to use, and why.',
+        'Improve your Missions using store performance data — which target and reward configuration to use, and why.',
         'faracart'
       )}
     >
       {/* §39: the one-line distinction that removes the conceptual confusion. */}
       <Alert severity="info" variant="outlined" icon={<TipsAndUpdatesIcon fontSize="small" />}>
         {__(
-          'Recommendations helps you choose better Goal targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells.',
+          'Recommendations helps you choose better Mission targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells.',
           'faracart'
         )}
       </Alert>
 
-      <RevenueToolbar goalId={goalId} onGoalChange={handleGoalChange} goalRequired />
+      <RevenueToolbar missionId={missionId} onMissionChange={handleMissionChange} missionRequired />
 
-      {goalId < 1 ? (
+      {missionId < 1 ? (
         <EmptyState
           icon={<TipsAndUpdatesIcon fontSize="large" />}
-          title={__('Select a goal', 'faracart')}
+          title={__('Select a mission', 'faracart')}
           description={__(
-            'To see the best optimization recommendation for a goal, first choose one of your store goals.',
+            'To see the best optimization recommendation for a mission, first choose one of your store missions.',
             'faracart'
           )}
         />
-      ) : goalMissing ? (
+      ) : missionMissing ? (
         <EmptyState
           icon={<TipsAndUpdatesIcon fontSize="large" />}
-          title={__('The selected goal could not be found', 'faracart')}
-          description={__('Please select another goal.', 'faracart')}
+          title={__('The selected mission could not be found', 'faracart')}
+          description={__('Please select another mission.', 'faracart')}
         />
       ) : query.isError ? (
         <Alert severity="error" variant="outlined">
@@ -634,7 +634,7 @@ export default function Recommendations() {
           <Skeleton variant="rounded" height={120} />
           <Skeleton variant="rounded" height={420} />
         </Stack>
-      ) : !payload ? null : !payload.available || !ownsGoal ? (
+      ) : !payload ? null : !payload.available || !ownsMission ? (
         <EmptyState
           icon={<TipsAndUpdatesIcon fontSize="large" />}
           title={__('No recommendation available', 'faracart')}
@@ -646,9 +646,9 @@ export default function Recommendations() {
           {top && !topDismissed && (
             <TopRecommendationCard
               candidate={top}
-              goalId={goalId}
-              goalName={selectedGoal?.name ?? null}
-              goalHistory={goalHistory}
+              missionId={missionId}
+              missionName={selectedMission?.name ?? null}
+              missionHistory={missionHistory}
               detailsOpen={showTopDetails}
               onToggleDetails={() => setShowTopDetails((current) => !current)}
               onApply={handleApply}
@@ -677,14 +677,14 @@ export default function Recommendations() {
               {coverage.product_coverage.coverage_pct !== null
                 ? sprintf(
                     /* translators: 1: products with cost, 2: total products, 3: coverage percentage. */
-                    __('Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Goal economics.', 'faracart'),
+                    __('Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Mission economics.', 'faracart'),
                     formatNumber(coverage.product_coverage.products_with_cost),
                     formatNumber(coverage.product_coverage.total_products),
                     // coverage_pct is already a 0–100 percentage point value
                     // (never divide by 100 and print as a 0–1 rate).
                     formatPercentValue(coverage.product_coverage.coverage_pct)
                   )
-                : __('Profit estimates need product cost data. Add product costs on your products to enable Goal economics.', 'faracart')}
+                : __('Profit estimates need product cost data. Add product costs on your products to enable Mission economics.', 'faracart')}
             </Alert>
           )}
 
@@ -707,12 +707,12 @@ export default function Recommendations() {
         description={
           applyTarget ? (
             <>
-              {goalHistory ? (
+              {missionHistory ? (
                 <>
                   {sprintf(
                     /* translators: 1: current target. */
                     __('Current target: %1$s', 'faracart'),
-                    formatCurrency(goalHistory.current_target)
+                    formatCurrency(missionHistory.current_target)
                   )}{' '}
                   {sprintf(
                     /* translators: 1: recommended target. */
@@ -723,11 +723,11 @@ export default function Recommendations() {
               ) : (
                 sprintf(
                   /* translators: 1: threshold. */
-                  __('Set the goal target to %s?', 'faracart'),
+                  __('Set the mission target to %s?', 'faracart'),
                   formatCurrency(applyTarget.threshold)
                 )
               )}{' '}
-              {__('This changes a production goal — the action is not reversible from here.', 'faracart')}
+              {__('This changes a production mission — the action is not reversible from here.', 'faracart')}
             </>
           ) : undefined
         }

@@ -23,15 +23,15 @@ defined( 'ABSPATH' ) || exit;
  *
  * Phase 3 (Database & Domain Model) defines three entities:
  *
- *  - `goals`            — one row per goal (amount / quantity / category …).
- *                         The MVP reward is embedded on the goal (type,
+ *  - `missions`            — one row per mission (amount / quantity / category …).
+ *                         The MVP reward is embedded on the mission (type,
  *                         value, max value, extra meta) because MVP ships
- *                         exactly one reward per goal; a standalone
+ *                         exactly one reward per mission; a standalone
  *                         `rewards` table can be extracted later without
  *                         breaking this schema.
  *  - `campaigns`        — one row per campaign (scheduled, prioritized).
- *                         Goals join to a campaign through
- *                         `goals.campaign_id` + `goals.menu_order`, which
+ *                         Missions join to a campaign through
+ *                         `missions.campaign_id` + `missions.menu_order`, which
  *                         expresses milestone ordering (Phase 10).
  *  - `analytics_events` — append-only event log (impressions, progress,
  *                         completions, reward activations, suggestion
@@ -68,12 +68,12 @@ class Schema {
 	 *
 	 * Phase 33 (Revenue Optimization) adds the five attribution tables:
 	 * revenue_events (the raw attribution event log), revenue_daily (daily
-	 * aggregates), goal_attribution (per-order attribution), upsell_events
+	 * aggregates), mission_attribution (per-order attribution), upsell_events
 	 * (raw upsell interaction log) and upsell_stats (per-product upsell
 	 * aggregates).
 	 *
-	 * Phase 36 (Per-User Goal Completion Limit) adds `goal_completions` —
-	 * the authoritative server-side completion history (one row per goal
+	 * Phase 36 (Per-User Mission Completion Limit) adds `mission_completions` —
+	 * the authoritative server-side completion history (one row per mission
 	 * per order per identity) backing the per-user completion limit.
 	 *
 	 * @return string[]
@@ -81,14 +81,14 @@ class Schema {
 	public static function tables() {
 		return array(
 			'campaigns',
-			'goals',
+			'missions',
 			'analytics_events',
 			'revenue_events',
 			'revenue_daily',
-			'goal_attribution',
+			'mission_attribution',
 			'upsell_events',
 			'upsell_stats',
-			'goal_completions',
+			'mission_completions',
 		);
 	}
 
@@ -101,17 +101,17 @@ class Schema {
 		global $wpdb;
 
 		$collate   = $wpdb->get_charset_collate();
-		$goals     = self::table( 'goals' );
+		$missions     = self::table( 'missions' );
 		$campaigns = self::table( 'campaigns' );
 		$events    = self::table( 'analytics_events' );
 
 		// Phase 33 (Revenue Optimization): the five attribution tables.
 		$revenue_events = self::table( 'revenue_events' );
 		$revenue_daily  = self::table( 'revenue_daily' );
-		$goal_attrib    = self::table( 'goal_attribution' );
+		$mission_attrib    = self::table( 'mission_attribution' );
 		$upsell_events  = self::table( 'upsell_events' );
 		$upsell_stats   = self::table( 'upsell_stats' );
-		$completions    = self::table( 'goal_completions' );
+		$completions    = self::table( 'mission_completions' );
 		return array(
 			$campaigns => "CREATE TABLE {$campaigns} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -130,7 +130,7 @@ class Schema {
 				KEY ends_at (ends_at)
 			) ENGINE=InnoDB {$collate};",
 
-			$goals => "CREATE TABLE {$goals} (
+			$missions => "CREATE TABLE {$missions} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 				name varchar(191) NOT NULL,
 				description text,
@@ -165,7 +165,7 @@ class Schema {
 
 			$events => "CREATE TABLE {$events} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-				goal_id bigint(20) unsigned DEFAULT NULL,
+				mission_id bigint(20) unsigned DEFAULT NULL,
 				campaign_id bigint(20) unsigned DEFAULT NULL,
 				event_type varchar(40) NOT NULL,
 				session_id varchar(32) DEFAULT NULL,
@@ -176,21 +176,21 @@ class Schema {
 				meta longtext,
 				created_at datetime NOT NULL,
 				PRIMARY KEY  (id),
-				KEY goal_id (goal_id),
+				KEY mission_id (mission_id),
 				KEY campaign_id (campaign_id),
 				KEY event_type (event_type),
 				KEY session_id (session_id),
 				KEY product_id (product_id),
 				KEY order_id (order_id),
 				KEY created_at (created_at),
-				KEY goal_event (goal_id, event_type),
+				KEY mission_event (mission_id, event_type),
 				KEY campaign_event (campaign_id, event_type)
 			) ENGINE=InnoDB {$collate};",
 
 			// Phase 33 (Revenue Attribution): the raw revenue-optimization
 			// event log. Deliberately separate from analytics_events: those
 			// rows are the lightweight Phase 16 dashboard counters, while
-			// revenue_events carries the attribution fields (goal_target,
+			// revenue_events carries the attribution fields (mission_target,
 			// incremental_value) plus order ids and is only written when the
 			// revenue tracking gate passes (RevenueTracker::tracking_enabled
 			// — master + analytics toggles plus the
@@ -198,38 +198,38 @@ class Schema {
 			$revenue_events => "CREATE TABLE {$revenue_events} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 				event_type varchar(40) NOT NULL,
-				goal_id bigint(20) unsigned DEFAULT NULL,
+				mission_id bigint(20) unsigned DEFAULT NULL,
 				campaign_id bigint(20) unsigned DEFAULT NULL,
 				product_id bigint(20) unsigned DEFAULT NULL,
 				order_id bigint(20) unsigned DEFAULT NULL,
 				session_id varchar(32) DEFAULT NULL,
 				user_id bigint(20) unsigned DEFAULT NULL,
 				cart_value decimal(19,4) DEFAULT NULL,
-				goal_target decimal(19,4) DEFAULT NULL,
+				mission_target decimal(19,4) DEFAULT NULL,
 				incremental_value decimal(19,4) DEFAULT NULL,
 				meta longtext,
 				created_at datetime NOT NULL,
 				PRIMARY KEY  (id),
 				KEY event_type (event_type),
-				KEY goal_id (goal_id),
+				KEY mission_id (mission_id),
 				KEY campaign_id (campaign_id),
 				KEY product_id (product_id),
 				KEY order_id (order_id),
 				KEY session_id (session_id),
 				KEY user_id (user_id),
 				KEY created_at (created_at),
-				KEY goal_event (goal_id, event_type),
+				KEY mission_event (mission_id, event_type),
 				KEY order_event (order_id, event_type),
 				UNIQUE KEY order_dedup (event_type, order_id)
 			) ENGINE=InnoDB {$collate};",
 
-			// Phase 33 (Aggregation): one row per goal per day — the
+			// Phase 33 (Aggregation): one row per mission per day — the
 			// pre-aggregated revenue metrics the dashboard reads instead of
 			// scanning the raw event log on every admin request.
 			$revenue_daily => "CREATE TABLE {$revenue_daily} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 				report_date date NOT NULL,
-				goal_id bigint(20) unsigned DEFAULT NULL,
+				mission_id bigint(20) unsigned DEFAULT NULL,
 				views int(10) unsigned NOT NULL DEFAULT 0,
 				progressions int(10) unsigned NOT NULL DEFAULT 0,
 				completions int(10) unsigned NOT NULL DEFAULT 0,
@@ -241,33 +241,33 @@ class Schema {
 				created_at datetime NOT NULL,
 				updated_at datetime NOT NULL,
 				PRIMARY KEY  (id),
-				KEY goal_id (goal_id),
+				KEY mission_id (mission_id),
 				KEY report_date (report_date),
-				KEY goal_date (goal_id, report_date)
+				KEY mission_date (mission_id, report_date)
 			) ENGINE=InnoDB {$collate};",
 
-			// Phase 33 (Order attribution): one row per goal per order — the
-			// deterministic link between an order and the goal(s) that
+			// Phase 33 (Order attribution): one row per mission per order — the
+			// deterministic link between an order and the mission(s) that
 			// influenced it, with the attribution model (direct vs assisted)
-			// and the incremental value attributed to the goal.
-			$goal_attrib => "CREATE TABLE {$goal_attrib} (
+			// and the incremental value attributed to the mission.
+			$mission_attrib => "CREATE TABLE {$mission_attrib} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 				order_id bigint(20) unsigned NOT NULL,
-				goal_id bigint(20) unsigned DEFAULT NULL,
+				mission_id bigint(20) unsigned DEFAULT NULL,
 				session_id varchar(32) DEFAULT NULL,
 				user_id bigint(20) unsigned DEFAULT NULL,
 				model varchar(20) NOT NULL DEFAULT 'direct',
 				order_total decimal(19,4) NOT NULL DEFAULT 0,
 				incremental_value decimal(19,4) NOT NULL DEFAULT 0,
-				goal_completed tinyint(1) NOT NULL DEFAULT 0,
+				mission_completed tinyint(1) NOT NULL DEFAULT 0,
 				created_at datetime NOT NULL,
 				PRIMARY KEY  (id),
 				KEY order_id (order_id),
-				KEY goal_id (goal_id),
+				KEY mission_id (mission_id),
 				KEY session_id (session_id),
 				KEY model (model),
 				KEY created_at (created_at),
-				UNIQUE KEY order_goal_model (order_id, goal_id, model)
+				UNIQUE KEY order_mission_model (order_id, mission_id, model)
 			) ENGINE=InnoDB {$collate};",
 
 			// Phase 33 (Smart Upsell): raw upsell interaction events —
@@ -275,7 +275,7 @@ class Schema {
 			$upsell_events => "CREATE TABLE {$upsell_events} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 				event_type varchar(40) NOT NULL,
-				goal_id bigint(20) unsigned DEFAULT NULL,
+				mission_id bigint(20) unsigned DEFAULT NULL,
 				product_id bigint(20) unsigned DEFAULT NULL,
 				order_id bigint(20) unsigned DEFAULT NULL,
 				session_id varchar(32) DEFAULT NULL,
@@ -285,7 +285,7 @@ class Schema {
 				created_at datetime NOT NULL,
 				PRIMARY KEY  (id),
 				KEY event_type (event_type),
-				KEY goal_id (goal_id),
+				KEY mission_id (mission_id),
 				KEY product_id (product_id),
 				KEY order_id (order_id),
 				KEY session_id (session_id),
@@ -311,8 +311,8 @@ class Schema {
 				UNIQUE KEY product_id (product_id)
 			) ENGINE=InnoDB {$collate};",
 
-			// Phase 36 (Per-User Goal Completion Limit): the authoritative
-			// server-side completion history. One row per (goal, order,
+			// Phase 36 (Per-User Mission Completion Limit): the authoritative
+			// server-side completion history. One row per (mission, order,
 			// identity) — a successful completion cycle is recorded here at
 			// order time, and the per-user completion count is a plain
 			// COUNT over this table. Deliberately separate from the
@@ -321,14 +321,14 @@ class Schema {
 			// enforcement limit. `user_id` is the order customer id
 			// (NULL for guests); `session_id` is the anonymous Session id
 			// for guest orders (both nullable — an order resolves to at
-			// least one). The `order_goal` unique key makes recording
+			// least one). The `order_mission` unique key makes recording
 			// exactly-once per order (both payment hooks + webhook replays
 			// are no-ops) and is the race-condition backstop; the
-			// `goal_user` / `goal_session` composite keys serve the
+			// `mission_user` / `mission_session` composite keys serve the
 			// per-identity COUNT queries.
 			$completions => "CREATE TABLE {$completions} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-				goal_id bigint(20) unsigned DEFAULT NULL,
+				mission_id bigint(20) unsigned DEFAULT NULL,
 				user_id bigint(20) unsigned DEFAULT NULL,
 				session_id varchar(32) DEFAULT NULL,
 				order_id bigint(20) unsigned DEFAULT NULL,
@@ -336,14 +336,14 @@ class Schema {
 				meta longtext,
 				created_at datetime NOT NULL,
 				PRIMARY KEY  (id),
-				KEY goal_id (goal_id),
+				KEY mission_id (mission_id),
 				KEY user_id (user_id),
 				KEY session_id (session_id),
 				KEY order_id (order_id),
 				KEY created_at (created_at),
-				KEY goal_user (goal_id, user_id),
-				KEY goal_session (goal_id, session_id),
-				UNIQUE KEY order_goal (order_id, goal_id)
+				KEY mission_user (mission_id, user_id),
+				KEY mission_session (mission_id, session_id),
+				UNIQUE KEY order_mission (order_id, mission_id)
 			) ENGINE=InnoDB {$collate};",
 		);
 	}
@@ -367,22 +367,22 @@ class Schema {
 	 *
 	 * P22 hardening (Database → indexed queries): every query path in the
 	 * repositories and the analytics layer is covered by an index (status /
-	 * type / campaign_id on goals, event_type / session_id / created_at on
-	 * the append-only event log, plus the goal_event and campaign_event
+	 * type / campaign_id on missions, event_type / session_id / created_at on
+	 * the append-only event log, plus the mission_event and campaign_event
 	 * composite keys the dashboard aggregations group by).
 	 *
 	 * @return array<string, array<string, string[]>> Table => index name => columns.
 	 */
 	public static function indexes() {
 		$campaigns      = self::table( 'campaigns' );
-		$goals          = self::table( 'goals' );
+		$missions          = self::table( 'missions' );
 		$events         = self::table( 'analytics_events' );
 		$revenue_events = self::table( 'revenue_events' );
 		$revenue_daily  = self::table( 'revenue_daily' );
-		$goal_attrib    = self::table( 'goal_attribution' );
+		$mission_attrib    = self::table( 'mission_attribution' );
 		$upsell_events  = self::table( 'upsell_events' );
 		$upsell_stats   = self::table( 'upsell_stats' );
-		$completions    = self::table( 'goal_completions' );
+		$completions    = self::table( 'mission_completions' );
 
 		return array(
 			$campaigns => array(
@@ -390,7 +390,7 @@ class Schema {
 				'starts_at' => array( 'starts_at' ),
 				'ends_at'   => array( 'ends_at' ),
 			),
-			$goals => array(
+			$missions => array(
 				'status'      => array( 'status' ),
 				'type'        => array( 'type' ),
 				'campaign_id' => array( 'campaign_id' ),
@@ -399,43 +399,43 @@ class Schema {
 				'ends_at'     => array( 'ends_at' ),
 			),
 			$events => array(
-				'goal_id'        => array( 'goal_id' ),
+				'mission_id'        => array( 'mission_id' ),
 				'campaign_id'    => array( 'campaign_id' ),
 				'event_type'     => array( 'event_type' ),
 				'session_id'     => array( 'session_id' ),
 				'product_id'     => array( 'product_id' ),
 				'order_id'       => array( 'order_id' ),
 				'created_at'     => array( 'created_at' ),
-				'goal_event'     => array( 'goal_id', 'event_type' ),
+				'mission_event'     => array( 'mission_id', 'event_type' ),
 				'campaign_event' => array( 'campaign_id', 'event_type' ),
 			),
 			$revenue_events => array(
 				'event_type'  => array( 'event_type' ),
-				'goal_id'     => array( 'goal_id' ),
+				'mission_id'     => array( 'mission_id' ),
 				'campaign_id' => array( 'campaign_id' ),
 				'product_id'  => array( 'product_id' ),
 				'order_id'    => array( 'order_id' ),
 				'session_id'  => array( 'session_id' ),
 				'user_id'     => array( 'user_id' ),
 				'created_at'  => array( 'created_at' ),
-				'goal_event'  => array( 'goal_id', 'event_type' ),
+				'mission_event'  => array( 'mission_id', 'event_type' ),
 				'order_event' => array( 'order_id', 'event_type' ),
 			),
 			$revenue_daily => array(
-				'goal_id'     => array( 'goal_id' ),
+				'mission_id'     => array( 'mission_id' ),
 				'report_date' => array( 'report_date' ),
-				'goal_date'   => array( 'goal_id', 'report_date' ),
+				'mission_date'   => array( 'mission_id', 'report_date' ),
 			),
-			$goal_attrib => array(
+			$mission_attrib => array(
 				'order_id'  => array( 'order_id' ),
-				'goal_id'   => array( 'goal_id' ),
+				'mission_id'   => array( 'mission_id' ),
 				'session_id' => array( 'session_id' ),
 				'model'     => array( 'model' ),
 				'created_at' => array( 'created_at' ),
 			),
 			$upsell_events => array(
 				'event_type'   => array( 'event_type' ),
-				'goal_id'      => array( 'goal_id' ),
+				'mission_id'      => array( 'mission_id' ),
 				'product_id'   => array( 'product_id' ),
 				'order_id'     => array( 'order_id' ),
 				'session_id'   => array( 'session_id' ),
@@ -446,13 +446,13 @@ class Schema {
 				'product_id' => array( 'product_id' ),
 			),
 			$completions => array(
-				'goal_id'      => array( 'goal_id' ),
+				'mission_id'      => array( 'mission_id' ),
 				'user_id'      => array( 'user_id' ),
 				'session_id'   => array( 'session_id' ),
 				'order_id'     => array( 'order_id' ),
 				'created_at'   => array( 'created_at' ),
-				'goal_user'    => array( 'goal_id', 'user_id' ),
-				'goal_session' => array( 'goal_id', 'session_id' ),
+				'mission_user'    => array( 'mission_id', 'user_id' ),
+				'mission_session' => array( 'mission_id', 'session_id' ),
 			),
 		);
 	}
@@ -469,7 +469,7 @@ class Schema {
 	 * dedup in the tracker closes the common re-report paths, while the
 	 * unique key is the final guard against a concurrent double-report of
 	 * the same order (the same hardening rationale as the
-	 * order_goal_model unique key on goal_attribution). MySQL permits
+	 * order_mission_model unique key on mission_attribution). MySQL permits
 	 * multiple NULL order_ids in a unique key, so rows without an order
 	 * (views, progress, cart snapshots, impressions) are unaffected.
 	 *
@@ -478,7 +478,7 @@ class Schema {
 	public static function unique_keys() {
 		$revenue_events = self::table( 'revenue_events' );
 		$upsell_events  = self::table( 'upsell_events' );
-		$completions    = self::table( 'goal_completions' );
+		$completions    = self::table( 'mission_completions' );
 
 		return array(
 			$revenue_events => array(
@@ -488,7 +488,7 @@ class Schema {
 				'order_dedup' => array( 'event_type', 'order_id' ),
 			),
 			$completions => array(
-				'order_goal' => array( 'order_id', 'goal_id' ),
+				'order_mission' => array( 'order_id', 'mission_id' ),
 			),
 		);
 	}
@@ -499,10 +499,10 @@ class Schema {
 	 * dbDelta() cannot create foreign keys, so the installer adds them with
 	 * ALTER TABLE statements based on this definition.
 	 *
-	 * Only plugin-owned tables get foreign keys (campaigns, goals, the
+	 * Only plugin-owned tables get foreign keys (campaigns, missions, the
 	 * analytics event log, and the Phase 33 revenue/upsell tables that
-	 * reference plugin goals/campaigns), always ON DELETE SET NULL so
-	 * analytics history and standalone goals survive deletion.
+	 * reference plugin missions/campaigns), always ON DELETE SET NULL so
+	 * analytics history and standalone missions survive deletion.
 	 *
 	 * WooCommerce data (product_id, order_id) is deliberately referenced
 	 * WITHOUT foreign keys: since WC 8.2 orders live in the High-Performance
@@ -514,19 +514,19 @@ class Schema {
 	 * @return array[] Each entry: table, name, column, references, referenced_column, on_delete.
 	 */
 	public static function foreign_keys() {
-		$goals           = self::table( 'goals' );
+		$missions           = self::table( 'missions' );
 		$campaigns       = self::table( 'campaigns' );
 		$events          = self::table( 'analytics_events' );
 		$revenue_events  = self::table( 'revenue_events' );
 		$revenue_daily   = self::table( 'revenue_daily' );
-		$goal_attrib     = self::table( 'goal_attribution' );
+		$mission_attrib     = self::table( 'mission_attribution' );
 		$upsell_events   = self::table( 'upsell_events' );
-		$completions     = self::table( 'goal_completions' );
+		$completions     = self::table( 'mission_completions' );
 
 		return array(
 			array(
-				'table'             => $goals,
-				'name'              => 'fk_faracart_goals_campaign',
+				'table'             => $missions,
+				'name'              => 'fk_faracart_missions_campaign',
 				'column'            => 'campaign_id',
 				'references'        => $campaigns,
 				'referenced_column' => 'id',
@@ -534,9 +534,9 @@ class Schema {
 			),
 			array(
 				'table'             => $events,
-				'name'              => 'fk_faracart_analytics_goal',
-				'column'            => 'goal_id',
-				'references'        => $goals,
+				'name'              => 'fk_faracart_analytics_mission',
+				'column'            => 'mission_id',
+				'references'        => $missions,
 				'referenced_column' => 'id',
 				'on_delete'         => 'SET NULL',
 			),
@@ -548,15 +548,15 @@ class Schema {
 				'referenced_column' => 'id',
 				'on_delete'         => 'SET NULL',
 			),
-			// Phase 33.1: the revenue/upsell tables reference plugin goals
+			// Phase 33.1: the revenue/upsell tables reference plugin missions
 			// and campaigns, so they follow the same SET NULL convention as
-			// analytics_events — deleting a goal/campaign never orphans or
+			// analytics_events — deleting a mission/campaign never orphans or
 			// cascades away its attribution history.
 			array(
 				'table'             => $revenue_events,
-				'name'              => 'fk_faracart_revenue_goal',
-				'column'            => 'goal_id',
-				'references'        => $goals,
+				'name'              => 'fk_faracart_revenue_mission',
+				'column'            => 'mission_id',
+				'references'        => $missions,
 				'referenced_column' => 'id',
 				'on_delete'         => 'SET NULL',
 			),
@@ -570,38 +570,38 @@ class Schema {
 			),
 			array(
 				'table'             => $revenue_daily,
-				'name'              => 'fk_faracart_daily_goal',
-				'column'            => 'goal_id',
-				'references'        => $goals,
+				'name'              => 'fk_faracart_daily_mission',
+				'column'            => 'mission_id',
+				'references'        => $missions,
 				'referenced_column' => 'id',
 				'on_delete'         => 'SET NULL',
 			),
 			array(
-				'table'             => $goal_attrib,
-				'name'              => 'fk_faracart_attribution_goal',
-				'column'            => 'goal_id',
-				'references'        => $goals,
+				'table'             => $mission_attrib,
+				'name'              => 'fk_faracart_attribution_mission',
+				'column'            => 'mission_id',
+				'references'        => $missions,
 				'referenced_column' => 'id',
 				'on_delete'         => 'SET NULL',
 			),
 			array(
 				'table'             => $upsell_events,
-				'name'              => 'fk_faracart_upsell_goal',
-				'column'            => 'goal_id',
-				'references'        => $goals,
+				'name'              => 'fk_faracart_upsell_mission',
+				'column'            => 'mission_id',
+				'references'        => $missions,
 				'referenced_column' => 'id',
 				'on_delete'         => 'SET NULL',
 			),
-			// Phase 36 (Per-User Goal Completion Limit): the completion
-			// history references the goal with the project's standard
-			// SET NULL semantics — deleting a goal preserves the history
+			// Phase 36 (Per-User Mission Completion Limit): the completion
+			// history references the mission with the project's standard
+			// SET NULL semantics — deleting a mission preserves the history
 			// rows (they stay countable as orphaned records, matching the
 			// analytics event log convention).
 			array(
 				'table'             => $completions,
-				'name'              => 'fk_faracart_completions_goal',
-				'column'            => 'goal_id',
-				'references'        => $goals,
+				'name'              => 'fk_faracart_completions_mission',
+				'column'            => 'mission_id',
+				'references'        => $missions,
 				'referenced_column' => 'id',
 				'on_delete'         => 'SET NULL',
 			),

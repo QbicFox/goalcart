@@ -4,26 +4,26 @@
  *
  * Boots WordPress and exercises the Phase 32 surface:
  *
- *  - goal types: tag / attribute / brand goals evaluate against the
+ *  - mission types: tag / attribute / brand missions evaluate against the
  *    product tags and attribute taxonomies on the cart items
  *  - customer conditions: roles, guest/logged-in state, first-order and
- *    VIP goals gate eligibility (guest semantics for first-order)
- *  - shipping-zone conditions: the goal applies only in configured zones
+ *    VIP missions gate eligibility (guest semantics for first-order)
+ *  - shipping-zone conditions: the mission applies only in configured zones
  *  - cart-state conditions: required coupons and minimum item count
  *  - advanced scheduling: recurring weekdays + day time windows (incl. a
  *    midnight-crossing window)
  *  - campaign folding: campaign display_rules carry recurring schedule
- *    rules that milestones inherit (GoalRepository engine path)
+ *    rules that milestones inherit (MissionRepository engine path)
  *  - free gift selection: the Reward model reads gift_products + choose
- *    mode, and the REST goal payload round-trips the new keys
+ *    mode, and the REST mission payload round-trips the new keys
  *  - settings: Phase 32 defaults (countdown / celebration /
  *    suggestions_ranking) and the REST schema + sanitizer
- *  - frontend payload: countdown_end appears on goals and campaign groups
+ *  - frontend payload: countdown_end appears on missions and campaign groups
  *    and the gift picker data rides on the reward
  *
  * Run: php tests/phase32-test.php   (from the plugin directory)
  *
- * The script only reads state; goal/campaign rows are created inside
+ * The script only reads state; mission/campaign rows are created inside
  * transactions that are rolled back, and settings flips are in-memory
  * and restored.
  */
@@ -52,11 +52,11 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalEngine;
-use FaraCart\Goals\GoalRepository;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionEngine;
+use FaraCart\Missions\MissionRepository;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Rewards\Reward;
 use FaraCart\Settings\Settings;
 
@@ -83,16 +83,16 @@ function ctx( array $data, array $items = array() ) {
 	return new CartContext( $data );
 }
 
-function goal( array $data ) {
-	return new Goal( $data );
+function mission( array $data ) {
+	return new Mission( $data );
 }
 
-$engine = new GoalEngine();
+$engine = new MissionEngine();
 
 // ---------------------------------------------------------------------------
-// 1. Tag / attribute / brand goal types (Phase 32)
+// 1. Tag / attribute / brand mission types (Phase 32)
 // ---------------------------------------------------------------------------
-echo "\n== 1. Tag / attribute / brand goals ==\n";
+echo "\n== 1. Tag / attribute / brand missions ==\n";
 
 $store_cart = ctx(
 	array( 'subtotal' => 130, 'total' => 130 ),
@@ -103,48 +103,48 @@ $store_cart = ctx(
 	)
 );
 
-// Tag goals default to the subtotal money basis; quantity needs the
-// explicit calculation_mode (the same contract as category goals).
+// Tag missions default to the subtotal money basis; quantity needs the
+// explicit calculation_mode (the same contract as category missions).
 $r = $engine->evaluate(
-	goal( array( 'type' => Goal::TYPE_TAG, 'target' => 3, 'tags' => array( 10 ), 'calculation_mode' => Goal::MODE_QUANTITY ) ),
+	mission( array( 'type' => Mission::TYPE_TAG, 'target' => 3, 'tags' => array( 10 ), 'calculation_mode' => Mission::MODE_QUANTITY ) ),
 	$store_cart
 );
-check( 'tag goal quantity = items with tag 10 (3)', near( $r->current(), 3 ) );
-check( 'tag goal completed', $r->completed() );
+check( 'tag mission quantity = items with tag 10 (3)', near( $r->current(), 3 ) );
+check( 'tag mission completed', $r->completed() );
 
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_TAG, 'target' => 50, 'tags' => array( 11 ) ) ), $store_cart );
-check( 'tag goal amount = line sum with tag 11 (60)', near( $r->current(), 60 ) );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_TAG, 'target' => 50, 'tags' => array( 11 ) ) ), $store_cart );
+check( 'tag mission amount = line sum with tag 11 (60)', near( $r->current(), 60 ) );
 
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_TAG, 'target' => 10, 'tags' => array( 999 ) ) ), $store_cart );
-check( 'tag goal with no matching tag -> 0, still eligible', $r->eligible() && near( $r->current(), 0 ) );
-
-$r = $engine->evaluate(
-	goal( array( 'type' => Goal::TYPE_ATTRIBUTE, 'target' => 3, 'attributes' => array( 'pa_color' ), 'calculation_mode' => Goal::MODE_QUANTITY ) ),
-	$store_cart
-);
-check( 'attribute goal quantity = items with pa_color (3)', near( $r->current(), 3 ) );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_TAG, 'target' => 10, 'tags' => array( 999 ) ) ), $store_cart );
+check( 'tag mission with no matching tag -> 0, still eligible', $r->eligible() && near( $r->current(), 0 ) );
 
 $r = $engine->evaluate(
-	goal( array( 'type' => Goal::TYPE_ATTRIBUTE, 'target' => 1, 'attributes' => array( 'pa_brand' ), 'calculation_mode' => Goal::MODE_QUANTITY ) ),
+	mission( array( 'type' => Mission::TYPE_ATTRIBUTE, 'target' => 3, 'attributes' => array( 'pa_color' ), 'calculation_mode' => Mission::MODE_QUANTITY ) ),
 	$store_cart
 );
-check( 'attribute goal matches pa_brand items (qty 1)', near( $r->current(), 1 ) );
-
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_BRAND, 'target' => 40, 'attributes' => array( 'pa_brand' ) ) ), $store_cart );
-check( 'brand goal amount = brand line sum (40)', near( $r->current(), 40 ) );
+check( 'attribute mission quantity = items with pa_color (3)', near( $r->current(), 3 ) );
 
 $r = $engine->evaluate(
-	goal( array( 'type' => Goal::TYPE_BRAND, 'target' => 1, 'calculation_mode' => Goal::MODE_QUANTITY ) ),
+	mission( array( 'type' => Mission::TYPE_ATTRIBUTE, 'target' => 1, 'attributes' => array( 'pa_brand' ), 'calculation_mode' => Mission::MODE_QUANTITY ) ),
 	$store_cart
 );
-check( 'brand goal defaults to pa_brand taxonomy (qty 1)', near( $r->current(), 1 ) );
+check( 'attribute mission matches pa_brand items (qty 1)', near( $r->current(), 1 ) );
 
-check( 'brand_taxonomy accessor', 'pa_brand' === goal( array( 'type' => Goal::TYPE_BRAND ) )->brand_taxonomy() );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_BRAND, 'target' => 40, 'attributes' => array( 'pa_brand' ) ) ), $store_cart );
+check( 'brand mission amount = brand line sum (40)', near( $r->current(), 40 ) );
+
+$r = $engine->evaluate(
+	mission( array( 'type' => Mission::TYPE_BRAND, 'target' => 1, 'calculation_mode' => Mission::MODE_QUANTITY ) ),
+	$store_cart
+);
+check( 'brand mission defaults to pa_brand taxonomy (qty 1)', near( $r->current(), 1 ) );
+
+check( 'brand_taxonomy accessor', 'pa_brand' === mission( array( 'type' => Mission::TYPE_BRAND ) )->brand_taxonomy() );
 
 $types = $engine->registry()->types();
-check( 'registry supports tag', in_array( Goal::TYPE_TAG, $types, true ) );
-check( 'registry supports attribute', in_array( Goal::TYPE_ATTRIBUTE, $types, true ) );
-check( 'registry supports brand', in_array( Goal::TYPE_BRAND, $types, true ) );
+check( 'registry supports tag', in_array( Mission::TYPE_TAG, $types, true ) );
+check( 'registry supports attribute', in_array( Mission::TYPE_ATTRIBUTE, $types, true ) );
+check( 'registry supports brand', in_array( Mission::TYPE_BRAND, $types, true ) );
 
 // ---------------------------------------------------------------------------
 // 2. Customer conditions (Phase 32)
@@ -164,43 +164,43 @@ $user_id = wp_insert_user( array(
 ) );
 $user = ctx( array( 'subtotal' => 50, 'total' => 50, 'user_id' => (int) $user_id, 'is_guest' => false ) );
 
-// Roles: the subscriber matches a subscriber-restricted goal and never an
+// Roles: the subscriber matches a subscriber-restricted mission and never an
 // administrator-restricted one.
-$role_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'customer_roles' => array( 'administrator' ) ) );
-$r = $engine->evaluate( $role_goal, $guest );
-check( 'role-restricted goal blocked for guests', ! $r->eligible() && GoalResult::REASON_CUSTOMER_CONDITIONS === $r->reason() );
+$role_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'customer_roles' => array( 'administrator' ) ) );
+$r = $engine->evaluate( $role_mission, $guest );
+check( 'role-restricted mission blocked for guests', ! $r->eligible() && MissionResult::REASON_CUSTOMER_CONDITIONS === $r->reason() );
 
-$r = $engine->evaluate( $role_goal, $user );
-check( 'role-restricted goal blocked without the role', ! $r->eligible() );
+$r = $engine->evaluate( $role_mission, $user );
+check( 'role-restricted mission blocked without the role', ! $r->eligible() );
 
-$sub_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'customer_roles' => array( 'subscriber' ) ) );
-$r = $engine->evaluate( $sub_goal, $user );
-check( 'role-restricted goal passes with the role', $r->eligible() );
+$sub_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'customer_roles' => array( 'subscriber' ) ) );
+$r = $engine->evaluate( $sub_mission, $user );
+check( 'role-restricted mission passes with the role', $r->eligible() );
 
 // Customer state.
-$state_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'customer_state' => array( 'guest' ) ) );
-$r = $engine->evaluate( $state_goal, $user );
-check( 'guest-only goal blocked for logged-in user', ! $r->eligible() );
-$r = $engine->evaluate( $state_goal, $guest );
-check( 'guest-only goal allowed for guests', $r->eligible() );
+$state_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'customer_state' => array( 'guest' ) ) );
+$r = $engine->evaluate( $state_mission, $user );
+check( 'guest-only mission blocked for logged-in user', ! $r->eligible() );
+$r = $engine->evaluate( $state_mission, $guest );
+check( 'guest-only mission allowed for guests', $r->eligible() );
 
 // First order (guests always qualify — order history is unknowable; the
-// fresh subscriber has no orders, so the goal applies).
-$first_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'first_order' => true ) );
-$r = $engine->evaluate( $first_goal, $guest );
-check( 'first-order goal never blocks guests', $r->eligible() );
-$r = $engine->evaluate( $first_goal, $user );
-check( 'first-order goal applies to an orderless customer', $r->eligible() );
+// fresh subscriber has no orders, so the mission applies).
+$first_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'first_order' => true ) );
+$r = $engine->evaluate( $first_mission, $guest );
+check( 'first-order mission never blocks guests', $r->eligible() );
+$r = $engine->evaluate( $first_mission, $user );
+check( 'first-order mission applies to an orderless customer', $r->eligible() );
 
 // VIP: guests are always blocked; a logged-in customer with zero-threshold
 // VIP config qualifies (threshold checks delegate to wc helpers).
-$vip_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'vip' => true, 'vip_min_spend' => 100, 'vip_min_orders' => 1 ) );
-$r = $engine->evaluate( $vip_goal, $guest );
-check( 'vip goal blocked for guests', ! $r->eligible() && GoalResult::REASON_VIP_ONLY === $r->reason() );
+$vip_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'vip' => true, 'vip_min_spend' => 100, 'vip_min_orders' => 1 ) );
+$r = $engine->evaluate( $vip_mission, $guest );
+check( 'vip mission blocked for guests', ! $r->eligible() && MissionResult::REASON_VIP_ONLY === $r->reason() );
 
-$vip_open = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'vip' => true, 'vip_min_spend' => 0, 'vip_min_orders' => 0 ) );
+$vip_open = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'vip' => true, 'vip_min_spend' => 0, 'vip_min_orders' => 0 ) );
 $r = $engine->evaluate( $vip_open, $user );
-check( 'vip goal passes for logged-in customers at zero thresholds', $r->eligible() );
+check( 'vip mission passes for logged-in customers at zero thresholds', $r->eligible() );
 $wpdb_users->query( 'ROLLBACK' );
 wp_cache_delete( $user_id, 'users' );
 
@@ -210,13 +210,13 @@ wp_cache_delete( $user_id, 'users' );
 echo "\n== 3. Shipping zones ==\n";
 
 $zone_cart = ctx( array( 'subtotal' => 50, 'total' => 50, 'shipping_zone_id' => 4 ) );
-$zone_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'shipping_zones' => array( 4 ) ) );
-$r = $engine->evaluate( $zone_goal, $zone_cart );
-check( 'zone goal matches configured zone', $r->eligible() );
+$zone_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'shipping_zones' => array( 4 ) ) );
+$r = $engine->evaluate( $zone_mission, $zone_cart );
+check( 'zone mission matches configured zone', $r->eligible() );
 
 $other = ctx( array( 'subtotal' => 50, 'total' => 50, 'shipping_zone_id' => 9 ) );
-$r = $engine->evaluate( $zone_goal, $other );
-check( 'zone goal blocked in other zone', ! $r->eligible() && GoalResult::REASON_SHIPPING_ZONE === $r->reason() );
+$r = $engine->evaluate( $zone_mission, $other );
+check( 'zone mission blocked in other zone', ! $r->eligible() && MissionResult::REASON_SHIPPING_ZONE === $r->reason() );
 
 // ---------------------------------------------------------------------------
 // 4. Cart-state conditions (Phase 32)
@@ -224,19 +224,19 @@ check( 'zone goal blocked in other zone', ! $r->eligible() && GoalResult::REASON
 echo "\n== 4. Cart state ==\n";
 
 $coupon_cart = ctx( array( 'subtotal' => 50, 'total' => 50, 'coupons' => array( 'SUMMER' ) ) );
-$coupon_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'cart_coupons' => array( 'SUMMER', 'WINTER' ) ) );
-$r = $engine->evaluate( $coupon_goal, $coupon_cart );
-check( 'cart-coupon goal passes with one required coupon', $r->eligible() );
+$coupon_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'cart_coupons' => array( 'SUMMER', 'WINTER' ) ) );
+$r = $engine->evaluate( $coupon_mission, $coupon_cart );
+check( 'cart-coupon mission passes with one required coupon', $r->eligible() );
 
 $no_coupon = ctx( array( 'subtotal' => 50, 'total' => 50, 'coupons' => array() ) );
-$r = $engine->evaluate( $coupon_goal, $no_coupon );
-check( 'cart-coupon goal blocked without coupon', ! $r->eligible() && GoalResult::REASON_CART_CONDITIONS === $r->reason() );
+$r = $engine->evaluate( $coupon_mission, $no_coupon );
+check( 'cart-coupon mission blocked without coupon', ! $r->eligible() && MissionResult::REASON_CART_CONDITIONS === $r->reason() );
 
-$min_items = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'cart_min_items' => 3 ) );
+$min_items = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'cart_min_items' => 3 ) );
 $r = $engine->evaluate( $min_items, ctx( array( 'subtotal' => 50, 'total' => 50 ), array( array( 'product_id' => 1, 'quantity' => 2 ) ) ) );
-check( 'min-items goal blocked below threshold', ! $r->eligible() && GoalResult::REASON_CART_CONDITIONS === $r->reason() );
+check( 'min-items mission blocked below threshold', ! $r->eligible() && MissionResult::REASON_CART_CONDITIONS === $r->reason() );
 $r = $engine->evaluate( $min_items, ctx( array( 'subtotal' => 50, 'total' => 50 ), array( array( 'product_id' => 1, 'quantity' => 3 ) ) ) );
-check( 'min-items goal passes at threshold', $r->eligible() );
+check( 'min-items mission passes at threshold', $r->eligible() );
 
 // ---------------------------------------------------------------------------
 // 5. Advanced scheduling (Phase 32)
@@ -244,28 +244,28 @@ check( 'min-items goal passes at threshold', $r->eligible() );
 echo "\n== 5. Advanced scheduling ==\n";
 
 // Weekday gating: 2024-06-01 is a Saturday (date('N') = 6).
-$day_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'schedule_days' => array( 6 ) ) );
-$r = $engine->evaluate( $day_goal, $user, '2024-06-01 12:00:00' );
+$day_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'schedule_days' => array( 6 ) ) );
+$r = $engine->evaluate( $day_mission, $user, '2024-06-01 12:00:00' );
 check( 'weekday rule passes on the configured day', $r->eligible() );
 
-$day_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'schedule_days' => array( 1 ) ) );
-$r = $engine->evaluate( $day_goal, $user, '2024-06-01 12:00:00' );
-check( 'weekday rule blocks other days', ! $r->eligible() && GoalResult::REASON_OUT_OF_SCHEDULE === $r->reason() );
+$day_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'schedule_days' => array( 1 ) ) );
+$r = $engine->evaluate( $day_mission, $user, '2024-06-01 12:00:00' );
+check( 'weekday rule blocks other days', ! $r->eligible() && MissionResult::REASON_OUT_OF_SCHEDULE === $r->reason() );
 
 // Time window.
-$time_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'schedule_start_time' => '09:00', 'schedule_end_time' => '17:00' ) );
-$r = $engine->evaluate( $time_goal, $user, '2024-06-01 12:00:00' );
+$time_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'schedule_start_time' => '09:00', 'schedule_end_time' => '17:00' ) );
+$r = $engine->evaluate( $time_mission, $user, '2024-06-01 12:00:00' );
 check( 'time window passes inside', $r->eligible() );
-$r = $engine->evaluate( $time_goal, $user, '2024-06-01 18:00:00' );
+$r = $engine->evaluate( $time_mission, $user, '2024-06-01 18:00:00' );
 check( 'time window blocks outside', ! $r->eligible() );
 
 // Midnight-crossing window: 22:00–06:00 means "after 22:00 OR before 06:00".
-$night_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 10, 'schedule_start_time' => '22:00', 'schedule_end_time' => '06:00' ) );
-$r = $engine->evaluate( $night_goal, $user, '2024-06-01 23:30:00' );
+$night_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 10, 'schedule_start_time' => '22:00', 'schedule_end_time' => '06:00' ) );
+$r = $engine->evaluate( $night_mission, $user, '2024-06-01 23:30:00' );
 check( 'midnight window passes after start', $r->eligible() );
-$r = $engine->evaluate( $night_goal, $user, '2024-06-01 03:00:00' );
+$r = $engine->evaluate( $night_mission, $user, '2024-06-01 03:00:00' );
 check( 'midnight window passes before end', $r->eligible() );
-$r = $engine->evaluate( $night_goal, $user, '2024-06-01 12:00:00' );
+$r = $engine->evaluate( $night_mission, $user, '2024-06-01 12:00:00' );
 check( 'midnight window blocks midday', ! $r->eligible() );
 
 // ---------------------------------------------------------------------------
@@ -275,8 +275,8 @@ echo "\n== 6. Campaign folding ==\n";
 
 $wpdb = $GLOBALS['wpdb'];
 $campaigns = \FaraCart\Database\Schema::table( 'campaigns' );
-$goals_table = \FaraCart\Database\Schema::table( 'goals' );
-$goals_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
+$missions_table = \FaraCart\Database\Schema::table( 'missions' );
+$missions_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}" );
 
 $wpdb->query( 'START TRANSACTION' );
 
@@ -300,9 +300,9 @@ try {
 	$campaign_id = (int) $wpdb->insert_id;
 
 	$wpdb->insert(
-		$goals_table,
+		$missions_table,
 		array(
-			'name'             => 'Phase32 Goal',
+			'name'             => 'Phase32 Mission',
 			'description'      => '',
 			'status'           => 'active',
 			'type'             => 'amount',
@@ -314,34 +314,34 @@ try {
 			'updated_at'       => current_time( 'mysql' ),
 		)
 	);
-	$goal_id = (int) $wpdb->insert_id;
+	$mission_id = (int) $wpdb->insert_id;
 
-	$repo = new GoalRepository();
-	$loaded = $repo->find( $goal_id );
+	$repo = new MissionRepository();
+	$loaded = $repo->find( $mission_id );
 
 	check( 'campaign milestone loads via engine path', null !== $loaded );
 	check( 'milestone inherits campaign weekday rule', array( 6 ) === ( null !== $loaded ? $loaded->schedule_days() : array() ) );
 	check( 'milestone inherits campaign time window', '09:00' === ( null !== $loaded ? $loaded->schedule_start_time() : '' ) );
 
-	// The inherited window gates the goal exactly like a native one.
+	// The inherited window gates the mission exactly like a native one.
 	$r = $engine->evaluate( $loaded, $user, '2024-06-01 12:00:00' );
-	check( 'folded campaign goal eligible inside inherited window', $r->eligible() );
+	check( 'folded campaign mission eligible inside inherited window', $r->eligible() );
 	$r = $engine->evaluate( $loaded, $user, '2024-06-02 12:00:00' );
-	check( 'folded campaign goal blocked outside inherited days', ! $r->eligible() );
+	check( 'folded campaign mission blocked outside inherited days', ! $r->eligible() );
 } finally {
 	$wpdb->query( 'ROLLBACK' );
 }
 
-$goals_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
-check( 'goal rows restored on rollback', $goals_before === $goals_after );
+$missions_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}" );
+check( 'mission rows restored on rollback', $missions_before === $missions_after );
 
 // ---------------------------------------------------------------------------
 // 7. Free gift selection (Phase 32)
 // ---------------------------------------------------------------------------
 echo "\n== 7. Free gift selection ==\n";
 
-$gift_goal = goal( array(
-	'type'        => Goal::TYPE_AMOUNT,
+$gift_mission = mission( array(
+	'type'        => Mission::TYPE_AMOUNT,
 	'target'      => 10,
 	'reward_type' => 'free_gift',
 	'reward_meta' => array(
@@ -351,7 +351,7 @@ $gift_goal = goal( array(
 	),
 ) );
 
-$reward = Reward::from_goal( $gift_goal );
+$reward = Reward::from_mission( $gift_mission );
 check( 'reward type is free_gift', 'free_gift' === $reward->type() );
 check( 'reward choose mode read from meta', 'choose' === $reward->gift_add_mode() );
 check( 'reward gift_products list read from meta', array( 5, 6, 7 ) === $reward->gift_products() );

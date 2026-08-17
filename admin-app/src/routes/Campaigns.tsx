@@ -67,7 +67,7 @@ export default function Campaigns() {
   });
   const invalidate = () => {
     void queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-    void queryClient.invalidateQueries({ queryKey: ['goals'] });
+    void queryClient.invalidateQueries({ queryKey: ['missions'] });
     // A toggled/duplicated/deleted campaign must not linger in the
     // detail cache — reopening the builder within the 60 s stale window
     // would otherwise show the pre-mutation values.
@@ -116,7 +116,7 @@ export default function Campaigns() {
     <PageContainer
       title={__('Campaigns', 'faracart')}
       description={__(
-        'Group goals into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M.',
+        'Group missions into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M.',
         'faracart'
       )}
       actions={
@@ -147,7 +147,7 @@ export default function Campaigns() {
           icon={<CampaignIcon fontSize="large" />}
           title={__('No campaigns yet', 'faracart')}
           description={__(
-            'Campaigns bundle multiple goals into scheduled, prioritized milestones. Create your first campaign to group goals around an event or season.',
+            'Campaigns bundle multiple missions into scheduled, prioritized milestones. Create your first campaign to group missions around an event or season.',
             'faracart'
           )}
           action={
@@ -190,7 +190,7 @@ export default function Campaigns() {
                       </Box>
                     </TableCell>
                     <TableCell align="right">
-                      <Typography variant="body2">{campaign.goal_count}</Typography>
+                      <Typography variant="body2">{campaign.mission_count}</Typography>
                     </TableCell>
                     <TableCell>
                       <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
@@ -288,7 +288,7 @@ export default function Campaigns() {
             ? sprintf(
                 /* translators: %s: campaign name. */
                 __(
-                  '“%s” will be permanently deleted. Its goals are kept and detached — they can be reused by other campaigns.',
+                  '“%s” will be permanently deleted. Its missions are kept and detached — they can be reused by other campaigns.',
                   'faracart'
                 ),
                 pendingDelete.name

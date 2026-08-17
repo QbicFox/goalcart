@@ -12,24 +12,24 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Interface Template
  *
- * Every progress template — Goal-scoped or Campaign-scoped — implements
+ * Every progress template — Mission-scoped or Campaign-scoped — implements
  * this contract and registers against the TemplateRegistry. A template is
  * a fully self-describing rendering unit:
  *
- *  - a stable `id` (never renamed/reused — it is persisted in goal
+ *  - a stable `id` (never renamed/reused — it is persisted in mission
  *    display_settings / campaign display_rules and in plugin settings),
  *  - human-readable label + description,
- *  - the scope it applies to (goal | campaign | both),
+ *  - the scope it applies to (mission | campaign | both),
  *  - a `settings schema` describing exactly which appearance fields this
  *    template accepts — the schema drives the dynamic admin settings
  *    form, the REST payload and the server-side validation, so a new
  *    template automatically gets a working settings UI,
  *  - a `version` so a template's settings shape can migrate safely later.
  *
- * Built-in templates live in `includes/Templates/Goal/` and
+ * Built-in templates live in `includes/Templates/Mission/` and
  * `includes/Templates/Campaign/` and are registered on plugin bootstrap
  * through the filterable `faracart_template_classes` class map (the same
- * lazy registry convention as GoalEvaluatorRegistry / RewardApplicatorRegistry).
+ * lazy registry convention as MissionEvaluatorRegistry / RewardApplicatorRegistry).
  *
  * @see TemplateRegistry
  * @see TemplateEngine
@@ -37,7 +37,7 @@ defined( 'ABSPATH' ) || exit;
 interface Template {
 
 	/**
-	 * The stable template id (stored in goal/campaign config and settings).
+	 * The stable template id (stored in mission/campaign config and settings).
 	 *
 	 * @return string
 	 */
@@ -58,9 +58,9 @@ interface Template {
 	public function description();
 
 	/**
-	 * The scope this template can be used in: goal, campaign or both.
+	 * The scope this template can be used in: mission, campaign or both.
 	 *
-	 * @return string One of TemplateEngine::SCOPE_GOAL / SCOPE_CAMPAIGN / 'both'.
+	 * @return string One of TemplateEngine::SCOPE_MISSION / SCOPE_CAMPAIGN / 'both'.
 	 */
 	public function scope();
 

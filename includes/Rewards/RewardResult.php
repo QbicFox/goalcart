@@ -13,13 +13,13 @@ defined( 'ABSPATH' ) || exit;
  * Class RewardResult
  *
  * The consistent output of every reward evaluation (P05-T02). Produced by
- * the RewardEngine from a GoalResult plus the goal's Reward configuration.
+ * the RewardEngine from a MissionResult plus the mission's Reward configuration.
  * Immutable once built.
  *
  * State semantics:
- *  - not_applicable  no reward applies (goal ineligible, no reward configured,
+ *  - not_applicable  no reward applies (mission ineligible, no reward configured,
  *                    or unknown reward type)
- *  - locked          goal eligible but target not reached — reward stays locked
+ *  - locked          mission eligible but target not reached — reward stays locked
  *  - available       target reached and the reward may be granted
  *  - applied         the reward has actually been applied to the live cart
  *                    (used by the WooCommerce sync; reserved for analytics)
@@ -41,7 +41,7 @@ final class RewardResult {
 	 * Blocking / ineligibility reasons.
 	 */
 	const REASON_NONE             = '';
-	const REASON_GOAL_INELIGIBLE  = 'goal_ineligible';
+	const REASON_MISSION_INELIGIBLE  = 'mission_ineligible';
 	const REASON_NO_REWARD        = 'no_reward';
 	const REASON_UNKNOWN_TYPE     = 'unknown_type';
 	const REASON_STACKING         = 'stacking';
@@ -64,11 +64,11 @@ final class RewardResult {
 	protected $state;
 
 	/**
-	 * Goal id the reward belongs to (0 for anonymous goals).
+	 * Mission id the reward belongs to (0 for anonymous missions).
 	 *
 	 * @var int
 	 */
-	protected $goal_id;
+	protected $mission_id;
 
 	/**
 	 * REASON_* constant when not available.
@@ -96,15 +96,15 @@ final class RewardResult {
 	 *
 	 * @param Reward              $reward Reward.
 	 * @param string              $state  STATE_* constant.
-	 * @param int                 $goal_id Goal id.
+	 * @param int                 $mission_id Mission id.
 	 * @param string              $reason REASON_* constant.
 	 * @param float               $amount Computed reward value.
 	 * @param array<string, mixed> $meta   Extra payload.
 	 */
-	protected function __construct( Reward $reward, $state, $goal_id, $reason = self::REASON_NONE, $amount = 0.0, array $meta = array() ) {
+	protected function __construct( Reward $reward, $state, $mission_id, $reason = self::REASON_NONE, $amount = 0.0, array $meta = array() ) {
 		$this->reward  = $reward;
 		$this->state   = (string) $state;
-		$this->goal_id = (int) $goal_id;
+		$this->mission_id = (int) $mission_id;
 		$this->reason  = (string) $reason;
 		$this->amount  = (float) $amount;
 		$this->meta    = $meta;
@@ -114,61 +114,61 @@ final class RewardResult {
 	 * No reward applies.
 	 *
 	 * @param Reward $reward  Reward.
-	 * @param int    $goal_id Goal id.
+	 * @param int    $mission_id Mission id.
 	 * @param string $reason  REASON_* constant.
 	 * @return RewardResult
 	 */
-	public static function not_applicable( Reward $reward, $goal_id, $reason = self::REASON_GOAL_INELIGIBLE ) {
-		return new self( $reward, self::STATE_NOT_APPLICABLE, $goal_id, $reason );
+	public static function not_applicable( Reward $reward, $mission_id, $reason = self::REASON_MISSION_INELIGIBLE ) {
+		return new self( $reward, self::STATE_NOT_APPLICABLE, $mission_id, $reason );
 	}
 
 	/**
-	 * Goal eligible but target not reached.
+	 * Mission eligible but target not reached.
 	 *
 	 * @param Reward $reward  Reward.
-	 * @param int    $goal_id Goal id.
+	 * @param int    $mission_id Mission id.
 	 * @return RewardResult
 	 */
-	public static function locked( Reward $reward, $goal_id ) {
-		return new self( $reward, self::STATE_LOCKED, $goal_id );
+	public static function locked( Reward $reward, $mission_id ) {
+		return new self( $reward, self::STATE_LOCKED, $mission_id );
 	}
 
 	/**
 	 * Target reached; the reward can be granted.
 	 *
 	 * @param Reward              $reward  Reward.
-	 * @param int                 $goal_id Goal id.
+	 * @param int                 $mission_id Mission id.
 	 * @param float               $amount  Computed reward value.
 	 * @param array<string, mixed> $meta    Extra payload.
 	 * @return RewardResult
 	 */
-	public static function available( Reward $reward, $goal_id, $amount = 0.0, array $meta = array() ) {
-		return new self( $reward, self::STATE_AVAILABLE, $goal_id, self::REASON_NONE, $amount, $meta );
+	public static function available( Reward $reward, $mission_id, $amount = 0.0, array $meta = array() ) {
+		return new self( $reward, self::STATE_AVAILABLE, $mission_id, self::REASON_NONE, $amount, $meta );
 	}
 
 	/**
 	 * The reward has been applied to the live cart.
 	 *
 	 * @param Reward              $reward  Reward.
-	 * @param int                 $goal_id Goal id.
+	 * @param int                 $mission_id Mission id.
 	 * @param float               $amount  Computed reward value.
 	 * @param array<string, mixed> $meta    Extra payload.
 	 * @return RewardResult
 	 */
-	public static function applied( Reward $reward, $goal_id, $amount = 0.0, array $meta = array() ) {
-		return new self( $reward, self::STATE_APPLIED, $goal_id, self::REASON_NONE, $amount, $meta );
+	public static function applied( Reward $reward, $mission_id, $amount = 0.0, array $meta = array() ) {
+		return new self( $reward, self::STATE_APPLIED, $mission_id, self::REASON_NONE, $amount, $meta );
 	}
 
 	/**
 	 * Target reached but a safety rule prevents granting.
 	 *
 	 * @param Reward $reward  Reward.
-	 * @param int    $goal_id Goal id.
+	 * @param int    $mission_id Mission id.
 	 * @param string $reason  REASON_* constant.
 	 * @return RewardResult
 	 */
-	public static function blocked( Reward $reward, $goal_id, $reason ) {
-		return new self( $reward, self::STATE_BLOCKED, $goal_id, $reason );
+	public static function blocked( Reward $reward, $mission_id, $reason ) {
+		return new self( $reward, self::STATE_BLOCKED, $mission_id, $reason );
 	}
 
 	/**
@@ -195,8 +195,8 @@ final class RewardResult {
 	/**
 	 * @return int
 	 */
-	public function goal_id() {
-		return $this->goal_id;
+	public function mission_id() {
+		return $this->mission_id;
 	}
 
 	/**
@@ -238,7 +238,7 @@ final class RewardResult {
 		return array(
 			'type'    => $this->type(),
 			'state'   => $this->state,
-			'goal_id' => $this->goal_id,
+			'mission_id' => $this->mission_id,
 			'reason'  => $this->reason,
 			'amount'  => $this->amount,
 			'meta'    => $this->meta,

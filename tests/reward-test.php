@@ -3,7 +3,7 @@
  * FaraCart reward engine tests (P05-T02 / P05-T03).
  *
  * Boots WordPress, then exercises the RewardEngine, the reward applicators
- * and the RewardSafety guards against synthetic Goal / GoalResult /
+ * and the RewardSafety guards against synthetic Mission / MissionResult /
  * CartContext objects — the same pure-value-object approach as the Phase 4
  * engine tests. The WooCommerce-only application path (live cart mutations)
  * is guarded by design and not simulated here.
@@ -36,10 +36,10 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalEngine;
-use FaraCart\Goals\GoalResult;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionEngine;
+use FaraCart\Missions\MissionResult;
 use FaraCart\Rewards\Applicators\FixedDiscountApplicator;
 use FaraCart\Rewards\Applicators\FreeGiftApplicator;
 use FaraCart\Rewards\Applicators\FreeShippingApplicator;
@@ -72,11 +72,11 @@ function ctx( array $data, array $items = array() ) {
     return new CartContext( $data );
 }
 
-function goal( array $data ) {
-    return new Goal( $data );
+function mission( array $data ) {
+    return new Mission( $data );
 }
 
-$engine       = new GoalEngine();
+$engine       = new MissionEngine();
 $reward_engine = new RewardEngine();
 
 // ---------------------------------------------------------------------------
@@ -84,8 +84,8 @@ $reward_engine = new RewardEngine();
 // ---------------------------------------------------------------------------
 echo "\n== 1. Reward value object ==\n";
 
-$reward = Reward::from_goal(
-    goal(
+$reward = Reward::from_mission(
+    mission(
         array(
             'reward_type'     => Reward::TYPE_PERCENT_DISCOUNT,
             'reward_value'    => 10,
@@ -99,24 +99,24 @@ $reward = Reward::from_goal(
         )
     )
 );
-check( 'from_goal reads reward type', Reward::TYPE_PERCENT_DISCOUNT === $reward->type() );
-check( 'from_goal reads reward value', near( $reward->value(), 10 ) );
-check( 'from_goal reads max value', near( $reward->max_value(), 50 ) );
+check( 'from_mission reads reward type', Reward::TYPE_PERCENT_DISCOUNT === $reward->type() );
+check( 'from_mission reads reward value', near( $reward->value(), 10 ) );
+check( 'from_mission reads max value', near( $reward->max_value(), 50 ) );
 check( 'eligible products normalized to positive ints', array( 5, 6 ) === $reward->eligible_products() );
 check( 'eligible categories parsed', array( 11 ) === $reward->eligible_categories() );
 check( 'excluded products parsed', array( 9 ) === $reward->excluded_products() );
 check( 'stacking parsed', $reward->stacking_is_stack() );
 
-$defaults = Reward::from_goal( goal( array( 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ) );
+$defaults = Reward::from_mission( mission( array( 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ) );
 check( 'stacking defaults to none', ! $defaults->stacking_is_stack() );
 check( 'gift mode defaults to automatic', $defaults->is_gift_automatic() );
 check( 'coupon generate defaults false', ! $defaults->coupon_generate() );
 
-$json = Reward::from_goal(
-    goal(
+$json = Reward::from_mission(
+    mission(
         array(
             'reward_type'  => Reward::TYPE_FREE_GIFT,
-            // A legacy goal that still stores the removed 'optional' add
+            // A legacy mission that still stores the removed 'optional' add
             // mode (pre-Phase-33 data) must read as automatic so the mode
             // can never surface in the UI or the engine again.
             'reward_meta'  => json_encode( array( 'gift_product_id' => 42, 'gift_add_mode' => 'optional' ) ),
@@ -126,7 +126,7 @@ $json = Reward::from_goal(
 check( 'reward_meta accepts a JSON string', 42 === $json->gift_product_id() && $json->is_gift_automatic() );
 check( 'legacy optional gift mode normalized to automatic', Reward::GIFT_AUTOMATIC === $json->gift_add_mode() );
 
-$empty = Reward::from_goal( goal( array() ) );
+$empty = Reward::from_mission( mission( array() ) );
 check( 'no reward configured -> has_config false', ! $empty->has_config() );
 
 // ---------------------------------------------------------------------------
@@ -134,7 +134,7 @@ check( 'no reward configured -> has_config false', ! $empty->has_config() );
 // ---------------------------------------------------------------------------
 echo "\n== 2. RewardResult ==\n";
 
-$reward = Reward::from_goal( goal( array( 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 30 ) ) );
+$reward = Reward::from_mission( mission( array( 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 30 ) ) );
 
 $r = RewardResult::locked( $reward, 3 );
 check( 'locked state', RewardResult::STATE_LOCKED === $r->state() );
@@ -153,7 +153,7 @@ $r = RewardResult::not_applicable( $reward, 3, RewardResult::REASON_NO_REWARD );
 check( 'not_applicable state', RewardResult::STATE_NOT_APPLICABLE === $r->state() );
 
 $arr = RewardResult::available( $reward, 7, 10.0 )->to_array();
-check( 'to_array shape', array( 'type', 'state', 'goal_id', 'reason', 'amount', 'meta', 'reward' ) === array_keys( $arr ) );
+check( 'to_array shape', array( 'type', 'state', 'mission_id', 'reason', 'amount', 'meta', 'reward' ) === array_keys( $arr ) );
 
 // ---------------------------------------------------------------------------
 // 3. RewardApplicatorRegistry
@@ -183,18 +183,18 @@ $cart = ctx(
 $pct = new PercentageDiscountApplicator();
 $fixed = new FixedDiscountApplicator();
 
-$percent_reward = Reward::from_goal(
-    goal( array( 'reward_type' => Reward::TYPE_PERCENT_DISCOUNT, 'reward_value' => 10 ) )
+$percent_reward = Reward::from_mission(
+    mission( array( 'reward_type' => Reward::TYPE_PERCENT_DISCOUNT, 'reward_value' => 10 ) )
 );
 check( '10% of 1000 = 100', near( $pct->compute_amount( $percent_reward, $cart ), 100 ) );
 
-$capped = Reward::from_goal(
-    goal( array( 'reward_type' => Reward::TYPE_PERCENT_DISCOUNT, 'reward_value' => 10, 'reward_max_value' => 50 ) )
+$capped = Reward::from_mission(
+    mission( array( 'reward_type' => Reward::TYPE_PERCENT_DISCOUNT, 'reward_value' => 10, 'reward_max_value' => 50 ) )
 );
 check( 'percent capped at max discount 50', near( $pct->compute_amount( $capped, $cart ), 50 ) );
 
-$restricted = Reward::from_goal(
-    goal(
+$restricted = Reward::from_mission(
+    mission(
         array(
             'reward_type'  => Reward::TYPE_PERCENT_DISCOUNT,
             'reward_value' => 10,
@@ -204,8 +204,8 @@ $restricted = Reward::from_goal(
 );
 check( 'percent restricted to product 1 -> 40', near( $pct->compute_amount( $restricted, $cart ), 40 ) );
 
-$by_cat = Reward::from_goal(
-    goal(
+$by_cat = Reward::from_mission(
+    mission(
         array(
             'reward_type'  => Reward::TYPE_PERCENT_DISCOUNT,
             'reward_value' => 10,
@@ -215,8 +215,8 @@ $by_cat = Reward::from_goal(
 );
 check( 'percent restricted to category 11 -> 60', near( $pct->compute_amount( $by_cat, $cart ), 60 ) );
 
-$excluded = Reward::from_goal(
-    goal(
+$excluded = Reward::from_mission(
+    mission(
         array(
             'reward_type'  => Reward::TYPE_PERCENT_DISCOUNT,
             'reward_value' => 10,
@@ -226,13 +226,13 @@ $excluded = Reward::from_goal(
 );
 check( 'percent excludes product 1 -> 60', near( $pct->compute_amount( $excluded, $cart ), 60 ) );
 
-$fixed_reward = Reward::from_goal(
-    goal( array( 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 150 ) )
+$fixed_reward = Reward::from_mission(
+    mission( array( 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 150 ) )
 );
 check( 'fixed 150 clamped to eligible base 1000', near( $fixed->compute_amount( $fixed_reward, $cart ), 150 ) );
 
-$big_fixed = Reward::from_goal(
-    goal(
+$big_fixed = Reward::from_mission(
+    mission(
         array(
             'reward_type'  => Reward::TYPE_FIXED_DISCOUNT,
             'reward_value' => 5000,
@@ -242,8 +242,8 @@ $big_fixed = Reward::from_goal(
 );
 check( 'fixed never exceeds eligible base (600)', near( $fixed->compute_amount( $big_fixed, $cart ), 600 ) );
 
-$nothing = Reward::from_goal(
-    goal(
+$nothing = Reward::from_mission(
+    mission(
         array(
             'reward_type'  => Reward::TYPE_PERCENT_DISCOUNT,
             'reward_value' => 10,
@@ -264,39 +264,39 @@ $full_cart = ctx(
 );
 
 // 5a. No reward configured
-$r = $reward_engine->evaluate( $engine->evaluate( goal( array( 'target' => 100 ) ), $full_cart ) );
-check( 'goal without reward -> not_applicable no_reward', RewardResult::STATE_NOT_APPLICABLE === $r->state() && RewardResult::REASON_NO_REWARD === $r->reason() );
+$r = $reward_engine->evaluate( $engine->evaluate( mission( array( 'target' => 100 ) ), $full_cart ) );
+check( 'mission without reward -> not_applicable no_reward', RewardResult::STATE_NOT_APPLICABLE === $r->state() && RewardResult::REASON_NO_REWARD === $r->reason() );
 
-// 5b. Ineligible goal (inactive)
+// 5b. Ineligible mission (inactive)
 $r = $reward_engine->evaluate(
-    $engine->evaluate( goal( array( 'target' => 100, 'status' => Goal::STATUS_INACTIVE ) ), $full_cart )
+    $engine->evaluate( mission( array( 'target' => 100, 'status' => Mission::STATUS_INACTIVE ) ), $full_cart )
 );
-check( 'ineligible goal -> not_applicable', RewardResult::STATE_NOT_APPLICABLE === $r->state() );
+check( 'ineligible mission -> not_applicable', RewardResult::STATE_NOT_APPLICABLE === $r->state() );
 
-// 5c. Locked (goal not reached)
+// 5c. Locked (mission not reached)
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal( array( 'target' => 300, 'reward_type' => Reward::TYPE_PERCENT_DISCOUNT, 'reward_value' => 10 ) ),
+        mission( array( 'target' => 300, 'reward_type' => Reward::TYPE_PERCENT_DISCOUNT, 'reward_value' => 10 ) ),
         $full_cart
     )
 );
-check( 'unreached goal -> locked', RewardResult::STATE_LOCKED === $r->state() );
+check( 'unreached mission -> locked', RewardResult::STATE_LOCKED === $r->state() );
 
 // 5d. Unlocked percent discount with amount
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal( array( 'target' => 100, 'reward_type' => Reward::TYPE_PERCENT_DISCOUNT, 'reward_value' => 10 ) ),
+        mission( array( 'target' => 100, 'reward_type' => Reward::TYPE_PERCENT_DISCOUNT, 'reward_value' => 10 ) ),
         $full_cart
     ),
     array( 'cart' => $full_cart )
 );
-check( 'completed percent goal -> available', RewardResult::STATE_AVAILABLE === $r->state() );
+check( 'completed percent mission -> available', RewardResult::STATE_AVAILABLE === $r->state() );
 check( 'available carries computed amount (20)', near( $r->amount(), 20 ) );
 
 // 5e. Unknown reward type -> not_applicable (never throws)
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal( array( 'target' => 100, 'reward_type' => 'mystery_reward', 'reward_value' => 1 ) ),
+        mission( array( 'target' => 100, 'reward_type' => 'mystery_reward', 'reward_value' => 1 ) ),
         $full_cart
     )
 );
@@ -305,7 +305,7 @@ check( 'unknown reward type -> not_applicable', RewardResult::STATE_NOT_APPLICAB
 // 5f. Stacking: second non-stacking discount blocked
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal( array( 'target' => 100, 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 20 ) ),
+        mission( array( 'target' => 100, 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 20 ) ),
         $full_cart
     ),
     array( 'already_applied' => array( Reward::TYPE_FIXED_DISCOUNT ) )
@@ -315,7 +315,7 @@ check( 'duplicate non-stacking type blocked (stacking)', RewardResult::STATE_BLO
 // 5g. Stacking allowed: different type is fine
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal( array( 'target' => 100, 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 20 ) ),
+        mission( array( 'target' => 100, 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 20 ) ),
         $full_cart
     ),
     array( 'already_applied' => array( Reward::TYPE_PERCENT_DISCOUNT ) )
@@ -325,7 +325,7 @@ check( 'different type stacks by default', RewardResult::STATE_AVAILABLE === $r-
 // 5h. Stacking='stack' allows same type
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal(
+        mission(
             array(
                 'target'      => 100,
                 'reward_type' => Reward::TYPE_FIXED_DISCOUNT,
@@ -342,7 +342,7 @@ check( 'stacking=stack allows same type', RewardResult::STATE_AVAILABLE === $r->
 // 5i. Free shipping unlocked
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal( array( 'target' => 100, 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ),
+        mission( array( 'target' => 100, 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ),
         $full_cart
     )
 );
@@ -352,7 +352,7 @@ check( 'free shipping exposes zone/method config', array( 'shipping_zone_ids', '
 // 5j. Coupon: no code and no generate -> blocked invalid_coupon
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal( array( 'target' => 100, 'reward_type' => Reward::TYPE_COUPON ) ),
+        mission( array( 'target' => 100, 'reward_type' => Reward::TYPE_COUPON ) ),
         $full_cart
     )
 );
@@ -361,7 +361,7 @@ check( 'coupon without config blocked', RewardResult::STATE_BLOCKED === $r->stat
 // 5k. Coupon: nonexistent code -> blocked invalid_coupon
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal(
+        mission(
             array(
                 'target'      => 100,
                 'reward_type' => Reward::TYPE_COUPON,
@@ -376,7 +376,7 @@ check( 'nonexistent coupon blocked', RewardResult::STATE_BLOCKED === $r->state()
 // 5l. Coupon: generate mode -> available
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal(
+        mission(
             array(
                 'target'       => 100,
                 'reward_type'  => Reward::TYPE_COUPON,
@@ -392,7 +392,7 @@ check( 'coupon generate mode available', RewardResult::STATE_AVAILABLE === $r->s
 // 5m. Gift: no gift product -> blocked gift_unavailable
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal( array( 'target' => 100, 'reward_type' => Reward::TYPE_FREE_GIFT ) ),
+        mission( array( 'target' => 100, 'reward_type' => Reward::TYPE_FREE_GIFT ) ),
         $full_cart
     )
 );
@@ -401,7 +401,7 @@ check( 'gift without product blocked', RewardResult::STATE_BLOCKED === $r->state
 // 5n. Gift: configured product -> available with meta
 $r = $reward_engine->evaluate(
     $engine->evaluate(
-        goal(
+        mission(
             array(
                 'target'      => 100,
                 'reward_type' => Reward::TYPE_FREE_GIFT,
@@ -414,9 +414,9 @@ $r = $reward_engine->evaluate(
 check( 'configured gift available', RewardResult::STATE_AVAILABLE === $r->state() );
 check( 'gift meta carries product + mode', 42 === $r->meta()['gift_product_id'] && Reward::GIFT_AUTOMATIC === $r->meta()['gift_add_mode'] );
 
-// 5o. Zero-target goal with reward -> unlocked -> available
+// 5o. Zero-target mission with reward -> unlocked -> available
 $r = $reward_engine->evaluate(
-    $engine->evaluate( goal( array( 'target' => 0, 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ), $full_cart )
+    $engine->evaluate( mission( array( 'target' => 0, 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ), $full_cart )
 );
 check( 'zero target + reward -> available', RewardResult::STATE_AVAILABLE === $r->state() );
 
@@ -425,9 +425,9 @@ check( 'zero target + reward -> available', RewardResult::STATE_AVAILABLE === $r
 // ---------------------------------------------------------------------------
 echo "\n== 6. RewardSafety ==\n";
 
-$none = Reward::from_goal( goal( array( 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ) );
-$stack = Reward::from_goal(
-    goal( array( 'reward_type' => Reward::TYPE_FREE_SHIPPING, 'reward_meta' => array( 'stacking' => Reward::STACK_STACK ) ) )
+$none = Reward::from_mission( mission( array( 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ) );
+$stack = Reward::from_mission(
+    mission( array( 'reward_type' => Reward::TYPE_FREE_SHIPPING, 'reward_meta' => array( 'stacking' => Reward::STACK_STACK ) ) )
 );
 
 check( 'stacking none blocks same type', ! RewardSafety::stacking_allows( $none, array( Reward::TYPE_FREE_SHIPPING ) ) );
@@ -442,14 +442,14 @@ check( 'gift unavailable for zero id', ! RewardSafety::gift_product_available( 0
 check( 'gift unavailable for nonexistent product', ! RewardSafety::gift_product_available( 99999999 ) );
 
 check( 'generated coupon code deterministic', RewardSafety::generated_coupon_code( 5 ) === RewardSafety::generated_coupon_code( 5 ) );
-check( 'generated coupon code differs per goal', RewardSafety::generated_coupon_code( 5 ) !== RewardSafety::generated_coupon_code( 6 ) );
+check( 'generated coupon code differs per mission', RewardSafety::generated_coupon_code( 5 ) !== RewardSafety::generated_coupon_code( 6 ) );
 
 // ---------------------------------------------------------------------------
 // 7. CartContext own-fee exclusion (reward-loop safety)
 // ---------------------------------------------------------------------------
 echo "\n== 7. CartContext loop safety ==\n";
 
-$r = Reward::from_goal( goal( array( 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 30 ) ) );
+$r = Reward::from_mission( mission( array( 'reward_type' => Reward::TYPE_FIXED_DISCOUNT, 'reward_value' => 30 ) ) );
 check( 'own fee prefix constant exposed on CartContext', CartContext::OWN_FEE_PREFIX === 'faracart_reward_' );
 
 // The pure-constructor total is used directly; own-fee exclusion is applied
@@ -478,7 +478,7 @@ if ( class_exists( 'WC_Shipping_Rate' ) ) {
 	};
 
 	// No restrictions -> everything free.
-	$open  = Reward::from_goal( goal( array( 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ) );
+	$open  = Reward::from_mission( mission( array( 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ) );
 	$rates = $fs->apply_to_rates(
 		array( 'flat_rate:3' => $rate( 'flat_rate:3', 12 ), 'flat_rate:9' => $rate( 'flat_rate:9', 25 ) ),
 		array(),
@@ -487,8 +487,8 @@ if ( class_exists( 'WC_Shipping_Rate' ) ) {
 	check( 'unrestricted free shipping zeroes all rates', near( $rates['flat_rate:3']->cost, 0 ) && near( $rates['flat_rate:9']->cost, 0 ) );
 
 	// Method-restricted -> only the configured instance goes free.
-	$restricted = Reward::from_goal(
-		goal(
+	$restricted = Reward::from_mission(
+		mission(
 			array(
 				'reward_type'  => Reward::TYPE_FREE_SHIPPING,
 				'reward_meta'  => array( 'shipping_method_ids' => array( 'flat_rate:3' ) ),
@@ -554,8 +554,8 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 	$ctx = CartContext::from_cart( $cart, array( 'exclude_shipping' => true ) );
 
 	check( 'subtotal derived from line subtotals', near( $ctx->subtotal(), 200 ) );
-	check( 'discounted subtotal derived from line totals', near( $ctx->amount( Goal::MODE_DISCOUNTED_SUBTOTAL ), 180 ) );
-	check( 'total falls back to after-discount line value', near( $ctx->amount( Goal::MODE_TOTAL ), 180 ) );
+	check( 'discounted subtotal derived from line totals', near( $ctx->amount( Mission::MODE_DISCOUNTED_SUBTOTAL ), 180 ) );
+	check( 'total falls back to after-discount line value', near( $ctx->amount( Mission::MODE_TOTAL ), 180 ) );
 	check( 'discount total derived from line delta', near( $ctx->discount_total(), 20 ) );
 	check( 'quantity still counted', near( $ctx->total_quantity(), 2 ) );
 } else {
@@ -567,7 +567,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 //
 // The gift line is marked with faracart_gift*, and the engine makes it
 // shopper-proof: zero-priced, no remove link, quantity locked to 1, and a
-// removed gift is restored while its goal still grants it. These checks
+// removed gift is restored while its mission still grants it. These checks
 // exercise the guard paths and filters against a non-persisted WC_Cart
 // (no add_to_cart, so no session/customer dependency — consistent with the
 // suite's read-only contract).
@@ -630,7 +630,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'line_subtotal'       => 50.0,
 		'line_total'          => 50.0,
 	);
-	// Legacy gift line: no mode stamp and an unresolvable granting goal —
+	// Legacy gift line: no mode stamp and an unresolvable granting mission —
 	// the conservative default keeps it mandatory until re-added.
 	$cart->cart_contents['gift3'] = array(
 		'key'                 => 'gift3',
@@ -696,13 +696,13 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 	check( 'non-gift removal not restored', ! isset( $cart->cart_contents['norm1'] ) );
 	unset( $cart->removed_cart_contents['norm1'] );
 
-	// restore_removed_gift: a gift whose goal no longer exists is not
+	// restore_removed_gift: a gift whose mission no longer exists is not
 	// restored (repository lookup fails before any cart mutation).
 	$cart->removed_cart_contents['gift1'] = $cart->cart_contents['gift1'];
 	unset( $cart->cart_contents['gift1'] );
 	$cart->removed_cart_contents['gift1']['faracart_gift_goal'] = 99999999;
 	$re->restore_removed_gift( 'gift1', $cart );
-	check( 'orphaned goal gift not restored', ! isset( $cart->cart_contents['gift1'] ) );
+	check( 'orphaned mission gift not restored', ! isset( $cart->cart_contents['gift1'] ) );
 
 	// Engine-initiated removal (stale reward) is not restored: the
 	// removing_gift flag suppresses the restore handler. remove_cart_item is
@@ -723,8 +723,8 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 //
 // A shopper removing an earned gift line triggers
 // 'woocommerce_cart_item_removed', and restore_removed_gift re-adds it
-// while the goal still grants an automatic free-gift reward. Runs against
-// a real goal row + purchasable product inside a rolled-back transaction;
+// while the mission still grants an automatic free-gift reward. Runs against
+// a real mission row + purchasable product inside a rolled-back transaction;
 // the cart session is swapped for an in-memory mock so no session row can
 // be written to the database.
 // ---------------------------------------------------------------------------
@@ -732,9 +732,9 @@ echo "\n== 12. Free gift removal restore (positive path) ==\n";
 
 if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_exists( 'WC_Session' ) ) {
 	$container  = \FaraCart\Plugin::instance()->container();
-	$goal_repo  = $container->get( \FaraCart\Goals\GoalRepository::class );
+	$mission_repo  = $container->get( \FaraCart\Missions\MissionRepository::class );
 	$wpdb       = $GLOBALS['wpdb'];
-	$goals_table = \FaraCart\Database\Schema::table( 'goals' );
+	$missions_table = \FaraCart\Database\Schema::table( 'missions' );
 
 	$real_session = WC()->session;
 	// In-memory session so WC_Cart_Session::set_session() writes to memory
@@ -770,8 +770,8 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		update_post_meta( $product_id, '_virtual', 'no' );
 		update_post_meta( $product_id, '_downloadable', 'no' );
 
-		$wpdb->insert( $goals_table, array(
-			'name'             => 'Gift Goal (test)',
+		$wpdb->insert( $missions_table, array(
+			'name'             => 'Gift Mission (test)',
 			'status'           => 'active',
 			'type'             => 'amount',
 			'target'           => 100,
@@ -784,13 +784,13 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'created_at' => current_time( 'mysql' ),
 			'updated_at' => current_time( 'mysql' ),
 		) );
-		$goal_id = (int) $wpdb->insert_id;
+		$mission_id = (int) $wpdb->insert_id;
 
-		check( 'gift restore goal seeded', $goal_id > 0 && $product_id > 0 );
+		check( 'gift restore mission seeded', $mission_id > 0 && $product_id > 0 );
 		check( 'gift restore product available', RewardSafety::gift_product_available( $product_id ) );
 
 		$cart = new \WC_Cart();
-		// A qualifying line (goal target is 100; cart subtotal 200).
+		// A qualifying line (mission target is 100; cart subtotal 200).
 		$qual = new \WC_Product_Simple();
 		$qual->set_name( 'Qualifier' );
 		$qual->set_price( 200 );
@@ -812,7 +812,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'quantity'              => 1,
 			'data'                  => wc_get_product( $product_id ),
 			'faracart_gift'         => true,
-			'faracart_gift_goal'    => $goal_id,
+			'faracart_gift_goal'    => $mission_id,
 			'faracart_gift_product' => $product_id,
 			'line_subtotal'         => 50.0,
 			'line_total'            => 50.0,
@@ -820,41 +820,41 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 
 		// The shopper removes the gift: remove_cart_item fires
 		// 'woocommerce_cart_item_removed', and the engine's handler must
-		// re-add it (the goal is active and still grants the reward). The
+		// re-add it (the mission is active and still grants the reward). The
 		// restored line lives under a fresh generated cart key, so it is
-		// located by its goal marker.
+		// located by its mission marker.
 		$cart->remove_cart_item( 'giftX' );
 		$restored_key = null;
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( ! empty( $item['faracart_gift_goal'] ) && $goal_id === (int) $item['faracart_gift_goal'] ) {
+			if ( ! empty( $item['faracart_gift_goal'] ) && $mission_id === (int) $item['faracart_gift_goal'] ) {
 				$restored_key = $key;
 				break;
 			}
 		}
 		check( 'removed gift restored by the engine', null !== $restored_key );
-		check( 'restored gift keeps the goal marker', null !== $restored_key && $goal_id === (int) $cart->cart_contents[ $restored_key ]['faracart_gift_goal'] );
+		check( 'restored gift keeps the mission marker', null !== $restored_key && $mission_id === (int) $cart->cart_contents[ $restored_key ]['faracart_gift_goal'] );
 		check( 'restored gift is zero-priced', null !== $restored_key && isset( $cart->cart_contents[ $restored_key ]['data'] ) && $cart->cart_contents[ $restored_key ]['data'] instanceof \WC_Product && near( 0, $cart->cart_contents[ $restored_key ]['data']->get_price() ) );
 
 		// The qualifying line survived untouched.
 		check( 'qualifying line survives', isset( $cart->cart_contents['q1'] ) );
 
-		// Deactivating the goal turns the next removal into a permanent one.
+		// Deactivating the mission turns the next removal into a permanent one.
 		// This check simulates the admin's separate request: sync_cart was
 		// never called in this test, so the repository's per-request
-		// active-goal cache is unpopulated and the priority-20
+		// active-mission cache is unpopulated and the priority-20
 		// calculate_totals listener reads a fresh query. Do NOT add a
 		// sync_cart call before this — the stale cache would re-add the
 		// gift mid-request and break the assertion (that only happens with
 		// same-request DB mutations, which production never does).
-		$wpdb->update( $goals_table, array( 'status' => 'inactive' ), array( 'id' => $goal_id ) );
+		$wpdb->update( $missions_table, array( 'status' => 'inactive' ), array( 'id' => $mission_id ) );
 		$cart->remove_cart_item( $restored_key );
-		check( 'removed gift not restored once the goal is inactive', null !== $restored_key && ! isset( $cart->cart_contents[ $restored_key ] ) );
+		check( 'removed gift not restored once the mission is inactive', null !== $restored_key && ! isset( $cart->cart_contents[ $restored_key ] ) );
 
-		// ---- Sub-scenario: goal active but unmet (cart below target) ----
-		// Re-activate the goal (the transaction will roll back, so this is
-		// safe). The restoring handler must check the goal is CURRENTLY MET,
+		// ---- Sub-scenario: mission active but unmet (cart below target) ----
+		// Re-activate the mission (the transaction will roll back, so this is
+		// safe). The restoring handler must check the mission is CURRENTLY MET,
 		// not just active.
-		$wpdb->update( $goals_table, array( 'status' => 'active' ), array( 'id' => $goal_id ) );
+		$wpdb->update( $missions_table, array( 'status' => 'active' ), array( 'id' => $mission_id ) );
 
 		// Add a fresh gift line manually (the previous one was removed and
 		// not restored).
@@ -865,7 +865,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'quantity'              => 1,
 			'data'                  => wc_get_product( $product_id ),
 			'faracart_gift'         => true,
-			'faracart_gift_goal'    => $goal_id,
+			'faracart_gift_goal'    => $mission_id,
 			'faracart_gift_product' => $product_id,
 			'line_subtotal'         => 50.0,
 			'line_total'            => 50.0,
@@ -884,23 +884,23 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		// line_subtotal (the Fix 1 stale-context guard). With the qualifier
 		// at 30 × 1 = 30 and the gift line at 50 × 1 = 50, the subtotal
 		// should be 80, not the stale 200 + 50 = 250.
-		$ctx = \FaraCart\Goals\CartContext::from_cart( $cart );
+		$ctx = \FaraCart\Missions\CartContext::from_cart( $cart );
 		check( 'CartContext subtotal uses current price × quantity', near( 80.0, $ctx->subtotal() ) );
 
 		// Remove the gift line — restore_removed_gift must NOT re-add it
-		// because the cart no longer qualifies (goal target 100, subtotal
+		// because the cart no longer qualifies (mission target 100, subtotal
 		// 30 after the gift is removed). This is the Fix 2 hardening.
 		$cart->remove_cart_item( 'giftY' );
 		$still_restored = false;
 
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( ! empty( $item['faracart_gift_goal'] ) && $goal_id === (int) $item['faracart_gift_goal'] ) {
+			if ( ! empty( $item['faracart_gift_goal'] ) && $mission_id === (int) $item['faracart_gift_goal'] ) {
 				$still_restored = true;
 				break;
 			}
 		}
 
-		check( 'gift not restored when the goal is unmet', ! $still_restored );
+		check( 'gift not restored when the mission is unmet', ! $still_restored );
 	} finally {
 		$wpdb->query( 'ROLLBACK' );
 		WC()->session = $real_session;
@@ -912,23 +912,23 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 // ---------------------------------------------------------------------------
 // 13. Gift reconciliation (stale removal + selectable re-selection)
 //
-// End-to-end coverage of the free-gift bug fixes against real goal rows
+// End-to-end coverage of the free-gift bug fixes against real mission rows
 // and purchasable products (rolled-back transaction, in-memory session):
-//   (a) a gift line whose granting goal stops qualifying is revoked by
+//   (a) a gift line whose granting mission stops qualifying is revoked by
 //       scanning the live cart (Bug B), while a customer-added line of
-//       the same product — which carries no goal marker — survives;
-//   (b) selectable (choose) mode adds exactly one gift per goal, and
+//       the same product — which carries no mission marker — survives;
+//   (b) selectable (choose) mode adds exactly one gift per mission, and
 //       re-selecting a candidate replaces the previous selection instead
 //       of stacking a second line (Bug C); the chosen gift stays while
-//       the goal grants it and is revoked the moment it stops qualifying;
-//   (c) the quantity clamp and the goal markers (faracart_gift_mode)
+//       the mission grants it and is revoked the moment it stops qualifying;
+//   (c) the quantity clamp and the mission markers (faracart_gift_mode)
 //       hold on lines added through the real add_to_cart path.
 // ---------------------------------------------------------------------------
 echo "\n== 13. Gift reconciliation (stale removal + selectable re-selection) ==\n";
 
 if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_exists( 'WC_Session' ) ) {
 	$wpdb        = $GLOBALS['wpdb'];
-	$goals_table = \FaraCart\Database\Schema::table( 'goals' );
+	$missions_table = \FaraCart\Database\Schema::table( 'missions' );
 
 	$real_session = WC()->session;
 	// In-memory session so WC_Cart_Session writes to memory, not the DB.
@@ -943,7 +943,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 	update_option( 'faracart_settings', $forced_settings );
 
 	// This block drives sync_cart through a dedicated engine instance (so
-	// the seeded goals are the active ones) while the WooCommerce hooks
+	// the seeded missions are the active ones) while the WooCommerce hooks
 	// stay registered on the plugin's engine. When the dedicated engine
 	// removes a gift line, the plugin's hooked restore_removed_gift would
 	// re-add it (its own removing_gift flag is untouched) — a two-instance
@@ -993,9 +993,9 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$gift_a = $product_ids[0];
 		$gift_b = $product_ids[1];
 
-		// Automatic-mode goal (mandatory gift: product A at 100 subtotal).
-		$wpdb->insert( $goals_table, array(
-			'name'             => 'Auto Gift Goal (test)',
+		// Automatic-mode mission (mandatory gift: product A at 100 subtotal).
+		$wpdb->insert( $missions_table, array(
+			'name'             => 'Auto Gift Mission (test)',
 			'status'           => 'active',
 			'type'             => 'amount',
 			'target'           => 100,
@@ -1009,11 +1009,11 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'created_at' => current_time( 'mysql' ),
 			'updated_at' => current_time( 'mysql' ),
 		) );
-		$auto_goal = (int) $wpdb->insert_id;
+		$auto_mission = (int) $wpdb->insert_id;
 
-		// Selectable-mode goal (choose A or B at the same threshold).
-		$wpdb->insert( $goals_table, array(
-			'name'             => 'Choose Gift Goal (test)',
+		// Selectable-mode mission (choose A or B at the same threshold).
+		$wpdb->insert( $missions_table, array(
+			'name'             => 'Choose Gift Mission (test)',
 			'status'           => 'active',
 			'type'             => 'amount',
 			'target'           => 100,
@@ -1027,14 +1027,14 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'created_at' => current_time( 'mysql' ),
 			'updated_at' => current_time( 'mysql' ),
 		) );
-		$choose_goal = (int) $wpdb->insert_id;
+		$choose_mission = (int) $wpdb->insert_id;
 
-		check( 'reconciliation goals seeded', $auto_goal > 0 && $choose_goal > 0 );
+		check( 'reconciliation missions seeded', $auto_mission > 0 && $choose_mission > 0 );
 		check( 'reconciliation products available', RewardSafety::gift_product_available( $gift_a ) && RewardSafety::gift_product_available( $gift_b ) );
 
 		// A dedicated engine + repository (fresh caches) so the seeded
-		// goals are the active ones and the forced settings are read.
-		$repo   = new \FaraCart\Goals\GoalRepository();
+		// missions are the active ones and the forced settings are read.
+		$repo   = new \FaraCart\Missions\MissionRepository();
 		$engine = new RewardEngine( null, $repo, new \FaraCart\Settings\Settings(), null, null );
 
 		$cart = new \WC_Cart();
@@ -1052,11 +1052,11 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'line_total'    => 200.0,
 		);
 
-		$gift_lines = function ( $goal_id ) use ( $cart ) {
+		$gift_lines = function ( $mission_id ) use ( $cart ) {
 			$lines = array();
 
 			foreach ( $cart->get_cart() as $key => $item ) {
-				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id ) {
+				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id ) {
 					$lines[ $key ] = $item;
 				}
 			}
@@ -1064,10 +1064,10 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			return $lines;
 		};
 
-		// First pass: the automatic goal grants its gift on a qualifying
+		// First pass: the automatic mission grants its gift on a qualifying
 		// cart.
 		$engine->sync_cart( $cart );
-		$auto_lines = $gift_lines( $auto_goal );
+		$auto_lines = $gift_lines( $auto_mission );
 		check( 'auto gift granted on qualifying cart', 1 === count( $auto_lines ) );
 		$auto_line = reset( $auto_lines );
 		check( 'auto gift line carries the mode marker', is_array( $auto_line ) && isset( $auto_line['faracart_gift_mode'] ) && Reward::GIFT_AUTOMATIC === $auto_line['faracart_gift_mode'] );
@@ -1077,10 +1077,10 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		// with it, on the same recalculation.
 		unset( $cart->cart_contents['q1'] );
 		$engine->sync_cart( $cart );
-		check( 'stale auto gift removed when the goal stops qualifying', 0 === count( $gift_lines( $auto_goal ) ) );
+		check( 'stale auto gift removed when the mission stops qualifying', 0 === count( $gift_lines( $auto_mission ) ) );
 
-		// A customer-added line of the SAME product (no goal marker) must
-		// never be touched by gift reconciliation — and the goal re-adding
+		// A customer-added line of the SAME product (no mission marker) must
+		// never be touched by gift reconciliation — and the mission re-adding
 		// its own marked gift line does not remove or merge the shopper's.
 		$cart->cart_contents['own_a'] = array(
 			'key'           => 'own_a',
@@ -1103,51 +1103,51 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$engine->sync_cart( $cart );
 		check( 'customer line of the same product survives reconciliation', isset( $cart->cart_contents['own_a'] ) );
 		check( 'customer line never marked as a gift', empty( $cart->cart_contents['own_a']['faracart_gift'] ) );
-		check( 'auto gift re-added for the still-qualifying goal', 1 === count( $gift_lines( $auto_goal ) ) );
+		check( 'auto gift re-added for the still-qualifying mission', 1 === count( $gift_lines( $auto_mission ) ) );
 
 		// Bug C: selectable mode — choosing a candidate adds exactly one
-		// gift line for the goal.
-		check( 'choose-mode gift A added', $engine->add_chosen_gift( $choose_goal, $gift_a, $cart ) );
-		$choose_lines = $gift_lines( $choose_goal );
+		// gift line for the mission.
+		check( 'choose-mode gift A added', $engine->add_chosen_gift( $choose_mission, $gift_a, $cart ) );
+		$choose_lines = $gift_lines( $choose_mission );
 		check( 'exactly one choose-mode gift line after choosing A', 1 === count( $choose_lines ) );
 		$choose_line = reset( $choose_lines );
 		check( 'chosen product A is the one added', is_array( $choose_line ) && (int) $choose_line['faracart_gift_product'] === $gift_a );
 		check( 'choose-mode gift carries the mode marker', is_array( $choose_line ) && isset( $choose_line['faracart_gift_mode'] ) && Reward::GIFT_CHOOSE === $choose_line['faracart_gift_mode'] );
 
 		// Re-selecting a different candidate replaces, never duplicates.
-		check( 'choose-mode gift B selected', $engine->add_chosen_gift( $choose_goal, $gift_b, $cart ) );
-		$choose_lines = $gift_lines( $choose_goal );
+		check( 'choose-mode gift B selected', $engine->add_chosen_gift( $choose_mission, $gift_b, $cart ) );
+		$choose_lines = $gift_lines( $choose_mission );
 		check( 're-selection replaces the old gift', 1 === count( $choose_lines ) );
 		$choose_line = reset( $choose_lines );
 		check( 're-selected product B is the one added', is_array( $choose_line ) && (int) $choose_line['faracart_gift_product'] === $gift_b );
 
 		// Re-selecting the SAME candidate stays idempotent.
-		$engine->add_chosen_gift( $choose_goal, $gift_b, $cart );
-		check( 'same-candidate re-selection is idempotent', 1 === count( $gift_lines( $choose_goal ) ) );
+		$engine->add_chosen_gift( $choose_mission, $gift_b, $cart );
+		check( 'same-candidate re-selection is idempotent', 1 === count( $gift_lines( $choose_mission ) ) );
 
-		// While the goal still grants it, the chosen gift survives a
+		// While the mission still grants it, the chosen gift survives a
 		// reconciliation pass (the picker must not re-add — no auto-add in
 		// choose mode — and must not remove a valid choice).
 		$engine->sync_cart( $cart );
-		check( 'chosen gift kept while the goal still grants it', 1 === count( $gift_lines( $choose_goal ) ) );
+		check( 'chosen gift kept while the mission still grants it', 1 === count( $gift_lines( $choose_mission ) ) );
 
 		// Bug B for choose mode: losing eligibility revokes the chosen gift
-		// live (and the auto goal's gift at the same time).
+		// live (and the auto mission's gift at the same time).
 		unset( $cart->cart_contents['q1'], $cart->cart_contents['own_a'] );
 		$engine->sync_cart( $cart );
-		check( 'chosen gift revoked when the goal stops qualifying', 0 === count( $gift_lines( $choose_goal ) ) );
-		check( 'auto gift revoked with the goal', 0 === count( $gift_lines( $auto_goal ) ) );
+		check( 'chosen gift revoked when the mission stops qualifying', 0 === count( $gift_lines( $choose_mission ) ) );
+		check( 'auto gift revoked with the mission', 0 === count( $gift_lines( $auto_mission ) ) );
 
 		// ---- Sub-scenario: stale line_subtotal after set_quantity ----
 		// Simulates the cart-page flow: WC_Cart::set_quantity() updates the
 		// `quantity` field but leaves `line_subtotal`/`line_total` at their
 		// previous values. CartContext::from_cart() must recompute the line
-		// value from price × quantity so the goal evaluation uses the
-		// CURRENT cart, not the stale line_subtotal. The auto goal has a
+		// value from price × quantity so the mission evaluation uses the
+		// CURRENT cart, not the stale line_subtotal. The auto mission has a
 		// target of 100; the qualifier price is 60 and quantity is 1 (stale
 		// line_subtotal = 60, below target). After raising quantity to 2
 		// without refreshing line_subtotal (still 60), the correct subtotal
-		// is 120 — the goal is now met and the gift must be granted.
+		// is 120 — the mission is now met and the gift must be granted.
 		$cart->cart_contents['q1'] = array(
 			'key'           => 'q1',
 			'product_id'    => 5,
@@ -1162,7 +1162,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 
 		// The qualifier at qty 1 is below the target (60 < 100).
 		$engine->sync_cart( $cart );
-		check( 'no gift below goal with stale context', 0 === count( $gift_lines( $auto_goal ) ) );
+		check( 'no gift below mission with stale context', 0 === count( $gift_lines( $auto_mission ) ) );
 
 		// Now simulate set_quantity(2): update quantity but NOT line_subtotal
 		// (the stale-context condition). The engine must see the CORRECT
@@ -1170,14 +1170,14 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$cart->cart_contents['q1']['quantity'] = 2;
 		// line_subtotal is deliberately left at 60.0 (stale)
 		$engine->sync_cart( $cart );
-		$stale_lines = $gift_lines( $auto_goal );
+		$stale_lines = $gift_lines( $auto_mission );
 		check( 'gift granted despite stale line_subtotal (price×quantity used)', 1 === count( $stale_lines ) );
 
 		// Crossing back down: decrease quantity to 1 (qualified subtotal
-		// back to 60, below goal). The gift must be revoked.
+		// back to 60, below mission). The gift must be revoked.
 		$cart->cart_contents['q1']['quantity'] = 1;
 		$engine->sync_cart( $cart );
-		check( 'gift revoked when stale context would keep it', 0 === count( $gift_lines( $auto_goal ) ) );
+		check( 'gift revoked when stale context would keep it', 0 === count( $gift_lines( $auto_mission ) ) );
 	} finally {
 		$wpdb->query( 'ROLLBACK' );
 		WC()->session = $real_session;

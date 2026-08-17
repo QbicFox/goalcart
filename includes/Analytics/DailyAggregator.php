@@ -19,10 +19,10 @@ defined( 'ABSPATH' ) || exit;
  * the heavy analytics so admin/dashboard reads never scan the raw event log.
  * Two outputs, both built with the exact same definitions as the live reads:
  *
- *  - `revenue_daily`  — one row per goal per day (views, progressions,
+ *  - `revenue_daily`  — one row per mission per day (views, progressions,
  *    completions, conversions, revenue, incremental_revenue, reward_cost,
  *    estimated_profit), filled by aggregate_revenue_day() from the Phase 33.1
- *    revenue_events + goal_attribution logs through the AttributionEngine's
+ *    revenue_events + mission_attribution logs through the AttributionEngine's
  *    daily_metrics() (same funnel + summary + reward-cost + profit code the
  *    dashboard reads live — the aggregate and the live view can never drift).
  *  - `upsell_stats`   — one row per product (impressions, clicks, adds,
@@ -79,7 +79,7 @@ final class DailyAggregator {
 	const DEFAULT_LOOKBACK_DAYS = 90;
 
 	/**
-	 * Revenue attribution engine (per-goal daily metrics).
+	 * Revenue attribution engine (per-mission daily metrics).
 	 *
 	 * @var AttributionEngine
 	 */
@@ -142,7 +142,7 @@ final class DailyAggregator {
 	}
 
 	/**
-	 * Aggregate revenue_events + goal_attribution into revenue_daily.
+	 * Aggregate revenue_events + mission_attribution into revenue_daily.
 	 *
 	 * Processes at most faracart_aggregate_max_days days per call, from the
 	 * day after the last aggregated date (or the lookback floor on the first
@@ -200,34 +200,34 @@ final class DailyAggregator {
 	/**
 	 * Aggregate a single date into revenue_daily (idempotent).
 	 *
-	 * Only goals with revenue activity on that date (events and/or
-	 * attribution rows) get rows — no all-goals scan. Existing rows for the
+	 * Only missions with revenue activity on that date (events and/or
+	 * attribution rows) get rows — no all-missions scan. Existing rows for the
 	 * date are removed first, so re-runs never duplicate.
 	 *
 	 * @param string $date Date 'Y-m-d'.
-	 * @return int Number of goals aggregated.
+	 * @return int Number of missions aggregated.
 	 */
 	public function aggregate_revenue_day( $date ) {
 		global $wpdb;
 
 		$revenue = Schema::table( 'revenue_events' );
-		$attrib  = Schema::table( 'goal_attribution' );
+		$attrib  = Schema::table( 'mission_attribution' );
 		$daily   = Schema::table( 'revenue_daily' );
 
 		$from = $date . ' 00:00:00';
 		$to   = $date . ' 23:59:59';
 
-		// Goal ids with any revenue activity on this date (events or
-		// attribution rows). UNION dedupes; NULL goal ids (deleted goals —
+		// Mission ids with any revenue activity on this date (events or
+		// attribution rows). UNION dedupes; NULL mission ids (deleted missions —
 		// the FK is ON DELETE SET NULL) are excluded — there is nothing to
 		// attribute them to.
-		$goal_ids = $wpdb->get_col(
+		$mission_ids = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT goal_id FROM {$revenue}
-				 WHERE created_at >= %s AND created_at <= %s AND goal_id IS NOT NULL
+				"SELECT mission_id FROM {$revenue}
+				 WHERE created_at >= %s AND created_at <= %s AND mission_id IS NOT NULL
 				 UNION
-				 SELECT goal_id FROM {$attrib}
-				 WHERE created_at >= %s AND created_at <= %s AND goal_id IS NOT NULL",
+				 SELECT mission_id FROM {$attrib}
+				 WHERE created_at >= %s AND created_at <= %s AND mission_id IS NOT NULL",
 				$from,
 				$to,
 				$from,
@@ -238,19 +238,19 @@ final class DailyAggregator {
 		// Idempotent rewrite: drop the date's rows, then write fresh ones.
 		$wpdb->delete( $daily, array( 'report_date' => $date ), array( '%s' ) );
 
-		$goals = array();
+		$missions = array();
 
-		foreach ( array_unique( array_map( 'intval', (array) $goal_ids ) ) as $goal_id ) {
-			if ( $goal_id < 1 ) {
+		foreach ( array_unique( array_map( 'intval', (array) $mission_ids ) ) as $mission_id ) {
+			if ( $mission_id < 1 ) {
 				continue;
 			}
 
-			$goals[] = $goal_id;
+			$missions[] = $mission_id;
 
 			// Same code path the live dashboard reads (funnel + summary +
-			// reward cost + profit scoped to this goal and date).
+			// reward cost + profit scoped to this mission and date).
 			$metrics = $this->engine->daily_metrics(
-				$goal_id,
+				$mission_id,
 				array( 'from' => $date, 'to' => $date )
 			);
 
@@ -258,7 +258,7 @@ final class DailyAggregator {
 				$daily,
 				array(
 					'report_date'         => $date,
-					'goal_id'             => $goal_id,
+					'mission_id'             => $mission_id,
 					'views'               => (int) $metrics['views'],
 					'progressions'        => (int) $metrics['progressions'],
 					'completions'         => (int) $metrics['completions'],
@@ -276,7 +276,7 @@ final class DailyAggregator {
 			);
 		}
 
-		return count( $goals );
+		return count( $missions );
 	}
 
 	/**

@@ -8,15 +8,15 @@ The current system contains strong revenue attribution, funnel, AOV, reward-cost
 
 1. How much additional sales did FaraCart generate?
 2. How much did FaraCart increase basket value?
-3. How many customers actually purchased after interacting with a goal?
-4. Which goals perform best?
+3. How many customers actually purchased after interacting with a mission?
+4. Which missions perform best?
 5. How much did rewards cost?
 6. How much estimated profit did FaraCart generate?
 7. What should the store owner change to improve results?
 
-The goal of this implementation is therefore NOT to remove analytics.
+The mission of this implementation is therefore NOT to remove analytics.
 
-The goal is:
+The mission is:
 
 > Hide unnecessary complexity at the first level, preserve advanced analytics behind expandable details, make purchases/conversions visible, and make Estimated Profit actionable and understandable.
 
@@ -31,7 +31,7 @@ Phase 1 : ████████████████████ 100%   Co
 Phase 2 : ████████████████████ 100%   Backend / Data Layer
 Phase 3 : ████████████████████ 100%   Profit Availability
 Phase 4 : ████████████████████ 100%   Revenue Overview Redesign
-Phase 5 : ████████████████████ 100%   Goal Performance Redesign
+Phase 5 : ████████████████████ 100%   Mission Performance Redesign
 Phase 6 : ████████████████████ 100%   Analytics Redesign
 Phase 7 : ████████████████████ 100%   Recommendations
 Phase 8 : ████████████████████ 100%   Upsell Analytics
@@ -42,17 +42,17 @@ Phase 10: ████████████████████ 100%   Te
 | Phase | Status | Deliverable |
 | --- | --- | --- |
 | 1 — Codebase Audit | [x] 100% | `REVENUE_ANALYTICS_AUDIT.md` (no code modified) |
-| 2 — Backend / Data Layer | [x] 100% | purchase/profit metrics on the legacy `/analytics` summary, profit reason codes + cost coverage + profit details, goal filter resolution, `tests/purchase-metrics-test.php` |
+| 2 — Backend / Data Layer | [x] 100% | purchase/profit metrics on the legacy `/analytics` summary, profit reason codes + cost coverage + profit details, mission filter resolution, `tests/purchase-metrics-test.php` |
 | 3 — Profit Availability | [x] 100% | cost sources verified (`_cost` / `_wc_cog_cost` / variation fallback / `faracart_product_cost`), `cost_sources` + `store_has_cost_data` metadata, `tests/profit-availability-test.php` |
 | 4 — Revenue Overview Redesign | [x] 100% | Sales Performance page: 4 KPI cards, profit states + details, simplified trend with toggles, insight cards, advanced attribution drawer, nav rename |
-| 5 — Goal Performance Redesign | [x] 100% | commercial-outcomes Goal table (Viewed/Progressed/Completed/Purchased/Purchase Rate/Sales/Estimated Profit, sortable), per-goal detail drawer (performance summary, funnel with drop-off, costs via the shared profit card, advanced attribution + advanced accordions), additive `goal_metrics()` fields, `tests/revenue-admin-test.php` (56 checks) |
-| 6 — Analytics Redesign | [x] 100% | Analytics page → Goal Conversion & Purchase Analysis: purchase KPI row + secondary views/completions, customer-journey funnel with drop-off, completion-vs-purchase analysis, sortable goal comparison table, deterministic drop-off insights, advanced attribution accordion, legacy activity metrics preserved behind an accordion; additive `goal_comparison`/`funnel`/assisted/influenced payload fields |
+| 5 — Mission Performance Redesign | [x] 100% | commercial-outcomes Mission table (Viewed/Progressed/Completed/Purchased/Purchase Rate/Sales/Estimated Profit, sortable), per-mission detail drawer (performance summary, funnel with drop-off, costs via the shared profit card, advanced attribution + advanced accordions), additive `mission_metrics()` fields, `tests/revenue-admin-test.php` (56 checks) |
+| 6 — Analytics Redesign | [x] 100% | Analytics page → Mission Conversion & Purchase Analysis: purchase KPI row + secondary views/completions, customer-journey funnel with drop-off, completion-vs-purchase analysis, sortable mission comparison table, deterministic drop-off insights, advanced attribution accordion, legacy activity metrics preserved behind an accordion; additive `mission_comparison`/`funnel`/assisted/influenced payload fields |
 | 7 — Recommendations | [x] 100% | business-first Smart Recommendations page (Confidence: High/Medium/Low label, Expected impact, §34 expected-profit state, Why? bullets, raw scoring behind an Advanced details expander); typed `RecommendationFactors`; fa_IR coverage gap closed (i18n 53/53); `tests/frontend-test.php` Phase 7 source-scan guards; docs + CHANGELOG updated |
 | 8 — Upsell Analytics | [x] 100% | commercial-first Upsell Analytics page (summary strip Products/Purchased Orders/Sales/Conversion; table leads Product/Orders/Sales/Estimated profit/Conversion; interaction funnel + score behind a Show-interaction-details toggle; CTR/add-to-cart derived from real counts, "—" without a denominator; commercial sort views — top by purchases then sales; score breakdown kept in the per-product dialog); `tests/frontend-test.php` Phase 8 source-scan guards; docs + CHANGELOG updated |
-| 9 — UX Polish | [x] 100% | verified + completed the frontend-state contract (§43–§53): distinct "No sales data yet" vs "No purchases yet" empty states on Sales Performance + Goal Conversion & Purchase Analysis (§44); loading/error/unavailable/partial/zero/negative states and subtle observed-impact disclaimers confirmed on every page; responsive (2-col KPI grids, scrollable tables) + a11y (chart summaries, aria-expanded, keyboard rows) verified; new strings translated to fa_IR (POT 893, i18n 53/53); `tests/frontend-test.php` Phase 9 guards |
+| 9 — UX Polish | [x] 100% | verified + completed the frontend-state contract (§43–§53): distinct "No sales data yet" vs "No purchases yet" empty states on Sales Performance + Mission Conversion & Purchase Analysis (§44); loading/error/unavailable/partial/zero/negative states and subtle observed-impact disclaimers confirmed on every page; responsive (2-col KPI grids, scrollable tables) + a11y (chart summaries, aria-expanded, keyboard rows) verified; new strings translated to fa_IR (POT 893, i18n 53/53); `tests/frontend-test.php` Phase 9 guards |
 | 10 — Testing & Regression | [x] 100% | full 30-suite regression run + `tests/run-all.php` repeatable runner (18 PASS / 12 documented live-store drift / 0 regression); 13-item checklist mapped to suite coverage; non-regression proof (`includes/` byte-identical to the ip6 baseline); `docs/testing.md` with the drift baseline table |
 
-**Last update:** 2026-08-12 — Phase 10 (Testing & Regression) complete: all 30 suites run via the new `tests/run-all.php` runner (18 PASS, 12 suites within the documented live-store drift set, **0 regressions**); every Phase 10 checklist item is covered by an existing suite (documented in `docs/testing.md`); non-regression proven — `git log 3ce5008..HEAD -- includes/` is empty, so the drift suites test byte-identical backend code to when they were green, and the failures (live orders/events/goals in the fixture windows, storefront settings drift, fixture rollback residue) are environment data, not regressions. Phases 7–9 verification stays green: `tsc`, ESLint, `vite build`, i18n 53/53, frontend-test 130 checks (4 documented pre-existing drift).
+**Last update:** 2026-08-12 — Phase 10 (Testing & Regression) complete: all 30 suites run via the new `tests/run-all.php` runner (18 PASS, 12 suites within the documented live-store drift set, **0 regressions**); every Phase 10 checklist item is covered by an existing suite (documented in `docs/testing.md`); non-regression proven — `git log 3ce5008..HEAD -- includes/` is empty, so the drift suites test byte-identical backend code to when they were green, and the failures (live orders/events/missions in the fixture windows, storefront settings drift, fixture rollback residue) are environment data, not regressions. Phases 7–9 verification stays green: `tsc`, ESLint, `vite build`, i18n 53/53, frontend-test 130 checks (4 documented pre-existing drift).
 
 ---
 
@@ -69,7 +69,7 @@ The documentation package includes:
 * api.md
 * frontend.md
 * database.md
-* goal-engine.md
+* mission-engine.md
 * rewards.md
 * REFERENCE_ARCHITECTURE.md
 * CHANGELOG.md
@@ -87,7 +87,7 @@ First determine:
 * Current RevenueRepository
 * AttributionEngine
 * RewardCostEstimator
-* GoalPerformance implementation
+* MissionPerformance implementation
 * Existing AnalyticsRepository
 * Existing API response structures
 * Existing database tables
@@ -133,7 +133,7 @@ Examples:
 
 * 187 orders purchased after FaraCart interaction
 * Average basket was 8.7% higher
-* 102 orders completed the free-shipping goal
+* 102 orders completed the free-shipping mission
 * Estimated profit is based on product cost, reward cost, and shipping cost
 
 ## Level 3 — Advanced analysis
@@ -170,7 +170,7 @@ Revenue / Sales Performance
 │
 ├── Overview
 │
-├── Goals
+├── Missions
 │
 └── Optimization
     │
@@ -230,9 +230,9 @@ Do not simultaneously show three competing revenue numbers at the primary level.
 
 Do NOT put these three values side by side as primary KPIs:
 
-* goal_driven_revenue
-* goal_assisted_revenue
-* goal_influenced_revenue
+* mission_driven_revenue
+* mission_assisted_revenue
+* mission_influenced_revenue
 
 This creates confusion.
 
@@ -283,7 +283,7 @@ Show comparison details on expansion:
 
 ```text
 Store average       1,240,000
-Goal-exposed        1,348,000
+Mission-exposed        1,348,000
 Difference           +108,000
 Percentage             +8.7%
 ```
@@ -317,7 +317,7 @@ after FaraCart interaction
 
 The user must immediately understand that:
 
-* Goal completion is NOT the same as purchase.
+* Mission completion is NOT the same as purchase.
 * Purchase is the final commercial outcome.
 
 Use the existing attribution/order association logic.
@@ -578,7 +578,7 @@ Allow the user to toggle:
 
 * Attributed Sales
 * Purchased Orders
-* Goal Completions
+* Mission Completions
 
 Optional advanced toggle:
 
@@ -626,9 +626,9 @@ Do not introduce an LLM/AI dependency.
 
 ---
 
-# 16. REDESIGN GOAL PERFORMANCE
+# 16. REDESIGN MISSION PERFORMANCE
 
-The Goals page must focus on commercial outcomes.
+The Missions page must focus on commercial outcomes.
 
 Current structure:
 
@@ -654,7 +654,7 @@ Profit
 
 Example table:
 
-| Goal          | Viewed | Progressed | Completed | Purchased | Purchase Rate | Sales | Profit |
+| Mission          | Viewed | Progressed | Completed | Purchased | Purchase Rate | Sales | Profit |
 | ------------- | -----: | ---------: | --------: | --------: | ------------: | ----: | -----: |
 | Free Shipping |  4,820 |      2,410 |       920 |       187 |         20.3% |  5.8M |   2.4M |
 | 10% Discount  |  2,410 |      1,120 |       410 |        54 |         13.2% |  3.1M |   1.1M |
@@ -669,18 +669,18 @@ Do not invent values.
 
 This distinction must be explicit everywhere.
 
-A goal completion means:
+A mission completion means:
 
-> The customer reached the goal threshold.
+> The customer reached the mission threshold.
 
 A purchase means:
 
-> A qualifying WooCommerce order was actually associated with the goal according to the attribution rules.
+> A qualifying WooCommerce order was actually associated with the mission according to the attribution rules.
 
 Therefore:
 
 ```text
-Goal Completion
+Mission Completion
       ↓
 Customer reached target
 
@@ -695,7 +695,7 @@ Do not merge these concepts.
 
 # 18. PURCHASE CONVERSION RATE
 
-For each goal, expose:
+For each mission, expose:
 
 > Purchase Rate
 
@@ -710,7 +710,7 @@ conversion_rate =
 
 Preserve this semantic unless the existing implementation shows a better established definition.
 
-If there are fewer than one completed goal:
+If there are fewer than one completed mission:
 
 ```text
 —
@@ -726,13 +726,13 @@ because there is no denominator.
 
 Add tooltip:
 
-> Percentage of completed goals that were followed by an attributed purchase.
+> Percentage of completed missions that were followed by an attributed purchase.
 
 ---
 
 # 19. ADD PURCHASE VALUE
 
-For every goal show:
+For every mission show:
 
 > Purchased Orders
 
@@ -742,7 +742,7 @@ and:
 
 This is much more meaningful to store owners than completion count alone.
 
-Example expanded goal:
+Example expanded mission:
 
 ```text
 Free Shipping
@@ -761,9 +761,9 @@ Estimated profit      2.4M
 
 ---
 
-# 20. GOAL DETAIL DRAWER
+# 20. MISSION DETAIL DRAWER
 
-Clicking a goal should open a detail drawer/dialog.
+Clicking a mission should open a detail drawer/dialog.
 
 Structure:
 
@@ -839,11 +839,11 @@ This is insufficient.
 
 The Analytics page must become a real:
 
-# Goal Conversion & Purchase Analysis
+# Mission Conversion & Purchase Analysis
 
 Its main question should be:
 
-> What happens after customers see and complete my goals?
+> What happens after customers see and complete my missions?
 
 ---
 
@@ -851,8 +851,8 @@ Its main question should be:
 
 Use:
 
-1. Goal Views
-2. Goal Completions
+1. Mission Views
+2. Mission Completions
 3. Purchased Orders
 4. Purchase Rate
 5. Attributed Sales
@@ -871,8 +871,8 @@ Primary:
 
 Secondary:
 
-* Goal Views
-* Goal Completions
+* Mission Views
+* Mission Completions
 
 ---
 
@@ -881,7 +881,7 @@ Secondary:
 Replace the existing simplistic completion-only visualization with:
 
 ```text
-Goal Views
+Mission Views
      ↓
 Progressed
      ↓
@@ -923,7 +923,7 @@ Add a dedicated section:
 Show:
 
 ```text
-Completed Goals       1,840
+Completed Missions       1,840
 Purchased Orders        387
 Purchase Rate          21.0%
 ```
@@ -946,7 +946,7 @@ Add a visualization/table:
 
 | Metric                     | Value |
 | -------------------------- | ----: |
-| Goals Completed            | 1,840 |
+| Missions Completed            | 1,840 |
 | Purchased After Completion |   387 |
 | Purchase Rate              | 21.0% |
 | Attributed Sales           | 12.4M |
@@ -966,7 +966,7 @@ Examples:
 ```text
 Largest drop-off
 
-57% of customers who viewed a goal
+57% of customers who viewed a mission
 did not reach the target.
 ```
 
@@ -975,14 +975,14 @@ or:
 ```text
 Completion is strong, but purchase conversion is weak.
 
-Only 21% of completed goals were followed by
+Only 21% of completed missions were followed by
 an attributed purchase.
 ```
 
 or:
 
 ```text
-This goal has a high completion rate but low
+This mission has a high completion rate but low
 purchase rate. Consider testing the reward.
 ```
 
@@ -992,11 +992,11 @@ Never claim causality.
 
 ---
 
-# 27. GOAL COMPARISON IN ANALYTICS
+# 27. MISSION COMPARISON IN ANALYTICS
 
 Add a comparison table:
 
-| Goal | Views | Completed | Purchased | Purchase Rate | Sales | Profit |
+| Mission | Views | Completed | Purchased | Purchase Rate | Sales | Profit |
 | ---- | ----: | --------: | --------: | ------------: | ----: | -----: |
 
 Allow sorting by:
@@ -1089,7 +1089,7 @@ Explain each metric in plain English.
 Example:
 
 > Direct Revenue
-> Revenue from orders where the customer progressed toward or completed the goal before ordering.
+> Revenue from orders where the customer progressed toward or completed the mission before ordering.
 
 Use the existing documented semantics.
 
@@ -1106,7 +1106,7 @@ Maintain:
 * attribution window
 * revenue-producing statuses
 * idempotency
-* unique order/goal association
+* unique order/mission association
 * bounded reads
 * caching
 
@@ -1120,15 +1120,15 @@ Use these user-facing labels:
 
 | Technical               | User-facing                   |
 | ----------------------- | ----------------------------- |
-| goal_driven_revenue     | Sales attributed to FaraCart |
-| goal_assisted_revenue   | Assisted sales                |
-| goal_influenced_revenue | Influenced sales              |
+| mission_driven_revenue     | Sales attributed to FaraCart |
+| mission_assisted_revenue   | Assisted sales                |
+| mission_influenced_revenue | Influenced sales              |
 | incremental_revenue     | Additional sales value        |
 | incremental_cart_value  | Additional basket value       |
 | AOV impact              | Average basket increase       |
 | reward_cost             | Reward cost                   |
 | estimated_profit        | Estimated profit              |
-| completion_rate         | Goal completion rate          |
+| completion_rate         | Mission completion rate          |
 | conversion_rate         | Purchase rate                 |
 | converted               | Purchased                     |
 | funnel                  | Customer journey              |
@@ -1146,7 +1146,7 @@ However, simplify its presentation.
 Primary card:
 
 ```text
-Recommended Goal Target
+Recommended Mission Target
 
 1,290,000 تومان
 
@@ -1234,7 +1234,7 @@ Reuse:
 * AttributionEngine
 * RevenueRepository
 * RewardCostEstimator
-* GoalRecommendationEngine
+* MissionRecommendationEngine
 * existing aggregation
 * existing cache
 * existing attribution tables
@@ -1246,7 +1246,7 @@ Preferred approach:
 
 Extend existing payloads rather than introducing duplicate endpoints.
 
-For example, if `goal_performance()` already has:
+For example, if `mission_performance()` already has:
 
 ```text
 views
@@ -1287,7 +1287,7 @@ The existing analytics implementation documented in `api.md` contains metrics su
 * completions
 * completion rate
 * average cart value
-* revenue associated with completed goals
+* revenue associated with completed missions
 * suggestion CTR
 * suggestion add-to-cart rate
 
@@ -1420,7 +1420,7 @@ At minimum test:
 * no purchases
 * one purchase
 * multiple purchases
-* multiple goals
+* multiple missions
 * direct attribution
 * assisted attribution
 * mixed direct + assisted
@@ -1441,9 +1441,9 @@ At minimum test:
 
 Ensure all metrics use the same date range.
 
-## Goal filtering
+## Mission filtering
 
-Ensure all metrics respect `goal_id`.
+Ensure all metrics respect `mission_id`.
 
 ## Privacy/security
 
@@ -1497,7 +1497,7 @@ If there are no FaraCart interactions:
 ```text
 No sales data yet
 
-Once customers start interacting with your goals,
+Once customers start interacting with your missions,
 FaraCart will show sales, purchases and profit insights here.
 ```
 
@@ -1506,7 +1506,7 @@ If there are interactions but no purchases:
 ```text
 No purchases yet
 
-Customers are interacting with your goals,
+Customers are interacting with your missions,
 but no attributed purchases have been recorded
 for this period.
 ```
@@ -1575,7 +1575,7 @@ Advanced Analytics
 │
 ├── Basket Analysis
 │   ├── Baseline
-│   ├── Goal-exposed AOV
+│   ├── Mission-exposed AOV
 │   └── Incremental value
 │
 ├── Profit Model
@@ -1613,7 +1613,7 @@ What happened?
 Then:
 
 ```text
-Which goal worked?
+Which mission worked?
 ```
 
 Then:
@@ -1659,9 +1659,9 @@ Implement approximately:
 │                                                 │
 ├─────────────────────────────────────────────────┤
 │                                                 │
-│ Top Performing Goals                           │
+│ Top Performing Missions                           │
 │                                                 │
-│ Goal             Purchased   Sales   Profit     │
+│ Mission             Purchased   Sales   Profit     │
 │ Free Shipping       187       5.8M    2.4M      │
 │ 10% Discount         54       3.1M    1.1M      │
 │                                                 │
@@ -1686,7 +1686,7 @@ Do not copy this literally if the existing design system requires another layout
 Recommended:
 
 ```text
-Goal Conversion & Purchase Analysis
+Mission Conversion & Purchase Analysis
 
 [Date Range]
 
@@ -1697,7 +1697,7 @@ Goal Conversion & Purchase Analysis
 
 Purchase Rate: 21.0%
 
-             Goal Funnel
+             Mission Funnel
 
 Views
   ↓
@@ -1711,7 +1711,7 @@ Purchased
 
 Purchase Analysis
 
-Completed Goals       1,840
+Completed Missions       1,840
 Purchased Orders        387
 Purchase Rate          21.0%
 Attributed Sales      12.4M
@@ -1720,17 +1720,17 @@ Estimated Profit       6.2M
 
 ────────────────────────────────────────────
 
-Goal Performance
+Mission Performance
 
-Goal | Views | Completed | Purchased | Rate | Sales | Profit
+Mission | Views | Completed | Purchased | Rate | Sales | Profit
 
 ────────────────────────────────────────────
 
 Key Insights
 
 • Free Shipping generated the most purchases.
-• 21% of completed goals resulted in attributed orders.
-• Goal X has strong completion but weak purchase conversion.
+• 21% of completed missions resulted in attributed orders.
+• Mission X has strong completion but weak purchase conversion.
 
 ────────────────────────────────────────────
 
@@ -1784,8 +1784,8 @@ Add translations for:
 * Cost Coverage
 * Advanced Analytics
 * Purchase Analysis
-* Goal Completion
-* Goal Purchase
+* Mission Completion
+* Mission Purchase
 * Observed Impact
 * Data Sufficiency
 * Profit Unavailable
@@ -1852,7 +1852,7 @@ containing:
 
 **Key audit findings (summary):** the purchase/conversion/profit data the new UI needs
 already exists (`converted` = purchased orders, `conversion_rate` = purchase rate,
-`goal_driven_revenue` = attributed sales, `profit_impact`/`profit_available`/
+`mission_driven_revenue` = attributed sales, `profit_impact`/`profit_available`/
 `profit_reason` = estimated profit states). Later phases are additive payload
 extensions (legacy `/analytics` summary, profit reason codes, optional cost coverage)
 plus the React/navigation redesign — no new analytics engine, no new attribution
@@ -1874,7 +1874,7 @@ Priorities:
 4. Estimated profit visibility
 5. Profit availability/reason
 6. Optional cost coverage
-7. Goal-level purchased metrics
+7. Mission-level purchased metrics
 
 Reuse existing services.
 
@@ -1885,12 +1885,12 @@ Update API tests.
 **Deliverables:**
 
 * `RewardCostEstimator::profit_impact()` now returns a stable machine-readable `reason_code` (`available` / `missing_product_cost`) alongside the existing human `reason` (§39).
-* `AttributionEngine` — the summary gained `profit_reason_code`, `cost_coverage` (attributed orders vs orders with cost data + coverage %, §11) and `profit_details` (incremental revenue, margin %, reward cost, shipping cost — §12 building blocks); `goal_metrics()` passes the same metadata through; all reads accept a `goal_ids` IN-clause for campaign/reward-filtered purchase metrics; fixed the regression where the pre-computed reward cost was zeroed inside the profit model (estimated profit now matches `incremental × margin − reward − shipping`).
-* `GoalRepository` — `ids_by_campaign()` / `ids_by_reward_type()` resolve the campaign/reward filters onto the attribution dimension.
-* `RevenueRepository::purchase_summary()` — cached attribution summary mapped from the legacy `/analytics` filters (from/to, goal_id, goal_ids, campaign_id, reward_type); `product_id` is unsupported in attribution and returns `null` (never a fabricated number); an unmatched filter returns an honest zeroed summary (`insufficient_data`), never store-wide fallback.
+* `AttributionEngine` — the summary gained `profit_reason_code`, `cost_coverage` (attributed orders vs orders with cost data + coverage %, §11) and `profit_details` (incremental revenue, margin %, reward cost, shipping cost — §12 building blocks); `mission_metrics()` passes the same metadata through; all reads accept a `mission_ids` IN-clause for campaign/reward-filtered purchase metrics; fixed the regression where the pre-computed reward cost was zeroed inside the profit model (estimated profit now matches `incremental × margin − reward − shipping`).
+* `MissionRepository` — `ids_by_campaign()` / `ids_by_reward_type()` resolve the campaign/reward filters onto the attribution dimension.
+* `RevenueRepository::purchase_summary()` — cached attribution summary mapped from the legacy `/analytics` filters (from/to, mission_id, mission_ids, campaign_id, reward_type); `product_id` is unsupported in attribution and returns `null` (never a fabricated number); an unmatched filter returns an honest zeroed summary (`insufficient_data`), never store-wide fallback.
 * `AnalyticsController` (`GET /faracart/v1/analytics`) — the existing summary is **extended** (never modified) with `progressed`, `purchased_orders`, `purchase_rate`, `attributed_sales`, `estimated_profit`, `profit_available`, `profit_reason`, `profit_reason_code`, `cost_coverage`, `profit_details` (§37/§38). Legacy fields stay byte-for-byte intact.
-* `admin-app/src/types.ts` — `AnalyticsSummary`, revenue summary and goal-performance row types extended with the new fields (typed `ProfitReasonCode`, `CostCoverage`, `ProfitDetails`).
-* `tests/purchase-metrics-test.php` — 107 checks covering funnel/purchase states, profit states (available / missing cost / incomplete cost / zero / negative), reward cost regression, cost coverage, reason codes, date + goal/campaign/reward/product filtering, distinct-order counting and rollback residue.
+* `admin-app/src/types.ts` — `AnalyticsSummary`, revenue summary and mission-performance row types extended with the new fields (typed `ProfitReasonCode`, `CostCoverage`, `ProfitDetails`).
+* `tests/purchase-metrics-test.php` — 107 checks covering funnel/purchase states, profit states (available / missing cost / incomplete cost / zero / negative), reward cost regression, cost coverage, reason codes, date + mission/campaign/reward/product filtering, distinct-order counting and rollback residue.
 * Existing suites remain green: `attribution` (72), `aggregation` (74), `phase33` (99), `revenue-admin` (53) — the legacy `analytics-dashboard` suite's 31 failures are pre-existing dev-DB drift (32 failures reproduce on unmodified code); the Phase 2 additions to it all pass.
 
 ---
@@ -1935,13 +1935,13 @@ Do not invent costs.
 * `AttributionEngine` — every attribution summary now carries the
   UI-ready availability metadata `cost_sources` and
   `store_has_cost_data` (plus a delegating `store_has_cost_data()`
-  accessor); mirrored through `goal_metrics()`, the zeroed empty summary
+  accessor); mirrored through `mission_metrics()`, the zeroed empty summary
   (`RevenueRepository`) and the `/analytics` summary
   (`AnalyticsController` — `store_has_cost_data` is `null` for filters
   attribution cannot express).
 * `admin-app/src/types.ts` — `CostSource` type + `cost_sources` /
   `store_has_cost_data` on `AnalyticsSummary`, `RevenueSummary` and
-  `GoalPerformanceRow`.
+  `MissionPerformanceRow`.
 * `tests/profit-availability-test.php` — 44 checks: every cost source
   (`_cost`, `_wc_cog_cost`, precedence, zero/negative safety, variation
   → parent raw meta, variation → parent via filter, filter override,
@@ -1983,7 +1983,7 @@ already supplied every value):
     incremental + purchased-orders sub-line + expandable "How is this
     calculated?" with direct/assisted/influenced + methodology),
     Average Basket Increase (signed %, observed impact + compare panel:
-    store average / goal-exposed / difference / percentage), Purchased
+    store average / mission-exposed / difference / percentage), Purchased
     Orders, Estimated Profit.
   - **Estimated Profit card** (`components/revenue/EstimatedProfitCard.tsx`,
     reusable by later phases) — all §10–§13 states: available (zero and
@@ -1995,7 +1995,7 @@ already supplied every value):
     cost / shipping / estimated profit) + "analytical estimate, not
     accounting profit" disclaimer.
   - **Simplified trend** (§14): defaults to Attributed Sales + Purchased
-    Orders; toggles add Goal Completions and an optional advanced
+    Orders; toggles add Mission Completions and an optional advanced
     Incremental Revenue series.
   - **Insight cards** (§15/§26): 2–3 deterministic plain-English
     insights computed from the real payload (purchases influenced,
@@ -2015,7 +2015,7 @@ already supplied every value):
 
 ---
 
-# Phase 5 — Goal Performance Redesign
+# Phase 5 — Mission Performance Redesign
 
 > **STATUS: ✅ COMPLETE — 2026-08-12** (see progress register at the top of this document)
 
@@ -2029,7 +2029,7 @@ Implement:
 * Sales
 * Estimated Profit
 
-Add expandable goal details.
+Add expandable mission details.
 
 Add detailed funnel.
 
@@ -2037,15 +2037,15 @@ Add advanced attribution section.
 
 **Deliverables:**
 
-* `AttributionEngine::goal_metrics()` — additive fields (all derived from
+* `AttributionEngine::mission_metrics()` — additive fields (all derived from
   the already-computed summary + incremental read — nothing new queried)
-  for the redesign: `influenced_revenue` (total order value of the goal's
+  for the redesign: `influenced_revenue` (total order value of the mission's
   associated orders, §20 Revenue), `attribution_window_days` (the engine's
   attribution-window constant, exposed for the Advanced section) and
   `data_sufficiency` (the session-count signal behind the existing
   incremental-cart-value read, §45).
-* `admin-app/src/routes/GoalPerformance.tsx` rewritten as the
-  **commercial outcomes table** (§16): Goal / Viewed / Progressed /
+* `admin-app/src/routes/MissionPerformance.tsx` rewritten as the
+  **commercial outcomes table** (§16): Mission / Viewed / Progressed /
   Completed / **Purchased** / **Purchase Rate** / **Sales** / **Estimated
   Profit**, sortable (default: attributed sales descending; unavailable
   profit/rate always sorts last, in either direction), with header
@@ -2069,11 +2069,11 @@ Add advanced attribution section.
   stages (the drop-off read §20/§23, reusable by the Phase 6 Analytics
   funnel), and the final stage is labeled **Purchased**, never
   "Converted" (§32).
-* `admin-app/src/types.ts` — `GoalPerformanceRow` extended with
+* `admin-app/src/types.ts` — `MissionPerformanceRow` extended with
   `influenced_revenue`, `attribution_window_days`, `data_sufficiency`.
 * `languages/faracart.pot` regenerated (847 strings) so translators see
   the new labels.
-* Tests: `tests/revenue-admin-test.php` extended with the new goal-row
+* Tests: `tests/revenue-admin-test.php` extended with the new mission-row
   field checks (56 checks, 0 failures); every regression suite stays
   green — `attribution` (72), `purchase-metrics` (107), `aggregation`
   (74), `phase33` (99), `profit-availability` (45), `revenue-foundation`
@@ -2087,7 +2087,7 @@ Add advanced attribution section.
 
 Transform the existing Analytics page into:
 
-> Goal Conversion & Purchase Analysis
+> Mission Conversion & Purchase Analysis
 
 Add:
 
@@ -2097,7 +2097,7 @@ Add:
 * completed vs purchased comparison
 * attributed sales
 * estimated profit
-* goal comparison
+* mission comparison
 * drop-off analysis
 * deterministic insights
 
@@ -2105,34 +2105,34 @@ Do not remove existing Analytics API compatibility.
 
 **Deliverables:**
 
-* `RevenueRepository` — `resolve_goal_ids()` extracted as the shared
-  analytics→attribution filter resolver (goal_id → goal_ids → campaign →
-  reward; used by `purchase_summary()` and the new `goal_comparison()`),
-  `goal_performance()` accepts a `goal_ids` IN-clause to limit the cached
-  per-goal loop, and `goal_comparison()` serves the per-goal comparison
+* `RevenueRepository` — `resolve_mission_ids()` extracted as the shared
+  analytics→attribution filter resolver (mission_id → mission_ids → campaign →
+  reward; used by `purchase_summary()` and the new `mission_comparison()`),
+  `mission_performance()` accepts a `mission_ids` IN-clause to limit the cached
+  per-mission loop, and `mission_comparison()` serves the per-mission comparison
   rows over the same filters (null for product_id — never a fabricated
-  list; empty for a filter that resolves to no goals).
+  list; empty for a filter that resolves to no missions).
 * `AnalyticsController` (`GET /faracart/v1/analytics`) — the existing
   payload is **extended** (never modified): the summary now carries the
   full attribution `funnel` (views → progressed → completed → purchased,
   §23/§25), `assisted_sales` and `influenced_sales` (§30) and a new
-  `goal_comparison` key (§27) with the same row shape as `/revenue/goals`.
+  `mission_comparison` key (§27) with the same row shape as `/revenue/missions`.
   All Phase 17 legacy fields stay byte-for-byte intact.
-* `admin-app/src/routes/Analytics.tsx` rewritten as **Goal Conversion &
+* `admin-app/src/routes/Analytics.tsx` rewritten as **Mission Conversion &
   Purchase Analysis**:
   - **Primary KPI row** (§22) — Purchased Orders (with completed ≠
     purchased tooltip), Purchase Rate, Attributed Sales and the reusable
-    Estimated Profit card (every §10–§13 state); **secondary** Goal Views
-    + Goal Completions cards.
+    Estimated Profit card (every §10–§13 state); **secondary** Mission Views
+    + Mission Completions cards.
   - **Customer Journey** (§23) — the views → progressed → completed →
     purchased funnel with stage-to-stage drop-off percentages
     (`FunnelVisual showTransitions`) and the completion-vs-purchase
     explanation (§17).
   - **Purchase Analysis** (§24/§25) — completed vs purchased comparison:
-    goals completed, purchased after completion, purchase rate, attributed
+    missions completed, purchased after completion, purchase rate, attributed
     sales, average purchased order (influenced order totals ÷ orders) and
     estimated profit.
-  - **Goal Comparison** (§27) — sortable table (views / completed /
+  - **Mission Comparison** (§27) — sortable table (views / completed /
     purchased / purchase rate / sales / estimated profit), default sort
     attributed sales, unavailable values always last.
   - **Key Insights** (§26) — deterministic drop-off analysis (largest
@@ -2148,15 +2148,15 @@ Do not remove existing Analytics API compatibility.
     date caption (§29); every section shares the exact selected range.
 * `admin-app/src/components/revenue/StatRow.tsx` — the shared
   label/value row extracted from the duplicated `AttributionRow` /
-  `DetailRow` copies and used by RevenueOverview, GoalPerformance and
+  `DetailRow` copies and used by RevenueOverview, MissionPerformance and
   Analytics.
 * `admin-app/src/types.ts` — `AnalyticsSummary` gains `funnel`,
   `assisted_sales`, `influenced_sales`, `profit_details`;
-  `AnalyticsPayload` gains `goal_comparison`.
+  `AnalyticsPayload` gains `mission_comparison`.
 * `languages/faracart.pot` regenerated (868 strings).
 * Tests: `tests/analytics-dashboard-test.php` extended with the Phase 6
-  checks (funnel shape, assisted/influenced fields, goal_comparison
-  presence + goal/unmatched/product filter behavior — all pass); the
+  checks (funnel shape, assisted/influenced fields, mission_comparison
+  presence + mission/unmatched/product filter behavior — all pass); the
   suite's remaining 31 failures are the documented pre-existing dev-DB
   drift baseline. Regression suites stay green: `purchase-metrics` (107),
   `revenue-admin` (56), `attribution` (72), `aggregation` (74),
@@ -2184,7 +2184,7 @@ supplied every value; no backend change needed):
 
 * `admin-app/src/routes/Recommendations.tsx` rewritten business-first
   (§33–§34):
-  - **Top recommendation card** — the recommended goal target up front,
+  - **Top recommendation card** — the recommended mission target up front,
     a **"Confidence: High / Medium / Low"** label (tiered from the raw
     score — the number is no longer the primary read), the expected
     impact as "+X% – +Y% average basket value" (never the technical
@@ -2203,8 +2203,8 @@ supplied every value; no backend change needed):
   - **Ranked candidates** — threshold + expected impact + confidence
     label per row; the score bar, reasons and reward cost move behind
     the row's Details expander.
-  - The explicit **Apply → confirm → `PUT /goals/{id}`** flow and the
-    Dismiss behavior are unchanged (the engine never modifies a goal).
+  - The explicit **Apply → confirm → `PUT /missions/{id}`** flow and the
+    Dismiss behavior are unchanged (the engine never modifies a mission).
 * `admin-app/src/types.ts` — `RecommendationCandidate.factors` is now
   the typed `RecommendationFactors` interface (the four component
   scores, ratios, reach shares, reward-cost availability, margin %);
@@ -2280,7 +2280,7 @@ shipped UI and the gaps were fixed.
 * **empty** — two **distinct** states now exist (§44): "No sales data
   yet" (no interactions at all) vs **"No purchases yet"** (customers
   interact but no attributed purchase was recorded). Added to the Sales
-  Performance page and the Goal Conversion & Purchase Analysis page,
+  Performance page and the Mission Conversion & Purchase Analysis page,
   branched on the funnel (`views === 0 && orders === 0` vs
   `views > 0 && orders === 0`) with the §44 copy.
 * **unavailable** — Estimated Profit card renders "Not available" /
@@ -2335,7 +2335,7 @@ item is covered; no suite regressed.
   * estimated profit → `profit-availability-test` + `purchase-metrics-test`
   * profit unavailable → `profit-availability-test`
   * profit negative → `purchase-metrics-test` (scenario E: −200 stays real)
-  * goal filtering → `purchase-metrics-test` + `attribution-test`
+  * mission filtering → `purchase-metrics-test` + `attribution-test`
   * date filtering → `purchase-metrics-test` + `recommendation-test` + `upsell-test`
   * direct attribution → `attribution-test` (`MODEL_DIRECT`)
   * assisted attribution → `attribution-test` (`MODEL_ASSISTED`)
@@ -2343,7 +2343,7 @@ item is covered; no suite regressed.
   * caching → `phase33-test` + `upsell-test` + `aggregation-test` + `performance-test`
   * permissions → `security-test` (65) + `rest-api-test`
 * **Drift baseline documented** — the plugin runs on a live store, so
-  fixtures assuming a clean DB drift as real orders/events/goals/
+  fixtures assuming a clean DB drift as real orders/events/missions/
   campaigns accumulate and storefront settings change. `docs/testing.md`
   lists each drifting suite, its baseline and root cause.
 * **Non-regression proof** — `git log 3ce5008..HEAD -- includes/` is
@@ -2389,15 +2389,15 @@ The implementation is complete only when all of the following are true:
 * [x] Analytics shows Estimated Profit.
 * [x] Funnel ends with Purchased.
 * [x] Completion and purchase are clearly distinguished.
-* [x] Goal comparison includes purchased orders.
+* [x] Mission comparison includes purchased orders.
 * [x] Drop-off insights are shown when meaningful.
 
-## Goals
+## Missions
 
-* [x] Goal table includes purchased orders.
-* [x] Goal table includes purchase rate.
-* [x] Goal table includes sales.
-* [x] Goal detail shows the complete funnel.
+* [x] Mission table includes purchased orders.
+* [x] Mission table includes purchase rate.
+* [x] Mission table includes sales.
+* [x] Mission detail shows the complete funnel.
 * [x] Advanced attribution remains accessible.
 
 ## Profit
@@ -2444,7 +2444,7 @@ How much did it sell?
         ↓
 How many customers purchased?
         ↓
-Which goals worked?
+Which missions worked?
         ↓
 How profitable was it?
         ↓
@@ -2498,7 +2498,7 @@ Do not fabricate purchase data.
 
 Do not claim causality from observed AOV differences.
 
-Do not label goal completion as a purchase.
+Do not label mission completion as a purchase.
 
 The primary objective is:
 

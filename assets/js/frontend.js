@@ -7,32 +7,32 @@
  * display location and this library fills them from `GET /faracart/v1/progress`.
  *
  * Components (P11):
- *   GoalContainer    wrapper that hosts one goal's UI (full / compact)
+ *   MissionContainer    wrapper that hosts one mission's UI (full / compact)
  *   ProgressBar      percentage fill bar
- *   GoalMessage      the goal's progress message
+ *   MissionMessage      the mission's progress message
  *   RewardStatus     locked / unlocked reward chip
  *   UnifiedRecommendations  one customer-facing product block
  *                     (Suggestions + Upsells consolidation: the payload
  *                     carries the merged, deduplicated, ranked list
  *                     from the ProductRecommendationEngine with per-row
  *                     source attribution; a rank-endpoint fallback
- *                     closes money-goal gaps)
- *   FloatingWidget   floating goals/campaigns button + progress drawer
+ *                     closes money-mission gaps)
+ *   FloatingWidget   floating missions/campaigns button + progress drawer
  *                     (position preset + offsets, per-device settings,
  *                     drawer always opens toward the screen center,
  *                     safe-area aware, RTL-safe)
  *
- * Every eligible goal renders as its own card, stacked in a shared
- * wrapper (`.faracart-widget__goals`) — a campaign's milestones each get
+ * Every eligible mission renders as its own card, stacked in a shared
+ * wrapper (`.faracart-widget__missions`) — a campaign's milestones each get
  * a full card instead of one featured card + a tiny ladder. Each card
  * sees only itself.
  *
- * Templates (the six design templates): the goal body renders per the
+ * Templates (the six design templates): the mission body renders per the
  * active variant — template-1 (classic progress card), template-2
- * (minimal inline cart goal), template-3 (circular progress), template-4
- * (product recommendation + goal), template-5 (compact floating goal)
+ * (minimal inline cart mission), template-3 (circular progress), template-4
+ * (product recommendation + mission), template-5 (compact floating mission)
  * or template-6 (premium / elegant e-commerce style) — driven by
- * the goal's resolved `template` (item override → scope default →
+ * the mission's resolved `template` (item override → scope default →
  * legacy → fallback) or a per-container `data-faracart-template`
  * override. Appearance tokens (colors, radius, bar height) come from
  * the resolved `template_settings`; the animation toggle adds a
@@ -68,10 +68,10 @@
 	var WIDGET_SELECTOR = '[data-faracart-widget]';
 	var FLOATING_ID = 'faracart-floating';
 
-	// Floating widget (floating goals/campaigns button + drawer) state:
+	// Floating widget (floating missions/campaigns button + drawer) state:
 	// whether the drawer is open, whether the button/drawer markup was
 	// built once (the payload only rebuilds the drawer content), the
-	// drawer content fingerprint (rebuild only when the goals changed),
+	// drawer content fingerprint (rebuild only when the missions changed),
 	// the resolved drawer direction + button side (re-applied on resize)
 	// and the default button glyph.
 	var floatingOpen = false;
@@ -81,7 +81,7 @@
 	var floatingButtonSide = 'right';
 	var FLOATING_DEFAULT_ICON = '\uD83D\uDED2'; // shopping cart
 
-	// The template ids the floating drawer accepts when resolving a goal's
+	// The template ids the floating drawer accepts when resolving a mission's
 	// card (the same ids widgetTemplate honors, minus per-container overrides).
 	var FLOATING_TEMPLATES = [ 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6', 'milestone_chain', 'campaign_progress' ];
 
@@ -91,7 +91,7 @@
 	var tracking = window.faracartTracking || null;
 
 	// Per-session dedup: impressions / completions / suggestion impressions
-	// are reported once per goal (or goal+product); progress only when the
+	// are reported once per mission (or mission+product); progress only when the
 	// percentage actually changed. Keeps refreshes quiet while still
 	// capturing the funnel events.
 	var reportedImpressions = {};
@@ -104,10 +104,10 @@
 	// panel is disabled and every upsell call is a guarded no-op.
 	var upsells = cfg.upsells || null;
 
-	// Per-session dedup for upsell impressions (one per goal + product).
+	// Per-session dedup for upsell impressions (one per mission + product).
 	var reportedUpsellImpressions = {};
 
-	// Per-goal ranking cache keyed by "goalId:remaining": a cart change
+	// Per-mission ranking cache keyed by "missionId:remaining": a cart change
 	// re-renders the card and reuses the last payload when the gap did
 	// not move, instead of refetching on every poll.
 	var upsellRankCache = {};
@@ -121,7 +121,7 @@
 	var renderedFingerprints = {};
 
 	// Phase 32: per-session state for the celebration animation (one burst
-	// per goal).
+	// per mission).
 	var celebrated = {};
 
 	// Confetti palette (Phase 32 celebration).
@@ -321,7 +321,7 @@
 	 *
 	 * The smart upsell funnel (impression / clicked / added) posts to the
 	 * public `POST /faracart/v1/upsell/track` route — NOT the Phase 16
-	 * track endpoint, which only whitelists the goal/reward events. The
+	 * track endpoint, which only whitelists the mission/reward events. The
 	 * route reuses the same tracking nonce + session id the Phase 16
 	 * tracker already holds, so no second nonce is needed. Fire-and-forget
 	 * and must never throw, exactly like sendTrack.
@@ -373,23 +373,23 @@
 	}
 
 	/**
-	 * Fetch the ranked upsell products for one goal (Phase 33.7).
+	 * Fetch the ranked upsell products for one mission (Phase 33.7).
 	 *
-	 * GETs the public rank endpoint with just goal_id + limit — the
+	 * GETs the public rank endpoint with just mission_id + limit — the
 	 * server computes the remaining gap from the live cart, so the client
 	 * never needs to send (or trust) the gap. Cache-busted with a
 	 * timestamp, mirroring fetchProgress.
 	 *
-	 * @param {string}   goalId Goal id.
+	 * @param {string}   missionId Mission id.
 	 * @param {Function} done   Callback receiving the payload `data`
 	 *                          object, or null on any failure.
 	 * @return {void}
 	 */
-	function fetchUpsells( goalId, done ) {
+	function fetchUpsells( missionId, done ) {
 		var request = new XMLHttpRequest();
 		var separator = upsells.endpoint.indexOf( '?' ) >= 0 ? '&' : '?';
 		var url = upsells.endpoint + separator
-			+ 'goal_id=' + encodeURIComponent( goalId )
+			+ 'mission_id=' + encodeURIComponent( missionId )
 			+ '&limit=' + encodeURIComponent( upsells.limit || 3 )
 			+ '&_=' + Date.now();
 
@@ -416,20 +416,20 @@
 	/**
 	 * The cart money value for event payloads.
 	 *
-	 * Uses the first money-based goal's current value (the storefront
-	 * payload carries per-goal values, not a cart total).
+	 * Uses the first money-based mission's current value (the storefront
+	 * payload carries per-mission values, not a cart total).
 	 *
-	 * @param {Array} goals Progress goal entries.
+	 * @param {Array} missions Progress mission entries.
 	 * @return {number}
 	 */
-	function cartValue( goals ) {
-		if ( ! goals ) {
+	function cartValue( missions ) {
+		if ( ! missions ) {
 			return 0;
 		}
 
-		for ( var i = 0; i < goals.length; i++ ) {
-			if ( goals[ i ].is_money && Number( goals[ i ].current ) > 0 ) {
-				return Number( goals[ i ].current ) || 0;
+		for ( var i = 0; i < missions.length; i++ ) {
+			if ( missions[ i ].is_money && Number( missions[ i ].current ) > 0 ) {
+				return Number( missions[ i ].current ) || 0;
 			}
 		}
 
@@ -437,53 +437,53 @@
 	}
 
 	/**
-	 * Report the per-goal analytics events for a payload (Phase 16).
+	 * Report the per-mission analytics events for a payload (Phase 16).
 	 *
-	 * Runs after every render: impressions once per goal per session,
+	 * Runs after every render: impressions once per mission per session,
 	 * progress when the percentage changed, completion events once per
-	 * goal, and suggestion impressions once per goal+product.
+	 * mission, and suggestion impressions once per mission+product.
 	 *
 	 * @param {Object} data Progress payload data.
 	 * @return {void}
 	 */
-	function trackGoals( data ) {
-		var goals = ( data && data.goals ) || [];
-		var value = cartValue( goals );
+	function trackMissions( data ) {
+		var missions = ( data && data.missions ) || [];
+		var value = cartValue( missions );
 
-		for ( var i = 0; i < goals.length; i++ ) {
-			var goal = goals[ i ];
-			var goalId = String( goal.goal_id || 0 );
+		for ( var i = 0; i < missions.length; i++ ) {
+			var mission = missions[ i ];
+			var missionId = String( mission.mission_id || 0 );
 
-			if ( ! reportedImpressions[ goalId ] && goal.eligible !== false ) {
-				reportedImpressions[ goalId ] = true;
+			if ( ! reportedImpressions[ missionId ] && mission.eligible !== false ) {
+				reportedImpressions[ missionId ] = true;
 				sendTrack( 'goal_impression', {
-					goal_id: goalId,
-					campaign_id: goal.campaign_id || 0,
+					mission_id: missionId,
+					campaign_id: mission.campaign_id || 0,
 					cart_value: value,
 				} );
 			}
 
-			var percentage = Math.round( Number( goal.percentage ) || 0 );
+			var percentage = Math.round( Number( mission.percentage ) || 0 );
 
-			// Progress is reported only for eligible goals (an ineligible
-			// goal never renders a widget — no ghost events for hidden ones).
-			if ( goal.eligible !== false && reportedProgress[ goalId ] !== percentage ) {
-				reportedProgress[ goalId ] = percentage;
+			// Progress is reported only for eligible missions (an ineligible
+			// mission never renders a widget — no ghost events for hidden ones).
+			if ( mission.eligible !== false && reportedProgress[ missionId ] !== percentage ) {
+				reportedProgress[ missionId ] = percentage;
 				sendTrack( 'goal_progress', {
-					goal_id: goalId,
-					campaign_id: goal.campaign_id || 0,
+					mission_id: missionId,
+					campaign_id: mission.campaign_id || 0,
 					cart_value: value,
 					percentage: percentage,
 				} );
 			}
 
-			if ( goal.completed && ! reportedCompletions[ goalId ] ) {
-				reportedCompletions[ goalId ] = true;
+			if ( mission.completed && ! reportedCompletions[ missionId ] ) {
+				reportedCompletions[ missionId ] = true;
 				// A conflict-suppressed reward never reports as activated
 				// (Phase 26): only the completion is recorded.
-				sendTrack( goal.reward && goal.reward.type && ! rewardBlocked( goal ) ? 'reward_activated' : 'goal_completed', {
-					goal_id: goalId,
-					campaign_id: goal.campaign_id || 0,
+				sendTrack( mission.reward && mission.reward.type && ! rewardBlocked( mission ) ? 'reward_activated' : 'goal_completed', {
+					mission_id: missionId,
+					campaign_id: mission.campaign_id || 0,
 					cart_value: value,
 				} );
 			}
@@ -492,18 +492,18 @@
 			// existing funnels: suggestion-sourced items feed the Phase 16
 			// suggestion funnel, upsell-sourced items feed the Phase 33.5
 			// upsell funnel, and 'both' items feed both — one impression per
-			// goal + product per session per funnel, never duplicates.
-			if ( goal.suggestions && goal.suggestions.length ) {
-				for ( var j = 0; j < goal.suggestions.length; j++ ) {
-					var item = goal.suggestions[ j ] || {};
+			// mission + product per session per funnel, never duplicates.
+			if ( mission.suggestions && mission.suggestions.length ) {
+				for ( var j = 0; j < mission.suggestions.length; j++ ) {
+					var item = mission.suggestions[ j ] || {};
 					var productId = String( item.product_id || item.id || 0 );
-					var key = goalId + ':' + productId;
+					var key = missionId + ':' + productId;
 					var src = String( item.source || '' );
 
 					if ( productId && ! reportedSuggestionImpressions[ key ] && ( src === 'suggestion' || src === 'both' ) ) {
 						reportedSuggestionImpressions[ key ] = true;
 						sendTrack( 'suggestion_impression', {
-							goal_id: goalId,
+							mission_id: missionId,
 							product_id: productId,
 						} );
 					}
@@ -511,9 +511,9 @@
 					if ( productId && ! reportedUpsellImpressions[ key ] && ( src === 'upsell' || src === 'both' ) ) {
 						reportedUpsellImpressions[ key ] = true;
 						sendUpsellTrack( 'upsell_impression', {
-							goal_id: goalId,
+							mission_id: missionId,
 							product_id: productId,
-							cart_value: Number( goal.current ) || 0,
+							cart_value: Number( mission.current ) || 0,
 							source: src,
 						} );
 					}
@@ -546,7 +546,7 @@
 	}
 
 	/**
-	 * Format a catalog price with the same settings as goal targets.
+	 * Format a catalog price with the same settings as mission targets.
 	 *
 	 * The API keeps price_html for compatibility, but that value is
 	 * produced by WooCommerce and cannot reflect FaraCart's currency
@@ -598,33 +598,33 @@
 	 * @return {string}
 	 */
 	function payloadFingerprint( data ) {
-		var goals = ( data && data.goals ) || [];
+		var missions = ( data && data.missions ) || [];
 		var parts = [];
 
-		for ( var i = 0; i < goals.length; i++ ) {
-			var goal = goals[ i ] || {};
-			var suggestionIds = ( goal.suggestions || [] ).map( function ( suggestion ) {
+		for ( var i = 0; i < missions.length; i++ ) {
+			var mission = missions[ i ] || {};
+			var suggestionIds = ( mission.suggestions || [] ).map( function ( suggestion ) {
 				return String( suggestion.id || 0 ) + ':' + String( suggestion.name || '' );
 			} ).join( ',' );
 
 			parts.push(
 				[
-					String( goal.goal_id || 0 ),
-					String( goal.goal_name || '' ),
-					String( goal.icon || '' ),
-					String( goal.template || '' ),
-					String( goal.current || 0 ),
-					String( goal.target || 0 ),
-					String( goal.percentage || 0 ),
-					goal.completed ? '1' : '0',
-					goal.eligible === false ? '0' : '1',
-					rewardBlocked( goal ) ? '0' : '1',
-					String( goal.state || '' ),
-					String( goal.message || '' ),
-					String( ( goal.reward && goal.reward.type ) || '' ),
-					String( ( goal.reward && goal.reward.value ) || '' ),
-					String( goal.countdown_end || '' ),
-					( goal.reward && goal.reward.gift_chosen ) ? '1' : '0',
+					String( mission.mission_id || 0 ),
+					String( mission.mission_name || '' ),
+					String( mission.icon || '' ),
+					String( mission.template || '' ),
+					String( mission.current || 0 ),
+					String( mission.target || 0 ),
+					String( mission.percentage || 0 ),
+					mission.completed ? '1' : '0',
+					mission.eligible === false ? '0' : '1',
+					rewardBlocked( mission ) ? '0' : '1',
+					String( mission.state || '' ),
+					String( mission.message || '' ),
+					String( ( mission.reward && mission.reward.type ) || '' ),
+					String( ( mission.reward && mission.reward.value ) || '' ),
+					String( mission.countdown_end || '' ),
+					( mission.reward && mission.reward.gift_chosen ) ? '1' : '0',
 					suggestionIds,
 				].join( '|' )
 			);
@@ -691,13 +691,13 @@
 	}
 
 	/**
-	 * Countdown chip for a goal/campaign with an end time (Phase 32).
+	 * Countdown chip for a mission/campaign with an end time (Phase 32).
 	 *
 	 * The chip carries the end timestamp on a data attribute; a single
 	 * global ticker (started in init) rewrites the readout every second
 	 * without re-rendering the widget.
 	 *
-	 * @param {Object} entry Goal or campaign group with countdown_end.
+	 * @param {Object} entry Mission or campaign group with countdown_end.
 	 * @return {HTMLElement|null}
 	 */
 	function countdownPanel( entry ) {
@@ -739,23 +739,23 @@
 	}
 
 	/**
-	 * The featured goal: the first eligible one, else the first listed.
+	 * The featured mission: the first eligible one, else the first listed.
 	 *
-	 * @param {Array} goals Progress goal entries.
+	 * @param {Array} missions Progress mission entries.
 	 * @return {Object|null}
 	 */
-	function featuredGoal( goals ) {
-		if ( ! goals || ! goals.length ) {
+	function featuredMission( missions ) {
+		if ( ! missions || ! missions.length ) {
 			return null;
 		}
 
-		for ( var i = 0; i < goals.length; i++ ) {
-			if ( goals[ i ].eligible !== false ) {
-				return goals[ i ];
+		for ( var i = 0; i < missions.length; i++ ) {
+			if ( missions[ i ].eligible !== false ) {
+				return missions[ i ];
 			}
 		}
 
-		return goals[ 0 ];
+		return missions[ 0 ];
 	}
 
 	/* ------------------------------------------------------------------ *
@@ -765,17 +765,17 @@
 	/**
 	 * ProgressBar — a percentage fill bar.
 	 *
-	 * @param {Object} goal Progress goal entry.
+	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement}
 	 */
-	function progressBar( goal ) {
+	function progressBar( mission ) {
 		var track = el( 'div', 'faracart-progress' );
 		var fill = el( 'div', 'faracart-progress__fill' );
-		var percent = Math.max( 0, Math.min( 100, Number( goal.percentage ) || 0 ) );
+		var percent = Math.max( 0, Math.min( 100, Number( mission.percentage ) || 0 ) );
 
 		fill.style.width = percent + '%';
 
-		if ( goal.completed ) {
+		if ( mission.completed ) {
 			track.classList.add( 'faracart-progress--complete' );
 		}
 
@@ -785,51 +785,51 @@
 	}
 
 	/**
-	 * GoalMessage — the goal's progress message.
+	 * MissionMessage — the mission's progress message.
 	 *
-	 * @param {Object} goal Progress goal entry.
+	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement}
 	 */
-	function goalMessage( goal ) {
-		return el( 'p', 'faracart-message', String( goal.message || '' ) );
+	function missionMessage( mission ) {
+		return el( 'p', 'faracart-message', String( mission.message || '' ) );
 	}
 
 	/**
-	 * Whether a goal's reward is suppressed by a conflict (Phase 26).
+	 * Whether a mission's reward is suppressed by a conflict (Phase 26).
 	 *
 	 * The progress payload resolves conflicts with the same rules the
 	 * reward engine grants with; a suppressed reward must never render as
 	 * unlocked (the shopper would see a claim the cart does not grant).
 	 *
-	 * @param {Object} goal Progress goal entry.
+	 * @param {Object} mission Progress mission entry.
 	 * @return {boolean}
 	 */
-	function rewardBlocked( goal ) {
-		return !!( goal.conflict && goal.conflict.resolved === false );
+	function rewardBlocked( mission ) {
+		return !!( mission.conflict && mission.conflict.resolved === false );
 	}
 
 	/**
-	 * RewardStatus — a locked/unlocked chip for the goal's reward.
+	 * RewardStatus — a locked/unlocked chip for the mission's reward.
 	 *
-	 * @param {Object} goal Progress goal entry.
+	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement|null}
 	 */
-	function rewardStatus( goal ) {
-		var reward = goal.reward || null;
+	function rewardStatus( mission ) {
+		var reward = mission.reward || null;
 
 		if ( ! reward || ! reward.type ) {
 			return null;
 		}
 
-		var blocked = rewardBlocked( goal );
-		var unlocked = goal.completed && ! blocked;
+		var blocked = rewardBlocked( mission );
+		var unlocked = mission.completed && ! blocked;
 		var label = ( cfg.labels && cfg.labels[ reward.type ] ) || reward.type;
 		var chip = el( 'span', 'faracart-reward' );
 
 		chip.classList.add( unlocked ? 'faracart-reward--unlocked' : 'faracart-reward--locked' );
 
-		if ( blocked && goal.conflict && goal.conflict.reason ) {
-			chip.setAttribute( 'title', String( goal.conflict.reason ) );
+		if ( blocked && mission.conflict && mission.conflict.reason ) {
+			chip.setAttribute( 'title', String( mission.conflict.reason ) );
 		}
 
 		chip.appendChild( el( 'span', 'faracart-reward__icon', unlocked ? '\u2713' : '\uD83D\uDD12' ) );
@@ -884,16 +884,16 @@
 	 * without resolving anything.
 	 *
 	 * @param {Object} item Ranked product payload row.
-	 * @param {Object} goal The goal the ranking belongs to.
+	 * @param {Object} mission The mission the ranking belongs to.
 	 * @return {HTMLElement}
 	 */
-	function upsellRow( item, goal ) {
+	function upsellRow( item, mission ) {
 		var row = el( 'div', 'faracart-upsell' );
 
 		row.setAttribute( 'data-faracart-upsell-product', String( item.product_id || item.id || 0 ) );
-		row.setAttribute( 'data-faracart-upsell-goal', String( goal.goal_id || 0 ) );
+		row.setAttribute( 'data-faracart-upsell-mission', String( mission.mission_id || 0 ) );
 		row.setAttribute( 'data-faracart-upsell-permalink', String( item.permalink || '' ) );
-		row.setAttribute( 'data-faracart-upsell-value', String( Number( goal.current ) || 0 ) );
+		row.setAttribute( 'data-faracart-upsell-value', String( Number( mission.current ) || 0 ) );
 		// Source attribution rides on the row so the delegated handlers can
 		// keep the suggestion and upsell funnels separate after unification.
 		row.setAttribute( 'data-faracart-upsell-source', recommendationSource( item ) );
@@ -909,7 +909,7 @@
 		var link = el( 'a', 'faracart-upsell__name' );
 		link.setAttribute( 'href', isSafeUrl( item.permalink ) ? String( item.permalink ) : '#' );
 		link.setAttribute( 'data-faracart-upsell-id', String( item.product_id || item.id || 0 ) );
-		link.setAttribute( 'data-faracart-upsell-goal', String( goal.goal_id || 0 ) );
+		link.setAttribute( 'data-faracart-upsell-mission', String( mission.mission_id || 0 ) );
 		link.setAttribute( 'data-faracart-upsell-source', recommendationSource( item ) );
 		link.textContent = String( item.name || '' );
 		row.appendChild( link );
@@ -930,40 +930,40 @@
 	 * UnifiedRecommendations — one customer-facing product recommendation
 	 * panel (Suggestions + Upsells consolidation).
 	 *
-	 * Renders the goal's unified recommendation list — the progress
+	 * Renders the mission's unified recommendation list — the progress
 	 * payload already carries the merged, deduplicated, ranked candidates
 	 * (suggestion + upsell engines, `source` preserved per row) — for any
-	 * goal that has one. Money goals with a positive remaining gap fall
+	 * mission that has one. Money missions with a positive remaining gap fall
 	 * back to the public rank endpoint when the payload carried nothing:
 	 * the ranker closes the gap from the live cart with signals beyond
-	 * the suggestion pool (the result is cached per goal:remaining so
+	 * the suggestion pool (the result is cached per mission:remaining so
 	 * cart-change re-renders reuse it). Every rendered product reports
 	 * one impression per session per funnel (suggestion-sourced rows feed
 	 * the Phase 16 suggestion funnel, upsell-sourced rows the Phase 33.7
 	 * upsell funnel, 'both' rows feed both).
 	 *
-	 * @param {Object} goal Progress goal entry.
+	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement|null}
 	 */
-	function upsellPanel( goal ) {
-		var goalId = String( goal.goal_id || 0 );
+	function upsellPanel( mission ) {
+		var missionId = String( mission.mission_id || 0 );
 
-		if ( ! goalId ) {
+		if ( ! missionId ) {
 			return null;
 		}
 
 		// The unified recommendations ride on the payload; they render for
-		// any goal that has them (money or not, like the original
+		// any mission that has them (money or not, like the original
 		// suggestions block they replace).
-		var payloadItems = ( goal.suggestions && goal.suggestions.length ) ? goal.suggestions : [];
+		var payloadItems = ( mission.suggestions && mission.suggestions.length ) ? mission.suggestions : [];
 
-		// Money goals with a gap fall back to the rank endpoint when the
-		// payload carried nothing — a completed goal needs no
+		// Money missions with a gap fall back to the rank endpoint when the
+		// payload carried nothing — a completed mission needs no
 		// recommendations.
 		var useRank = false;
-		var remaining = Number( goal.remaining );
+		var remaining = Number( mission.remaining );
 
-		if ( upsells && upsells.enabled && upsells.endpoint && goal.is_money && ! goal.completed && remaining > 0 ) {
+		if ( upsells && upsells.enabled && upsells.endpoint && mission.is_money && ! mission.completed && remaining > 0 ) {
 			useRank = true;
 		}
 
@@ -977,7 +977,7 @@
 		var list = el( 'div', 'faracart-upsells__list' );
 		panel.appendChild( list );
 
-		var cacheKey = goalId + ':' + Math.round( remaining );
+		var cacheKey = missionId + ':' + Math.round( remaining );
 		var cached = upsellRankCache[ cacheKey ] || null;
 
 		function renderRows( rows ) {
@@ -995,25 +995,25 @@
 					continue;
 				}
 
-				list.appendChild( upsellRow( item, goal ) );
+				list.appendChild( upsellRow( item, mission ) );
 
 				// Upsell-funnel impressions for upsell/both-sourced rows.
-				// Suggestion-sourced rows skip this — trackGoals reports
+				// Suggestion-sourced rows skip this — trackMissions reports
 				// their suggestion_impression (and the upsell side of a
 				// 'both' row) when it scans the payload; the shared dedup
-				// map keeps a single impression per goal + product per
+				// map keeps a single impression per mission + product per
 				// funnel per session.
 				var src = recommendationSource( item );
 
 				if ( src !== 'suggestion' ) {
-					var key = goalId + ':' + String( item.product_id );
+					var key = missionId + ':' + String( item.product_id );
 
 					if ( ! reportedUpsellImpressions[ key ] ) {
 						reportedUpsellImpressions[ key ] = true;
 						sendUpsellTrack( 'upsell_impression', {
-							goal_id: goalId,
+							mission_id: missionId,
 							product_id: String( item.product_id ),
-							cart_value: Number( goal.current ) || 0,
+							cart_value: Number( mission.current ) || 0,
 							source: src || 'upsell',
 						} );
 					}
@@ -1049,7 +1049,7 @@
 		// Loading state: a subtle placeholder; the fetch fills the list.
 		list.appendChild( el( 'div', 'faracart-upsells__loading', '…' ) );
 
-		fetchUpsells( goalId, function ( payload ) {
+		fetchUpsells( missionId, function ( payload ) {
 			upsellRankCache[ cacheKey ] = payload;
 
 			safe( function () {
@@ -1080,7 +1080,7 @@
 	 * endpoint the theme's add-to-cart buttons use, so it works in every
 	 * theme). On success it reports upsell_added and funnels into the
 	 * centralized cart-changed bridge, which re-polls the progress
-	 * endpoint and recomputes the goal gap live. Falls back to the
+	 * endpoint and recomputes the mission gap live. Falls back to the
 	 * classic `?add-to-cart=` redirect when the AJAX surface is missing,
 	 * and to the product page when the item needs a variation choice.
 	 *
@@ -1097,7 +1097,7 @@
 		}
 
 		var productId = row.getAttribute( 'data-faracart-upsell-product' ) || '';
-		var goalId = row.getAttribute( 'data-faracart-upsell-goal' ) || '';
+		var missionId = row.getAttribute( 'data-faracart-upsell-mission' ) || '';
 		var permalink = row.getAttribute( 'data-faracart-upsell-permalink' ) || '';
 		var cartValue = Number( row.getAttribute( 'data-faracart-upsell-value' ) || 0 );
 		var src = row.getAttribute( 'data-faracart-upsell-source' ) || '';
@@ -1108,14 +1108,14 @@
 
 		if ( src === 'suggestion' || src === 'both' ) {
 			sendTrack( 'suggestion_clicked', {
-				goal_id: goalId,
+				mission_id: missionId,
 				product_id: productId,
 			} );
 		}
 
 		if ( ! src || src === 'upsell' || src === 'both' ) {
 			sendUpsellTrack( 'upsell_clicked', {
-				goal_id: goalId,
+				mission_id: missionId,
 				product_id: productId,
 				cart_value: cartValue,
 			} );
@@ -1136,7 +1136,7 @@
 			// impression, so no separate add event for them.
 			if ( ! src || src === 'upsell' || src === 'both' ) {
 				sendUpsellTrack( 'upsell_added', {
-					goal_id: goalId,
+					mission_id: missionId,
 					product_id: productId,
 					cart_value: cartValue,
 				} );
@@ -1205,16 +1205,16 @@
 	/**
 	 * GiftPicker — the shopper's free-gift selection (Phase 32).
 	 *
-	 * Renders for completed goals whose free-gift reward is in "choose"
+	 * Renders for completed missions whose free-gift reward is in "choose"
 	 * mode: one button per candidate gift. Clicking claims the gift through
 	 * the public gift endpoint (nonce-guarded), then the widgets refresh
 	 * and the picker flips to its "added" state.
 	 *
-	 * @param {Object} goal Progress goal entry.
+	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement|null}
 	 */
-	function giftPicker( goal ) {
-		var reward = goal.reward || null;
+	function giftPicker( mission ) {
+		var reward = mission.reward || null;
 
 		if ( ! reward || reward.type !== 'free_gift' || ! reward.gift || ! reward.gift.length ) {
 			return null;
@@ -1243,7 +1243,7 @@
 
 			button.type = 'button';
 			button.setAttribute( 'data-faracart-gift-product', String( item.id || 0 ) );
-			button.setAttribute( 'data-faracart-gift-goal', String( goal.goal_id || 0 ) );
+			button.setAttribute( 'data-faracart-gift-mission', String( mission.mission_id || 0 ) );
 
 			if ( item.image ) {
 				var img = el( 'img', 'faracart-gift-picker__image' );
@@ -1276,10 +1276,10 @@
 	 * @return {void}
 	 */
 	function claimGift( button ) {
-		var goalId = button.getAttribute( 'data-faracart-gift-goal' ) || '0';
+		var missionId = button.getAttribute( 'data-faracart-gift-mission' ) || '0';
 		var productId = button.getAttribute( 'data-faracart-gift-product' ) || '0';
 
-		if ( ! goalId || ! productId || button.disabled ) {
+		if ( ! missionId || ! productId || button.disabled ) {
 			return;
 		}
 
@@ -1289,7 +1289,7 @@
 		var body;
 		try {
 			body = JSON.stringify( {
-				goal_id: Number( goalId ) || 0,
+				mission_id: Number( missionId ) || 0,
 				product_id: Number( productId ) || 0,
 				nonce: cfg.giftNonce || '',
 			} );
@@ -1330,13 +1330,13 @@
 
 	/**
 	 * The per-widget template: an explicit container override wins, then
-	 * the goal's own Display template (the goal builder's template picker),
+	 * the mission's own Display template (the mission builder's template picker),
 	 * then the store-wide Appearance template.
 	 * 	 * @param {HTMLElement} container Widget container.
-	 * @param {Object}      goal     Goal this card renders (may be null).
+	 * @param {Object}      mission     Mission this card renders (may be null).
 	 * @return {string}
 	 */
-	function widgetTemplate( container, goal ) {
+	function widgetTemplate( container, mission ) {
 		var override = container.getAttribute( 'data-faracart-template' );
 		var names = [ 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6', 'milestone_chain', 'campaign_progress' ];
 
@@ -1344,10 +1344,10 @@
 			return override;
 		}
 
-		// The goal's Display settings can pin a template per goal; it wins
+		// The mission's Display settings can pin a template per mission; it wins
 		// over the store-wide Appearance template.
-		if ( goal && goal.template && names.indexOf( goal.template ) !== -1 ) {
-			return goal.template;
+		if ( mission && mission.template && names.indexOf( mission.template ) !== -1 ) {
+			return mission.template;
 		}
 
 		if ( cfg.template && names.indexOf( cfg.template ) !== -1 ) {
@@ -1361,10 +1361,10 @@
 	 * Apply a template's resolved settings to a node as CSS custom
 	 * properties (pluggable template engine).
 	 *
-	 * The backend resolves each goal's effective template settings (item
+	 * The backend resolves each mission's effective template settings (item
 	 * override → scope default → legacy → fallback) and ships them in the
 	 * payload; the stylesheet reads the same --faracart-* custom
-	 * properties the global Appearance settings override, so a per-goal
+	 * properties the global Appearance settings override, so a per-mission
 	 * (or per-campaign) template styles exactly what its settings say.
 	 *
 	 * @param {HTMLElement} node     Element to style.
@@ -1475,15 +1475,15 @@
 	}
 
 	/**
-	 * The goal's icon glyph — the configured goal icon (emoji / dashicon
+	 * The mission's icon glyph — the configured mission icon (emoji / dashicon
 	 * name) as text, or a template fallback glyph when none is set.
 	 *
-	 * @param {Object} goal     Progress goal entry.
+	 * @param {Object} mission     Progress mission entry.
 	 * @param {string} fallback Fallback glyph.
 	 * @return {HTMLElement}
 	 */
-	function tplIcon( goal, fallback ) {
-		var icon = String( goal.icon || '' ).trim();
+	function tplIcon( mission, fallback ) {
+		var icon = String( mission.icon || '' ).trim();
 
 		return el( 'span', 'faracart-tpl-icon', icon || fallback );
 	}
@@ -1492,14 +1492,14 @@
 	 * The template CTA — links to the top recommended product (the
 	 * gap-closing product) when one exists; hidden otherwise.
 	 *
-	 * @param {Object} goal     Progress goal entry.
+	 * @param {Object} mission     Progress mission entry.
 	 * @param {string} currency ISO currency code.
 	 * @param {string} label    Button label.
 	 * @param {string} klass    Extra class ('' = none).
 	 * @return {HTMLElement|null}
 	 */
-	function tplCta( goal, currency, label, klass ) {
-		var items = ( goal.suggestions && goal.suggestions.length ) ? goal.suggestions : [];
+	function tplCta( mission, currency, label, klass ) {
+		var items = ( mission.suggestions && mission.suggestions.length ) ? mission.suggestions : [];
 
 		if ( ! items.length ) {
 			return null;
@@ -1520,14 +1520,14 @@
 	/**
 	 * The remaining-amount label ("%s left"), localized.
 	 *
-	 * @param {Object} goal     Progress goal entry.
+	 * @param {Object} mission     Progress mission entry.
 	 * @param {string} currency ISO currency code.
 	 * @return {string}
 	 */
-	function remainingLabel( goal, currency ) {
-		var amount = goal.is_money
-			? formatMoney( goal.remaining, currency )
-			: formatNumber( goal.remaining );
+	function remainingLabel( mission, currency ) {
+		var amount = mission.is_money
+			? formatMoney( mission.remaining, currency )
+			: formatNumber( mission.remaining );
 
 		return uiLabel( 'left', '%s left' ).replace( '%s', amount );
 	}
@@ -1535,14 +1535,14 @@
 	/**
 	 * The "Add %s more" CTA label, localized.
 	 *
-	 * @param {Object} goal     Progress goal entry.
+	 * @param {Object} mission     Progress mission entry.
 	 * @param {string} currency ISO currency code.
 	 * @return {string}
 	 */
-	function addMoreLabel( goal, currency ) {
-		var amount = goal.is_money
-			? formatMoney( goal.remaining, currency )
-			: formatNumber( goal.remaining );
+	function addMoreLabel( mission, currency ) {
+		var amount = mission.is_money
+			? formatMoney( mission.remaining, currency )
+			: formatNumber( mission.remaining );
 
 		return uiLabel( 'add_more', 'Add %s more' ).replace( '%s', amount );
 	}
@@ -1551,7 +1551,7 @@
 	 * A circular gauge — SVG ring whose stroke-dashoffset draws exactly
 	 * `percent` of the circumference (Concept 03 / template-3). The center
 	 * readout is a localized percent + "Progress" label, or a check when
-	 * the goal is done.
+	 * the mission is done.
 	 *
 	 * @param {number} percent    0–100 progress.
 	 * @param {number} size       Ring diameter (px).
@@ -1624,17 +1624,17 @@
 	 * serves it without a second code path.
 	 *
 	 * @param {Object} item Recommended product payload row.
-	 * @param {Object} goal Progress goal entry.
+	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement}
 	 */
-	function recommendRow( item, goal ) {
+	function recommendRow( item, mission ) {
 		var row = el( 'div', 'faracart-recommend' );
 		var productId = String( item.id || item.product_id || 0 );
 
 		row.setAttribute( 'data-faracart-upsell-product', productId );
-		row.setAttribute( 'data-faracart-upsell-goal', String( goal.goal_id || 0 ) );
+		row.setAttribute( 'data-faracart-upsell-mission', String( mission.mission_id || 0 ) );
 		row.setAttribute( 'data-faracart-upsell-permalink', String( item.permalink || '' ) );
-		row.setAttribute( 'data-faracart-upsell-value', String( Number( goal.current ) || 0 ) );
+		row.setAttribute( 'data-faracart-upsell-value', String( Number( mission.current ) || 0 ) );
 		row.setAttribute( 'data-faracart-upsell-source', 'suggestion' );
 
 		var image;
@@ -1674,26 +1674,26 @@
 	 * chip, a horizontal bar, current/remaining amounts and a CTA, with
 	 * completed and expired states.
 	 *
-	 * @param {Object} goal     Progress goal entry.
+	 * @param {Object} mission     Progress mission entry.
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t1Panel( goal, currency ) {
-		var settings = goal.template_settings || {};
-		var percent = clampPercent( goal.percentage );
+	function t1Panel( mission, currency ) {
+		var settings = mission.template_settings || {};
+		var percent = clampPercent( mission.percentage );
 		var accent = settings.accent || '#f97316';
 		var muted = settings.secondaryText || '#9ca3af';
 		var text = settings.text || '#1f2937';
 		var panel = el( 'div', 'faracart-t1' );
 
 		// Expired / ended: muted clock row.
-		if ( goal.eligible === false || goal.state === 'inactive' || goal.state === 'unavailable' ) {
+		if ( mission.eligible === false || mission.state === 'inactive' || mission.state === 'unavailable' ) {
 			panel.classList.add( 'faracart-t1--expired' );
 			var expiredRow = el( 'div', 'faracart-t1__expired' );
-			expiredRow.appendChild( tplIcon( goal, '\u23F0' ) );
+			expiredRow.appendChild( tplIcon( mission, '\u23F0' ) );
 			var expiredInfo = el( 'div', 'faracart-t1__expired-info' );
 			expiredInfo.appendChild( el( 'span', 'faracart-t1__expired-label', uiLabel( 'expired', 'Expired' ) ) );
-			expiredInfo.appendChild( el( 'span', 'faracart-t1__expired-title', uiLabel( 'goal_ended', 'This goal has ended' ) ) );
+			expiredInfo.appendChild( el( 'span', 'faracart-t1__expired-title', uiLabel( 'mission_ended', 'This mission has ended' ) ) );
 			expiredRow.appendChild( expiredInfo );
 			expiredRow.appendChild( el( 'span', 'faracart-t1__expired-chip', uiLabel( 'expired', 'Expired' ) ) );
 			panel.appendChild( expiredRow );
@@ -1701,17 +1701,17 @@
 		}
 
 		// Completed: green card with a check + full bar.
-		if ( goal.completed ) {
+		if ( mission.completed ) {
 			panel.classList.add( 'faracart-t1--done' );
 			var done = el( 'div', 'faracart-t1__done' );
 			var doneRow = el( 'div', 'faracart-t1__done-row' );
-			doneRow.appendChild( tplIcon( goal, '\u2705' ) );
+			doneRow.appendChild( tplIcon( mission, '\u2705' ) );
 			var doneInfo = el( 'div', 'faracart-t1__done-info' );
-			doneInfo.appendChild( el( 'span', 'faracart-t1__done-label', uiLabel( 'goal_reached', 'Goal completed' ) + ' \uD83C\uDF89' ) );
-			doneInfo.appendChild( el( 'span', 'faracart-t1__done-title', String( goal.goal_name || '' ) ) );
+			doneInfo.appendChild( el( 'span', 'faracart-t1__done-label', uiLabel( 'mission_reached', 'Mission completed' ) + ' \uD83C\uDF89' ) );
+			doneInfo.appendChild( el( 'span', 'faracart-t1__done-title', String( mission.mission_name || '' ) ) );
 			doneRow.appendChild( doneInfo );
 			done.appendChild( doneRow );
-			done.appendChild( progressBar( goal ) );
+			done.appendChild( progressBar( mission ) );
 			panel.appendChild( done );
 			return panel;
 		}
@@ -1721,12 +1721,12 @@
 		var headMain = el( 'div', 'faracart-t1__head-main' );
 
 		if ( settings.showIcon !== false ) {
-			headMain.appendChild( tplIcon( goal, '\uD83D\uDE9A' ) );
+			headMain.appendChild( tplIcon( mission, '\uD83D\uDE9A' ) );
 		}
 
 		var headText = el( 'div', 'faracart-t1__head-text' );
-		headText.appendChild( el( 'span', 'faracart-t1__label', uiLabel( 'shopping_goal', 'Shopping goal' ) ) );
-		headText.appendChild( el( 'span', 'faracart-t1__title', String( goal.goal_name || '' ) ) );
+		headText.appendChild( el( 'span', 'faracart-t1__label', uiLabel( 'shopping_mission', 'Shopping mission' ) ) );
+		headText.appendChild( el( 'span', 'faracart-t1__title', String( mission.mission_name || '' ) ) );
 		headMain.appendChild( headText );
 		head.appendChild( headMain );
 
@@ -1735,21 +1735,21 @@
 		}
 
 		panel.appendChild( head );
-		panel.appendChild( progressBar( goal ) );
+		panel.appendChild( progressBar( mission ) );
 
 		if ( settings.showAmounts !== false ) {
 			var amounts = el( 'div', 'faracart-t1__amounts' );
-			amounts.appendChild( el( 'span', 'faracart-t1__current', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
+			amounts.appendChild( el( 'span', 'faracart-t1__current', mission.is_money ? formatMoney( mission.current, currency ) : formatNumber( mission.current ) ) );
 
 			if ( settings.showRemaining !== false ) {
-				amounts.appendChild( el( 'span', 'faracart-t1__remaining', remainingLabel( goal, currency ) ) );
+				amounts.appendChild( el( 'span', 'faracart-t1__remaining', remainingLabel( mission, currency ) ) );
 			}
 
 			panel.appendChild( amounts );
 		}
 
 		if ( settings.showCta !== false ) {
-			var cta = tplCta( goal, currency, addMoreLabel( goal, currency ), 'faracart-t1__cta' );
+			var cta = tplCta( mission, currency, addMoreLabel( mission, currency ), 'faracart-t1__cta' );
 
 			if ( cta ) {
 				panel.appendChild( cta );
@@ -1760,41 +1760,41 @@
 	}
 
 	/**
-	 * Template 2 — Minimal Inline Cart Goal (Concept 02). A very compact
+	 * Template 2 — Minimal Inline Cart Mission (Concept 02). A very compact
 	 * inline strip: icon, title, remaining amount, a slim bar and a
 	 * compact CTA. Fits between the cart content and the totals.
 	 *
-	 * @param {Object} goal     Progress goal entry.
+	 * @param {Object} mission     Progress mission entry.
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t2Panel( goal, currency ) {
-		var settings = goal.template_settings || {};
+	function t2Panel( mission, currency ) {
+		var settings = mission.template_settings || {};
 		var panel = el( 'div', 'faracart-t2' );
 
 		if ( settings.showIcon !== false ) {
-			panel.appendChild( tplIcon( goal, '\uD83D\uDE9A' ) );
+			panel.appendChild( tplIcon( mission, '\uD83D\uDE9A' ) );
 		}
 
 		var body = el( 'div', 'faracart-t2__body' );
 		var row = el( 'div', 'faracart-t2__row' );
 
 		if ( settings.showTitle !== false ) {
-			row.appendChild( el( 'span', 'faracart-t2__title', String( goal.goal_name || '' ) ) );
+			row.appendChild( el( 'span', 'faracart-t2__title', String( mission.mission_name || '' ) ) );
 		}
 
-		if ( goal.completed ) {
+		if ( mission.completed ) {
 			row.appendChild( el( 'span', 'faracart-t2__done', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
 		} else if ( settings.showRemaining !== false ) {
-			row.appendChild( el( 'span', 'faracart-t2__remaining', remainingLabel( goal, currency ) ) );
+			row.appendChild( el( 'span', 'faracart-t2__remaining', remainingLabel( mission, currency ) ) );
 		}
 
 		body.appendChild( row );
-		body.appendChild( progressBar( goal ) );
+		body.appendChild( progressBar( mission ) );
 		panel.appendChild( body );
 
-		if ( settings.showCta !== false && ! goal.completed ) {
-			var cta = tplCta( goal, currency, uiLabel( 'add', 'Add' ), 'faracart-t2__cta' );
+		if ( settings.showCta !== false && ! mission.completed ) {
+			var cta = tplCta( mission, currency, uiLabel( 'add', 'Add' ), 'faracart-t2__cta' );
 
 			if ( cta ) {
 				panel.appendChild( cta );
@@ -1810,13 +1810,13 @@
 	 * and the current/remaining amounts, plus a CTA; the completed state
 	 * draws a full green ring with a check.
 	 *
-	 * @param {Object} goal     Progress goal entry.
+	 * @param {Object} mission     Progress mission entry.
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t3Panel( goal, currency ) {
-		var settings = goal.template_settings || {};
-		var percent = clampPercent( goal.percentage );
+	function t3Panel( mission, currency ) {
+		var settings = mission.template_settings || {};
+		var percent = clampPercent( mission.percentage );
 		var accent = settings.accent || '#6366f1';
 		var trackColor = settings.trackColor || '#e5e7eb';
 		var muted = settings.secondaryText || '#6b7280';
@@ -1825,12 +1825,12 @@
 		var stroke = Number( settings.strokeWidth ) || 8;
 		var panel = el( 'div', 'faracart-t3' );
 
-		if ( goal.completed ) {
+		if ( mission.completed ) {
 			var doneRow = el( 'div', 'faracart-t3__done-row' );
 			doneRow.appendChild( circularSvg( 100, Math.round( size * 0.8 ), stroke, trackColor, '#10b981', 'check' ) );
 			var doneInfo = el( 'div', 'faracart-t3__done-info' );
 			doneInfo.appendChild( el( 'span', 'faracart-t3__done-title', uiLabel( 'congrats', 'Congratulations!' ) + ' \uD83C\uDF89' ) );
-			doneInfo.appendChild( el( 'span', 'faracart-t3__done-sub', String( goal.goal_name || '' ) ) );
+			doneInfo.appendChild( el( 'span', 'faracart-t3__done-sub', String( mission.mission_name || '' ) ) );
 			doneRow.appendChild( doneInfo );
 			panel.appendChild( doneRow );
 			return panel;
@@ -1841,23 +1841,23 @@
 
 		var info = el( 'div', 'faracart-t3__info' );
 		var titleRow = el( 'div', 'faracart-t3__title-row' );
-		titleRow.appendChild( tplIcon( goal, '\uD83D\uDE9A' ) );
-		titleRow.appendChild( el( 'span', 'faracart-t3__title', String( goal.goal_name || '' ) ) );
+		titleRow.appendChild( tplIcon( mission, '\uD83D\uDE9A' ) );
+		titleRow.appendChild( el( 'span', 'faracart-t3__title', String( mission.mission_name || '' ) ) );
 		info.appendChild( titleRow );
 
 		if ( settings.showDescription !== false ) {
-			info.appendChild( el( 'p', 'faracart-t3__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( goal.is_money ? formatMoney( goal.target, currency ) : formatNumber( goal.target ) ) ) );
+			info.appendChild( el( 'p', 'faracart-t3__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( mission.is_money ? formatMoney( mission.target, currency ) : formatNumber( mission.target ) ) ) );
 		}
 
 		if ( settings.showAmounts !== false ) {
 			var paid = el( 'div', 'faracart-t3__amount' );
 			paid.appendChild( el( 'span', 'faracart-t3__amount-label', uiLabel( 'paid', 'Paid' ) ) );
-			paid.appendChild( el( 'span', 'faracart-t3__amount-value', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
+			paid.appendChild( el( 'span', 'faracart-t3__amount-value', mission.is_money ? formatMoney( mission.current, currency ) : formatNumber( mission.current ) ) );
 			info.appendChild( paid );
 
 			var left = el( 'div', 'faracart-t3__amount' );
 			left.appendChild( el( 'span', 'faracart-t3__amount-label', uiLabel( 'remaining', 'Remaining' ) ) );
-			left.appendChild( el( 'span', 'faracart-t3__amount-value faracart-t3__amount-value--accent', goal.is_money ? formatMoney( goal.remaining, currency ) : formatNumber( goal.remaining ) ) );
+			left.appendChild( el( 'span', 'faracart-t3__amount-value faracart-t3__amount-value--accent', mission.is_money ? formatMoney( mission.remaining, currency ) : formatNumber( mission.remaining ) ) );
 			info.appendChild( left );
 		}
 
@@ -1865,7 +1865,7 @@
 		panel.appendChild( row );
 
 		if ( settings.showCta !== false ) {
-			var cta = tplCta( goal, currency, uiLabel( 'view_products', 'View products' ), 'faracart-t3__cta' );
+			var cta = tplCta( mission, currency, uiLabel( 'view_products', 'View products' ), 'faracart-t3__cta' );
 
 			if ( cta ) {
 				panel.appendChild( cta );
@@ -1876,38 +1876,38 @@
 	}
 
 	/**
-	 * Template 4 — Product Recommendation + Goal (Concept 07). A gradient
+	 * Template 4 — Product Recommendation + Mission (Concept 07). A gradient
 	 * progress header (title + remaining chip + bar) followed by the
-	 * goal's own recommended products (the existing FaraCart / WooCommerce
+	 * mission's own recommended products (the existing FaraCart / WooCommerce
 	 * recommendation data) with add-to-cart buttons.
 	 *
-	 * @param {Object} goal     Progress goal entry.
+	 * @param {Object} mission     Progress mission entry.
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t4Panel( goal, currency ) {
-		var settings = goal.template_settings || {};
+	function t4Panel( mission, currency ) {
+		var settings = mission.template_settings || {};
 		var accent = settings.accent || '#2563eb';
 		var headerBg = settings.headerBg || accent;
 		var muted = settings.secondaryText || '#6b7280';
 		var text = settings.text || '#1f2937';
-		var products = ( goal.suggestions && goal.suggestions.length ) ? goal.suggestions : [];
+		var products = ( mission.suggestions && mission.suggestions.length ) ? mission.suggestions : [];
 		var panel = el( 'div', 'faracart-t4' );
 
 		// Gradient progress header.
 		var header = el( 'div', 'faracart-t4__header' );
 		header.style.background = 'linear-gradient(135deg, ' + headerBg + ', ' + headerBg + 'cc)';
 		var headerRow = el( 'div', 'faracart-t4__header-row' );
-		headerRow.appendChild( el( 'span', 'faracart-t4__title', String( goal.goal_name || '' ) ) );
+		headerRow.appendChild( el( 'span', 'faracart-t4__title', String( mission.mission_name || '' ) ) );
 
-		if ( goal.completed ) {
+		if ( mission.completed ) {
 			headerRow.appendChild( el( 'span', 'faracart-t4__chip', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
 		} else if ( settings.showRemaining !== false ) {
-			headerRow.appendChild( el( 'span', 'faracart-t4__chip', remainingLabel( goal, currency ) ) );
+			headerRow.appendChild( el( 'span', 'faracart-t4__chip', remainingLabel( mission, currency ) ) );
 		}
 
 		header.appendChild( headerRow );
-		header.appendChild( progressBar( goal ) );
+		header.appendChild( progressBar( mission ) );
 		panel.appendChild( header );
 
 		// Recommended products.
@@ -1916,7 +1916,7 @@
 		if ( settings.showHeading !== false ) {
 			var heading = el( 'p', 'faracart-t4__heading' );
 			heading.appendChild( el( 'span', 'faracart-t4__heading-icon', '\uD83D\uDCA1' ) );
-			heading.appendChild( document.createTextNode( ' ' + uiLabel( 'recommend_heading', 'Add these products to reach your goal faster:' ) ) );
+			heading.appendChild( document.createTextNode( ' ' + uiLabel( 'recommend_heading', 'Add these products to reach your mission faster:' ) ) );
 			body.appendChild( heading );
 		}
 
@@ -1924,7 +1924,7 @@
 			body.appendChild( el( 'p', 'faracart-t4__empty', uiLabel( 'unavailable', 'No recommendations available right now.' ) ) );
 		} else {
 			for ( var i = 0; i < products.length; i++ ) {
-				body.appendChild( recommendRow( products[ i ], goal ) );
+				body.appendChild( recommendRow( products[ i ], mission ) );
 			}
 		}
 
@@ -1933,40 +1933,40 @@
 	}
 
 	/**
-	 * Template 5 — Compact Floating / Sticky Goal (Concept 08). A compact
+	 * Template 5 — Compact Floating / Sticky Mission (Concept 08). A compact
 	 * dark bar: icon badge, slim progress, remaining amount and a small
 	 * CTA. Deliberately compact — never a normal large card.
 	 *
-	 * @param {Object} goal     Progress goal entry.
+	 * @param {Object} mission     Progress mission entry.
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t5Panel( goal, currency ) {
-		var settings = goal.template_settings || {};
+	function t5Panel( mission, currency ) {
+		var settings = mission.template_settings || {};
 		var accent = settings.accent || '#4ade80';
 		var panel = el( 'div', 'faracart-t5' );
 
 		if ( settings.showIcon !== false ) {
-			var badge = el( 'span', 'faracart-t5__badge', String( goal.icon || '' ).trim() || '\uD83D\uDE9A' );
+			var badge = el( 'span', 'faracart-t5__badge', String( mission.icon || '' ).trim() || '\uD83D\uDE9A' );
 			panel.appendChild( badge );
 		}
 
 		var body = el( 'div', 'faracart-t5__body' );
 		var row = el( 'div', 'faracart-t5__row' );
-		row.appendChild( el( 'span', 'faracart-t5__title', String( goal.goal_name || '' ) ) );
+		row.appendChild( el( 'span', 'faracart-t5__title', String( mission.mission_name || '' ) ) );
 
-		if ( goal.completed ) {
+		if ( mission.completed ) {
 			row.appendChild( el( 'span', 'faracart-t5__done', uiLabel( 'completed', 'Completed' ) + ' \u2713' ) );
 		} else if ( settings.showRemaining !== false ) {
-			row.appendChild( el( 'span', 'faracart-t5__remaining', remainingLabel( goal, currency ) ) );
+			row.appendChild( el( 'span', 'faracart-t5__remaining', remainingLabel( mission, currency ) ) );
 		}
 
 		body.appendChild( row );
-		body.appendChild( progressBar( goal ) );
+		body.appendChild( progressBar( mission ) );
 		panel.appendChild( body );
 
-		if ( settings.showCta !== false && ! goal.completed ) {
-			var cta = tplCta( goal, currency, uiLabel( 'add', 'Add' ), 'faracart-t5__cta' );
+		if ( settings.showCta !== false && ! mission.completed ) {
+			var cta = tplCta( mission, currency, uiLabel( 'add', 'Add' ), 'faracart-t5__cta' );
 
 			if ( cta ) {
 				panel.appendChild( cta );
@@ -1983,13 +1983,13 @@
 	 * current/remaining amounts and a refined outline CTA, plus a
 	 * highlighted "almost completed" callout.
 	 *
-	 * @param {Object} goal     Progress goal entry.
+	 * @param {Object} mission     Progress mission entry.
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t6Panel( goal, currency ) {
-		var settings = goal.template_settings || {};
-		var percent = clampPercent( goal.percentage );
+	function t6Panel( mission, currency ) {
+		var settings = mission.template_settings || {};
+		var percent = clampPercent( mission.percentage );
 		var gold = settings.accent || '#d4af37';
 		var progressColor = settings.progressColor || gold;
 		var muted = settings.secondaryText || '#9ca3af';
@@ -2001,19 +2001,19 @@
 		var header = el( 'div', 'faracart-t6__header' );
 		var headerMain = el( 'div', 'faracart-t6__header-main' );
 		headerMain.appendChild( el( 'span', 'faracart-t6__rail' ) );
-		headerMain.appendChild( el( 'span', 'faracart-t6__eyebrow', uiLabel( 'shopping_goal', 'Shopping goal' ) ) );
+		headerMain.appendChild( el( 'span', 'faracart-t6__eyebrow', uiLabel( 'shopping_mission', 'Shopping mission' ) ) );
 		header.appendChild( headerMain );
 		header.appendChild( el( 'span', 'faracart-t6__header-icon', '\uD83D\uDE9A' ) );
 		panel.appendChild( header );
 
-		panel.appendChild( el( 'h4', 'faracart-t6__title', String( goal.goal_name || '' ) ) );
-		panel.appendChild( el( 'p', 'faracart-t6__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( goal.is_money ? formatMoney( goal.target, currency ) : formatNumber( goal.target ) ) ) );
+		panel.appendChild( el( 'h4', 'faracart-t6__title', String( mission.mission_name || '' ) ) );
+		panel.appendChild( el( 'p', 'faracart-t6__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( mission.is_money ? formatMoney( mission.target, currency ) : formatNumber( mission.target ) ) ) );
 
 		// Elegant progress with a marker dot at the end.
 		var progress = el( 'div', 'faracart-t6__progress' );
-		progress.appendChild( progressBar( goal ) );
+		progress.appendChild( progressBar( mission ) );
 
-		if ( ! goal.completed && percent > 0 && percent < 100 ) {
+		if ( ! mission.completed && percent > 0 && percent < 100 ) {
 			var dot = el( 'span', 'faracart-t6__dot' );
 			dot.style.setProperty( '--faracart-t6-dot', percent + '%' );
 			progress.appendChild( dot );
@@ -2025,18 +2025,18 @@
 			var amounts = el( 'div', 'faracart-t6__amounts' );
 			var paid = el( 'div', 'faracart-t6__amount' );
 			paid.appendChild( el( 'span', 'faracart-t6__amount-label', uiLabel( 'paid', 'Paid' ) ) );
-			paid.appendChild( el( 'span', 'faracart-t6__amount-value', goal.is_money ? formatMoney( goal.current, currency ) : formatNumber( goal.current ) ) );
+			paid.appendChild( el( 'span', 'faracart-t6__amount-value', mission.is_money ? formatMoney( mission.current, currency ) : formatNumber( mission.current ) ) );
 			amounts.appendChild( paid );
 
 			var left = el( 'div', 'faracart-t6__amount faracart-t6__amount--end' );
 			left.appendChild( el( 'span', 'faracart-t6__amount-label', uiLabel( 'remaining', 'Remaining' ) ) );
-			left.appendChild( el( 'span', 'faracart-t6__amount-value faracart-t6__amount-value--gold', goal.is_money ? formatMoney( goal.remaining, currency ) : formatNumber( goal.remaining ) ) );
+			left.appendChild( el( 'span', 'faracart-t6__amount-value faracart-t6__amount-value--gold', mission.is_money ? formatMoney( mission.remaining, currency ) : formatNumber( mission.remaining ) ) );
 			amounts.appendChild( left );
 			panel.appendChild( amounts );
 		}
 
 		if ( settings.showCta !== false ) {
-			var cta = tplCta( goal, currency, uiLabel( 'view_products', 'View products' ), 'faracart-t6__cta' );
+			var cta = tplCta( mission, currency, uiLabel( 'view_products', 'View products' ), 'faracart-t6__cta' );
 
 			if ( cta ) {
 				panel.appendChild( cta );
@@ -2044,11 +2044,11 @@
 		}
 
 		// Almost-completed callout.
-		if ( goal.state === 'nearly_complete' && ! goal.completed ) {
+		if ( mission.state === 'nearly_complete' && ! mission.completed ) {
 			var callout = el( 'div', 'faracart-t6__callout' );
 			callout.appendChild( el( 'span', 'faracart-t6__callout-icon', '\uD83D\uDD25' ) );
 			var calloutText = el( 'div', 'faracart-t6__callout-text' );
-			calloutText.appendChild( el( 'span', 'faracart-t6__callout-title', uiLabel( 'almost_done', 'Almost there!' ) + ' — ' + remainingLabel( goal, currency ) ) );
+			calloutText.appendChild( el( 'span', 'faracart-t6__callout-title', uiLabel( 'almost_done', 'Almost there!' ) + ' — ' + remainingLabel( mission, currency ) ) );
 			calloutText.appendChild( el( 'span', 'faracart-t6__callout-sub', uiLabel( 'finish_today', 'Finish today — your reward is waiting' ) ) );
 			callout.appendChild( calloutText );
 			panel.appendChild( callout );
@@ -2061,51 +2061,51 @@
 	 * The template's core visual (everything except the shared message /
 	 * reward chip / suggestion flow).
 	 *
-	 * @param {Object}  goal     Goal this card renders.
+	 * @param {Object}  mission     Mission this card renders.
 	 * @param {string}  currency ISO currency code.
 	 * @param {string}  template Template variant.
 	 * @return {HTMLElement}
 	 */
-	function templateBody( goal, currency, template, showBar ) {
+	function templateBody( mission, currency, template, showBar ) {
 		switch ( template ) {
 			case 'template-1':
-				return t1Panel( goal, currency );
+				return t1Panel( mission, currency );
 			case 'template-2':
-				return t2Panel( goal, currency );
+				return t2Panel( mission, currency );
 			case 'template-3':
-				return t3Panel( goal, currency );
+				return t3Panel( mission, currency );
 			case 'template-4':
-				return t4Panel( goal, currency );
+				return t4Panel( mission, currency );
 			case 'template-5':
-				return t5Panel( goal, currency );
+				return t5Panel( mission, currency );
 			case 'template-6':
-				return t6Panel( goal, currency );
+				return t6Panel( mission, currency );
 			default:
-				return false === showBar ? null : progressBar( goal );
+				return false === showBar ? null : progressBar( mission );
 		}
 	}
 
 	/**
-	 * GoalContainer — the widget body for one goal's card.
+	 * MissionContainer — the widget body for one mission's card.
 	 *
 	 * Full: reward chip + template body + message + the unified
 	 * recommendations panel. Compact: template body + message + reward
-	 * chip. Every eligible goal renders as its own card (renderWidget
-	 * stacks them), so there is no cross-goal ladder here anymore.
+	 * chip. Every eligible mission renders as its own card (renderWidget
+	 * stacks them), so there is no cross-mission ladder here anymore.
 	 *
-	 * @param {Object} goal     Goal this card renders.
+	 * @param {Object} mission     Mission this card renders.
 	 * @param {string} currency ISO currency code.
 	 * @param {string} variant  full|compact.
 	 * @param {string} template Template variant.
 	 * @return {HTMLElement}
 	 */
-	function goalContainer( goal, currency, variant, template ) {
+	function missionContainer( mission, currency, variant, template ) {
 		// The Phase 13 message state (inactive / unavailable / progressing /
 		// nearly_complete / completed / reward_activated) lands as a modifier
 		// class so the stylesheet can highlight near-completion etc.
-		var stateClass = goal.state ? ' faracart-state--' + goal.state : '';
+		var stateClass = mission.state ? ' faracart-state--' + mission.state : '';
 		var card = el( 'div', 'faracart-card faracart-template--' + template + stateClass );
-		var settings = goal.template_settings || {};
+		var settings = mission.template_settings || {};
 
 		// The resolved template settings drive this card's appearance
 		// (colors, radius, bar height) through the shared CSS variables.
@@ -2117,17 +2117,17 @@
 		}
 
 		var compact = 'compact' === variant;
-		var reward = rewardStatus( goal );
+		var reward = rewardStatus( mission );
 		var showReward = settings.showReward !== false;
 		var showMessage = settings.showMessage !== false;
 
 		if ( compact ) {
-			var compactBody = templateBody( goal, currency, template, settings.showBar );
+			var compactBody = templateBody( mission, currency, template, settings.showBar );
 			if ( compactBody ) {
 				card.appendChild( compactBody );
 			}
 			if ( showMessage ) {
-				card.appendChild( goalMessage( goal ) );
+				card.appendChild( missionMessage( mission ) );
 			}
 			if ( reward && showReward ) {
 				card.appendChild( reward );
@@ -2141,23 +2141,23 @@
 		}
 		card.appendChild( head );
 
-		var body = templateBody( goal, currency, template, settings.showBar );
+		var body = templateBody( mission, currency, template, settings.showBar );
 		if ( body ) {
 			card.appendChild( body );
 		}
 
 		if ( showMessage ) {
-			card.appendChild( goalMessage( goal ) );
+			card.appendChild( missionMessage( mission ) );
 		}
 
 		// Phase 32 (countdown + free gift selection): the deadline chip and
 		// the gift picker render at the bottom of the full card.
-		var countdown = countdownPanel( goal );
+		var countdown = countdownPanel( mission );
 		if ( countdown ) {
 			card.appendChild( countdown );
 		}
 
-		var gift = giftPicker( goal );
+		var gift = giftPicker( mission );
 		if ( gift ) {
 			card.appendChild( gift );
 		}
@@ -2168,7 +2168,7 @@
 		// Template-4 renders its recommended products inline as its body,
 		// so the shared panel would duplicate them — it is suppressed.
 		if ( 'template-4' !== template ) {
-			var upsell = upsellPanel( goal );
+			var upsell = upsellPanel( mission );
 			if ( upsell ) {
 				card.appendChild( upsell );
 			}
@@ -2178,19 +2178,19 @@
 	}
 
 	/**
-	 * Celebration — a confetti burst + pulse when a goal completes
+	 * Celebration — a confetti burst + pulse when a mission completes
 	 * (Phase 32).
 	 *
-	 * Runs once per goal per session (the `celebrated` map). The pieces are
+	 * Runs once per mission per session (the `celebrated` map). The pieces are
 	 * plain CSS-animated spans removed after the animation, so nothing
 	 * lingers on the page.
 	 *
-	 * @param {HTMLElement} card The goal card.
-	 * @param {Object}      goal Progress goal entry.
+	 * @param {HTMLElement} card The mission card.
+	 * @param {Object}      mission Progress mission entry.
 	 * @return {void}
 	 */
-	function celebrate( card, goal ) {
-		celebrated[ String( goal.goal_id || 0 ) ] = true;
+	function celebrate( card, mission ) {
+		celebrated[ String( mission.mission_id || 0 ) ] = true;
 
 		card.classList.add( 'faracart-card--celebrate' );
 
@@ -2221,15 +2221,15 @@
 	 * Renders a campaign's milestones as one connected ladder — dots,
 	 * names, targets and rewards per step, with an overall progress bar
 	 * driven by the top milestone. Used when the campaign's resolved
-	 * template is 'milestone_chain'; otherwise the campaign's goals render
+	 * template is 'milestone_chain'; otherwise the campaign's missions render
 	 * as individual cards.
 	 *
-	 * @param {Array}  goals    The campaign's eligible milestone goals.
+	 * @param {Array}  missions    The campaign's eligible milestone missions.
 	 * @param {Object} campaign Campaign group (template + resolved settings).
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function campaignChain( goals, campaign, currency ) {
+	function campaignChain( missions, campaign, currency ) {
 		var settings = campaign.settings || {};
 		var panel = el( 'div', 'faracart-chain faracart-template--' + campaign.template );
 
@@ -2246,26 +2246,26 @@
 
 		var rung = el( 'ol', 'faracart-chain__steps' );
 
-		for ( var i = 0; i < goals.length; i++ ) {
-			var goal = goals[ i ];
+		for ( var i = 0; i < missions.length; i++ ) {
+			var mission = missions[ i ];
 			var step = el( 'li', 'faracart-chain__step' );
 
-			step.classList.add( goal.completed ? 'faracart-chain__step--done' : 'faracart-chain__step--pending' );
+			step.classList.add( mission.completed ? 'faracart-chain__step--done' : 'faracart-chain__step--pending' );
 			step.appendChild( el( 'span', 'faracart-chain__dot' ) );
 
 			if ( settings.showLabels !== false ) {
-				step.appendChild( el( 'span', 'faracart-chain__label', String( goal.goal_name || '' ) ) );
+				step.appendChild( el( 'span', 'faracart-chain__label', String( mission.mission_name || '' ) ) );
 			}
 
 			if ( settings.showTargets !== false ) {
-				var target = goal.is_money
-					? formatMoney( goal.target, currency )
-					: formatNumber( goal.target );
+				var target = mission.is_money
+					? formatMoney( mission.target, currency )
+					: formatNumber( mission.target );
 				step.appendChild( el( 'span', 'faracart-chain__target', target ) );
 			}
 
-			if ( settings.showRewards !== false && goal.reward && goal.reward.type ) {
-				step.appendChild( el( 'span', 'faracart-chain__reward', ( cfg.labels && cfg.labels[ goal.reward.type ] ) || goal.reward.type ) );
+			if ( settings.showRewards !== false && mission.reward && mission.reward.type ) {
+				step.appendChild( el( 'span', 'faracart-chain__reward', ( cfg.labels && cfg.labels[ mission.reward.type ] ) || mission.reward.type ) );
 			}
 
 			rung.appendChild( step );
@@ -2276,9 +2276,9 @@
 		// Overall progress: the top milestone drives the bar.
 		var top = null;
 
-		for ( var j = 0; j < goals.length; j++ ) {
-			if ( ! top || Number( goals[ j ].target ) > Number( top.target ) ) {
-				top = goals[ j ];
+		for ( var j = 0; j < missions.length; j++ ) {
+			if ( ! top || Number( missions[ j ].target ) > Number( top.target ) ) {
+				top = missions[ j ];
 			}
 		}
 
@@ -2298,12 +2298,12 @@
 	 * template is 'campaign_progress'; the milestone_chain stays the
 	 * connected-ladder variant.
 	 *
-	 * @param {Array}  goals    The campaign's eligible milestone goals.
+	 * @param {Array}  missions    The campaign's eligible milestone missions.
 	 * @param {Object} campaign Campaign group (template + resolved settings).
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function campaignProgress( goals, campaign, currency ) {
+	function campaignProgress( missions, campaign, currency ) {
 		var settings = campaign.settings || {};
 		var panel = el( 'div', 'faracart-campaign faracart-template--' + campaign.template );
 
@@ -2321,23 +2321,23 @@
 		if ( settings.showCounter !== false ) {
 			var done = 0;
 
-			for ( var i = 0; i < goals.length; i++ ) {
-				if ( goals[ i ].completed ) {
+			for ( var i = 0; i < missions.length; i++ ) {
+				if ( missions[ i ].completed ) {
 					done++;
 				}
 			}
 
 			panel.appendChild(
-				el( 'div', 'faracart-campaign__counter', formatNumber( done ) + ' / ' + formatNumber( goals.length ) )
+				el( 'div', 'faracart-campaign__counter', formatNumber( done ) + ' / ' + formatNumber( missions.length ) )
 			);
 		}
 
 		// Overall progress: the top milestone drives the bar.
 		var top = null;
 
-		for ( var j = 0; j < goals.length; j++ ) {
-			if ( ! top || Number( goals[ j ].target ) > Number( top.target ) ) {
-				top = goals[ j ];
+		for ( var j = 0; j < missions.length; j++ ) {
+			if ( ! top || Number( missions[ j ].target ) > Number( top.target ) ) {
+				top = missions[ j ];
 			}
 		}
 
@@ -2348,10 +2348,10 @@
 		if ( settings.showRewards !== false ) {
 			var chips = el( 'div', 'faracart-campaign__rewards' );
 
-			for ( var k = 0; k < goals.length; k++ ) {
-				if ( goals[ k ].reward && goals[ k ].reward.type ) {
+			for ( var k = 0; k < missions.length; k++ ) {
+				if ( missions[ k ].reward && missions[ k ].reward.type ) {
 					chips.appendChild(
-						el( 'span', 'faracart-campaign__reward', ( cfg.labels && cfg.labels[ goals[ k ].reward.type ] ) || goals[ k ].reward.type )
+						el( 'span', 'faracart-campaign__reward', ( cfg.labels && cfg.labels[ missions[ k ].reward.type ] ) || missions[ k ].reward.type )
 					);
 				}
 			}
@@ -2374,14 +2374,14 @@
 	 * ------------------------------------------------------------------ */ 	/**
 	 * Render the progress payload into a single widget container.
 	 *
-	 * Every eligible goal renders as its own card, stacked in a shared
+	 * Every eligible mission renders as its own card, stacked in a shared
 	 * wrapper — a campaign's milestones each get a full card instead of
 	 * one featured card + a tiny ladder. Each card resolves its own
-	 * template (per-widget override → goal Display template → global
+	 * template (per-widget override → mission Display template → global
 	 * Appearance template) and sees only itself, so the milestone
-	 * template degrades to the goal's own single rung.
+	 * template degrades to the mission's own single rung.
 	 *
-	 * Empty state: no eligible goals (or no goals at all) → the container
+	 * Empty state: no eligible missions (or no missions at all) → the container
 	 * is hidden entirely rather than showing a broken bar.
 	 *
 	 * @param {HTMLElement} container Widget container.
@@ -2393,7 +2393,7 @@
 			return;
 		}
 
-		var goals = ( data && data.goals ) || [];
+		var missions = ( data && data.missions ) || [];
 		var variant = 'compact' === container.getAttribute( 'data-faracart-variant' ) ? 'compact' : 'full';
 
 		// The animation toggle (Phase 12) freezes the fill transition via a
@@ -2410,28 +2410,28 @@
 		}
 		container.classList.remove( 'faracart-widget--mobile-hidden' );
 
-		// Group the eligible goals by campaign so a campaign template
+		// Group the eligible missions by campaign so a campaign template
 		// (e.g. the milestone chain) can render the whole group as one
 		// unit. Campaign groups without a configured campaign template —
-		// and every standalone goal — render as individual cards.
+		// and every standalone mission — render as individual cards.
 		var groups = {};
 		var order = [];
 
-		for ( var i = 0; i < goals.length; i++ ) {
-			var goal = goals[ i ];
+		for ( var i = 0; i < missions.length; i++ ) {
+			var mission = missions[ i ];
 
-			if ( ! goal || goal.eligible === false ) {
+			if ( ! mission || mission.eligible === false ) {
 				continue;
 			}
 
-			var groupId = goal.campaign_id || 0;
+			var groupId = mission.campaign_id || 0;
 
 			if ( ! groups[ groupId ] ) {
 				groups[ groupId ] = [];
 				order.push( groupId );
 			}
 
-			groups[ groupId ].push( goal );
+			groups[ groupId ].push( mission );
 		}
 
 		var campaigns = ( data && data.campaigns ) || [];
@@ -2441,39 +2441,39 @@
 			campaignById[ campaigns[ c ].campaign_id ] = campaigns[ c ];
 		}
 
-		// Stack one card per eligible goal (or one chain per campaign
-		// group). Ineligible goals never render (they are skipped, not
+		// Stack one card per eligible mission (or one chain per campaign
+		// group). Ineligible missions never render (they are skipped, not
 		// broken), and when nothing is left the whole widget hides.
 		var rendered = 0;
-		var stack = el( 'div', 'faracart-widget__goals' );
+		var stack = el( 'div', 'faracart-widget__missions' );
 
 		for ( var g = 0; g < order.length; g++ ) {
-			var groupGoals = groups[ order[ g ] ];
+			var groupMissions = groups[ order[ g ] ];
 			var campaign = campaignById[ order[ g ] ];
 
 			if ( campaign && campaign.template ) {
 				if ( 'milestone_chain' === campaign.template ) {
-					stack.appendChild( campaignChain( groupGoals, campaign, data.currency || cfg.currency ) );
+					stack.appendChild( campaignChain( groupMissions, campaign, data.currency || cfg.currency ) );
 					rendered++;
 					continue;
 				}
 
 				// Phase 32: the second campaign template — one overall bar.
 				if ( 'campaign_progress' === campaign.template ) {
-					stack.appendChild( campaignProgress( groupGoals, campaign, data.currency || cfg.currency ) );
+					stack.appendChild( campaignProgress( groupMissions, campaign, data.currency || cfg.currency ) );
 					rendered++;
 					continue;
 				}
 			}
 
-			for ( var j = 0; j < groupGoals.length; j++ ) {
-				var goal = groupGoals[ j ];
-				var card = goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) );
+			for ( var j = 0; j < groupMissions.length; j++ ) {
+				var mission = groupMissions[ j ];
+				var card = missionContainer( mission, data.currency || cfg.currency, variant, widgetTemplate( container, mission ) );
 
 				// Phase 32 (celebration): one confetti burst + pulse per
-				// completed goal per session.
-				if ( goal.completed && cfg.celebrate && ! celebrated[ String( goal.goal_id || 0 ) ] ) {
-					celebrate( card, goal );
+				// completed mission per session.
+				if ( mission.completed && cfg.celebrate && ! celebrated[ String( mission.mission_id || 0 ) ] ) {
+					celebrate( card, mission );
 				}
 
 				stack.appendChild( card );
@@ -2491,7 +2491,7 @@
 	}
 
 	/* ------------------------------------------------------------------ *
-	 * Floating widget (floating goals/campaigns button + drawer)
+	 * Floating widget (floating missions/campaigns button + drawer)
 	 * ------------------------------------------------------------------ */
 
 	/**
@@ -2857,18 +2857,18 @@
 	}
 
 	/**
-	 * The template for a goal card inside the floating drawer.
+	 * The template for a mission card inside the floating drawer.
 	 *
 	 * The drawer has no per-container override, so the resolution is the
-	 * goal's Display template → the store-wide Appearance template → the
+	 * mission's Display template → the store-wide Appearance template → the
 	 * fallback (the same chain widgetTemplate uses for regular widgets).
 	 *
-	 * @param {Object} goal Progress goal entry.
+	 * @param {Object} mission Progress mission entry.
 	 * @return {string}
 	 */
-	function floatingTemplate( goal ) {
-		if ( goal && goal.template && FLOATING_TEMPLATES.indexOf( goal.template ) !== -1 ) {
-			return goal.template;
+	function floatingTemplate( mission ) {
+		if ( mission && mission.template && FLOATING_TEMPLATES.indexOf( mission.template ) !== -1 ) {
+			return mission.template;
 		}
 
 		if ( cfg.template && FLOATING_TEMPLATES.indexOf( cfg.template ) !== -1 ) {
@@ -2879,10 +2879,10 @@
 	}
 
 	/**
-	 * Rebuild the drawer's goal cards from the payload.
+	 * Rebuild the drawer's mission cards from the payload.
 	 *
-	 * The drawer hosts the same compact goal cards the storefront renders
-	 * (goalContainer with the compact variant), capped at a few cards so
+	 * The drawer hosts the same compact mission cards the storefront renders
+	 * (missionContainer with the compact variant), capped at a few cards so
 	 * the panel stays scannable — it scrolls internally past that. The
 	 * close button is preserved across rebuilds.
 	 *
@@ -2909,20 +2909,20 @@
 			drawer.appendChild( close );
 		}
 
-		var goals = ( data && data.goals ) || [];
+		var missions = ( data && data.missions ) || [];
 		var currency = ( data && data.currency ) || cfg.currency;
 		var widget = el( 'div', 'faracart-widget faracart-widget--full' );
-		var stack = el( 'div', 'faracart-widget__goals' );
+		var stack = el( 'div', 'faracart-widget__missions' );
 		var count = 0;
 
-		for ( var i = 0; i < goals.length; i++ ) {
-			var goal = goals[ i ];
+		for ( var i = 0; i < missions.length; i++ ) {
+			var mission = missions[ i ];
 
-			if ( ! goal || goal.eligible === false ) {
+			if ( ! mission || mission.eligible === false ) {
 				continue;
 			}
 
-			stack.appendChild( goalContainer( goal, currency, 'compact', floatingTemplate( goal ) ) );
+			stack.appendChild( missionContainer( mission, currency, 'compact', floatingTemplate( mission ) ) );
 			count++;
 
 			if ( count >= 3 ) {
@@ -2939,9 +2939,9 @@
 	/**
 	 * Build the floating button + drawer markup once.
 	 *
-	 * The container rendered by PHP is inert until an eligible goal
+	 * The container rendered by PHP is inert until an eligible mission
 	 * exists; the button/drawer markup is built on first show and kept
-	 * (only the drawer's goal cards rebuild per payload). Global click /
+	 * (only the drawer's mission cards rebuild per payload). Global click /
 	 * Escape handlers close the drawer, and the animation toggle rides on
 	 * a class the stylesheet freezes.
 	 *
@@ -2997,10 +2997,10 @@
 	 * Render the floating widget for a progress payload.
 	 *
 	 * Gated on the master toggle, the per-device visibility flag and at
-	 * least one eligible goal — the button stays hidden (and the drawer
+	 * least one eligible mission — the button stays hidden (and the drawer
 	 * closes) whenever any gate fails. The position and button appearance
 	 * apply on every render (cheap, and keeps the widget correct across
-	 * resize/scroll), while the drawer goal cards only rebuild when the
+	 * resize/scroll), while the drawer mission cards only rebuild when the
 	 * payload fingerprint changes.
 	 *
 	 * @param {Object} data Progress payload data.
@@ -3014,11 +3014,11 @@
 		}
 
 		var floating = floatingConfig();
-		var goals = ( data && data.goals ) || [];
+		var missions = ( data && data.missions ) || [];
 		var hasEligible = false;
 
-		for ( var i = 0; i < goals.length; i++ ) {
-			if ( goals[ i ] && goals[ i ].eligible !== false ) {
+		for ( var i = 0; i < missions.length; i++ ) {
+			if ( missions[ i ] && missions[ i ].eligible !== false ) {
 				hasEligible = true;
 				break;
 			}
@@ -3054,7 +3054,7 @@
 		var button = container.querySelector( '.faracart-floating__button' );
 
 		if ( button ) {
-			var label = floating.label || floating.labels.open || 'View your cart goals';
+			var label = floating.label || floating.labels.open || 'View your cart missions';
 			button.setAttribute( 'aria-label', label );
 			button.title = label;
 		}
@@ -3188,7 +3188,7 @@
 					// current payload and viewport.
 					renderFloating( data );
 
-					trackGoals( data );
+					trackMissions( data );
 				} );
 			}, function () {
 				safe( function () {
@@ -3290,7 +3290,7 @@
 			'wc_fragments_refreshed',
 			'wc_fragments_loaded',
 			// Coupon apply/remove and cart emptied change the totals (and
-			// therefore goal eligibility) without an item mutation — the
+			// therefore mission eligibility) without an item mutation — the
 			// widget must refresh for them too.
 			'applied_coupon',
 			'removed_coupon',
@@ -3423,20 +3423,20 @@
 					}
 
 					if ( target.classList.contains( 'faracart-upsell__name' ) ) {
-						var goalId = target.getAttribute( 'data-faracart-upsell-goal' ) || '';
+						var missionId = target.getAttribute( 'data-faracart-upsell-mission' ) || '';
 						var productId = target.getAttribute( 'data-faracart-upsell-id' ) || '';
 						var src = target.getAttribute( 'data-faracart-upsell-source' ) || '';
 
 						if ( src === 'suggestion' || src === 'both' ) {
 							sendTrack( 'suggestion_clicked', {
-								goal_id: goalId,
+								mission_id: missionId,
 								product_id: productId,
 							} );
 						}
 
 						if ( ! src || src === 'upsell' || src === 'both' ) {
 							sendUpsellTrack( 'upsell_clicked', {
-								goal_id: goalId,
+								mission_id: missionId,
 								product_id: productId,
 							} );
 						}

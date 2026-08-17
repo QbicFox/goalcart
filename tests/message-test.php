@@ -3,14 +3,14 @@
  * FaraCart dynamic-messaging tests (P13-T01 / P13-T02 / P13-T03 / P13-T04).
  *
  * Boots WordPress and exercises the Phase 13 MessageEngine against
- * synthetic Goal + GoalResult pairs (the engine is UI- and
- * database-independent, like the GoalEngine before it):
+ * synthetic Mission + MissionResult pairs (the engine is UI- and
+ * database-independent, like the MissionEngine before it):
  *
  *  - the service resolves from the DI container and is stateless
  *  - state detection: inactive / unavailable / progressing /
  *    nearly_complete / completed / reward_activated
  *  - variables: {current} {target} {remaining} {percentage} {quantity}
- *    {remaining_quantity} {reward} {goal_name} {campaign_name}
+ *    {remaining_quantity} {reward} {mission_name} {campaign_name}
  *  - locale-aware formatting (currency via wc_price, plain via
  *    number_format_i18n)
  *  - template selection: per-state defaults + display_settings
@@ -49,9 +49,9 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalResult;
-use FaraCart\Goals\MessageEngine;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionResult;
+use FaraCart\Missions\MessageEngine;
 
 $failures = 0;
 $checks   = 0;
@@ -71,8 +71,8 @@ function near( $a, $b, $eps = 0.001 ) {
 	return abs( (float) $a - (float) $b ) < $eps;
 }
 
-function goal( array $data ) {
-	return new Goal( $data );
+function mission( array $data ) {
+	return new Mission( $data );
 }
 
 // Force English assertions (the storefront strings are translated for the
@@ -94,10 +94,10 @@ echo "\n== 1. Service wiring ==\n";
 check( 'MessageEngine resolves from container', $version instanceof MessageEngine );
 
 // A fresh instance renders immediately (no internal state to initialize).
-$smoke_goal = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100 ) );
-$smoke      = new GoalResult( $smoke_goal, 0, 100 );
+$smoke_mission = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100 ) );
+$smoke      = new MissionResult( $smoke_mission, 0, 100 );
 check( 'fresh instance renders a message', false !== strpos(
-	$engine->message( $smoke_goal, $smoke ),
+	$engine->message( $smoke_mission, $smoke ),
 	'left to reach'
 ) );
 
@@ -106,31 +106,31 @@ check( 'fresh instance renders a message', false !== strpos(
 // ---------------------------------------------------------------------------
 echo "\n== 2. States ==\n";
 
-$g = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping' ) );
+$g = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping' ) );
 
-$r = GoalResult::ineligible( $g, GoalResult::REASON_GOAL_INACTIVE );
-check( 'inactive goal -> inactive state', MessageEngine::STATE_INACTIVE === $engine->state( $g, $r ) );
+$r = MissionResult::ineligible( $g, MissionResult::REASON_MISSION_INACTIVE );
+check( 'inactive mission -> inactive state', MessageEngine::STATE_INACTIVE === $engine->state( $g, $r ) );
 
-$r = GoalResult::ineligible( $g, GoalResult::REASON_NO_MATCHING_ITEMS );
+$r = MissionResult::ineligible( $g, MissionResult::REASON_NO_MATCHING_ITEMS );
 check( 'no matching items -> unavailable state', MessageEngine::STATE_UNAVAILABLE === $engine->state( $g, $r ) );
 
-$r = GoalResult::ineligible( $g, GoalResult::REASON_OUT_OF_SCHEDULE );
+$r = MissionResult::ineligible( $g, MissionResult::REASON_OUT_OF_SCHEDULE );
 check( 'out of schedule -> unavailable state', MessageEngine::STATE_UNAVAILABLE === $engine->state( $g, $r ) );
 
-$r = GoalResult::ineligible( $g, GoalResult::REASON_INVALID_TARGET );
+$r = MissionResult::ineligible( $g, MissionResult::REASON_INVALID_TARGET );
 check( 'invalid target -> unavailable state', MessageEngine::STATE_UNAVAILABLE === $engine->state( $g, $r ) );
 
-$r = new GoalResult( $g, 40, 100 );
+$r = new MissionResult( $g, 40, 100 );
 check( '40% -> progressing state', MessageEngine::STATE_PROGRESSING === $engine->state( $g, $r ) );
 
-$r = new GoalResult( $g, 80, 100 );
+$r = new MissionResult( $g, 80, 100 );
 check( '80% -> nearly complete state', MessageEngine::STATE_NEARLY_COMPLETE === $engine->state( $g, $r ) );
 
-$r = new GoalResult( $g, 100, 100 );
+$r = new MissionResult( $g, 100, 100 );
 check( '100% without reward -> completed state', MessageEngine::STATE_COMPLETED === $engine->state( $g, $r ) );
 
-$g_reward = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'reward_type' => 'free_shipping' ) );
-$r        = new GoalResult( $g_reward, 100, 100 );
+$g_reward = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'reward_type' => 'free_shipping' ) );
+$r        = new MissionResult( $g_reward, 100, 100 );
 check( '100% with reward -> reward activated state', MessageEngine::STATE_REWARD_ACTIVATED === $engine->state( $g_reward, $r ) );
 
 // ---------------------------------------------------------------------------
@@ -138,8 +138,8 @@ check( '100% with reward -> reward activated state', MessageEngine::STATE_REWARD
 // ---------------------------------------------------------------------------
 echo "\n== 3. Variables ==\n";
 
-$g = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping', 'reward_type' => 'percent_discount', 'reward_value' => 10 ) );
-$r = new GoalResult( $g, 40, 100 );
+$g = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping', 'reward_type' => 'percent_discount', 'reward_value' => 10 ) );
+$r = new MissionResult( $g, 40, 100 );
 
 $vars = $engine->variables( $g, $r, array( 'quantity' => 2 ) );
 
@@ -158,9 +158,9 @@ check( 'target formatted as money', $money(100) === $vars['target'] );
 check( 'remaining formatted as money', $money(60) === $vars['remaining'] );
 check( 'percentage formatted plain', '40' === $vars['percentage'] );
 check( 'quantity from extra', '2' === $vars['quantity'] );
-check( 'remaining_quantity renders 0 for money goals', '0' === $vars['remaining_quantity'] );
+check( 'remaining_quantity renders 0 for money missions', '0' === $vars['remaining_quantity'] );
 check( 'reward label value-aware', '10% discount' === $vars['reward'] );
-check( 'goal_name variable', 'Free shipping' === $vars['goal_name'] );
+check( 'mission_name variable', 'Free shipping' === $vars['mission_name'] );
 check( 'campaign_name empty when standalone', '' === $vars['campaign_name'] );
 
 // Entity decoding: WooCommerce ships the IRT "تومان" symbol as an HTML
@@ -179,27 +179,27 @@ check( 'entity currency symbol decoded to plain text', false !== strpos( $irt_va
 check( 'no raw entity text in money output', false === strpos( $irt_vars['remaining'], '&#' ) );
 check( 'no raw &nbsp; in money output', false === strpos( $irt_vars['remaining'], '&nbsp;' ) );
 
-// Quantity-mode goal: quantity/remaining_quantity fall back to current/remaining.
-$gq = goal( array( 'type' => Goal::TYPE_QUANTITY, 'target' => 10, 'name' => 'Ten items', 'calculation_mode' => Goal::MODE_QUANTITY ) );
-$rq = new GoalResult( $gq, 4, 10 );
+// Quantity-mode mission: quantity/remaining_quantity fall back to current/remaining.
+$gq = mission( array( 'type' => Mission::TYPE_QUANTITY, 'target' => 10, 'name' => 'Ten items', 'calculation_mode' => Mission::MODE_QUANTITY ) );
+$rq = new MissionResult( $gq, 4, 10 );
 $vars = $engine->variables( $gq, $rq );
 check( 'quantity mode: quantity falls back to current', '4' === $vars['quantity'] );
 check( 'quantity mode: remaining_quantity falls back to remaining', '6' === $vars['remaining_quantity'] );
 check( 'quantity mode: current is plain number', '4' === $vars['current'] );
 
-// Quantity-TYPE goals default to the subtotal mode, so the type itself
+// Quantity-TYPE missions default to the subtotal mode, so the type itself
 // must also mean "not money" (the Phase 13 fix).
-$gq2 = goal( array( 'type' => Goal::TYPE_QUANTITY, 'target' => 10, 'name' => 'Ten items' ) );
-$vars = $engine->variables( $gq2, new GoalResult( $gq2, 4, 10 ) );
-check( 'quantity-type goal is not money', '4' === $vars['current'] );
+$gq2 = mission( array( 'type' => Mission::TYPE_QUANTITY, 'target' => 10, 'name' => 'Ten items' ) );
+$vars = $engine->variables( $gq2, new MissionResult( $gq2, 4, 10 ) );
+check( 'quantity-type mission is not money', '4' === $vars['current'] );
 
-// Campaign name from the goal (repository folds it in) and via extra.
-$gc = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping', 'campaign_name' => 'Summer Sale' ) );
-$vars = $engine->variables( $gc, new GoalResult( $gc, 10, 100 ) );
-check( 'campaign_name from goal', 'Summer Sale' === $vars['campaign_name'] );
+// Campaign name from the mission (repository folds it in) and via extra.
+$gc = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping', 'campaign_name' => 'Summer Sale' ) );
+$vars = $engine->variables( $gc, new MissionResult( $gc, 10, 100 ) );
+check( 'campaign_name from mission', 'Summer Sale' === $vars['campaign_name'] );
 
-$gx = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'name' => 'X' ) );
-$vars = $engine->variables( $gx, new GoalResult( $gx, 10, 100 ), array( 'campaign_name' => 'Fall Drop' ) );
+$gx = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'name' => 'X' ) );
+$vars = $engine->variables( $gx, new MissionResult( $gx, 10, 100 ), array( 'campaign_name' => 'Fall Drop' ) );
 check( 'campaign_name from extra override', 'Fall Drop' === $vars['campaign_name'] );
 
 // ---------------------------------------------------------------------------
@@ -207,45 +207,45 @@ check( 'campaign_name from extra override', 'Fall Drop' === $vars['campaign_name
 // ---------------------------------------------------------------------------
 echo "\n== 4. Reward labels ==\n";
 
-check( 'free shipping label', 'Free shipping' === $engine->reward_label( goal( array( 'reward_type' => 'free_shipping' ) ) ) );
-check( 'percent label with value', '15% discount' === $engine->reward_label( goal( array( 'reward_type' => 'percent_discount', 'reward_value' => 15 ) ) ) );
-check( 'percent label without value', 'Percentage discount' === $engine->reward_label( goal( array( 'reward_type' => 'percent_discount' ) ) ) );
-check( 'fixed label with value', 'Fixed ' . $money(20) . ' off' === $engine->reward_label( goal( array( 'reward_type' => 'fixed_discount', 'reward_value' => 20 ) ) ) );
-check( 'free gift label', 'Free gift' === $engine->reward_label( goal( array( 'reward_type' => 'free_gift' ) ) ) );
-check( 'coupon label', 'Coupon' === $engine->reward_label( goal( array( 'reward_type' => 'coupon' ) ) ) );
-check( 'no reward -> empty label', '' === $engine->reward_label( goal( array() ) ) );
+check( 'free shipping label', 'Free shipping' === $engine->reward_label( mission( array( 'reward_type' => 'free_shipping' ) ) ) );
+check( 'percent label with value', '15% discount' === $engine->reward_label( mission( array( 'reward_type' => 'percent_discount', 'reward_value' => 15 ) ) ) );
+check( 'percent label without value', 'Percentage discount' === $engine->reward_label( mission( array( 'reward_type' => 'percent_discount' ) ) ) );
+check( 'fixed label with value', 'Fixed ' . $money(20) . ' off' === $engine->reward_label( mission( array( 'reward_type' => 'fixed_discount', 'reward_value' => 20 ) ) ) );
+check( 'free gift label', 'Free gift' === $engine->reward_label( mission( array( 'reward_type' => 'free_gift' ) ) ) );
+check( 'coupon label', 'Coupon' === $engine->reward_label( mission( array( 'reward_type' => 'coupon' ) ) ) );
+check( 'no reward -> empty label', '' === $engine->reward_label( mission( array() ) ) );
 
 // ---------------------------------------------------------------------------
 // 5. Templates & defaults (P13-T03 / P13-T04)
 // ---------------------------------------------------------------------------
 echo "\n== 5. Templates ==\n";
 
-$g = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping' ) );
+$g = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'name' => 'Free shipping' ) );
 
-$r = new GoalResult( $g, 40, 100 );
+$r = new MissionResult( $g, 40, 100 );
 check( 'progressing default has no unresolved placeholders', false === strpos( $engine->message( $g, $r ), '{' ) );
 check( 'progressing default mentions remaining', false !== strpos( $engine->message( $g, $r ), $money(60) ) );
 
-$r = new GoalResult( $g, 90, 100 );
+$r = new MissionResult( $g, 90, 100 );
 check( 'nearly complete default', 'Almost there! Only ' . $money(10) . ' left' === $engine->message( $g, $r ) );
 
-$r = new GoalResult( $g, 100, 100 );
-check( 'completed default', 'You reached your goal!' === $engine->message( $g, $r ) );
+$r = new MissionResult( $g, 100, 100 );
+check( 'completed default', 'You reached your mission!' === $engine->message( $g, $r ) );
 
-$g_reward = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'reward_type' => 'free_shipping' ) );
-$r = new GoalResult( $g_reward, 100, 100 );
+$g_reward = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'reward_type' => 'free_shipping' ) );
+$r = new MissionResult( $g_reward, 100, 100 );
 check( 'reward activated default names the reward', 'Reward unlocked: Free shipping' === $engine->message( $g_reward, $r ) );
 
-$r = GoalResult::ineligible( $g, GoalResult::REASON_GOAL_INACTIVE );
+$r = MissionResult::ineligible( $g, MissionResult::REASON_MISSION_INACTIVE );
 check( 'inactive default', 'This offer is not active right now.' === $engine->message( $g, $r ) );
 
-$r = GoalResult::ineligible( $g, GoalResult::REASON_NO_MATCHING_ITEMS );
+$r = MissionResult::ineligible( $g, MissionResult::REASON_NO_MATCHING_ITEMS );
 check( 'unavailable default', 'This offer is not available for your cart.' === $engine->message( $g, $r ) );
 
-// Display-settings overrides (the goal builder's message fields).
-$g_override = goal(
+// Display-settings overrides (the mission builder's message fields).
+$g_override = mission(
 	array(
-		'type'             => Goal::TYPE_AMOUNT,
+		'type'             => Mission::TYPE_AMOUNT,
 		'target'           => 100,
 		'reward_type'      => 'free_shipping',
 		'display_settings' => array(
@@ -254,14 +254,14 @@ $g_override = goal(
 		),
 	)
 );
-$r = new GoalResult( $g_override, 40, 100 );
+$r = new MissionResult( $g_override, 40, 100 );
 check( 'custom message used for progressing', 'Add ' . $money(60) . ' more for Free shipping' === $engine->message( $g_override, $r ) );
 
-$r = new GoalResult( $g_override, 100, 100 );
+$r = new MissionResult( $g_override, 100, 100 );
 check( 'custom completed message used', 'You unlocked Free shipping — enjoy!' === $engine->message( $g_override, $r ) );
 
 // Unknown placeholders stay untouched; the render never throws.
-$r = new GoalResult( $g, 40, 100 );
+$r = new MissionResult( $g, 40, 100 );
 check( 'unknown placeholder untouched', 'x{unknown_var}x' === $engine->render( 'x{unknown_var}x', $g, $r ) );
 check( 'empty template renders empty', '' === $engine->render( '', $g, $r ) );
 
@@ -270,16 +270,16 @@ check( 'empty template renders empty', '' === $engine->render( '', $g, $r ) );
 // ---------------------------------------------------------------------------
 echo "\n== 6. Formatting ==\n";
 
-$g = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 1000, 'name' => 'Big' ) );
-$r = new GoalResult( $g, 250, 1000 );
+$g = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 1000, 'name' => 'Big' ) );
+$r = new MissionResult( $g, 250, 1000 );
 $vars = $engine->variables( $g, $r );
 check( 'money uses store currency (wc_price)', $money(250) === $vars['current'] );
 check( 'money target', $money(1000) === $vars['target'] );
 check( 'plain percentage', '25' === $vars['percentage'] );
 
-$gw = goal( array( 'type' => Goal::TYPE_WEIGHT, 'target' => 5, 'name' => 'Weight' ) );
-$rw = new GoalResult( $gw, 3, 5 );
-check( 'weight goal current is plain number', '3' === $engine->variables( $gw, $rw )['current'] );
+$gw = mission( array( 'type' => Mission::TYPE_WEIGHT, 'target' => 5, 'name' => 'Weight' ) );
+$rw = new MissionResult( $gw, 3, 5 );
+check( 'weight mission current is plain number', '3' === $engine->variables( $gw, $rw )['current'] );
 
 // ---------------------------------------------------------------------------
 // Summary

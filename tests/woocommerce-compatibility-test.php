@@ -55,8 +55,8 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\Goal;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\Mission;
 use FaraCart\Rewards\Applicators\FreeShippingApplicator;
 use FaraCart\Rewards\Reward;
 
@@ -194,7 +194,7 @@ if ( class_exists( 'WC_Product_Simple' ) ) {
 	$cart->cart_contents['a'] = cart_line( 'a', 0, 0, 1, 100.0, 100.0, $sale );
 
 	$ctx = CartContext::from_cart( $cart );
-	check( 'sale products included by default', near( 100, $ctx->amount( Goal::MODE_SUBTOTAL ) ) );
+	check( 'sale products included by default', near( 100, $ctx->amount( Mission::MODE_SUBTOTAL ) ) );
 
 	$ctx = CartContext::from_cart( $cart, array( 'include_sale' => false ) );
 	check( 'sale products dropped when include_sale off', $ctx->is_empty() );
@@ -205,7 +205,7 @@ if ( class_exists( 'WC_Product_Simple' ) ) {
 	// make the cart hold a line tax the way a real totals pass does
 	$tax_cart->cart_contents['t1']['line_tax'] = 20.0;
 	$ctx = CartContext::from_cart( $tax_cart, array( 'include_tax' => true ) );
-	check( 'include_tax folds line tax into subtotal', near( 220, $ctx->amount( Goal::MODE_SUBTOTAL ) ) );
+	check( 'include_tax folds line tax into subtotal', near( 220, $ctx->amount( Mission::MODE_SUBTOTAL ) ) );
 } else {
 	echo "SKIP sale/tax checks (WC_Product_Simple unavailable)\n";
 }
@@ -223,7 +223,7 @@ if ( class_exists( 'WC_Shipping_Rate' ) ) {
 		return new \WC_Shipping_Rate( $id, 'Flat', $cost, array(), $parts[0], $instance );
 	};
 
-	$open  = Reward::from_goal( new Goal( array( 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ) );
+	$open  = Reward::from_mission( new Mission( array( 'reward_type' => Reward::TYPE_FREE_SHIPPING ) ) );
 	$rates = $fs->apply_to_rates(
 		array( 'flat_rate:3' => $rate( 'flat_rate:3', 12 ), 'flat_rate:9' => $rate( 'flat_rate:9', 25 ) ),
 		array(),
@@ -231,8 +231,8 @@ if ( class_exists( 'WC_Shipping_Rate' ) ) {
 	);
 	check( 'unrestricted free shipping zeroes all rates', near( $rates['flat_rate:3']->cost, 0 ) && near( $rates['flat_rate:9']->cost, 0 ) );
 
-	$restricted = Reward::from_goal(
-		new Goal(
+	$restricted = Reward::from_mission(
+		new Mission(
 			array(
 				'reward_type' => Reward::TYPE_FREE_SHIPPING,
 				'reward_meta' => array( 'shipping_method_ids' => array( 'flat_rate:3' ) ),

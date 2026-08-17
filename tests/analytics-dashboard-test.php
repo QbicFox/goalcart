@@ -9,7 +9,7 @@
  *  - service wiring: AnalyticsController resolves from the container and
  *    the GET /analytics route is registered
  *  - arg schema (P17-T02): date validation, the reward-type whitelist,
- *    goal_ids items, the limit clamp
+ *    mission_ids items, the limit clamp
  *  - permissions: anonymous dispatch is rejected (403), an authenticated
  *    administrator dispatch returns the full payload
  *  - summary KPIs (P17-T01): impressions, completions, completion rate,
@@ -17,13 +17,13 @@
  *    add-to-cart rate over seeded events
  *  - trend (P17-T03): a zero-filled daily series summing exactly to the
  *    seeded totals, with multi-day buckets
- *  - top lists: top goals / top campaigns / top suggested products with
+ *  - top lists: top missions / top campaigns / top suggested products with
  *    the expected ranking, names and derived rates
- *  - filters (P17-T02): campaign, goal, goal ids, reward type, product,
+ *  - filters (P17-T02): campaign, mission, mission ids, reward type, product,
  *    future date range and limit — each slicing the payload correctly
  *  - full rollback verification (no residue)
  *
- * All writes (goals, campaigns, posts, users, events, rate-limit
+ * All writes (missions, campaigns, posts, users, events, rate-limit
  * transients) happen inside a single database transaction that is rolled
  * back; absence of residue is asserted afterwards.
  *
@@ -58,7 +58,7 @@ use FaraCart\Analytics\AnalyticsRepository;
 use FaraCart\Analytics\Tracker;
 use FaraCart\REST\AnalyticsController;
 use FaraCart\REST\CampaignsController;
-use FaraCart\REST\GoalsController;
+use FaraCart\REST\MissionsController;
 
 $failures = 0;
 $checks   = 0;
@@ -99,7 +99,7 @@ $container = \FaraCart\Plugin::instance()->container();
 $repo           = $container->get( AnalyticsRepository::class );
 $tracker        = $container->get( Tracker::class );
 $analytics_ctrl = $container->get( AnalyticsController::class );
-$goals_ctrl     = $container->get( GoalsController::class );
+$missions_ctrl     = $container->get( MissionsController::class );
 $campaigns_ctrl = $container->get( CampaignsController::class );
 
 $server = rest_get_server();
@@ -136,8 +136,8 @@ check( 'bogus reward rejected by schema', is_wp_error( rest_validate_value_from_
 check( 'coupon reward accepted by schema', true === rest_validate_value_from_schema( 'coupon', $args['reward'], 'reward' ) );
 check( 'empty reward accepted by schema', true === rest_validate_value_from_schema( '', $args['reward'], 'reward' ) );
 
-check( 'goal_ids items validated', is_wp_error( rest_validate_value_from_schema( array( 0, -1 ), $args['goal_ids'], 'goal_ids' ) ) );
-check( 'positive goal_ids accepted', true === rest_validate_value_from_schema( array( 3, 7 ), $args['goal_ids'], 'goal_ids' ) );
+check( 'mission_ids items validated', is_wp_error( rest_validate_value_from_schema( array( 0, -1 ), $args['mission_ids'], 'mission_ids' ) ) );
+check( 'positive mission_ids accepted', true === rest_validate_value_from_schema( array( 3, 7 ), $args['mission_ids'], 'mission_ids' ) );
 check( 'limit above max rejected', is_wp_error( rest_validate_value_from_schema( 25, $args['limit'], 'limit' ) ) );
 
 // ---------------------------------------------------------------------------
@@ -151,34 +151,34 @@ $events_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$events_table}" );
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	// 3.1 Seed: campaign X with goal A (free_shipping reward), standalone
-	// goal B (coupon reward), and two suggested products.
+	// 3.1 Seed: campaign X with mission A (free_shipping reward), standalone
+	// mission B (coupon reward), and two suggested products.
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/campaigns' );
 	$req->set_param( 'name', 'Analytics Campaign X' );
 	$req->set_param( 'status', 'active' );
 	$resp = $campaigns_ctrl->handle_create( $req );
 	$campaign_x = (int) $resp->get_data()['data']['id'];
 
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
-	$req->set_param( 'name', 'Analytics Goal A' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
+	$req->set_param( 'name', 'Analytics Mission A' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 500 );
 	$req->set_param( 'reward_type', 'free_shipping' );
 	$req->set_param( 'campaign_id', $campaign_x );
-	$resp = $goals_ctrl->handle_create( $req );
-	$goal_a = (int) $resp->get_data()['data']['id'];
+	$resp = $missions_ctrl->handle_create( $req );
+	$mission_a = (int) $resp->get_data()['data']['id'];
 
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/goals' );
-	$req->set_param( 'name', 'Analytics Goal B' );
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/missions' );
+	$req->set_param( 'name', 'Analytics Mission B' );
 	$req->set_param( 'type', 'amount' );
 	$req->set_param( 'target', 100 );
 	$req->set_param( 'reward_type', 'coupon' );
-	$resp = $goals_ctrl->handle_create( $req );
-	$goal_b = (int) $resp->get_data()['data']['id'];
+	$resp = $missions_ctrl->handle_create( $req );
+	$mission_b = (int) $resp->get_data()['data']['id'];
 
 	check( 'campaign seeded', $campaign_x > 0 );
-	check( 'goal A seeded', $goal_a > 0 );
-	check( 'goal B seeded', $goal_b > 0 );
+	check( 'mission A seeded', $mission_a > 0 );
+	check( 'mission B seeded', $mission_b > 0 );
 
 	// Suggested products must exist as posts for the top-products join
 	// (explicit IDs so the events' product_id references resolve).
@@ -209,7 +209,7 @@ try {
 	$seed_a_impressions = array();
 	foreach ( array( 100, 200, 300 ) as $value ) {
 		$seed_a_impressions[] = $tracker->record( Tracker::EVENT_GOAL_IMPRESSION, array(
-			'goal_id'     => $goal_a,
+			'mission_id'     => $mission_a,
 			'campaign_id' => $campaign_x,
 			'cart_value'  => $value,
 			'session_id'  => $session,
@@ -217,13 +217,13 @@ try {
 	}
 
 	$tracker->record( Tracker::EVENT_GOAL_COMPLETED, array(
-		'goal_id'     => $goal_a,
+		'mission_id'     => $mission_a,
 		'campaign_id' => $campaign_x,
 		'cart_value'  => 300,
 		'session_id'  => $session,
 	) );
 	$tracker->record( Tracker::EVENT_REWARD_ACTIVATED, array(
-		'goal_id'     => $goal_a,
+		'mission_id'     => $mission_a,
 		'campaign_id' => $campaign_x,
 		'cart_value'  => 400,
 		'session_id'  => $session,
@@ -231,41 +231,41 @@ try {
 
 	foreach ( array( 50, 60 ) as $value ) {
 		$tracker->record( Tracker::EVENT_GOAL_IMPRESSION, array(
-			'goal_id'    => $goal_b,
+			'mission_id'    => $mission_b,
 			'cart_value' => $value,
 			'session_id' => $session,
 		) );
 	}
 
-	$goal_b_completion = $tracker->record( Tracker::EVENT_GOAL_COMPLETED, array(
-		'goal_id'    => $goal_b,
+	$mission_b_completion = $tracker->record( Tracker::EVENT_GOAL_COMPLETED, array(
+		'mission_id'    => $mission_b,
 		'cart_value' => 60,
 		'session_id' => $session,
 	) );
 
 	for ( $i = 0; $i < 4; $i++ ) {
 		$tracker->record( Tracker::EVENT_SUGGESTION_IMPRESSION, array(
-			'goal_id'    => $goal_a,
+			'mission_id'    => $mission_a,
 			'product_id' => 900007,
 			'session_id' => $session,
 		) );
 	}
 	for ( $i = 0; $i < 2; $i++ ) {
 		$tracker->record( Tracker::EVENT_SUGGESTION_IMPRESSION, array(
-			'goal_id'    => $goal_b,
+			'mission_id'    => $mission_b,
 			'product_id' => 900008,
 			'session_id' => $session,
 		) );
 	}
 	for ( $i = 0; $i < 2; $i++ ) {
 		$tracker->record( Tracker::EVENT_SUGGESTION_CLICKED, array(
-			'goal_id'    => $goal_a,
+			'mission_id'    => $mission_a,
 			'product_id' => 900007,
 			'session_id' => $session,
 		) );
 	}
 	$tracker->record( Tracker::EVENT_SUGGESTED_PRODUCT_ADDED, array(
-		'goal_id'    => $goal_a,
+		'mission_id'    => $mission_a,
 		'product_id' => 900007,
 		'session_id' => $session,
 	) );
@@ -281,10 +281,10 @@ try {
 	$wpdb->update(
 		$events_table,
 		array( 'created_at' => $yesterday . ' 10:00:00' ),
-		array( 'id' => $goal_b_completion )
+		array( 'id' => $mission_b_completion )
 	);
 
-	check( 'seed events recorded', $seed_a_impressions[0] > 0 && $goal_b_completion > 0 );
+	check( 'seed events recorded', $seed_a_impressions[0] > 0 && $mission_b_completion > 0 );
 
 	// 3.3 Summary KPIs (P17-T01) over the default 30-day window.
 	$req  = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
@@ -315,7 +315,7 @@ try {
 	// Phase 6 (Analytics Redesign — Improvement.md §21–§30): the summary
 	// also exposes the attribution funnel (views → progressed → completed
 	// → purchased) and the assisted/influenced revenue splits, and the
-	// payload carries the per-goal comparison rows (§27) — all additive.
+	// payload carries the per-mission comparison rows (§27) — all additive.
 	check( 'summary extended with funnel', isset( $summary['funnel'] ) && is_array( $summary['funnel'] ) );
 	check(
 		'summary funnel has the four stages',
@@ -323,7 +323,7 @@ try {
 	);
 	check( 'summary extended with assisted_sales', array_key_exists( 'assisted_sales', $summary ) );
 	check( 'summary extended with influenced_sales', array_key_exists( 'influenced_sales', $summary ) );
-	check( 'payload has goal_comparison', isset( $data['data']['goal_comparison'] ) && is_array( $data['data']['goal_comparison'] ) );
+	check( 'payload has mission_comparison', isset( $data['data']['mission_comparison'] ) && is_array( $data['data']['mission_comparison'] ) );
 
 	// 3.4 Trend (P17-T03): zero-filled daily series over the window.
 	$today  = current_time( 'Y-m-d' );
@@ -354,13 +354,13 @@ try {
 	$resp = $analytics_ctrl->handle_get( $req );
 	$data = $resp->get_data();
 
-	$top_goals = $data['data']['top_goals'];
-	check( 'top goals has 2 entries', 2 === count( $top_goals ) );
-	check( 'top goals ranks goal A first', isset( $top_goals[0] ) && $goal_a === (int) $top_goals[0]['id'] );
-	check( 'top goals names resolved', isset( $top_goals[0] ) && 'Analytics Goal A' === $top_goals[0]['name'] );
-	check( 'top goal A completions', isset( $top_goals[0] ) && 2 === (int) $top_goals[0]['completions'] );
-	check( 'top goal B follows', isset( $top_goals[1] ) && $goal_b === (int) $top_goals[1]['id'] );
-	check( 'top goal completion rate', isset( $top_goals[1] ) && near( 0.5, $top_goals[1]['completion_rate'] ) );
+	$top_missions = $data['data']['top_missions'];
+	check( 'top missions has 2 entries', 2 === count( $top_missions ) );
+	check( 'top missions ranks mission A first', isset( $top_missions[0] ) && $mission_a === (int) $top_missions[0]['id'] );
+	check( 'top missions names resolved', isset( $top_missions[0] ) && 'Analytics Mission A' === $top_missions[0]['name'] );
+	check( 'top mission A completions', isset( $top_missions[0] ) && 2 === (int) $top_missions[0]['completions'] );
+	check( 'top mission B follows', isset( $top_missions[1] ) && $mission_b === (int) $top_missions[1]['id'] );
+	check( 'top mission completion rate', isset( $top_missions[1] ) && near( 0.5, $top_missions[1]['completion_rate'] ) );
 
 	$top_campaigns = $data['data']['top_campaigns'];
 	check( 'top campaigns has 1 entry', 1 === count( $top_campaigns ) );
@@ -389,17 +389,17 @@ try {
 	check( 'campaign filter revenue', near( 700, $summary['revenue_influenced'] ) );
 
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
-	$req->set_param( 'goal_id', $goal_b );
+	$req->set_param( 'mission_id', $mission_b );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
-	check( 'goal filter impressions', 2 === (int) $summary['impressions'] );
-	check( 'goal filter completions', 1 === (int) $summary['completions'] );
+	check( 'mission filter impressions', 2 === (int) $summary['impressions'] );
+	check( 'mission filter completions', 1 === (int) $summary['completions'] );
 
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
-	$req->set_param( 'goal_ids', array( $goal_a, $goal_b ) );
+	$req->set_param( 'mission_ids', array( $mission_a, $mission_b ) );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
-	check( 'goal_ids filter impressions', 5 === (int) $summary['impressions'] );
+	check( 'mission_ids filter impressions', 5 === (int) $summary['impressions'] );
 
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'reward', 'free_shipping' );
@@ -426,19 +426,19 @@ try {
 	check( 'product filter purchase fields null', null === $summary['purchased_orders'] && null === $summary['attributed_sales'] && null === $summary['estimated_profit'] );
 	check( 'product filter legacy impressions intact', array_key_exists( 'impressions', $summary ) );
 
-	// Phase 6: the goal comparison rows respect the filters (§27) — a
-	// goal filter narrows them to that goal, an unmatched filter yields
+	// Phase 6: the mission comparison rows respect the filters (§27) — a
+	// mission filter narrows them to that mission, an unmatched filter yields
 	// no rows, and a product filter cannot be expressed in attribution
 	// (null, never a fabricated list).
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
-	$req->set_param( 'goal_id', $goal_b );
+	$req->set_param( 'mission_id', $mission_b );
 	$resp = $analytics_ctrl->handle_get( $req );
-	$comparison = $resp->get_data()['data']['goal_comparison'];
-	check( 'goal filter comparison → exactly the goal', 1 === count( $comparison ) && $goal_b === (int) $comparison[0]['goal_id'] );
+	$comparison = $resp->get_data()['data']['mission_comparison'];
+	check( 'mission filter comparison → exactly the mission', 1 === count( $comparison ) && $mission_b === (int) $comparison[0]['mission_id'] );
 	// array_key_exists (not isset): conversion_rate is legitimately null
 	// without completions — the key must still be present.
 	check(
-		'goal comparison rows carry purchase fields',
+		'mission comparison rows carry purchase fields',
 		array_key_exists( 'views', $comparison[0] )
 			&& array_key_exists( 'converted', $comparison[0] )
 			&& array_key_exists( 'attributed_revenue', $comparison[0] )
@@ -446,26 +446,26 @@ try {
 	);
 
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
-	$req->set_param( 'goal_id', 999999 );
+	$req->set_param( 'mission_id', 999999 );
 	$resp = $analytics_ctrl->handle_get( $req );
-	check( 'unmatched goal → empty goal_comparison', array() === $resp->get_data()['data']['goal_comparison'] );
+	check( 'unmatched mission → empty mission_comparison', array() === $resp->get_data()['data']['mission_comparison'] );
 
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
 	$req->set_param( 'product_id', 900007 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$data = $resp->get_data();
-	check( 'product filter → goal_comparison null', null === $data['data']['goal_comparison'] );
+	check( 'product filter → mission_comparison null', null === $data['data']['mission_comparison'] );
 	check( 'product filter → funnel null', null === $data['data']['summary']['funnel'] );
 
-	// A goal filter that resolves to no goals yields an honest empty
+	// A mission filter that resolves to no missions yields an honest empty
 	// purchase summary — never store-wide data for the wrong filter.
 	$req = new \WP_REST_Request( 'GET', '/faracart/v1/analytics' );
-	$req->set_param( 'goal_id', 999999 );
+	$req->set_param( 'mission_id', 999999 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$summary = $resp->get_data()['data']['summary'];
-	check( 'unmatched goal → purchased_orders 0', 0 === (int) $summary['purchased_orders'] );
-	check( 'unmatched goal → profit_reason_code insufficient_data', 'insufficient_data' === $summary['profit_reason_code'] );
-	check( 'unmatched goal → profit unavailable', false === $summary['profit_available'] && null === $summary['estimated_profit'] );
+	check( 'unmatched mission → purchased_orders 0', 0 === (int) $summary['purchased_orders'] );
+	check( 'unmatched mission → profit_reason_code insufficient_data', 'insufficient_data' === $summary['profit_reason_code'] );
+	check( 'unmatched mission → profit unavailable', false === $summary['profit_available'] && null === $summary['estimated_profit'] );
 
 	// Today-inclusive date bound (regression): a date-only `to` must cover
 	// the whole `to` day. MySQL casts a bare 'YYYY-MM-DD' to midnight, so
@@ -498,7 +498,7 @@ try {
 	$req->set_param( 'limit', 1 );
 	$resp = $analytics_ctrl->handle_get( $req );
 	$data = $resp->get_data();
-	check( 'limit clamps top goals', 1 === count( $data['data']['top_goals'] ) );
+	check( 'limit clamps top missions', 1 === count( $data['data']['top_missions'] ) );
 	check( 'limit clamps top campaigns', 1 === count( $data['data']['top_campaigns'] ) );
 	check( 'limit clamps top products', 1 === count( $data['data']['top_suggested_products'] ) );
 
@@ -524,7 +524,7 @@ try {
 	check( 'dispatch payload has summary', isset( $dispatch_data['data']['summary'] ) );
 	check( 'dispatch summary matches seed', 5 === (int) $dispatch_data['data']['summary']['impressions'] );
 	check( 'dispatch payload has trend', isset( $dispatch_data['data']['trend'] ) && is_array( $dispatch_data['data']['trend'] ) );
-	check( 'dispatch payload has top lists', isset( $dispatch_data['data']['top_goals'], $dispatch_data['data']['top_campaigns'], $dispatch_data['data']['top_suggested_products'] ) );
+	check( 'dispatch payload has top lists', isset( $dispatch_data['data']['top_missions'], $dispatch_data['data']['top_campaigns'], $dispatch_data['data']['top_suggested_products'] ) );
 	wp_set_current_user( 0 );
 } finally {
 	wp_set_current_user( 0 );
@@ -543,9 +543,9 @@ $posts_table = $wpdb->posts;
 $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$posts_table} WHERE post_name = %s", 'suggested-900007' ) );
 check( 'seeded products rolled back', 0 === $count );
 
-$goals_table = \FaraCart\Database\Schema::table( 'goals' );
-$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$goals_table} WHERE name = %s", 'Analytics Goal A' ) );
-check( 'seeded goal rolled back', 0 === $count );
+$missions_table = \FaraCart\Database\Schema::table( 'missions' );
+$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$missions_table} WHERE name = %s", 'Analytics Mission A' ) );
+check( 'seeded mission rolled back', 0 === $count );
 
 $campaigns_table = \FaraCart\Database\Schema::table( 'campaigns' );
 $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$campaigns_table} WHERE name = %s", 'Analytics Campaign X' ) );

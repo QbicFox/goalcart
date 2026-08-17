@@ -9,14 +9,14 @@
  * whole Phase 33 surface as one regression pass:
  *
  *  - unit: tracker dedup windows (view/completed 24h, progress 30 min,
- *    order exactly-once, upsell per session+goal+product), session
+ *    order exactly-once, upsell per session+mission+product), session
  *    validation + fallback, event-whitelist gating and meta sanitization
- *  - integration: a full funnel end-to-end in one transaction — goal
+ *  - integration: a full funnel end-to-end in one transaction — mission
  *    views → progress → completion → order paid → attribution rows →
  *    live metric reads → cached repository reads
- *  - edge cases: no goal / closed gap / no candidates (upsell rank),
+ *  - edge cases: no mission / closed gap / no candidates (upsell rank),
  *    zero-value and non-revenue orders never attributed, refunded
- *    skipped, per-goal scoping, insufficient-data recommendation
+ *    skipped, per-mission scoping, insufficient-data recommendation
  *  - HPOS: the plugin declares custom_order_tables compatibility through
  *    FeaturesUtil, and the store-wide scans go through wc_get_orders
  *  - large datasets: bounded store scans (page cap), bounded metric
@@ -29,19 +29,19 @@
  *    the store's margin/profit data (anonymous callers can never harvest
  *    cost-derived data)
  *  - query optimization: index-backed reads, prepared statements, single
- *    grouped rebuild for upsell_stats, no all-goals scans
+ *    grouped rebuild for upsell_stats, no all-missions scans
  *  - cache validation: generation-versioned transients, the bypass
- *    filter, invalidation on order/goal/product/aggregation events
+ *    filter, invalidation on order/mission/product/aggregation events
  *  - regression: every Phase 33 service resolves, every route registers,
  *    the cron schedule stays intact, and the schema tables/indexes exist
  *
  * Like the other Phase 33 suites, all writes happen inside a single
  * database transaction that is rolled back; verification is scoped to
- * THIS suite's fixtures (goal ids 401–403, sessions efef/fefe, orders
+ * THIS suite's fixtures (mission ids 401–403, sessions efef/fefe, orders
  * 99001+) so it never collides with live store traffic or other suites'
  * residue. The suite is intentionally safe to run alongside the other
  * Phase 33 suites as long as they run sequentially (the suites share the
- * goals/revenue tables and must not run in parallel).
+ * missions/revenue tables and must not run in parallel).
  *
  * Run: php tests/phase33-test.php   (from the plugin directory)
  */
@@ -72,14 +72,14 @@ require dirname( __DIR__ ) . '/ravis-faracart.php';
 
 use FaraCart\Analytics\AttributionEngine;
 use FaraCart\Analytics\DailyAggregator;
-use FaraCart\Analytics\GoalRecommendationEngine;
+use FaraCart\Analytics\MissionRecommendationEngine;
 use FaraCart\Analytics\RevenueRepository;
 use FaraCart\Analytics\RevenueTracker;
 use FaraCart\Analytics\Session;
 use FaraCart\Analytics\UpsellRanker;
 use FaraCart\Database\Installer;
 use FaraCart\Database\Schema;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\Plugin;
 use FaraCart\REST\BaseController;
 use FaraCart\REST\RecommendationsController;
@@ -117,12 +117,12 @@ $repo     = $container->get( RevenueRepository::class );
 $aggregator = $container->get( DailyAggregator::class );
 $ranker   = $container->get( UpsellRanker::class );
 $settings = $container->get( Settings::class );
-$goals_repo = $container->get( GoalRepository::class );
+$missions_repo = $container->get( MissionRepository::class );
 $wpdb     = $GLOBALS['wpdb'];
 
 $revenue_table = Schema::table( 'revenue_events' );
-$attrib_table  = Schema::table( 'goal_attribution' );
-$goals_table   = Schema::table( 'goals' );
+$attrib_table  = Schema::table( 'mission_attribution' );
+$missions_table   = Schema::table( 'missions' );
 $upsell_table  = Schema::table( 'upsell_events' );
 $stats_table   = Schema::table( 'upsell_stats' );
 $daily_table   = Schema::table( 'revenue_daily' );
@@ -145,54 +145,54 @@ $settings->set( 'analytics_enabled', true );
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	// Fixture goals 401/402/403 (unique to this suite).
+	// Fixture missions 401/402/403 (unique to this suite).
 	foreach ( array(
 		array( 'id' => 401, 'reward_type' => 'percent_discount', 'reward_value' => 10, 'reward_max_value' => 50 ),
 		array( 'id' => 402 ),
 		array( 'id' => 403, 'reward_type' => 'free_shipping' ),
-	) as $goal_row ) {
-		$wpdb->insert( $goals_table, array(
-			'id'              => $goal_row['id'],
-			'name'            => 'P33.8 goal ' . $goal_row['id'],
+	) as $mission_row ) {
+		$wpdb->insert( $missions_table, array(
+			'id'              => $mission_row['id'],
+			'name'            => 'P33.8 mission ' . $mission_row['id'],
 			'status'          => 'active',
 			'type'            => 'amount',
 			'target'          => 1000000,
-			'reward_type'     => isset( $goal_row['reward_type'] ) ? $goal_row['reward_type'] : null,
-			'reward_value'    => isset( $goal_row['reward_value'] ) ? $goal_row['reward_value'] : null,
-			'reward_max_value'=> isset( $goal_row['reward_max_value'] ) ? $goal_row['reward_max_value'] : null,
+			'reward_type'     => isset( $mission_row['reward_type'] ) ? $mission_row['reward_type'] : null,
+			'reward_value'    => isset( $mission_row['reward_value'] ) ? $mission_row['reward_value'] : null,
+			'reward_max_value'=> isset( $mission_row['reward_max_value'] ) ? $mission_row['reward_max_value'] : null,
 			'created_at'      => current_time( 'mysql' ),
 			'updated_at'      => current_time( 'mysql' ),
 		) );
 	}
 
-	// --- goal_view dedups per session+goal within 24h. ---
-	$id1 = $tracker->record( 'goal_view', array( 'goal_id' => 401, 'cart_value' => 700000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	$id2 = $tracker->record( 'goal_view', array( 'goal_id' => 401, 'cart_value' => 700000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	check( 'goal_view records once per session+goal (24h)', $id1 > 0 && 0 === $id2 );
+	// --- goal_view dedups per session+mission within 24h. ---
+	$id1 = $tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$id2 = $tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	check( 'goal_view records once per session+mission (24h)', $id1 > 0 && 0 === $id2 );
 
-	$id3 = $tracker->record( 'goal_view', array( 'goal_id' => 401, 'cart_value' => 800000, 'goal_target' => 1000000, 'session_id' => $session_b ) );
+	$id3 = $tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 800000, 'mission_target' => 1000000, 'session_id' => $session_b ) );
 	check( 'goal_view records for a different session', $id3 > 0 );
 
-	$id4 = $tracker->record( 'goal_view', array( 'goal_id' => 402, 'cart_value' => 900000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	check( 'goal_view records for a different goal', $id4 > 0 );
+	$id4 = $tracker->record( 'goal_view', array( 'mission_id' => 402, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	check( 'goal_view records for a different mission', $id4 > 0 );
 
 	// A view older than the 24h window records again (dedup is windowed).
 	$wpdb->update( $revenue_table, array( 'created_at' => date( 'Y-m-d H:i:s', strtotime( '-2 days' ) ) ), array( 'id' => $id1 ) );
-	$id5 = $tracker->record( 'goal_view', array( 'goal_id' => 401, 'cart_value' => 700000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
+	$id5 = $tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
 	check( 'goal_view outside the 24h window records again', $id5 > 0 );
 
 	// --- goal_progress dedups within 30 min, records after. ---
-	$p1 = $tracker->record( 'goal_progress', array( 'goal_id' => 401, 'cart_value' => 900000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	$p2 = $tracker->record( 'goal_progress', array( 'goal_id' => 401, 'cart_value' => 910000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
+	$p1 = $tracker->record( 'goal_progress', array( 'mission_id' => 401, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$p2 = $tracker->record( 'goal_progress', array( 'mission_id' => 401, 'cart_value' => 910000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
 	check( 'goal_progress dedups within 30 min', $p1 > 0 && 0 === $p2 );
 
 	$wpdb->update( $revenue_table, array( 'created_at' => date( 'Y-m-d H:i:s', strtotime( '-1 hour' ) ) ), array( 'id' => $p1 ) );
-	$p3 = $tracker->record( 'goal_progress', array( 'goal_id' => 401, 'cart_value' => 950000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
+	$p3 = $tracker->record( 'goal_progress', array( 'mission_id' => 401, 'cart_value' => 950000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
 	check( 'goal_progress outside the 30 min window records again', $p3 > 0 );
 
-	// --- goal_completed dedups per session+goal (24h). ---
-	$c1 = $tracker->record( 'goal_completed', array( 'goal_id' => 401, 'cart_value' => 1050000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	$c2 = $tracker->record( 'goal_completed', array( 'goal_id' => 401, 'cart_value' => 1050000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
+	// --- goal_completed dedups per session+mission (24h). ---
+	$c1 = $tracker->record( 'goal_completed', array( 'mission_id' => 401, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$c2 = $tracker->record( 'goal_completed', array( 'mission_id' => 401, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
 	check( 'goal_completed dedups within 24h', $c1 > 0 && 0 === $c2 );
 
 	// --- order_paid is exactly-once per order (any session). ---
@@ -205,16 +205,16 @@ try {
 	$v2 = $tracker->record( 'cart_value', array( 'cart_value' => 720000, 'session_id' => $session_a ) );
 	check( 'cart_value dedups within 30 min', $v1 > 0 && 0 === $v2 );
 
-	// --- Upsell events dedup per session+goal+product (24h). ---
-	$u1 = $tracker->record_upsell( 'upsell_impression', array( 'goal_id' => 401, 'product_id' => 5001, 'session_id' => $session_a ) );
-	$u2 = $tracker->record_upsell( 'upsell_impression', array( 'goal_id' => 401, 'product_id' => 5001, 'session_id' => $session_a ) );
-	check( 'upsell_impression dedups per session+goal+product', $u1 > 0 && 0 === $u2 );
+	// --- Upsell events dedup per session+mission+product (24h). ---
+	$u1 = $tracker->record_upsell( 'upsell_impression', array( 'mission_id' => 401, 'product_id' => 5001, 'session_id' => $session_a ) );
+	$u2 = $tracker->record_upsell( 'upsell_impression', array( 'mission_id' => 401, 'product_id' => 5001, 'session_id' => $session_a ) );
+	check( 'upsell_impression dedups per session+mission+product', $u1 > 0 && 0 === $u2 );
 
-	$u3 = $tracker->record_upsell( 'upsell_impression', array( 'goal_id' => 401, 'product_id' => 5001, 'session_id' => $session_b ) );
+	$u3 = $tracker->record_upsell( 'upsell_impression', array( 'mission_id' => 401, 'product_id' => 5001, 'session_id' => $session_b ) );
 	check( 'upsell_impression records for a different session', $u3 > 0 );
 
-	$u4 = $tracker->record_upsell( 'upsell_clicked', array( 'goal_id' => 401, 'product_id' => 5001, 'session_id' => $session_a ) );
-	$u5 = $tracker->record_upsell( 'upsell_added', array( 'goal_id' => 401, 'product_id' => 5001, 'session_id' => $session_a ) );
+	$u4 = $tracker->record_upsell( 'upsell_clicked', array( 'mission_id' => 401, 'product_id' => 5001, 'session_id' => $session_a ) );
+	$u5 = $tracker->record_upsell( 'upsell_added', array( 'mission_id' => 401, 'product_id' => 5001, 'session_id' => $session_a ) );
 	check( 'distinct upsell event types record independently', $u4 > 0 && $u5 > 0 );
 
 	// --- Gating: whitelist rejects bogus types; tracking-off records 0. ---
@@ -222,7 +222,7 @@ try {
 	check( 'revenue type rejected by upsell recorder', 0 === $tracker->record_upsell( 'goal_view', array( 'session_id' => $session_a ) ) );
 
 	$settings->set( 'analytics_enabled', false );
-	check( 'tracking-off records nothing', 0 === $tracker->record( 'goal_view', array( 'goal_id' => 401, 'session_id' => $session_a ) ) );
+	check( 'tracking-off records nothing', 0 === $tracker->record( 'goal_view', array( 'mission_id' => 401, 'session_id' => $session_a ) ) );
 	$settings->set( 'analytics_enabled', true );
 
 	// --- Session validation: an invalid id falls back to the cookie. ---
@@ -266,8 +266,8 @@ check(
 	0 === (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$upsell_table} WHERE session_id IN (%s,%s,%s)", $session_a, $session_b, $session_c ) )
 );
 check(
-	'no fixture goals remain after rollback',
-	0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table} WHERE id IN (401,402,403)" )
+	'no fixture missions remain after rollback',
+	0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table} WHERE id IN (401,402,403)" )
 );
 
 // ---------------------------------------------------------------------------
@@ -284,30 +284,30 @@ try {
 	foreach ( array(
 		array( 'id' => 401, 'reward_type' => 'percent_discount', 'reward_value' => 10, 'reward_max_value' => 50 ),
 		array( 'id' => 402 ),
-	) as $goal_row ) {
-		$wpdb->insert( $goals_table, array(
-			'id'              => $goal_row['id'],
-			'name'            => 'P33.8 goal ' . $goal_row['id'],
+	) as $mission_row ) {
+		$wpdb->insert( $missions_table, array(
+			'id'              => $mission_row['id'],
+			'name'            => 'P33.8 mission ' . $mission_row['id'],
 			'status'          => 'active',
 			'type'            => 'amount',
 			'target'          => 1000000,
-			'reward_type'     => isset( $goal_row['reward_type'] ) ? $goal_row['reward_type'] : null,
-			'reward_value'    => isset( $goal_row['reward_value'] ) ? $goal_row['reward_value'] : null,
-			'reward_max_value'=> isset( $goal_row['reward_max_value'] ) ? $goal_row['reward_max_value'] : null,
+			'reward_type'     => isset( $mission_row['reward_type'] ) ? $mission_row['reward_type'] : null,
+			'reward_value'    => isset( $mission_row['reward_value'] ) ? $mission_row['reward_value'] : null,
+			'reward_max_value'=> isset( $mission_row['reward_max_value'] ) ? $mission_row['reward_max_value'] : null,
 			'created_at'      => current_time( 'mysql' ),
 			'updated_at'      => current_time( 'mysql' ),
 		) );
 	}
 
 	// The complete funnel for session A: view → progress → completed.
-	$tracker->record( 'goal_view', array( 'goal_id' => 401, 'cart_value' => 700000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_progress', array( 'goal_id' => 401, 'cart_value' => 900000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_completed', array( 'goal_id' => 401, 'cart_value' => 1050000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
-	// Exposed-only goal 402 in the same session.
-	$tracker->record( 'goal_view', array( 'goal_id' => 402, 'cart_value' => 800000, 'goal_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'goal_progress', array( 'mission_id' => 401, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'goal_completed', array( 'mission_id' => 401, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	// Exposed-only mission 402 in the same session.
+	$tracker->record( 'goal_view', array( 'mission_id' => 402, 'cart_value' => 800000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
 
-	// A second session (B) only views goal 401.
-	$tracker->record( 'goal_view', array( 'goal_id' => 401, 'cart_value' => 500000, 'goal_target' => 1000000, 'session_id' => $session_b ) );
+	// A second session (B) only views mission 401.
+	$tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 500000, 'mission_target' => 1000000, 'session_id' => $session_b ) );
 
 	// Attribute an order for session A: 401 is direct (progressed +
 	// completed), 402 is assisted (viewed only).
@@ -317,16 +317,16 @@ try {
 		'shipping_total' => 85,
 		'session_id'     => $session_a,
 	) );
-	check( 'order written to 2 goals (direct + assisted)', 2 === $written );
+	check( 'order written to 2 missions (direct + assisted)', 2 === $written );
 
 	$row_401 = $wpdb->get_row(
-		$wpdb->prepare( "SELECT model, incremental_value, goal_completed FROM {$attrib_table} WHERE order_id = %d AND goal_id = %d", 99001, 401 ),
+		$wpdb->prepare( "SELECT model, incremental_value, mission_completed FROM {$attrib_table} WHERE order_id = %d AND mission_id = %d", 99001, 401 ),
 		ARRAY_A
 	);
-	check( 'direct model carries the incremental value', null !== $row_401 && AttributionEngine::MODEL_DIRECT === $row_401['model'] && close( 350000, $row_401['incremental_value'] ) && 1 === (int) $row_401['goal_completed'] );
+	check( 'direct model carries the incremental value', null !== $row_401 && AttributionEngine::MODEL_DIRECT === $row_401['model'] && close( 350000, $row_401['incremental_value'] ) && 1 === (int) $row_401['mission_completed'] );
 
 	$row_402 = $wpdb->get_row(
-		$wpdb->prepare( "SELECT model, incremental_value FROM {$attrib_table} WHERE order_id = %d AND goal_id = %d", 99001, 402 ),
+		$wpdb->prepare( "SELECT model, incremental_value FROM {$attrib_table} WHERE order_id = %d AND mission_id = %d", 99001, 402 ),
 		ARRAY_A
 	);
 	check( 'assisted model carries zero incremental', null !== $row_402 && AttributionEngine::MODEL_ASSISTED === $row_402['model'] && close( 0, $row_402['incremental_value'] ) );
@@ -339,8 +339,8 @@ try {
 
 	// --- Live metric reads reflect the funnel. ---
 	$summary = $engine->attribution_summary();
-	check( 'goal-driven revenue = direct incremental', close( 350000, $summary['goal_driven_revenue'] ) );
-	check( 'goal-influenced revenue = order total', close( 1050000, $summary['goal_influenced_revenue'] ) );
+	check( 'mission-driven revenue = direct incremental', close( 350000, $summary['mission_driven_revenue'] ) );
+	check( 'mission-influenced revenue = order total', close( 1050000, $summary['mission_influenced_revenue'] ) );
 	check( 'summary counts one order', 1 === $summary['orders'] );
 
 	$funnel = $engine->funnel();
@@ -349,15 +349,15 @@ try {
 	check( 'funnel counts one completion', 1 === $funnel['completed'] );
 	check( 'funnel counts one converted order', 1 === $funnel['converted'] );
 
-	$funnel_401 = $engine->funnel( array( 'goal_id' => 401 ) );
-	check( 'per-goal funnel views = 2 sessions', 2 === $funnel_401['views'] );
+	$funnel_401 = $engine->funnel( array( 'mission_id' => 401 ) );
+	check( 'per-mission funnel views = 2 sessions', 2 === $funnel_401['views'] );
 
 	$incremental = $engine->incremental_cart_value();
 	check( 'incremental cart value = peak − baseline', close( 350000, $incremental['average'] ) );
 
-	// Reward cost: completed goal 401 grants 10% of the order total,
+	// Reward cost: completed mission 401 grants 10% of the order total,
 	// capped at the reward max (50).
-	check( 'reward cost from the completed goal', close( 50, $summary['reward_cost'] ) );
+	check( 'reward cost from the completed mission', close( 50, $summary['reward_cost'] ) );
 
 	// --- Cached repository reads over the same window. ---
 	$today = date( 'Y-m-d' );
@@ -365,8 +365,8 @@ try {
 	check( 'cached overview exposes the summary funnel', isset( $overview['summary']['funnel'] ) );
 	check( 'cached overview exposes incremental cart value', isset( $overview['incremental_cart_value']['average'] ) );
 
-	$perf = $repo->goal_performance( array( 'goal_id' => 401, 'from' => $today, 'to' => $today ) );
-	check( 'goal performance returns the fixture goal row', 1 === count( $perf ) && 401 === (int) $perf[0]['goal_id'] );
+	$perf = $repo->mission_performance( array( 'mission_id' => 401, 'from' => $today, 'to' => $today ) );
+	check( 'mission performance returns the fixture mission row', 1 === count( $perf ) && 401 === (int) $perf[0]['mission_id'] );
 } finally {
 	$settings->set( 'enabled', $prev_enabled );
 	$settings->set( 'analytics_enabled', $prev_analytics );
@@ -384,7 +384,7 @@ check(
 	'no fixture rows remain after integration rollback',
 	0 === (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$revenue_table} WHERE session_id IN (%s,%s)", $session_a, $session_b ) )
 	&& 0 === (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$attrib_table} WHERE order_id = %d", 99001 ) )
-	&& 0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table} WHERE id IN (401,402)" )
+	&& 0 === (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table} WHERE id IN (401,402)" )
 );
 
 // Zero-value orders are never revenue-producing.
@@ -445,23 +445,23 @@ try {
 
 // --- Upsell rank edge cases (pure, no DB writes). ---
 $empty = $ranker->rank( array() );
-check( 'rank without goal/remaining is unavailable', empty( $empty['available'] ) && '' !== (string) $empty['reason'] );
+check( 'rank without mission/remaining is unavailable', empty( $empty['available'] ) && '' !== (string) $empty['reason'] );
 
-$closed = $ranker->rank( array( 'goal_id' => 401, 'cart_value' => 1000000, 'remaining' => 0 ) );
+$closed = $ranker->rank( array( 'mission_id' => 401, 'cart_value' => 1000000, 'remaining' => 0 ) );
 check( 'rank with a closed gap is unavailable', empty( $closed['available'] ) && '' !== (string) $closed['reason'] );
 
-// An unknown goal with no explicit remaining has no gap to close — the
+// An unknown mission with no explicit remaining has no gap to close — the
 // ranker degrades to unavailable rather than fabricating a list. (With an
 // explicit remaining the ranker can still rank by gap alone — that is the
 // documented contract for embedded consumers.)
-$ghost = $ranker->rank( array( 'goal_id' => 999999, 'cart_value' => 500000 ) );
-check( 'rank with an unknown goal and no gap is unavailable', empty( $ghost['available'] ) );
+$ghost = $ranker->rank( array( 'mission_id' => 999999, 'cart_value' => 500000 ) );
+check( 'rank with an unknown mission and no gap is unavailable', empty( $ghost['available'] ) );
 
-$ghost_gap = $ranker->rank( array( 'goal_id' => 999999, 'cart_value' => 500000, 'remaining' => 100000 ) );
-check( 'rank with an explicit gap still ranks for a ghost goal', ! empty( $ghost_gap['available'] ) && is_array( $ghost_gap['recommendations'] ) );
+$ghost_gap = $ranker->rank( array( 'mission_id' => 999999, 'cart_value' => 500000, 'remaining' => 100000 ) );
+check( 'rank with an explicit gap still ranks for a ghost mission', ! empty( $ghost_gap['available'] ) && is_array( $ghost_gap['recommendations'] ) );
 
 // --- Recommendation edge cases (pure, no DB writes). ---
-$rec = $container->get( GoalRecommendationEngine::class );
+$rec = $container->get( MissionRecommendationEngine::class );
 $min = (int) apply_filters( 'faracart_recommendation_min_orders', 50 );
 
 // Without any orders in the store, no recommendation is fabricated.
@@ -592,8 +592,8 @@ $routes = function_exists( 'rest_get_server' ) ? rest_get_server()->get_routes()
 
 // Admin endpoints are manage_options-gated.
 check( 'revenue/overview admin-gated', isset( $routes['/faracart/v1/revenue/overview'][0]['permission_callback'] ) );
-check( 'revenue/goals admin-gated', isset( $routes['/faracart/v1/revenue/goals'][0]['permission_callback'] ) );
-check( 'revenue/goal-recommendations admin-gated', isset( $routes['/faracart/v1/revenue/goal-recommendations'][0]['permission_callback'] ) );
+check( 'revenue/missions admin-gated', isset( $routes['/faracart/v1/revenue/missions'][0]['permission_callback'] ) );
+check( 'revenue/mission-recommendations admin-gated', isset( $routes['/faracart/v1/revenue/mission-recommendations'][0]['permission_callback'] ) );
 check( 'revenue/upsells admin-gated', isset( $routes['/faracart/v1/revenue/upsells'][0]['permission_callback'] ) );
 
 // The public rank route has no capability requirement (public by design).
@@ -606,7 +606,7 @@ check( 'rate limit constants present', 60 === BaseController::RATE_LIMIT_COUNT &
 
 // Datetime + numeric arg validation (shared by the revenue endpoints).
 $args = $revenue_ctrl->window_args();
-check( 'revenue window args define goal_id bounds', isset( $args['goal_id']['minimum'] ) && 0 === $args['goal_id']['minimum'] );
+check( 'revenue window args define mission_id bounds', isset( $args['mission_id']['minimum'] ) && 0 === $args['mission_id']['minimum'] );
 check( 'revenue window args validate datetimes', isset( $args['from']['validate_callback'] ) && isset( $args['to']['validate_callback'] ) );
 check( 'datetime validator rejects garbage', ! $revenue_ctrl->validate_datetime_param( '12/34/5678' ) );
 check( 'datetime validator accepts Y-m-d', $revenue_ctrl->validate_datetime_param( '2026-01-01' ) );
@@ -665,23 +665,23 @@ $stats_idx = $wpdb->get_col(
 		Schema::table( 'revenue_events' )
 	)
 );
-check( 'revenue_events indexed for the funnel reads', in_array( 'event_type', $stats_idx, true ) && in_array( 'goal_id', $stats_idx, true ) && in_array( 'session_id', $stats_idx, true ) );
+check( 'revenue_events indexed for the funnel reads', in_array( 'event_type', $stats_idx, true ) && in_array( 'mission_id', $stats_idx, true ) && in_array( 'session_id', $stats_idx, true ) );
 
 $attrib_idx = $wpdb->get_col(
 	$wpdb->prepare(
 		'SELECT INDEX_NAME FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s',
 		$wpdb->dbname,
-		Schema::table( 'goal_attribution' )
+		Schema::table( 'mission_attribution' )
 	)
 );
-check( 'goal_attribution has the order_goal_model unique key', in_array( 'order_goal_model', $attrib_idx, true ) );
+check( 'mission_attribution has the order_mission_model unique key', in_array( 'order_mission_model', $attrib_idx, true ) );
 
 // Regression: every Phase 33 service resolves from the container.
 $services = array(
 	RevenueTracker::class,
 	AttributionEngine::class,
 	DailyAggregator::class,
-	GoalRecommendationEngine::class,
+	MissionRecommendationEngine::class,
 	UpsellRanker::class,
 	RevenueRepository::class,
 	RevenueController::class,
@@ -703,8 +703,8 @@ check( 'all Phase 33 services resolve from the container', $all_resolve );
 $expected_routes = array(
 	'/faracart/v1/revenue/overview',
 	'/faracart/v1/revenue/attribution',
-	'/faracart/v1/revenue/goals',
-	'/faracart/v1/revenue/goal-recommendations',
+	'/faracart/v1/revenue/missions',
+	'/faracart/v1/revenue/mission-recommendations',
 	'/faracart/v1/revenue/upsells',
 	'/faracart/v1/upsell/rank',
 	'/faracart/v1/upsell/track',
@@ -731,7 +731,7 @@ check( 'cleanup scheduled weekly', 'faracart_weekly' === $intervals[ RevenueTrac
 // Regression: the retention cleanup is bounded and respects the filter.
 $wpdb->query( 'START TRANSACTION' );
 try {
-	$old = $tracker->record( 'goal_view', array( 'goal_id' => 401, 'cart_value' => 100, 'goal_target' => 1000000, 'session_id' => $session_c ) );
+	$old = $tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 100, 'mission_target' => 1000000, 'session_id' => $session_c ) );
 	$wpdb->update( $revenue_table, array( 'created_at' => date( 'Y-m-d H:i:s', strtotime( '-200 days' ) ) ), array( 'id' => $old ) );
 
 	add_filter( 'faracart_revenue_retention_days', function () {

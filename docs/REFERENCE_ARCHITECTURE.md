@@ -295,10 +295,10 @@ wooinsights/                      # Plugin root (slug = folder name)
 12. **Utils pattern**: static helper classes (`Helpers`, `Formatting`) for shared sanitization/formatting; `number_format_i18n`, `wc_price`, `date_i18n`.
 13. **Pluggable template engine (FaraCart pattern, extends the registry
     convention)**: a `Template` contract — stable id, translated
-    label/description, scope (goal | campaign | both), a settings
+    label/description, scope (mission | campaign | both), a settings
     `schema` (field type, default, validation, label, group) and a
     `version` — plus a lazy, filterable `TemplateRegistry` (the same
-    class-map convention as the goal-evaluator / reward-applicator
+    class-map convention as the mission-evaluator / reward-applicator
     registries, filterable via `faracart_template_classes`) and a
     resolver (`TemplateEngine`) with a documented resolution order
     (item override → scope default → legacy → fallback) and
@@ -311,7 +311,7 @@ wooinsights/                      # Plugin root (slug = folder name)
 
 ## 12. Patterns That MUST NOT Be Copied
 
-1. **WooInsights business logic**: search tracking, session cookies, funnel/opportunity/quality/typo/synonym/brand/segment/device analytics, notification rules — FaraCart implements its own domain (goals, rewards, campaigns, cart progress).
+1. **WooInsights business logic**: search tracking, session cookies, funnel/opportunity/quality/typo/synonym/brand/segment/device analytics, notification rules — FaraCart implements its own domain (missions, rewards, campaigns, cart progress).
 2. **Table schemas**: the 8 analytics tables are WooInsights-specific; FaraCart defines its own schema following the same *style* (prefix, dbDelta, indexes, FK pattern).
 3. **Settings keys**: `wooinsights_settings` option contents are search-analytics settings; FaraCart has its own settings model.
 4. **The `admin/` and `public/` empty-placeholder dirs** (`.gitkeep`) — legacy from the reference's scaffolding; FaraCart may omit them.

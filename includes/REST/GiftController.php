@@ -18,9 +18,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * Phase 32 (free gift selection): `POST /faracart/v1/gift` — the storefront
  * gift picker calls this when the shopper picks one of the candidate gifts
- * of a completed goal configured in "choose" mode. The reward engine
- * validates the goal is currently completed and the product is in the
- * goal's gift list, then adds it free (session-tracked so a goal that
+ * of a completed mission configured in "choose" mode. The reward engine
+ * validates the mission is currently completed and the product is in the
+ * mission's gift list, then adds it free (session-tracked so a mission that
  * stops qualifying revokes it).
  *
  * The endpoint is public (guests must be able to claim their gift), so it
@@ -46,7 +46,7 @@ class GiftController extends BaseController {
 	const GIFT_NONCE_ACTION = 'faracart_gift_nonce';
 
 	/**
-	 * Reward engine (validates the goal + adds the chosen gift).
+	 * Reward engine (validates the mission + adds the chosen gift).
 	 *
 	 * @var RewardEngine
 	 */
@@ -95,7 +95,7 @@ class GiftController extends BaseController {
 				'callback'            => array( $this, 'handle' ),
 				'permission_callback' => array( $this, 'permission_callback' ),
 				'args'                => array(
-					'goal_id'    => array(
+					'mission_id'    => array(
 						'required'          => true,
 						'type'              => 'integer',
 						'minimum'           => 1,
@@ -161,13 +161,13 @@ class GiftController extends BaseController {
 			);
 		}
 
-		$goal_id    = (int) $request->get_param( 'goal_id' );
+		$mission_id    = (int) $request->get_param( 'mission_id' );
 		$product_id = (int) $request->get_param( 'product_id' );
 
-		if ( ! $this->rewards->add_chosen_gift( $goal_id, $product_id, $cart ) ) {
+		if ( ! $this->rewards->add_chosen_gift( $mission_id, $product_id, $cart ) ) {
 			return $this->error(
 				'faracart_gift_unavailable',
-				__( 'This gift is no longer available for the goal.', 'faracart' ),
+				__( 'This gift is no longer available for the mission.', 'faracart' ),
 				400
 			);
 		}
@@ -178,7 +178,7 @@ class GiftController extends BaseController {
 		return $this->success(
 			array(
 				'added'   => true,
-				'goal_id' => $goal_id,
+				'mission_id' => $mission_id,
 			)
 		);
 	}

@@ -31,23 +31,23 @@ fails and needs attention.
 | analytics-dashboard-test | 110 | legacy `/analytics` payload (drift baseline 31) |
 | analytics-test | 72 | analytics payload fields |
 | attribution-test | 72 | direct/assisted/influenced models, AOV, costs |
-| cart-integration-test | 22 | cart hooks + goal progress integration |
+| cart-integration-test | 22 | cart hooks + mission progress integration |
 | cart-rest-initialization-test | 24 | cart REST init |
-| conflict-test | 57 | goal/campaign conflict resolution, rollback |
-| engine-test | 75 | goal engine evaluation |
+| conflict-test | 57 | mission/campaign conflict resolution, rollback |
+| engine-test | 75 | mission engine evaluation |
 | frontend-test | 140 | storefront widget, templates, Phase 7–9 source-scan guards, best-recommendation + percentage-safety guards |
 | i18n-test | 53 | POT ⇄ fa_IR sync, JED/MO build |
-| message-test | 50 | goal message engine |
+| message-test | 50 | mission message engine |
 | performance-test | 38 | query/cache performance guardrails |
 | phase32-test | 54 | Phase 32 scope |
 | phase33-test | 99 | revenue engine, recommendations, caching |
 | preview-test | 90 | template previews |
 | profit-availability-test | 45 | cost sources, unavailable states |
 | purchase-metrics-test | 107 | funnel, purchase states, profit math, dedupe |
-| recommendation-test | 91 | goal-threshold recommendation engine, best-recommendation ranking |
+| recommendation-test | 91 | mission-threshold recommendation engine, best-recommendation ranking |
 | refactor-test | 81 | UPSELL_REFACTOR: product-cost field, order snapshots, coverage, apply endpoint, upsell-assisted completions, terminology (UICHANGES.md §30/§40 labels) |
 | rest-api-test | 142 | REST routes, duplicate/update/delete flows |
-| revenue-admin-test | 56 | admin payloads (overview/goals/analytics) |
+| revenue-admin-test | 56 | admin payloads (overview/missions/analytics) |
 | revenue-foundation-test | 69 | revenue event recording |
 | reward-test | 130 | reward engine + safety |
 | security-test | 65 | route permission callbacks, caps, 403s |
@@ -68,8 +68,8 @@ fails and needs attention.
 | funnel | `revenue-admin-test.php`, `analytics-dashboard-test.php`, `purchase-metrics-test.php` |
 | estimated profit | `profit-availability-test.php`, `purchase-metrics-test.php`, `revenue-admin-test.php` |
 | profit unavailable | `profit-availability-test.php` (missing cost → unavailable, never invented) |
-| profit negative | `purchase-metrics-test.php` scenario E (goal 505 → −200 stays real) |
-| goal filtering | `purchase-metrics-test.php`, `attribution-test.php` (`goal_id` param) |
+| profit negative | `purchase-metrics-test.php` scenario E (mission 505 → −200 stays real) |
+| mission filtering | `purchase-metrics-test.php`, `attribution-test.php` (`mission_id` param) |
 | date filtering | `purchase-metrics-test.php`, `recommendation-test.php`, `upsell-test.php` (`from`/`to` windows) |
 | direct attribution | `attribution-test.php` (`MODEL_DIRECT`, direct order fixtures) |
 | assisted attribution | `attribution-test.php` (`MODEL_ASSISTED`, exposure-only orders) |
@@ -80,7 +80,7 @@ fails and needs attention.
 ## Documented live-store drift baseline
 
 This plugin is installed on a **live WooCommerce store**. Test suites that
-assume a clean/empty database drift as real orders, events, goals,
+assume a clean/empty database drift as real orders, events, missions,
 campaigns and products accumulate, and the storefront settings/theme are
 the store's, not the defaults fixtures assume. Every suite in the table
 below was green in the earlier phases (before the live data accumulated),
@@ -100,12 +100,12 @@ below) — the failures listed are environment data, not regressions.
 | aggregation-test | 11 | live "today" bucket has real views; fixture rollback residue |
 | phase33-test | 10 | cache generation moves with live activity; invalidation tests are order/timing sensitive |
 | profit-availability-test | 1 | a fixture product could not be rolled back on the live DB |
-| purchase-metrics-test | 4 | live goals/orders carrying the fixture reward types resolve through `ids_by_reward_type`, inflating the reward-filter and no-goals degradation assertions |
+| purchase-metrics-test | 4 | live missions/orders carrying the fixture reward types resolve through `ids_by_reward_type`, inflating the reward-filter and no-missions degradation assertions |
 | revenue-admin-test | 1 | live products with cost data outrank the fixture rows in `upsell_analytics`, so the top row no longer degrades profit to unavailable |
 | suggestion-test | 1 | live catalog products outrank the fixture cross-sell product in the suggestion ranking |
-| upsell-frontend-test | 1 | live catalog products fit the goal gap and outrank the fixture gap-filler product in the public ranking |
-| rest-api-test | 2 | live goals/campaigns collide with fixture names (duplicate "(copy)" suffix assertion) |
-| conflict-test | 3 | live goals/campaigns change conflict-priority ordering + rollback assertions |
+| upsell-frontend-test | 1 | live catalog products fit the mission gap and outrank the fixture gap-filler product in the public ranking |
+| rest-api-test | 2 | live missions/campaigns collide with fixture names (duplicate "(copy)" suffix assertion) |
+| conflict-test | 3 | live missions/campaigns change conflict-priority ordering + rollback assertions |
 
 Counts above are the *first observed* values; the drift is variable (e.g.
 conflict-test reported 0–3, phase33 1–9 across runs) because live store
@@ -130,7 +130,7 @@ conversation's Phase 7–9 work, when the drift suites above were green).
 The failing suites therefore test identical backend code, and their
 failures are environment data — not regressions from this work.
 
-## Goal
+## Mission
 
 Phase 10 is satisfied when:
 

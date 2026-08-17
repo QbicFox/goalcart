@@ -15,7 +15,7 @@ import { tokensFromSettings } from './types';
 import type { PreviewState } from './usePreview';
 
 interface PreviewPanelProps {
-  /** The previewed scope: goal (one card) or campaign (milestone group). */
+  /** The previewed scope: mission (one card) or campaign (milestone group). */
   scope: TemplateScope;
   /** The shared preview state (controls + queries) from usePreview. */
   preview: PreviewState;
@@ -24,14 +24,14 @@ interface PreviewPanelProps {
 /**
  * The Phase 15 preview frame: the real storefront widget mirror rendered
  * ABOVE the (remaining) Preview Settings section, using the full width of
- * its column. Shared by the Goal and Campaign builders (sticky column) so
+ * its column. Shared by the Mission and Campaign builders (sticky column) so
  * the preview rendering can never drift between the two scopes — the same
  * components the frontend uses.
  *
  * The template is never chosen here: the preview renders whatever the
  * backend resolved for the current form state (item override → scope
  * default → fallback) — the exact same template the storefront renders —
- * so a goal/campaign with a selected template previews that template and
+ * so a mission/campaign with a selected template previews that template and
  * one without previews the global default. The only preview setting left
  * is the progress state (empty cart → completed), which derives its
  * simulated values internally from the form target.
@@ -41,22 +41,22 @@ export default function PreviewPanel({ scope, preview }: PreviewPanelProps) {
   const settings = settingsQuery.data?.data;
   const templates = templatesQuery.data;
   const tokens = tokensFromSettings(settings);
-  const goals = previewQuery.data?.goals ?? [];
-  const completedCount = goals.filter((goal) => goal.completed).length;
-  const percent = goals[0] ? Math.round(goals[0].percentage) : 0;
+  const missions = previewQuery.data?.missions ?? [];
+  const completedCount = missions.filter((mission) => mission.completed).length;
+  const percent = missions[0] ? Math.round(missions[0].percentage) : 0;
 
   // The resolved template comes from the preview payload — the backend's
   // TemplateEngine (the single template-resolution mechanism shared with
   // the storefront) already applied item override → scope default →
-  // fallback. A campaign without its own template renders per-goal cards,
+  // fallback. A campaign without its own template renders per-mission cards,
   // so its label falls back to the first milestone's resolved template.
   const resolvedTemplate =
-    scope === 'goal'
-      ? previewQuery.data?.goals[0]?.template ?? ''
-      : (previewQuery.data?.campaigns?.[0]?.template ?? previewQuery.data?.goals[0]?.template ?? '');
+    scope === 'mission'
+      ? previewQuery.data?.missions[0]?.template ?? ''
+      : (previewQuery.data?.campaigns?.[0]?.template ?? previewQuery.data?.missions[0]?.template ?? '');
   const resolvedTemplateLabel =
     templateById(templates, scope, resolvedTemplate)?.label ??
-    templateById(templates, 'goal', resolvedTemplate)?.label ??
+    templateById(templates, 'mission', resolvedTemplate)?.label ??
     (resolvedTemplate || undefined);
 
   const rewardLabel =
@@ -65,7 +65,7 @@ export default function PreviewPanel({ scope, preview }: PreviewPanelProps) {
           /* translators: %1$d: completed milestones, %2$d: total milestones. */
           __('%1$d/%2$d milestones', 'faracart'),
           completedCount,
-          goals.length
+          missions.length
         )
       : sprintf(__('%d%% progress', 'faracart'), percent);
 
@@ -95,12 +95,12 @@ export default function PreviewPanel({ scope, preview }: PreviewPanelProps) {
               : __('Could not load the preview.', 'faracart')}
           </Alert>
         ) : previewQuery.data ? (
-          scope === 'campaign' && goals.length === 0 ? (
+          scope === 'campaign' && missions.length === 0 ? (
             <Alert severity="info" variant="outlined">
               {__('No milestones in this campaign yet.', 'faracart')}
             </Alert>
-          ) : scope === 'goal' && goals.length > 0 && goals[0].target <= 0 ? (
-            // A goal with no target yet (a fresh or cleared target field)
+          ) : scope === 'mission' && missions.length > 0 && missions[0].target <= 0 ? (
+            // A mission with no target yet (a fresh or cleared target field)
             // evaluates as trivially complete server-side (target ≤ 0 →
             // 100%). For an unsaved draft that is misleading — there is no
             // progress to preview — so show a configuring hint instead of
@@ -111,7 +111,7 @@ export default function PreviewPanel({ scope, preview }: PreviewPanelProps) {
           ) : (
             <>
               <PreviewWidget
-                goals={goals}
+                missions={missions}
                 campaigns={previewQuery.data.campaigns}
                 currency={previewQuery.data.currency}
                 tokens={tokens}

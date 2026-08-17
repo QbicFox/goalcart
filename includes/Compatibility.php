@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  * that is missing.
  *
  * Deviation note (Agent rule 15): the reference plugin (WooInsights)
- * works without WooCommerce and therefore has no equivalent class; Goal
+ * works without WooCommerce and therefore has no equivalent class; Mission
  * Cart's core value is cart revenue optimization, so WooCommerce is a
  * hard dependency. A single top-level class (mirroring the top-level
  * Plugin/Container convention) was chosen over scattering checks across

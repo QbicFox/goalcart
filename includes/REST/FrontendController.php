@@ -10,14 +10,14 @@ namespace FaraCart\REST;
 use FaraCart\Analytics\Tracker;
 use FaraCart\Cart\CartIntegration;
 use FaraCart\REST\GiftController;
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\CompletionService;
-use FaraCart\Goals\ConflictResolver;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalEngine;
-use FaraCart\Goals\GoalRepository;
-use FaraCart\Goals\GoalResult;
-use FaraCart\Goals\MessageEngine;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\CompletionService;
+use FaraCart\Missions\ConflictResolver;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionEngine;
+use FaraCart\Missions\MissionRepository;
+use FaraCart\Missions\MissionResult;
+use FaraCart\Missions\MessageEngine;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Rewards\Reward;
 use FaraCart\Rewards\RewardEngine;
@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Phase 7 (REST API / AJAX Layer) frontend endpoint:
  *
- *  - `GET /faracart/v1/progress` — the current cart's goal progress,
+ *  - `GET /faracart/v1/progress` — the current cart's mission progress,
  *    exposing only the minimum necessary data (P07-T03):
  *
  *    ```text
@@ -41,10 +41,10 @@ defined( 'ABSPATH' ) || exit;
  *    message, reward, suggestions
  *    ```
  *
- *    one entry per active goal, plus cart/currency metadata. The progress
+ *    one entry per active mission, plus cart/currency metadata. The progress
  *    widgets (Phase 11) poll this endpoint and re-render.
  *
- *  - `shape_goal()` — the shared per-goal payload shaper, the single
+ *  - `shape_mission()` — the shared per-mission payload shaper, the single
  *    source of truth for the item shape above. It is consumed by this
  *    endpoint and by the Phase 15 PreviewController, so the admin preview
  *    and the storefront payload can never drift.
@@ -60,18 +60,18 @@ defined( 'ABSPATH' ) || exit;
 class FrontendController extends BaseController {
 
 	/**
-	 * Goal engine instance.
+	 * Mission engine instance.
 	 *
-	 * @var GoalEngine
+	 * @var MissionEngine
 	 */
 	protected $engine;
 
 	/**
-	 * Goal repository instance.
+	 * Mission repository instance.
 	 *
-	 * @var GoalRepository
+	 * @var MissionRepository
 	 */
-	protected $goals;
+	protected $missions;
 
 	/**
 	 * Cart integration instance.
@@ -97,7 +97,7 @@ class FrontendController extends BaseController {
 	protected $recommendations;
 
 	/**
-	 * Settings instance (Phase 18: goal behavior, suggestions, caching).
+	 * Settings instance (Phase 18: mission behavior, suggestions, caching).
 	 *
 	 * @var Settings
 	 */
@@ -105,7 +105,7 @@ class FrontendController extends BaseController {
 
 	/**
 	 * Reward engine (Phase 26 display/grant parity): evaluates each
-	 * completed goal's reward against the same cart snapshot the engine
+	 * completed mission's reward against the same cart snapshot the engine
 	 * grants with, so 'best' mode compares real computed amounts and the
 	 * payload reflects stacking suppression exactly like the live cart.
 	 * Null when unavailable (bare constructions) — falls back to the
@@ -116,7 +116,7 @@ class FrontendController extends BaseController {
 	protected $reward_engine;
 
 	/**
-	 * Template engine (pluggable templates): resolves each goal's
+	 * Template engine (pluggable templates): resolves each mission's
 	 * effective template + settings (item override → scope default →
 	 * legacy → fallback) and each campaign's group template. Null when not
 	 * injected — resolved lazily from the plugin container.
@@ -127,8 +127,8 @@ class FrontendController extends BaseController {
 
 	/**
 	 * Per-user completion limit service (Phase 36): the payload carries
-	 * each goal's completion status (limit / count / remaining /
-	 * can_complete) for the current shopper, and a goal the shopper has
+	 * each mission's completion status (limit / count / remaining /
+	 * can_complete) for the current shopper, and a mission the shopper has
 	 * already completed the maximum number of times renders the
 	 * limit-reached state with its reward shown locked — the storefront
 	 * only ever reflects the authoritative server state. Null when not
@@ -148,8 +148,8 @@ class FrontendController extends BaseController {
 	/**
 	 * Constructor.
 	 *
-	 * @param GoalEngine        $engine          Goal engine.
-	 * @param GoalRepository    $goals           Goal repository.
+	 * @param MissionEngine        $engine          Mission engine.
+	 * @param MissionRepository    $missions           Mission repository.
 	 * @param CartIntegration   $cart_integration Cart snapshot service.
 	 * @param MessageEngine     $messages        Message template engine.
 	 * @param ProductRecommendationEngine $recommendations Unified recommendation
@@ -161,9 +161,9 @@ class FrontendController extends BaseController {
 	 * @param CompletionService|null $completions Per-user completion limit
 	 *                                           service (Phase 36).
 	 */
-	public function __construct( GoalEngine $engine, GoalRepository $goals, CartIntegration $cart_integration, MessageEngine $messages, ProductRecommendationEngine $recommendations, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null, ?CompletionService $completions = null ) {
+	public function __construct( MissionEngine $engine, MissionRepository $missions, CartIntegration $cart_integration, MessageEngine $messages, ProductRecommendationEngine $recommendations, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null, ?CompletionService $completions = null ) {
 		$this->engine           = $engine;
-		$this->goals            = $goals;
+		$this->missions            = $missions;
 		$this->cart_integration = $cart_integration;
 		$this->messages         = $messages;
 		$this->recommendations  = $recommendations;
@@ -217,8 +217,8 @@ class FrontendController extends BaseController {
 	/**
 	 * Handle a cart-progress read.
 	 *
-	 * Evaluates every active goal against the current cart snapshot and
-	 * returns the minimal per-goal progress payload. Accepts an optional
+	 * Evaluates every active mission against the current cart snapshot and
+	 * returns the minimal per-mission progress payload. Accepts an optional
 	 * cart for testability/embedding; null uses the live cart via
 	 * CartIntegration.
 	 *
@@ -230,14 +230,14 @@ class FrontendController extends BaseController {
 		$caching = (bool) $this->settings->get( 'performance_caching', false );
 
 		$context = $this->cart_integration->context( $cart );
-		$goals   = $this->active_goals_for( $this->goals->active_goals(), $context );
+		$missions   = $this->active_missions_for( $this->missions->active_missions(), $context );
 
 		// Phase 18 (Performance → caching): a short-lived transient keyed
-		// by the cart snapshot + goals + behavior settings serves repeat
-		// widget polls without re-evaluating every goal. The key embeds the
+		// by the cart snapshot + missions + behavior settings serves repeat
+		// widget polls without re-evaluating every mission. The key embeds the
 		// cart state, so any cart change produces a fresh payload within
 		// one TTL; admin-disabled by default.
-		$cache_key = $caching ? $this->progress_cache_key( $context, $goals ) : '';
+		$cache_key = $caching ? $this->progress_cache_key( $context, $missions ) : '';
 
 		if ( $caching ) {
 			$cached = get_transient( $cache_key );
@@ -267,36 +267,36 @@ class FrontendController extends BaseController {
 
 		// Phase 26 (Conflict & Priority Engine): the same deterministic
 		// resolution the reward engine grants with is reflected here, so
-		// every goal's payload says whether it won or was suppressed (and
-		// why). The storefront widgets keep rendering every goal's
+		// every mission's payload says whether it won or was suppressed (and
+		// why). The storefront widgets keep rendering every mission's
 		// progress; the conflict flag lets them show the honest reward
 		// state (a suppressed reward never renders as unlocked).
-		$resolved = $this->resolve_conflicts( $goals, $context );
+		$resolved = $this->resolve_conflicts( $missions, $context );
 
 		// Phase 36 (per-user completion limit): one batched completion-count
-		// query primes the per-request cache so the per-goal shape below
+		// query primes the per-request cache so the per-mission shape below
 		// never runs N individual counts on the storefront. The completion
 		// status is user-specific, so the optional progress transient is
 		// keyed by identity too (see progress_cache_key).
 		if ( null !== $this->completions ) {
-			$this->completions->context_statuses( $goals, $context );
+			$this->completions->context_statuses( $missions, $context );
 		}
 
-		foreach ( $goals as $goal ) {
-			$result = $this->engine->evaluate( $goal, $context );
+		foreach ( $missions as $mission ) {
+			$result = $this->engine->evaluate( $mission, $context );
 
-			$items[] = $this->shape_goal( $goal, $result, $context, $extra, false, $this->conflict_for( $resolved, $goal ) );
+			$items[] = $this->shape_mission( $mission, $result, $context, $extra, false, $this->conflict_for( $resolved, $mission ) );
 		}
 
 		$response = $this->success(
 			array(
-				'goals'    => $items,
+				'missions'    => $items,
 				// Campaign template groups (pluggable engine): only campaigns
 				// with a configured campaign-scoped template are listed — the
 				// storefront renders those milestone groups through the
 				// campaign template (e.g. the milestone chain) instead of
-				// per-goal cards.
-				'campaigns' => $this->campaign_groups( $goals ),
+				// per-mission cards.
+				'campaigns' => $this->campaign_groups( $missions ),
 				'currency' => $this->settings->currency(),
 				// Self-healing tracking nonce: a freshly minted faracart_track
 				// nonce rides on every progress response so the storefront JS
@@ -312,7 +312,7 @@ class FrontendController extends BaseController {
 				'gift_nonce'     => $this->gift_nonce(),
 			),
 			array(
-				'total_goals' => count( $items ),
+				'total_missions' => count( $items ),
 			)
 		);
 
@@ -404,82 +404,82 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * Narrow the active goals per the default goal behavior setting.
+	 * Narrow the active missions per the default mission behavior setting.
 	 *
 	 * Phase 18 (Settings → General):
 	 *
-	 *  - all     — every active goal (default)
-	 *  - first   — only the first active goal (repository order)
-	 *  - closest — only the eligible goal closest to completion
+	 *  - all     — every active mission (default)
+	 *  - first   — only the first active mission (repository order)
+	 *  - closest — only the eligible mission closest to completion
 	 *
-	 * The storefront still picks an eligible featured goal per render, so
-	 * a narrowed set changes how many goals are advertised at once.
+	 * The storefront still picks an eligible featured mission per render, so
+	 * a narrowed set changes how many missions are advertised at once.
 	 *
-	 * @param Goal[]      $goals   Active goals.
+	 * @param Mission[]      $missions   Active missions.
 	 * @param CartContext $context Cart snapshot.
-	 * @return Goal[]
+	 * @return Mission[]
 	 */
-	protected function active_goals_for( array $goals, CartContext $context ) {
-		$behavior = $this->settings->get( 'default_goal_behavior', 'all' );
+	protected function active_missions_for( array $missions, CartContext $context ) {
+		$behavior = $this->settings->get( 'default_mission_behavior', 'all' );
 
-		if ( 'all' === $behavior || count( $goals ) < 2 ) {
-			return $goals;
+		if ( 'all' === $behavior || count( $missions ) < 2 ) {
+			return $missions;
 		}
 
 		if ( 'first' === $behavior ) {
-			return array( $goals[0] );
+			return array( $missions[0] );
 		}
 
-		// 'closest': the eligible goal with the highest percentage.
+		// 'closest': the eligible mission with the highest percentage.
 		$best      = null;
 		$best_perc = -1.0;
 
-		foreach ( $goals as $goal ) {
-			$result = $this->engine->evaluate( $goal, $context );
+		foreach ( $missions as $mission ) {
+			$result = $this->engine->evaluate( $mission, $context );
 
 			if ( $result->eligible() && $result->percentage() > $best_perc ) {
-				$best      = $goal;
+				$best      = $mission;
 				$best_perc = $result->percentage();
 			}
 		}
 
-		return $best ? array( $best ) : array( $goals[0] );
+		return $best ? array( $best ) : array( $missions[0] );
 	}
 
 	/**
-	 * Resolve conflict winners among the given goals for the payload.
+	 * Resolve conflict winners among the given missions for the payload.
 	 *
 	 * Mirrors the RewardEngine pass (Phase 26) so the payload is always
-	 * what the live cart grants: completed goals that carry a reward
+	 * what the live cart grants: completed missions that carry a reward
 	 * compete under the configured mode ('best' compares the real computed
 	 * reward amounts on the same cart snapshot), and the per-reward
 	 * stacking safety applies to the winners in priority order — a
 	 * same-type non-stacking loser is blocked with the 'stacking' reason.
-	 * Display narrowing (default_goal_behavior) happens before this, so a
+	 * Display narrowing (default_mission_behavior) happens before this, so a
 	 * narrowed set resolves within itself.
 	 *
-	 * @param Goal[]      $goals   Goals being served.
+	 * @param Mission[]      $missions   Missions being served.
 	 * @param CartContext $context Cart snapshot.
-	 * @return array<int, string> goal_id => ConflictResolver::REASON_*.
+	 * @return array<int, string> mission_id => ConflictResolver::REASON_*.
 	 */
-	protected function resolve_conflicts( array $goals, CartContext $context ) {
+	protected function resolve_conflicts( array $missions, CartContext $context ) {
 		$mode    = (string) $this->settings->get( 'conflict_resolution', ConflictResolver::MODE_CUMULATIVE );
 		$results = array();
 		$scores  = array();
 		$rewards = array();
 
-		foreach ( $goals as $goal ) {
-			$result = $this->engine->evaluate( $goal, $context );
+		foreach ( $missions as $mission ) {
+			$result = $this->engine->evaluate( $mission, $context );
 
-			if ( ! $result->eligible() || GoalResult::REWARD_UNLOCKED !== $result->reward_state() ) {
+			if ( ! $result->eligible() || MissionResult::REWARD_UNLOCKED !== $result->reward_state() ) {
 				continue;
 			}
 
-			if ( empty( $goal->reward_type() ) ) {
+			if ( empty( $mission->reward_type() ) ) {
 				continue;
 			}
 
-			$results[ $goal->id() ] = $result;
+			$results[ $mission->id() ] = $result;
 
 			// The reward is evaluated WITHOUT the stacking guard (the empty
 			// already_applied pass), exactly like RewardEngine::sync_cart()
@@ -491,36 +491,36 @@ class FrontendController extends BaseController {
 					array( 'cart' => $context )
 				);
 
-				$rewards[ $goal->id() ] = $reward_result;
+				$rewards[ $mission->id() ] = $reward_result;
 
 				if ( RewardResult::STATE_AVAILABLE === $reward_result->state() ) {
-					$scores[ $goal->id() ] = $reward_result->amount();
+					$scores[ $mission->id() ] = $reward_result->amount();
 				}
 			}
 		}
 
 		$resolver  = new ConflictResolver();
-		$resolution = $resolver->resolve( $goals, $results, $mode, $scores );
+		$resolution = $resolver->resolve( $missions, $results, $mode, $scores );
 
 		if ( null !== $this->reward_engine ) {
-			$resolution = $resolver->apply_stacking( $goals, $resolution, $rewards );
+			$resolution = $resolver->apply_stacking( $missions, $resolution, $rewards );
 		}
 
 		return $resolution;
 	}
 
 	/**
-	 * The per-goal conflict payload fragment.
+	 * The per-mission conflict payload fragment.
 	 *
-	 * Goals that did not participate in resolution (not completed, no
+	 * Missions that did not participate in resolution (not completed, no
 	 * reward) are reported as resolved — they are never suppressed.
 	 *
-	 * @param array<int, string> $resolution goal_id => reason.
-	 * @param Goal               $goal       Goal.
+	 * @param array<int, string> $resolution mission_id => reason.
+	 * @param Mission               $mission       Mission.
 	 * @return array<string, mixed>
 	 */
-	protected function conflict_for( array $resolution, Goal $goal ) {
-		$reason = isset( $resolution[ $goal->id() ] ) ? $resolution[ $goal->id() ] : ConflictResolver::REASON_NONE;
+	protected function conflict_for( array $resolution, Mission $mission ) {
+		$reason = isset( $resolution[ $mission->id() ] ) ? $resolution[ $mission->id() ] : ConflictResolver::REASON_NONE;
 
 		return array(
 			'resolved' => ConflictResolver::REASON_NONE === $reason,
@@ -529,17 +529,17 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * The progress cache key for a cart snapshot + goal set.
+	 * The progress cache key for a cart snapshot + mission set.
 	 *
 	 * @param CartContext $context Cart snapshot.
-	 * @param Goal[]      $goals   Selected goals.
+	 * @param Mission[]      $missions   Selected missions.
 	 * @return string
 	 */
-	protected function progress_cache_key( CartContext $context, array $goals ) {
-		$goal_ids = array();
+	protected function progress_cache_key( CartContext $context, array $missions ) {
+		$mission_ids = array();
 
-		foreach ( $goals as $goal ) {
-			$goal_ids[] = $goal->id();
+		foreach ( $missions as $mission ) {
+			$mission_ids[] = $mission->id();
 		}
 
 		// Phase 36: the payload now carries per-user completion status, so
@@ -559,8 +559,8 @@ class FrontendController extends BaseController {
 						$context->total_weight(),
 					),
 					'identity'    => $identity,
-					'goals'       => $goal_ids,
-					'behavior'    => $this->settings->get( 'default_goal_behavior', 'all' ),
+					'missions'       => $mission_ids,
+					'behavior'    => $this->settings->get( 'default_mission_behavior', 'all' ),
 					'conflict'    => $this->settings->get( 'conflict_resolution', ConflictResolver::MODE_CUMULATIVE ),
 					'suggestions' => (bool) $this->settings->get( 'performance_suggestions', true ),
 				)
@@ -569,27 +569,27 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * Shape one goal evaluation into the shared progress payload item.
+	 * Shape one mission evaluation into the shared progress payload item.
 	 *
-	 * Single source of truth for the per-goal payload shape, used by both
+	 * Single source of truth for the per-mission payload shape, used by both
 	 * the public `GET /progress` endpoint (live cart) and the admin
 	 * PreviewController (Phase 15, simulated cart) so the two can never
 	 * drift apart. Mirrors the documented payload in docs/api.md.
 	 *
-	 * @param Goal        $goal    Goal.
-	 * @param GoalResult  $result  Evaluation result.
-	 * @param CartContext $context Cart snapshot the goal was evaluated on
+	 * @param Mission        $mission    Mission.
+	 * @param MissionResult  $result  Evaluation result.
+	 * @param CartContext $context Cart snapshot the mission was evaluated on
 	 *                             (drives suggestions).
 	 * @param array<string, mixed> $extra Extra message variables (quantity,
 	 *                             remaining_quantity, campaign_name).
 	 * @param bool         $full_reward_meta Whether to expose the full reward
 	 *                             meta (admin preview only — P22 redaction).
 	 * @param array<string, mixed>|null $conflict Conflict payload fragment
-	 *                             (resolved/reason, Phase 26); null = goal
+	 *                             (resolved/reason, Phase 26); null = mission
 	 *                             was not suppressed.
 	 * @return array<string, mixed>
 	 */
-	public function shape_goal( Goal $goal, GoalResult $result, CartContext $context, array $extra = array(), $full_reward_meta = false, $conflict = null ) {
+	public function shape_mission( Mission $mission, MissionResult $result, CartContext $context, array $extra = array(), $full_reward_meta = false, $conflict = null ) {
 		if ( ! is_array( $conflict ) ) {
 			$conflict = array(
 				'resolved' => true,
@@ -597,16 +597,16 @@ class FrontendController extends BaseController {
 			);
 		}
 
-		$resolved = $this->templates()->resolve_goal( $goal );
+		$resolved = $this->templates()->resolve_mission( $mission );
 
 		// Phase 36 (per-user completion limit): the shopper's completion
-		// status for this goal (completion_limit / completion_count /
+		// status for this mission (completion_limit / completion_count /
 		// remaining_completions / can_complete). Null when the service is
 		// absent (bare constructions). When the shopper can no longer
-		// complete the goal, the reward renders locked (the conflict
+		// complete the mission, the reward renders locked (the conflict
 		// fragment is overridden — a limit-reached reward must never look
 		// claimable) and the message switches to the limit copy.
-		$completion    = $this->completion_status( $goal, $context );
+		$completion    = $this->completion_status( $mission, $context );
 		$limit_reached = is_array( $completion ) && empty( $completion['can_complete'] );
 
 		if ( $limit_reached ) {
@@ -617,12 +617,18 @@ class FrontendController extends BaseController {
 		}
 
 		return array(
-			'goal_id'      => $goal->id(),
-			'campaign_id'  => $goal->campaign_id(),
-			'goal_name'    => $goal->name(),
-			'goal_type'    => $goal->type(),
-			'is_money'     => $this->is_money_goal( $goal ),
-			'icon'         => $this->goal_icon( $goal ),
+			'mission_id'      => $mission->id(),
+			'campaign_id'  => $mission->campaign_id(),
+			'mission_name'    => $mission->name(),
+			'mission_type'    => $mission->type(),
+			// Legacy aliases (Goal → Mission rename): the canonical keys are
+			// mission_*; the old goal_* keys stay in the payload so existing
+			// storefront consumers keep reading the same values.
+			'goal_id'      => $mission->id(),
+			'goal_name'    => $mission->name(),
+			'goal_type'    => $mission->type(),
+			'is_money'     => $this->is_money_mission( $mission ),
+			'icon'         => $this->mission_icon( $mission ),
 			// The effective template + settings (item override → scope
 			// default → legacy → fallback) — the storefront renders exactly
 			// what the template engine resolved.
@@ -633,10 +639,10 @@ class FrontendController extends BaseController {
 			'remaining'    => $result->remaining(),
 			'percentage'   => $result->percentage(),
 			'completed'    => $result->completed(),
-			'state'        => $this->messages->state( $goal, $result, $completion ),
-			'message'      => $this->messages->message( $goal, $result, $extra, $completion ),
-			'reward'       => $this->reward( $goal, ! $full_reward_meta ),
-			'suggestions'  => $this->suggestions_on() ? $this->recommendations->recommend( $goal, $result, $context ) : array(),
+			'state'        => $this->messages->state( $mission, $result, $completion ),
+			'message'      => $this->messages->message( $mission, $result, $extra, $completion ),
+			'reward'       => $this->reward( $mission, ! $full_reward_meta ),
+			'suggestions'  => $this->suggestions_on() ? $this->recommendations->recommend( $mission, $result, $context ) : array(),
 			'reward_state' => $result->reward_state(),
 			'eligible'     => $result->eligible(),
 			'reason'       => $result->reason(),
@@ -645,47 +651,47 @@ class FrontendController extends BaseController {
 			// completion status — the storefront reflects it, the server
 			// enforces it.
 			'completion'   => $completion,
-			// Phase 32 (countdown): the goal's deadline as a local-time ISO
-			// string ('' when the goal has no end time). The storefront JS
+			// Phase 32 (countdown): the mission's deadline as a local-time ISO
+			// string ('' when the mission has no end time). The storefront JS
 			// renders a live countdown chip from it.
-			'countdown_end' => $this->countdown_end( $goal ),
+			'countdown_end' => $this->countdown_end( $mission ),
 		);
 	}
 
 	/**
-	 * The shopper's completion status for a goal (Phase 36).
+	 * The shopper's completion status for a mission (Phase 36).
 	 *
 	 * Null when the completion service is absent (bare constructions). The
 	 * per-request count cache is primed in handle_progress() with one
-	 * batched query, so the per-goal reads here are cache hits on the
-	 * storefront; the admin preview path pays one COUNT per goal (admin
+	 * batched query, so the per-mission reads here are cache hits on the
+	 * storefront; the admin preview path pays one COUNT per mission (admin
 	 * only, acceptable).
 	 *
-	 * @param Goal        $goal    Goal.
+	 * @param Mission        $mission    Mission.
 	 * @param CartContext $context Cart snapshot.
 	 * @return array<string, mixed>|null
 	 */
-	protected function completion_status( Goal $goal, CartContext $context ) {
+	protected function completion_status( Mission $mission, CartContext $context ) {
 		if ( null === $this->completions ) {
 			return null;
 		}
 
-		return $this->completions->context_status( $goal, $context );
+		return $this->completions->context_status( $mission, $context );
 	}
 
 	/**
-	 * The goal's deadline for the storefront countdown (Phase 32).
+	 * The mission's deadline for the storefront countdown (Phase 32).
 	 *
 	 * Only an end time in the future is worth counting down to; past and
 	 * empty values render no chip. The stored site-local datetime is
 	 * emitted as a local-time ISO string ('2026-08-07T14:30:00') so the
 	 * JS Date parsing matches the site clock.
 	 *
-	 * @param Goal $goal Goal.
+	 * @param Mission $mission Mission.
 	 * @return string
 	 */
-	protected function countdown_end( Goal $goal ) {
-		$ends_at = $goal->ends_at();
+	protected function countdown_end( Mission $mission ) {
+		$ends_at = $mission->ends_at();
 
 		if ( empty( $ends_at ) || ! (bool) $this->settings->get( 'frontend_countdown', true ) ) {
 			return '';
@@ -702,7 +708,7 @@ class FrontendController extends BaseController {
 	 * Whether the storefront payload carries product suggestions.
 	 *
 	 * Phase 18 (Settings → Performance → suggestions): an opt-out for
-	 * stores that want the goals without the upsell list. Filterable via
+	 * stores that want the missions without the upsell list. Filterable via
 	 * faracart_suggestions_enabled (the Phase 28 developer API hook).
 	 *
 	 * @return bool
@@ -714,33 +720,33 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * Whether a goal's progress is measured in money.
+	 * Whether a mission's progress is measured in money.
 	 *
-	 * Quantity/distinct-quantity/weight goals count items, not money, and
-	 * quantity-mode category/product goals do too. Quantity goals default
-	 * to the subtotal calculation mode (Goal::default_calculation_mode),
+	 * Quantity/distinct-quantity/weight missions count items, not money, and
+	 * quantity-mode category/product missions do too. Quantity missions default
+	 * to the subtotal calculation mode (Mission::default_calculation_mode),
 	 * so the type is checked in addition to the mode — keeps the widget
 	 * milestone labels and the Phase 13 message numbers consistent.
 	 *
-	 * @param Goal $goal Goal.
+	 * @param Mission $mission Mission.
 	 * @return bool
 	 */
-	protected function is_money_goal( Goal $goal ) {
-		return $goal->is_money_goal();
+	protected function is_money_mission( Mission $mission ) {
+		return $mission->is_money_mission();
 	}
 
 	/**
-	 * The goal's display icon for the card template (Phase 12).
+	 * The mission's display icon for the card template (Phase 12).
 	 *
-	 * Comes from the goal builder's Display section (`display_settings.icon`);
+	 * Comes from the mission builder's Display section (`display_settings.icon`);
 	 * empty when none was configured — the widget falls back to its own
 	 * default icon.
 	 *
-	 * @param Goal $goal Goal.
+	 * @param Mission $mission Mission.
 	 * @return string
 	 */
-	protected function goal_icon( Goal $goal ) {
-		$display = $goal->display_settings();
+	protected function mission_icon( Mission $mission ) {
+		$display = $mission->display_settings();
 
 		return isset( $display['icon'] ) && is_string( $display['icon'] ) ? trim( $display['icon'] ) : '';
 	}
@@ -748,35 +754,35 @@ class FrontendController extends BaseController {
 	/**
 	 * The campaign template groups for the progress payload.
 	 *
-	 * Groups the served goals by campaign and resolves each campaign's
+	 * Groups the served missions by campaign and resolves each campaign's
 	 * template + settings through the engine. Only campaigns with a
 	 * configured campaign-scoped template are listed — a campaign without
-	 * one keeps the pre-engine per-goal card rendering.
+	 * one keeps the pre-engine per-mission card rendering.
 	 *
-	 * @param Goal[] $goals Goals being served.
+	 * @param Mission[] $missions Missions being served.
 	 * @return array<int, array<string, mixed>>
 	 */
-	protected function campaign_groups( array $goals ) {
+	protected function campaign_groups( array $missions ) {
 		$groups = array();
 
-		foreach ( $goals as $goal ) {
-			if ( ! $goal->campaign_id() ) {
+		foreach ( $missions as $mission ) {
+			if ( ! $mission->campaign_id() ) {
 				continue;
 			}
 
-			if ( isset( $groups[ $goal->campaign_id() ] ) ) {
+			if ( isset( $groups[ $mission->campaign_id() ] ) ) {
 				continue;
 			}
 
-			$resolved = $this->templates()->resolve_campaign( $goal->campaign_display_rules() );
+			$resolved = $this->templates()->resolve_campaign( $mission->campaign_display_rules() );
 
 			if ( '' === $resolved['template_id'] ) {
-				continue; // No campaign template configured → per-goal cards.
+				continue; // No campaign template configured → per-mission cards.
 			}
 
-			$groups[ $goal->campaign_id() ] = array(
-				'campaign_id' => (int) $goal->campaign_id(),
-				'name'        => $goal->campaign_name(),
+			$groups[ $mission->campaign_id() ] = array(
+				'campaign_id' => (int) $mission->campaign_id(),
+				'name'        => $mission->campaign_name(),
 				'template'    => $resolved['template_id'],
 				'settings'    => $resolved['settings'],
 			);
@@ -785,20 +791,20 @@ class FrontendController extends BaseController {
 		// Phase 32 (countdown): a campaign group exposes the latest of its
 		// milestones' end times so the storefront can render one countdown
 		// per campaign.
-		foreach ( $goals as $goal ) {
-			if ( ! $goal->campaign_id() || ! isset( $groups[ $goal->campaign_id() ] ) ) {
+		foreach ( $missions as $mission ) {
+			if ( ! $mission->campaign_id() || ! isset( $groups[ $mission->campaign_id() ] ) ) {
 				continue;
 			}
 
-			$ends = $this->countdown_end( $goal );
+			$ends = $this->countdown_end( $mission );
 
 			if ( '' !== $ends ) {
-				$current = isset( $groups[ $goal->campaign_id() ]['countdown_end'] )
-					? (string) $groups[ $goal->campaign_id() ]['countdown_end']
+				$current = isset( $groups[ $mission->campaign_id() ]['countdown_end'] )
+					? (string) $groups[ $mission->campaign_id() ]['countdown_end']
 					: '';
 
 				if ( '' === $current || $ends > $current ) {
-					$groups[ $goal->campaign_id() ]['countdown_end'] = $ends;
+					$groups[ $mission->campaign_id() ]['countdown_end'] = $ends;
 				}
 			}
 		}
@@ -807,7 +813,7 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * The goal's reward summary for the frontend.
+	 * The mission's reward summary for the frontend.
 	 *
 	 * P22 hardening: the PUBLIC `/faracart/v1/progress` payload carries only
 	 * the reward offer the widget needs to render (type, value, max_value).
@@ -816,44 +822,44 @@ class FrontendController extends BaseController {
 	 * excluded product and category lists, and shipping restrictions — is
 	 * deliberately NOT exposed: any visitor could otherwise harvest those
 	 * secrets at `wp-json/faracart/v1/progress` without authentication and
-	 * redeem a coupon reward before its goal is completed.
+	 * redeem a coupon reward before its mission is completed.
 	 *
-	 * The admin PreviewController shapes the same goal but may pass
+	 * The admin PreviewController shapes the same mission but may pass
 	 * `$private_meta = true` (it is manage_options-gated), so the admin
 	 * preview can still reflect the configured reward meta.
 	 *
-	 * @param Goal $goal Goal.
+	 * @param Mission $mission Mission.
 	 * @param bool $redact_meta Whether the meta must be stripped. Default
 	 *                          true (public endpoint contract).
 	 * @return array<string, mixed>|null
 	 */
-	protected function reward( Goal $goal, $redact_meta = true ) {
-		if ( empty( $goal->reward_type() ) ) {
+	protected function reward( Mission $mission, $redact_meta = true ) {
+		if ( empty( $mission->reward_type() ) ) {
 			return null;
 		}
 
 		$reward = array(
-			'type'      => $goal->reward_type(),
-			'value'     => $goal->reward_value(),
-			'max_value' => $goal->reward_max_value(),
+			'type'      => $mission->reward_type(),
+			'value'     => $mission->reward_value(),
+			'max_value' => $mission->reward_max_value(),
 		);
 
-		// Phase 32 (free gift selection): a choose-mode gift goal exposes
+		// Phase 32 (free gift selection): a choose-mode gift mission exposes
 		// the candidate gifts as catalog data (id/name/image/price — store
 		// products, no secrets) so the storefront picker can render; the
 		// gift_chosen flag reflects the live cart. Only rendered for the
 		// public payload — the admin preview gets the full meta anyway.
-		if ( $redact_meta && Reward::TYPE_FREE_GIFT === $goal->reward_type() ) {
-			$meta = $goal->reward_meta();
+		if ( $redact_meta && Reward::TYPE_FREE_GIFT === $mission->reward_type() ) {
+			$meta = $mission->reward_meta();
 
 			if ( isset( $meta['gift_add_mode'] ) && 'choose' === $meta['gift_add_mode'] ) {
 				$reward['gift']        = $this->gift_catalog( $meta );
-				$reward['gift_chosen'] = $this->gift_chosen_in_cart( $goal->id() );
+				$reward['gift_chosen'] = $this->gift_chosen_in_cart( $mission->id() );
 			}
 		}
 
 		if ( ! $redact_meta ) {
-			$reward['meta'] = $goal->reward_meta();
+			$reward['meta'] = $mission->reward_meta();
 		}
 
 		return $reward;
@@ -902,18 +908,18 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * Whether the live cart already carries a chosen gift for the goal.
+	 * Whether the live cart already carries a chosen gift for the mission.
 	 *
-	 * @param int $goal_id Goal id.
+	 * @param int $mission_id Mission id.
 	 * @return bool
 	 */
-	protected function gift_chosen_in_cart( $goal_id ) {
+	protected function gift_chosen_in_cart( $mission_id ) {
 		if ( ! function_exists( 'WC' ) || ! WC() || ! WC()->cart ) {
 			return false;
 		}
 
 		foreach ( WC()->cart->get_cart() as $item ) {
-			if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $goal_id ) {
+			if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id ) {
 				return true;
 			}
 		}

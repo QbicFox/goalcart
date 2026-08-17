@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class FixedDiscountApplicator
  *
- * Grants a fixed amount off the cart on goal completion, clamped to the
+ * Grants a fixed amount off the cart on mission completion, clamped to the
  * eligible cart value so the discount can never exceed what the shopper
  * actually owes on eligible items. Applied as a negative cart fee (see
  * AbstractDiscountApplicator).

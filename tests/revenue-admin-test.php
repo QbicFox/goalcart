@@ -7,18 +7,18 @@
  * admin pages:
  *
  *  - route registration for /revenue/overview, /revenue/attribution and
- *    /revenue/goals
+ *    /revenue/missions
  *  - anonymous 403 on every revenue admin route (dispatch)
- *  - the window arg schema (datetime validation, goal_id bounds)
+ *  - the window arg schema (datetime validation, mission_id bounds)
  *  - the payload shapes: overview (summary + incremental cart value +
  *    AOV + shipping + daily trend), attribution (same minus trend) and
- *    goal performance (per-goal rows)
+ *    mission performance (per-mission rows)
  *  - the Phase 33.5 upsell analytics rows carry the Phase 33.6 profit /
  *    margin fields (estimated_profit, profit_available, margin_pct)
- *  - goal-scoped reads return the requested goal only
+ *  - mission-scoped reads return the requested mission only
  *
  * Read-only like the other suites: the only writes (fixture products,
- * upsell events, a goal row, cache invalidation) happen inside a single
+ * upsell events, a mission row, cache invalidation) happen inside a single
  * database transaction that is rolled back, and the absence of any
  * residue is asserted afterwards.
  *
@@ -94,8 +94,8 @@ echo "\n== 1. Route registration ==\n";
 
 check( '/revenue/overview registered', route_exists( $routes, '/faracart/v1/revenue/overview' ) );
 check( '/revenue/attribution registered', route_exists( $routes, '/faracart/v1/revenue/attribution' ) );
-check( '/revenue/goals registered', route_exists( $routes, '/faracart/v1/revenue/goals' ) );
-check( '/revenue/goal-recommendations registered', route_exists( $routes, '/faracart/v1/revenue/goal-recommendations' ) );
+check( '/revenue/missions registered', route_exists( $routes, '/faracart/v1/revenue/missions' ) );
+check( '/revenue/mission-recommendations registered', route_exists( $routes, '/faracart/v1/revenue/mission-recommendations' ) );
 check( '/revenue/upsells registered', route_exists( $routes, '/faracart/v1/revenue/upsells' ) );
 
 // ---------------------------------------------------------------------------
@@ -108,15 +108,15 @@ $args = $revenue_ctrl->window_args();
 check( 'invalid from rejected', false === $revenue_ctrl->validate_datetime_param( '12/34/5678' ) );
 check( 'valid from accepted', true === $revenue_ctrl->validate_datetime_param( '2026-01-01' ) );
 check( 'empty from accepted', true === $revenue_ctrl->validate_datetime_param( '' ) );
-check( 'negative goal_id rejected', is_wp_error( rest_validate_value_from_schema( -1, $args['goal_id'], 'goal_id' ) ) );
-check( 'zero goal_id accepted', true === rest_validate_value_from_schema( 0, $args['goal_id'], 'goal_id' ) );
+check( 'negative mission_id rejected', is_wp_error( rest_validate_value_from_schema( -1, $args['mission_id'], 'mission_id' ) ) );
+check( 'zero mission_id accepted', true === rest_validate_value_from_schema( 0, $args['mission_id'], 'mission_id' ) );
 
 // ---------------------------------------------------------------------------
 // 3. Anonymous users are rejected on the revenue admin routes (403)
 // ---------------------------------------------------------------------------
 echo "\n== 3. Permissions ==\n";
 
-foreach ( array( '/faracart/v1/revenue/overview', '/faracart/v1/revenue/attribution', '/faracart/v1/revenue/goals' ) as $route ) {
+foreach ( array( '/faracart/v1/revenue/overview', '/faracart/v1/revenue/attribution', '/faracart/v1/revenue/missions' ) as $route ) {
 	$req  = new \WP_REST_Request( 'GET', $route );
 	$resp = $server->dispatch( $req );
 	check( "anonymous rejected on {$route} (403)", 403 === $resp->get_status() );
@@ -155,65 +155,65 @@ check( 'attribution has summary', isset( $attribution['summary'] ) );
 check( 'attribution has incremental_cart_value', isset( $attribution['incremental_cart_value'] ) );
 check( 'attribution has no trend (overview minus trend)', ! array_key_exists( 'trend', $attribution ) );
 
-$goals_resp = $revenue_ctrl->handle_goals( new \WP_REST_Request( 'GET', '/faracart/v1/revenue/goals' ) );
-$goals      = $goals_resp->get_data()['data'];
+$missions_resp = $revenue_ctrl->handle_missions( new \WP_REST_Request( 'GET', '/faracart/v1/revenue/missions' ) );
+$missions      = $missions_resp->get_data()['data'];
 
-check( 'goals payload has items', isset( $goals['items'] ) );
-check( 'goals items is an array', is_array( $goals['items'] ) );
-if ( ! empty( $goals['items'] ) ) {
-	$first = $goals['items'][0];
-	check( 'goal row has goal_id', isset( $first['goal_id'] ) );
-	check( 'goal row has funnel counts', isset( $first['views'], $first['progressed'], $first['completed'], $first['converted'] ) );
+check( 'missions payload has items', isset( $missions['items'] ) );
+check( 'missions items is an array', is_array( $missions['items'] ) );
+if ( ! empty( $missions['items'] ) ) {
+	$first = $missions['items'][0];
+	check( 'mission row has mission_id', isset( $first['mission_id'] ) );
+	check( 'mission row has funnel counts', isset( $first['views'], $first['progressed'], $first['completed'], $first['converted'] ) );
 	check(
-		'goal row has revenue metrics',
+		'mission row has revenue metrics',
 		array_key_exists( 'attributed_revenue', $first )
 			&& array_key_exists( 'assisted_revenue', $first )
 			&& array_key_exists( 'reward_cost', $first )
 			&& array_key_exists( 'profit_impact', $first )
 	);
-	check( 'goal row has profit_reason_code', array_key_exists( 'profit_reason_code', $first ) );
-	check( 'goal row has cost_coverage', array_key_exists( 'cost_coverage', $first ) );
-	check( 'goal row has profit_details', array_key_exists( 'profit_details', $first ) );
-	// Phase 5 (Goal Performance Redesign): commercial-outcome + detail
+	check( 'mission row has profit_reason_code', array_key_exists( 'profit_reason_code', $first ) );
+	check( 'mission row has cost_coverage', array_key_exists( 'cost_coverage', $first ) );
+	check( 'mission row has profit_details', array_key_exists( 'profit_details', $first ) );
+	// Phase 5 (Mission Performance Redesign): commercial-outcome + detail
 	// drawer fields — total influenced revenue, the attribution window and
 	// the data-sufficiency signal (Improvement.md §20/§45).
-	check( 'goal row has influenced_revenue', array_key_exists( 'influenced_revenue', $first ) );
-	check( 'goal row has attribution_window_days', array_key_exists( 'attribution_window_days', $first ) && $first['attribution_window_days'] > 0 );
-	check( 'goal row has data_sufficiency', array_key_exists( 'data_sufficiency', $first ) && in_array( $first['data_sufficiency'], array( 'low', 'medium', 'high' ), true ) );
+	check( 'mission row has influenced_revenue', array_key_exists( 'influenced_revenue', $first ) );
+	check( 'mission row has attribution_window_days', array_key_exists( 'attribution_window_days', $first ) && $first['attribution_window_days'] > 0 );
+	check( 'mission row has data_sufficiency', array_key_exists( 'data_sufficiency', $first ) && in_array( $first['data_sufficiency'], array( 'low', 'medium', 'high' ), true ) );
 }
 
 // ---------------------------------------------------------------------------
-// 5. Transactional fixtures: goal-scoped reads + upsell analytics fields
+// 5. Transactional fixtures: mission-scoped reads + upsell analytics fields
 // ---------------------------------------------------------------------------
 echo "\n== 5. Fixture reads (rolled back) ==\n";
 
-$goal_repo = $container->get( \FaraCart\Goals\GoalRepository::class );
+$mission_repo = $container->get( \FaraCart\Missions\MissionRepository::class );
 
 $revenue_events_before = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'revenue_events' ) );
 $upsell_events_before  = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'upsell_events' ) );
-$goals_before          = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'goals' ) );
+$missions_before          = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'missions' ) );
 
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	// Fixture goal (read by the goal-scoped endpoints).
-	$goal_id = $goal_repo->create(
+	// Fixture mission (read by the mission-scoped endpoints).
+	$mission_id = $mission_repo->create(
 		array(
-			'name'             => 'P33.6 Revenue Admin Test Goal',
+			'name'             => 'P33.6 Revenue Admin Test Mission',
 			'type'             => 'amount',
 			'target'           => 5000000,
 			'status'           => 'active',
 			'calculation_mode' => 'subtotal',
 		)
 	);
-	check( 'fixture goal created', $goal_id > 0 );
+	check( 'fixture mission created', $mission_id > 0 );
 
-	// Goal-scoped reads return only that goal.
-	$scoped_req = new \WP_REST_Request( 'GET', '/faracart/v1/revenue/goals' );
-	$scoped_req->set_param( 'goal_id', (int) $goal_id );
-	$scoped = $revenue_ctrl->handle_goals( $scoped_req )->get_data()['data']['items'];
-	check( 'goal-scoped goals returns exactly the fixture goal', 1 === count( $scoped ) && (int) $scoped[0]['goal_id'] === (int) $goal_id );
-	check( 'goal-scoped row has the fixture name', $scoped[0]['name'] === 'P33.6 Revenue Admin Test Goal' );
+	// Mission-scoped reads return only that mission.
+	$scoped_req = new \WP_REST_Request( 'GET', '/faracart/v1/revenue/missions' );
+	$scoped_req->set_param( 'mission_id', (int) $mission_id );
+	$scoped = $revenue_ctrl->handle_missions( $scoped_req )->get_data()['data']['items'];
+	check( 'mission-scoped missions returns exactly the fixture mission', 1 === count( $scoped ) && (int) $scoped[0]['mission_id'] === (int) $mission_id );
+	check( 'mission-scoped row has the fixture name', $scoped[0]['name'] === 'P33.6 Revenue Admin Test Mission' );
 
 	// Fixture products + upsell funnel events for the analytics row shape.
 	$product_ids = array();
@@ -233,13 +233,13 @@ try {
 	check( 'fixture products created', 2 === count( $product_ids ) );
 
 	// Record impressions/clicked/added per product in distinct sessions
-	// (the tracker dedups per session+goal+product within 24h).
+	// (the tracker dedups per session+mission+product within 24h).
 	foreach ( $product_ids as $index => $product_id ) {
 		foreach ( array( RevenueTracker::EVENT_UPSELL_IMPRESSION, RevenueTracker::EVENT_UPSELL_CLICKED, RevenueTracker::EVENT_UPSELL_ADDED ) as $type ) {
 			$tracker->record_upsell(
 				$type,
 				array(
-					'goal_id'    => (int) $goal_id,
+					'mission_id'    => (int) $mission_id,
 					'product_id' => $product_id,						'session_id' => sprintf( '%032x', $index + 1 ),
 					'cart_value' => 3000000,
 				)
@@ -285,11 +285,11 @@ echo "\n== 6. Rollback residue ==\n";
 
 $revenue_events_after = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'revenue_events' ) );
 $upsell_events_after  = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'upsell_events' ) );
-$goals_after          = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'goals' ) );
+$missions_after          = (int) $wpdb->get_var( 'SELECT COUNT(*) FROM ' . \FaraCart\Database\Schema::table( 'missions' ) );
 
 check( 'revenue_events unchanged after rollback', $revenue_events_after === $revenue_events_before );
 check( 'upsell_events unchanged after rollback', $upsell_events_after === $upsell_events_before );
-check( 'goals unchanged after rollback', $goals_after === $goals_before );
+check( 'missions unchanged after rollback', $missions_after === $missions_before );
 
 $fixture_products = get_posts(
 	array(

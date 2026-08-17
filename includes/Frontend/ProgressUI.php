@@ -166,7 +166,7 @@ final class ProgressUI {
 		// at most one widget per location, so a page can never show it twice.
 		$hooks->add_filter( 'render_block', array( $this, 'render_block_widget' ), 10, 2 );
 
-		// Floating goals/campaigns button + drawer (on widget pages).
+		// Floating missions/campaigns button + drawer (on widget pages).
 		$hooks->add_action( 'wp_footer', array( $this, 'render_floating_button' ), 20 );
 	}
 
@@ -207,8 +207,8 @@ final class ProgressUI {
 				'title'           => __( 'FaraCart Progress', 'faracart' ),
 				'category'        => 'widgets',
 				'icon'            => 'cart',
-				'description'     => __( 'Show cart goals, progress and rewards (FaraCart).', 'faracart' ),
-				'keywords'        => array( 'goal', 'cart', 'progress', 'aov' ),
+				'description'     => __( 'Show cart missions, progress and rewards (FaraCart).', 'faracart' ),
+				'keywords'        => array( 'mission', 'cart', 'progress', 'aov' ),
 				'supports'        => array(
 					'anchor'     => true,
 					'align'      => true,
@@ -455,14 +455,14 @@ final class ProgressUI {
 			'giftNonce'   => $this->settings->get( 'enabled', true )
 				? wp_create_nonce( \FaraCart\REST\GiftController::GIFT_NONCE_ACTION )
 				: '',
-			// Floating widget (floating goals/campaigns button + drawer): the
+			// Floating widget (floating missions/campaigns button + drawer): the
 			// resolved position config, per-device visibility and display
 			// options the storefront JS applies. Position axes are physical
 			// sides (the admin's choice must keep its visual result in RTL),
 			// so the JS positions with physical offsets, not logical ones.
 			'floating'  => $this->floating_config(),
 			// Phase 33.7 (Frontend Upsell Integration): the smart upsell
-			// panel's contract — the public rank endpoint (live-cart goal
+			// panel's contract — the public rank endpoint (live-cart mission
 			// gap + deterministic ranking), the nonce-guarded track
 			// endpoint (impression/clicked/added into the upsell_events
 			// log) and the localized labels. Absent/disabled = the JS
@@ -553,7 +553,7 @@ final class ProgressUI {
 			'icon'             => trim( sanitize_text_field( (string) $this->settings->get( 'floating_icon', '' ) ) ),
 			'label'            => trim( sanitize_text_field( (string) $this->settings->get( 'floating_label', '' ) ) ),
 			'labels'           => array(
-				'open'   => __( 'View your cart goals', 'faracart' ),
+				'open'   => __( 'View your cart missions', 'faracart' ),
 				'close'  => __( 'Close', 'faracart' ),
 			),
 		);
@@ -818,7 +818,7 @@ final class ProgressUI {
 	 * Render the single-product widget (compact variant).
 	 *
 	 * Priority 45 lands it just below the add-to-cart button (30) and meta
-	 * (40), the conventional spot for a cart-goal nudge.
+	 * (40), the conventional spot for a cart-mission nudge.
 	 *
 	 * @return void
 	 */
@@ -832,12 +832,12 @@ final class ProgressUI {
 	}
 
 	/**
-	 * Render the floating goals/campaigns button container.
+	 * Render the floating missions/campaigns button container.
 	 *
 	 * Gated on the floating_enabled setting (and the master enabled
 	 * toggle + widget pages like every other widget). The container is
 	 * inert markup — the JS builds the button + drawer and keeps it hidden
-	 * until the cart has an eligible goal to show.
+	 * until the cart has an eligible mission to show.
 	 *
 	 * @return void
 	 */
@@ -1037,7 +1037,7 @@ final class ProgressUI {
 			'gift_picker'      => __( 'Pick your free gift', 'faracart' ),
 			'gift_chosen'      => __( 'Gift added to your cart', 'faracart' ),
 			// Design-template storefront copy (the six progress templates).
-			'shopping_goal'    => __( 'Shopping goal', 'faracart' ),
+			'shopping_mission'    => __( 'Shopping mission', 'faracart' ),
 			'progress'         => __( 'Progress', 'faracart' ),
 			'paid'             => __( 'Paid', 'faracart' ),
 			'remaining'        => __( 'Remaining', 'faracart' ),
@@ -1046,12 +1046,12 @@ final class ProgressUI {
 			'add_more'         => __( 'Add %s more', 'faracart' ),
 			'view_products'    => __( 'View products', 'faracart' ),
 			'only_price'       => __( 'Only %s', 'faracart' ),
-			'recommend_heading' => __( 'Add these products to reach your goal faster:', 'faracart' ),
+			'recommend_heading' => __( 'Add these products to reach your mission faster:', 'faracart' ),
 			'completed'        => __( 'Completed', 'faracart' ),
-			'goal_reached'     => __( 'Goal completed', 'faracart' ),
+			'mission_reached'     => __( 'Mission completed', 'faracart' ),
 			'reward_active'    => __( '%s is active', 'faracart' ),
 			'expired'          => __( 'Expired', 'faracart' ),
-			'goal_ended'       => __( 'This goal has ended', 'faracart' ),
+			'mission_ended'       => __( 'This mission has ended', 'faracart' ),
 			'almost_done'      => __( 'Almost there!', 'faracart' ),
 			'congrats'         => __( 'Congratulations!', 'faracart' ),
 			'with_purchase'    => __( 'With a purchase of', 'faracart' ),

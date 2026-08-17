@@ -104,6 +104,14 @@ class TrackController extends BaseController {
 							return Tracker::is_event_type( $value );
 						},
 					),
+					'mission_id'    => array(
+						'type'              => 'integer',
+						'default'           => 0,
+						'minimum'           => 0,
+						'sanitize_callback' => 'absint',
+					),
+					// Legacy alias (Goal → Mission rename): old storefronts
+					// still post goal_id.
 					'goal_id'    => array(
 						'type'              => 'integer',
 						'default'           => 0,
@@ -235,10 +243,17 @@ class TrackController extends BaseController {
 			$meta['percentage'] = $percentage;
 		}
 
+		// Legacy alias: mission_id wins when present, else goal_id.
+		$mission_id = (int) $request->get_param( 'mission_id' );
+
+		if ( ! $mission_id ) {
+			$mission_id = (int) $request->get_param( 'goal_id' );
+		}
+
 		$id = $this->tracker->record(
 			$event_type,
 			array(
-				'goal_id'     => (int) $request->get_param( 'goal_id' ),
+				'mission_id'     => $mission_id,
 				'campaign_id' => (int) $request->get_param( 'campaign_id' ),
 				'product_id'  => (int) $request->get_param( 'product_id' ),
 				'cart_value'  => max( 0.0, (float) $request->get_param( 'cart_value' ) ),

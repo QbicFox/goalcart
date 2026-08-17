@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class SearchController
  *
- * Phase 7 (REST API / AJAX Layer) admin search endpoints used by the goal
+ * Phase 7 (REST API / AJAX Layer) admin search endpoints used by the mission
  * builder to pick products, categories and coupons:
  * *  - `GET /faracart/v1/search/products`    — products/variations by name or
  *    SKU (q), capped at 50 results.
@@ -22,9 +22,9 @@ defined( 'ABSPATH' ) || exit;
  *  - `GET /faracart/v1/search/coupons`     — shop_coupon posts by code.
  *
  * Every route also accepts an `ids` array: when present, the search is
- * narrowed to exactly those ids (Phase 9: the goal builder uses it to
+ * narrowed to exactly those ids (Phase 9: the mission builder uses it to
  * preload already-selected products/categories/coupons when editing a
- * goal, since the search endpoints are the only admin lookup available).
+ * mission, since the search endpoints are the only admin lookup available).
  *
  * Searches are admin-only (manage_options). Results are capped so the
  * builder never loads thousands of products at once (Phase 23 performance
@@ -89,7 +89,7 @@ class SearchController extends BaseController {
 		);
 
 		// Phase 32 (brand/tag/attribute conditions): tag terms, global
-		// attribute taxonomies and shipping zones for the goal builder.
+		// attribute taxonomies and shipping zones for the mission builder.
 		register_rest_route(
 			self::NAMESPACE,
 			'/search/tags',
@@ -128,7 +128,7 @@ class SearchController extends BaseController {
 	 * Shared search arg schema.
 	 *
 	 * `ids` narrows the result to exactly the given positive ids (used by
-	 * the goal builder to preload saved selections).
+	 * the mission builder to preload saved selections).
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
@@ -355,7 +355,7 @@ class SearchController extends BaseController {
 	/**
 	 * List global product attribute taxonomies (e.g. pa_color, pa_brand).
 	 *
-	 * The goal builder stores the selected taxonomy slugs; brand goals
+	 * The mission builder stores the selected taxonomy slugs; brand missions
 	 * store their brand taxonomy the same way.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -393,7 +393,7 @@ class SearchController extends BaseController {
 	}
 
 	/**
-	 * List shipping zones (phase 32 shipping-zone goals).
+	 * List shipping zones (phase 32 shipping-zone missions).
 	 *
 	 * Zone 0 ("locations not covered by your other zones") is listed with
 	 * its conventional id 0.

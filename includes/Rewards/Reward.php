@@ -7,20 +7,20 @@
 
 namespace FaraCart\Rewards;
 
-use FaraCart\Goals\Goal;
+use FaraCart\Missions\Mission;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Class Reward
  *
- * An immutable, UI-independent representation of a goal's reward (P05-T02).
- * Rewards are decoupled from goal calculation: the GoalEngine computes a
- * GoalResult and the RewardEngine turns that result into a RewardResult
+ * An immutable, UI-independent representation of a mission's reward (P05-T02).
+ * Rewards are decoupled from mission calculation: the MissionEngine computes a
+ * MissionResult and the RewardEngine turns that result into a RewardResult
  * using the reward configuration carried here.
  *
- * The MVP embeds exactly one reward per goal (see Database\Schema), so a
- * Reward is derived from a Goal's reward columns plus the JSON `reward_meta`
+ * The MVP embeds exactly one reward per mission (see Database\Schema), so a
+ * Reward is derived from a Mission's reward columns plus the JSON `reward_meta`
  * (eligible products/categories, stacking rules, shipping method/zone
  * filters, gift product, coupon settings). The value object normalizes that
  * raw config into typed accessors the applicators can rely on.
@@ -46,12 +46,12 @@ final class Reward {
 	 * Gift add modes.
 	 *
 	 * 'automatic' silently adds the single configured gift product once
-	 * the goal is reached (mandatory — the shopper cannot remove it).
+	 * the mission is reached (mandatory — the shopper cannot remove it).
 	 * Phase 32 (free gift selection) adds 'choose': the shopper picks one
 	 * gift from the configured `gift_products` list through the storefront
 	 * widget picker. The former 'optional' mode was removed (its auto-add
 	 * but shopper-removable behavior blurred the mandatory/selectable
-	 * model); legacy goals still storing it read as 'automatic'.
+	 * model); legacy missions still storing it read as 'automatic'.
 	 */
 	const GIFT_AUTOMATIC = 'automatic';
 	const GIFT_CHOOSE    = 'choose';
@@ -212,7 +212,7 @@ final class Reward {
 		$this->gift_products       = $this->ints( isset( $data['gift_products'] ) ? $data['gift_products'] : array() );
 		$this->gift_add_mode       = isset( $data['gift_add_mode'] ) ? (string) $data['gift_add_mode'] : self::GIFT_AUTOMATIC;
 
-		// The 'optional' gift add mode was removed; a legacy goal still
+		// The 'optional' gift add mode was removed; a legacy mission still
 		// storing it reads as 'automatic' (mandatory, auto-added) so the
 		// value can never surface in the UI or the engine again.
 		if ( 'optional' === $this->gift_add_mode ) {
@@ -224,20 +224,20 @@ final class Reward {
 	}
 
 	/**
-	 * Build the reward configured on a goal.
+	 * Build the reward configured on a mission.
 	 *
-	 * @param Goal $goal Goal to read the reward from.
+	 * @param Mission $mission Mission to read the reward from.
 	 * @return Reward
 	 */
-	public static function from_goal( Goal $goal ) {
-		$meta = $goal->reward_meta();
+	public static function from_mission( Mission $mission ) {
+		$meta = $mission->reward_meta();
 
 		return new self(
 			array(
-				'type'                => $goal->reward_type(),
-				'value'               => $goal->reward_value(),
-				'max_value'           => $goal->reward_max_value(),
-				'label'               => isset( $meta['label'] ) ? (string) $meta['label'] : $goal->name(),
+				'type'                => $mission->reward_type(),
+				'value'               => $mission->reward_value(),
+				'max_value'           => $mission->reward_max_value(),
+				'label'               => isset( $meta['label'] ) ? (string) $meta['label'] : $mission->name(),
 				'stacking'            => isset( $meta['stacking'] ) ? (string) $meta['stacking'] : self::STACK_NONE,
 				'eligible_products'   => isset( $meta['eligible_products'] ) ? $meta['eligible_products'] : array(),
 				'eligible_categories' => isset( $meta['eligible_categories'] ) ? $meta['eligible_categories'] : array(),

@@ -1,0 +1,174 @@
+<?php
+/**
+ * Premium / elegant e-commerce mission template.
+ *
+ * @package FaraCart
+ */
+
+namespace FaraCart\Templates\Mission;
+
+use FaraCart\Templates\AbstractTemplate;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Class Template6
+ *
+ * The premium/elegant mission card (Concept 09 — Premium / Elegant
+ * E-commerce Style): a gold-accented header, a thin elegant progress bar
+ * with a marker dot, the current/remaining amounts and a refined CTA,
+ * plus a highlighted "almost completed" callout. The default appearance
+ * follows the reference design (gold on a soft neutral surface).
+ */
+class Template6 extends AbstractTemplate {
+
+	/**
+	 * Stable template id (persisted — never rename).
+	 *
+	 * @return string
+	 */
+	public function id() {
+		return 'template-6';
+	}
+
+	/**
+	 * @return string
+	 */
+	public function label() {
+		return __( 'Template 6', 'faracart' );
+	}
+
+	/**
+	 * @return string
+	 */
+	public function description() {
+		return __( 'Premium card — gold accents, elegant progress and a refined call-to-action.', 'faracart' );
+	}
+
+	/**
+	 * @return string
+	 */
+	public function scope() {
+		return 'mission';
+	}
+
+	/**
+	 * @return int
+	 */
+	public function version() {
+		return 1;
+	}
+
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
+	public function schema() {
+		return array(
+			'accent'        => array(
+				'type'    => 'color',
+				'label'   => __( 'Gold accent color', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
+				'default' => '#d4af37',
+			),
+			'progressColor' => array(
+				'type'    => 'color',
+				'label'   => __( 'Progress color', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
+				'default' => '#d4af37',
+			),
+			'bg'            => array(
+				'type'    => 'color',
+				'label'   => __( 'Background', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
+				'default' => '#fafafa',
+			),
+			'border'        => array(
+				'type'    => 'color',
+				'label'   => __( 'Border', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
+				'default' => '#ece5d0',
+			),
+			'text'          => array(
+				'type'    => 'color',
+				'label'   => __( 'Text', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
+				'default' => '#111827',
+			),
+			'secondaryText' => array(
+				'type'    => 'color',
+				'label'   => __( 'Secondary text', 'faracart' ),
+				'group'   => __( 'Colors', 'faracart' ),
+				'default' => '#9ca3af',
+			),
+			'radius'        => array(
+				'type'    => 'number',
+				'label'   => __( 'Corner radius (px)', 'faracart' ),
+				'group'   => __( 'Shape', 'faracart' ),
+				'default' => 2,
+				'min'     => 0,
+				'max'     => 5,
+			),
+			'barHeight'     => array(
+				'type'    => 'number',
+				'label'   => __( 'Bar height (px)', 'faracart' ),
+				'group'   => __( 'Shape', 'faracart' ),
+				'default' => 6,
+				'min'     => 2,
+				'max'     => 16,
+			),
+			'buttonColor'   => array(
+				'type'    => 'color',
+				'label'   => __( 'Button color', 'faracart' ),
+				'group'   => __( 'Button', 'faracart' ),
+				'default' => '#b8922a',
+			),
+			'buttonTextColor' => array(
+				'type'    => 'color',
+				'label'   => __( 'Button text color', 'faracart' ),
+				'group'   => __( 'Button', 'faracart' ),
+				'default' => '#b8922a',
+			),
+			'buttonStyle'   => array(
+				'type'    => 'select',
+				'label'   => __( 'Button style', 'faracart' ),
+				'group'   => __( 'Button', 'faracart' ),
+				'default' => 'outline',
+				'options' => array(
+					'solid'   => __( 'Solid', 'faracart' ),
+					'outline' => __( 'Outline', 'faracart' ),
+				),
+			),
+			'showAmounts'   => array(
+				'type'    => 'bool',
+				'label'   => __( 'Show the amounts', 'faracart' ),
+				'group'   => __( 'Content', 'faracart' ),
+				'default' => true,
+			),
+			'showCta'       => array(
+				'type'    => 'bool',
+				'label'   => __( 'Show the call-to-action', 'faracart' ),
+				'group'   => __( 'Content', 'faracart' ),
+				'default' => true,
+			),
+			'animation'     => array(
+				'type'    => 'bool',
+				'label'   => __( 'Animate progress updates', 'faracart' ),
+				'group'   => __( 'Behavior', 'faracart' ),
+				'default' => true,
+			),
+			'cssClass'      => array(
+				'type'    => 'text',
+				'label'   => __( 'Extra CSS class', 'faracart' ),
+				'group'   => __( 'Advanced', 'faracart' ),
+				'default' => '',
+			),
+			'customCss'     => array(
+				'type'    => 'css',
+				'label'   => __( 'Custom CSS', 'faracart' ),
+				'group'   => __( 'Advanced', 'faracart' ),
+				'default' => '',
+				'help'    => __( 'Appended to the widget styles. Applied only while this template renders.', 'faracart' ),
+			),
+		);
+	}
+}

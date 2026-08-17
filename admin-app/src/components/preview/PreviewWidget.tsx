@@ -6,16 +6,16 @@ import { __ } from '@wordpress/i18n';
 import type { ComponentType } from 'react';
 
 import { formatCurrency } from '../../lib/format';
-import { CAMPAIGN_RENDERERS, GOAL_RENDERERS } from '../../templates/registry';
+import { CAMPAIGN_RENDERERS, MISSION_RENDERERS } from '../../templates/registry';
 import type { CampaignTemplateProps } from '../../templates/registry';
 import { rewardLabel } from '../../templates/rewardLabel';
 import { bool, num, str } from '../../templates/utils';
-import type { ProgressCampaign, ProgressGoal, TemplateSettingsValue } from '../../types';
+import type { ProgressCampaign, ProgressMission, TemplateSettingsValue } from '../../types';
 import type { PreviewRewardState, PreviewTokens } from './types';
 
 interface PreviewWidgetProps {
-  /** Evaluated goals (single goal or a campaign's milestones in order). */
-  goals: ProgressGoal[];
+  /** Evaluated missions (single mission or a campaign's milestones in order). */
+  missions: ProgressMission[];
   /** Campaign template groups (pluggable engine) from the payload. */
   campaigns?: ProgressCampaign[];
   /** ISO currency code from the payload (or the boot data). */
@@ -23,7 +23,7 @@ interface PreviewWidgetProps {
   /** Storefront appearance tokens (legacy fallback base). */
   tokens: PreviewTokens;
   /**
-   * Forced template override ('' = per-goal): renders every card through
+   * Forced template override ('' = per-mission): renders every card through
    * the given template so admins can preview any variant. Requires
    * `settingsOverride` to supply that template's default appearance.
    */
@@ -36,13 +36,13 @@ interface PreviewWidgetProps {
   animation: boolean;
 }
 
-/** Human-readable reason a goal was suppressed by a conflict (Phase 26). */
+/** Human-readable reason a mission was suppressed by a conflict (Phase 26). */
 function conflictReasonLabel(reason: string): string {
   switch (reason) {
     case 'exclusive':
-      return __('Blocked by an exclusive goal', 'faracart');
+      return __('Blocked by an exclusive mission', 'faracart');
     case 'not_first':
-      return __('Skipped — a higher-priority goal wins', 'faracart');
+      return __('Skipped — a higher-priority mission wins', 'faracart');
     case 'not_best':
       return __('Skipped — another reward is better', 'faracart');
     case 'lower_priority':
@@ -52,18 +52,18 @@ function conflictReasonLabel(reason: string): string {
   }
 }
 
-/** The eligible goals, in payload order. */
-function eligibleGoals(goals: ProgressGoal[]): ProgressGoal[] {
-  return goals.filter((goal) => goal.eligible !== false);
+/** The eligible missions, in payload order. */
+function eligibleMissions(missions: ProgressMission[]): ProgressMission[] {
+  return missions.filter((mission) => mission.eligible !== false);
 }
 
 /**
  * The effective settings for one card: legacy appearance tokens as the
- * base, then the goal's own resolved template settings (or the forced
+ * base, then the mission's own resolved template settings (or the forced
  * override's global defaults when previewing a different template).
  */
 function effectiveSettings(
-  goal: ProgressGoal,
+  mission: ProgressMission,
   tokens: PreviewTokens,
   templateOverride: string | undefined,
   settingsOverride: TemplateSettingsValue | null | undefined
@@ -77,7 +77,7 @@ function effectiveSettings(
     barHeight: tokens.barHeight,
   };
 
-  const own = templateOverride ? (settingsOverride ?? {}) : (goal.template_settings ?? {});
+  const own = templateOverride ? (settingsOverride ?? {}) : (mission.template_settings ?? {});
 
   return { ...base, ...own };
 }
@@ -112,15 +112,15 @@ function RewardChip({ label, state }: { label: string; state: 'locked' | 'unlock
 
 /** The Phase 14 suggestion list (name + server-formatted price). */
 function SuggestionList({
-  goal,
+  mission,
   currency,
   tokens,
 }: {
-  goal: ProgressGoal;
+  mission: ProgressMission;
   currency: string;
   tokens: PreviewTokens;
 }) {
-  const items = goal.suggestions ?? [];
+  const items = mission.suggestions ?? [];
 
   if (!items.length) {
     return null;
@@ -160,14 +160,14 @@ function SuggestionList({
 }
 
 /**
- * One goal's card — mirrors goalContainer() in assets/js/frontend.js:
+ * One mission's card — mirrors missionContainer() in assets/js/frontend.js:
  * reward chip + template body (via the React template registry) + message
- * + suggestions. The card surface comes from the goal's effective
+ * + suggestions. The card surface comes from the mission's effective
  * settings (accent/bg/border/text/radius), exactly like the storefront's
  * per-card CSS custom properties.
  */
-function GoalCard({
-  goal,
+function MissionCard({
+  mission,
   currency,
   tokens,
   template,
@@ -175,7 +175,7 @@ function GoalCard({
   rewardState,
   animation,
 }: {
-  goal: ProgressGoal;
+  mission: ProgressMission;
   currency: string;
   tokens: PreviewTokens;
   template: string;
@@ -185,10 +185,10 @@ function GoalCard({
 }) {
   // Property lookup (not a call result) keeps the component reference
   // static across renders — react-hooks/static-components.
-  const Renderer = GOAL_RENDERERS[template] ?? GOAL_RENDERERS['template-1'];
+  const Renderer = MISSION_RENDERERS[template] ?? MISSION_RENDERERS['template-1'];
   const chipState: 'locked' | 'unlocked' =
-    rewardState === 'auto' ? (goal.completed ? 'unlocked' : 'locked') : rewardState;
-  const nearlyComplete = goal.state === 'nearly_complete';
+    rewardState === 'auto' ? (mission.completed ? 'unlocked' : 'locked') : rewardState;
+  const nearlyComplete = mission.state === 'nearly_complete';
   const showReward = bool(settings, 'showReward', true);
   // Template 4 renders the recommended products inline (its body), so the
   // shared bottom suggestion list would duplicate them — suppress it.
@@ -209,17 +209,17 @@ function GoalCard({
         fontSize: 14,
       }}
     >
-      {/* GoalContainer head: the reward chip, right-aligned. */}
-      {goal.reward?.type && showReward && (
+      {/* MissionContainer head: the reward chip, right-aligned. */}
+      {mission.reward?.type && showReward && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 0.5 }}>
-          <RewardChip label={rewardLabel(goal.reward)} state={chipState} />
+          <RewardChip label={rewardLabel(mission.reward)} state={chipState} />
         </Box>
       )}
 
       {/* Template body (pluggable template engine). */}
-      <Renderer goal={goal} currency={currency} settings={settings} animation={animation} />
+      <Renderer mission={mission} currency={currency} settings={settings} animation={animation} />
 
-      {/* GoalMessage (Phase 13 state styling). */}
+      {/* MissionMessage (Phase 13 state styling). */}
       {showMessage && (
         <Typography
           sx={{
@@ -228,25 +228,25 @@ function GoalCard({
             color: nearlyComplete ? str(settings, 'accent', tokens.accent) : undefined,
           }}
         >
-          {goal.message}
+          {mission.message}
         </Typography>
       )}
 
       {/* Conflict resolution note (Phase 26). */}
-      {goal.conflict && goal.conflict.resolved === false && (
+      {mission.conflict && mission.conflict.resolved === false && (
         <Box sx={{ mt: 1 }}>
           <Chip
             size="small"
             color="warning"
             variant="outlined"
-            label={conflictReasonLabel(goal.conflict.reason)}
+            label={conflictReasonLabel(mission.conflict.reason)}
           />
         </Box>
       )}
 
       {/* SuggestionList (Phase 14) — hidden for template-4 whose body
           already renders the recommended products. */}
-      {showSuggestions && <SuggestionList goal={goal} currency={currency} tokens={tokens} />}
+      {showSuggestions && <SuggestionList mission={mission} currency={currency} tokens={tokens} />}
     </Box>
   );
 }
@@ -255,12 +255,12 @@ function GoalCard({
  * The storefront progress widget, rendered in React for the Phase 15
  * admin preview. Mirrors the component flow of assets/js/frontend.js —
  * campaign groups render through their campaign template (e.g. the
- * milestone chain), everything else as one GoalContainer card per
- * eligible goal — with the resolved template settings, so the admin sees
+ * milestone chain), everything else as one MissionContainer card per
+ * eligible mission — with the resolved template settings, so the admin sees
  * exactly what customers see.
  */
 export default function PreviewWidget({
-  goals,
+  missions,
   campaigns = [],
   currency,
   tokens,
@@ -269,32 +269,32 @@ export default function PreviewWidget({
   rewardState,
   animation,
 }: PreviewWidgetProps) {
-  const cards = eligibleGoals(goals);
+  const cards = eligibleMissions(missions);
 
   if (!cards.length) {
     return null;
   }
 
-  // Group eligible goals by campaign so a campaign template (e.g. the
+  // Group eligible missions by campaign so a campaign template (e.g. the
   // milestone chain) renders the whole group as one unit — the same
   // grouping renderWidget() performs on the storefront.
   const campaignById = new Map(campaigns.map((campaign) => [campaign.campaign_id, campaign]));
   const groupOrder: number[] = [];
-  const groups = new Map<number, ProgressGoal[]>();
-  const standalone: ProgressGoal[] = [];
+  const groups = new Map<number, ProgressMission[]>();
+  const standalone: ProgressMission[] = [];
 
-  for (const goal of cards) {
-    const campaign = goal.campaign_id ? campaignById.get(goal.campaign_id) : undefined;
+  for (const mission of cards) {
+    const campaign = mission.campaign_id ? campaignById.get(mission.campaign_id) : undefined;
 
     if (campaign && campaign.template && CAMPAIGN_RENDERERS[campaign.template]) {
-      const list = groups.get(goal.campaign_id as number) ?? [];
-      list.push(goal);
-      groups.set(goal.campaign_id as number, list);
+      const list = groups.get(mission.campaign_id as number) ?? [];
+      list.push(mission);
+      groups.set(mission.campaign_id as number, list);
       if (list.length === 1) {
-        groupOrder.push(goal.campaign_id as number);
+        groupOrder.push(mission.campaign_id as number);
       }
     } else {
-      standalone.push(goal);
+      standalone.push(mission);
     }
   }
   return (
@@ -329,7 +329,7 @@ export default function PreviewWidget({
           >
             <Renderer
               campaign={campaign}
-              goals={groups.get(campaignId) as ProgressGoal[]}
+              missions={groups.get(campaignId) as ProgressMission[]}
               currency={currency}
               settings={groupSettings}
               animation={animation}
@@ -338,14 +338,14 @@ export default function PreviewWidget({
         );
       })}
 
-      {standalone.map((goal) => (
-        <GoalCard
-          key={goal.goal_id}
-          goal={goal}
+      {standalone.map((mission) => (
+        <MissionCard
+          key={mission.mission_id}
+          mission={mission}
           currency={currency}
           tokens={tokens}
-          template={templateOverride || goal.template || 'template-1'}
-          settings={effectiveSettings(goal, tokens, templateOverride, settingsOverride)}
+          template={templateOverride || mission.template || 'template-1'}
+          settings={effectiveSettings(mission, tokens, templateOverride, settingsOverride)}
           rewardState={rewardState}
           animation={animation}
         />

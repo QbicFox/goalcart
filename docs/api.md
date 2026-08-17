@@ -37,8 +37,8 @@ Every failure returns a structured `WP_Error`, serialized by WP core as:
 
 ```json
 {
-  "code": "faracart_goal_not_found",
-  "message": "The goal could not be found.",
+  "code": "faracart_mission_not_found",
+  "message": "The mission could not be found.",
   "data": { "status": 404 }
 }
 ```
@@ -50,9 +50,9 @@ status codes are always set. The common codes:
 |---|---:|---|
 | `faracart_forbidden` | 403 | Missing capability |
 | `faracart_rate_limited` | 429 | Rate limit exceeded (`retry_after` in data) |
-| `faracart_goal_not_found` / `faracart_campaign_not_found` | 404 | Resource missing |
-| `faracart_preview_target_required` | 400 | Neither / both of `goal_id` + `campaign_id` given |
-| `faracart_preview_not_found` | 404 | Preview target (goal/campaign) missing |
+| `faracart_mission_not_found` / `faracart_campaign_not_found` | 404 | Resource missing |
+| `faracart_preview_target_required` | 400 | Neither / both of `mission_id` + `campaign_id` given |
+| `faracart_preview_not_found` | 404 | Preview target (mission/campaign) missing |
 | `faracart_invalid_nonce` | 403 | Invalid tracking nonce (`/track`) |
 | `faracart_tracking_disabled` | 403 | Tracking master toggle off (`/track`) |
 | `faracart_invalid_event_type` | 400 | Unknown event type (`/track`, direct handler) |
@@ -85,11 +85,11 @@ on every cart refresh).
 All admin endpoints are `manage_options`-gated. Base URL:
 `https://site/wp-json/faracart/v1`.
 
-### 2.1 Goals
+### 2.1 Missions
 
-#### `GET /goals`
+#### `GET /missions`
 
-Paginated goal list. Query args:
+Paginated mission list. Query args:
 
 | Arg | Type | Default | Notes |
 |---|---|---|---|
@@ -98,33 +98,33 @@ Paginated goal list. Query args:
 | `status` | `''`/`active`/`inactive` | `''` | empty = all |
 | `search` | string | `''` | name `LIKE` filter |
 
-Response: `pagination` envelope; each item is a full goal object (see
+Response: `pagination` envelope; each item is a full mission object (see
 below).
 
-#### `GET /goals/{id}`
+#### `GET /missions/{id}`
 
-Single goal object, or `faracart_goal_not_found` (404).
+Single mission object, or `faracart_mission_not_found` (404).
 
-#### `POST /goals`
+#### `POST /missions`
 
-Create a goal. `name` and `type` are required; every other field is
-optional (schema defaults apply). Returns the created goal object.
+Create a mission. `name` and `type` are required; every other field is
+optional (schema defaults apply). Returns the created mission object.
 
-#### `PUT /goals/{id}`
+#### `PUT /missions/{id}`
 
 Partial update — only the keys present in the body are written. Returns
-the updated goal object.
+the updated mission object.
 
-#### `DELETE /goals/{id}`
+#### `DELETE /missions/{id}`
 
 Hard delete (analytics history survives via `ON DELETE SET NULL`).
 Returns `{ "deleted": true, "id": N }`.
 
-#### `POST /goals/{id}/duplicate`
+#### `POST /missions/{id}/duplicate`
 
-Copies the goal with a ` (copy)` name suffix. Returns the new goal.
+Copies the mission with a ` (copy)` name suffix. Returns the new mission.
 
-#### Goal object
+#### Mission object
 
 ```json
 {
@@ -168,15 +168,15 @@ Validation highlights (all enforced by the route arg schemas):
 - `status` — `active` / `inactive`; `operator` — `and` / `or`.
 - `target` — number ≥ 0.
 - `priority` — int ≥ 0 (lower wins conflicts); `exclusive` — boolean
-  (mutually exclusive goal, Phase 26).
+  (mutually exclusive mission, Phase 26).
 - `campaign_id` — 0 (none) or an existing campaign id.
 - `starts_at` / `ends_at` — `Y-m-d` or `Y-m-d H:i:s` or `null`.
 
 Persistence mapping: `categories`, `products`, `excluded_products`,
 `operator` and `children` are stored inside the `conditions` JSON column;
 `reward_meta`, `display_settings` and `limits` are stored as JSON. The
-repository spreads them back onto the Goal model on read, so persisted
-category/product/composite goals evaluate correctly.
+repository spreads them back onto the Mission model on read, so persisted
+category/product/composite missions evaluate correctly.
 
 ### 2.2 Settings
 
@@ -188,7 +188,7 @@ category/product/composite goals evaluate correctly.
     "enabled": true,
     "fullscreen_dashboard": true,
     "currency_display": "symbol",
-    "default_goal_behavior": "all",
+    "default_mission_behavior": "all",
     "conflict_resolution": "cumulative",
     "calculation_mode": "subtotal",
     "frontend_template": "template-1",
@@ -242,12 +242,12 @@ sanitizer (direct handler saves included). The full Phase 18 surface:
 |---|---|---|
 | `enabled` / `fullscreen_dashboard` | boolean | cast |
 | `currency_display` | enum `symbol` `code` `name` | unknown → `symbol` |
-| `default_goal_behavior` | enum `all` `first` `closest` | unknown → `all` |
+| `default_mission_behavior` | enum `all` `first` `closest` | unknown → `all` |
 | `conflict_resolution` | enum `cumulative` `best` `first` | unknown → `cumulative` |
 | `calculation_mode` | enum `subtotal` `discounted_subtotal` `total` | unknown → `subtotal` |
-| `frontend_template` | enum `template-1` … `template-6` | unknown → `template-1`; does not sync `template_defaults.goal` |
-| `template_defaults` | object `{ goal?, campaign? }` — ids registered for that scope ('' allowed) | unknown ids rejected; does not sync `frontend_template` |
-| `template_settings` | object `{ goal?, campaign? }` → per-template appearance maps | sanitized against each template's schema (unknown scopes/templates dropped, colors/ranges/enums/CSS cleaned) |
+| `frontend_template` | enum `template-1` … `template-6` | unknown → `template-1`; does not sync `template_defaults.mission` |
+| `template_defaults` | object `{ mission?, campaign? }` — ids registered for that scope ('' allowed) | unknown ids rejected; does not sync `frontend_template` |
+| `template_settings` | object `{ mission?, campaign? }` → per-template appearance maps | sanitized against each template's schema (unknown scopes/templates dropped, colors/ranges/enums/CSS cleaned) |
 | `frontend_animation` | boolean | cast |
 | `frontend_locations` | array of the location enum (`cart` `mini-cart` `checkout` `shop` `product` `sticky`) | filtered + deduped |
 | `frontend_mobile` | enum `show` `hide` | unknown → `show` |
@@ -264,7 +264,7 @@ Saving identical settings is a successful no-op (an unchanged option is
 not a failure). A successful save fires the `faracart_settings_saved`
 action and logs a debug entry when logging is enabled.
 
-### 2.3 Search (goal builder)
+### 2.3 Search (mission builder)
 
 Server-side, capped at 50 results (`no_found_rows`).
 
@@ -276,23 +276,23 @@ Server-side, capped at 50 results (`no_found_rows`).
 
 All three accept an optional `ids` array (repeated query args, e.g.
 `ids=5&ids=12`). When present, the result is narrowed to exactly those
-ids — the Phase 9 goal builder uses this to preload already-selected
-products/categories/coupons when editing a goal. Non-positive ids are
+ids — the Phase 9 mission builder uses this to preload already-selected
+products/categories/coupons when editing a mission. Non-positive ids are
 rejected by the arg schema.
 
 ### 2.4 Campaigns
 
 Campaign CRUD + milestone ordering (Phase 10 — Campaign Builder):
 
-- `GET /campaigns` — all campaigns, each with `goal_count`.
-- `GET /campaigns/{id}` — one campaign (with its ordered `goals`), or
+- `GET /campaigns` — all campaigns, each with `mission_count`.
+- `GET /campaigns/{id}` — one campaign (with its ordered `missions`), or
   `faracart_campaign_not_found` (404).
 - `POST /campaigns` — create. `name` is required.
 - `PUT /campaigns/{id}` — partial update.
-- `DELETE /campaigns/{id}` — delete; the campaign's goals are detached
+- `DELETE /campaigns/{id}` — delete; the campaign's missions are detached
   (`campaign_id` → null) and survive for reuse.
 - `POST /campaigns/{id}/duplicate` — copy the campaign (name ` (copy)`
-  suffix, starts **inactive**) plus its goals as new goal rows.
+  suffix, starts **inactive**) plus its missions as new mission rows.
 
 #### Campaign object
 
@@ -306,8 +306,8 @@ Campaign CRUD + milestone ordering (Phase 10 — Campaign Builder):
   "ends_at": null,
   "priority": 10,
   "display_rules": {},
-  "goal_count": 2,
-  "goals": [
+  "mission_count": 2,
+  "missions": [
     { "id": 8, "name": "Free shipping", "type": "amount", "target": 500000, "reward_type": "free_shipping", "menu_order": 1 },
     { "id": 9, "name": "Free gift", "type": "amount", "target": 1000000, "reward_type": "free_gift", "menu_order": 2 }
   ],
@@ -316,23 +316,23 @@ Campaign CRUD + milestone ordering (Phase 10 — Campaign Builder):
 }
 ```
 
-Milestone ordering: create/update accept an ordered `goals` array of goal
-ids (e.g. `{ "goals": [8, 9] }`); the repository assigns
-`goals.campaign_id` + `goals.menu_order` accordingly and detaches goals
+Milestone ordering: create/update accept an ordered `missions` array of mission
+ids (e.g. `{ "missions": [8, 9] }`); the repository assigns
+`missions.campaign_id` + `missions.menu_order` accordingly and detaches missions
 removed from the list. Validation: `name` (required on create),
 `status` (`active`/`inactive`), `starts_at`/`ends_at` (`Y-m-d` or
 `Y-m-d H:i:s`), `priority` (≥ 0), `display_rules` (object),
-`goals` (array of positive ints).
+`missions` (array of positive ints).
 
 ### 2.5 Preview (Phase 15)
 
 #### `POST /preview` — admin-only, rate limited per user
 
-Evaluates a goal (or a campaign's milestone goals) against a **simulated
-cart** and returns the exact same per-goal payload shape as the public
+Evaluates a mission (or a campaign's milestone missions) against a **simulated
+cart** and returns the exact same per-mission payload shape as the public
 `GET /progress` endpoint, so the admin preview renders the real
 storefront widget before publishing. The simulation never touches the
-real WooCommerce cart, and publish gating is ignored (goals preview as
+real WooCommerce cart, and publish gating is ignored (missions preview as
 active and in-schedule) so drafts and scheduled campaigns can be seen
 first.
 
@@ -340,19 +340,19 @@ Body args:
 
 | Arg | Type | Default | Notes |
 |---|---|---|---|
-| `goal_id` | int ≥ 0 | 0 | Preview a single goal (XOR with `campaign_id`) |
-| `campaign_id` | int ≥ 0 | 0 | Preview a campaign's ordered milestone goals |
-| `simulated.amount` | number ≥ 0 | 0 | Simulated cart amount (money goals) |
-| `simulated.quantity` | number ≥ 0 | 0 | Simulated item quantity (count goals) |
+| `mission_id` | int ≥ 0 | 0 | Preview a single mission (XOR with `campaign_id`) |
+| `campaign_id` | int ≥ 0 | 0 | Preview a campaign's ordered milestone missions |
+| `simulated.amount` | number ≥ 0 | 0 | Simulated cart amount (money missions) |
+| `simulated.quantity` | number ≥ 0 | 0 | Simulated item quantity (count missions) |
 
-Exactly one of `goal_id` / `campaign_id` is required — neither or both
+Exactly one of `mission_id` / `campaign_id` is required — neither or both
 returns `faracart_preview_target_required` (400); a missing target
 returns `faracart_preview_not_found` (404). Unknown keys inside
 `simulated` are rejected by the arg schema.
 
 ```json
 {
-  "goal_id": 5,
+  "mission_id": 5,
   "simulated": { "amount": 500000, "quantity": 1 }
 }
 ```
@@ -362,11 +362,11 @@ Response:
 ```json
 {
   "data": {
-    "goals": [
+    "missions": [
       {
-        "goal_id": 5,
-        "goal_name": "Free shipping",
-        "goal_type": "amount",
+        "mission_id": 5,
+        "mission_name": "Free shipping",
+        "mission_type": "amount",
         "is_money": true,
         "current": 250000,
         "target": 500000,
@@ -374,7 +374,7 @@ Response:
         "percentage": 50,
         "completed": false,
         "state": "progressing",
-        "message": "Only ۲۵۰٬۰۰۰ left to reach your goal",
+        "message": "Only ۲۵۰٬۰۰۰ left to reach your mission",
         "reward": { "type": "free_shipping", "value": null, "max_value": null, "meta": {} },
         "suggestions": [],
         "reward_state": "locked",
@@ -386,14 +386,14 @@ Response:
     "currency": "IRR",
     "simulated": { "amount": 500000, "quantity": 1 }
   },
-  "meta": { "mode": "goal" }
+  "meta": { "mode": "mission" }
 }
 ```
 
-`meta.mode` is `goal` or `campaign`; campaign previews return every
-milestone goal in `menu_order` (each with the same shape), which is what
+`meta.mode` is `mission` or `campaign`; campaign previews return every
+milestone mission in `menu_order` (each with the same shape), which is what
 drives the admin's stacked milestone-card rendering. The payload is
-built by the shared `FrontendController::shape_goal()` — identical to
+built by the shared `FrontendController::shape_mission()` — identical to
 `/progress`.
 
 ### 2.6 Analytics (Phase 17)
@@ -410,8 +410,8 @@ Query args (all validated by the route arg schema):
 |---|---|---|---|
 | `from` / `to` | `Y-m-d` or `Y-m-d H:i:s` | last 30 days | Inclusive window (`from` is taken from 00:00:00, `to` to 23:59:59 on the trend) |
 | `campaign_id` | int ≥ 0 | 0 | Restrict to one campaign |
-| `goal_id` | int ≥ 0 | 0 | Restrict to one goal |
-| `goal_ids` | int[] ≥ 1 | — | Restrict to a set of goals (`IN` clause) |
+| `mission_id` | int ≥ 0 | 0 | Restrict to one mission |
+| `mission_ids` | int[] ≥ 1 | — | Restrict to a set of missions (`IN` clause) |
 | `reward` | enum | `''` | `free_shipping` `percent_discount` `fixed_discount` `free_gift` `coupon` (empty = all) |
 | `product_id` | int ≥ 0 | 0 | Restrict to one product (suggestion metrics) |
 | `limit` | int 1–20 | 5 | Max entries per top list |
@@ -436,7 +436,7 @@ Response:
     "top_campaigns": [
       { "id": 3, "name": "Summer Sale", "impressions": 40, "completions": 10, "revenue": 5000.0, "completion_rate": 0.25 }
     ],
-    "top_goals": [
+    "top_missions": [
       { "id": 8, "name": "Free shipping", "impressions": 30, "completions": 9, "revenue": 4500.0, "completion_rate": 0.3 }
     ],
     "top_suggested_products": [
@@ -444,7 +444,7 @@ Response:
     ]
   },
   "meta": {
-    "applied": { "from": "2026-07-10", "to": "2026-08-08", "campaign_id": 0, "goal_id": 0, "goal_ids": null, "product_id": 0, "reward": "", "limit": 5 }
+    "applied": { "from": "2026-07-10", "to": "2026-08-08", "campaign_id": 0, "mission_id": 0, "mission_ids": null, "product_id": 0, "reward": "", "limit": 5 }
   }
 }
 ```
@@ -453,13 +453,13 @@ Semantics:
 
 - `summary` is the seven Phase 16 metrics (impressions, completions =
   goal_completed + reward_activated, completion rate, average cart value
-  at impression, revenue associated with completed goals, suggestion
+  at impression, revenue associated with completed missions, suggestion
   CTR, suggestion add-to-cart rate), all with zero-denominator guards.
 - `trend` is one daily point per day of the window (default last 30
   days), zero-filled so the chart is continuous; `revenue` sums
   `cart_value` at completion events.
-- `top_campaigns` / `top_goals` rank by completions (then impressions),
-  joining the campaigns/goals tables for names; `top_suggested_products`
+- `top_campaigns` / `top_missions` rank by completions (then impressions),
+  joining the campaigns/missions tables for names; `top_suggested_products`
   ranks by conversions (added → clicks → impressions) and joins
   `wp_posts` for product names.
 - `meta.applied` echoes the exact filters that produced the payload.
@@ -471,7 +471,7 @@ Errors: `faracart_forbidden` (403, anonymous).
 #### `GET /templates` — admin-only, rate limited per user
 
 The single source of truth the admin app uses to render the template
-pickers and the schema-driven settings forms (Appearance page, Goal
+pickers and the schema-driven settings forms (Appearance page, Mission
 Builder Display, Campaign Builder Display): every registered template
 grouped by scope, with its settings schema, the current scope defaults
 and the effective default appearance per template.
@@ -479,15 +479,15 @@ and the effective default appearance per template.
 ```json
 {
   "data": {
-    "scopes": ["goal", "campaign"],
-    "defaults": { "goal": "basic", "campaign": "" },
-    "goal": [
+    "scopes": ["mission", "campaign"],
+    "defaults": { "mission": "basic", "campaign": "" },
+    "mission": [
       {
         "id": "basic",
         "label": "Basic",
-        "description": "Progress bar + message — the classic goal strip.",
+        "description": "Progress bar + message — the classic mission strip.",
         "version": 1,
-        "scope": "goal",
+        "scope": "mission",
         "schema": [
           { "key": "accent", "type": "color", "label": "Accent color", "group": "Colors", "default": "#2271b1" }
         ],
@@ -497,13 +497,13 @@ and the effective default appearance per template.
     "campaign": [
       { "id": "milestone_chain", "label": "Milestone chain", "version": 1, "scope": "campaign", "schema": [], "settings": {} }
     ],
-    "versions": { "goal": { "basic": 1 }, "campaign": { "milestone_chain": 1 } }
+    "versions": { "mission": { "basic": 1 }, "campaign": { "milestone_chain": 1 } }
   }
 }
 ```
 
-`defaults.goal` always resolves (legacy `frontend_template` included);
-`defaults.campaign` may be `''` — no campaign template → per-goal cards.
+`defaults.mission` always resolves (legacy `frontend_template` included);
+`defaults.campaign` may be `''` — no campaign template → per-mission cards.
 The `settings` object of each definition is the effective default
 appearance (stored per-template settings merged over the schema defaults
 and the legacy `frontend_*` tokens), so the admin forms open pre-filled
@@ -511,16 +511,16 @@ with exactly what the storefront would render.
 
 ### `GET /progress` — public, rate limited per IP
 
-Evaluates every active goal against the current shopper's cart and
+Evaluates every active mission against the current shopper's cart and
 exposes only the minimum data the widgets need:
 
 ```json
 {
   "data": {
-    "goals": [
+    "missions": [
       {
-        "goal_id": 5,
-        "goal_name": "Free shipping",		"goal_type": "amount",		"is_money": true,
+        "mission_id": 5,
+        "mission_name": "Free shipping",		"mission_type": "amount",		"is_money": true,
 		"icon": "",
 		"template": "card",
 		"template_settings": { "radius": 20 },
@@ -529,7 +529,7 @@ exposes only the minimum data the widgets need:
         "remaining": 250000,
         "percentage": 50,
         "completed": false,
-        "state": "progressing",		"message": "Only ۲۵۰٬۰۰۰ left to reach your goal",
+        "state": "progressing",		"message": "Only ۲۵۰٬۰۰۰ left to reach your mission",
 		"reward": { "type": "free_shipping", "value": null, "max_value": null, "meta": {} },
 		"suggestions": [
 			{
@@ -553,7 +553,7 @@ exposes only the minimum data the widgets need:
     "currency": "IRR",
     "tracking_nonce": "<fresh faracart_track nonce — see below>"
   },
-  "meta": { "total_goals": 1 }
+  "meta": { "total_missions": 1 }
 }
 ```
 
@@ -562,32 +562,32 @@ Notes:
 - `message` is rendered by the Phase 13 MessageEngine: state-aware
   (inactive / unavailable / progressing / nearly_complete / completed /
   reward_activated), variable-substituted ({current}, {target},
-  {remaining}, {percentage}, {quantity}, {remaining_quantity},  {reward}, {goal_name}, {campaign_name}) and overridable through the goal's
+  {remaining}, {percentage}, {quantity}, {remaining_quantity},  {reward}, {mission_name}, {campaign_name}) and overridable through the mission's
   `display_settings.message` / `completed_message`. `state` carries the
   raw state for styling.
 - `suggestions` (Phase 14 — Smart Product Suggestions) is a capped list
-  (max 4) of products that close the gap to the goal. Each item carries
+  (max 4) of products that close the gap to the mission. Each item carries
   `id`, `name`, `permalink`, `price`, `price_html` (server-formatted via
   `wc_price` — the widget renders this, falling back to the raw price),
   `image`, `stock_status` and `source` (`manual` `category` `upsell`
   `cross_sell` `related` `recently_viewed` `best_seller`). Candidates
-  come from the goal's own products, its categories, the cart items'
+  come from the mission's own products, its categories, the cart items'
   upsells/cross-sells/related products, the shopper's recently-viewed
   cookie, and best sellers; out-of-stock products, cart items, excluded
   products and ghost ids are never suggested. Ranking: stock first, then
-  goal eligibility (+3 manual, +2 counts toward the goal), relevance
+  mission eligibility (+3 manual, +2 counts toward the mission), relevance
   (shares a cart category +1), WC-endorsed sources (+0.5) and, for money
-  goals, price proximity to `remaining` — products in the 0.6–1.4× band
+  missions, price proximity to `remaining` — products in the 0.6–1.4× band
   score +2 (the spec's "prefer 150K–220K when 180K is left"). The final
   list is filterable via the `faracart_suggestions` filter.
-- `is_money` tells the widgets whether to format the goal's numbers as
+- `is_money` tells the widgets whether to format the mission's numbers as
   currency (amount/category/product/composite) or as plain numbers
   (quantity / distinct-quantity / weight) — it drives the milestone
   labels in `assets/js/frontend.js`.
-- `icon` is the goal's Display icon (`display_settings.icon`, empty when
+- `icon` is the mission's Display icon (`display_settings.icon`, empty when
   none was configured) — the Phase 12 card template renders it, falling
   back to its own default icon.
-- `template` + `template_settings` are the goal's **resolved** template
+- `template` + `template_settings` are the mission's **resolved** template
   id and appearance, computed server-side by the template engine
   (pluggable template engine, Phase 12): item override
   `display_settings.template_id` + `template_settings` → scope default
@@ -600,16 +600,16 @@ Notes:
   campaign with a configured campaign-scoped template
   (`campaign_id`, `name`, `template`, `settings`). The widget renders
   those milestone groups as one chain (e.g. the milestone_chain ladder)
-  instead of per-goal cards; a campaign without a template keeps the
-  pre-engine per-goal card rendering and never appears here.
-- `conflict` (Phase 26) is the per-goal conflict-resolution fragment:
+  instead of per-mission cards; a campaign without a template keeps the
+  pre-engine per-mission card rendering and never appears here.
+- `conflict` (Phase 26) is the per-mission conflict-resolution fragment:
   `{ "resolved": true|false, "reason": "" | "not_first" | "not_best" |
   "exclusive" | "stacking" | "lower_priority" | "completion_limit" }`. `resolved: false`
-  means the goal reached its target but its reward is suppressed by the
-  store's conflict rules (`conflict_resolution` mode, an exclusive goal,
+  means the mission reached its target but its reward is suppressed by the
+  store's conflict rules (`conflict_resolution` mode, an exclusive mission,
   the per-reward stacking safety, or the per-user completion limit — a
   same-type non-stacking reward never both grants and displays as won;
-  a goal the shopper already completed the configured maximum times
+  a mission the shopper already completed the configured maximum times
   renders locked too) — the widget renders such a reward as locked,
   never unlocked, and the analytics layer records `goal_completed`
   instead of `reward_activated` for it. The same fragment appears in the
@@ -620,14 +620,14 @@ Notes:
   suppression in the same priority order. See `docs/conflicts.md` for
   the full rule set.
 - `completion` (Phase 36 — per-user completion limit) is the shopper's
-  completion status for the goal: `completion_limit` (the configured
+  completion status for the mission: `completion_limit` (the configured
   per-user maximum, `null` = unlimited), `completion_count` (how many
   times THIS shopper already completed it), `remaining_completions`
   (limit − count, `null` when unlimited) and `can_complete` (whether the
   shopper may still complete it). The server enforces the limit; the
-  widget only reflects it. When `can_complete` is `false` the goal's
+  widget only reflects it. When `can_complete` is `false` the mission's
   `state` becomes `completion_limit_reached`, its `message` switches to
-  "You have already completed this goal." and its reward chip renders
+  "You have already completed this mission." and its reward chip renders
   locked (the `conflict` fragment is overridden with reason
   `completion_limit`) — the storefront never claims a reward the server
   will not grant. The same fragment is user-specific, so the optional
@@ -674,8 +674,8 @@ Body args (all typed in the route arg schema):
 | Arg | Type | Default | Notes |
 |---|---|---|---|
 | `event_type` | string (required) | — | One of the seven event types (below) — validated against the whitelist |
-| `goal_id` | int ≥ 0 | 0 | Goal the event is about |
-| `campaign_id` | int ≥ 0 | 0 | Campaign the goal belongs to |
+| `mission_id` | int ≥ 0 | 0 | Mission the event is about |
+| `campaign_id` | int ≥ 0 | 0 | Campaign the mission belongs to |
 | `product_id` | int ≥ 0 | 0 | Suggested product (suggestion events) |
 | `cart_value` | number ≥ 0 | 0 | Cart money value at event time |
 | `percentage` | number 0–100 | 0 | Progress percentage (goal_progress), stored in `meta` |
@@ -710,7 +710,7 @@ bad event type or field), `faracart_track_failed` (500).
 
 The template engine (pluggable template engine, Phase 12) is the one
 FaraCart surface a third party extends with a **class-map filter**,
-using the same convention as the goal evaluators and reward
+using the same convention as the mission evaluators and reward
 applicators:
 
 ```php
@@ -734,9 +734,9 @@ for free. Minimum surface:
 
 | Method | Returns |
 |---|---|
-| `id()` | Stable string id — persisted in goal/campaign config and settings; never rename or reuse |
+| `id()` | Stable string id — persisted in mission/campaign config and settings; never rename or reuse |
 | `label()` / `description()` | Translated, shown in the template pickers |
-| `scope()` | `'goal'`, `'campaign'` or `'both'` |
+| `scope()` | `'mission'`, `'campaign'` or `'both'` |
 | `version()` | Int — bump when the settings shape changes (safe future migrations) |
 | `schema()` | The settings fields this template accepts — drives the admin form *and* the server-side validation |
 
@@ -801,17 +801,17 @@ else — no changes to the Settings UI, the builders, the REST layer or
 the preview system:
 
 - `GET /templates` lists it with its schema, so the Appearance page,
-  the Goal Builder and the Campaign Builder pickers render it as-is,
-  including a generated settings form and per-goal/campaign overrides
+  the Mission Builder and the Campaign Builder pickers render it as-is,
+  including a generated settings form and per-mission/campaign overrides
   with reset-to-default.
-- Goal/Campaign/Settings saves validate `template_id` against the
+- Mission/Campaign/Settings saves validate `template_id` against the
   template's scope and sanitize `template_settings` field-by-field
   against `schema()` server-side (colors, ranges, enums, tag-free CSS
   — client values are never trusted).
 - `TemplateEngine` resolves it with the same order as the built-ins
   (item override → scope default → legacy → fallback), so the
   storefront and the admin preview render it identically.
-- If the template is later de-registered, stored goals/campaigns fall
+- If the template is later de-registered, stored missions/campaigns fall
   back to the scope default — a removed template can never break
   rendering.
 
@@ -824,9 +824,9 @@ on the two rendering surfaces (both already fall back safely):
 | Surface | File | Unknown id falls back to |
 |---|---|---|
 | Storefront | `assets/js/frontend.js` — add a case to `templateBody()` | the first design template (`template-1`) |
-| Admin preview | `admin-app/src/templates/registry.tsx` — add your component to `GOAL_RENDERERS` / `CAMPAIGN_RENDERERS` | `GOAL_RENDERERS['template-1']` (goal) / per-goal cards (campaign) |
+| Admin preview | `admin-app/src/templates/registry.tsx` — add your component to `MISSION_RENDERERS` / `CAMPAIGN_RENDERERS` | `MISSION_RENDERERS['template-1']` (mission) / per-mission cards (campaign) |
 
-Each renderer receives the goal (or campaign group + goals), the
+Each renderer receives the mission (or campaign group + missions), the
 currency and the **resolved** settings object. A template that reuses
 a built-in visual and only adds settings fields needs no new renderer
 at all — the resolved settings reach the storefront as card-level CSS
@@ -864,7 +864,7 @@ template with those settings applied.
   resolve and register their hooks)
 - anonymous sessions: 32-hex ids, cookie validation
 - the event-type whitelist (all seven types, nothing else)
-- recording: rows carry goal/campaign/product ids, cart value, session,
+- recording: rows carry mission/campaign/product ids, cart value, session,
   scalar-only meta; guest `user_id` stays NULL
 - privacy: the events table has no PII columns; the `faracart_tracking_enabled`
   filter and the master toggle both gate recording
@@ -872,10 +872,10 @@ template with those settings applied.
   dispatch records end-to-end
 - `suggested_product_added` attribution: attributed only when the session
   saw a suggestion_impression for that product (fresh/unseen sessions are
-  never attributed), and the FK-resilience retry for deleted goals
+  never attributed), and the FK-resilience retry for deleted missions
 - all seven metrics over seeded events (impressions, completions,
-  completion rate, average cart value, revenue on completed goals,
-  suggestion CTR, suggestion add-to-cart rate) + campaign/goal/date
+  completion rate, average cart value, revenue on completed missions,
+  suggestion CTR, suggestion add-to-cart rate) + campaign/mission/date
   filters + zero-denominator guards
 - full rollback verification (no residue)
 
@@ -883,7 +883,7 @@ template with those settings applied.
 `php tests/analytics-dashboard-test.php`):
 
 - service wiring + route registration (GET-only `/analytics`)
-- arg-schema validation: dates, the reward-type whitelist, `goal_ids`
+- arg-schema validation: dates, the reward-type whitelist, `mission_ids`
   items, the `limit` clamp
 - permissions: anonymous dispatch → 403, authenticated administrator
   dispatch → 200 with the full payload
@@ -892,9 +892,9 @@ template with those settings applied.
   CTR 0.3333, add-to-cart rate 0.5)
 - the daily trend: window-length zero-filled series summing exactly to
   the seeded totals, multi-day buckets
-- top goals / top campaigns / top suggested products: ranking, resolved
+- top missions / top campaigns / top suggested products: ranking, resolved
   names, derived rates
-- every filter (campaign, goal, goal ids, reward type, product, future
+- every filter (campaign, mission, mission ids, reward type, product, future
   window, limit) slicing the payload correctly
 - full rollback verification (no residue)
 
@@ -905,11 +905,11 @@ template with those settings applied.
 - permission: anonymous rejected on `/preview` (admin-only)
 - preview states against a simulated cart (empty / 50% / completed) with
 the live cart's contents asserted byte-identical afterwards
-- every goal type's simulated context: quantity, distinct-quantity,
+- every mission type's simulated context: quantity, distinct-quantity,
 category (quantity + money modes), product (and the honest
-no-matching-items ineligibility), weight and composite (AND) goals
-- publish-gating bypass (inactive goal previews as active)
-- campaign preview: all milestone goals evaluated in order (the
+no-matching-items ineligibility), weight and composite (AND) missions
+- publish-gating bypass (inactive mission previews as active)
+- campaign preview: all milestone missions evaluated in order (the
 "multiple milestones" state)
 - error paths (400 / 404) and full rollback verification
 
@@ -917,12 +917,12 @@ no-matching-items ineligibility), weight and composite (AND) goals
 
 - defaults for every Phase 18 key (each preserving the pre-Phase-18
   behavior) + the `faracart_default_calculation_mode` filter wiring
-- the store-wide calculation mode: amount/category goals follow it,
-  quantity-style goals keep their type defaults
-- REST schema coverage (enums for currency display / goal behavior /
+- the store-wide calculation mode: amount/category missions follow it,
+  quantity-style missions keep their type defaults
+- REST schema coverage (enums for currency display / mission behavior /
   calculation mode / mobile, the location items enum, booleans) and the
   sanitizer's normalization of invalid values through `handle_save`
-- goal calculation toggles: `include_tax` (line-tax folding into
+- mission calculation toggles: `include_tax` (line-tax folding into
   subtotal/discounted bases), `include_discount`, `include_shipping`
   (incl. legacy `exclude_shipping` precedence), `include_sale` and
   `include_virtual` (items dropped and bases rebased), plus
@@ -930,7 +930,7 @@ no-matching-items ineligibility), weight and composite (AND) goals
 - frontend: locations follow the setting, sticky gated on the 'sticky'
   location, the locations filter override, and the config carrying
   `currencyDisplay` + `mobile`
-- goal behavior `all` / `first` / `closest` narrowing the progress
+- mission behavior `all` / `first` / `closest` narrowing the progress
   payload, and progress caching (off → no transient, on → payload
   written, sentinel payload served verbatim on read)
 - performance toggles: `analytics_enabled` gates the tracker and
@@ -939,7 +939,7 @@ no-matching-items ineligibility), weight and composite (AND) goals
 - advanced: the GET settings meta carries the developer-hooks reference,
   and the Logger respects `logging_enabled` + `debug_mode` (error vs
   debug levels, log path in meta, cleanup)
-- every real write (settings option, goals, transients, log file) is
+- every real write (settings option, missions, transients, log file) is
   rolled back / removed and residue is asserted
 
 `tests/rest-api-test.php` (120 checks, `php tests/rest-api-test.php`):
@@ -949,7 +949,7 @@ no-matching-items ineligibility), weight and composite (AND) goals
 - permission callbacks (anonymous 403 through a real server dispatch,
   public progress allowed)
 - arg-schema validation (enums, ranges, datetime + campaign callbacks)
-- goal create → get → list → duplicate → update → delete through the
+- mission create → get → list → duplicate → update → delete through the
   handlers, plus an end-to-end server dispatch of `/progress`
 - settings read + save (success and error paths) — including Phase 12
   progress-template sanitization (enum fallback, color fallback, range
@@ -957,11 +957,11 @@ no-matching-items ineligibility), weight and composite (AND) goals
 - Phase 13 messaging: the public /progress payload carries the
   engine-rendered message (no unresolved placeholders) and the message
   state
-- per-goal display template: `display_settings.template_id` persists on
-  create and the /progress payload carries the normalized per-goal
+- per-mission display template: `display_settings.template_id` persists on
+  create and the /progress payload carries the normalized per-mission
   `template`
-- campaign CRUD + milestone ordering: create, order/reorder goals,
-  duplicate (inactive copy with copied milestones), delete (goals
+- campaign CRUD + milestone ordering: create, order/reorder missions,
+  duplicate (inactive copy with copied milestones), delete (missions
   detached), schema + 404 paths
 - all writes run inside a single database transaction that is rolled
   back; residue is asserted absent afterwards (read-only guarantee)

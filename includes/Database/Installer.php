@@ -133,9 +133,248 @@ class Installer {
 			return;
 		}
 
+		// 0.7.0: Goal → Mission terminology migration. Runs before the
+		// schema create/upgrade pass so the renamed tables exist before
+		// dbDelta / index / foreign-key statements reference them.
+		if ( version_compare( $installed, '0.7.0', '<' ) ) {
+			self::maybe_migrate_goal_to_mission();
+		}
+
 		self::maybe_create_tables();
 		self::maybe_schedule_events();
 		update_option( self::DB_VERSION_OPTION, FARACART_DB_VERSION, false );
+	}
+
+	/**
+	 * Migrate the Goal terminology in the database to Mission (0.7.0).
+	 *
+	 * Renames the tables/columns/indexes/foreign keys in place, preserving
+	 * every row. The legacy `goals` tables are renamed to `missions` only
+	 * when they exist (fresh installs skip straight to the new schema), and
+	 * every statement is guarded by an INFORMATION_SCHEMA existence check so
+	 * a partial/interrupted migration is safe to re-run on the next upgrade.
+	 *
+	 * Renames performed (all in the plugin's own prefix):
+	 *   - tables:     goals → missions, goal_attribution → mission_attribution,
+	 *                 goal_completions → mission_completions
+	 *   - columns:    goal_id → mission_id (on 6 tables), goal_target →
+	 *                 mission_target (revenue_events), goal_completed →
+	 *                 mission_completed (mission_attribution)
+	 *   - indexes:    goal_id → mission_id, goal_event → mission_event,
+	 *                 goal_date → mission_date, goal_user → mission_user,
+	 *                 goal_session → mission_session, order_goal →
+	 *                 order_mission, order_goal_model → order_mission_model
+	 *   - foreign keys: fk_faracart_*_goal → fk_faracart_*_mission
+	 *
+	 * Foreign keys are dropped first (MySQL cannot rename a constraint in
+	 * place) and re-added by the standard maybe_add_foreign_keys() pass that
+	 * runs right after this method in maybe_upgrade().
+	 *
+	 * @return void
+	 */
+	protected static function maybe_migrate_goal_to_mission() {
+		global $wpdb;
+
+		$prefix = $wpdb->prefix . Schema::TABLE_PREFIX;
+
+		// --- 1. Drop the legacy foreign keys (renamed/readded below). ---
+		$legacy_fks = array(
+			$prefix . 'goals'              => array( 'fk_faracart_goals_campaign' ),
+			$prefix . 'analytics_events'   => array( 'fk_faracart_analytics_goal' ),
+			$prefix . 'revenue_events'     => array( 'fk_faracart_revenue_goal' ),
+			$prefix . 'revenue_daily'      => array( 'fk_faracart_daily_goal' ),
+			$prefix . 'goal_attribution'   => array( 'fk_faracart_attribution_goal' ),
+			$prefix . 'upsell_events'      => array( 'fk_faracart_upsell_goal' ),
+			$prefix . 'goal_completions'   => array( 'fk_faracart_completions_goal' ),
+		);
+
+		foreach ( $legacy_fks as $table => $names ) {
+			if ( ! self::table_exists( $table ) ) {
+				continue;
+			}
+
+			foreach ( $names as $name ) {
+				if ( self::constraint_exists( $table, $name ) ) {
+					$wpdb->query( "ALTER TABLE `{$table}` DROP FOREIGN KEY `{$name}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				}
+			}
+		}
+
+		// --- 2. Rename the three tables (data preserved). ---
+		$table_renames = array(
+			'goals'            => 'missions',
+			'goal_attribution' => 'mission_attribution',
+			'goal_completions' => 'mission_completions',
+		);
+
+		foreach ( $table_renames as $old => $new ) {
+			$old_table = $prefix . $old;
+			$new_table = $prefix . $new;
+
+			if ( self::table_exists( $old_table ) && ! self::table_exists( $new_table ) ) {
+				$wpdb->query( "RENAME TABLE `{$old_table}` TO `{$new_table}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			}
+		}
+
+		// --- 3. Rename the goal_* columns. ---
+		// Each entry carries the column definition so CHANGE COLUMN
+		// preserves the exact type (goal_target is decimal, goal_completed
+		// is tinyint — a generic definition would corrupt them).
+		$column_renames = array(
+			$prefix . 'analytics_events'      => array(
+				'goal_id' => array( 'mission_id', 'bigint(20) unsigned DEFAULT NULL' ),
+			),
+			$prefix . 'revenue_events'        => array(
+				'goal_id'     => array( 'mission_id', 'bigint(20) unsigned DEFAULT NULL' ),
+				'goal_target' => array( 'mission_target', 'decimal(19,4) DEFAULT NULL' ),
+			),
+			$prefix . 'revenue_daily'         => array(
+				'goal_id' => array( 'mission_id', 'bigint(20) unsigned DEFAULT NULL' ),
+			),
+			$prefix . 'mission_attribution'   => array(
+				'goal_id'         => array( 'mission_id', 'bigint(20) unsigned DEFAULT NULL' ),
+				'goal_completed'  => array( 'mission_completed', 'tinyint(1) NOT NULL DEFAULT 0' ),
+			),
+			$prefix . 'upsell_events'         => array(
+				'goal_id' => array( 'mission_id', 'bigint(20) unsigned DEFAULT NULL' ),
+			),
+			$prefix . 'mission_completions'   => array(
+				'goal_id' => array( 'mission_id', 'bigint(20) unsigned DEFAULT NULL' ),
+			),
+		);
+
+		foreach ( $column_renames as $table => $columns ) {
+			if ( ! self::table_exists( $table ) ) {
+				continue;
+			}
+
+			foreach ( $columns as $old => $column ) {
+				list( $new, $definition ) = $column;
+
+				if ( self::column_exists( $table, $old ) && ! self::column_exists( $table, $new ) ) {
+					$wpdb->query( "ALTER TABLE `{$table}` CHANGE COLUMN `{$old}` `{$new}` {$definition}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				}
+			}
+		}
+
+		// --- 4. Rename the goal_* indexes. ---
+		$index_renames = array(
+			$prefix . 'analytics_events'      => array(
+				'goal_id'    => 'mission_id',
+				'goal_event' => 'mission_event',
+			),
+			$prefix . 'revenue_events'        => array(
+				'goal_id'    => 'mission_id',
+				'goal_event' => 'mission_event',
+			),
+			$prefix . 'revenue_daily'         => array(
+				'goal_id'    => 'mission_id',
+				'goal_date'  => 'mission_date',
+			),
+			$prefix . 'mission_attribution'   => array(
+				'goal_id'            => 'mission_id',
+				'order_goal_model'   => 'order_mission_model',
+			),
+			$prefix . 'upsell_events'         => array(
+				'goal_id'    => 'mission_id',
+			),
+			$prefix . 'mission_completions'   => array(
+				'goal_id'      => 'mission_id',
+				'order_goal'   => 'order_mission',
+				'goal_user'    => 'mission_user',
+				'goal_session' => 'mission_session',
+			),
+		);
+
+		foreach ( $index_renames as $table => $indexes ) {
+			if ( ! self::table_exists( $table ) ) {
+				continue;
+			}
+
+			foreach ( $indexes as $old => $new ) {
+				if ( self::index_exists( $table, $old ) && ! self::index_exists( $table, $new ) ) {
+					$wpdb->query( "ALTER TABLE `{$table}` RENAME INDEX `{$old}` TO `{$new}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				}
+			}
+		}
+	}
+
+	/**
+	 * Whether a database table exists.
+	 *
+	 * @param string $table Fully qualified table name.
+	 * @return bool
+	 */
+	protected static function table_exists( $table ) {
+		global $wpdb;
+
+		return (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s',
+				$wpdb->dbname,
+				$table
+			)
+		);
+	}
+
+	/**
+	 * Whether a constraint exists on a table.
+	 *
+	 * @param string $table Fully qualified table name.
+	 * @param string $name  Constraint name.
+	 * @return bool
+	 */
+	protected static function constraint_exists( $table, $name ) {
+		global $wpdb;
+
+		return (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = %s AND TABLE_NAME = %s AND CONSTRAINT_NAME = %s',
+				$wpdb->dbname,
+				$table,
+				$name
+			)
+		);
+	}
+
+	/**
+	 * Whether a column exists on a table.
+	 *
+	 * @param string $table  Fully qualified table name.
+	 * @param string $column Column name.
+	 * @return bool
+	 */
+	protected static function column_exists( $table, $column ) {
+		global $wpdb;
+
+		return (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s',
+				$wpdb->dbname,
+				$table,
+				$column
+			)
+		);
+	}
+
+	/**
+	 * Whether an index exists on a table.
+	 *
+	 * @param string $table Fully qualified table name.
+	 * @param string $name  Index name.
+	 * @return bool
+	 */
+	protected static function index_exists( $table, $name ) {
+		global $wpdb;
+
+		return (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND INDEX_NAME = %s',
+				$wpdb->dbname,
+				$table,
+				$name
+			)
+		);
 	}
 
 	/**
@@ -181,7 +420,7 @@ class Installer {
 	 *
 	 * dbDelta() creates indexes only on NEW tables — it never adds an
 	 * index to a table that already exists (P22 hardening: the analytics
-	 * composite keys goal_event / campaign_event shipped after the table
+	 * composite keys mission_event / campaign_event shipped after the table
 	 * first deployed, so upgrades would silently miss them). Each missing
 	 * index is added with ALTER TABLE after an INFORMATION_SCHEMA check,
 	 * making the operation safe to re-run on every activation/upgrade.
@@ -294,7 +533,7 @@ class Installer {
 	 * Remove every plugin table and option. Called from uninstall.php.
 	 *
 	 * Foreign keys are disabled around the drops: child tables
-	 * (analytics_events -> goals/campaigns, goals -> campaigns) reference
+	 * (analytics_events -> missions/campaigns, missions -> campaigns) reference
 	 * their parents, and MySQL refuses to DROP a parent table while a
 	 * child FK still references it. Wrapping the drops in
 	 * FOREIGN_KEY_CHECKS=0 makes uninstall order-independent and safe to

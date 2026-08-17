@@ -8,7 +8,7 @@
 namespace FaraCart\REST;
 
 use FaraCart\Campaigns\CampaignRepository;
-use FaraCart\Goals\Goal;
+use FaraCart\Missions\Mission;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Templates\TemplateEngine;
 
@@ -19,17 +19,17 @@ defined( 'ABSPATH' ) || exit;
  *
  * Campaign endpoints (Phase 10 — Campaign Builder):
  *
- *  - `GET    /faracart/v1/campaigns`      — campaign list (goal_count each)
+ *  - `GET    /faracart/v1/campaigns`      — campaign list (mission_count each)
  *  - `GET    /faracart/v1/campaigns/{id}` — a single campaign + milestones
  *  - `POST   /faracart/v1/campaigns`      — create a campaign
  *  - `PUT    /faracart/v1/campaigns/{id}` — update a campaign (partial)
- *  - `DELETE /faracart/v1/campaigns/{id}` — delete a campaign (goals detach)
+ *  - `DELETE /faracart/v1/campaigns/{id}` — delete a campaign (missions detach)
  *  - `POST   /faracart/v1/campaigns/{id}/duplicate` — duplicate a campaign
- *    (copy starts inactive; its goals are copied as new goal rows)
+ *    (copy starts inactive; its missions are copied as new mission rows)
  *
- * The payload mirrors the campaigns table plus an ordered `goals` array
- * of goal ids that becomes the campaign's milestone ordering
- * (`goals.campaign_id` + `goals.menu_order`, Phase 10). Admin-only
+ * The payload mirrors the campaigns table plus an ordered `missions` array
+ * of mission ids that becomes the campaign's milestone ordering
+ * (`missions.campaign_id` + `missions.menu_order`, Phase 10). Admin-only
  * (manage_options, P07-T04).
  */
 class CampaignsController extends BaseController {
@@ -399,8 +399,8 @@ class CampaignsController extends BaseController {
 			),
 			'status'        => array(
 				'type'    => 'string',
-				'default' => Goal::STATUS_ACTIVE,
-				'enum'    => array( Goal::STATUS_ACTIVE, Goal::STATUS_INACTIVE ),
+				'default' => Mission::STATUS_ACTIVE,
+				'enum'    => array( Mission::STATUS_ACTIVE, Mission::STATUS_INACTIVE ),
 			),
 			'starts_at'     => array(
 				'type'              => array( 'string', 'null' ),
@@ -427,7 +427,7 @@ class CampaignsController extends BaseController {
 				'validate_callback'    => array( $this, 'validate_display_rules' ),
 				'sanitize_callback'    => array( $this, 'sanitize_display_rules' ),
 			),
-			'goals'         => array(
+			'missions'         => array(
 				'type'  => 'array',
 				'items' => array(
 					'type'    => 'integer',
@@ -477,16 +477,16 @@ class CampaignsController extends BaseController {
 	 * @return array<string, mixed>
 	 */
 	protected function shape( array $row ) {
-		$goals = array();
+		$missions = array();
 
-		foreach ( isset( $row['goals'] ) && is_array( $row['goals'] ) ? $row['goals'] : array() as $goal ) {
-			$goals[] = array(
-				'id'          => (int) $goal['id'],
-				'name'        => (string) $goal['name'],
-				'type'        => (string) $goal['type'],
-				'target'      => (float) $goal['target'],
-				'reward_type' => ! empty( $goal['reward_type'] ) ? (string) $goal['reward_type'] : null,
-				'menu_order'  => (int) $goal['menu_order'],
+		foreach ( isset( $row['missions'] ) && is_array( $row['missions'] ) ? $row['missions'] : array() as $mission ) {
+			$missions[] = array(
+				'id'          => (int) $mission['id'],
+				'name'        => (string) $mission['name'],
+				'type'        => (string) $mission['type'],
+				'target'      => (float) $mission['target'],
+				'reward_type' => ! empty( $mission['reward_type'] ) ? (string) $mission['reward_type'] : null,
+				'menu_order'  => (int) $mission['menu_order'],
 			);
 		}
 
@@ -499,8 +499,8 @@ class CampaignsController extends BaseController {
 			'ends_at'       => ! empty( $row['ends_at'] ) ? (string) $row['ends_at'] : null,
 			'priority'      => (int) $row['priority'],
 			'display_rules' => isset( $row['display_rules'] ) && is_array( $row['display_rules'] ) ? $row['display_rules'] : array(),
-			'goal_count'    => isset( $row['goal_count'] ) ? (int) $row['goal_count'] : count( $goals ),
-			'goals'         => $goals,
+			'mission_count'    => isset( $row['mission_count'] ) ? (int) $row['mission_count'] : count( $missions ),
+			'missions'         => $missions,
 			'created_at'    => (string) $row['created_at'],
 			'updated_at'    => (string) $row['updated_at'],
 		);

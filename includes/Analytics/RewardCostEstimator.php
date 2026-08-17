@@ -7,7 +7,7 @@
 
 namespace FaraCart\Analytics;
 
-use FaraCart\Goals\Goal;
+use FaraCart\Missions\Mission;
 use FaraCart\Rewards\Reward;
 
 defined( 'ABSPATH' ) || exit;
@@ -15,12 +15,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class RewardCostEstimator
  *
- * Phase 33.2 (Revenue Attribution) — estimates the cost of goal rewards and
- * the profit impact of the revenue the goals influenced, without ever
+ * Phase 33.2 (Revenue Attribution) — estimates the cost of mission rewards and
+ * the profit impact of the revenue the missions influenced, without ever
  * modifying WooCommerce pricing/cost data.
  *
  * Reward cost (P33.2): every reward type maps to a deterministic cost model
- * based on the goal's own reward configuration plus, where available, the
+ * based on the mission's own reward configuration plus, where available, the
  * order it was granted on:
  *
  *  - percent_discount  → min(order_total × value%, reward_max_value)
@@ -94,22 +94,22 @@ final class RewardCostEstimator {
 	protected $store_cost_checked = null;
 
 	/**
-	 * Estimate the cost of a goal's reward granted on an order.
+	 * Estimate the cost of a mission's reward granted on an order.
 	 *
 	 * Deterministic and transparent: the returned array always carries the
 	 * cost model's basis and an `available` flag, so the caller can show
 	 * "unavailable" (with the reason) instead of a guessed number when the
 	 * model needs data the store does not provide.
 	 *
-	 * @param Goal            $goal        The goal that granted the reward.
+	 * @param Mission            $mission        The mission that granted the reward.
 	 * @param float           $order_total Order total the reward applied to
 	 *                                     (0 when unknown).
 	 * @param array<string, mixed> $context Optional: 'order_id',
 	 *                                     'shipping_total'.
 	 * @return array{estimated_cost: float, available: bool, basis: string, type: string|null}
 	 */
-	public function estimate_reward_cost( Goal $goal, $order_total = 0.0, array $context = array() ) {
-		$reward = Reward::from_goal( $goal );
+	public function estimate_reward_cost( Mission $mission, $order_total = 0.0, array $context = array() ) {
+		$reward = Reward::from_mission( $mission );
 
 		if ( ! $reward->has_config() ) {
 			return $this->result( 0.0, true, 'no reward configured', $reward->type() );
@@ -143,7 +143,7 @@ final class RewardCostEstimator {
 					$cost = $max_value;
 				}
 
-				// Estimate from the goal's coupon configuration — a
+				// Estimate from the mission's coupon configuration — a
 				// pre-existing coupon code's actual terms are not read (the
 				// basis label makes the estimate transparent).
 				return $this->result( $cost, true, 'percent coupon of order total, capped at reward max (configured value)', $reward->type() );

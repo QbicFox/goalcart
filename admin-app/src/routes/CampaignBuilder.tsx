@@ -25,10 +25,10 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { createCampaign, fetchCampaign, updateCampaign } from '../api/campaigns';
-import { fetchGoals } from '../api/goals';
+import { fetchMissions } from '../api/missions';
 import PreviewPanel from '../components/preview/PreviewPanel';
 import { usePreview } from '../components/preview/usePreview';
-import SectionCard from '../components/goal-builder/SectionCard';
+import SectionCard from '../components/mission-builder/SectionCard';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { useStickyBarActions } from '../providers/ActionBarProvider';
 import { useFullscreen } from '../providers/FullscreenProvider';
@@ -36,7 +36,7 @@ import PageContainer from '../components/PageContainer';
 import { formatCurrency, formatNumber } from '../lib/format';
 import SchemaForm from '../templates/SchemaForm';
 import { useTemplates } from '../templates/useTemplates';
-import type { Campaign, CampaignInput, Goal } from '../types';
+import type { Campaign, CampaignInput, Mission } from '../types';
 
 const REWARD_LABELS: Record<string, string> = {
   free_shipping: __('Free shipping', 'faracart'),
@@ -66,7 +66,7 @@ function emptyCampaign(): CampaignInput {
     ends_at: null,
     priority: 10,
     display_rules: {},
-    goals: [],
+    missions: [],
   };
 }
 
@@ -80,38 +80,38 @@ function campaignToInput(campaign: Campaign): CampaignInput {
     ends_at: campaign.ends_at,
     priority: campaign.priority,
     display_rules: campaign.display_rules ?? {},
-    goals: (campaign.goals ?? [])
+    missions: (campaign.missions ?? [])
       .slice()
       .sort((a, b) => a.menu_order - b.menu_order)
-      .map((goal) => goal.id),
+      .map((mission) => mission.id),
   };
 }
 
-function targetLabel(goal: Goal): string {
+function targetLabel(mission: Mission): string {
   const countTypes = ['quantity', 'distinct_quantity', 'weight'];
 
-  if (countTypes.includes(goal.type) || goal.calculation_mode === 'quantity') {
-    return formatNumber(goal.target);
+  if (countTypes.includes(mission.type) || mission.calculation_mode === 'quantity') {
+    return formatNumber(mission.target);
   }
 
-  return formatCurrency(goal.target);
+  return formatCurrency(mission.target);
 }
 
 /** Amount/quantity a state preset fraction should simulate for the form. */
 function campaignPresetTargets(
   values: CampaignInput,
-  goalsById: Map<number, Goal>,
+  missionsById: Map<number, Mission>,
   fraction: number
 ): { amount: number; quantity: number } {
   // Anchor the presets to the top milestone target (mirrors the campaign
   // preview dialog's topMilestone anchoring).
-  let top: Goal | null = null;
+  let top: Mission | null = null;
 
-  for (const goalId of values.goals) {
-    const goal = goalsById.get(goalId);
+  for (const missionId of values.missions) {
+    const mission = missionsById.get(missionId);
 
-    if (goal && (!top || goal.target > top.target)) {
-      top = goal;
+    if (mission && (!top || mission.target > top.target)) {
+      top = mission;
     }
   }
 
@@ -124,7 +124,7 @@ function campaignPresetTargets(
 
 /**
  * Campaign Builder (Phase 10). A form for creating and editing campaigns
- * — Basic information, Schedule, Priority and Milestones (goal ordering)
+ * — Basic information, Schedule, Priority and Milestones (mission ordering)
  * — wired to the Phase 10 REST CRUD endpoints. New campaigns use
  * `/campaigns/new`, existing ones `/campaigns/:id/edit`.
  *
@@ -170,10 +170,10 @@ export default function CampaignBuilder() {
     enabled: editId !== null,
   });
 
-  // All goals, so milestones can be picked and ordered.
-  const goalsQuery = useQuery({
-    queryKey: ['goals', 'all'],
-    queryFn: () => fetchGoals({ per_page: 100 }),
+  // All missions, so milestones can be picked and ordered.
+  const missionsQuery = useQuery({
+    queryKey: ['missions', 'all'],
+    queryFn: () => fetchMissions({ per_page: 100 }),
   });
 
   // Seed the form once the campaign loads. This is a guarded state
@@ -197,7 +197,7 @@ export default function CampaignBuilder() {
           : __('The campaign was created.', 'faracart')
       );
       void queryClient.invalidateQueries({ queryKey: ['campaigns'] });
-      void queryClient.invalidateQueries({ queryKey: ['goals'] });
+      void queryClient.invalidateQueries({ queryKey: ['missions'] });
       // The detail cache must not serve the pre-save campaign when the
       // builder is reopened (the list invalidate above only matches
       // ['campaigns'], not the ['campaign', id] detail query).
@@ -213,23 +213,23 @@ export default function CampaignBuilder() {
 
   const patch = (data: Partial<CampaignInput>) => setValues((prev) => ({ ...prev, ...data }));
 
-  const goals = useMemo(() => goalsQuery.data?.items ?? [], [goalsQuery.data]);
-  const goalsById = useMemo(() => new Map(goals.map((goal) => [goal.id, goal])), [goals]);
+  const missions = useMemo(() => missionsQuery.data?.items ?? [], [missionsQuery.data]);
+  const missionsById = useMemo(() => new Map(missions.map((mission) => [mission.id, mission])), [missions]);
 
   // Live preview: the target key includes the (possibly unsaved) form
   // values, so the preview refetches whenever the form changes
-  // (debounced inside usePreview). The backend loads the milestone goals
+  // (debounced inside usePreview). The backend loads the milestone missions
   // by id and applies the form's name + display_rules, so the preview
   // reflects the current form state.
   const previewTarget = useMemo(
-    () => ({ id: editId ?? 0, values, goalsById }),
-    [editId, values, goalsById]
+    () => ({ id: editId ?? 0, values, missionsById }),
+    [editId, values, missionsById]
   );
 
   const preview = usePreview({
     target: previewTarget,
     derive: (current) => ({
-      targetsFor: (fraction) => campaignPresetTargets(current.values, current.goalsById, fraction),
+      targetsFor: (fraction) => campaignPresetTargets(current.values, current.missionsById, fraction),
       paramsFor: () => ({ campaignId: editId ?? undefined, campaign: current.values }),
       payloadKey: `campaign:${current.id}:${JSON.stringify(current.values)}`,
     }),
@@ -240,14 +240,14 @@ export default function CampaignBuilder() {
   // is fixed and the content area scrolls internally.
   const stickyTop = fullscreen ? 8 : 40;
 
-  const milestones = values.goals
-    .map((goalId) => goalsById.get(goalId))
-    .filter((goal): goal is Goal => goal !== undefined);
+  const milestones = values.missions
+    .map((missionId) => missionsById.get(missionId))
+    .filter((mission): mission is Mission => mission !== undefined);
 
-  const availableGoals = goals.filter((goal) => !values.goals.includes(goal.id));
+  const availableMissions = missions.filter((mission) => !values.missions.includes(mission.id));
 
   const move = (index: number, direction: -1 | 1) => {
-    const next = [...values.goals];
+    const next = [...values.missions];
     const target = index + direction;
 
     if (target < 0 || target >= next.length) {
@@ -255,11 +255,11 @@ export default function CampaignBuilder() {
     }
 
     [next[index], next[target]] = [next[target], next[index]];
-    patch({ goals: next });
+    patch({ missions: next });
   };
 
   const remove = (index: number) => {
-    patch({ goals: values.goals.filter((_goal, i) => i !== index) });
+    patch({ missions: values.missions.filter((_mission, i) => i !== index) });
   };
 
   const canSave = useMemo(() => values.name.trim().length > 0, [values.name]); // Sticky bottom bar: Save / Create + Cancel (moved out of the page
@@ -322,7 +322,7 @@ export default function CampaignBuilder() {
     <PageContainer
       title={editId ? __('Edit campaign', 'faracart') : __('Add campaign', 'faracart')}
       description={__(
-        'Group goals into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds.',
+        'Group missions into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds.',
         'faracart'
       )}
       actions={
@@ -380,7 +380,7 @@ export default function CampaignBuilder() {
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
                         {__(
-                          'Inactive campaigns never evaluate their goals on the storefront.',
+                          'Inactive campaigns never evaluate their missions on the storefront.',
                           'faracart'
                         )}
                       </Typography>
@@ -434,7 +434,7 @@ export default function CampaignBuilder() {
             <SectionCard
               title={__('Recurring schedule', 'faracart')}
               description={__(
-                'Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Goals inherit these rules unless they pin their own.',
+                'Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Missions inherit these rules unless they pin their own.',
                 'faracart'
               )}
             >
@@ -497,7 +497,7 @@ export default function CampaignBuilder() {
             <SectionCard
               title={__('Display', 'faracart')}
               description={__(
-                'How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own goal card.',
+                'How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own mission card.',
                 'faracart'
               )}
             >
@@ -507,23 +507,23 @@ export default function CampaignBuilder() {
                 onChange={(display_rules) => patch({ display_rules })}
               />
             </SectionCard>
-            {/* 5. Milestones (goal ordering) */}
+            {/* 5. Milestones (mission ordering) */}
             <SectionCard
               title={__('Milestones', 'faracart')}
               description={__(
-                'The ordered goals of the campaign. Shoppers unlock each goal in order as their cart grows.',
+                'The ordered missions of the campaign. Shoppers unlock each mission in order as their cart grows.',
                 'faracart'
               )}
             >
-              {goalsQuery.isLoading ? (
+              {missionsQuery.isLoading ? (
                 <Skeleton variant="rounded" height={160} />
               ) : (
                 <Stack spacing={2}>
                   {milestones.length > 0 && (
                     <Paper variant="outlined" sx={{ p: 1 }}>
-                      {milestones.map((goal, index) => (
+                      {milestones.map((mission, index) => (
                         <Box
-                          key={goal.id}
+                          key={mission.id}
                           sx={{
                             display: 'flex',
                             alignItems: 'center',
@@ -552,10 +552,10 @@ export default function CampaignBuilder() {
                           </Box>
                           <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Typography variant="body2" sx={{ fontWeight: 600 }} noWrap>
-                              {goal.name}
+                              {mission.name}
                             </Typography>
                             <Typography variant="caption" color="text.secondary" noWrap>
-                              {sprintf('%s · %s', targetLabel(goal), rewardLabel(goal))}
+                              {sprintf('%s · %s', targetLabel(mission), rewardLabel(mission))}
                             </Typography>
                           </Box>
                           <Tooltip title={__('Move up', 'faracart')}>
@@ -592,17 +592,17 @@ export default function CampaignBuilder() {
                     </Paper>
                   )}
 
-                  {availableGoals.length > 0 ? (
+                  {availableMissions.length > 0 ? (
                     <Box>
                       <Typography variant="subtitle2" gutterBottom>
                         {__('Add a milestone', 'faracart')}
                       </Typography>
                       <Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: 'wrap' }}>
-                        {availableGoals.map((goal) => (
+                        {availableMissions.map((mission) => (
                           <Chip
-                            key={goal.id}
-                            label={`${goal.name} · ${targetLabel(goal)}`}
-                            onClick={() => patch({ goals: [...values.goals, goal.id] })}
+                            key={mission.id}
+                            label={`${mission.name} · ${targetLabel(mission)}`}
+                            onClick={() => patch({ missions: [...values.missions, mission.id] })}
                             variant="outlined"
                           />
                         ))}
@@ -610,9 +610,9 @@ export default function CampaignBuilder() {
                     </Box>
                   ) : (
                     <Typography variant="body2" color="text.secondary">
-                      {values.goals.length === 0
-                        ? __('No goals yet — create a goal on the Goals page first.', 'faracart')
-                        : __('All goals are already milestones of this campaign.', 'faracart')}
+                      {values.missions.length === 0
+                        ? __('No missions yet — create a mission on the Missions page first.', 'faracart')
+                        : __('All missions are already milestones of this campaign.', 'faracart')}
                     </Typography>
                   )}
                 </Stack>
@@ -634,18 +634,18 @@ export default function CampaignBuilder() {
   );
 }
 
-function rewardLabel(goal: Goal): string {
-  if (!goal.reward_type) {
+function rewardLabel(mission: Mission): string {
+  if (!mission.reward_type) {
     return __('No reward', 'faracart');
   }
 
-  const base = REWARD_LABELS[goal.reward_type] ?? goal.reward_type;
+  const base = REWARD_LABELS[mission.reward_type] ?? mission.reward_type;
 
-  if (goal.reward_value !== null) {
+  if (mission.reward_value !== null) {
     const value =
-      goal.reward_type === 'percent_discount'
-        ? `${goal.reward_value}%`
-        : formatCurrency(goal.reward_value);
+      mission.reward_type === 'percent_discount'
+        ? `${mission.reward_value}%`
+        : formatCurrency(mission.reward_value);
     return sprintf('%s (%s)', base, value);
   }
 
@@ -657,7 +657,7 @@ function rewardLabel(goal: Goal): string {
  * template picker + schema-driven appearance form, stored in
  * `display_rules.template_id` / `display_rules.template_settings` and
  * validated server-side against the campaign-scope registry. "Default"
- * (no template) keeps the per-goal card rendering.
+ * (no template) keeps the per-mission card rendering.
  */
 function CampaignDisplayFields({
   display,

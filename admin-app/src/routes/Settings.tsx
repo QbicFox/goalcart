@@ -36,7 +36,7 @@ import {
   type FloatingPosition,
   type FloatingPreset,
 } from '../components/floating/floating';
-import SectionCard from '../components/goal-builder/SectionCard';
+import SectionCard from '../components/mission-builder/SectionCard';
 import PageContainer from '../components/PageContainer';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { useStickyBarActions } from '../providers/ActionBarProvider';
@@ -379,7 +379,7 @@ function FloatingPositionCard({
  * Settings (Phase 18 — the full configuration surface).
  *
  * Six tabs over a single react-hook-form instance: General, Frontend,
- * Goal Calculation, Performance, Advanced and Floating. Every control
+ * Mission Calculation, Performance, Advanced and Floating. Every control
  * maps 1:1 to a persisted setting key validated server-side by the
  * Phase 7 REST schema; saving updates the query data so the form
  * re-syncs, and the full-screen toggle still previews live through
@@ -525,7 +525,7 @@ export default function Settings() {
             <Tab
               icon={<CalculateIcon />}
               iconPosition="start"
-              label={__('Goal Calculation', 'faracart')}
+              label={__('Mission Calculation', 'faracart')}
             />
             <Tab icon={<SpeedIcon />} iconPosition="start" label={__('Performance', 'faracart')} />
             <Tab icon={<BuildIcon />} iconPosition="start" label={__('Advanced', 'faracart')} />
@@ -548,7 +548,7 @@ export default function Settings() {
                     name="enabled"
                     label={__('Enable FaraCart', 'faracart')}
                     description={__(
-                      'Turn the storefront goals, rewards and progress bars on or off.',
+                      'Turn the storefront missions, rewards and progress bars on or off.',
                       'faracart'
                     )}
                   />
@@ -564,16 +564,16 @@ export default function Settings() {
                   />
                   <SelectField
                     control={control}
-                    name="default_goal_behavior"
-                    label={__('Default goal behavior', 'faracart')}
+                    name="default_mission_behavior"
+                    label={__('Default mission behavior', 'faracart')}
                     description={__(
-                      'How multiple active goals are presented when the shopper has no campaign.',
+                      'How multiple active missions are presented when the shopper has no campaign.',
                       'faracart'
                     )}
                     options={[
-                      { value: 'all', label: __('Show all goals', 'faracart') },
-                      { value: 'first', label: __('Show the first goal only', 'faracart') },
-                      { value: 'closest', label: __('Show the closest goal only', 'faracart') },
+                      { value: 'all', label: __('Show all missions', 'faracart') },
+                      { value: 'first', label: __('Show the first mission only', 'faracart') },
+                      { value: 'closest', label: __('Show the closest mission only', 'faracart') },
                     ]}
                   />
                   <SelectField
@@ -581,7 +581,7 @@ export default function Settings() {
                     name="conflict_resolution"
                     label={__('Conflict resolution', 'faracart')}
                     description={__(
-                      'How completed goals grant rewards when several compete: combine them, grant only the highest-priority matching goal, or grant only the best reward. Per-goal exclusive flags and priorities are respected in every mode.',
+                      'How completed missions grant rewards when several compete: combine them, grant only the highest-priority matching mission, or grant only the best reward. Per-mission exclusive flags and priorities are respected in every mode.',
                       'faracart'
                     )}
                     options={[
@@ -591,7 +591,7 @@ export default function Settings() {
                       },
                       {
                         value: 'first',
-                        label: __('First matching goal only', 'faracart'),
+                        label: __('First matching mission only', 'faracart'),
                       },
                       {
                         value: 'best',
@@ -604,7 +604,7 @@ export default function Settings() {
                     name="calculation_mode"
                     label={__('Calculation mode', 'faracart')}
                     description={__(
-                      'Default money basis for goals that do not set their own.',
+                      'Default money basis for missions that do not set their own.',
                       'faracart'
                     )}
                     options={[
@@ -695,7 +695,7 @@ export default function Settings() {
                     name="frontend_countdown"
                     label={__('Countdown timer', 'faracart')}
                     description={__(
-                      'Show a live countdown to the goal/campaign deadline (Phase 32).',
+                      'Show a live countdown to the mission/campaign deadline (Phase 32).',
                       'faracart'
                     )}
                   />
@@ -704,7 +704,7 @@ export default function Settings() {
                     name="frontend_celebrate"
                     label={__('Celebration animation', 'faracart')}
                     description={__(
-                      'Play a confetti burst when a goal is reached (Phase 32).',
+                      'Play a confetti burst when a mission is reached (Phase 32).',
                       'faracart'
                     )}
                   />
@@ -716,9 +716,9 @@ export default function Settings() {
           {tab === 2 && (
             <Stack spacing={2.5}>
               <SectionCard
-                title={__('Goal Calculation', 'faracart')}
+                title={__('Mission Calculation', 'faracart')}
                 description={__(
-                  'Which cart money counts toward goals. Defaults match the storefront behavior before these options existed.',
+                  'Which cart money counts toward missions. Defaults match the storefront behavior before these options existed.',
                   'faracart'
                 )}
               >
@@ -755,7 +755,7 @@ export default function Settings() {
                     name="calculation_include_sale"
                     label={__('Include sale items', 'faracart')}
                     description={__(
-                      'When off, products currently on sale are excluded from every goal.',
+                      'When off, products currently on sale are excluded from every mission.',
                       'faracart'
                     )}
                   />
@@ -764,7 +764,7 @@ export default function Settings() {
                     name="calculation_include_virtual"
                     label={__('Include virtual products', 'faracart')}
                     description={__(
-                      'When off, virtual and downloadable products are excluded from every goal.',
+                      'When off, virtual and downloadable products are excluded from every mission.',
                       'faracart'
                     )}
                   />
@@ -785,7 +785,7 @@ export default function Settings() {
                     name="performance_caching"
                     label={__('Cache progress payloads', 'faracart')}
                     description={__(
-                      'Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer goal evaluations, at the cost of a brief staleness window after cart changes.',
+                      'Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer mission evaluations, at the cost of a brief staleness window after cart changes.',
                       'faracart'
                     )}
                   />
@@ -794,7 +794,7 @@ export default function Settings() {
                     name="analytics_enabled"
                     label={__('Analytics tracking', 'faracart')}
                     description={__(
-                      'Collect goal and suggestion events. Keep the goals running while turning event collection off.',
+                      'Collect mission and suggestion events. Keep the missions running while turning event collection off.',
                       'faracart'
                     )}
                   />
@@ -803,7 +803,7 @@ export default function Settings() {
                     name="performance_suggestions"
                     label={__('Product suggestions', 'faracart')}
                     description={__(
-                      'Show recommended products that help reach the goal.',
+                      'Show recommended products that help reach the mission.',
                       'faracart'
                     )}
                   />
@@ -915,7 +915,7 @@ export default function Settings() {
               <SectionCard
                 title={__('Floating widget', 'faracart')}
                 description={__(
-                  'A floating goals/campaigns button with a progress drawer — always reachable while shopping.',
+                  'A floating missions/campaigns button with a progress drawer — always reachable while shopping.',
                   'faracart'
                 )}
               >
@@ -925,7 +925,7 @@ export default function Settings() {
                     name="floating_enabled"
                     label={__('Enable floating widget', 'faracart')}
                     description={__(
-                      'Show the floating button on widget pages whenever the cart has an eligible goal.',
+                      'Show the floating button on widget pages whenever the cart has an eligible mission.',
                       'faracart'
                     )}
                   />

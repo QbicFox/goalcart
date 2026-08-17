@@ -1,6 +1,6 @@
 <?php
 /**
- * FaraCart UPSELL_REFACTOR tests (Goal Optimization & Upsell Performance).
+ * FaraCart UPSELL_REFACTOR tests (Mission Optimization & Upsell Performance).
  *
  * Verifies the full refactor task list (`UPSELL_REFACTOR.md`):
  *
@@ -14,12 +14,12 @@
  *    cost — historical profit is stable when costs change later
  *  - Catalog cost coverage: `cost_coverage()` + the admin-only
  *    `GET /revenue/cost-coverage` endpoint (shape, permission, payload)
- *  - The feedback loop: `POST /revenue/goal-recommendations/apply`
+ *  - The feedback loop: `POST /revenue/mission-recommendations/apply`
  *    (route, anonymous 403, apply behavior — only the target changes,
  *    the `recommendation_applied` event is recorded with previous +
- *    applied threshold and deduped daily, unknown goal / invalid
+ *    applied threshold and deduped daily, unknown mission / invalid
  *    threshold errors, cache invalidation)
- *  - Upsell-assisted completions: `AttributionEngine::goal_metrics()`
+ *  - Upsell-assisted completions: `AttributionEngine::mission_metrics()`
  *    carries `upsell_assisted` / `upsell_assisted_rate` / `upsell_funnel`
  *    (completions whose session also engaged the smart-upsell panel)
  *  - Terminology sweep: the admin labels/navigation/redirects use the
@@ -27,7 +27,7 @@
  *    Influenced sales / Additional Sales Value — and never the old labels
  *
  * All writes happen inside a single database transaction that is rolled
- * back; absence of residue is asserted afterwards. Fixtures use goal ids
+ * back; absence of residue is asserted afterwards. Fixtures use mission ids
  * 701+, sessions "t70"-style and products with the "R7 " prefix, so they
  * never collide with live store traffic or other suites' residue.
  *
@@ -66,7 +66,7 @@ use FaraCart\Analytics\RevenueTracker;
 use FaraCart\Analytics\RewardCostEstimator;
 use FaraCart\Database\Installer;
 use FaraCart\Database\Schema;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\REST\RecommendationsController;
 use FaraCart\REST\RevenueController;
 use FaraCart\Settings\Settings;
@@ -105,7 +105,7 @@ $engine   = $container->get( AttributionEngine::class );
 $tracker  = $container->get( RevenueTracker::class );
 $costs    = $container->get( RewardCostEstimator::class );
 $repo     = $container->get( RevenueRepository::class );
-$goals    = $container->get( GoalRepository::class );
+$missions    = $container->get( MissionRepository::class );
 $settings = $container->get( Settings::class );
 $snapshot = $container->get( OrderCostSnapshot::class );
 $wpdb     = $GLOBALS['wpdb'];
@@ -113,10 +113,10 @@ $wpdb     = $GLOBALS['wpdb'];
 $server = rest_get_server();
 $routes = $server->get_routes();
 
-$goals_table   = Schema::table( 'goals' );
+$missions_table   = Schema::table( 'missions' );
 $revenue_table = Schema::table( 'revenue_events' );
 $upsell_table  = Schema::table( 'upsell_events' );
-$attrib_table  = Schema::table( 'goal_attribution' );
+$attrib_table  = Schema::table( 'mission_attribution' );
 
 function route_exists( $routes, $pattern ) {
 	return isset( $routes[ $pattern ] );
@@ -142,9 +142,9 @@ check( 'COST_SOURCES lists faracart_product_cost', in_array( 'faracart_product_c
 check( 'COST_SOURCES lists variation_fallback', in_array( 'variation_fallback', $sources, true ) );
 check( '_faracart_product_cost precedes _cost', array_search( '_faracart_product_cost', $sources, true ) < array_search( '_cost', $sources, true ) );
 
-check( 'apply route registered', route_exists( $routes, '/faracart/v1/revenue/goal-recommendations/apply' ) );
+check( 'apply route registered', route_exists( $routes, '/faracart/v1/revenue/mission-recommendations/apply' ) );
 check( 'cost-coverage route registered', route_exists( $routes, '/faracart/v1/revenue/cost-coverage' ) );
-check( 'recommendation route still registered', route_exists( $routes, '/faracart/v1/revenue/goal-recommendations' ) );
+check( 'recommendation route still registered', route_exists( $routes, '/faracart/v1/revenue/mission-recommendations' ) );
 
 check( 'recommendation_applied is a revenue event', RevenueTracker::is_revenue_event( RevenueTracker::EVENT_RECOMMENDATION_APPLIED ) );
 check( 'upsell funnel events are upsell events', RevenueTracker::is_upsell_event( RevenueTracker::EVENT_UPSELL_IMPRESSION ) && RevenueTracker::is_upsell_event( RevenueTracker::EVENT_UPSELL_CLICKED ) && RevenueTracker::is_upsell_event( RevenueTracker::EVENT_UPSELL_ADDED ) && RevenueTracker::is_upsell_event( RevenueTracker::EVENT_UPSELL_ORDER ) );
@@ -160,7 +160,7 @@ $product_ids = array();
 
 $revenue_events_before = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table}" );
 $upsell_events_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_table}" );
-$goals_before          = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
+$missions_before          = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}" );
 $attrib_before         = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$attrib_table}" );
 
 $wpdb->query( 'START TRANSACTION' );
@@ -256,52 +256,52 @@ try {
 	check( 'cost-coverage payload has store_has_cost_data', isset( $coverage_payload['store_has_cost_data'] ) && is_bool( $coverage_payload['store_has_cost_data'] ) );
 	check( 'cost-coverage payload has cost_sources', isset( $coverage_payload['cost_sources'] ) && $coverage_payload['cost_sources'] === RewardCostEstimator::COST_SOURCES );
 
-	// --- Upsell-assisted completions (per-goal smart-upsell linkage). ---
-	$goal_id = $goals->create( array(
-		'name'             => 'R7 upsell-assisted goal',
+	// --- Upsell-assisted completions (per-mission smart-upsell linkage). ---
+	$mission_id = $missions->create( array(
+		'name'             => 'R7 upsell-assisted mission',
 		'type'             => 'amount',
 		'target'           => 5000000,
 		'status'           => 'active',
 		'calculation_mode' => 'subtotal',
 	) );
-	check( 'fixture goal created', $goal_id > 0 );
+	check( 'fixture mission created', $mission_id > 0 );
 
 	// Session A: views → progresses → completes AND sees a product
-	// recommendation for the goal → assisted completion.
+	// recommendation for the mission → assisted completion.
 	$session_a = sprintf( '%032x', 701 );
 	$session_b = sprintf( '%032x', 702 );
 	$sessions[] = $session_a;
 	$sessions[] = $session_b;
 
 	foreach ( array( 'goal_view', 'goal_progress', 'goal_completed' ) as $type ) {
-		$tracker->record( $type, array( 'goal_id' => $goal_id, 'cart_value' => 3000000, 'goal_target' => 5000000, 'session_id' => $session_a ) );
+		$tracker->record( $type, array( 'mission_id' => $mission_id, 'cart_value' => 3000000, 'mission_target' => 5000000, 'session_id' => $session_a ) );
 	}
-	$tracker->record_upsell( RevenueTracker::EVENT_UPSELL_IMPRESSION, array( 'goal_id' => $goal_id, 'product_id' => (int) $post_id, 'session_id' => $session_a, 'cart_value' => 3000000 ) );
-	$tracker->record_upsell( RevenueTracker::EVENT_UPSELL_CLICKED, array( 'goal_id' => $goal_id, 'product_id' => (int) $post_id, 'session_id' => $session_a, 'cart_value' => 3000000 ) );
+	$tracker->record_upsell( RevenueTracker::EVENT_UPSELL_IMPRESSION, array( 'mission_id' => $mission_id, 'product_id' => (int) $post_id, 'session_id' => $session_a, 'cart_value' => 3000000 ) );
+	$tracker->record_upsell( RevenueTracker::EVENT_UPSELL_CLICKED, array( 'mission_id' => $mission_id, 'product_id' => (int) $post_id, 'session_id' => $session_a, 'cart_value' => 3000000 ) );
 
-	// Session B: completes the goal with no upsell exposure → not assisted.
+	// Session B: completes the mission with no upsell exposure → not assisted.
 	foreach ( array( 'goal_view', 'goal_progress', 'goal_completed' ) as $type ) {
-		$tracker->record( $type, array( 'goal_id' => $goal_id, 'cart_value' => 3000000, 'goal_target' => 5000000, 'session_id' => $session_b ) );
+		$tracker->record( $type, array( 'mission_id' => $mission_id, 'cart_value' => 3000000, 'mission_target' => 5000000, 'session_id' => $session_b ) );
 	}
 
 	$repo->invalidate();
-	$metrics = $engine->goal_metrics( (int) $goal_id );
-	check( 'goal_metrics carries upsell_assisted', isset( $metrics['upsell_assisted'] ) && 1 === (int) $metrics['upsell_assisted'] );
-	check( 'goal_metrics carries upsell_assisted_rate', close( 0.5, (float) $metrics['upsell_assisted_rate'] ) );
-	check( 'goal_metrics carries upsell_funnel impressions', isset( $metrics['upsell_funnel'] ) && 1 === (int) $metrics['upsell_funnel']['impressions'] );
-	check( 'goal_metrics upsell_funnel clicks', 1 === (int) $metrics['upsell_funnel']['clicks'] );
-	check( 'goal_metrics upsell_funnel adds + orders zero', 0 === (int) $metrics['upsell_funnel']['adds'] && 0 === (int) $metrics['upsell_funnel']['orders'] );
+	$metrics = $engine->mission_metrics( (int) $mission_id );
+	check( 'mission_metrics carries upsell_assisted', isset( $metrics['upsell_assisted'] ) && 1 === (int) $metrics['upsell_assisted'] );
+	check( 'mission_metrics carries upsell_assisted_rate', close( 0.5, (float) $metrics['upsell_assisted_rate'] ) );
+	check( 'mission_metrics carries upsell_funnel impressions', isset( $metrics['upsell_funnel'] ) && 1 === (int) $metrics['upsell_funnel']['impressions'] );
+	check( 'mission_metrics upsell_funnel clicks', 1 === (int) $metrics['upsell_funnel']['clicks'] );
+	check( 'mission_metrics upsell_funnel adds + orders zero', 0 === (int) $metrics['upsell_funnel']['adds'] && 0 === (int) $metrics['upsell_funnel']['orders'] );
 
 	// --- Apply endpoint: behavior + feedback loop. ---
 	$rec_ctrl = $container->get( RecommendationsController::class );
 
-	$anon = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/goal-recommendations/apply' );
-	$anon->set_param( 'goal_id', (int) $goal_id );
+	$anon = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/mission-recommendations/apply' );
+	$anon->set_param( 'mission_id', (int) $mission_id );
 	$anon->set_param( 'threshold', 4000000 );
 	check( 'anonymous rejected on apply (403)', 403 === $server->dispatch( $anon )->get_status() );
 
-	$apply = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/goal-recommendations/apply' );
-	$apply->set_param( 'goal_id', (int) $goal_id );
+	$apply = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/mission-recommendations/apply' );
+	$apply->set_param( 'mission_id', (int) $mission_id );
 	$apply->set_param( 'threshold', 4000000 );
 	$applied = $rec_ctrl->handle_apply( $apply );
 	check( 'apply succeeds', ! is_wp_error( $applied ) );
@@ -309,25 +309,25 @@ try {
 	check( 'apply response reports the new target', close( 4000000, (float) $applied_data['target'] ) );
 	check( 'apply response reports the previous target', close( 5000000, (float) $applied_data['previous_target'] ) );
 
-	$after = $goals->find( (int) $goal_id );
-	check( 'goal target actually updated', null !== $after && close( 4000000, (float) $after->target() ) );
-	check( 'apply never touched the goal name', null !== $after && 'R7 upsell-assisted goal' === $after->name() );
+	$after = $missions->find( (int) $mission_id );
+	check( 'mission target actually updated', null !== $after && close( 4000000, (float) $after->target() ) );
+	check( 'apply never touched the mission name', null !== $after && 'R7 upsell-assisted mission' === $after->name() );
 
 	// The recommendation_applied event was recorded (previous + applied).
 	$applied_events = (int) $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$revenue_table} WHERE event_type = %s AND goal_id = %d",
+			"SELECT COUNT(*) FROM {$revenue_table} WHERE event_type = %s AND mission_id = %d",
 			RevenueTracker::EVENT_RECOMMENDATION_APPLIED,
-			(int) $goal_id
+			(int) $mission_id
 		)
 	);
 	check( 'recommendation_applied event recorded', 1 === $applied_events );
 
 	$event_meta = $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT meta FROM {$revenue_table} WHERE event_type = %s AND goal_id = %d",
+			"SELECT meta FROM {$revenue_table} WHERE event_type = %s AND mission_id = %d",
 			RevenueTracker::EVENT_RECOMMENDATION_APPLIED,
-			(int) $goal_id
+			(int) $mission_id
 		)
 	);
 	$meta = $event_meta ? json_decode( (string) $event_meta, true ) : array();
@@ -335,28 +335,28 @@ try {
 	check( 'event meta carries the previous target', isset( $meta['previous_target'] ) && close( 5000000, (float) $meta['previous_target'] ) );
 
 	// Re-applying within the daily window dedups the event (still one row).
-	$apply2 = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/goal-recommendations/apply' );
-	$apply2->set_param( 'goal_id', (int) $goal_id );
+	$apply2 = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/mission-recommendations/apply' );
+	$apply2->set_param( 'mission_id', (int) $mission_id );
 	$apply2->set_param( 'threshold', 4200000 );
 	$rec_ctrl->handle_apply( $apply2 );
 	$applied_events2 = (int) $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT COUNT(*) FROM {$revenue_table} WHERE event_type = %s AND goal_id = %d",
+			"SELECT COUNT(*) FROM {$revenue_table} WHERE event_type = %s AND mission_id = %d",
 			RevenueTracker::EVENT_RECOMMENDATION_APPLIED,
-			(int) $goal_id
+			(int) $mission_id
 		)
 	);
 	check( 'daily dedup keeps one recommendation_applied row', 1 === $applied_events2 );
 
-	// Errors: unknown goal → 404; non-positive threshold → 400.
-	$missing = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/goal-recommendations/apply' );
-	$missing->set_param( 'goal_id', 999999 );
+	// Errors: unknown mission → 404; non-positive threshold → 400.
+	$missing = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/mission-recommendations/apply' );
+	$missing->set_param( 'mission_id', 999999 );
 	$missing->set_param( 'threshold', 100 );
 	$missing_resp = $rec_ctrl->handle_apply( $missing );
-	check( 'unknown goal → 404', is_wp_error( $missing_resp ) && 404 === (int) $missing_resp->get_error_data()['status'] );
+	check( 'unknown mission → 404', is_wp_error( $missing_resp ) && 404 === (int) $missing_resp->get_error_data()['status'] );
 
-	$bad = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/goal-recommendations/apply' );
-	$bad->set_param( 'goal_id', (int) $goal_id );
+	$bad = new \WP_REST_Request( 'POST', '/faracart/v1/revenue/mission-recommendations/apply' );
+	$bad->set_param( 'mission_id', (int) $mission_id );
 	$bad->set_param( 'threshold', 0 );
 	$bad_resp = $rec_ctrl->handle_apply( $bad );
 	check( 'non-positive threshold → 400', is_wp_error( $bad_resp ) && 400 === (int) $bad_resp->get_error_data()['status'] );
@@ -377,26 +377,26 @@ $navigation   = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src
 $app_tsx      = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/App.tsx' );
 $reco_tsx     = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/Recommendations.tsx' );
 $upsell_tsx   = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/UpsellAnalytics.tsx' );
-$goals_tsx    = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/GoalPerformance.tsx' );
+$missions_tsx    = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/MissionPerformance.tsx' );
 $overview_tsx = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/RevenueOverview.tsx' );
 $analytics_tsx = (string) file_get_contents( dirname( __DIR__ ) . '/admin-app/src/routes/Analytics.tsx' );
 
 check( 'navigation uses Recommendations', false !== strpos( $navigation, "label: __('Recommendations', 'faracart')" ) );
 check( 'navigation uses Upsells', false !== strpos( $navigation, "label: __('Upsells', 'faracart')" ) );
-check( 'navigation drops the old Goal Optimization label', false === strpos( $navigation, 'Goal Optimization' ) );
+check( 'navigation drops the old Mission Optimization label', false === strpos( $navigation, 'Mission Optimization' ) );
 check( 'navigation drops the old Upsell Performance label', false === strpos( $navigation, 'Upsell Performance' ) );
 check( 'navigation drops Smart Recommendations label', false === strpos( $navigation, 'Smart Recommendations' ) );
 check( 'navigation drops Upsell Analytics label', false === strpos( $navigation, 'Upsell Analytics' ) );
-check( 'App redirects old recommendations route', false !== strpos( $app_tsx, "path: '/revenue/recommendations'" ) && false !== strpos( $app_tsx, '/optimization/goals' ) );
+check( 'App redirects old recommendations route', false !== strpos( $app_tsx, "path: '/revenue/recommendations'" ) && false !== strpos( $app_tsx, '/optimization/missions' ) );
 check( 'App redirects old upsells route', false !== strpos( $app_tsx, "path: '/revenue/upsells'" ) && false !== strpos( $app_tsx, '/optimization/upsells' ) );
 check( 'Recommendations page titled Recommendations', false !== strpos( $reco_tsx, "title={__('Recommendations', 'faracart')}" ) );
 check( 'Recommendations page drops Smart Recommendations title', false === strpos( $reco_tsx, "Smart Recommendations" ) );
 check( 'Upsell Analytics page titled Upsells', false !== strpos( $upsell_tsx, "title={__('Upsells', 'faracart')}" ) );
 check( 'Upsell Analytics page drops old title', false === strpos( $upsell_tsx, "title={__('Upsell Analytics', 'faracart')}" ) );
-check( 'Goal Performance reads upsell_assisted', false !== strpos( $goals_tsx, 'upsell_assisted' ) );
-check( 'Goal Performance drawer uses the Recommendations section', false !== strpos( $goals_tsx, "SectionTitle>{__('Recommendations', 'faracart')}" ) );
-check( 'Goal Performance drawer uses the Upsells section', false !== strpos( $goals_tsx, "SectionTitle>{__('Upsells', 'faracart')}" ) );
-check( 'Goal Performance drawer drops Smart Upsells label', false === strpos( $goals_tsx, "__('Smart Upsells', 'faracart')" ) );
+check( 'Mission Performance reads upsell_assisted', false !== strpos( $missions_tsx, 'upsell_assisted' ) );
+check( 'Mission Performance drawer uses the Recommendations section', false !== strpos( $missions_tsx, "SectionTitle>{__('Recommendations', 'faracart')}" ) );
+check( 'Mission Performance drawer uses the Upsells section', false !== strpos( $missions_tsx, "SectionTitle>{__('Upsells', 'faracart')}" ) );
+check( 'Mission Performance drawer drops Smart Upsells label', false === strpos( $missions_tsx, "__('Smart Upsells', 'faracart')" ) );
 check( 'Revenue Overview labels Influenced sales', false !== strpos( $overview_tsx, "label={__('Influenced sales', 'faracart')}" ) );
 check( 'Revenue Overview drops Influenced revenue', false === strpos( $overview_tsx, "label={__('Influenced revenue', 'faracart')}" ) );
 check( 'Revenue Overview labels the trend series Additional Sales Value', false !== strpos( $overview_tsx, "__('Additional Sales Value', 'faracart')" ) );
@@ -411,13 +411,13 @@ echo "\n== 4. Rollback verification ==\n";
 
 $revenue_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$revenue_table}" );
 $upsell_after  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_table}" );
-$goals_after   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table}" );
+$missions_after   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}" );
 $attrib_after  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$attrib_table}" );
 
 check( 'revenue_events unchanged after rollback', $revenue_after === $revenue_events_before );
 check( 'upsell_events unchanged after rollback', $upsell_after === $upsell_events_before );
-check( 'goals unchanged after rollback', $goals_after === $goals_before );
-check( 'goal_attribution unchanged after rollback', $attrib_after === $attrib_before );
+check( 'missions unchanged after rollback', $missions_after === $missions_before );
+check( 'mission_attribution unchanged after rollback', $attrib_after === $attrib_before );
 
 // wc_get_order() resolves from WC's in-memory order cache after the SQL
 // rollback, so assert against the actual stores (HPOS + classic posts).

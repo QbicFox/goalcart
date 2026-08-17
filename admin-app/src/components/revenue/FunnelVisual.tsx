@@ -17,7 +17,7 @@ interface FunnelStage {
  * The four funnel stages (views → progressed → completed → purchased).
  * The final stage is labeled "Purchased" — never "Converted" — so the
  * commercial outcome (an attributed WooCommerce order) stays distinct
- * from goal completion (Improvement.md §17/§32).
+ * from mission completion (Improvement.md §17/§32).
  */
 const STAGES: FunnelStage[] = [
   { key: 'views', label: __('Views', 'faracart'), color: '#72aee6' },
@@ -43,13 +43,13 @@ interface FunnelVisualProps {
   /**
    * Show the percentage each stage carries over from the previous one
    * between the bars — the drop-off read (e.g. "↓ 43%" views → progressed)
-   * the goal detail drawer needs (Improvement.md §20/§23).
+   * the mission detail drawer needs (Improvement.md §20/§23).
    */
   showTransitions?: boolean;
 }
 
 /**
- * Revenue funnel visualization (Phase 33.6 Attribution Dashboard / Goal
+ * Revenue funnel visualization (Phase 33.6 Attribution Dashboard / Mission
  * Performance; Phase 5 detail drawer). Four bars whose widths are
  * proportional to each stage's count, with the completion and purchase
  * rates below — a single-glance read of views → progressed → completed →
@@ -60,7 +60,7 @@ export default function FunnelVisual({ funnel, compact = false, showTransitions 
   const max = Math.max(1, funnel.views);
 
   return (
-    <Box role="img" aria-label={__('Goal funnel: views, progressed, completed, purchased', 'faracart')}>
+    <Box role="img" aria-label={__('Mission funnel: views, progressed, completed, purchased', 'faracart')}>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
         {STAGES.map((stage, index) => {
           const count = funnel[stage.key];

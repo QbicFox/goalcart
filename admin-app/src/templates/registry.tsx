@@ -1,6 +1,6 @@
 import type { ComponentType } from 'react';
 
-import type { ProgressCampaign, ProgressGoal, TemplateSettingsValue } from '../types';
+import type { ProgressCampaign, ProgressMission, TemplateSettingsValue } from '../types';
 import CampaignProgressTemplateRenderer from './renderers/CampaignProgressTemplateRenderer';
 import MilestoneChainTemplateRenderer from './renderers/MilestoneChainTemplateRenderer';
 import Template1Renderer from './renderers/Template1Renderer';
@@ -11,13 +11,13 @@ import Template5Renderer from './renderers/Template5Renderer';
 import Template6Renderer from './renderers/Template6Renderer';
 
 /**
- * The props every Goal template renderer receives. Renderers draw only
+ * The props every Mission template renderer receives. Renderers draw only
  * the template-specific body (bar / percent / rung / card header); the
  * shared chrome (reward chip, message, suggestions, conflict note) lives
  * in PreviewWidget so all templates stay consistent.
  */
-export interface GoalTemplateProps {
-  goal: ProgressGoal;
+export interface MissionTemplateProps {
+  mission: ProgressMission;
   currency: string;
   /** The resolved settings for this template (schema-conformant). */
   settings: TemplateSettingsValue;
@@ -30,13 +30,13 @@ export interface GoalTemplateProps {
  */
 export interface CampaignTemplateProps {
   campaign: ProgressCampaign;
-  goals: ProgressGoal[];
+  missions: ProgressMission[];
   currency: string;
   settings: TemplateSettingsValue;
   animation: boolean;
 }
 
-export type GoalTemplateRenderer = ComponentType<GoalTemplateProps>;
+export type MissionTemplateRenderer = ComponentType<MissionTemplateProps>;
 export type CampaignTemplateRenderer = ComponentType<CampaignTemplateProps>;
 
 /**
@@ -48,9 +48,9 @@ export type CampaignTemplateRenderer = ComponentType<CampaignTemplateProps>;
  * Consumers look components up by property access (never by call
  * result) so the component references stay static across renders. A
  * template that is no longer registered falls back to the first design
- * template (`GOAL_RENDERERS['template-1']`) rather than failing.
+ * template (`MISSION_RENDERERS['template-1']`) rather than failing.
  */
-export const GOAL_RENDERERS: Record<string, GoalTemplateRenderer> = {
+export const MISSION_RENDERERS: Record<string, MissionTemplateRenderer> = {
   'template-1': Template1Renderer,
   'template-2': Template2Renderer,
   'template-3': Template3Renderer,
@@ -61,7 +61,7 @@ export const GOAL_RENDERERS: Record<string, GoalTemplateRenderer> = {
 
 /**
  * The registered Campaign template renderers. A campaign whose template
- * id is missing here renders as per-goal cards instead (the storefront
+ * id is missing here renders as per-mission cards instead (the storefront
  * grouping check looks the id up in this map).
  */
 export const CAMPAIGN_RENDERERS: Record<string, CampaignTemplateRenderer> = {

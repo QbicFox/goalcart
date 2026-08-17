@@ -3,26 +3,26 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
 
-import type { GoalTemplateProps } from '../registry';
+import type { MissionTemplateProps } from '../registry';
 import { bool, num, str } from '../utils';
-import { GoalBar, RecommendedProductItem, goalPercent, remainingLabel } from './goalShared';
+import { MissionBar, RecommendedProductItem, missionPercent, remainingLabel } from './missionShared';
 
 /**
- * Template 4 — Product Recommendation + Goal (Concept 07).
+ * Template 4 — Product Recommendation + Mission (Concept 07).
  *
- * A gradient progress header (goal title + remaining chip + bar) followed
- * by the goal's own recommended products with add-to-cart buttons. The
+ * A gradient progress header (mission title + remaining chip + bar) followed
+ * by the mission's own recommended products with add-to-cart buttons. The
  * products come from the existing FaraCart / WooCommerce recommendation
- * data (goal.suggestions) — nothing is hard-coded and no second
+ * data (mission.suggestions) — nothing is hard-coded and no second
  * recommendation engine is introduced.
  */
-export default function Template4Renderer({ goal, currency, settings, animation }: GoalTemplateProps) {
-  const percent = goalPercent(goal);
+export default function Template4Renderer({ mission, currency, settings, animation }: MissionTemplateProps) {
+  const percent = missionPercent(mission);
   const headerBg = str(settings, 'headerBg', '#2563eb');
   const accent = str(settings, 'accent', '#2563eb');
   const text = str(settings, 'text', '#1f2937');
   const muted = str(settings, 'secondaryText', '#6b7280');
-  const products = goal.suggestions ?? [];
+  const products = mission.suggestions ?? [];
 
   return (
     <Box sx={{ overflow: 'hidden', borderRadius: 2 }}>
@@ -46,9 +46,9 @@ export default function Template4Renderer({ goal, currency, settings, animation 
               whiteSpace: 'nowrap',
             }}
           >
-            {goal.goal_name}
+            {mission.mission_name}
           </Typography>
-          {bool(settings, 'showRemaining', true) && !goal.completed && (
+          {bool(settings, 'showRemaining', true) && !mission.completed && (
             <Box
               component="span"
               sx={{
@@ -62,10 +62,10 @@ export default function Template4Renderer({ goal, currency, settings, animation 
                 whiteSpace: 'nowrap',
               }}
             >
-              {remainingLabel(goal, currency)}
+              {remainingLabel(mission, currency)}
             </Box>
           )}
-          {goal.completed && (
+          {mission.completed && (
             <Box
               component="span"
               sx={{
@@ -83,9 +83,9 @@ export default function Template4Renderer({ goal, currency, settings, animation 
             </Box>
           )}
         </Box>
-        <GoalBar
-          percent={goal.completed ? 100 : percent}
-          completed={goal.completed}
+        <MissionBar
+          percent={mission.completed ? 100 : percent}
+          completed={mission.completed}
           animation={animation}
           track="rgba(255,255,255,0.25)"
           height={num(settings, 'barHeight', 8)}
@@ -100,7 +100,7 @@ export default function Template4Renderer({ goal, currency, settings, animation 
             <LightbulbIcon
               sx={{ fontSize: 14, color: '#eab308', verticalAlign: 'middle', ml: 0.25 }}
             />
-            {__('Add these products to reach your goal faster:', 'faracart')}
+            {__('Add these products to reach your mission faster:', 'faracart')}
           </Typography>
         )}
 

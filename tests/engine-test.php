@@ -2,7 +2,7 @@
 /**
  * FaraCart engine edge-case tests (P04-T05).
  *
- * Boots WordPress, then runs the GoalEngine against synthetic CartContext
+ * Boots WordPress, then runs the MissionEngine against synthetic CartContext
  * snapshots — the engine is UI- and WooCommerce-independent, so every edge
  * case from the phase spec is exercised with plain data:
  *
@@ -39,11 +39,11 @@ $_SERVER['REMOTE_ADDR']     = '127.0.0.1';
 require $dir . '/wp-load.php';
 require dirname( __DIR__ ) . '/ravis-faracart.php';
 
-use FaraCart\Goals\CartContext;
-use FaraCart\Goals\Goal;
-use FaraCart\Goals\GoalEngine;
-use FaraCart\Goals\GoalResult;
-use FaraCart\Goals\ProgressCalculator;
+use FaraCart\Missions\CartContext;
+use FaraCart\Missions\Mission;
+use FaraCart\Missions\MissionEngine;
+use FaraCart\Missions\MissionResult;
+use FaraCart\Missions\ProgressCalculator;
 
 $failures = 0;
 $checks   = 0;
@@ -75,11 +75,11 @@ function ctx( array $data, array $items = array() ) {
     return new CartContext( $data );
 }
 
-function goal( array $data ) {
-    return new Goal( $data );
+function mission( array $data ) {
+    return new Mission( $data );
 }
 
-$engine = new GoalEngine();
+$engine = new MissionEngine();
 
 // ---------------------------------------------------------------------------
 // 1. ProgressCalculator unit math
@@ -101,20 +101,20 @@ check( 'not completed below target', ! ProgressCalculator::completed( 99.99, 100
 echo "\n== 2. Empty cart ==\n";
 
 $empty     = ctx( array( 'subtotal' => 0, 'total' => 0 ) );
-$goal_100  = goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100 ) );
-$r         = $engine->evaluate( $goal_100, $empty );
+$mission_100  = mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100 ) );
+$r         = $engine->evaluate( $mission_100, $empty );
 
-check( 'amount goal eligible on empty cart', $r->eligible() );
+check( 'amount mission eligible on empty cart', $r->eligible() );
 check( 'empty cart current 0', near( $r->current(), 0 ) );
 check( 'empty cart remaining = target', near( $r->remaining(), 100 ) );
 check( 'empty cart percentage 0', near( $r->percentage(), 0 ) );
 check( 'empty cart not completed', ! $r->completed() );
-check( 'empty cart reward locked', GoalResult::REWARD_LOCKED === $r->reward_state() );
+check( 'empty cart reward locked', MissionResult::REWARD_LOCKED === $r->reward_state() );
 
 // ---------------------------------------------------------------------------
-// 3. Amount goals: subtotal / total / discounted_subtotal, sale prices
+// 3. Amount missions: subtotal / total / discounted_subtotal, sale prices
 // ---------------------------------------------------------------------------
-echo "\n== 3. Amount goals ==\n";
+echo "\n== 3. Amount missions ==\n";
 
 $cart = ctx(
     array(
@@ -131,25 +131,25 @@ $cart = ctx(
     )
 );
 
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100 ) ), $cart );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100 ) ), $cart );
 check( 'subtotal mode uses pre-discount subtotal', near( $r->current(), 120 ) );
 check( 'subtotal mode completed', $r->completed() );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 150, 'calculation_mode' => Goal::MODE_SUBTOTAL ) ),
+    mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 150, 'calculation_mode' => Mission::MODE_SUBTOTAL ) ),
     $cart
 );
 check( 'subtotal mode not completed below target', ! $r->completed() );
 check( 'subtotal mode percentage 80', near( $r->percentage(), 80 ) );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100, 'calculation_mode' => Goal::MODE_TOTAL ) ),
+    mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100, 'calculation_mode' => Mission::MODE_TOTAL ) ),
     $cart
 );
 check( 'total mode includes tax + shipping', near( $r->current(), 137.60 ) );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 120, 'calculation_mode' => Goal::MODE_DISCOUNTED_SUBTOTAL ) ),
+    mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 120, 'calculation_mode' => Mission::MODE_DISCOUNTED_SUBTOTAL ) ),
     $cart
 );
 check( 'discounted subtotal reflects coupon discount', near( $r->current(), 115 ) );
@@ -161,12 +161,12 @@ $sale = ctx(
     array( 'subtotal' => 40, 'total' => 40 ),
     array( array( 'product_id' => 3, 'name' => 'Sale', 'quantity' => 1, 'line_subtotal' => 40, 'line_total' => 40, 'price' => 40 ) )
 );
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 50 ) ), $sale );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 50 ) ), $sale );
 check( 'sale price reflected in current (40, not 60)', near( $r->current(), 40 ) );
-check( 'sale price goal not completed', ! $r->completed() );
+check( 'sale price mission not completed', ! $r->completed() );
 
 // ---------------------------------------------------------------------------
-// 4. Quantity goal (decimal quantities)
+// 4. Quantity mission (decimal quantities)
 // ---------------------------------------------------------------------------
 echo "\n== 4. Quantity ==\n";
 
@@ -178,18 +178,18 @@ $qty_cart = ctx(
         array( 'product_id' => 3, 'quantity' => 0.5 ), // sold by weight
     )
 );
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_QUANTITY, 'target' => 3 ) ), $qty_cart );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_QUANTITY, 'target' => 3 ) ), $qty_cart );
 check( 'decimal quantities sum to 3.5', near( $r->current(), 3.5 ) );
-check( 'quantity goal completed', $r->completed() );
+check( 'quantity mission completed', $r->completed() );
 
 // ---------------------------------------------------------------------------
-// 5. Distinct quantity goal
+// 5. Distinct quantity mission
 // ---------------------------------------------------------------------------
 echo "\n== 5. Distinct quantity ==\n";
 
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_DISTINCT_QUANTITY, 'target' => 3 ) ), $qty_cart );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_DISTINCT_QUANTITY, 'target' => 3 ) ), $qty_cart );
 check( 'distinct products = 3 (0.5 qty still counts once)', near( $r->current(), 3 ) );
-check( 'distinct goal completed', $r->completed() );
+check( 'distinct mission completed', $r->completed() );
 
 $dup = ctx(
     array( 'subtotal' => 40, 'total' => 40 ),
@@ -198,11 +198,11 @@ $dup = ctx(
         array( 'product_id' => 5, 'variation_id' => 51, 'quantity' => 1 ),
     )
 );
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_DISTINCT_QUANTITY, 'target' => 2 ) ), $dup );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_DISTINCT_QUANTITY, 'target' => 2 ) ), $dup );
 check( 'duplicate lines of same variation count once', near( $r->current(), 1 ) );
 
 // ---------------------------------------------------------------------------
-// 6. Category goal (amount + quantity), no matching items
+// 6. Category mission (amount + quantity), no matching items
 // ---------------------------------------------------------------------------
 echo "\n== 6. Category ==\n";
 
@@ -216,32 +216,32 @@ $cat_cart = ctx(
 );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_CATEGORY, 'target' => 50, 'categories' => array( 10 ) ) ),
+    mission( array( 'type' => Mission::TYPE_CATEGORY, 'target' => 50, 'categories' => array( 10 ) ) ),
     $cat_cart
 );
 check( 'category amount = sum of matching items (90)', near( $r->current(), 90 ) );
 check( 'category amount completed', $r->completed() );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_CATEGORY, 'target' => 2, 'categories' => array( 11 ), 'calculation_mode' => Goal::MODE_QUANTITY ) ),
+    mission( array( 'type' => Mission::TYPE_CATEGORY, 'target' => 2, 'categories' => array( 11 ), 'calculation_mode' => Mission::MODE_QUANTITY ) ),
     $cat_cart
 );
 check( 'category quantity mode = 2', near( $r->current(), 2 ) );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_CATEGORY, 'target' => 10, 'categories' => array( 99 ) ) ),
+    mission( array( 'type' => Mission::TYPE_CATEGORY, 'target' => 10, 'categories' => array( 99 ) ) ),
     $cat_cart
 );
 check( 'category with no matching items -> 0, still eligible', $r->eligible() && near( $r->current(), 0 ) );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_CATEGORY, 'target' => 10, 'categories' => array() ) ),
+    mission( array( 'type' => Mission::TYPE_CATEGORY, 'target' => 10, 'categories' => array() ) ),
     $cat_cart
 );
-check( 'category goal without categories -> ineligible', ! $r->eligible() && GoalResult::REASON_NO_MATCHING_ITEMS === $r->reason() );
+check( 'category mission without categories -> ineligible', ! $r->eligible() && MissionResult::REASON_NO_MATCHING_ITEMS === $r->reason() );
 
 // ---------------------------------------------------------------------------
-// 7. Product goal (variations + parent)
+// 7. Product mission (variations + parent)
 // ---------------------------------------------------------------------------
 echo "\n== 7. Product ==\n";
 
@@ -254,25 +254,25 @@ $prod_cart = ctx(
 );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_PRODUCT, 'target' => 1, 'products' => array( 101 ) ) ),
+    mission( array( 'type' => Mission::TYPE_PRODUCT, 'target' => 1, 'products' => array( 101 ) ) ),
     $prod_cart
 );
-check( 'product goal matches variation id', near( $r->current(), 1 ) && $r->completed() );
+check( 'product mission matches variation id', near( $r->current(), 1 ) && $r->completed() );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_PRODUCT, 'target' => 2, 'products' => array( 100, 200 ) ) ),
+    mission( array( 'type' => Mission::TYPE_PRODUCT, 'target' => 2, 'products' => array( 100, 200 ) ) ),
     $prod_cart
 );
-check( 'product goal matches parent + simple product (qty 3)', near( $r->current(), 3 ) );
+check( 'product mission matches parent + simple product (qty 3)', near( $r->current(), 3 ) );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_PRODUCT, 'target' => 1, 'products' => array( 999 ) ) ),
+    mission( array( 'type' => Mission::TYPE_PRODUCT, 'target' => 1, 'products' => array( 999 ) ) ),
     $prod_cart
 );
-check( 'product goal with no matching items -> 0', $r->eligible() && near( $r->current(), 0 ) );
+check( 'product mission with no matching items -> 0', $r->eligible() && near( $r->current(), 0 ) );
 
 // ---------------------------------------------------------------------------
-// 8. Weight goal
+// 8. Weight mission
 // ---------------------------------------------------------------------------
 echo "\n== 8. Weight ==\n";
 
@@ -284,12 +284,12 @@ $weight_cart = ctx(
         array( 'product_id' => 3, 'quantity' => 1, 'weight' => 0 ),
     )
 );
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_WEIGHT, 'target' => 4 ) ), $weight_cart );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_WEIGHT, 'target' => 4 ) ), $weight_cart );
 check( 'weight = 2*1.5 + 0.5*3 + 0 = 4.5', near( $r->current(), 4.5 ) );
-check( 'weight goal completed', $r->completed() );
+check( 'weight mission completed', $r->completed() );
 
 // ---------------------------------------------------------------------------
-// 9. Composite goals (AND / OR)
+// 9. Composite missions (AND / OR)
 // ---------------------------------------------------------------------------
 echo "\n== 9. Composite ==\n";
 
@@ -301,28 +301,28 @@ $comp_cart = ctx(
     )
 );
 
-$and_goal = goal(
+$and_mission = mission(
     array(
-        'type'     => Goal::TYPE_COMPOSITE,
-        'operator' => Goal::OP_AND,
+        'type'     => Mission::TYPE_COMPOSITE,
+        'operator' => Mission::OP_AND,
         'children' => array(
-            array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100 ),
-            array( 'type' => Goal::TYPE_QUANTITY, 'target' => 3 ),
+            array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100 ),
+            array( 'type' => Mission::TYPE_QUANTITY, 'target' => 3 ),
         ),
     )
 );
-$r = $engine->evaluate( $and_goal, $comp_cart );
+$r = $engine->evaluate( $and_mission, $comp_cart );
 check( 'AND completed when all children complete', $r->completed() );
 check( 'AND percentage 100', near( $r->percentage(), 100 ) );
-check( 'AND reward unlocked', GoalResult::REWARD_UNLOCKED === $r->reward_state() );
+check( 'AND reward unlocked', MissionResult::REWARD_UNLOCKED === $r->reward_state() );
 
-$and_partial = goal(
+$and_partial = mission(
     array(
-        'type'     => Goal::TYPE_COMPOSITE,
-        'operator' => Goal::OP_AND,
+        'type'     => Mission::TYPE_COMPOSITE,
+        'operator' => Mission::OP_AND,
         'children' => array(
-            array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100 ),
-            array( 'type' => Goal::TYPE_QUANTITY, 'target' => 5 ),
+            array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100 ),
+            array( 'type' => Mission::TYPE_QUANTITY, 'target' => 5 ),
         ),
     )
 );
@@ -333,43 +333,43 @@ check( 'AND current = sum of children (124)', near( $r->current(), 124 ) );
 check( 'AND target = sum of children (105)', near( $r->target(), 105 ) );
 check( 'AND remaining stays target - current (0)', near( $r->remaining(), 0 ) );
 
-$or_goal = goal(
+$or_mission = mission(
     array(
-        'type'     => Goal::TYPE_COMPOSITE,
-        'operator' => Goal::OP_OR,
+        'type'     => Mission::TYPE_COMPOSITE,
+        'operator' => Mission::OP_OR,
         'children' => array(
-            array( 'type' => Goal::TYPE_AMOUNT, 'target' => 1000 ),
-            array( 'type' => Goal::TYPE_QUANTITY, 'target' => 3 ),
+            array( 'type' => Mission::TYPE_AMOUNT, 'target' => 1000 ),
+            array( 'type' => Mission::TYPE_QUANTITY, 'target' => 3 ),
         ),
     )
 );
-$r = $engine->evaluate( $or_goal, $comp_cart );
+$r = $engine->evaluate( $or_mission, $comp_cart );
 check( 'OR completed when any child completes', $r->completed() );
 
-$or_open = goal(
+$or_open = mission(
     array(
-        'type'     => Goal::TYPE_COMPOSITE,
-        'operator' => Goal::OP_OR,
+        'type'     => Mission::TYPE_COMPOSITE,
+        'operator' => Mission::OP_OR,
         'children' => array(
-            array( 'type' => Goal::TYPE_AMOUNT, 'target' => 1000 ),
-            array( 'type' => Goal::TYPE_QUANTITY, 'target' => 10 ),
+            array( 'type' => Mission::TYPE_AMOUNT, 'target' => 1000 ),
+            array( 'type' => Mission::TYPE_QUANTITY, 'target' => 10 ),
         ),
     )
 );
 $r = $engine->evaluate( $or_open, $comp_cart );
 check( 'OR incomplete when no child completes', ! $r->completed() );
 
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_COMPOSITE, 'children' => array() ) ), $comp_cart );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_COMPOSITE, 'children' => array() ) ), $comp_cart );
 check( 'composite without children -> ineligible', ! $r->eligible() );
 
 // AND with an ineligible child stays incomplete (per the documented semantics).
-$and_ineligible = goal(
+$and_ineligible = mission(
     array(
-        'type'     => Goal::TYPE_COMPOSITE,
-        'operator' => Goal::OP_AND,
+        'type'     => Mission::TYPE_COMPOSITE,
+        'operator' => Mission::OP_AND,
         'children' => array(
-            array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100 ),
-            array( 'type' => Goal::TYPE_QUANTITY, 'target' => 3, 'status' => Goal::STATUS_INACTIVE ),
+            array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100 ),
+            array( 'type' => Mission::TYPE_QUANTITY, 'target' => 3, 'status' => Mission::STATUS_INACTIVE ),
         ),
     )
 );
@@ -377,12 +377,12 @@ $r = $engine->evaluate( $and_ineligible, $comp_cart );
 check( 'AND with ineligible child stays incomplete', $r->eligible() && ! $r->completed() );
 
 // Unknown-type children are ineligible, never a throw.
-$unknown_child = goal(
+$unknown_child = mission(
     array(
-        'type'     => Goal::TYPE_COMPOSITE,
-        'operator' => Goal::OP_AND,
+        'type'     => Mission::TYPE_COMPOSITE,
+        'operator' => Mission::OP_AND,
         'children' => array(
-            array( 'type' => Goal::TYPE_AMOUNT, 'target' => 100 ),
+            array( 'type' => Mission::TYPE_AMOUNT, 'target' => 100 ),
             array( 'type' => 'mystery', 'target' => 1 ),
         ),
     )
@@ -390,10 +390,10 @@ $unknown_child = goal(
 $r = $engine->evaluate( $unknown_child, $comp_cart );
 check( 'composite with unknown-type child does not throw and stays incomplete', $r->eligible() && ! $r->completed() );
 
-$all_unknown = goal(
+$all_unknown = mission(
     array(
-        'type'     => Goal::TYPE_COMPOSITE,
-        'operator' => Goal::OP_OR,
+        'type'     => Mission::TYPE_COMPOSITE,
+        'operator' => Mission::OP_OR,
         'children' => array(
             array( 'type' => 'mystery', 'target' => 1 ),
             array( 'type' => 'mystery2', 'target' => 1 ),
@@ -401,22 +401,22 @@ $all_unknown = goal(
     )
 );
 $r = $engine->evaluate( $all_unknown, $comp_cart );
-check( 'composite with only unknown-type children -> ineligible (unknown_type)', ! $r->eligible() && GoalResult::REASON_UNKNOWN_TYPE === $r->reason() );
+check( 'composite with only unknown-type children -> ineligible (unknown_type)', ! $r->eligible() && MissionResult::REASON_UNKNOWN_TYPE === $r->reason() );
 
 // ---------------------------------------------------------------------------
 // 10. Zero / negative / invalid targets
 // ---------------------------------------------------------------------------
 echo "\n== 10. Zero and invalid targets ==\n";
 
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 0 ) ), $empty );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 0 ) ), $empty );
 check( 'zero target trivially completed', $r->completed() );
 check( 'zero target percentage 100', near( $r->percentage(), 100 ) );
-check( 'zero target reward unlocked', GoalResult::REWARD_UNLOCKED === $r->reward_state() );
+check( 'zero target reward unlocked', MissionResult::REWARD_UNLOCKED === $r->reward_state() );
 
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => -50 ) ), $empty );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => -50 ) ), $empty );
 check( 'negative target ineligible', ! $r->eligible() );
-check( 'negative target reason', GoalResult::REASON_INVALID_TARGET === $r->reason() );
-check( 'negative target reward not applicable', GoalResult::REWARD_NOT_APPLICABLE === $r->reward_state() );
+check( 'negative target reason', MissionResult::REASON_INVALID_TARGET === $r->reason() );
+check( 'negative target reward not applicable', MissionResult::REWARD_NOT_APPLICABLE === $r->reward_state() );
 
 // ---------------------------------------------------------------------------
 // 11. Coupons / discounts
@@ -433,18 +433,18 @@ echo "\n== 11. Coupons ==\n";	$coupon = ctx(
     )
 );
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 195, 'calculation_mode' => Goal::MODE_DISCOUNTED_SUBTOTAL ) ),
+    mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 195, 'calculation_mode' => Mission::MODE_DISCOUNTED_SUBTOTAL ) ),
     $coupon
 );
 check( 'coupon discount lowers discounted current to 190', near( $r->current(), 190 ) );
-check( 'coupon discount keeps subtotal at 200', near( $coupon->amount( Goal::MODE_SUBTOTAL ), 200 ) );
+check( 'coupon discount keeps subtotal at 200', near( $coupon->amount( Mission::MODE_SUBTOTAL ), 200 ) );
 
 // ---------------------------------------------------------------------------
 // 12. Virtual / downloadable products are counted normally
 // ---------------------------------------------------------------------------
 echo "\n== 12. Virtual & downloadable ==\n";
 
-$r = $engine->evaluate( goal( array( 'type' => Goal::TYPE_QUANTITY, 'target' => 2 ) ), $qty_cart );
+$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_QUANTITY, 'target' => 2 ) ), $qty_cart );
 check( 'virtual/downloadable counted in quantity', $r->completed() );
 
 // ---------------------------------------------------------------------------
@@ -460,13 +460,13 @@ $excl = ctx(
     )
 );
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 50, 'excluded_products' => array( 2 ) ) ),
+    mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 50, 'excluded_products' => array( 2 ) ) ),
     $excl
 );
 check( 'excluded product dropped from amount (40)', near( $r->current(), 40 ) );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_QUANTITY, 'target' => 1, 'excluded_products' => array( 1, 2 ) ) ),
+    mission( array( 'type' => Mission::TYPE_QUANTITY, 'target' => 1, 'excluded_products' => array( 1, 2 ) ) ),
     $excl
 );
 check( 'all items excluded -> 0', near( $r->current(), 0 ) );
@@ -482,21 +482,21 @@ $user  = ctx( array( 'subtotal' => 50, 'total' => 50, 'user_id' => 7, 'is_guest'
 check( 'guest context flagged', $guest->is_guest() && 0 === $guest->user_id() );
 check( 'logged-in context flagged', ! $user->is_guest() && 7 === $user->user_id() );
 
-$r_guest = $engine->evaluate( goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 50 ) ), $guest );
-$r_user  = $engine->evaluate( goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 50 ) ), $user );
+$r_guest = $engine->evaluate( mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 50 ) ), $guest );
+$r_user  = $engine->evaluate( mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 50 ) ), $user );
 check( 'both guests and logged-in users get evaluated', $r_guest->completed() && $r_user->completed() );
 
 // ---------------------------------------------------------------------------
-// 15. Inactive goal
+// 15. Inactive mission
 // ---------------------------------------------------------------------------
-echo "\n== 15. Inactive goal ==\n";
+echo "\n== 15. Inactive mission ==\n";
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 50, 'status' => Goal::STATUS_INACTIVE ) ),
+    mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 50, 'status' => Mission::STATUS_INACTIVE ) ),
     $cart
 );
-check( 'inactive goal ineligible', ! $r->eligible() );
-check( 'inactive goal reason', GoalResult::REASON_GOAL_INACTIVE === $r->reason() );
+check( 'inactive mission ineligible', ! $r->eligible() );
+check( 'inactive mission reason', MissionResult::REASON_MISSION_INACTIVE === $r->reason() );
 
 // ---------------------------------------------------------------------------
 // 16. Scheduling
@@ -504,35 +504,35 @@ check( 'inactive goal reason', GoalResult::REASON_GOAL_INACTIVE === $r->reason()
 echo "\n== 16. Scheduling ==\n";
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 50, 'ends_at' => '2020-01-01 00:00:00' ) ),
+    mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 50, 'ends_at' => '2020-01-01 00:00:00' ) ),
     $cart,
     '2024-06-01 12:00:00'
 );
-check( 'expired goal ineligible', ! $r->eligible() );
-check( 'expired goal reason', GoalResult::REASON_OUT_OF_SCHEDULE === $r->reason() );
+check( 'expired mission ineligible', ! $r->eligible() );
+check( 'expired mission reason', MissionResult::REASON_OUT_OF_SCHEDULE === $r->reason() );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 50, 'starts_at' => '2030-01-01 00:00:00' ) ),
+    mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 50, 'starts_at' => '2030-01-01 00:00:00' ) ),
     $cart,
     '2024-06-01 12:00:00'
 );
-check( 'not-yet-started goal ineligible', ! $r->eligible() );
+check( 'not-yet-started mission ineligible', ! $r->eligible() );
 
 $r = $engine->evaluate(
-    goal( array( 'type' => Goal::TYPE_AMOUNT, 'target' => 50, 'starts_at' => '2024-01-01', 'ends_at' => '2024-12-31' ) ),
+    mission( array( 'type' => Mission::TYPE_AMOUNT, 'target' => 50, 'starts_at' => '2024-01-01', 'ends_at' => '2024-12-31' ) ),
     $cart,
     '2024-06-01 12:00:00'
 );
-check( 'goal inside window eligible', $r->eligible() );
+check( 'mission inside window eligible', $r->eligible() );
 
 // ---------------------------------------------------------------------------
-// 17. Unknown goal type
+// 17. Unknown mission type
 // ---------------------------------------------------------------------------
 echo "\n== 17. Unknown type ==\n";
 
-$r = $engine->evaluate( goal( array( 'type' => 'mystery', 'target' => 50 ) ), $cart );
+$r = $engine->evaluate( mission( array( 'type' => 'mystery', 'target' => 50 ) ), $cart );
 check( 'unknown type ineligible', ! $r->eligible() );
-check( 'unknown type reason', GoalResult::REASON_UNKNOWN_TYPE === $r->reason() );
+check( 'unknown type reason', MissionResult::REASON_UNKNOWN_TYPE === $r->reason() );
 
 $types = $engine->registry()->types();
 sort( $types );

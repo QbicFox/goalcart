@@ -6,7 +6,7 @@ export interface AnalyticsParams {
   from?: string;
   to?: string;
   campaign_id?: number;
-  goal_id?: number;
+  mission_id?: number;
   reward?: string;
   product_id?: number;
   limit?: number;
@@ -15,9 +15,9 @@ export interface AnalyticsParams {
 /**
  * Fetch the analytics dashboard payload from `GET /faracart/v1/analytics`.
  *
- * Sends the active date range plus any campaign / goal / reward / product
+ * Sends the active date range plus any campaign / mission / reward / product
  * filters; the backend responds with the summary KPIs, the daily trend
- * and the top campaigns / goals / suggested products lists.
+ * and the top campaigns / missions / suggested products lists.
  */
 export async function fetchAnalytics(params: AnalyticsParams = {}): Promise<AnalyticsPayload> {
   const query = new URLSearchParams();
@@ -31,8 +31,8 @@ export async function fetchAnalytics(params: AnalyticsParams = {}): Promise<Anal
   if (params.campaign_id && params.campaign_id > 0) {
     query.set('campaign_id', String(params.campaign_id));
   }
-  if (params.goal_id && params.goal_id > 0) {
-    query.set('goal_id', String(params.goal_id));
+  if (params.mission_id && params.mission_id > 0) {
+    query.set('mission_id', String(params.mission_id));
   }
   if (params.reward) {
     query.set('reward', params.reward);

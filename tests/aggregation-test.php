@@ -7,10 +7,10 @@
  *  - service wiring: DailyAggregator + RevenueRepository resolve from the
  *    container; the daily aggregation cron event is registered with the
  *    'daily' interval and the handlers are wired
- *  - schema: revenue_daily (goal_date composite) + upsell_stats (unique
+ *  - schema: revenue_daily (mission_date composite) + upsell_stats (unique
  *    product_id) exist as the Phase 33.1 schema declares
  *  - daily aggregation: aggregate_revenue_day() rolls a day's revenue_events
- *    + goal_attribution rows into revenue_daily with the same definitions as
+ *    + mission_attribution rows into revenue_daily with the same definitions as
  *    the live reads (views/progressions/completions/conversions, revenue,
  *    incremental_revenue, reward_cost, estimated_profit); re-running is
  *    idempotent (delete-then-insert)
@@ -19,12 +19,12 @@
  *    faracart_aggregate_max_days per run and advances the option
  *  - upsell stats: aggregate_upsells() rebuilds upsell_stats from the raw
  *    upsell_events log (per-product impressions/clicks/adds/orders/revenue)
- *  - cached repository: overview / goal_performance / daily_trend (aggregated
+ *  - cached repository: overview / mission_performance / daily_trend (aggregated
  *    + today's live merge) / product_stats, with generation-versioned
  *    transients, the faracart_revenue_cache_enabled bypass and invalidate()
- *  - invalidation hooks: order status, goal CRUD (faracart_goals_changed),
+ *  - invalidation hooks: order status, mission CRUD (faracart_missions_changed),
  *    product saves and the aggregation run all bump the cache version
- *  - GoalRepository fires faracart_goals_changed on create/update/delete
+ *  - MissionRepository fires faracart_missions_changed on create/update/delete
  *
  * All writes happen inside a single database transaction that is rolled
  * back; the absence of residue is asserted afterwards.
@@ -64,7 +64,7 @@ use FaraCart\Analytics\RewardCostEstimator;
 use FaraCart\Analytics\Session;
 use FaraCart\Database\Installer;
 use FaraCart\Database\Schema;
-use FaraCart\Goals\GoalRepository;
+use FaraCart\Missions\MissionRepository;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Settings\Settings;
 
@@ -98,7 +98,7 @@ $engine     = $container->get( AttributionEngine::class );
 $tracker    = $container->get( RevenueTracker::class );
 $costs      = $container->get( RewardCostEstimator::class );
 $settings   = $container->get( Settings::class );
-$goals_repo = $container->get( GoalRepository::class );
+$missions_repo = $container->get( MissionRepository::class );
 $wpdb       = $GLOBALS['wpdb'];
 
 // ---------------------------------------------------------------------------
@@ -124,7 +124,7 @@ $hooks->run();
 
 check( 'aggregation cron callback registered', has_action( DailyAggregator::AGGREGATE_EVENT ) );
 check( 'cache invalidated on payment_complete', has_action( 'woocommerce_payment_complete' ) );
-check( 'cache invalidated on goal changes', has_action( 'faracart_goals_changed' ) );
+check( 'cache invalidated on mission changes', has_action( 'faracart_missions_changed' ) );
 check( 'cache invalidated on product saves', has_action( 'save_post_product' ) );
 check( 'cache invalidated after aggregation', has_action( 'faracart_revenue_aggregated' ) );
 
@@ -140,7 +140,7 @@ $daily_idx = $wpdb->get_col(
 		Schema::table( 'revenue_daily' )
 	)
 );
-check( 'revenue_daily has the goal_date composite index', in_array( 'goal_date', $daily_idx, true ) );
+check( 'revenue_daily has the mission_date composite index', in_array( 'mission_date', $daily_idx, true ) );
 check( 'revenue_daily has the report_date index', in_array( 'report_date', $daily_idx, true ) );
 
 $stats_idx = $wpdb->get_col(
@@ -157,9 +157,9 @@ check( 'upsell_stats has the unique product_id key', in_array( 'product_id', $st
 // ---------------------------------------------------------------------------
 echo "\n== 3. Aggregation (rolled back) ==\n";
 
-$goals_table    = Schema::table( 'goals' );
+$missions_table    = Schema::table( 'missions' );
 $revenue_table  = Schema::table( 'revenue_events' );
-$attrib_table   = Schema::table( 'goal_attribution' );
+$attrib_table   = Schema::table( 'mission_attribution' );
 $upsell_table   = Schema::table( 'upsell_events' );
 $daily_table    = Schema::table( 'revenue_daily' );
 $stats_table    = Schema::table( 'upsell_stats' );
@@ -179,20 +179,20 @@ $settings->set( 'analytics_enabled', true );
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	// --- Fixture goals (must exist for the event/attribution FKs). ---
+	// --- Fixture missions (must exist for the event/attribution FKs). ---
 	foreach ( array(
 		array( 'id' => 101, 'reward_type' => 'percent_discount', 'reward_value' => 10, 'reward_max_value' => 50 ),
 		array( 'id' => 202, 'reward_type' => null ),
-	) as $goal_row ) {
-		$wpdb->insert( $goals_table, array(
-			'id'              => $goal_row['id'],
-			'name'            => 'P33 aggregation goal ' . $goal_row['id'],
+	) as $mission_row ) {
+		$wpdb->insert( $missions_table, array(
+			'id'              => $mission_row['id'],
+			'name'            => 'P33 aggregation mission ' . $mission_row['id'],
 			'status'          => 'active',
 			'type'            => 'amount',
 			'target'          => 1000000,
-			'reward_type'     => $goal_row['reward_type'],
-			'reward_value'    => isset( $goal_row['reward_value'] ) ? $goal_row['reward_value'] : null,
-			'reward_max_value'=> isset( $goal_row['reward_max_value'] ) ? $goal_row['reward_max_value'] : null,
+			'reward_type'     => $mission_row['reward_type'],
+			'reward_value'    => isset( $mission_row['reward_value'] ) ? $mission_row['reward_value'] : null,
+			'reward_max_value'=> isset( $mission_row['reward_max_value'] ) ? $mission_row['reward_max_value'] : null,
 			'created_at'      => '2026-08-05 00:00:00',
 			'updated_at'      => '2026-08-05 00:00:00',
 		) );
@@ -200,13 +200,13 @@ try {
 
 	// --- Revenue events on a fixed past date (direct inserts — the tracker
 	// stamps current_time; the aggregator must read the stored date). ---
-	$event = function ( $type, $goal_id, $cart, $created_at, $extra = array() ) use ( $wpdb, $revenue_table, $session_a ) {
+	$event = function ( $type, $mission_id, $cart, $created_at, $extra = array() ) use ( $wpdb, $revenue_table, $session_a ) {
 		$wpdb->insert( $revenue_table, array_merge( array(
 			'event_type'   => $type,
-			'goal_id'      => $goal_id,
+			'mission_id'      => $mission_id,
 			'session_id'   => $session_a,
 			'cart_value'   => $cart,
-			'goal_target'  => 1000000,
+			'mission_target'  => 1000000,
 			'created_at'   => $created_at,
 		), $extra ) );
 	};
@@ -219,7 +219,7 @@ try {
 	// --- Attribution rows on the same day. ---
 	$wpdb->insert( $attrib_table, array(
 		'order_id'          => 9001,
-		'goal_id'           => 101,
+		'mission_id'           => 101,
 		'session_id'        => $session_a,
 		'model'             => 'direct',
 		'order_total'       => 1050000,
@@ -230,7 +230,7 @@ try {
 
 	$wpdb->insert( $attrib_table, array(
 		'order_id'          => 9002,
-		'goal_id'           => 202,
+		'mission_id'           => 202,
 		'session_id'        => $session_b,
 		'model'             => 'assisted',
 		'order_total'       => 800000,
@@ -240,48 +240,48 @@ try {
 	) );
 
 	// --- Daily aggregation. ---
-	$goal_count = $aggregator->aggregate_revenue_day( '2026-08-05' );
-	check( 'aggregates both goals for the day', 2 === $goal_count );
+	$mission_count = $aggregator->aggregate_revenue_day( '2026-08-05' );
+	check( 'aggregates both missions for the day', 2 === $mission_count );
 
 	$row_101 = $wpdb->get_row(
 		$wpdb->prepare(
-			"SELECT * FROM {$daily_table} WHERE report_date = %s AND goal_id = %d",
+			"SELECT * FROM {$daily_table} WHERE report_date = %s AND mission_id = %d",
 			'2026-08-05',
 			101
 		),
 		ARRAY_A
 	);
 
-	check( 'daily row for the direct goal exists', null !== $row_101 );
+	check( 'daily row for the direct mission exists', null !== $row_101 );
 	check( 'daily views = goal_view count', null !== $row_101 && 1 === (int) $row_101['views'] );
 	check( 'daily progressions = goal_progress count', null !== $row_101 && 1 === (int) $row_101['progressions'] );
 	check( 'daily completions = goal_completed count', null !== $row_101 && 1 === (int) $row_101['completions'] );
 	check( 'daily conversions = distinct attributed orders', null !== $row_101 && 1 === (int) $row_101['conversions'] );
 	check( 'daily revenue = influenced order totals', null !== $row_101 && close( 1050000, $row_101['revenue'] ) );
 	check( 'daily incremental revenue = direct incremental', null !== $row_101 && close( 350000, $row_101['incremental_revenue'] ) );
-	check( 'daily reward cost from the completed goal', null !== $row_101 && close( 50, $row_101['reward_cost'] ) );
+	check( 'daily reward cost from the completed mission', null !== $row_101 && close( 50, $row_101['reward_cost'] ) );
 	check( 'daily profit stored as 0 without margin data', null !== $row_101 && close( 0, $row_101['estimated_profit'] ) );
 
 	$row_202 = $wpdb->get_row(
 		$wpdb->prepare(
-			"SELECT * FROM {$daily_table} WHERE report_date = %s AND goal_id = %d",
+			"SELECT * FROM {$daily_table} WHERE report_date = %s AND mission_id = %d",
 			'2026-08-05',
 			202
 		),
 		ARRAY_A
 	);
 
-	check( 'daily row for the assisted goal exists', null !== $row_202 );
-	check( 'assisted goal daily views counted', null !== $row_202 && 1 === (int) $row_202['views'] );
-	check( 'assisted goal daily revenue = order total', null !== $row_202 && close( 800000, $row_202['revenue'] ) );
-	check( 'assisted goal daily incremental is zero', null !== $row_202 && close( 0, $row_202['incremental_revenue'] ) );
+	check( 'daily row for the assisted mission exists', null !== $row_202 );
+	check( 'assisted mission daily views counted', null !== $row_202 && 1 === (int) $row_202['views'] );
+	check( 'assisted mission daily revenue = order total', null !== $row_202 && close( 800000, $row_202['revenue'] ) );
+	check( 'assisted mission daily incremental is zero', null !== $row_202 && close( 0, $row_202['incremental_revenue'] ) );
 
 	// --- Idempotency: re-aggregating the day replaces, never duplicates. ---
 	$aggregator->aggregate_revenue_day( '2026-08-05' );
 	$after_repeat = (int) $wpdb->get_var(
 		$wpdb->prepare( "SELECT COUNT(*) FROM {$daily_table} WHERE report_date = %s", '2026-08-05' )
 	);
-	check( 're-aggregation keeps exactly one row per goal', 2 === $after_repeat );
+	check( 're-aggregation keeps exactly one row per mission', 2 === $after_repeat );
 
 	// --- Bounded catch-up. ---
 	update_option( DailyAggregator::LAST_AGGREGATED_OPTION, '2026-08-01', false );
@@ -312,10 +312,10 @@ try {
 	// --- Upsell stats rebuild. ---
 	// Non-order events store order_id as NULL (the tracker normalizes 0 →
 	// NULL so the order_dedup unique key never collapses them).
-	$upsell = function ( $type, $product_id, $order_id, $cart, $created_at, $goal_id = 101 ) use ( $wpdb, $upsell_table, $session_a ) {
+	$upsell = function ( $type, $product_id, $order_id, $cart, $created_at, $mission_id = 101 ) use ( $wpdb, $upsell_table, $session_a ) {
 		$wpdb->insert( $upsell_table, array(
 			'event_type' => $type,
-			'goal_id'    => $goal_id,
+			'mission_id'    => $mission_id,
 			'product_id' => $product_id,
 			'order_id'   => $order_id > 0 ? $order_id : null,
 			'session_id' => $session_a,
@@ -363,12 +363,12 @@ try {
 	$trend = $repo->daily_trend( array( 'from' => '2026-08-05', 'to' => '2026-08-05' ) );
 	check( 'daily trend returns the aggregated bucket', 1 === count( $trend ) );
 	check( 'trend bucket carries the aggregated views', 1 === count( $trend ) && 2 === (int) $trend[0]['views'] );
-	check( 'trend bucket sums revenue across goals', 1 === count( $trend ) && close( 1850000, $trend[0]['revenue'] ) );
+	check( 'trend bucket sums revenue across missions', 1 === count( $trend ) && close( 1850000, $trend[0]['revenue'] ) );
 	check( 'trend bucket sums incremental revenue', 1 === count( $trend ) && close( 350000, $trend[0]['incremental_revenue'] ) );
 
-	// Goal-scoped trend.
-	$goal_trend = $repo->daily_trend( array( 'goal_id' => 101, 'from' => '2026-08-05', 'to' => '2026-08-05' ) );
-	check( 'goal-scoped trend filters by goal', 1 === count( $goal_trend ) && 1 === (int) $goal_trend[0]['views'] && close( 50, $goal_trend[0]['reward_cost'] ) );
+	// Mission-scoped trend.
+	$mission_trend = $repo->daily_trend( array( 'mission_id' => 101, 'from' => '2026-08-05', 'to' => '2026-08-05' ) );
+	check( 'mission-scoped trend filters by mission', 1 === count( $mission_trend ) && 1 === (int) $mission_trend[0]['views'] && close( 50, $mission_trend[0]['reward_cost'] ) );
 
 	// Today's live merge (window reaching today pulls the live bucket).
 	$today_trend = $repo->daily_trend( array( 'from' => $today, 'to' => $today ) );
@@ -393,15 +393,15 @@ try {
 
 	// overview merges the live attribution summary + AOV + shipping.
 	$overview = $repo->overview( array( 'from' => '2026-08-05', 'to' => '2026-08-05' ) );
-	check( 'overview exposes the attribution summary', isset( $overview['summary'] ) && close( 350000, $overview['summary']['goal_driven_revenue'] ) );
+	check( 'overview exposes the attribution summary', isset( $overview['summary'] ) && close( 350000, $overview['summary']['mission_driven_revenue'] ) );
 	check( 'overview exposes incremental cart value', isset( $overview['incremental_cart_value'] ) && isset( $overview['incremental_cart_value']['average'] ) );
 	check( 'overview exposes AOV analysis', isset( $overview['aov'] ) && isset( $overview['aov']['exposed_aov'] ) );
 	check( 'overview exposes shipping stats', isset( $overview['shipping'] ) && isset( $overview['shipping']['available'] ) );
 
-	// goal_performance rows.
-	$performance = $repo->goal_performance( array( 'goal_id' => 101, 'from' => '2026-08-05', 'to' => '2026-08-05' ) );
-	check( 'goal performance returns the goal row', 1 === count( $performance ) && 101 === (int) $performance[0]['goal_id'] );
-	check( 'goal performance exposes the funnel', 1 === count( $performance ) && 1 === (int) $performance[0]['views'] && 1 === (int) $performance[0]['completed'] );
+	// mission_performance rows.
+	$performance = $repo->mission_performance( array( 'mission_id' => 101, 'from' => '2026-08-05', 'to' => '2026-08-05' ) );
+	check( 'mission performance returns the mission row', 1 === count( $performance ) && 101 === (int) $performance[0]['mission_id'] );
+	check( 'mission performance exposes the funnel', 1 === count( $performance ) && 1 === (int) $performance[0]['views'] && 1 === (int) $performance[0]['completed'] );
 
 	// --- Caching. ---
 	$transient_rows = (int) $wpdb->get_var(
@@ -421,7 +421,7 @@ try {
 	add_filter( 'faracart_revenue_cache_enabled', '__return_false' );
 	$fresh = $repo->overview( array( 'from' => '2026-08-05', 'to' => '2026-08-05' ) );
 	remove_all_filters( 'faracart_revenue_cache_enabled' );
-	check( 'cache bypass still computes the overview', isset( $fresh['summary'] ) && close( 350000, $fresh['summary']['goal_driven_revenue'] ) );
+	check( 'cache bypass still computes the overview', isset( $fresh['summary'] ) && close( 350000, $fresh['summary']['mission_driven_revenue'] ) );
 
 	$version_bypass = (int) get_option( RevenueRepository::CACHE_VERSION_OPTION, 1 );
 	check( 'cache bypass writes no new version', $version_bypass === $version_after );
@@ -441,26 +441,26 @@ try {
 	check( 'aggregation run fires the aggregated action', in_array( 'aggregated', $fired, true ) );
 	check( 'aggregation run invalidates the revenue cache', $v2 === $v1 + 1 );
 
-	// --- GoalRepository fires faracart_goals_changed on CRUD. ---
+	// --- MissionRepository fires faracart_missions_changed on CRUD. ---
 	$changed = array();
-	add_action( 'faracart_goals_changed', function ( $goal_id ) use ( &$changed ) {
-		$changed[] = (int) $goal_id;
+	add_action( 'faracart_missions_changed', function ( $mission_id ) use ( &$changed ) {
+		$changed[] = (int) $mission_id;
 	} );
 
-	$new_id = $goals_repo->create( array(
-		'name'   => 'P33 cache-invalidation goal',
+	$new_id = $missions_repo->create( array(
+		'name'   => 'P33 cache-invalidation mission',
 		'type'   => 'amount',
 		'target' => 500000,
 	) );
 
-	$goals_repo->update( $new_id, array( 'name' => 'P33 renamed goal' ) );
-	$goals_repo->delete( $new_id );
+	$missions_repo->update( $new_id, array( 'name' => 'P33 renamed mission' ) );
+	$missions_repo->delete( $new_id );
 
-	remove_all_actions( 'faracart_goals_changed' );
+	remove_all_actions( 'faracart_missions_changed' );
 
-	check( 'goal create fires faracart_goals_changed', in_array( $new_id, $changed, true ) );
-	check( 'goal update fires faracart_goals_changed', 3 === count( $changed ) );
-	check( 'goal delete fires faracart_goals_changed', $new_id === end( $changed ) );
+	check( 'mission create fires faracart_missions_changed', in_array( $new_id, $changed, true ) );
+	check( 'mission update fires faracart_missions_changed', 3 === count( $changed ) );
+	check( 'mission delete fires faracart_missions_changed', $new_id === end( $changed ) );
 
 	// Order-status invalidation is wired through the repository's registered
 	// callback (firing the real hook with a fake order id crashes WC core
@@ -519,8 +519,8 @@ check( 'fixture attribution rows removed by rollback', 0 === $attrib_after );
 $last_option = get_option( DailyAggregator::LAST_AGGREGATED_OPTION, '' );
 check( 'last-aggregated option restored after rollback', (string) $last_option === (string) $prev_last_agg );
 
-$goals_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$goals_table} WHERE id IN (101, 202)" );
-check( 'fixture goals removed by rollback', 0 === $goals_after );
+$missions_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table} WHERE id IN (101, 202)" );
+check( 'fixture missions removed by rollback', 0 === $missions_after );
 
 // ---------------------------------------------------------------------------
 // Summary

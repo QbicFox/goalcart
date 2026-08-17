@@ -27,7 +27,7 @@ so a classic + block hybrid page can never show the widget twice.
 | Surface | Behavior | Where |
 |---|---|---|
 | Variable products | Categories resolve from the **parent** product (WooCommerce convention) | `CartContext::from_cart()` + `CartIntegration::load_categories()` |
-| Product variations | `variation_id` preserved on the context item; product goals match by the **effective** id (variation → parent fallback) | `Goals\CartItem::effective_product_id()` |
+| Product variations | `variation_id` preserved on the context item; product missions match by the **effective** id (variation → parent fallback) | `Missions\CartItem::effective_product_id()` |
 | Coupons | Cart-order coupon apply/remove invalidate the memoized context; discount bases use line totals | `CartIntegration` lifecycle hooks; `CartContext::from_cart()` |
 | Sale prices | `calculation_include_sale` drops on-sale products from the snapshot | `settings-test` §3.4 |
 | Taxes | `calculation_include_tax` folds line taxes into money bases | `settings-test` §3.1 |
@@ -42,7 +42,7 @@ so a classic + block hybrid page can never show the widget twice.
   with the store's existing shipping zones and methods; the store's own
   `free_shipping` method settings are never modified.
 - Multiple shipping methods: each active reward is matched per
-  method-instance spec, so one goal can free one method while another stays
+  method-instance spec, so one mission can free one method while another stays
   paid.
 
 ## 4. Users & Orders (HPOS)
@@ -51,7 +51,7 @@ so a classic + block hybrid page can never show the widget twice.
   carts; the frontend `/progress` REST endpoint is public by design (guest
   shoppers must read their own progress) and rate limited per IP.
 - **Logged-in users** — `user_id` is captured on the snapshot; customer
-  conditions in goal builder evaluate against it.
+  conditions in mission builder evaluate against it.
 - **HPOS (custom order tables)** — the plugin declares compatibility via the
   public `Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility()`
   in `Plugin::declare_feature_compatibility()` (hooked to

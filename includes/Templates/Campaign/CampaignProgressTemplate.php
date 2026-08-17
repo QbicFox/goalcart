@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * The second Campaign-scoped template (Phase 32, campaign templates): a
  * single overall progress readout for the whole campaign — the campaign
  * name, a "2 of 4 milestones" counter and one bar driven by the top
- * milestone — instead of the per-goal cards or the milestone ladder. The
+ * milestone — instead of the per-mission cards or the milestone ladder. The
  * template's schema lives here; the React admin renderer and the
  * storefront JS render by the same id, so adding templates stays a
  * registration-only change (see TemplateRegistry).

@@ -15,13 +15,13 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class Tracker
  *
- * Phase 16 (Analytics Foundation) — records the seven goal-cart events
+ * Phase 16 (Analytics Foundation) — records the seven mission-cart events
  * into the `analytics_events` table:
  *
- *  - goal_impression          a goal widget was shown to a shopper
+ *  - goal_impression          a mission widget was shown to a shopper
  *  - goal_progress            the widget reported a progress percentage
- *  - goal_completed           a goal's target was reached (no reward)
- *  - reward_activated         a goal's target was reached (with reward)
+ *  - goal_completed           a mission's target was reached (no reward)
+ *  - reward_activated         a mission's target was reached (with reward)
  *  - suggestion_impression    a suggested product was shown
  *  - suggestion_clicked       a shopper clicked a suggested product
  *  - suggested_product_added  a suggested product was added to the cart
@@ -35,7 +35,7 @@ defined( 'ABSPATH' ) || exit;
  * plugin's add-to-cart funnel attribution.
  *
  * Sessions are anonymous (Session cookie) and every event row stores
- * only aggregate numbers (cart value, percentage) plus product/goal ids
+ * only aggregate numbers (cart value, percentage) plus product/mission ids
  * — never IPs, user agents, emails or other PII (P16-T04).
  *
  * The REST controller checks tracking_enabled() (master toggle + filter);
@@ -150,7 +150,7 @@ final class Tracker {
 	 *
 	 * Phase 18 (Settings → Performance → analytics): the `analytics_enabled`
 	 * setting is the dedicated event-collection toggle — stores can keep
-	 * the goals running while switching the analytics pipeline off (e.g.
+	 * the missions running while switching the analytics pipeline off (e.g.
 	 * consent concerns). Used by the REST handler and the add-to-cart hook
 	 * (both can run outside plain frontend page views), mirroring the
 	 * reference which checks only the settings toggles for AJAX/add-to-cart
@@ -238,12 +238,12 @@ final class Tracker {
 	 * Record an analytics event.
 	 *
 	 * The event type must be whitelisted and the master toggle on. The
-	 * row stores only aggregate data: goal/campaign/product/order ids,
+	 * row stores only aggregate data: mission/campaign/product/order ids,
 	 * the cart value at event time, and a scalar-only meta JSON (e.g.
 	 * percentage, quantity) — never IPs or other PII.
 	 *
 	 * @param string               $event_type One of the EVENT_* constants.
-	 * @param array<string, mixed> $context    Optional context: goal_id,
+	 * @param array<string, mixed> $context    Optional context: mission_id,
 	 *                                         campaign_id, product_id,
 	 *                                         order_id, cart_value, meta,
 	 *                                         session_id.
@@ -258,7 +258,7 @@ final class Tracker {
 			? $context['session_id']
 			: $this->session->id();
 
-		$goal_id     = isset( $context['goal_id'] ) ? absint( $context['goal_id'] ) : 0;
+		$mission_id     = isset( $context['mission_id'] ) ? absint( $context['mission_id'] ) : 0;
 		$campaign_id = isset( $context['campaign_id'] ) ? absint( $context['campaign_id'] ) : 0;
 		$product_id  = isset( $context['product_id'] ) ? absint( $context['product_id'] ) : 0;
 		$order_id    = isset( $context['order_id'] ) ? absint( $context['order_id'] ) : 0;
@@ -275,7 +275,7 @@ final class Tracker {
 		$table = \FaraCart\Database\Schema::table( 'analytics_events' );
 
 		$data = array(
-			'goal_id'     => $goal_id > 0 ? $goal_id : null,
+			'mission_id'     => $mission_id > 0 ? $mission_id : null,
 			'campaign_id' => $campaign_id > 0 ? $campaign_id : null,
 			'event_type'  => $event_type,
 			'session_id'  => $session_id,
@@ -291,8 +291,8 @@ final class Tracker {
 
 		$inserted = $wpdb->insert( $table, $data, $formats );
 
-		// FK resilience: analytics_events references goals/campaigns with
-		// ON DELETE SET NULL, but a goal deleted between the impression and
+		// FK resilience: analytics_events references missions/campaigns with
+		// ON DELETE SET NULL, but a mission deleted between the impression and
 		// this event report would make the INSERT fail and silently drop
 		// the event. Retry once without the FK ids so the event survives
 		// (the same outcome the FK's SET NULL implies for deletion). The
@@ -302,10 +302,10 @@ final class Tracker {
 		// which is the priority).
 		if (
 			! $inserted
-			&& ( $goal_id > 0 || $campaign_id > 0 )
+			&& ( $mission_id > 0 || $campaign_id > 0 )
 			&& false !== stripos( (string) $wpdb->last_error, 'foreign key' )
 		) {
-			$data['goal_id']     = null;
+			$data['mission_id']     = null;
 			$data['campaign_id'] = null;
 			$inserted = $wpdb->insert( $table, $data, $formats );
 		}
@@ -363,8 +363,8 @@ final class Tracker {
 	 *
 	 * The product counts as a suggestion conversion when the session saw
 	 * a suggestion_impression for it within the attribution window. The
-	 * goal/campaign from that impression carry over, so the analytics
-	 * dashboard can measure suggestion add-to-cart rate per goal.
+	 * mission/campaign from that impression carry over, so the analytics
+	 * dashboard can measure suggestion add-to-cart rate per mission.
 	 *
 	 * @param int $product_id Product ID.
 	 * @return int Event row id, or 0 when not attributable.
@@ -387,7 +387,7 @@ final class Tracker {
 
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
-				"SELECT goal_id, campaign_id FROM {$events}
+				"SELECT mission_id, campaign_id FROM {$events}
 				 WHERE session_id = %s AND event_type = %s AND product_id = %d AND created_at >= %s
 				 ORDER BY created_at DESC, id DESC
 				 LIMIT 1",
@@ -407,7 +407,7 @@ final class Tracker {
 			self::EVENT_SUGGESTED_PRODUCT_ADDED,
 			array(
 				'product_id'  => $product_id,
-				'goal_id'     => (int) $row['goal_id'],
+				'mission_id'     => (int) $row['mission_id'],
 				'campaign_id' => (int) $row['campaign_id'],
 				'session_id'  => $session_id,
 			)
