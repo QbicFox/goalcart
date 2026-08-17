@@ -341,7 +341,22 @@ $providers_src = read_source( $root . '/admin-app/src/providers/AppProviders.tsx
 check( 'Emotion cache RTL-flips via the stylis plugin', false !== strpos( $providers_src, 'stylis-plugin-rtl' ) );
 
 $frontend_css = read_source( $root . '/assets/css/frontend.css' );
-check( 'storefront CSS has no physical left/right properties', ! preg_match( '/(?<![a-z-])(?:left|right)\s*:/i', $frontend_css ) );
+
+// The floating widget is the one intentional exception to the physical
+// left/right rule: its position axes are PHYSICAL sides (left/right ×
+// top/center/bottom) that must keep their visual result in RTL — the
+// admin picks a side explicitly, so it must not flip like a logical
+// start/end would. Strip that block before the check.
+$floating_marker = '/* ------------------------------------------------------------------ *' . "\n * Floating widget (floating goals/campaigns button + drawer)";
+$floating_start  = strpos( $frontend_css, $floating_marker );
+
+if ( false !== $floating_start ) {
+	$next_header = strpos( $frontend_css, '/* ------------------------------------------------------------------ *', $floating_start + strlen( $floating_marker ) );
+	$frontend_css = substr( $frontend_css, 0, $floating_start )
+		. ( false !== $next_header ? substr( $frontend_css, $next_header ) : '' );
+}
+
+check( 'storefront CSS has no physical left/right properties (floating widget excluded — physical sides by design)', ! preg_match( '/(?<![a-z-])(?:left|right)\s*:/i', $frontend_css ) );
 
 // ---------------------------------------------------------------------------
 // 7. Admin locale-aware Intl formatting + script translations

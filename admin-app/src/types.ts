@@ -477,6 +477,31 @@ export type FrontendPosition = 'top' | 'bottom';
 /** Storefront mobile behavior (Phase 18, frontend_mobile). */
 export type MobileBehavior = 'show' | 'hide';
 
+/** Floating-widget horizontal anchor — a PHYSICAL side (left | right). */
+export type FloatingHorizontal = 'left' | 'right';
+
+/** Floating-widget vertical anchor (top | center | bottom). */
+export type FloatingVertical = 'top' | 'center' | 'bottom';
+
+/** Floating-widget drawer opening direction ('auto' = toward screen center). */
+export type FloatingDrawerDirection = 'auto' | 'left' | 'right' | 'up' | 'down';
+
+/**
+ * One floating-widget position object (desktop or mobile). The axes are
+ * physical sides the admin picks explicitly — they must keep their
+ * visual result in RTL, so they are never logical start/end.
+ */
+export interface FloatingPosition {
+  /** The physical side the button hugs (left | right). */
+  horizontal: FloatingHorizontal;
+  /** The physical edge/axis (top | center | bottom). */
+  vertical: FloatingVertical;
+  /** Horizontal offset in px from the chosen side. */
+  offset_x: number;
+  /** Vertical offset in px from the chosen edge (or the center axis). */
+  offset_y: number;
+}
+
 /** Reward-type filter on the analytics dashboard ('' = all rewards). */
 export type AnalyticsRewardFilter =
   '' | 'free_shipping' | 'percent_discount' | 'fixed_discount' | 'free_gift' | 'coupon';
@@ -680,6 +705,25 @@ export interface FaraCartSettings {
   sticky_countdown: boolean;
   sticky_suggestions: boolean;
   sticky_display: 'compact' | 'full';
+
+  // Floating widget (floating goals/campaigns button + drawer). The
+  // position axes are physical sides (left/right × top/center/bottom)
+  // plus pixel offsets; mobile can reuse the desktop position
+  // (floating_mobile_use_desktop) or pin its own so the button never
+  // clashes with mobile UI.
+  floating_enabled: boolean;
+  floating_desktop: FloatingPosition;
+  floating_mobile: FloatingPosition;
+  floating_mobile_use_desktop: boolean;
+  floating_show_desktop: boolean;
+  floating_show_mobile: boolean;
+  floating_button_size: number;
+  floating_animation: boolean;
+  floating_drawer_direction: FloatingDrawerDirection;
+  /** Custom button glyph/emoji ('' = the default cart glyph). */
+  floating_icon: string;
+  /** Custom button tooltip/label ('' = the default label). */
+  floating_label: string;
 
   // Pluggable template engine (Phase 12 → engine): per-scope default
   // template ids, per-template default appearance and schema versions.

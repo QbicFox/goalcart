@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Controller, useForm, type Control, type Path } from 'react-hook-form';
 import BuildIcon from '@mui/icons-material/Build';
 import CalculateIcon from '@mui/icons-material/Calculate';
+import SmartButtonIcon from '@mui/icons-material/SmartButton';
 import SpeedIcon from '@mui/icons-material/Speed';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import TuneIcon from '@mui/icons-material/Tune';
@@ -12,7 +13,9 @@ import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import Chip from '@mui/material/Chip';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Grid from '@mui/material/Grid';
 import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import Switch from '@mui/material/Switch';
@@ -21,11 +24,23 @@ import Tabs from '@mui/material/Tabs';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useRef, useState } from 'react';
+import { useWatch } from 'react-hook-form';
 
 import { fetchSettingsEnvelope, saveSettings } from '../api/settings';
 import { setBootCurrency, setBootCurrencyDisplay } from '../boot';
+import FloatingWidgetPreview from '../components/floating/FloatingWidgetPreview';
+import {
+  FLOATING_PRESETS,
+  presetForPosition,
+  resolveFloatingPosition,
+  type FloatingDevice,
+  type FloatingDraft,
+  type FloatingPosition,
+  type FloatingPreset,
+} from '../components/floating/floating';
 import SectionCard from '../components/goal-builder/SectionCard';
 import PageContainer from '../components/PageContainer';
+import { tokensFromSettings } from '../components/preview/types';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { useStickyBarActions } from '../providers/ActionBarProvider';
 import { useFullscreen } from '../providers/FullscreenProvider';
@@ -251,18 +266,162 @@ function HookRow({ type, hook, description }: { type: string; hook: string; desc
   );
 }
 
+/**
+ * One floating-widget position card (desktop or mobile): the position
+ * preset, the horizontal/vertical anchors and the pixel offsets.
+ *
+ * The preset select derives its value from the current position (it shows
+ * 'Custom' when the position is not one of the six presets) and applies
+ * the preset's anchors via setValue — the offset fields stay untouched
+ * so a preset never clobbers the admin's fine-tuning.
+ */
+function FloatingPositionCard({
+  device,
+  control,
+  position,
+  onApplyPreset,
+}: {
+  device: FloatingDevice;
+  control: Control<FaraCartSettings>;
+  position: FloatingPosition;
+  onApplyPreset: (preset: FloatingPreset) => void;
+}) {
+  const base = device === 'desktop' ? 'floating_desktop' : 'floating_mobile';
+  const preset = presetForPosition(position);
+
+  return (
+    <Paper variant="outlined" sx={{ p: 2.5, height: '100%' }}>
+      <Stack spacing={2}>
+        <Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+            {device === 'desktop' ? __('Desktop', 'faracart') : __('Mobile', 'faracart')}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {device === 'desktop'
+              ? __('The button position on desktop screens.', 'faracart')
+              : __(
+                  'The button position on mobile screens — handy when the button must clear mobile navigation or sticky cart buttons.',
+                  'faracart'
+                )}
+          </Typography>
+        </Box>
+
+        <TextField
+          select
+          size="small"
+          fullWidth
+          label={__('Position preset', 'faracart')}
+          value={preset}
+          onChange={(event) => {
+            const next = FLOATING_PRESETS.find(
+              (candidate) => candidate.value === event.target.value
+            );
+
+            if (next) {
+              onApplyPreset(next);
+            }
+          }}
+          helperText={__(
+            'A quick position; the horizontal/vertical fields and offsets below fine-tune it.',
+            'faracart'
+          )}
+          sx={{ maxWidth: 360 }}
+        >
+          <MenuItem value="" disabled>
+            {__('Custom', 'faracart')}
+          </MenuItem>
+          {FLOATING_PRESETS.map((candidate) => (
+            <MenuItem key={candidate.value} value={candidate.value}>
+              {candidate.label}
+            </MenuItem>
+          ))}
+        </TextField>
+
+        <SelectField
+          control={control}
+          name={`${base}.horizontal` as Path<FaraCartSettings>}
+          label={__('Horizontal position', 'faracart')}
+          description={__(
+            'A physical side — the button keeps this exact side in RTL stores.',
+            'faracart'
+          )}
+          options={[
+            { value: 'left', label: __('Left', 'faracart') },
+            { value: 'right', label: __('Right', 'faracart') },
+          ]}
+        />
+        <SelectField
+          control={control}
+          name={`${base}.vertical` as Path<FaraCartSettings>}
+          label={__('Vertical position', 'faracart')}
+          description={__(
+            'Top and bottom offset from the matching edge; center positions the button on the viewport midline.',
+            'faracart'
+          )}
+          options={[
+            { value: 'top', label: __('Top', 'faracart') },
+            { value: 'center', label: __('Center', 'faracart') },
+            { value: 'bottom', label: __('Bottom', 'faracart') },
+          ]}
+        />
+
+        <Controller
+          control={control}
+          name={`${base}.offset_x` as Path<FaraCartSettings>}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              type="number"
+              size="small"
+              fullWidth
+              label={__('Horizontal offset (px)', 'faracart')}
+              helperText={__('Distance from the chosen side (0–200).', 'faracart')}
+              value={Number(field.value) || 0}
+              onChange={(event) => field.onChange(Number(event.target.value) || 0)}
+              slotProps={{ htmlInput: { min: 0, max: 200 } }}
+              sx={{ maxWidth: 360 }}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name={`${base}.offset_y` as Path<FaraCartSettings>}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              type="number"
+              size="small"
+              fullWidth
+              label={__('Vertical offset (px)', 'faracart')}
+              helperText={__(
+                'Distance from the chosen edge — or from the midline when the position is center (0–200).',
+                'faracart'
+              )}
+              value={Number(field.value) || 0}
+              onChange={(event) => field.onChange(Number(event.target.value) || 0)}
+              slotProps={{ htmlInput: { min: 0, max: 200 } }}
+              sx={{ maxWidth: 360 }}
+            />
+          )}
+        />
+      </Stack>
+    </Paper>
+  );
+}
+
 /* ------------------------------------------------------------------ *
- * Settings page (Phase 18: full surface in five tabs)
+ * Settings page (Phase 18: full surface in six tabs)
  * ------------------------------------------------------------------ */
 
 /**
  * Settings (Phase 18 — the full configuration surface).
  *
- * Five tabs over a single react-hook-form instance: General, Frontend,
- * Goal Calculation, Performance and Advanced. Every control maps 1:1 to
- * a persisted setting key validated server-side by the Phase 7 REST
- * schema; saving updates the query data so the form re-syncs, and the
- * full-screen toggle still previews live through FullscreenProvider.
+ * Six tabs over a single react-hook-form instance: General, Frontend,
+ * Goal Calculation, Performance, Advanced and Floating. Every control
+ * maps 1:1 to a persisted setting key validated server-side by the
+ * Phase 7 REST schema; saving updates the query data so the form
+ * re-syncs, and the full-screen toggle still previews live through
+ * FullscreenProvider.
  *
  * Mirrors the reference plugin's tabbed Settings page.
  */
@@ -291,10 +450,18 @@ export default function Settings() {
   // after saves (the mutation's setQueryData below updates `values`, which
   // resets the form — no manual reset needed). The defaultValues mirror the
   // PHP Settings::defaults() (keep them in sync if those change).
-  const { control, handleSubmit } = useForm<FaraCartSettings>({
+  const { control, handleSubmit, setValue } = useForm<FaraCartSettings>({
     defaultValues: { enabled: true, fullscreen_dashboard: true },
     values: data,
   });
+
+  // Live form values: the Floating tab's preview reads the current draft
+  // (including the appearance tokens edited on other tabs), so every
+  // change renders immediately without a page reload.
+  const watched = useWatch({ control }) as Partial<FaraCartSettings>;
+  const floatingDraft = watched as FloatingDraft;
+  const resolvedFloatingPosition = resolveFloatingPosition(floatingDraft);
+  const floatingMobileUseDesktop = floatingDraft.floating_mobile_use_desktop !== false;
 
   const saveMutation = useMutation({
     mutationFn: (values: FaraCartSettings) => saveSettings(values),
@@ -400,6 +567,11 @@ export default function Settings() {
             />
             <Tab icon={<SpeedIcon />} iconPosition="start" label={__('Performance', 'faracart')} />
             <Tab icon={<BuildIcon />} iconPosition="start" label={__('Advanced', 'faracart')} />
+            <Tab
+              icon={<SmartButtonIcon />}
+              iconPosition="start"
+              label={__('Floating', 'faracart')}
+            />
           </Tabs>
 
           {tab === 0 && (
@@ -858,6 +1030,208 @@ export default function Settings() {
                   </Box>
                 </SectionCard>
               )}
+            </Stack>
+          )}
+
+          {tab === 5 && (
+            <Stack spacing={2.5}>
+              <SectionCard
+                title={__('Floating widget', 'faracart')}
+                description={__(
+                  'A floating goals/campaigns button with a progress drawer — always reachable while shopping.',
+                  'faracart'
+                )}
+              >
+                <Stack spacing={2}>
+                  <BooleanField
+                    control={control}
+                    name="floating_enabled"
+                    label={__('Enable floating widget', 'faracart')}
+                    description={__(
+                      'Show the floating button on widget pages whenever the cart has an eligible goal.',
+                      'faracart'
+                    )}
+                  />
+                  <Stack direction="row" useFlexGap sx={{ flexWrap: 'wrap', gap: 2 }}>
+                    <Box sx={{ minWidth: 280, flex: 1 }}>
+                      <BooleanField
+                        control={control}
+                        name="floating_show_desktop"
+                        label={__('Show on desktop', 'faracart')}
+                        description={__('Display the button on desktop screens.', 'faracart')}
+                      />
+                    </Box>
+                    <Box sx={{ minWidth: 280, flex: 1 }}>
+                      <BooleanField
+                        control={control}
+                        name="floating_show_mobile"
+                        label={__('Show on mobile', 'faracart')}
+                        description={__('Display the button on mobile screens.', 'faracart')}
+                      />
+                    </Box>
+                  </Stack>
+                </Stack>
+              </SectionCard>
+
+              <SectionCard
+                title={__('Position & display', 'faracart')}
+                description={__(
+                  'Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons.',
+                  'faracart'
+                )}
+              >
+                <Stack spacing={2}>
+                  <BooleanField
+                    control={control}
+                    name="floating_mobile_use_desktop"
+                    label={__('Use the desktop position on mobile', 'faracart')}
+                    description={__(
+                      'When on, mobile reuses the desktop position and the separate mobile fields are hidden.',
+                      'faracart'
+                    )}
+                  />
+                  <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      <FloatingPositionCard
+                        device="desktop"
+                        control={control}
+                        position={resolvedFloatingPosition.desktop}
+                        onApplyPreset={(preset) => {
+                          setValue('floating_desktop.horizontal', preset.horizontal);
+                          setValue('floating_desktop.vertical', preset.vertical);
+                        }}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6 }}>
+                      {floatingMobileUseDesktop ? (
+                        <Paper
+                          variant="outlined"
+                          sx={{
+                            p: 2.5,
+                            height: '100%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            bgcolor: 'action.hover',
+                          }}
+                        >
+                          <Typography variant="body2" color="text.secondary" align="center">
+                            {__(
+                              'Mobile reuses the desktop position. Turn the toggle above off to configure a separate mobile position.',
+                              'faracart'
+                            )}
+                          </Typography>
+                        </Paper>
+                      ) : (
+                        <FloatingPositionCard
+                          device="mobile"
+                          control={control}
+                          position={resolvedFloatingPosition.mobile}
+                          onApplyPreset={(preset) => {
+                            setValue('floating_mobile.horizontal', preset.horizontal);
+                            setValue('floating_mobile.vertical', preset.vertical);
+                          }}
+                        />
+                      )}
+                    </Grid>
+                  </Grid>
+                </Stack>
+              </SectionCard>
+
+              <SectionCard
+                title={__('Display', 'faracart')}
+                description={__('The button look and the drawer behavior.', 'faracart')}
+              >
+                <Stack spacing={2}>
+                  <Controller
+                    control={control}
+                    name="floating_button_size"
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        type="number"
+                        size="small"
+                        fullWidth
+                        label={__('Button size (px)', 'faracart')}
+                        helperText={__('The round button diameter (32–96).', 'faracart')}
+                        value={Number(field.value) || 56}
+                        onChange={(event) => field.onChange(Number(event.target.value) || 56)}
+                        slotProps={{ htmlInput: { min: 32, max: 96 } }}
+                        sx={{ maxWidth: 360 }}
+                      />
+                    )}
+                  />
+                  <SelectField
+                    control={control}
+                    name="floating_drawer_direction"
+                    label={__('Drawer opening direction', 'faracart')}
+                    description={__(
+                      'Which way the progress drawer opens from the button. Auto opens toward the screen center and never points off-screen.',
+                      'faracart'
+                    )}
+                    options={[
+                      { value: 'auto', label: __('Auto (toward screen center)', 'faracart') },
+                      { value: 'left', label: __('Left', 'faracart') },
+                      { value: 'right', label: __('Right', 'faracart') },
+                      { value: 'up', label: __('Up', 'faracart') },
+                      { value: 'down', label: __('Down', 'faracart') },
+                    ]}
+                  />
+                  <BooleanField
+                    control={control}
+                    name="floating_animation"
+                    label={__('Animate the button and drawer', 'faracart')}
+                    description={__(
+                      'Smooth open/close transitions for the floating button and its drawer.',
+                      'faracart'
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="floating_icon"
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        size="small"
+                        fullWidth
+                        label={__('Button icon', 'faracart')}
+                        helperText={__(
+                          'A custom glyph/emoji shown inside the button (leave empty for the default cart icon).',
+                          'faracart'
+                        )}
+                        sx={{ maxWidth: 360 }}
+                      />
+                    )}
+                  />
+                  <Controller
+                    control={control}
+                    name="floating_label"
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        size="small"
+                        fullWidth
+                        label={__('Button label / tooltip', 'faracart')}
+                        helperText={__(
+                          'The accessible label and tooltip for the button (leave empty for the default).',
+                          'faracart'
+                        )}
+                        sx={{ maxWidth: 360 }}
+                      />
+                    )}
+                  />
+                </Stack>
+              </SectionCard>
+
+              <SectionCard
+                title={__('Live preview', 'faracart')}
+                description={__(
+                  'The floating button exactly as it will appear — position, size, icon and drawer direction update live.',
+                  'faracart'
+                )}
+              >
+                <FloatingWidgetPreview draft={floatingDraft} tokens={tokensFromSettings(watched)} />
+              </SectionCard>
             </Stack>
           )}
         </Stack>

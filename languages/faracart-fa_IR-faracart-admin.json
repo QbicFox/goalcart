@@ -130,8 +130,14 @@
             "A connected ladder of the campaign milestones — dots, targets and rewards — with an overall progress bar.": [
                 "نردبانی متصل از نقاط عطف کمپین — نقاط، اهداف و پاداش‌ها — همراه با نوار پیشرفت کلی."
             ],
+            "A custom glyph\/emoji shown inside the button (leave empty for the default cart icon).": [
+                "نمادی سفارشی داخل دکمه نمایش داده می‌شود (برای آیکن پیش‌فرض سبد خرید، خالی بگذارید)."
+            ],
             "A deterministic coupon is created per customer.": [
                 "برای هر مشتری یک کوپن قطعی ایجاد می‌شود."
+            ],
+            "A floating goals\/campaigns button with a progress drawer — always reachable while shopping.": [
+                "دکمهٔ شناور اهداف\/کمپین‌ها با کشوی پیشرفت — همیشه هنگام خرید در دسترس است."
             ],
             "A goal ladder of dots and targets, bar underneath.": [
                 "نردبانی از نقاط و اهداف با نوار زیر آن."
@@ -139,11 +145,17 @@
             "A goal target or an explicit remaining amount is required to rank upsells.": [
                 "برای رتبه‌بندی پیشنهاد خرید، به یک هدف یا مقدار باقیماندهٔ صریح نیاز است."
             ],
+            "A physical side — the button keeps this exact side in RTL stores.": [
+                "یک سمت فیزیکی — دکمه در فروشگاه‌های راست‌به‌چپ دقیقاً همین سمت را حفظ می‌کند."
+            ],
             "A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side.": [
                 "یک عدد صحیح مثبت. وقتی خریدار به این تعداد تکمیل برسد، تکمیل‌های بعدی (و پاداش‌ها) از سمت سرور مسدود می‌شوند."
             ],
             "A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion.": [
                 "یک سفارش واجد شرایط ووکامرس واقعاً به این هدف مرتبط شده — یک خرید، نه یک تکمیل هدف."
+            ],
+            "A quick position; the horizontal\/vertical fields and offsets below fine-tune it.": [
+                "یک موقعیت سریع؛ فیلدهای افقی\/عمودی و آفست‌های زیر آن را دقیق‌تر تنظیم می‌کنند."
             ],
             "A start later than the end means “after start OR before end” (crosses midnight).": [
                 "شروع بعد از پایان یعنی «بعد از شروع یا قبل از پایان» (گذر از نیمهشب)."
@@ -301,6 +313,9 @@
             "Animate progress updates": [
                 "انیمیشن به‌روزرسانی پیشرفت"
             ],
+            "Animate the button and drawer": [
+                "انیمیشن دکمه و کشو"
+            ],
             "Appear delay (seconds)": [
                 "تأخیر نمایش (ثانیه)"
             ],
@@ -369,6 +384,9 @@
             ],
             "Auto (store currency)": [
                 "خودکار (واحد پول فروشگاه)"
+            ],
+            "Auto (toward screen center)": [
+                "خودکار (به سمت مرکز صفحه)"
             ],
             "Auto-hide": [
                 "پنهانشدن خودکار"
@@ -463,11 +481,26 @@
             "Bottom": [
                 "پایین"
             ],
+            "Bottom left": [
+                "پایین چپ"
+            ],
+            "Bottom right": [
+                "پایین راست"
+            ],
             "Brand": [
                 "برند"
             ],
             "Brand attribute": [
                 "ویژگی برند"
+            ],
+            "Button icon": [
+                "آیکن دکمه"
+            ],
+            "Button label \/ tooltip": [
+                "برچسب \/ راهنمای دکمه"
+            ],
+            "Button size (px)": [
+                "اندازهٔ دکمه (پیکسل)"
             ],
             "CTR": [
                 "نرخ کلیک"
@@ -538,6 +571,15 @@
             "Celebration animation": [
                 "انیمیشن جشن"
             ],
+            "Center": [
+                "مرکز"
+            ],
+            "Center left": [
+                "مرکز چپ"
+            ],
+            "Center right": [
+                "مرکز راست"
+            ],
             "Cheapest first": [
                 "ارزانترین اول"
             ],
@@ -561,6 +603,9 @@
             ],
             "Clicks": [
                 "کلیک‌ها"
+            ],
+            "Close": [
+                "بستن"
             ],
             "Code (USD 100)": [
                 "کد (USD 100)"
@@ -772,6 +817,9 @@
             "Current target: %1$s": [
                 "آستانهٔ فعلی: %1$s"
             ],
+            "Custom": [
+                "سفارشی"
+            ],
             "Custom CSS": [
                 "CSS سفارشی"
             ],
@@ -934,8 +982,20 @@
             "Display locations": [
                 "مکان‌های نمایش"
             ],
+            "Display the button on desktop screens.": [
+                "نمایش دکمه در صفحه‌نمایش‌های دسکتاپ."
+            ],
+            "Display the button on mobile screens.": [
+                "نمایش دکمه در صفحه‌نمایش‌های موبایل."
+            ],
             "Distance": [
                 "فاصله"
+            ],
+            "Distance from the chosen edge — or from the midline when the position is center (0–200).": [
+                "فاصله از لبهٔ انتخابی — یا از خط وسط وقتی موقعیت «مرکز» است (۰–۲۰۰)."
+            ],
+            "Distance from the chosen side (0–200).": [
+                "فاصله از سمت انتخابی (۰–۲۰۰)."
             ],
             "Distinct orders associated with a goal in the selected period.": [
                 "سفارش‌های متمایز مرتبط با یک هدف در بازهٔ انتخابی."
@@ -948,6 +1008,12 @@
             ],
             "Distinct quantity": [
                 "تعداد متمایز"
+            ],
+            "Down": [
+                "پایین"
+            ],
+            "Drawer opening direction": [
+                "جهت باز شدن کشو"
             ],
             "Drives money-based goals (subtotal \/ total).": [
                 "اهداف مبتنی بر مبلغ (جمع فرعی \/ کل) را هدایت می‌کند."
@@ -1002,6 +1068,12 @@
             ],
             "Enable FaraCart": [
                 "فعال کردن فراکارت"
+            ],
+            "Enable floating widget": [
+                "فعال‌سازی ویجت شناور"
+            ],
+            "Enable the floating widget to preview it.": [
+                "برای پیش‌نمایش، ویجت شناور را فعال کنید."
             ],
             "Ended": [
                 "پایان‌یافته"
@@ -1113,6 +1185,12 @@
             ],
             "Fixed discount": [
                 "تخفیف ثابت"
+            ],
+            "Floating": [
+                "شناور"
+            ],
+            "Floating widget": [
+                "ویجت شناور"
             ],
             "Free gift": [
                 "هدیه رایگان"
@@ -1306,6 +1384,12 @@
             "History": [
                 "تاریخچه"
             ],
+            "Horizontal offset (px)": [
+                "آفست افقی (پیکسل)"
+            ],
+            "Horizontal position": [
+                "موقعیت افقی"
+            ],
             "How Estimated Profit becomes available": [
                 "چگونه سود تخمینی در دسترس می‌شود"
             ],
@@ -1474,6 +1558,12 @@
             "Leave empty to apply to the whole cart.": [
                 "برای اعمال روی کل سبد، خالی بگذارید."
             ],
+            "Left": [
+                "چپ"
+            ],
+            "Left\/right and top\/bottom are physical sides — the button stays exactly here in RTL stores.": [
+                "چپ\/راست و بالا\/پایین سمت‌های فیزیکی هستند — دکمه در فروشگاه‌های راست‌به‌چپ دقیقاً همین‌جا می‌ماند."
+            ],
             "Limit": [
                 "محدودیت"
             ],
@@ -1593,6 +1683,9 @@
             ],
             "Mobile behavior": [
                 "رفتار موبایل"
+            ],
+            "Mobile reuses the desktop position. Turn the toggle above off to configure a separate mobile position.": [
+                "موبایل از موقعیت دسکتاپ استفاده می‌کند. برای تنظیم موقعیت جداگانهٔ موبایل، کلید بالا را خاموش کنید."
             ],
             "Moderate data": [
                 "دادهٔ متوسط"
@@ -1921,11 +2014,20 @@
             "Position": [
                 "موقعیت"
             ],
+            "Position & display": [
+                "موقعیت و نمایش"
+            ],
+            "Position preset": [
+                "پیش‌تنظیم موقعیت"
+            ],
             "Preview": [
                 "پیش‌نمایش"
             ],
             "Preview %s": [
                 "پیش‌نمایش %s"
+            ],
+            "Preview device": [
+                "دستگاه پیش‌نمایش"
             ],
             "Preview item": [
                 "اقلام پیش‌نمایش"
@@ -2188,6 +2290,9 @@
             "Rewards and shipping costs were higher than the estimated incremental margin.": [
                 "هزینه‌های پاداش و ارسال بیشتر از حاشیهٔ افزایشی تخمینی بودند."
             ],
+            "Right": [
+                "راست"
+            ],
             "Ring": [
                 "حلقه"
             ],
@@ -2341,6 +2446,9 @@
             "Show milestone targets": [
                 "نمایش اهداف نقاط عطف"
             ],
+            "Show on desktop": [
+                "نمایش در دسکتاپ"
+            ],
             "Show on mobile": [
                 "نمایش در موبایل"
             ],
@@ -2355,6 +2463,9 @@
             ],
             "Show the first goal only": [
                 "فقط اولین هدف را نمایش بده"
+            ],
+            "Show the floating button on widget pages whenever the cart has an eligible goal.": [
+                "هرگاه سبد خرید هدفی واجد شرایط داشته باشد، دکمهٔ شناور را در صفحات ویجت نمایش بده."
             ],
             "Show the percentage in the center": [
                 "نمایش درصد در مرکز"
@@ -2422,6 +2533,9 @@
             "Smart upsells are disabled.": [
                 "پیشنهاد خرید هوشمند غیرفعال است."
             ],
+            "Smooth open\/close transitions for the floating button and its drawer.": [
+                "انتقال نرم باز و بسته شدن برای دکمهٔ شناور و کشوی آن."
+            ],
             "Some orders do not have complete cost information.": [
                 "برخی سفارش‌ها اطلاعات کامل هزینه ندارند."
             ],
@@ -2484,6 +2598,21 @@
             ],
             "Symbol ($100)": [
                 "نماد ($100)"
+            ],
+            "The accessible label and tooltip for the button (leave empty for the default).": [
+                "برچسب و راهنمای در دسترس دکمه (برای پیش‌فرض، خالی بگذارید)."
+            ],
+            "The button is hidden on this device (visibility disabled or the widget is off).": [
+                "دکمه در این دستگاه مخفی است (نمایش غیرفعال است یا ویجت خاموش است)."
+            ],
+            "The button look and the drawer behavior.": [
+                "ظاهر دکمه و رفتار کشو."
+            ],
+            "The button position on desktop screens.": [
+                "موقعیت دکمه در صفحه‌نمایش‌های دسکتاپ."
+            ],
+            "The button position on mobile screens — handy when the button must clear mobile navigation or sticky cart buttons.": [
+                "موقعیت دکمه در صفحه‌نمایش‌های موبایل — زمانی مفید است که دکمه باید از ناوبری موبایل یا دکمه‌های چسبان سبد خرید فاصله بگیرد."
             ],
             "The currency unit shown on FaraCart amounts. “Auto” follows the store currency.": [
                 "واحد پول نمایشی مبالغ فاراکارت. «خودکار» از واحد پول فروشگاه پیروی می‌کند."
@@ -2566,6 +2695,9 @@
             "The discount never applies to these products.": [
                 "این تخفیف هرگز روی این محصولات اعمال نمی‌شود."
             ],
+            "The floating button exactly as it will appear — position, size, icon and drawer direction update live.": [
+                "دکمهٔ شناور دقیقاً همان‌طور که نمایش داده می‌شود — موقعیت، اندازه، آیکن و جهت کشو به‌صورت زنده به‌روز می‌شوند."
+            ],
             "The funnel and the direct vs assisted models behind FaraCart’s attributed revenue.": [
                 "قیف و مدل‌های مستقیم در برابر کمکی پشت فروش منتسب فراکارت."
             ],
@@ -2643,6 +2775,9 @@
             ],
             "The recommended target must be greater than zero.": [
                 "هدف پیشنهادی باید بیشتر از صفر باشد."
+            ],
+            "The round button diameter (32–96).": [
+                "قطر دکمهٔ گرد (۳۲–۹۶)."
             ],
             "The selected goal could not be found": [
                 "هدف انتخاب‌شده پیدا نشد"
@@ -2722,17 +2857,26 @@
             "Top": [
                 "بالا"
             ],
+            "Top and bottom offset from the matching edge; center positions the button on the viewport midline.": [
+                "آفست بالا و پایین از لبهٔ متناظر؛ «مرکز» دکمه را روی خط وسط صفحه قرار می‌دهد."
+            ],
             "Top campaigns": [
                 "کمپین‌های برتر"
             ],
             "Top campaigns by completions": [
                 "کمپین‌های برتر بر اساس تکمیل‌ها"
             ],
+            "Top left": [
+                "بالا چپ"
+            ],
             "Top performing": [
                 "بهترین عملکرد"
             ],
             "Top recommendation": [
                 "پیشنهاد برتر"
+            ],
+            "Top right": [
+                "بالا راست"
             ],
             "Top suggested products": [
                 "محصولات پیشنهادی برتر"
@@ -2794,6 +2938,9 @@
             "Unlocked": [
                 "فعال شد"
             ],
+            "Up": [
+                "بالا"
+            ],
             "Updating…": [
                 "در حال به‌روزرسانی…"
             ],
@@ -2821,6 +2968,9 @@
             "Use global default": [
                 "استفاده از پیش‌فرض سراسری"
             ],
+            "Use the desktop position on mobile": [
+                "استفاده از موقعیت دسکتاپ در موبایل"
+            ],
             "User menu": [
                 "منوی کاربر"
             ],
@@ -2829,6 +2979,12 @@
             ],
             "Variation falls back to its parent product": [
                 "متغیر به محصول والد خود بازمی‌گردد"
+            ],
+            "Vertical offset (px)": [
+                "آفست عمودی (پیکسل)"
+            ],
+            "Vertical position": [
+                "موقعیت عمودی"
             ],
             "View": [
                 "مشاهده"
@@ -2847,6 +3003,9 @@
             ],
             "View store": [
                 "مشاهدهٔ فروشگاه"
+            ],
+            "View your cart goals": [
+                "اهداف سبد خرید خود را ببینید"
             ],
             "Viewed": [
                 "بازدیدشده"
@@ -2896,6 +3055,9 @@
             "When off, virtual and downloadable products are excluded from every goal.": [
                 "وقتی خاموش است، محصولات مجازی و قابل دانلود از همهٔ اهداف مستثنی می‌شوند."
             ],
+            "When on, mobile reuses the desktop position and the separate mobile fields are hidden.": [
+                "وقتی روشن باشد، موبایل از موقعیت دسکتاپ استفاده می‌کند و فیلدهای جداگانهٔ موبایل پنهان می‌شوند."
+            ],
             "When on, shipping charges count toward the cart-total basis.": [
                 "وقتی روشن است، هزینه‌های ارسال به سمت مبنای کل سبد محاسبه می‌شوند."
             ],
@@ -2911,6 +3073,9 @@
             "Where and how the storefront widgets appear.": [
                 "کجا و چگونه ویجت‌های فروشگاه ظاهر می‌شوند."
             ],
+            "Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons.": [
+                "جای دکمه — به‌طور جداگانه برای دسکتاپ و موبایل. موبایل می‌تواند از موقعیت دسکتاپ استفاده کند یا موقعیت خودش را داشته باشد تا هرگز با ناوبری موبایل یا دکمه‌های چسبان سبد خرید تداخل نکند."
+            ],
             "Where the sticky bar docks.": [
                 "جایی که نوار چسبان قرار می‌گیرد."
             ],
@@ -2922,6 +3087,9 @@
             ],
             "Which goals generated purchases, sales and profit? Completion is not the same as purchase.": [
                 "کدام اهداف خرید، فروش و سود ایجاد کردند؟ تکمیل با خرید یکی نیست."
+            ],
+            "Which way the progress drawer opens from the button. Auto opens toward the screen center and never points off-screen.": [
+                "کشوی پیشرفت از دکمه به کدام سمت باز شود. «خودکار» به سمت مرکز صفحه باز می‌شود و هرگز به بیرون صفحه اشاره نمی‌کند."
             ],
             "Why this product": [
                 "چرا این محصول"

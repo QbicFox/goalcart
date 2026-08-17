@@ -1,6 +1,7 @@
 # Persian (fa_IR) translation of FaraCart.
 # This file is distributed under the same license as the FaraCart plugin (GPL-2.0-or-later).
 #
+
 msgid ""
 msgstr ""
 "Project-Id-Version: FaraCart 0.6.0\n"
@@ -188,9 +189,17 @@ msgstr "تکمیل یعنی مشتری به آستانهٔ هدف رسید. خر
 msgid "A connected ladder of the campaign milestones — dots, targets and rewards — with an overall progress bar."
 msgstr "نردبانی متصل از نقاط عطف کمپین — نقاط، اهداف و پاداش‌ها — همراه با نوار پیشرفت کلی."
 
+#: admin-app/src/routes/Settings.tsx:1198
+msgid "A custom glyph/emoji shown inside the button (leave empty for the default cart icon)."
+msgstr "نمادی سفارشی داخل دکمه نمایش داده می‌شود (برای آیکن پیش‌فرض سبد خرید، خالی بگذارید)."
+
 #: admin-app/src/components/goal-builder/RewardFields.tsx:360
 msgid "A deterministic coupon is created per customer."
 msgstr "برای هر مشتری یک کوپن قطعی ایجاد می‌شود."
+
+#: admin-app/src/routes/Settings.tsx:1037
+msgid "A floating goals/campaigns button with a progress drawer — always reachable while shopping."
+msgstr "دکمهٔ شناور اهداف/کمپین‌ها با کشوی پیشرفت — همیشه هنگام خرید در دسترس است."
 
 #: includes/Templates/Goal/MilestoneTemplate.php:43
 msgid "A goal ladder of dots and targets, bar underneath."
@@ -200,6 +209,10 @@ msgstr "نردبانی از نقاط و اهداف با نوار زیر آن."
 msgid "A goal target or an explicit remaining amount is required to rank upsells."
 msgstr "برای رتبه‌بندی پیشنهاد خرید، به یک هدف یا مقدار باقیماندهٔ صریح نیاز است."
 
+#: admin-app/src/routes/Settings.tsx:342
+msgid "A physical side — the button keeps this exact side in RTL stores."
+msgstr "یک سمت فیزیکی — دکمه در فروشگاه‌های راست‌به‌چپ دقیقاً همین سمت را حفظ می‌کند."
+
 #: admin-app/src/routes/GoalBuilder.tsx:426
 msgid "A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side."
 msgstr "یک عدد صحیح مثبت. وقتی خریدار به این تعداد تکمیل برسد، تکمیل‌های بعدی (و پاداش‌ها) از سمت سرور مسدود می‌شوند."
@@ -208,6 +221,10 @@ msgstr "یک عدد صحیح مثبت. وقتی خریدار به این تعد�
 #: admin-app/src/routes/GoalPerformance.tsx:71
 msgid "A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion."
 msgstr "یک سفارش واجد شرایط ووکامرس واقعاً به این هدف مرتبط شده — یک خرید، نه یک تکمیل هدف."
+
+#: admin-app/src/routes/Settings.tsx:322
+msgid "A quick position; the horizontal/vertical fields and offsets below fine-tune it."
+msgstr "یک موقعیت سریع؛ فیلدهای افقی/عمودی و آفست‌های زیر آن را دقیق‌تر تنظیم می‌کنند."
 
 #: admin-app/src/routes/CampaignBuilder.tsx:422
 msgid "A start later than the end means “after start OR before end” (crosses midnight)."
@@ -459,6 +476,10 @@ msgstr "انیمیشن پیشرفت"
 msgid "Animate progress updates"
 msgstr "انیمیشن به‌روزرسانی پیشرفت"
 
+#: admin-app/src/routes/Settings.tsx:1183
+msgid "Animate the button and drawer"
+msgstr "انیمیشن دکمه و کشو"
+
 #: admin-app/src/routes/Settings.tsx:592
 msgid "Appear delay (seconds)"
 msgstr "تأخیر نمایش (ثانیه)"
@@ -575,6 +596,10 @@ msgstr "خودکار (هدف/کمپین)"
 #: admin-app/src/routes/Settings.tsx
 msgid "Auto (store currency)"
 msgstr "خودکار (واحد پول فروشگاه)"
+
+#: admin-app/src/routes/Settings.tsx:1173
+msgid "Auto (toward screen center)"
+msgstr "خودکار (به سمت مرکز صفحه)"
 
 #: admin-app/src/routes/Settings.tsx:567
 msgid "Auto-hide"
@@ -722,6 +747,14 @@ msgstr "حاشیه"
 msgid "Bottom"
 msgstr "پایین"
 
+#: admin-app/src/components/floating/floating.ts:50
+msgid "Bottom left"
+msgstr "پایین چپ"
+
+#: admin-app/src/components/floating/floating.ts:49
+msgid "Bottom right"
+msgstr "پایین راست"
+
 #: admin-app/src/components/goal-builder/goalTypes.tsx:81
 msgid "Brand"
 msgstr "برند"
@@ -729,6 +762,18 @@ msgstr "برند"
 #: admin-app/src/components/goal-builder/TargetFields.tsx:189
 msgid "Brand attribute"
 msgstr "ویژگی برند"
+
+#: admin-app/src/routes/Settings.tsx:1197
+msgid "Button icon"
+msgstr "آیکن دکمه"
+
+#: admin-app/src/routes/Settings.tsx:1214
+msgid "Button label / tooltip"
+msgstr "برچسب / راهنمای دکمه"
+
+#: admin-app/src/routes/Settings.tsx:1155
+msgid "Button size (px)"
+msgstr "اندازهٔ دکمه (پیکسل)"
 
 #: admin-app/src/routes/Analytics.tsx:1081
 #: admin-app/src/routes/UpsellAnalytics.tsx:413
@@ -841,6 +886,18 @@ msgstr "دسته‌بندی"
 msgid "Celebration animation"
 msgstr "انیمیشن جشن"
 
+#: admin-app/src/routes/Settings.tsx:361
+msgid "Center"
+msgstr "مرکز"
+
+#: admin-app/src/components/floating/floating.ts:52
+msgid "Center left"
+msgstr "مرکز چپ"
+
+#: admin-app/src/components/floating/floating.ts:51
+msgid "Center right"
+msgstr "مرکز راست"
+
 #: admin-app/src/routes/Settings.tsx:730
 msgid "Cheapest first"
 msgstr "ارزانترین اول"
@@ -874,6 +931,10 @@ msgstr "برای مشاهدهٔ جزئیات کامل امتیاز، روی رد
 #: admin-app/src/routes/UpsellAnalytics.tsx:411
 msgid "Clicks"
 msgstr "کلیک‌ها"
+
+#: includes/Frontend/ProgressUI.php:575
+msgid "Close"
+msgstr "بستن"
 
 #: admin-app/src/routes/Settings.tsx:397
 msgid "Code (USD 100)"
@@ -1207,6 +1268,10 @@ msgstr "آستانهٔ فعلی %1$s → آستانهٔ پیشنهادی %2$s؟ 
 msgid "Current target: %1$s"
 msgstr "آستانهٔ فعلی: %1$s"
 
+#: admin-app/src/routes/Settings.tsx:329
+msgid "Custom"
+msgstr "سفارشی"
+
 #: admin-app/src/routes/Settings.tsx:788
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:141
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:160
@@ -1459,9 +1524,25 @@ msgstr "نمایش"
 msgid "Display locations"
 msgstr "مکان‌های نمایش"
 
+#: admin-app/src/routes/Settings.tsx:1058
+msgid "Display the button on desktop screens."
+msgstr "نمایش دکمه در صفحه‌نمایش‌های دسکتاپ."
+
+#: admin-app/src/routes/Settings.tsx:1066
+msgid "Display the button on mobile screens."
+msgstr "نمایش دکمه در صفحه‌نمایش‌های موبایل."
+
 #: admin-app/src/routes/Recommendations.tsx:154
 msgid "Distance"
 msgstr "فاصله"
+
+#: admin-app/src/routes/Settings.tsx:394
+msgid "Distance from the chosen edge — or from the midline when the position is center (0–200)."
+msgstr "فاصله از لبهٔ انتخابی — یا از خط وسط وقتی موقعیت «مرکز» است (۰–۲۰۰)."
+
+#: admin-app/src/routes/Settings.tsx:376
+msgid "Distance from the chosen side (0–200)."
+msgstr "فاصله از سمت انتخابی (۰–۲۰۰)."
 
 #: admin-app/src/routes/Analytics.tsx:869
 msgid "Distinct orders associated with a goal in the selected period."
@@ -1479,6 +1560,14 @@ msgstr "سفارش‌های متمایز مرتبط با این هدف در با
 #: admin-app/src/routes/Goals.tsx:54
 msgid "Distinct quantity"
 msgstr "تعداد متمایز"
+
+#: admin-app/src/routes/Settings.tsx:1177
+msgid "Down"
+msgstr "پایین"
+
+#: admin-app/src/routes/Settings.tsx:1167
+msgid "Drawer opening direction"
+msgstr "جهت باز شدن کشو"
 
 #: admin-app/src/components/preview/PreviewControls.tsx:90
 msgid "Drives money-based goals (subtotal / total)."
@@ -1510,6 +1599,7 @@ msgstr "هر خریدار حداکثر %d بار می‌تواند این هدف
 #: admin-app/src/routes/Recommendations.tsx:155
 msgid "EUR — Euro"
 msgstr "EUR — یورو"
+
 
 msgid "Economics"
 msgstr "اقتصاد"
@@ -1560,6 +1650,14 @@ msgstr "فعال کردن"
 #: admin-app/src/routes/Settings.tsx:381
 msgid "Enable FaraCart"
 msgstr "فعال کردن فراکارت"
+
+#: admin-app/src/routes/Settings.tsx:1046
+msgid "Enable floating widget"
+msgstr "فعال‌سازی ویجت شناور"
+
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:216
+msgid "Enable the floating widget to preview it."
+msgstr "برای پیش‌نمایش، ویجت شناور را فعال کنید."
 
 #: includes/Frontend/ProgressUI.php:883
 msgid "Ended"
@@ -1733,6 +1831,14 @@ msgstr "تخفیف مبلغ ثابت"
 #: includes/Goals/MessageEngine.php:316
 msgid "Fixed discount"
 msgstr "تخفیف ثابت"
+
+#: admin-app/src/routes/Settings.tsx:570
+msgid "Floating"
+msgstr "شناور"
+
+#: admin-app/src/routes/Settings.tsx:1036
+msgid "Floating widget"
+msgstr "ویجت شناور"
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:27
 #: admin-app/src/routes/Analytics.tsx:80
@@ -2026,6 +2132,14 @@ msgstr "عملکرد تاریخی پیشنهاد خرید: %d نمایش، %d س
 msgid "History"
 msgstr "تاریخچه"
 
+#: admin-app/src/routes/Settings.tsx:375
+msgid "Horizontal offset (px)"
+msgstr "آفست افقی (پیکسل)"
+
+#: admin-app/src/routes/Settings.tsx:341
+msgid "Horizontal position"
+msgstr "موقعیت افقی"
+
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:206
 msgid "How Estimated Profit becomes available"
 msgstr "چگونه سود تخمینی در دسترس می‌شود"
@@ -2274,6 +2388,15 @@ msgstr "برای اجازه به همهٔ نقشها خالی بگذارید. م
 msgid "Leave empty to apply to the whole cart."
 msgstr "برای اعمال روی کل سبد، خالی بگذارید."
 
+#: admin-app/src/routes/Settings.tsx:347
+#: admin-app/src/routes/Settings.tsx:1174
+msgid "Left"
+msgstr "چپ"
+
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:224
+msgid "Left/right and top/bottom are physical sides — the button stays exactly here in RTL stores."
+msgstr "چپ/راست و بالا/پایین سمت‌های فیزیکی هستند — دکمه در فروشگاه‌های راست‌به‌چپ دقیقاً همین‌جا می‌ماند."
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:286
 msgid "Limit"
 msgstr "محدودیت"
@@ -2442,6 +2565,10 @@ msgstr "موبایل"
 #: admin-app/src/routes/Settings.tsx:508
 msgid "Mobile behavior"
 msgstr "رفتار موبایل"
+
+#: admin-app/src/routes/Settings.tsx:1116
+msgid "Mobile reuses the desktop position. Turn the toggle above off to configure a separate mobile position."
+msgstr "موبایل از موقعیت دسکتاپ استفاده می‌کند. برای تنظیم موقعیت جداگانهٔ موبایل، کلید بالا را خاموش کنید."
 
 #: admin-app/src/routes/GoalPerformance.tsx:112
 #: admin-app/src/routes/Recommendations.tsx:52
@@ -2904,6 +3031,14 @@ msgstr "محبوبیت"
 msgid "Position"
 msgstr "موقعیت"
 
+#: admin-app/src/routes/Settings.tsx:1074
+msgid "Position & display"
+msgstr "موقعیت و نمایش"
+
+#: admin-app/src/routes/Settings.tsx:313
+msgid "Position preset"
+msgstr "پیش‌تنظیم موقعیت"
+
 #: admin-app/src/routes/Campaigns.tsx:233
 #: admin-app/src/routes/Goals.tsx:395
 msgid "Preview"
@@ -2913,6 +3048,10 @@ msgstr "پیش‌نمایش"
 #: admin-app/src/routes/Goals.tsx:398
 msgid "Preview %s"
 msgstr "پیش‌نمایش %s"
+
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:119
+msgid "Preview device"
+msgstr "دستگاه پیش‌نمایش"
 
 #: includes/REST/PreviewController.php:703
 msgid "Preview item"
@@ -3308,6 +3447,11 @@ msgstr "پاداش فعال شد: {reward}"
 msgid "Rewards and shipping costs were higher than the estimated incremental margin."
 msgstr "هزینه‌های پاداش و ارسال بیشتر از حاشیهٔ افزایشی تخمینی بودند."
 
+#: admin-app/src/routes/Settings.tsx:348
+#: admin-app/src/routes/Settings.tsx:1175
+msgid "Right"
+msgstr "راست"
+
 #: includes/Templates/Goal/RingTemplate.php:40
 #: includes/Templates/Goal/RingTemplate.php:99
 #: includes/Templates/Goal/RingTemplate.php:105
@@ -3542,6 +3686,10 @@ msgstr "نمایش پاداش‌های نقاط عطف"
 msgid "Show milestone targets"
 msgstr "نمایش اهداف نقاط عطف"
 
+#: admin-app/src/routes/Settings.tsx:1057
+msgid "Show on desktop"
+msgstr "نمایش در دسکتاپ"
+
 #: admin-app/src/routes/Settings.tsx:514
 msgid "Show on mobile"
 msgstr "نمایش در موبایل"
@@ -3561,6 +3709,10 @@ msgstr "شمارش معکوس مهلت را داخل نوار چسبان نشا�
 #: admin-app/src/routes/Settings.tsx:411
 msgid "Show the first goal only"
 msgstr "فقط اولین هدف را نمایش بده"
+
+#: admin-app/src/routes/Settings.tsx:1047
+msgid "Show the floating button on widget pages whenever the cart has an eligible goal."
+msgstr "هرگاه سبد خرید هدفی واجد شرایط داشته باشد، دکمهٔ شناور را در صفحات ویجت نمایش بده."
 
 #: includes/Templates/Goal/RingTemplate.php:120
 msgid "Show the percentage in the center"
@@ -3651,6 +3803,10 @@ msgstr "رتبه‌بندی پیشنهاد خرید هوشمند در دسترس
 #: includes/Analytics/UpsellRanker.php:277
 msgid "Smart upsells are disabled."
 msgstr "پیشنهاد خرید هوشمند غیرفعال است."
+
+#: admin-app/src/routes/Settings.tsx:1184
+msgid "Smooth open/close transitions for the floating button and its drawer."
+msgstr "انتقال نرم باز و بسته شدن برای دکمهٔ شناور و کشوی آن."
 
 #: admin-app/src/routes/GoalPerformance.tsx:738
 msgid "Some orders do not have complete cost information."
@@ -3745,6 +3901,26 @@ msgstr "از {current}، {target}، {remaining}، {percentage}، {quantity}، {r
 #: admin-app/src/routes/Settings.tsx:396
 msgid "Symbol ($100)"
 msgstr "نماد ($100)"
+
+#: admin-app/src/routes/Settings.tsx:1215
+msgid "The accessible label and tooltip for the button (leave empty for the default)."
+msgstr "برچسب و راهنمای در دسترس دکمه (برای پیش‌فرض، خالی بگذارید)."
+
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:228
+msgid "The button is hidden on this device (visibility disabled or the widget is off)."
+msgstr "دکمه در این دستگاه مخفی است (نمایش غیرفعال است یا ویجت خاموش است)."
+
+#: admin-app/src/routes/Settings.tsx:1140
+msgid "The button look and the drawer behavior."
+msgstr "ظاهر دکمه و رفتار کشو."
+
+#: admin-app/src/routes/Settings.tsx:301
+msgid "The button position on desktop screens."
+msgstr "موقعیت دکمه در صفحه‌نمایش‌های دسکتاپ."
+
+#: admin-app/src/routes/Settings.tsx:302
+msgid "The button position on mobile screens — handy when the button must clear mobile navigation or sticky cart buttons."
+msgstr "موقعیت دکمه در صفحه‌نمایش‌های موبایل — زمانی مفید است که دکمه باید از ناوبری موبایل یا دکمه‌های چسبان سبد خرید فاصله بگیرد."
 
 #: admin-app/src/routes/Settings.tsx
 msgid "The currency unit shown on FaraCart amounts. “Auto” follows the store currency."
@@ -3868,6 +4044,10 @@ msgstr "قالب پیش‌فرضی که کل کمپین را در فروشگاه
 msgid "The discount never applies to these products."
 msgstr "این تخفیف هرگز روی این محصولات اعمال نمی‌شود."
 
+#: admin-app/src/routes/Settings.tsx:1228
+msgid "The floating button exactly as it will appear — position, size, icon and drawer direction update live."
+msgstr "دکمهٔ شناور دقیقاً همان‌طور که نمایش داده می‌شود — موقعیت، اندازه، آیکن و جهت کشو به‌صورت زنده به‌روز می‌شوند."
+
 #: admin-app/src/routes/AttributionDashboard.tsx:88
 msgid "The funnel and the direct vs assisted models behind FaraCart’s attributed revenue."
 msgstr "قیف و مدل‌های مستقیم در برابر کمکی پشت فروش منتسب فراکارت."
@@ -3976,6 +4156,10 @@ msgstr "محصول یافت نشد."
 msgid "The recommended target must be greater than zero."
 msgstr "هدف پیشنهادی باید بیشتر از صفر باشد."
 
+#: admin-app/src/routes/Settings.tsx:1156
+msgid "The round button diameter (32–96)."
+msgstr "قطر دکمهٔ گرد (۳۲–۹۶)."
+
 #: admin-app/src/routes/Recommendations.tsx:623
 msgid "The selected goal could not be found"
 msgstr "هدف انتخاب‌شده پیدا نشد"
@@ -3991,7 +4175,6 @@ msgstr "خریدار می‌تواند این هدف را هر چند بار ک�
 #: admin-app/src/routes/Goals.tsx:380
 msgid "The shopper may complete this goal as many times as they want."
 msgstr "خریدار می‌تواند این هدف را هر چند بار که بخواهد تکمیل کند."
-
 
 #: admin-app/src/components/goal-builder/TargetFields.tsx:102
 msgid "The threshold shoppers need to reach"
@@ -4083,6 +4266,10 @@ msgstr "تعداد درخواست‌ها بیش از حد است. لطفاً ک�
 msgid "Top"
 msgstr "بالا"
 
+#: admin-app/src/routes/Settings.tsx:355
+msgid "Top and bottom offset from the matching edge; center positions the button on the viewport midline."
+msgstr "آفست بالا و پایین از لبهٔ متناظر؛ «مرکز» دکمه را روی خط وسط صفحه قرار می‌دهد."
+
 #: admin-app/src/routes/Analytics.tsx:1011
 msgid "Top campaigns"
 msgstr "کمپین‌های برتر"
@@ -4091,6 +4278,10 @@ msgstr "کمپین‌های برتر"
 msgid "Top campaigns by completions"
 msgstr "کمپین‌های برتر بر اساس تکمیل‌ها"
 
+#: admin-app/src/components/floating/floating.ts:54
+msgid "Top left"
+msgstr "بالا چپ"
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:44
 msgid "Top performing"
 msgstr "بهترین عملکرد"
@@ -4098,6 +4289,10 @@ msgstr "بهترین عملکرد"
 #: admin-app/src/routes/Recommendations.tsx:253
 msgid "Top recommendation"
 msgstr "پیشنهاد برتر"
+
+#: admin-app/src/components/floating/floating.ts:53
+msgid "Top right"
+msgstr "بالا راست"
 
 #: admin-app/src/routes/Analytics.tsx:1066
 msgid "Top suggested products"
@@ -4183,6 +4378,10 @@ msgstr "نامحدود"
 msgid "Unlocked"
 msgstr "فعال شد"
 
+#: admin-app/src/routes/Settings.tsx:1176
+msgid "Up"
+msgstr "بالا"
+
 #: admin-app/src/components/CampaignPreviewDialog.tsx:180
 #: admin-app/src/components/GoalPreviewDialog.tsx:160
 msgid "Updating…"
@@ -4223,6 +4422,10 @@ msgstr "پیشنهاد خرید نشان می‌دهد کدام محصولات �
 msgid "Use global default"
 msgstr "استفاده از پیش‌فرض سراسری"
 
+#: admin-app/src/routes/Settings.tsx:1084
+msgid "Use the desktop position on mobile"
+msgstr "استفاده از موقعیت دسکتاپ در موبایل"
+
 #: admin-app/src/components/layout/AdminLayout.tsx:370
 msgid "User menu"
 msgstr "منوی کاربر"
@@ -4234,6 +4437,14 @@ msgstr "فقط مشتریان ویژه (VIP)"
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:27
 msgid "Variation falls back to its parent product"
 msgstr "متغیر به محصول والد خود بازمی‌گردد"
+
+#: admin-app/src/routes/Settings.tsx:393
+msgid "Vertical offset (px)"
+msgstr "آفست عمودی (پیکسل)"
+
+#: admin-app/src/routes/Settings.tsx:354
+msgid "Vertical position"
+msgstr "موقعیت عمودی"
 
 #: admin-app/src/routes/Dashboard.tsx
 msgid "View"
@@ -4259,6 +4470,12 @@ msgstr "مشاهدهٔ عملکرد"
 #: admin-app/src/components/layout/AdminLayout.tsx:362
 msgid "View store"
 msgstr "مشاهدهٔ فروشگاه"
+
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:147
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:172
+#: includes/Frontend/ProgressUI.php:574
+msgid "View your cart goals"
+msgstr "اهداف سبد خرید خود را ببینید"
 
 #: admin-app/src/routes/GoalPerformance.tsx:64
 #: admin-app/src/routes/GoalPerformance.tsx:374
@@ -4327,6 +4544,10 @@ msgstr "وقتی خاموش است، محصولات در حال حراج از ه
 msgid "When off, virtual and downloadable products are excluded from every goal."
 msgstr "وقتی خاموش است، محصولات مجازی و قابل دانلود از همهٔ اهداف مستثنی می‌شوند."
 
+#: admin-app/src/routes/Settings.tsx:1085
+msgid "When on, mobile reuses the desktop position and the separate mobile fields are hidden."
+msgstr "وقتی روشن باشد، موبایل از موقعیت دسکتاپ استفاده می‌کند و فیلدهای جداگانهٔ موبایل پنهان می‌شوند."
+
 #: admin-app/src/routes/Settings.tsx:658
 msgid "When on, shipping charges count toward the cart-total basis."
 msgstr "وقتی روشن است، هزینه‌های ارسال به سمت مبنای کل سبد محاسبه می‌شوند."
@@ -4334,7 +4555,6 @@ msgstr "وقتی روشن است، هزینه‌های ارسال به سمت م
 #: admin-app/src
 msgid "When product cost is recorded, its profit is also considered in the ranking."
 msgstr "اگر قیمت تمام‌شده محصول ثبت شده باشد، سود آن نیز در اولویت‌بندی پیشنهادها در نظر گرفته می‌شود."
-
 
 #: admin-app/src/routes/CampaignBuilder.tsx:335
 msgid "When the campaign runs, and how it competes with other campaigns."
@@ -4347,6 +4567,10 @@ msgstr "وقتی این هدف محقق شود، همهٔ اهداف با اول
 #: admin-app/src/routes/Settings.tsx:479
 msgid "Where and how the storefront widgets appear."
 msgstr "کجا و چگونه ویجت‌های فروشگاه ظاهر می‌شوند."
+
+#: admin-app/src/routes/Settings.tsx:1075
+msgid "Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons."
+msgstr "جای دکمه — به‌طور جداگانه برای دسکتاپ و موبایل. موبایل می‌تواند از موقعیت دسکتاپ استفاده کند یا موقعیت خودش را داشته باشد تا هرگز با ناوبری موبایل یا دکمه‌های چسبان سبد خرید تداخل نکند."
 
 #: admin-app/src/routes/Settings.tsx:551
 msgid "Where the sticky bar docks."
@@ -4363,6 +4587,10 @@ msgstr "کدام مبلغ سبد به سمت اهداف محاسبه می‌شو
 #: admin-app/src/routes/GoalPerformance.tsx:636
 msgid "Which goals generated purchases, sales and profit? Completion is not the same as purchase."
 msgstr "کدام اهداف خرید، فروش و سود ایجاد کردند؟ تکمیل با خرید یکی نیست."
+
+#: admin-app/src/routes/Settings.tsx:1168
+msgid "Which way the progress drawer opens from the button. Auto opens toward the screen center and never points off-screen."
+msgstr "کشوی پیشرفت از دکمه به کدام سمت باز شود. «خودکار» به سمت مرکز صفحه باز می‌شود و هرگز به بیرون صفحه اشاره نمی‌کند."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:186
 msgid "Why this product"

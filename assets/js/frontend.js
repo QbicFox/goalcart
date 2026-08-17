@@ -18,6 +18,9 @@
  *                     source attribution; a rank-endpoint fallback
  *                     closes money-goal gaps)
  *   StickyGoalBar    fixed bottom bar (cart/checkout progress at a glance)
+ *   FloatingWidget   floating goals/campaigns button + progress drawer
+ *                     (physical left/right × top/center/bottom position,
+ *                     per-device settings, safe-area aware, RTL-safe)
  *
  * Every eligible goal renders as its own card, stacked in a shared
  * wrapper (`.faracart-widget__goals`) — a campaign's milestones each get
@@ -64,7 +67,22 @@
 
 	var WIDGET_SELECTOR = '[data-faracart-widget]';
 	var STICKY_ID = 'faracart-sticky';
+	var FLOATING_ID = 'faracart-floating';
 	var stickyDismissed = false;
+
+	// Floating widget (floating goals/campaigns button + drawer) state:
+	// whether the drawer is open, whether the button/drawer markup was
+	// built once (the payload only rebuilds the drawer content), the
+	// drawer content fingerprint (rebuild only when the goals changed)
+	// and the default button glyph.
+	var floatingOpen = false;
+	var floatingBuilt = false;
+	var floatingFingerprint = null;
+	var FLOATING_DEFAULT_ICON = '\uD83D\uDED2'; // shopping cart
+
+	// The template ids the floating drawer accepts when resolving a goal's
+	// card (the same ids widgetTemplate honors, minus per-container overrides).
+	var FLOATING_TEMPLATES = [ 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6', 'milestone_chain', 'campaign_progress' ];
 
 	// Phase 16 analytics: window.faracartTracking (printed by the Tracker)
 	// carries the track endpoint, the nonce and the session id. Absent =
@@ -2618,6 +2636,628 @@
 		return link;
 	}
 
+	/* ------------------------------------------------------------------ *
+	 * Floating widget (floating goals/campaigns button + drawer)
+	 * ------------------------------------------------------------------ */
+
+	/**
+	 * Whether the current viewport is a mobile (small) screen.
+	 *
+	 * Uses the same 782px breakpoint as mobileHidden() (the WP admin
+	 * mobile breakpoint) so the floating widget's per-device position and
+	 * visibility flags agree with the rest of the storefront widgets.
+	 *
+	 * @return {boolean}
+	 */
+	function isMobileViewport() {
+		if ( ! window.matchMedia ) {
+			return false;
+		}
+
+		return window.matchMedia( '(max-width: 782px)' ).matches;
+	}
+
+	/**
+	 * The resolved floating-widget config for the current device.
+	 *
+	 * Mirrors the PHP `floating_config()` payload: the master toggle, the
+	 * per-device position (mobile reuses desktop when
+	 * mobileUseDesktop is on), the per-device visibility flag and the
+	 * display options. Every value is normalized so a malformed stored
+	 * setting can never reach the DOM.
+	 *
+	 * @return {Object}
+	 */
+	function floatingConfig() {
+		var floating = cfg.floating || {};
+		var device = isMobileViewport() ? 'mobile' : 'desktop';
+		var position = ( device === 'mobile' && ! floating.mobileUseDesktop )
+			? ( floating.mobile || {} )
+			: ( floating.desktop || {} );
+
+		return {
+			enabled: !! floating.enabled,
+			device: device,
+			position: position,
+			visible: device === 'mobile'
+				? floating.showMobile !== false
+				: floating.showDesktop !== false,
+			buttonSize: Math.min( 96, Math.max( 32, Number( floating.buttonSize ) || 56 ) ),
+			animation: floating.animation !== false,
+			drawerDirection: ( floating.drawerDirection === 'left' || floating.drawerDirection === 'right'
+				|| floating.drawerDirection === 'up' || floating.drawerDirection === 'down' )
+				? floating.drawerDirection
+				: 'auto',
+			icon: String( floating.icon || '' ),
+			label: String( floating.label || '' ),
+			labels: floating.labels || {},
+		};
+	}	/**
+	 * The mobile-browser safe-area insets (home indicator, notches).
+	 *
+	 * Reads `env(safe-area-inset-*)` through a hidden probe element so the
+	 * button never hides under a phone's home indicator or rounded corner
+	 * — the insets are added to the configured offsets on anchored sides.
+	 * Cached for the session (orientation changes invalidate it on resize).
+	 *
+	 * @return {Object} { top, right, bottom, left } px.
+	 */
+	var floatingInsetCache = null;
+
+	function floatingSafeInsets() {
+		if ( floatingInsetCache ) {
+			return floatingInsetCache;
+		}
+
+		var zero = { top: 0, right: 0, bottom: 0, left: 0 };
+
+		if ( ! window.CSS || ! window.CSS.supports || ! window.CSS.supports( 'padding', 'env(safe-area-inset-bottom)' ) ) {
+			floatingInsetCache = zero;
+			return floatingInsetCache;
+		}
+
+		function readInset( side ) {
+			try {
+				var probe = el( 'div', '' );
+				probe.setAttribute( 'style', 'position:fixed;visibility:hidden;pointer-events:none;left:0;top:0;padding-' + side + ':env(safe-area-inset-' + side + ');' );
+				document.body.appendChild( probe );
+				var value = parseFloat( window.getComputedStyle( probe ).getPropertyValue( 'padding-' + side ) ) || 0;
+				probe.remove();
+				return value;
+			} catch ( error ) {
+				return 0;
+			}
+		}
+
+		floatingInsetCache = {
+			top: readInset( 'top' ),
+			right: readInset( 'right' ),
+			bottom: readInset( 'bottom' ),
+			left: readInset( 'left' ),
+		};
+
+		return floatingInsetCache;
+	}
+
+	/**
+	 * Apply the configured physical position to the floating container.
+	 *
+	 * The axes are physical sides (left/right × top/center/bottom), never
+	 * logical start/end, so the admin's chosen side keeps its visual
+	 * result in RTL. Safe positioning: the offsets are clamped so the
+	 * button always stays fully inside the viewport (small screens, large
+	 * zoom), and the mobile safe-area insets ride along on anchored sides.
+	 *
+	 * @param {HTMLElement} container   The #faracart-floating element.
+	 * @param {Object}      position    { horizontal, vertical, offset_x, offset_y }.
+	 * @param {number}      buttonSize  Button diameter (px).
+	 * @param {Object}      safeInsets  { top, right, bottom, left } px.
+	 * @return {void}
+	 */
+	function applyFloatingPosition( container, position, buttonSize, safeInsets ) {
+		var horizontal = ( position && position.horizontal === 'left' ) ? 'left' : 'right';
+		var vertical = ( position && position.vertical === 'top' ) ? 'top'
+			: ( ( position && position.vertical === 'center' ) ? 'center' : 'bottom' );
+		var offsetX = Math.max( 0, Number( ( position && position.offset_x ) || 0 ) );
+		var offsetY = Math.max( 0, Number( ( position && position.offset_y ) || 0 ) );
+
+		// Viewport clamp: the button must always fit fully on screen (very
+		// small screens, large browser zoom).
+		var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+		var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+		var margin = 8;
+		var maxX = Math.max( 0, vw - buttonSize - margin );
+		var maxY = Math.max( 0, vh - buttonSize - margin );
+
+		offsetX = Math.min( offsetX, maxX );
+		offsetY = Math.min( offsetY, maxY );
+
+		// Reset the previous anchors (and the center transform) first.
+		container.classList.remove( 'faracart-floating--center' );
+		container.style.removeProperty( 'left' );
+		container.style.removeProperty( 'right' );
+		container.style.removeProperty( 'top' );
+		container.style.removeProperty( 'bottom' );
+		container.style.removeProperty( '--faracart-fy' );
+
+		if ( horizontal === 'left' ) {
+			container.style.left = ( offsetX + safeInsets.left ) + 'px';
+		} else {
+			container.style.right = ( offsetX + safeInsets.right ) + 'px';
+		}
+
+		if ( vertical === 'top' ) {
+			container.style.top = ( offsetY + safeInsets.top ) + 'px';
+		} else if ( vertical === 'bottom' ) {
+			container.style.bottom = ( offsetY + safeInsets.bottom ) + 'px';
+		} else {
+			// Center: top at the viewport midline and the transform
+			// translateY(-50% + fy) composes with the offset (the CSS
+			// class handles it, the offset rides on --faracart-fy).
+			container.style.top = '50%';
+			container.classList.add( 'faracart-floating--center' );
+			container.style.setProperty( '--faracart-fy', ( offsetY + ( ( safeInsets.top - safeInsets.bottom ) / 2 ) ) + 'px' );
+		}
+	}
+
+	/**
+	 * The drawer opening direction for the button's current rect.
+	 *
+	 * 'auto' opens toward the screen center horizontally when the panel
+	 * fits — it never points off-screen — and an explicit direction that
+	 * has no room flips to the side with the most free space (the opposite
+	 * side first, then the vertical/horizontal axis). This is the
+	 * safe-positioning guard that keeps the drawer inside the viewport.
+	 *
+	 * @param {DOMRect} rect     The button's bounding rect.
+	 * @param {string}  requested 'auto' | 'left' | 'right' | 'up' | 'down'.
+	 * @return {string} 'left' | 'right' | 'up' | 'down'.
+	 */
+	function resolveFloatingDrawerDirection( rect, requested ) {
+		var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+		var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+		var minWidth = 280;
+		var minHeight = 240;
+		var order = [ 'left', 'right', 'up', 'down' ];
+		var free = {
+			left: rect.left,
+			right: vw - rect.right,
+			up: rect.top,
+			down: vh - rect.bottom,
+		};
+
+		function best() {
+			var direction = 'left';
+			var space = -1;
+
+			for ( var i = 0; i < order.length; i++ ) {
+				if ( free[ order[ i ] ] > space ) {
+					direction = order[ i ];
+					space = free[ order[ i ] ];
+				}
+			}
+
+			return direction;
+		}
+
+		if ( requested === 'left' || requested === 'right' ) {
+			if ( free[ requested ] >= minWidth ) {
+				return requested;
+			}
+
+			var oppositeX = requested === 'left' ? 'right' : 'left';
+			if ( free[ oppositeX ] >= minWidth ) {
+				return oppositeX;
+			}
+
+			return free.up >= free.down ? 'up' : 'down';
+		}
+
+		if ( requested === 'up' || requested === 'down' ) {
+			if ( free[ requested ] >= minHeight ) {
+				return requested;
+			}
+
+			var oppositeY = requested === 'up' ? 'down' : 'up';
+			if ( free[ oppositeY ] >= minHeight ) {
+				return oppositeY;
+			}
+
+			return free.left >= free.right ? 'left' : 'right';
+		}
+
+		// auto: toward the screen center horizontally when it fits,
+		// otherwise the vertical side with the most room, otherwise the
+		// single largest free side.
+		var center = rect.left + ( rect.right - rect.left ) / 2;
+		var towardCenter = center < vw / 2 ? 'right' : 'left';
+
+		if ( free[ towardCenter ] >= minWidth ) {
+			return towardCenter;
+		}
+
+		if ( free.up >= minHeight || free.down >= minHeight ) {
+			return free.up >= free.down ? 'up' : 'down';
+		}
+
+		return best();
+	}
+
+	/**
+	 * Constrain the open drawer to the viewport.
+	 *
+	 * The stylesheet already scrolls the panel internally (overflow: auto
+	 * + max-height), but the anchored panel can still extend past the
+	 * viewport edges — a vertically centered drawer on a button at the
+	 * very top/bottom, or a horizontally centered up/down drawer on a
+	 * button at the very left/right. This measures the (still hidden)
+	 * panel and clamps its anchor so it always stays fully on screen, and
+	 * caps the height by the space actually available from the button, so
+	 * the internal scrollbar is always reachable.
+	 *
+	 * @param {HTMLElement} drawer      The drawer element.
+	 * @param {DOMRect}     buttonRect  The button's bounding rect.
+	 * @param {string}      direction   'left' | 'right' | 'up' | 'down'.
+	 * @return {void}
+	 */
+	function constrainFloatingDrawer( drawer, buttonRect, direction ) {
+		var vw = window.innerWidth || document.documentElement.clientWidth || 0;
+		var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+		var margin = 12;
+
+		// Reset any previous constraints (the direction can change between
+		// opens, and the viewport can shrink).
+		drawer.style.removeProperty( 'top' );
+		drawer.style.removeProperty( 'left' );
+		drawer.style.removeProperty( 'max-height' );
+
+		// Cap the height by the space actually available from the button
+		// (up/down drawers grow toward the nearest edge); left/right
+		// drawers center vertically so the full band is safe.
+		var maxHeight = vh - margin * 2;
+
+		if ( direction === 'up' ) {
+			maxHeight = Math.min( maxHeight, buttonRect.top - margin );
+		} else if ( direction === 'down' ) {
+			maxHeight = Math.min( maxHeight, vh - buttonRect.bottom - margin );
+		}
+
+		drawer.style.maxHeight = Math.max( 120, Math.round( maxHeight ) ) + 'px';
+
+		// Measure the panel (it is laid out even while hidden) so the
+		// clamp below can keep it fully inside the viewport.
+		var width = drawer.offsetWidth || 300;
+		var height = drawer.offsetHeight || Math.max( 120, Math.round( maxHeight ) );
+
+		if ( direction === 'left' || direction === 'right' ) {
+			// The stylesheet centers the panel on the button (top:50% +
+			// translateY(-50%)); pin the anchor so the panel fits.
+			var centerY = buttonRect.top + buttonRect.height / 2;
+			var top = Math.min( Math.max( margin + height / 2, centerY ), vh - margin - height / 2 );
+			drawer.style.top = top + 'px';
+		} else {
+			// The stylesheet centers the panel on the button (left:50% +
+			// translateX(-50%)); pin the anchor so the panel fits.
+			var centerX = buttonRect.left + buttonRect.width / 2;
+			var left = Math.min( Math.max( margin + width / 2, centerX ), vw - margin - width / 2 );
+			drawer.style.left = left + 'px';
+		}
+	}
+
+	/**
+	 * Toggle the floating drawer open/closed.
+	 *
+	 * The direction is resolved at open time against the button's live
+	 * rect (it can move with scroll/resize), so an 'auto' direction always
+	 * opens toward the screen center and a configured direction never
+	 * points off-screen. The panel is then constrained to the viewport so
+	 * its internal scroll area is always reachable.
+	 *
+	 * @param {boolean} open Whether the drawer should open.
+	 * @return {void}
+	 */
+	function setFloatingOpen( open ) {
+		var container = document.getElementById( FLOATING_ID );
+
+		if ( ! container ) {
+			return;
+		}
+
+		floatingOpen = !! open;
+
+		if ( floatingOpen ) {
+			var drawer = container.querySelector( '.faracart-floating__drawer' );
+			var button = container.querySelector( '.faracart-floating__button' );
+			var direction = 'left';
+
+			if ( button ) {
+				direction = resolveFloatingDrawerDirection( button.getBoundingClientRect(), floatingConfig().drawerDirection );
+			}
+
+			container.classList.remove( 'faracart-floating--dir-left', 'faracart-floating--dir-right', 'faracart-floating--dir-up', 'faracart-floating--dir-down' );
+			container.classList.add( 'faracart-floating--dir-' + direction );
+
+			if ( drawer && button ) {
+				constrainFloatingDrawer( drawer, button.getBoundingClientRect(), direction );
+			}
+
+			container.classList.add( 'faracart-floating--open' );
+		} else {
+			container.classList.remove( 'faracart-floating--open' );
+		}
+	}
+
+	/**
+	 * The template for a goal card inside the floating drawer.
+	 *
+	 * The drawer has no per-container override, so the resolution is the
+	 * goal's Display template → the store-wide Appearance template → the
+	 * fallback (the same chain widgetTemplate uses for regular widgets).
+	 *
+	 * @param {Object} goal Progress goal entry.
+	 * @return {string}
+	 */
+	function floatingTemplate( goal ) {
+		if ( goal && goal.template && FLOATING_TEMPLATES.indexOf( goal.template ) !== -1 ) {
+			return goal.template;
+		}
+
+		if ( cfg.template && FLOATING_TEMPLATES.indexOf( cfg.template ) !== -1 ) {
+			return cfg.template;
+		}
+
+		return 'template-1';
+	}
+
+	/**
+	 * Rebuild the drawer's goal cards from the payload.
+	 *
+	 * The drawer hosts the same compact goal cards the storefront renders
+	 * (goalContainer with the compact variant), capped at a few cards so
+	 * the panel stays scannable — it scrolls internally past that. The
+	 * close button is preserved across rebuilds.
+	 *
+	 * @param {Object} data Progress payload data.
+	 * @return {void}
+	 */
+	function renderFloatingDrawer( data ) {
+		var container = document.getElementById( FLOATING_ID );
+
+		if ( ! container ) {
+			return;
+		}
+
+		var drawer = container.querySelector( '.faracart-floating__drawer' );
+
+		if ( ! drawer ) {
+			return;
+		}
+
+		var close = drawer.querySelector( '.faracart-floating__close' );
+		drawer.replaceChildren();
+
+		if ( close ) {
+			drawer.appendChild( close );
+		}
+
+		var goals = ( data && data.goals ) || [];
+		var currency = ( data && data.currency ) || cfg.currency;
+		var widget = el( 'div', 'faracart-widget faracart-widget--full' );
+		var stack = el( 'div', 'faracart-widget__goals' );
+		var count = 0;
+
+		for ( var i = 0; i < goals.length; i++ ) {
+			var goal = goals[ i ];
+
+			if ( ! goal || goal.eligible === false ) {
+				continue;
+			}
+
+			stack.appendChild( goalContainer( goal, currency, 'compact', floatingTemplate( goal ) ) );
+			count++;
+
+			if ( count >= 3 ) {
+				break;
+			}
+		}
+
+		if ( count ) {
+			widget.appendChild( stack );
+			drawer.appendChild( widget );
+		}
+	}
+
+	/**
+	 * Build the floating button + drawer markup once.
+	 *
+	 * The container rendered by PHP is inert until an eligible goal
+	 * exists; the button/drawer markup is built on first show and kept
+	 * (only the drawer's goal cards rebuild per payload). Global click /
+	 * Escape handlers close the drawer, and the animation toggle rides on
+	 * a class the stylesheet freezes.
+	 *
+	 * @param {HTMLElement} container The #faracart-floating element.
+	 * @return {void}
+	 */
+	function buildFloating( container ) {
+		if ( floatingBuilt ) {
+			return;
+		}
+
+		var button = el( 'button', 'faracart-floating__button' );
+		button.type = 'button';
+		button.setAttribute( 'aria-haspopup', 'dialog' );
+		button.appendChild( el( 'span', 'faracart-floating__icon' ) );
+		container.appendChild( button );
+
+		var drawer = el( 'div', 'faracart-floating__drawer' );
+		drawer.setAttribute( 'role', 'dialog' );
+		container.appendChild( drawer );
+
+		var close = el( 'button', 'faracart-floating__close' );
+		close.type = 'button';
+		close.textContent = '\u00D7';
+		drawer.appendChild( close );
+
+		button.addEventListener( 'click', function () {
+			setFloatingOpen( ! floatingOpen );
+		} );
+
+		close.addEventListener( 'click', function () {
+			setFloatingOpen( false );
+		} );
+
+		// Close on outside click and Escape (never while the shopper is
+		// interacting inside the drawer).
+		document.addEventListener( 'click', function ( event ) {
+			if ( floatingOpen && container && ! container.contains( event.target ) ) {
+				setFloatingOpen( false );
+			}
+		} );
+
+		document.addEventListener( 'keydown', function ( event ) {
+			if ( floatingOpen && ( event.key === 'Escape' || event.key === 'Esc' ) ) {
+				setFloatingOpen( false );
+			}
+		} );
+
+		floatingBuilt = true;
+	}
+
+	/**
+	 * Render the floating widget for a progress payload.
+	 *
+	 * Gated on the master toggle, the per-device visibility flag and at
+	 * least one eligible goal — the button stays hidden (and the drawer
+	 * closes) whenever any gate fails. The position and button appearance
+	 * apply on every render (cheap, and keeps the widget correct across
+	 * resize/scroll), while the drawer goal cards only rebuild when the
+	 * payload fingerprint changes.
+	 *
+	 * @param {Object} data Progress payload data.
+	 * @return {void}
+	 */
+	function renderFloating( data ) {
+		var container = document.getElementById( FLOATING_ID );
+
+		if ( ! container ) {
+			return;
+		}
+
+		var floating = floatingConfig();
+		var goals = ( data && data.goals ) || [];
+		var hasEligible = false;
+
+		for ( var i = 0; i < goals.length; i++ ) {
+			if ( goals[ i ] && goals[ i ].eligible !== false ) {
+				hasEligible = true;
+				break;
+			}
+		}
+
+		var visible = floating.enabled && floating.visible && hasEligible;
+
+		if ( ! visible ) {
+			if ( floatingOpen ) {
+				setFloatingOpen( false );
+			}
+
+			container.classList.remove( 'faracart-floating--visible' );
+			container.setAttribute( 'aria-hidden', 'true' );
+			return;
+		}
+
+		if ( ! floatingBuilt ) {
+			buildFloating( container );
+		}
+
+		applyFloatingPosition( container, floating.position, floating.buttonSize, floatingSafeInsets() );
+
+		container.classList.toggle( 'faracart-floating--no-anim', ! floating.animation );
+		container.style.setProperty( '--faracart-floating-size', floating.buttonSize + 'px' );
+
+		var icon = container.querySelector( '.faracart-floating__icon' );
+
+		if ( icon ) {
+			icon.textContent = floating.icon || FLOATING_DEFAULT_ICON;
+		}
+
+		var button = container.querySelector( '.faracart-floating__button' );
+
+		if ( button ) {
+			var label = floating.label || floating.labels.open || 'View your cart goals';
+			button.setAttribute( 'aria-label', label );
+			button.title = label;
+		}
+
+		var fingerprint = payloadFingerprint( data );
+
+		if ( floatingFingerprint !== fingerprint ) {
+			floatingFingerprint = fingerprint;
+			renderFloatingDrawer( data );
+		}
+
+		container.classList.add( 'faracart-floating--visible' );
+		container.setAttribute( 'aria-hidden', 'false' );
+	}
+
+	/**
+	 * Re-evaluate the floating widget when the viewport crosses the mobile
+	 * breakpoint (device-specific position and visibility) — debounced so
+	 * a resize drag does not fetch the progress endpoint per event.
+	 *
+	 * @return {void}
+	 */
+	function bindFloatingResize() {
+		if ( ! cfg.floating || ! cfg.floating.enabled ) {
+			return;
+		}
+
+		var timer = null;
+
+		window.addEventListener( 'resize', function () {
+			if ( timer ) {
+				window.clearTimeout( timer );
+			}
+
+			timer = window.setTimeout( function () {
+			timer = null;
+			// Orientation/rotation changes safe-area insets; the next
+			// render re-measures them.
+			floatingInsetCache = null;
+
+			safe( function () {
+				// Re-constrain an open drawer: the viewport (and possibly the
+				// device position) changed, so the panel must stay on screen
+				// with its scroll area reachable.
+				if ( floatingOpen ) {
+					var container = document.getElementById( FLOATING_ID );
+
+					if ( container ) {
+						var drawer = container.querySelector( '.faracart-floating__drawer' );
+						var button = container.querySelector( '.faracart-floating__button' );
+						var direction = 'left';
+
+						if ( container.classList.contains( 'faracart-floating--dir-right' ) ) {
+							direction = 'right';
+						} else if ( container.classList.contains( 'faracart-floating--dir-up' ) ) {
+							direction = 'up';
+						} else if ( container.classList.contains( 'faracart-floating--dir-down' ) ) {
+							direction = 'down';
+						}
+
+						if ( drawer && button ) {
+							constrainFloatingDrawer( drawer, button.getBoundingClientRect(), direction );
+						}
+					}
+				}
+
+				refresh();
+			} );
+		}, 200 );
+		}, { passive: true } );
+	}
+
 	/**
 	 * Refresh every mounted widget from the progress endpoint.
 	 *
@@ -2696,6 +3336,11 @@
 						renderSticky( data );
 						stickyFingerprint = fingerprint;
 					}
+
+					// The floating widget resolves its own device position and
+					// visibility every render (cheap), so it always tracks the
+					// current payload and viewport.
+					renderFloating( data );
 
 					trackGoals( data );
 				} );
@@ -3051,6 +3696,7 @@
 		bindGiftPicker();
 		bindCountdownTicker();
 		bindStickyScroll();
+		bindFloatingResize();
 
 		// Phase 18 (mobile behavior): re-render when the viewport crosses
 		// the mobile breakpoint so hidden widgets appear/disappear live.

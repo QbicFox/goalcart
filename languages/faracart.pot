@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-16T11:00:32Z\n"
+"POT-Creation-Date: 2026-08-17T06:44:50Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -101,7 +101,7 @@ msgstr ""
 msgid "%s completion rate"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:970
+#: includes/Frontend/ProgressUI.php:1065
 msgid "%s is active"
 msgstr ""
 
@@ -110,7 +110,7 @@ msgid "%s is your top performer"
 msgstr ""
 
 #: admin-app/src/templates/renderers/goalShared.tsx:30
-#: includes/Frontend/ProgressUI.php:962
+#: includes/Frontend/ProgressUI.php:1057
 msgid "%s left"
 msgstr ""
 
@@ -177,12 +177,24 @@ msgstr ""
 msgid "A connected ladder of the campaign milestones — dots, targets and rewards — with an overall progress bar."
 msgstr ""
 
+#: admin-app/src/routes/Settings.tsx:1198
+msgid "A custom glyph/emoji shown inside the button (leave empty for the default cart icon)."
+msgstr ""
+
 #: admin-app/src/components/goal-builder/RewardFields.tsx:360
 msgid "A deterministic coupon is created per customer."
 msgstr ""
 
+#: admin-app/src/routes/Settings.tsx:1037
+msgid "A floating goals/campaigns button with a progress drawer — always reachable while shopping."
+msgstr ""
+
 #: includes/Analytics/UpsellRanker.php:293
 msgid "A goal target or an explicit remaining amount is required to rank upsells."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:342
+msgid "A physical side — the button keeps this exact side in RTL stores."
 msgstr ""
 
 #: admin-app/src/routes/GoalBuilder.tsx:483
@@ -192,6 +204,10 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:187
 #: admin-app/src/routes/GoalPerformance.tsx:76
 msgid "A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:322
+msgid "A quick position; the horizontal/vertical fields and offsets below fine-tune it."
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:487
@@ -239,12 +255,12 @@ msgstr ""
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:91
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:119
 #: admin-app/src/templates/renderers/goalShared.tsx:317
-#: includes/Frontend/ProgressUI.php:963
+#: includes/Frontend/ProgressUI.php:1058
 msgid "Add"
 msgstr ""
 
 #: admin-app/src/templates/renderers/goalShared.tsx:39
-#: includes/Frontend/ProgressUI.php:964
+#: includes/Frontend/ProgressUI.php:1059
 msgid "Add %s more"
 msgstr ""
 
@@ -274,7 +290,7 @@ msgstr ""
 msgid "Add goal"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:681
+#: admin-app/src/routes/Settings.tsx:850
 msgid "Add line taxes to the subtotal-style money bases."
 msgstr ""
 
@@ -298,11 +314,11 @@ msgid "Add product costs to unlock Estimated Profit — FaraCart never invents a
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:103
-#: includes/Frontend/ProgressUI.php:967
+#: includes/Frontend/ProgressUI.php:1062
 msgid "Add these products to reach your goal faster:"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:525
+#: includes/Frontend/ProgressUI.php:534
 msgid "Add to cart"
 msgstr ""
 
@@ -320,7 +336,7 @@ msgid "Add-to-cart"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1217
-#: includes/Frontend/ProgressUI.php:527
+#: includes/Frontend/ProgressUI.php:536
 msgid "Added"
 msgstr ""
 
@@ -329,7 +345,7 @@ msgstr ""
 msgid "Added to cart"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:526
+#: includes/Frontend/ProgressUI.php:535
 msgid "Adding…"
 msgstr ""
 
@@ -344,8 +360,8 @@ msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:602
 #: admin-app/src/routes/RevenueOverview.tsx:440
-#: admin-app/src/routes/Settings.tsx:402
-#: admin-app/src/routes/Settings.tsx:783
+#: admin-app/src/routes/Settings.tsx:566
+#: admin-app/src/routes/Settings.tsx:952
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:147
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:153
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:166
@@ -414,7 +430,7 @@ msgstr ""
 msgid "Allowed shipping zones"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:973
+#: includes/Frontend/ProgressUI.php:1068
 msgid "Almost there!"
 msgstr ""
 
@@ -443,7 +459,7 @@ msgstr ""
 msgid "Analysis is based on a moderate number of customer sessions."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:746
+#: admin-app/src/routes/Settings.tsx:915
 msgid "Analytics tracking"
 msgstr ""
 
@@ -455,7 +471,7 @@ msgstr ""
 msgid "Analyzing: %1$s – %2$s"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:543
+#: admin-app/src/routes/Settings.tsx:712
 msgid "Animate progress"
 msgstr ""
 
@@ -470,7 +486,11 @@ msgstr ""
 msgid "Animate progress updates"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:633
+#: admin-app/src/routes/Settings.tsx:1183
+msgid "Animate the button and drawer"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:802
 msgid "Appear delay (seconds)"
 msgstr ""
 
@@ -485,7 +505,7 @@ msgstr ""
 msgid "Appearance saved."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:830
+#: admin-app/src/routes/Settings.tsx:999
 msgid "Appended to the storefront widget stylesheet (tags are stripped)."
 msgstr ""
 
@@ -578,11 +598,15 @@ msgstr ""
 msgid "Attribution window"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:130
+#: admin-app/src/routes/Settings.tsx:145
 msgid "Auto (store currency)"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:608
+#: admin-app/src/routes/Settings.tsx:1173
+msgid "Auto (toward screen center)"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:777
 msgid "Auto-hide"
 msgstr ""
 
@@ -669,7 +693,7 @@ msgstr ""
 msgid "Background"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:770
+#: admin-app/src/routes/Settings.tsx:939
 msgid "Balanced"
 msgstr ""
 
@@ -696,7 +720,7 @@ msgstr ""
 msgid "Basic information"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:601
+#: admin-app/src/routes/Settings.tsx:770
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:141
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:160
 #: includes/Templates/Goal/Template1.php:190
@@ -716,7 +740,7 @@ msgstr ""
 msgid "Best performer"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:464
+#: admin-app/src/routes/Settings.tsx:633
 msgid "Best reward only"
 msgstr ""
 
@@ -735,9 +759,18 @@ msgstr ""
 msgid "Border"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:523
-#: admin-app/src/routes/Settings.tsx:594
+#: admin-app/src/routes/Settings.tsx:362
+#: admin-app/src/routes/Settings.tsx:692
+#: admin-app/src/routes/Settings.tsx:763
 msgid "Bottom"
+msgstr ""
+
+#: admin-app/src/components/floating/floating.ts:50
+msgid "Bottom left"
+msgstr ""
+
+#: admin-app/src/components/floating/floating.ts:49
+msgid "Bottom right"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/goalTypes.tsx:81
@@ -778,10 +811,22 @@ msgstr ""
 msgid "Button color"
 msgstr ""
 
+#: admin-app/src/routes/Settings.tsx:1197
+msgid "Button icon"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1214
+msgid "Button label / tooltip"
+msgstr ""
+
 #: includes/Templates/Goal/Template2.php:128
 #: includes/Templates/Goal/Template4.php:134
 #: includes/Templates/Goal/Template5.php:133
 msgid "Button radius (px)"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1155
+msgid "Button size (px)"
 msgstr ""
 
 #: includes/Templates/Goal/Template1.php:139
@@ -804,11 +849,11 @@ msgstr ""
 msgid "CTR"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:737
+#: admin-app/src/routes/Settings.tsx:906
 msgid "Cache progress payloads"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:731
+#: admin-app/src/routes/Settings.tsx:900
 msgid "Caching and what the storefront measures."
 msgstr ""
 
@@ -817,7 +862,7 @@ msgstr ""
 msgid "Calculate against"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:471
+#: admin-app/src/routes/Settings.tsx:640
 msgid "Calculation mode"
 msgstr ""
 
@@ -872,7 +917,7 @@ msgstr ""
 msgid "Cart goals drive the storefront progress bars and rewards."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:146
+#: admin-app/src/routes/Settings.tsx:161
 msgid "Cart page"
 msgstr ""
 
@@ -887,7 +932,7 @@ msgstr ""
 #: admin-app/src/components/goal-builder/TargetFields.tsx:43
 #: admin-app/src/components/goal-builder/TargetFields.tsx:49
 #: admin-app/src/components/goal-builder/TargetFields.tsx:55
-#: admin-app/src/routes/Settings.tsx:487
+#: admin-app/src/routes/Settings.tsx:656
 msgid "Cart total (incl. tax & shipping)"
 msgstr ""
 
@@ -901,15 +946,27 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:571
+#: admin-app/src/routes/Settings.tsx:740
 msgid "Celebration animation"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:771
+#: admin-app/src/routes/Settings.tsx:361
+msgid "Center"
+msgstr ""
+
+#: admin-app/src/components/floating/floating.ts:52
+msgid "Center left"
+msgstr ""
+
+#: admin-app/src/components/floating/floating.ts:51
+msgid "Center right"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:940
 msgid "Cheapest first"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:148
+#: admin-app/src/routes/Settings.tsx:163
 msgid "Checkout"
 msgstr ""
 
@@ -944,11 +1001,15 @@ msgstr ""
 msgid "Clicks"
 msgstr ""
 
+#: includes/Frontend/ProgressUI.php:575
+msgid "Close"
+msgstr ""
+
 #: admin-app/src/components/layout/AdminLayout.tsx:290
 msgid "Collapse all"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:747
+#: admin-app/src/routes/Settings.tsx:916
 msgid "Collect goal and suggestion events. Keep the goals running while turning event collection off."
 msgstr ""
 
@@ -1010,7 +1071,7 @@ msgstr ""
 msgid "Comfortable"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:620
+#: admin-app/src/routes/Settings.tsx:789
 #: includes/Templates/Goal/Template1.php:154
 msgid "Compact"
 msgstr ""
@@ -1019,7 +1080,7 @@ msgstr ""
 msgid "Compact dark bar — icon, progress, remaining amount and a small CTA."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:615
+#: admin-app/src/routes/Settings.tsx:784
 msgid "Compact shows only the progress; full adds the message and reward."
 msgstr ""
 
@@ -1042,7 +1103,7 @@ msgstr ""
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:59
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:82
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:86
-#: includes/Frontend/ProgressUI.php:968
+#: includes/Frontend/ProgressUI.php:1063
 msgid "Completed"
 msgstr ""
 
@@ -1110,12 +1171,12 @@ msgstr ""
 msgid "Confirm"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:448
+#: admin-app/src/routes/Settings.tsx:617
 msgid "Conflict resolution"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:55
-#: includes/Frontend/ProgressUI.php:974
+#: includes/Frontend/ProgressUI.php:1069
 msgid "Congratulations!"
 msgstr ""
 
@@ -1227,7 +1288,7 @@ msgstr ""
 msgid "Could not load the sales overview."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:370
+#: admin-app/src/routes/Settings.tsx:534
 msgid "Could not load the settings."
 msgstr ""
 
@@ -1243,11 +1304,11 @@ msgstr ""
 msgid "Could not save the settings. Please try again."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:647
+#: admin-app/src/routes/Settings.tsx:816
 msgid "Countdown in sticky bar"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:562
+#: admin-app/src/routes/Settings.tsx:731
 msgid "Countdown timer"
 msgstr ""
 
@@ -1256,7 +1317,7 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:46
 #: admin-app/src/routes/Goals.tsx:46
 #: admin-app/src/templates/rewardLabel.ts:12
-#: includes/Frontend/ProgressUI.php:951
+#: includes/Frontend/ProgressUI.php:1046
 #: includes/Goals/MessageEngine.php:352
 msgid "Coupon"
 msgstr ""
@@ -1289,11 +1350,11 @@ msgstr ""
 msgid "Create your first Goal"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:456
+#: admin-app/src/routes/Settings.tsx:625
 msgid "Cumulative — all rewards stack"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:424
+#: admin-app/src/routes/Settings.tsx:593
 msgid "Currency"
 msgstr ""
 
@@ -1314,7 +1375,11 @@ msgstr ""
 msgid "Current target: %1$s"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:829
+#: admin-app/src/routes/Settings.tsx:329
+msgid "Custom"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:998
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:152
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:171
 #: includes/Templates/Goal/Template1.php:201
@@ -1416,11 +1481,11 @@ msgstr ""
 msgid "Day window starts"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:790
+#: admin-app/src/routes/Settings.tsx:959
 msgid "Debug mode"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:784
+#: admin-app/src/routes/Settings.tsx:953
 msgid "Debugging, logging and the developer surface."
 msgstr ""
 
@@ -1432,11 +1497,11 @@ msgstr ""
 msgid "Default (no campaign template)"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:434
+#: admin-app/src/routes/Settings.tsx:603
 msgid "Default goal behavior"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:472
+#: admin-app/src/routes/Settings.tsx:641
 msgid "Default money basis for goals that do not set their own."
 msgstr ""
 
@@ -1469,11 +1534,16 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:121
+#: admin-app/src/routes/Settings.tsx:297
+msgid "Desktop"
+msgstr ""
+
 #: admin-app/src/routes/Analytics.tsx:1042
 msgid "Detailed Activity"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:843
+#: admin-app/src/routes/Settings.tsx:1012
 msgid "Developer hooks"
 msgstr ""
 
@@ -1525,34 +1595,51 @@ msgstr ""
 #: admin-app/src/components/goal-builder/TargetFields.tsx:42
 #: admin-app/src/components/goal-builder/TargetFields.tsx:48
 #: admin-app/src/components/goal-builder/TargetFields.tsx:54
-#: admin-app/src/routes/Settings.tsx:483
+#: admin-app/src/routes/Settings.tsx:652
 msgid "Discounted subtotal"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:349
-#: includes/Frontend/ProgressUI.php:956
+#: includes/Frontend/ProgressUI.php:1051
 msgid "Dismiss"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:607
+#: admin-app/src/routes/Settings.tsx:776
 msgid "Dismissible"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:602
+#: admin-app/src/routes/Settings.tsx:771
 msgid "Dismissible bars hide via the close button; auto-hide bars collapse after a few seconds and reappear on scroll."
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:498
 #: admin-app/src/routes/GoalBuilder.tsx:430
+#: admin-app/src/routes/Settings.tsx:1139
 msgid "Display"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:515
+#: admin-app/src/routes/Settings.tsx:684
 msgid "Display locations"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1058
+msgid "Display the button on desktop screens."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1066
+msgid "Display the button on mobile screens."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:154
 msgid "Distance"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:394
+msgid "Distance from the chosen edge — or from the midline when the position is center (0–200)."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:376
+msgid "Distance from the chosen side (0–200)."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:986
@@ -1570,6 +1657,14 @@ msgstr ""
 #: admin-app/src/components/goal-builder/goalTypes.tsx:39
 #: admin-app/src/routes/Goals.tsx:52
 msgid "Distinct quantity"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1177
+msgid "Down"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1167
+msgid "Drawer opening direction"
 msgstr ""
 
 #: admin-app/src/routes/Campaigns.tsx:246
@@ -1638,11 +1733,19 @@ msgstr ""
 msgid "Enable"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:415
+#: admin-app/src/routes/Settings.tsx:584
 msgid "Enable FaraCart"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:953
+#: admin-app/src/routes/Settings.tsx:1046
+msgid "Enable floating widget"
+msgstr ""
+
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:216
+msgid "Enable the floating widget to preview it."
+msgstr ""
+
+#: includes/Frontend/ProgressUI.php:1048
 msgid "Ended"
 msgstr ""
 
@@ -1651,7 +1754,7 @@ msgstr ""
 msgid "Ends at"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:952
+#: includes/Frontend/ProgressUI.php:1047
 msgid "Ends in"
 msgstr ""
 
@@ -1771,7 +1874,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:49
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:67
-#: includes/Frontend/ProgressUI.php:971
+#: includes/Frontend/ProgressUI.php:1066
 msgid "Expired"
 msgstr ""
 
@@ -1795,7 +1898,7 @@ msgstr ""
 msgid "FaraCart"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:208
+#: includes/Frontend/ProgressUI.php:211
 msgid "FaraCart Progress"
 msgstr ""
 
@@ -1833,11 +1936,11 @@ msgid "FaraCart:"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:184
-#: includes/Frontend/ProgressUI.php:976
+#: includes/Frontend/ProgressUI.php:1071
 msgid "Finish today — your reward is waiting"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:460
+#: admin-app/src/routes/Settings.tsx:629
 msgid "First matching goal only"
 msgstr ""
 
@@ -1860,9 +1963,17 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:44
 #: admin-app/src/routes/Goals.tsx:44
 #: admin-app/src/templates/rewardLabel.ts:10
-#: includes/Frontend/ProgressUI.php:949
+#: includes/Frontend/ProgressUI.php:1044
 #: includes/Goals/MessageEngine.php:339
 msgid "Fixed discount"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:570
+msgid "Floating"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1036
+msgid "Floating widget"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:27
@@ -1871,11 +1982,13 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:45
 #: admin-app/src/routes/Goals.tsx:45
 #: admin-app/src/templates/rewardLabel.ts:11
-#: includes/Frontend/ProgressUI.php:950
+#: includes/Frontend/ProgressUI.php:1045
 #: includes/Goals/MessageEngine.php:349
 msgid "Free gift"
 msgstr ""
 
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:52
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:368
 #: admin-app/src/components/goal-builder/RewardFields.tsx:24
 #: admin-app/src/routes/Analytics.tsx:84
 #: admin-app/src/routes/Appearance.tsx:52
@@ -1883,7 +1996,7 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:42
 #: admin-app/src/routes/Goals.tsx:42
 #: admin-app/src/templates/rewardLabel.ts:8
-#: includes/Frontend/ProgressUI.php:947
+#: includes/Frontend/ProgressUI.php:1042
 #: includes/Goals/MessageEngine.php:326
 msgid "Free shipping"
 msgstr ""
@@ -1900,16 +2013,16 @@ msgstr ""
 msgid "Friday"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:394
-#: admin-app/src/routes/Settings.tsx:508
+#: admin-app/src/routes/Settings.tsx:558
+#: admin-app/src/routes/Settings.tsx:677
 msgid "Frontend"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:621
+#: admin-app/src/routes/Settings.tsx:790
 msgid "Full"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:494
+#: admin-app/src/routes/Settings.tsx:663
 msgid "Full-screen dashboard"
 msgstr ""
 
@@ -1917,8 +2030,8 @@ msgstr ""
 msgid "Funnel"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:390
-#: admin-app/src/routes/Settings.tsx:408
+#: admin-app/src/routes/Settings.tsx:554
+#: admin-app/src/routes/Settings.tsx:577
 msgid "General"
 msgstr ""
 
@@ -1926,7 +2039,7 @@ msgstr ""
 msgid "Generate a coupon from these rules"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:955
+#: includes/Frontend/ProgressUI.php:1050
 msgid "Gift added to your cart"
 msgstr ""
 
@@ -1958,8 +2071,8 @@ msgstr ""
 msgid "Goal"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:399
-#: admin-app/src/routes/Settings.tsx:670
+#: admin-app/src/routes/Settings.tsx:563
+#: admin-app/src/routes/Settings.tsx:839
 msgid "Goal Calculation"
 msgstr ""
 
@@ -1990,7 +2103,7 @@ msgid "Goal Views"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:94
-#: includes/Frontend/ProgressUI.php:969
+#: includes/Frontend/ProgressUI.php:1064
 msgid "Goal completed"
 msgstr ""
 
@@ -2087,11 +2200,11 @@ msgstr ""
 msgid "Hide interaction details"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:556
+#: admin-app/src/routes/Settings.tsx:725
 msgid "Hide on mobile"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:495
+#: admin-app/src/routes/Settings.tsx:664
 msgid "Hide the WordPress admin chrome and let the dashboard fill the whole browser window."
 msgstr ""
 
@@ -2124,11 +2237,19 @@ msgstr ""
 msgid "History"
 msgstr ""
 
+#: admin-app/src/routes/Settings.tsx:375
+msgid "Horizontal offset (px)"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:341
+msgid "Horizontal position"
+msgstr ""
+
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:212
 msgid "How Estimated Profit becomes available"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:449
+#: admin-app/src/routes/Settings.tsx:618
 msgid "How completed goals grant rewards when several compete: combine them, grant only the highest-priority matching goal, or grant only the best reward. Per-goal exclusive flags and priorities are respected in every mode."
 msgstr ""
 
@@ -2141,7 +2262,7 @@ msgstr ""
 msgid "How is this calculated?"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:634
+#: admin-app/src/routes/Settings.tsx:803
 msgid "How long after page load before the bar appears."
 msgstr ""
 
@@ -2157,7 +2278,7 @@ msgstr ""
 msgid "How many times the same shopper may complete this goal. Each completion cycle grants the reward once; after the limit is reached the goal no longer appears as completable for that shopper."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:435
+#: admin-app/src/routes/Settings.tsx:604
 msgid "How multiple active goals are presented when the shopper has no campaign."
 msgstr ""
 
@@ -2169,7 +2290,7 @@ msgstr ""
 msgid "How related this product is to the items already in the customer’s cart."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:765
+#: admin-app/src/routes/Settings.tsx:934
 msgid "How suggested products are ordered (Phase 32 advanced upsell ranking)."
 msgstr ""
 
@@ -2181,11 +2302,11 @@ msgstr ""
 msgid "How this goal competes when several goals are active. Lower priority numbers win first; a goal inside a campaign is also ordered by its campaign priority."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:132
+#: admin-app/src/routes/Settings.tsx:147
 msgid "IRR — Iranian rial"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:131
+#: admin-app/src/routes/Settings.tsx:146
 msgid "IRT — Iranian toman"
 msgstr ""
 
@@ -2231,23 +2352,23 @@ msgstr ""
 msgid "Inactive goals never evaluate on the storefront."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:689
+#: admin-app/src/routes/Settings.tsx:858
 msgid "Include discounts"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:707
+#: admin-app/src/routes/Settings.tsx:876
 msgid "Include sale items"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:698
+#: admin-app/src/routes/Settings.tsx:867
 msgid "Include shipping"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:680
+#: admin-app/src/routes/Settings.tsx:849
 msgid "Include taxes"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:716
+#: admin-app/src/routes/Settings.tsx:885
 msgid "Include virtual products"
 msgstr ""
 
@@ -2335,7 +2456,7 @@ msgstr ""
 msgid "Last 90 days"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:614
+#: admin-app/src/routes/Settings.tsx:783
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:83
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:89
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:95
@@ -2369,6 +2490,15 @@ msgstr ""
 msgid "Leave empty to apply to the whole cart."
 msgstr ""
 
+#: admin-app/src/routes/Settings.tsx:347
+#: admin-app/src/routes/Settings.tsx:1174
+msgid "Left"
+msgstr ""
+
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:224
+msgid "Left/right and top/bottom are physical sides — the button stays exactly here in RTL stores."
+msgstr ""
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:346
 msgid "Limit"
 msgstr ""
@@ -2386,11 +2516,13 @@ msgstr ""
 msgid "Limited stock remaining."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:657
+#: admin-app/src/routes/Settings.tsx:826
 msgid "List the gap-closing product suggestions in the bar."
 msgstr ""
 
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:107
 #: admin-app/src/routes/Appearance.tsx:642
+#: admin-app/src/routes/Settings.tsx:1227
 msgid "Live preview"
 msgstr ""
 
@@ -2414,7 +2546,7 @@ msgstr ""
 msgid "Locations not covered by your other zones"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:808
+#: admin-app/src/routes/Settings.tsx:977
 msgid "Log file"
 msgstr ""
 
@@ -2426,7 +2558,7 @@ msgstr ""
 msgid "Logged-in customers whose lifetime spend and order count meet the thresholds below."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:799
+#: admin-app/src/routes/Settings.tsx:968
 msgid "Logging"
 msgstr ""
 
@@ -2465,7 +2597,7 @@ msgstr ""
 msgid "Margin"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:409
+#: admin-app/src/routes/Settings.tsx:578
 msgid "Master toggle, display and default behavior."
 msgstr ""
 
@@ -2499,7 +2631,7 @@ msgstr ""
 msgid "Milestones"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:147
+#: admin-app/src/routes/Settings.tsx:162
 msgid "Mini cart"
 msgstr ""
 
@@ -2519,8 +2651,17 @@ msgstr ""
 msgid "Minimum lifetime spend"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:549
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:122
+#: admin-app/src/routes/Settings.tsx:297
+msgid "Mobile"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:718
 msgid "Mobile behavior"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1116
+msgid "Mobile reuses the desktop position. Turn the toggle above off to configure a separate mobile position."
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:126
@@ -2540,7 +2681,7 @@ msgstr ""
 msgid "More customer activity is needed for a more reliable analysis."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:772
+#: admin-app/src/routes/Settings.tsx:941
 msgid "Most popular first"
 msgstr ""
 
@@ -2649,8 +2790,8 @@ msgid "No recommendation is available for this goal yet."
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:109
-#: includes/Frontend/ProgressUI.php:528
-#: includes/Frontend/ProgressUI.php:977
+#: includes/Frontend/ProgressUI.php:537
+#: includes/Frontend/ProgressUI.php:1072
 msgid "No recommendations available right now."
 msgstr ""
 
@@ -2766,10 +2907,11 @@ msgid "Only %1$s of completed goals were followed by an attributed purchase."
 msgstr ""
 
 #: admin-app/src/templates/renderers/goalShared.tsx:294
-#: includes/Frontend/ProgressUI.php:966
+#: includes/Frontend/ProgressUI.php:1061
 msgid "Only %s"
 msgstr ""
 
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:53
 #: admin-app/src/routes/Appearance.tsx:64
 msgid "Only %s left to reach your goal"
 msgstr ""
@@ -2910,7 +3052,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:131
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:116
-#: includes/Frontend/ProgressUI.php:960
+#: includes/Frontend/ProgressUI.php:1055
 msgid "Paid"
 msgstr ""
 
@@ -2923,7 +3065,7 @@ msgid "Percentage"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:25
-#: includes/Frontend/ProgressUI.php:948
+#: includes/Frontend/ProgressUI.php:1043
 #: includes/Goals/MessageEngine.php:330
 msgid "Percentage discount"
 msgstr ""
@@ -2938,8 +3080,8 @@ msgstr ""
 msgid "Percentage off"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:401
-#: admin-app/src/routes/Settings.tsx:730
+#: admin-app/src/routes/Settings.tsx:565
+#: admin-app/src/routes/Settings.tsx:899
 msgid "Performance"
 msgstr ""
 
@@ -2951,11 +3093,11 @@ msgstr ""
 msgid "Pick the default progress template and tune its appearance — separately for Goals and Campaigns."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:954
+#: includes/Frontend/ProgressUI.php:1049
 msgid "Pick your free gift"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:572
+#: admin-app/src/routes/Settings.tsx:741
 msgid "Play a confetti burst when a goal is reached (Phase 32)."
 msgstr ""
 
@@ -2963,12 +3105,12 @@ msgstr ""
 msgid "Please select another goal."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:351
-#: admin-app/src/routes/Settings.tsx:365
+#: admin-app/src/routes/Settings.tsx:515
+#: admin-app/src/routes/Settings.tsx:529
 msgid "Plugin-wide configuration."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:379
+#: admin-app/src/routes/Settings.tsx:543
 msgid "Plugin-wide configuration. Changes apply immediately."
 msgstr ""
 
@@ -2980,13 +3122,25 @@ msgstr ""
 msgid "Popularity"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:520
-#: admin-app/src/routes/Settings.tsx:591
+#: admin-app/src/routes/Settings.tsx:689
+#: admin-app/src/routes/Settings.tsx:760
 msgid "Position"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1074
+msgid "Position & display"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:313
+msgid "Position preset"
 msgstr ""
 
 #: includes/Templates/Goal/Template6.php:45
 msgid "Premium card — gold accents, elegant progress and a refined call-to-action."
+msgstr ""
+
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:119
+msgid "Preview device"
 msgstr ""
 
 #: includes/REST/PreviewController.php:792
@@ -3068,11 +3222,11 @@ msgstr ""
 msgid "Product margin data is not available — profitability scored neutral."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:150
+#: admin-app/src/routes/Settings.tsx:165
 msgid "Product pages"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:755
+#: admin-app/src/routes/Settings.tsx:924
 msgid "Product suggestions"
 msgstr ""
 
@@ -3102,7 +3256,7 @@ msgstr ""
 msgid "Products recommended to customers who were working toward this goal."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:524
+#: includes/Frontend/ProgressUI.php:533
 msgid "Products suggested for you"
 msgstr ""
 
@@ -3124,7 +3278,7 @@ msgid "Profit not estimated yet"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:100
-#: includes/Frontend/ProgressUI.php:959
+#: includes/Frontend/ProgressUI.php:1054
 msgid "Progress"
 msgstr ""
 
@@ -3318,7 +3472,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:137
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:124
-#: includes/Frontend/ProgressUI.php:961
+#: includes/Frontend/ProgressUI.php:1056
 msgid "Remaining"
 msgstr ""
 
@@ -3405,6 +3559,11 @@ msgstr ""
 msgid "Rewards and shipping costs were higher than the estimated incremental margin."
 msgstr ""
 
+#: admin-app/src/routes/Settings.tsx:348
+#: admin-app/src/routes/Settings.tsx:1175
+msgid "Right"
+msgstr ""
+
 #: includes/Templates/Goal/Template3.php:106
 #: includes/Templates/Goal/Template3.php:114
 msgid "Ring"
@@ -3485,14 +3644,14 @@ msgstr ""
 msgid "Save changes"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:342
+#: admin-app/src/routes/Settings.tsx:506
 msgid "Save settings"
 msgstr ""
 
 #: admin-app/src/routes/Appearance.tsx:477
 #: admin-app/src/routes/CampaignBuilder.tsx:280
 #: admin-app/src/routes/GoalBuilder.tsx:256
-#: admin-app/src/routes/Settings.tsx:342
+#: admin-app/src/routes/Settings.tsx:506
 msgid "Saving…"
 msgstr ""
 
@@ -3557,7 +3716,7 @@ msgstr ""
 msgid "Select a goal to apply the recommendation to."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:738
+#: admin-app/src/routes/Settings.tsx:907
 msgid "Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer goal evaluations, at the cost of a brief staleness window after cart changes."
 msgstr ""
 
@@ -3578,13 +3737,13 @@ msgid "Set up product costs"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:69
-#: admin-app/src/routes/Settings.tsx:350
-#: admin-app/src/routes/Settings.tsx:364
-#: admin-app/src/routes/Settings.tsx:378
+#: admin-app/src/routes/Settings.tsx:514
+#: admin-app/src/routes/Settings.tsx:528
+#: admin-app/src/routes/Settings.tsx:542
 msgid "Settings"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:302
+#: admin-app/src/routes/Settings.tsx:466
 msgid "Settings saved."
 msgstr ""
 
@@ -3618,21 +3777,21 @@ msgstr ""
 msgid "Shipping destination"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:149
+#: admin-app/src/routes/Settings.tsx:164
 msgid "Shop / archives"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:129
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:65
-#: includes/Frontend/ProgressUI.php:958
+#: includes/Frontend/ProgressUI.php:1053
 msgid "Shopping goal"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:563
+#: admin-app/src/routes/Settings.tsx:732
 msgid "Show a live countdown to the goal/campaign deadline (Phase 32)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:440
+#: admin-app/src/routes/Settings.tsx:609
 msgid "Show all goals"
 msgstr ""
 
@@ -3640,7 +3799,7 @@ msgstr ""
 msgid "Show campaign name"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:211
+#: includes/Frontend/ProgressUI.php:214
 msgid "Show cart goals, progress and rewards (FaraCart)."
 msgstr ""
 
@@ -3665,11 +3824,16 @@ msgstr ""
 msgid "Show milestone targets"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:555
+#: admin-app/src/routes/Settings.tsx:1057
+msgid "Show on desktop"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:724
+#: admin-app/src/routes/Settings.tsx:1065
 msgid "Show on mobile"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:756
+#: admin-app/src/routes/Settings.tsx:925
 msgid "Show recommended products that help reach the goal."
 msgstr ""
 
@@ -3687,16 +3851,20 @@ msgstr ""
 msgid "Show the call-to-action"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:442
+#: admin-app/src/routes/Settings.tsx:611
 msgid "Show the closest goal only"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:648
+#: admin-app/src/routes/Settings.tsx:817
 msgid "Show the deadline countdown inside the sticky bar."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:441
+#: admin-app/src/routes/Settings.tsx:610
 msgid "Show the first goal only"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1047
+msgid "Show the floating button on widget pages whenever the cart has an eligible goal."
 msgstr ""
 
 #: includes/Templates/Goal/Template3.php:157
@@ -3764,7 +3932,7 @@ msgstr ""
 msgid "Skipped — lower priority"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:544
+#: admin-app/src/routes/Settings.tsx:713
 msgid "Slide the progress-bar fill on updates."
 msgstr ""
 
@@ -3782,6 +3950,10 @@ msgstr ""
 
 #: includes/Analytics/UpsellRanker.php:277
 msgid "Smart upsells are disabled."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1184
+msgid "Smooth open/close transitions for the floating button and its drawer."
 msgstr ""
 
 #: includes/Templates/Goal/Template1.php:143
@@ -3825,11 +3997,11 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:581
+#: admin-app/src/routes/Settings.tsx:750
 msgid "Sticky bar"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:151
+#: admin-app/src/routes/Settings.tsx:166
 msgid "Sticky bottom bar"
 msgstr ""
 
@@ -3841,7 +4013,7 @@ msgstr ""
 msgid "Store-wide comparison is not available in this window."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:530
+#: admin-app/src/routes/Settings.tsx:699
 msgid "Store-wide progress widget variant."
 msgstr ""
 
@@ -3852,15 +4024,15 @@ msgstr ""
 #: admin-app/src/components/goal-builder/TargetFields.tsx:41
 #: admin-app/src/components/goal-builder/TargetFields.tsx:47
 #: admin-app/src/components/goal-builder/TargetFields.tsx:53
-#: admin-app/src/routes/Settings.tsx:479
+#: admin-app/src/routes/Settings.tsx:648
 msgid "Subtotal (before discounts)"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:764
+#: admin-app/src/routes/Settings.tsx:933
 msgid "Suggestion ranking"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:656
+#: admin-app/src/routes/Settings.tsx:825
 msgid "Suggestions in sticky bar"
 msgstr ""
 
@@ -3895,36 +4067,36 @@ msgid "Target: %s"
 msgstr ""
 
 #: admin-app/src/components/goal-builder/DisplayFields.tsx:76
-#: admin-app/src/routes/Settings.tsx:529
+#: admin-app/src/routes/Settings.tsx:698
 msgid "Template"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:532
+#: admin-app/src/routes/Settings.tsx:701
 #: includes/Templates/Goal/Template1.php:38
 msgid "Template 1"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:533
+#: admin-app/src/routes/Settings.tsx:702
 #: includes/Templates/Goal/Template2.php:39
 msgid "Template 2"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:534
+#: admin-app/src/routes/Settings.tsx:703
 #: includes/Templates/Goal/Template3.php:38
 msgid "Template 3"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:535
+#: admin-app/src/routes/Settings.tsx:704
 #: includes/Templates/Goal/Template4.php:39
 msgid "Template 4"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:536
+#: admin-app/src/routes/Settings.tsx:705
 #: includes/Templates/Goal/Template5.php:38
 msgid "Template 5"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:537
+#: admin-app/src/routes/Settings.tsx:706
 #: includes/Templates/Goal/Template6.php:38
 msgid "Template 6"
 msgstr ""
@@ -3951,12 +4123,32 @@ msgstr ""
 msgid "Text color"
 msgstr ""
 
+#: admin-app/src/routes/Settings.tsx:1215
+msgid "The accessible label and tooltip for the button (leave empty for the default)."
+msgstr ""
+
 #: includes/Admin/AssetLoader.php:112
 msgid "The admin app is not built yet (%s is missing). Run npm install && npm run build inside the admin-app directory, or start npm run dev in a local/development environment for hot reload."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:582
+#: admin-app/src/routes/Settings.tsx:751
 msgid "The advanced sticky bottom/top bar (Phase 32): position, behavior, countdown and suggestions."
+msgstr ""
+
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:228
+msgid "The button is hidden on this device (visibility disabled or the widget is off)."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1140
+msgid "The button look and the drawer behavior."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:301
+msgid "The button position on desktop screens."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:302
+msgid "The button position on mobile screens — handy when the button must clear mobile navigation or sticky cart buttons."
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:234
@@ -4006,7 +4198,7 @@ msgstr ""
 msgid "The cart must contain at least this many items."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:425
+#: admin-app/src/routes/Settings.tsx:594
 msgid "The currency unit shown on FaraCart amounts. “Auto” follows the store currency."
 msgstr ""
 
@@ -4028,6 +4220,10 @@ msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:27
 msgid "The faracart_product_cost filter"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1228
+msgid "The floating button exactly as it will appear — position, size, icon and drawer direction update live."
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:88
@@ -4110,7 +4306,7 @@ msgstr ""
 msgid "The page you are looking for does not exist."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:844
+#: admin-app/src/routes/Settings.tsx:1013
 msgid "The plugin’s public actions and filters — a reference for theme and plugin developers."
 msgstr ""
 
@@ -4132,6 +4328,10 @@ msgstr ""
 
 #: includes/REST/RecommendationsController.php:157
 msgid "The recommended target must be greater than zero."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1156
+msgid "The round button diameter (32–96)."
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:623
@@ -4183,7 +4383,7 @@ msgid "This gift is no longer available for the goal."
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:52
-#: includes/Frontend/ProgressUI.php:972
+#: includes/Frontend/ProgressUI.php:1067
 msgid "This goal has ended"
 msgstr ""
 
@@ -4245,9 +4445,14 @@ msgstr ""
 msgid "Too many requests. Please try again shortly."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:522
-#: admin-app/src/routes/Settings.tsx:595
+#: admin-app/src/routes/Settings.tsx:360
+#: admin-app/src/routes/Settings.tsx:691
+#: admin-app/src/routes/Settings.tsx:764
 msgid "Top"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:355
+msgid "Top and bottom offset from the matching edge; center positions the button on the viewport midline."
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1143
@@ -4258,12 +4463,20 @@ msgstr ""
 msgid "Top campaigns by completions"
 msgstr ""
 
+#: admin-app/src/components/floating/floating.ts:54
+msgid "Top left"
+msgstr ""
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:45
 msgid "Top performing"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:253
 msgid "Top recommendation"
+msgstr ""
+
+#: admin-app/src/components/floating/floating.ts:53
+msgid "Top right"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1202
@@ -4306,7 +4519,7 @@ msgstr ""
 msgid "Tuesday"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:416
+#: admin-app/src/routes/Settings.tsx:585
 msgid "Turn the storefront goals, rewards and progress bars on or off."
 msgstr ""
 
@@ -4333,6 +4546,10 @@ msgstr ""
 #: admin-app/src/routes/GoalBuilder.tsx:464
 #: admin-app/src/routes/Goals.tsx:104
 msgid "Unlimited"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1176
+msgid "Up"
 msgstr ""
 
 #: admin-app/src/components/preview/PreviewPanel.tsx:127
@@ -4374,6 +4591,10 @@ msgstr ""
 msgid "Use global default"
 msgstr ""
 
+#: admin-app/src/routes/Settings.tsx:1084
+msgid "Use the desktop position on mobile"
+msgstr ""
+
 #: admin-app/src/components/layout/AdminLayout.tsx:373
 msgid "User menu"
 msgstr ""
@@ -4384,6 +4605,14 @@ msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:28
 msgid "Variation falls back to its parent product"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:393
+msgid "Vertical offset (px)"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:354
+msgid "Vertical position"
 msgstr ""
 
 #: admin-app/src/routes/Dashboard.tsx:314
@@ -4408,13 +4637,19 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:168
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:155
-#: includes/Frontend/ProgressUI.php:965
+#: includes/Frontend/ProgressUI.php:1060
 msgid "View products"
 msgstr ""
 
 #: admin-app/src/components/layout/AdminLayout.tsx:359
 #: admin-app/src/components/layout/AdminLayout.tsx:365
 msgid "View store"
+msgstr ""
+
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:147
+#: admin-app/src/components/floating/FloatingWidgetPreview.tsx:172
+#: includes/Frontend/ProgressUI.php:574
+msgid "View your cart goals"
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:69
@@ -4468,19 +4703,23 @@ msgstr ""
 msgid "What the goal measures."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:690
+#: admin-app/src/routes/Settings.tsx:859
 msgid "When off, cart coupons and discounts do not reduce the discounted-subtotal basis."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:708
+#: admin-app/src/routes/Settings.tsx:877
 msgid "When off, products currently on sale are excluded from every goal."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:717
+#: admin-app/src/routes/Settings.tsx:886
 msgid "When off, virtual and downloadable products are excluded from every goal."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:699
+#: admin-app/src/routes/Settings.tsx:1085
+msgid "When on, mobile reuses the desktop position and the separate mobile fields are hidden."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:868
 msgid "When on, shipping charges count toward the cart-total basis."
 msgstr ""
 
@@ -4496,24 +4735,32 @@ msgstr ""
 msgid "When this goal is reached, every lower-priority goal is skipped and never grants its reward. Higher-priority goals are unaffected."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:509
+#: admin-app/src/routes/Settings.tsx:678
 msgid "Where and how the storefront widgets appear."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:592
+#: admin-app/src/routes/Settings.tsx:1075
+msgid "Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:761
 msgid "Where the sticky bar docks."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:550
+#: admin-app/src/routes/Settings.tsx:719
 msgid "Whether the widgets render on small screens (≤782px)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:671
+#: admin-app/src/routes/Settings.tsx:840
 msgid "Which cart money counts toward goals. Defaults match the storefront behavior before these options existed."
 msgstr ""
 
 #: admin-app/src/routes/GoalPerformance.tsx:727
 msgid "Which goals generated purchases, sales and profit? Completion is not the same as purchase."
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:1168
+msgid "Which way the progress drawer opens from the button. Auto opens toward the screen center and never points off-screen."
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:240
@@ -4530,7 +4777,7 @@ msgid "Window"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:177
-#: includes/Frontend/ProgressUI.php:975
+#: includes/Frontend/ProgressUI.php:1070
 msgid "With a purchase of"
 msgstr ""
 
@@ -4566,11 +4813,11 @@ msgstr ""
 msgid "WordPress %1$s or newer is required (current: %2$s)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:791
+#: admin-app/src/routes/Settings.tsx:960
 msgid "Write detailed (debug-level) entries to the plugin log when logging is enabled."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:800
+#: admin-app/src/routes/Settings.tsx:969
 msgid "Write errors (and debug entries when debug mode is on) to a log file."
 msgstr ""
 

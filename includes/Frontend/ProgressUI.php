@@ -169,6 +169,9 @@ final class ProgressUI {
 
 		// Sticky bottom bar (rendered after the footer, on widget pages).
 		$hooks->add_action( 'wp_footer', array( $this, 'render_sticky_bar' ), 20 );
+
+		// Floating goals/campaigns button + drawer (on widget pages).
+		$hooks->add_action( 'wp_footer', array( $this, 'render_floating_button' ), 20 );
 	}
 
 	/**
@@ -467,6 +470,12 @@ final class ProgressUI {
 				'suggestions' => (bool) $this->settings->get( 'sticky_suggestions', false ),
 				'display'     => 'full' === $this->settings->get( 'sticky_display', 'compact' ) ? 'full' : 'compact',
 			),
+			// Floating widget (floating goals/campaigns button + drawer): the
+			// resolved position config, per-device visibility and display
+			// options the storefront JS applies. Position axes are physical
+			// sides (the admin's choice must keep its visual result in RTL),
+			// so the JS positions with physical offsets, not logical ones.
+			'floating'  => $this->floating_config(),
 			// Phase 33.7 (Frontend Upsell Integration): the smart upsell
 			// panel's contract — the public rank endpoint (live-cart goal
 			// gap + deterministic ranking), the nonce-guarded track
@@ -527,6 +536,69 @@ final class ProgressUI {
 				'added'       => __( 'Added', 'faracart' ),
 				'unavailable' => __( 'No recommendations available right now.', 'faracart' ),
 			),
+		);
+	}
+
+	/**
+	 * The resolved floating-widget config for the storefront JS.
+	 *
+	 * Carries the master toggle, the per-device position (desktop always;
+	 * mobile reused from desktop when floating_mobile_use_desktop is on),
+	 * the per-device visibility flags and the display options (button
+	 * size, animation, drawer direction, custom icon/label). Every value
+	 * is normalized so a malformed stored setting can never reach the JS.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function floating_config() {
+		$desktop = $this->floating_position( 'desktop' );
+		$mobile  = $this->floating_position( 'mobile' );
+
+		return array(
+			'enabled'          => (bool) apply_filters( 'faracart_floating_enabled', $this->settings->get( 'floating_enabled', false ) ),
+			'desktop'          => $desktop,
+			'mobile'           => $mobile,
+			'mobileUseDesktop' => (bool) $this->settings->get( 'floating_mobile_use_desktop', true ),
+			'showDesktop'      => (bool) $this->settings->get( 'floating_show_desktop', true ),
+			'showMobile'       => (bool) $this->settings->get( 'floating_show_mobile', true ),
+			'buttonSize'       => min( 96, max( 32, (int) $this->settings->get( 'floating_button_size', 56 ) ) ),
+			'animation'        => (bool) $this->settings->get( 'floating_animation', true ),
+			'drawerDirection'  => in_array(
+				$this->settings->get( 'floating_drawer_direction', 'auto' ),
+				array( 'auto', 'left', 'right', 'up', 'down' ),
+				true
+			) ? $this->settings->get( 'floating_drawer_direction', 'auto' ) : 'auto',
+			'icon'             => trim( sanitize_text_field( (string) $this->settings->get( 'floating_icon', '' ) ) ),
+			'label'            => trim( sanitize_text_field( (string) $this->settings->get( 'floating_label', '' ) ) ),
+			'labels'           => array(
+				'open'   => __( 'View your cart goals', 'faracart' ),
+				'close'  => __( 'Close', 'faracart' ),
+			),
+		);
+	}
+
+	/**
+	 * One floating-widget position object (desktop or mobile), normalized.
+	 *
+	 * @param string $scope 'desktop' | 'mobile'.
+	 * @return array<string, string|int>
+	 */
+	public function floating_position( $scope ) {
+		$defaults = $this->settings->defaults();
+		$key      = 'floating_' . ( 'mobile' === $scope ? 'mobile' : 'desktop' );
+		$default  = isset( $defaults[ $key ] ) && is_array( $defaults[ $key ] ) ? $defaults[ $key ] : array();
+		$stored   = $this->settings->get( $key, array() );
+		$stored   = is_array( $stored ) ? $stored : array();
+
+		return array(
+			'horizontal' => isset( $stored['horizontal'] ) && in_array( $stored['horizontal'], array( 'left', 'right' ), true )
+				? $stored['horizontal']
+				: ( $default['horizontal'] ?? 'right' ),
+			'vertical' => isset( $stored['vertical'] ) && in_array( $stored['vertical'], array( 'top', 'center', 'bottom' ), true )
+				? $stored['vertical']
+				: ( $default['vertical'] ?? 'bottom' ),
+			'offset_x' => isset( $stored['offset_x'] ) ? min( 200, max( 0, (int) $stored['offset_x'] ) ) : (int) ( $default['offset_x'] ?? 20 ),
+			'offset_y' => isset( $stored['offset_y'] ) ? min( 200, max( 0, (int) $stored['offset_y'] ) ) : (int) ( $default['offset_y'] ?? 80 ),
 		);
 	}
 
@@ -622,7 +694,7 @@ final class ProgressUI {
 		$a = $this->appearance();
 
 		$css = sprintf(
-			'.faracart-widget, #faracart-sticky { --faracart-accent:%1$s; --faracart-bg:%2$s; --faracart-border:%3$s; --faracart-text:%4$s; --faracart-radius:%5$dpx; --faracart-bar-height:%6$dpx; }',
+			'.faracart-widget, #faracart-sticky, #faracart-floating { --faracart-accent:%1$s; --faracart-bg:%2$s; --faracart-border:%3$s; --faracart-text:%4$s; --faracart-radius:%5$dpx; --faracart-bar-height:%6$dpx; }',
 			$a['accent'],
 			$a['bg'],
 			$a['border'],
@@ -769,6 +841,29 @@ final class ProgressUI {
 
 		// phpcs:ignore WordPress.Security.EscapeOutput -- static markup.
 		echo '<div id="faracart-sticky" class="faracart-sticky' . esc_attr( $position ) . '" aria-hidden="true"></div>';
+	}
+
+	/**
+	 * Render the floating goals/campaigns button container.
+	 *
+	 * Gated on the floating_enabled setting (and the master enabled
+	 * toggle + widget pages like every other widget). The container is
+	 * inert markup — the JS builds the button + drawer and keeps it hidden
+	 * until the cart has an eligible goal to show.
+	 *
+	 * @return void
+	 */
+	public function render_floating_button() {
+		if ( is_admin() || ! $this->is_enabled() || ! $this->page_needs_widget() ) {
+			return;
+		}
+
+		if ( ! (bool) apply_filters( 'faracart_floating_enabled', $this->settings->get( 'floating_enabled', false ) ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.EscapeOutput -- static markup.
+		echo '<div id="faracart-floating" class="faracart-floating" aria-hidden="true"></div>';
 	}
 
 	/**

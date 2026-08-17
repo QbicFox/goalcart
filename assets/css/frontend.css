@@ -32,7 +32,8 @@
  */
 
 .faracart-widget,
-#faracart-sticky {
+#faracart-sticky,
+#faracart-floating {
 	--faracart-accent: #2271b1;
 	--faracart-bg: #ffffff;
 	--faracart-border: #dcdcde;
@@ -67,7 +68,8 @@
 }
 
 .faracart-widget *,
-#faracart-sticky * {
+#faracart-sticky *,
+#faracart-floating * {
 	box-sizing: border-box;
 }
 
@@ -1607,6 +1609,183 @@
 }
 
 /* ------------------------------------------------------------------ *
+ * Floating widget (floating goals/campaigns button + drawer)
+ * ------------------------------------------------------------------ */
+
+/* The fixed container: its physical position (left/right/top/bottom +
+ * offsets) is applied inline by the JS so the admin's chosen side keeps
+ * its visual result in RTL (the axis is a physical side, not a logical
+ * start/end). The button size token drives the FAB; the container itself
+ * is inert until the JS flags it visible (an eligible goal exists). */
+
+.faracart-floating {
+	--faracart-floating-size: 56px;
+	position: fixed;
+	z-index: 99999;
+	display: none;
+	pointer-events: none;
+}
+
+.faracart-floating--visible {
+	display: block;
+}
+
+/* Center vertical: the JS flags the container and the offset rides on
+ * --faracart-fy, so the whole block (button + drawer) stays centered on
+ * the viewport midline minus the configured offset. */
+
+.faracart-floating--center {
+	transform: translateY( calc( -50% + var(--faracart-fy, 0px) ) );
+}
+
+.faracart-floating__button {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	width: var(--faracart-floating-size);
+	height: var(--faracart-floating-size);
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: var(--faracart-accent);
+	color: #ffffff;
+	font-size: calc( var(--faracart-floating-size) * 0.44 );
+	line-height: 1;
+	cursor: pointer;
+	box-shadow: var(--faracart-shadow);
+	pointer-events: auto;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.faracart-floating__button:hover,
+.faracart-floating__button:focus-visible {
+	transform: translateY(-1px);
+	box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+.faracart-floating__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+
+.faracart-floating--no-anim .faracart-floating__button,
+.faracart-floating--no-anim .faracart-floating__drawer {
+	transition: none;
+}
+
+/* The drawer panel: opens from the button in the configured direction
+ * (physical, so the admin's choice is stable in RTL). The anchor offset
+ * rides on the transform so the open/close scale animation composes with
+ * it; the panel scrolls internally and never exceeds the viewport. */
+
+.faracart-floating__drawer {
+	position: absolute;
+	z-index: 1;
+	min-width: 260px;
+	max-width: min( 340px, calc( 100vw - 2rem ) );
+	max-height: calc( 100vh - 2rem );
+	overflow: auto;
+	/* Scrolling inside the drawer must never scroll the page behind it. */
+	overscroll-behavior: contain;
+	padding: 1rem;
+	background: var(--faracart-bg);
+	border: 1px solid var(--faracart-border);
+	border-radius: var(--faracart-radius);
+	box-shadow: var(--faracart-shadow);
+	pointer-events: auto;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.faracart-floating--dir-left .faracart-floating__drawer {
+	right: calc( 100% + 0.75rem );
+	top: 50%;
+	transform: translateY(-50%) scale(0.94);
+}
+
+.faracart-floating--dir-right .faracart-floating__drawer {
+	left: calc( 100% + 0.75rem );
+	top: 50%;
+	transform: translateY(-50%) scale(0.94);
+}
+
+.faracart-floating--dir-up .faracart-floating__drawer {
+	bottom: calc( 100% + 0.75rem );
+	left: 50%;
+	transform: translateX(-50%) scale(0.94);
+}
+
+.faracart-floating--dir-down .faracart-floating__drawer {
+	top: calc( 100% + 0.75rem );
+	left: 50%;
+	transform: translateX(-50%) scale(0.94);
+}
+
+.faracart-floating--open .faracart-floating__drawer {
+	opacity: 1;
+	visibility: visible;
+	transform: scale(1);
+}
+
+/* The open-state transform must keep the anchor for the direction (the
+ * generic .faracart-floating--open rule above only flips the scale). */
+
+.faracart-floating--dir-left.faracart-floating--open .faracart-floating__drawer {
+	transform: translateY(-50%) scale(1);
+}
+
+.faracart-floating--dir-right.faracart-floating--open .faracart-floating__drawer {
+	transform: translateY(-50%) scale(1);
+}
+
+.faracart-floating--dir-up.faracart-floating--open .faracart-floating__drawer {
+	transform: translateX(-50%) scale(1);
+}
+
+.faracart-floating--dir-down.faracart-floating--open .faracart-floating__drawer {
+	transform: translateX(-50%) scale(1);
+}
+
+.faracart-floating__close {
+	position: absolute;
+	inset-block-start: 0.375rem;
+	inset-inline-end: 0.375rem;
+	width: 26px;
+	height: 26px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--faracart-text-muted);
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.faracart-floating__close:hover {
+	background: var(--faracart-track);
+	color: var(--faracart-text);
+}
+
+/* The drawer hosts a real progress widget container; flatten its card
+ * margins so it fills the panel cleanly. */
+
+.faracart-floating__drawer .faracart-widget {
+	max-width: none;
+	margin: 0;
+}
+
+.faracart-floating__drawer .faracart-widget--full {
+	margin-block: 0;
+}
+
+/* ------------------------------------------------------------------ *
  * Accessibility & motion
  * ------------------------------------------------------------------ */
 
@@ -1617,6 +1796,8 @@
 	.faracart-recommend,
 	.faracart-recommend__add,
 	.faracart-sticky,
+	.faracart-floating__button,
+	.faracart-floating__drawer,
 	.faracart-card--celebrate,
 	.faracart-confetti__piece,
 	.faracart-widget--updating .faracart-widget__goals,

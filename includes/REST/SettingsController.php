@@ -285,6 +285,22 @@ class SettingsController extends BaseController {
 			'sticky_suggestions'    => $bool,
 			'sticky_display'        => array( 'type' => 'string', 'enum' => array( 'compact', 'full' ) ),
 
+			// Floating widget (the floating goals/campaigns button + drawer).
+			'floating_enabled'            => $bool,
+			'floating_desktop'            => $this->floating_position_schema(),
+			'floating_mobile'             => $this->floating_position_schema(),
+			'floating_mobile_use_desktop' => $bool,
+			'floating_show_desktop'       => $bool,
+			'floating_show_mobile'        => $bool,
+			'floating_button_size'        => array( 'type' => 'integer', 'minimum' => 32, 'maximum' => 96 ),
+			'floating_animation'          => $bool,
+			'floating_drawer_direction'   => array(
+				'type' => 'string',
+				'enum' => array( 'auto', 'left', 'right', 'up', 'down' ),
+			),
+			'floating_icon'               => array( 'type' => 'string' ),
+			'floating_label'              => array( 'type' => 'string' ),
+
 			// Goal Calculation (P18-T03).
 			'calculation_include_tax'      => $bool,
 			'calculation_include_discount' => $bool,
@@ -325,6 +341,65 @@ class SettingsController extends BaseController {
 				'validate_callback'    => array( $this, 'validate_template_settings' ),
 				'sanitize_callback'    => array( $this, 'sanitize_template_settings' ),
 			),
+		);
+	}
+
+	/**
+	 * The REST arg schema for one floating-button position object.
+	 *
+	 * Shared by floating_desktop and floating_mobile so the two can never
+	 * drift apart. The horizontal axis is a physical side (left | right)
+	 * the admin picks explicitly — it must keep its visual result in RTL,
+	 * so it is not a logical start/end.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	protected function floating_position_schema() {
+		return array(
+			'type'                 => 'object',
+			'default'              => array(),
+			'properties'           => array(
+				'horizontal' => array( 'type' => 'string', 'enum' => array( 'left', 'right' ) ),
+				'vertical'   => array( 'type' => 'string', 'enum' => array( 'top', 'center', 'bottom' ) ),
+				'offset_x'   => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 200 ),
+				'offset_y'   => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 200 ),
+			),
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Normalize a floating-button position object.
+	 *
+	 * Validates the enums and clamps the offsets so a malformed stored or
+	 * submitted value can never reach the storefront; anything unknown
+	 * falls back to the documented default.
+	 *
+	 * @param mixed $value   Raw position value.
+	 * @param mixed $default The setting's default position array.
+	 * @return array<string, string|int>
+	 */
+	protected function sanitize_floating_position( $value, $default ) {
+		$default = is_array( $default ) ? $default : array(
+			'horizontal' => 'right',
+			'vertical'   => 'bottom',
+			'offset_x'   => 20,
+			'offset_y'   => 80,
+		);
+
+		if ( ! is_array( $value ) ) {
+			return $default;
+		}
+
+		return array(
+			'horizontal' => isset( $value['horizontal'] ) && in_array( $value['horizontal'], array( 'left', 'right' ), true )
+				? $value['horizontal']
+				: $default['horizontal'],
+			'vertical' => isset( $value['vertical'] ) && in_array( $value['vertical'], array( 'top', 'center', 'bottom' ), true )
+				? $value['vertical']
+				: $default['vertical'],
+			'offset_x' => isset( $value['offset_x'] ) ? min( 200, max( 0, (int) $value['offset_x'] ) ) : (int) $default['offset_x'],
+			'offset_y' => isset( $value['offset_y'] ) ? min( 200, max( 0, (int) $value['offset_y'] ) ) : (int) $default['offset_y'],
 		);
 	}
 
@@ -457,6 +532,11 @@ class SettingsController extends BaseController {
 			case 'frontend_celebrate':
 			case 'sticky_countdown':
 			case 'sticky_suggestions':
+			case 'floating_enabled':
+			case 'floating_mobile_use_desktop':
+			case 'floating_show_desktop':
+			case 'floating_show_mobile':
+			case 'floating_animation':
 			case 'calculation_include_tax':
 			case 'calculation_include_discount':
 			case 'calculation_include_shipping':
@@ -507,6 +587,22 @@ class SettingsController extends BaseController {
 
 			case 'sticky_display':
 				return in_array( $value, array( 'compact', 'full' ), true ) ? $value : $defaults['sticky_display'];
+
+			case 'floating_desktop':
+			case 'floating_mobile':
+				return $this->sanitize_floating_position( $value, $defaults[ $key ] );
+
+			case 'floating_button_size':
+				return min( 96, max( 32, (int) $value ) );
+
+			case 'floating_drawer_direction':
+				return in_array( $value, array( 'auto', 'left', 'right', 'up', 'down' ), true ) ? $value : $defaults['floating_drawer_direction'];
+
+			case 'floating_icon':
+				return trim( sanitize_text_field( (string) $value ) );
+
+			case 'floating_label':
+				return trim( sanitize_text_field( (string) $value ) );
 
 			case 'suggestions_ranking':
 				return in_array( $value, array( 'balanced', 'price', 'popularity' ), true ) ? $value : $defaults['suggestions_ranking'];
