@@ -238,7 +238,7 @@ final class Plugin {
 		$this->hooks()->register( $this->container->get( OrderCostSnapshot::class ) );
 
 		// Storefront progress UI (Phase 11): shortcode, display-location
-		// injection, sticky bar and frontend assets.
+		// injection, floating widget and frontend assets.
 		$this->hooks()->register( $this->container->get( ProgressUI::class ) );
 
 		// REST controllers (Phase 7): each registers its routes on

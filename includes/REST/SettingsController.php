@@ -262,7 +262,7 @@ class SettingsController extends BaseController {
 				'type'  => 'array',
 				'items' => array(
 					'type' => 'string',
-					'enum' => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ),
+					'enum' => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' ),
 				),
 			),
 			'frontend_position'     => array( 'type' => 'string', 'enum' => array( 'top', 'bottom' ) ),
@@ -275,15 +275,9 @@ class SettingsController extends BaseController {
 			'frontend_radius'       => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 40 ),
 			'frontend_css_class'    => array( 'type' => 'string' ),
 			'frontend_custom_css'   => array( 'type' => 'string' ),
-			// Phase 32 (countdown + celebration + advanced sticky bar).
+			// Phase 32 (countdown + celebration).
 			'frontend_countdown'    => $bool,
 			'frontend_celebrate'    => $bool,
-			'sticky_position'       => array( 'type' => 'string', 'enum' => array( 'bottom', 'top' ) ),
-			'sticky_behavior'       => array( 'type' => 'string', 'enum' => array( 'dismissible', 'auto_hide' ) ),
-			'sticky_delay'          => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 120 ),
-			'sticky_countdown'      => $bool,
-			'sticky_suggestions'    => $bool,
-			'sticky_display'        => array( 'type' => 'string', 'enum' => array( 'compact', 'full' ) ),
 
 			// Floating widget (the floating goals/campaigns button + drawer).
 			'floating_enabled'            => $bool,
@@ -530,8 +524,6 @@ class SettingsController extends BaseController {
 			case 'frontend_animation':
 			case 'frontend_countdown':
 			case 'frontend_celebrate':
-			case 'sticky_countdown':
-			case 'sticky_suggestions':
 			case 'floating_enabled':
 			case 'floating_mobile_use_desktop':
 			case 'floating_show_desktop':
@@ -576,18 +568,6 @@ class SettingsController extends BaseController {
 			case 'frontend_mobile':
 				return in_array( $value, array( 'show', 'hide' ), true ) ? $value : $defaults['frontend_mobile'];
 
-			case 'sticky_position':
-				return in_array( $value, array( 'bottom', 'top' ), true ) ? $value : $defaults['sticky_position'];
-
-			case 'sticky_behavior':
-				return in_array( $value, array( 'dismissible', 'auto_hide' ), true ) ? $value : $defaults['sticky_behavior'];
-
-			case 'sticky_delay':
-				return min( 120, max( 0, (int) $value ) );
-
-			case 'sticky_display':
-				return in_array( $value, array( 'compact', 'full' ), true ) ? $value : $defaults['sticky_display'];
-
 			case 'floating_desktop':
 			case 'floating_mobile':
 				return $this->sanitize_floating_position( $value, $defaults[ $key ] );
@@ -608,7 +588,7 @@ class SettingsController extends BaseController {
 				return in_array( $value, array( 'balanced', 'price', 'popularity' ), true ) ? $value : $defaults['suggestions_ranking'];
 
 			case 'frontend_locations':
-				$allowed  = array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' );
+				$allowed  = array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' );
 				$cleaned  = array_filter( array_map( 'sanitize_key', (array) $value ), function ( $location ) use ( $allowed ) {
 					return in_array( $location, $allowed, true );
 				} );

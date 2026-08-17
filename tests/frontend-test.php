@@ -6,7 +6,7 @@
  *
  *  - the ProgressUI service resolves from the container
  *  - hook registration for every display location (cart, mini-cart,
- *    checkout, shop, product, sticky bar) and the asset/config prints
+ *    checkout, shop, product) and the asset/config prints
  *  - shortcode registration, unique container ids, markup shape
  *  - the duplicate-render guard (a location renders exactly once)
  *  - the frontend config payload (endpoint, currency, reward labels)
@@ -102,8 +102,8 @@ echo "\n== 1. Service wiring ==\n";
 
 check( 'ProgressUI resolves from container', $ui instanceof ProgressUI );
 check( 'is_enabled defaults to the settings toggle', true === $ui->is_enabled() );
-check( 'default locations include cart/mini-cart/checkout/shop/product/sticky', array() === array_diff(
-	array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ),
+check( 'default locations include cart/mini-cart/checkout/shop/product', array() === array_diff(
+	array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' ),
 	$ui->locations()
 ) );
 
@@ -114,7 +114,6 @@ echo "\n== 2. Hook registration ==\n";
 
 check( 'wp_enqueue_scripts hooked', false !== has_action( 'wp_enqueue_scripts', array( $ui, 'enqueue_assets' ) ) );
 check( 'wp_footer config print hooked at 5', 5 === hook_priority( 'wp_footer', array( $ui, 'print_config' ) ) );
-check( 'wp_footer sticky bar hooked at 20', 20 === hook_priority( 'wp_footer', array( $ui, 'render_sticky_bar' ) ) );
 check( 'init shortcode registration hooked', false !== has_action( 'init', array( $ui, 'register_shortcode' ) ) );
 check( 'cart location hooked', false !== has_action( 'woocommerce_before_cart', array( $ui, 'render_cart_widget' ) ) );
 check( 'cart bottom location hooked', false !== has_action( 'woocommerce_after_cart', array( $ui, 'render_cart_widget_bottom' ) ) );
@@ -232,10 +231,6 @@ check( 'frontend JS adopts the payload tracking nonce', false !== strpos( $front
 check( 'frontend JS stacks one card per eligible goal', false !== strpos( $frontend_js, 'faracart-widget__goals' ) && false !== strpos( $frontend_js, 'for ( var i = 0; i < goals.length; i++ )' ) );
 check( 'frontend JS skips ineligible goals when rendering', false !== strpos( $frontend_js, 'goal.eligible === false' ) && false !== strpos( $frontend_js, 'continue;' ) );
 check( 'frontend JS renders each goal card with its own template', false !== strpos( $frontend_js, 'goalContainer( goal, data.currency || cfg.currency, variant, widgetTemplate( container, goal ) )' ) );
-check( 'frontend JS keeps the sticky bar featured-only', false !== strpos( $frontend_js, 'var goal = featuredGoal( goals );' ) );
-check( 'sticky auto-hide tracks the previous scroll position', false !== strpos( $frontend_js, 'var previousY = stickyLastScrollY;' ) && false !== strpos( $frontend_js, 'stickyAutoHidden = true;' ) );
-check( 'sticky auto-hide refreshes without payload changes', false !== strpos( $frontend_js, "stickyConfig.behavior === 'auto_hide'" ) );
-check( 'sticky suggestions work in compact layout', false !== strpos( $frontend_js, 'if ( sticky.suggestions ) {' ) );
 
 // Live cart-change refresh (Phase 11): every WooCommerce cart-mutation
 // signal must reach the widgets through ONE centralized bridge — the

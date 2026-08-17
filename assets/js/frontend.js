@@ -17,7 +17,6 @@
  *                     from the ProductRecommendationEngine with per-row
  *                     source attribution; a rank-endpoint fallback
  *                     closes money-goal gaps)
- *   StickyGoalBar    fixed bottom bar (cart/checkout progress at a glance)
  *   FloatingWidget   floating goals/campaigns button + progress drawer
  *                     (physical left/right × top/center/bottom position,
  *                     per-device settings, safe-area aware, RTL-safe)
@@ -30,8 +29,8 @@
  * Templates (the six design templates): the goal body renders per the
  * active variant — template-1 (classic progress card), template-2
  * (minimal inline cart goal), template-3 (circular progress), template-4
- * (product recommendation + goal), template-5 (compact floating / sticky
- * goal) or template-6 (premium / elegant e-commerce style) — driven by
+ * (product recommendation + goal), template-5 (compact floating goal)
+ * or template-6 (premium / elegant e-commerce style) — driven by
  * the goal's resolved `template` (item override → scope default →
  * legacy → fallback) or a per-container `data-faracart-template`
  * override. Appearance tokens (colors, radius, bar height) come from
@@ -66,9 +65,7 @@
 	var uiLocale = ( cfg && cfg.locale ) ? String( cfg.locale ).replace( '_', '-' ) : undefined;
 
 	var WIDGET_SELECTOR = '[data-faracart-widget]';
-	var STICKY_ID = 'faracart-sticky';
 	var FLOATING_ID = 'faracart-floating';
-	var stickyDismissed = false;
 
 	// Floating widget (floating goals/campaigns button + drawer) state:
 	// whether the drawer is open, whether the button/drawer markup was
@@ -118,16 +115,10 @@
 	// when nothing moved), so only the fragments whose numbers actually
 	// changed are touched.
 	var renderedFingerprints = {};
-	var stickyFingerprint = null;
 
 	// Phase 32: per-session state for the celebration animation (one burst
-	// per goal), the sticky bar's delay gating and the auto-hide scroll
-	// direction tracker.
+	// per goal).
 	var celebrated = {};
-	var stickyShown = false;
-	var stickyDelayTimer = null;
-	var stickyLastScrollY = 0;
-	var stickyAutoHidden = false;
 
 	// Confetti palette (Phase 32 celebration).
 	var CONFETTI_COLORS = [ '#2271b1', '#00a32a', '#d63638', '#f0b849', '#7e5af5', '#2c7a7b' ];
@@ -2495,147 +2486,6 @@
 		container.appendChild( stack );
 	}
 
-	/**
-	 * StickyGoalBar — a fixed progress bar (bottom by default, Phase 32
-	 * adds the top position, an appearance delay and an auto-hide
-	 * behavior).
-	 *
-	 * Visible only while the cart has progress to show (current > 0 or the
-	 * goal is completed). dismissible mode keeps the close button
-	 * (session-persistent); auto_hide mode fades the bar out while
-	 * scrolling down and back in while scrolling up. Countdown and
-	 * suggestions are controlled independently by their sticky settings.
-	 *
-	 * @param {Object} data Progress payload data.
-	 * @return {void}
-	 */
-	function renderSticky( data ) {
-		var bar = document.getElementById( STICKY_ID );
-
-		if ( ! bar ) {
-			return;
-		}
-
-		var goals = ( data && data.goals ) || [];
-		var goal = featuredGoal( goals );
-		var hasProgress = false;
-		var sticky = cfg.sticky || {};
-
-		for ( var i = 0; i < goals.length; i++ ) {
-			if ( Number( goals[ i ].current ) > 0 || goals[ i ].completed ) {
-				hasProgress = true;
-				break;
-			}
-		}
-
-		var visible = ! ! goal && hasProgress && ! stickyDismissed && ! mobileHidden();
-
-		// Delay gate: the bar waits sticky.delay seconds after the first
-		// render before appearing (the timer in init flips stickyShown).
-		if ( visible && Number( sticky.delay ) > 0 && ! stickyShown ) {
-			visible = false;
-		}
-
-		// Auto-hide: the scroll listener records direction in
-		// stickyAutoHidden. Keep the bar hidden during ordinary refreshes
-		// until the shopper scrolls upward again.
-		if ( visible && sticky.behavior === 'auto_hide' && stickyAutoHidden ) {
-			visible = false;
-		}
-
-		if ( ! visible ) {
-			bar.classList.remove( 'faracart-sticky--visible' );
-			bar.setAttribute( 'aria-hidden', 'true' );
-			bar.replaceChildren();
-			return;
-		}
-
-		bar.classList.add( 'faracart-sticky--visible' );
-		bar.classList.toggle( 'faracart-sticky--top', 'top' === sticky.position );
-		bar.classList.toggle( 'faracart-no-anim', false === cfg.animation );
-		bar.setAttribute( 'aria-hidden', 'false' );
-
-		// Rebuild the bar content on every refresh so the fill and message
-		// track the live cart (no mount-once freeze). The featured goal's
-		// resolved template settings drive the bar's appearance too (e.g.
-		// a template-5 goal renders the dark sticky styling), so the
-		// sticky bar follows the goal's template exactly like its card.
-		var inner = el( 'div', 'faracart-sticky__inner' );
-		applyTemplateSettings( inner, ( goal && goal.template_settings ) || {} );
-		var content = el( 'div', 'faracart-sticky__content' );
-		var reward = rewardStatus( goal );
-
-		content.appendChild( progressBar( goal ) );
-		content.appendChild( goalMessage( goal ) );
-		if ( reward ) {
-			content.appendChild( reward );
-		}
-
-		if ( sticky.countdown && goal.countdown_end ) {
-			var countdown = countdownPanel( goal );
-
-			if ( countdown ) {
-				content.appendChild( countdown );
-			}
-		}
-
-		// The suggestion toggle is independent from the compact/full layout:
-		// when enabled, the top gap-closing product rides along in either
-		// sticky layout.
-		if ( sticky.suggestions ) {
-			var suggestion = stickySuggestion( goal );
-
-			if ( suggestion ) {
-				content.appendChild( suggestion );
-			}
-		}
-
-		inner.appendChild( content );
-
-		if ( sticky.behavior !== 'auto_hide' ) {
-			var close = el( 'button', 'faracart-sticky__close' );
-
-			close.type = 'button';
-			close.setAttribute( 'aria-label', uiLabel( 'dismiss', 'Dismiss' ) );
-			close.textContent = '\u00D7';
-			close.addEventListener( 'click', function () {
-				stickyDismissed = true;
-				bar.classList.remove( 'faracart-sticky--visible' );
-				bar.setAttribute( 'aria-hidden', 'true' );
-			} );
-			inner.appendChild( close );
-		}
-
-		bar.replaceChildren( inner );
-	}
-
-	/**
-	 * The top suggestion as a single compact link (sticky bar full mode).
-	 *
-	 * @param {Object} goal Progress goal entry.
-	 * @return {HTMLElement|null}
-	 */
-	function stickySuggestion( goal ) {
-		var items = ( goal.suggestions && goal.suggestions.length ) ? goal.suggestions : [];
-
-		if ( ! items.length ) {
-			return null;
-		}
-
-		var item = items[ 0 ];
-		var link = el( 'a', 'faracart-sticky__suggestion' );
-
-		if ( item.permalink && isSafeUrl( item.permalink ) ) {
-			link.href = String( item.permalink );
-		}
-
-		link.setAttribute( 'rel', 'noreferrer' );
-		link.appendChild( el( 'span', 'faracart-sticky__suggestion-name', String( item.name || '' ) ) );
-		link.appendChild( el( 'span', 'faracart-sticky__suggestion-price', formatProductPrice( item ) ) );
-
-		return link;
-	}
-
 	/* ------------------------------------------------------------------ *
 	 * Floating widget (floating goals/campaigns button + drawer)
 	 * ------------------------------------------------------------------ */
@@ -3267,9 +3117,8 @@
 	 * Phase 23 (Performance → update only changed UI fragments): each
 	 * container is skipped when the payload fingerprint matches its last
 	 * render AND it already holds content — a freshly swapped container
-	 * (mini-cart fragment refresh) is empty, so it always mounts. The
-	 * sticky bar follows the same rule, and analytics stay on their own
-	 * per-session dedup.
+ * (mini-cart fragment refresh) is empty, so it always mounts.
+ * Analytics stay on their own per-session dedup.
 	 *
 	 * @return {void}
 	 */
@@ -3287,11 +3136,6 @@
 			containers[ i ].classList.toggle( 'faracart-widget--updating', !! on );
 		}
 
-		var bar = document.getElementById( STICKY_ID );
-
-		if ( bar ) {
-			bar.classList.toggle( 'faracart-widget--updating', !! on );
-		}
 	}
 
 	/**
@@ -3326,15 +3170,6 @@
 
 						renderWidget( container, data );
 						renderedFingerprints[ container.id ] = fingerprint;
-					}
-
-					var stickyConfig = cfg.sticky || {};
-
-					// Auto-hide depends on scroll direction, not payload data, so
-					// it must re-render even when the cart fingerprint is unchanged.
-					if ( stickyFingerprint !== fingerprint || stickyConfig.behavior === 'auto_hide' ) {
-						renderSticky( data );
-						stickyFingerprint = fingerprint;
 					}
 
 					// The floating widget resolves its own device position and
@@ -3654,36 +3489,6 @@
 	}
 
 	/**
-	 * Track the scroll direction for the sticky bar's auto-hide behavior
-	 * (Phase 32).
-	 *
-	 * @return {void}
-	 */
-	function bindStickyScroll() {
-		var sticky = cfg.sticky || {};
-
-		if ( sticky.behavior !== 'auto_hide' ) {
-			return;
-		}
-
-		window.addEventListener( 'scroll', function () {
-			var y = window.pageYOffset || document.documentElement.scrollTop || 0;
-			var previousY = stickyLastScrollY;
-
-			// Preserve the previous position before updating it; comparing y
-			// after assignment was the reason auto-hide never activated.
-			if ( y > 120 && y > previousY ) {
-				stickyAutoHidden = true;
-			} else if ( y < previousY ) {
-				stickyAutoHidden = false;
-			}
-
-			stickyLastScrollY = y;
-			safe( refresh );
-		}, { passive: true } );
-	}
-
-	/**
 	 * Boot the widgets.
 	 *
 	 * @return {void}
@@ -3695,24 +3500,12 @@
 		bindUpsellPanel();
 		bindGiftPicker();
 		bindCountdownTicker();
-		bindStickyScroll();
 		bindFloatingResize();
 
 		// Phase 18 (mobile behavior): re-render when the viewport crosses
 		// the mobile breakpoint so hidden widgets appear/disappear live.
 		if ( cfg.mobile === 'hide' ) {
 			window.addEventListener( 'resize', refresh );
-		}
-
-		// Phase 32 (sticky bar delay): after sticky.delay seconds the bar
-		// becomes eligible to show.
-		var sticky = cfg.sticky || {};
-
-		if ( Number( sticky.delay ) > 0 ) {
-			stickyDelayTimer = window.setTimeout( function () {
-				stickyShown = true;
-				safe( refresh );
-			}, Number( sticky.delay ) * 1000 );
 		}
 
 		refresh();

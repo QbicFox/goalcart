@@ -1,8 +1,8 @@
 /**
  * FaraCart storefront progress widgets (Phase 11).
  *
- * Scoped under .faracart-widget / #faracart-sticky so styles never leak
- * into the theme. RTL-aware (logical properties), responsive, and
+ * Scoped under .faracart-widget / #faracart-floating so styles never
+ * leak into the theme. RTL-aware (logical properties), responsive, and
  * themeable through a small set of CSS custom properties (Phase 12
  * Appearance overrides the same tokens).
  *
@@ -32,7 +32,6 @@
  */
 
 .faracart-widget,
-#faracart-sticky,
 #faracart-floating {
 	--faracart-accent: #2271b1;
 	--faracart-bg: #ffffff;
@@ -68,7 +67,6 @@
 }
 
 .faracart-widget *,
-#faracart-sticky *,
 #faracart-floating * {
 	box-sizing: border-box;
 }
@@ -118,10 +116,9 @@
 
 /* Live cart-change refresh: while the widgets re-fetch the progress
  * payload after an AJAX cart mutation they dim subtly (never blank or
- * flash). The sticky bar uses the same class on its container. */
+ * flash). */
 
-.faracart-widget--updating .faracart-widget__goals,
-#faracart-sticky.faracart-widget--updating .faracart-sticky__inner {
+.faracart-widget--updating .faracart-widget__goals {
 	opacity: 0.7;
 	transition: opacity 0.15s ease;
 }
@@ -1172,78 +1169,6 @@
 }
 
 /* ------------------------------------------------------------------ *
- * StickyGoalBar
- * ------------------------------------------------------------------ */
-
-.faracart-sticky {
-	position: fixed;
-	inset-inline: 0;
-	inset-block-end: 0;
-	z-index: 99999;
-	padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
-	pointer-events: none;
-	transform: translateY(110%);
-	transition: transform 0.35s ease;
-}
-
-.faracart-sticky--visible {
-	transform: translateY(0);
-	pointer-events: auto;
-}
-
-.faracart-sticky__inner {
-	position: relative;
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	max-width: 640px;
-	margin-inline: auto;
-	padding: 0.75rem 1rem;
-	background: var(--faracart-bg);
-	border: 1px solid var(--faracart-border);
-	border-radius: var(--faracart-radius);
-	box-shadow: var(--faracart-shadow);
-}
-
-.faracart-sticky__content {
-	flex: 1 1 auto;
-	min-width: 0;
-}
-
-.faracart-sticky__content .faracart-progress {
-	height: min(var(--faracart-bar-height, 10px), 8px);
-}
-
-.faracart-sticky__content .faracart-message {
-	margin-block-start: 0.375rem;
-	font-size: 13px;
-}
-
-.faracart-sticky__content .faracart-reward {
-	margin-block-start: 0.375rem;
-}
-
-.faracart-sticky__close {
-	flex: 0 0 auto;
-	width: 28px;
-	height: 28px;
-	padding: 0;
-	border: 0;
-	border-radius: 50%;
-	background: transparent;
-	color: var(--faracart-text-muted);
-	font-size: 20px;
-	line-height: 1;
-	cursor: pointer;
-	transition: background 0.2s ease, color 0.2s ease;
-}
-
-.faracart-sticky__close:hover {
-	background: var(--faracart-track);
-	color: var(--faracart-text);
-}
-
-/* ------------------------------------------------------------------ *
  * Countdown (Phase 32)
  * ------------------------------------------------------------------ */
 
@@ -1437,43 +1362,6 @@
 	font-size: 11px;
 	font-weight: 600;
 	background: var(--faracart-track);
-	color: var(--faracart-text-muted);
-}
-
-/* ------------------------------------------------------------------ *
- * Advanced sticky bar (Phase 32)
- * ------------------------------------------------------------------ */
-
-.faracart-sticky--top {
-	inset-block-end: auto;
-	inset-block-start: 0;
-	transform: translateY(-110%);
-}
-
-.faracart-sticky--top.faracart-sticky--visible {
-	transform: translateY(0);
-}
-
-.faracart-sticky__suggestion {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.5rem;
-	margin-block-start: 0.375rem;
-	padding: 0.25rem 0.625rem;
-	border-radius: 999px;
-	background: var(--faracart-track);
-	color: var(--faracart-text);
-	text-decoration: none;
-	font-size: 12px;
-	font-weight: 600;
-	transition: background 0.2s ease;
-}
-
-.faracart-sticky__suggestion:hover {
-	background: color-mix( in srgb, var(--faracart-track) 60%, var(--faracart-accent) );
-}
-
-.faracart-sticky__suggestion-price {
 	color: var(--faracart-text-muted);
 }
 
@@ -1795,13 +1683,11 @@
 	.faracart-cta,
 	.faracart-recommend,
 	.faracart-recommend__add,
-	.faracart-sticky,
 	.faracart-floating__button,
 	.faracart-floating__drawer,
 	.faracart-card--celebrate,
 	.faracart-confetti__piece,
-	.faracart-widget--updating .faracart-widget__goals,
-	#faracart-sticky.faracart-widget--updating .faracart-sticky__inner {
+	.faracart-widget--updating .faracart-widget__goals {
 		transition: none;
 		animation: none;
 	}

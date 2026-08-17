@@ -453,7 +453,7 @@ export type FrontendTemplate =
   'template-1' | 'template-2' | 'template-3' | 'template-4' | 'template-5' | 'template-6';
 
 /** Storefront widget display locations (Phase 18, frontend_locations). */
-export type FrontendLocation = 'cart' | 'mini-cart' | 'checkout' | 'shop' | 'product' | 'sticky';
+export type FrontendLocation = 'cart' | 'mini-cart' | 'checkout' | 'shop' | 'product';
 
 /** Storefront currency display style (Phase 18, currency_display). */
 export type CurrencyDisplay = 'symbol' | 'code' | 'name';
@@ -680,8 +680,7 @@ export interface FaraCartSettings {
   conflict_resolution: ConflictResolution;
   calculation_mode: CalculationMode;
 
-  // Frontend (P18-T02). Phase 32 adds the countdown/celebration toggles
-  // and the advanced sticky-bar surface.
+  // Frontend (P18-T02). Phase 32 adds the countdown/celebration toggles.
   frontend_template: FrontendTemplate;
   frontend_animation: boolean;
   frontend_locations: FrontendLocation[];
@@ -697,14 +696,6 @@ export interface FaraCartSettings {
   frontend_custom_css: string;
   frontend_countdown: boolean;
   frontend_celebrate: boolean;
-
-  // Phase 32 (advanced sticky bar).
-  sticky_position: 'bottom' | 'top';
-  sticky_behavior: 'dismissible' | 'auto_hide';
-  sticky_delay: number;
-  sticky_countdown: boolean;
-  sticky_suggestions: boolean;
-  sticky_display: 'compact' | 'full';
 
   // Floating widget (floating goals/campaigns button + drawer). The
   // position axes are physical sides (left/right × top/center/bottom)

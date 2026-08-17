@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
  * and cart changes update the UI through WooCommerce's own JS events.
  *
  * Display locations (P11: Cart, Mini Cart, Checkout, Shop, Product page,
- * configurable widget/shortcode, sticky bar):
+ * configurable widget/shortcode):
  *
  *  - `woocommerce_before_cart` / `woocommerce_after_cart`
  *                                           → full widget on the cart page
@@ -36,7 +36,6 @@ defined( 'ABSPATH' ) || exit;
  *  - `woocommerce_single_product_summary` / `woocommerce_after_single_product_summary`
  *                                           → compact widget on product pages
  *  - `[faracart_progress]` shortcode       → widget anywhere (full/compact)
- *  - `wp_footer`                           → sticky bottom progress bar
  *
  * Duplicate-render guard (P11): each location renders at most once per
  * request (a rendered-location registry), every container has a unique id,
@@ -167,9 +166,6 @@ final class ProgressUI {
 		// at most one widget per location, so a page can never show it twice.
 		$hooks->add_filter( 'render_block', array( $this, 'render_block_widget' ), 10, 2 );
 
-		// Sticky bottom bar (rendered after the footer, on widget pages).
-		$hooks->add_action( 'wp_footer', array( $this, 'render_sticky_bar' ), 20 );
-
 		// Floating goals/campaigns button + drawer (on widget pages).
 		$hooks->add_action( 'wp_footer', array( $this, 'render_floating_button' ), 20 );
 	}
@@ -290,7 +286,7 @@ final class ProgressUI {
 	 *
 	 * Shopper-facing widgets are hidden from logged-in site admins by
 	 * default so staff browsing or testing the storefront never see the
-	 * customer funnel (progress bars, rewards, suggestions, sticky bar).
+	 * customer funnel (progress bars, rewards, suggestions).
 	 * "Admin" is the same capability the admin menu uses
 	 * (`faracart_admin_capability` filter, default `manage_options`), so
 	 * every user who can administer the plugin is treated as staff. The
@@ -310,14 +306,14 @@ final class ProgressUI {
 	 * The enabled display locations.
 	 *
 	 * Phase 18 (Settings → Frontend): driven by the `frontend_locations`
-	 * setting (the default set ships all six locations), still filterable
+	 * setting (the default set ships all five locations), still filterable
 	 * via faracart_frontend_locations. Unknown keys are dropped so a bad
 	 * stored value can never register a location.
 	 *
 	 * @return string[]
 	 */
 	public function locations() {
-		$allowed = array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' );
+		$allowed = array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' );
 		$stored  = array_map( 'strval', (array) $this->settings->get( 'frontend_locations', array() ) );
 
 		$locations = array_values( array_intersect( $allowed, $stored ) );
@@ -328,8 +324,7 @@ final class ProgressUI {
 	/**
 	 * The position of page widgets (top or bottom), normalized and filterable.
 	 *
-	 * Sticky bars use their separate sticky_position setting. This setting
-	 * controls the regular cart, mini-cart, checkout, shop and product
+	 * Controls the regular cart, mini-cart, checkout, shop and product
 	 * widgets only.
 	 *
 	 * @return string
@@ -423,8 +418,8 @@ final class ProgressUI {
 	 * and mirror the Appearance settings without another round-trip.
 	 * Phase 18 adds the currency display style and the mobile behavior so
 	 * the JS formats money and hides widgets per the Settings page.
-	 * Phase 32 adds the countdown + celebration toggles, the advanced
-	 * sticky-bar surface and the gift-selection endpoint/nonce.
+	 * Phase 32 adds the countdown + celebration toggles and the
+	 * gift-selection endpoint/nonce.
 	 * Kept as its own method so tests can assert the shape without
 	 * capturing output.
 	 *
@@ -432,7 +427,6 @@ final class ProgressUI {
 	 */
 	public function frontend_config() {
 		$appearance = $this->appearance();
-		$position   = $this->settings->get( 'sticky_position', 'bottom' );
 
 		return array(
 			'endpoint'  => esc_url_raw( rest_url( 'faracart/v1/progress' ) ),
@@ -461,15 +455,6 @@ final class ProgressUI {
 			'giftNonce'   => $this->settings->get( 'enabled', true )
 				? wp_create_nonce( \FaraCart\REST\GiftController::GIFT_NONCE_ACTION )
 				: '',
-			// Phase 32 (advanced sticky bar).
-			'sticky'    => array(
-				'position'    => 'top' === $position ? 'top' : 'bottom',
-				'behavior'    => 'auto_hide' === $this->settings->get( 'sticky_behavior', 'dismissible' ) ? 'auto_hide' : 'dismissible',
-				'delay'       => min( 120, max( 0, (int) $this->settings->get( 'sticky_delay', 0 ) ) ),
-				'countdown'   => (bool) $this->settings->get( 'sticky_countdown', false ),
-				'suggestions' => (bool) $this->settings->get( 'sticky_suggestions', false ),
-				'display'     => 'full' === $this->settings->get( 'sticky_display', 'compact' ) ? 'full' : 'compact',
-			),
 			// Floating widget (floating goals/campaigns button + drawer): the
 			// resolved position config, per-device visibility and display
 			// options the storefront JS applies. Position axes are physical
@@ -694,7 +679,7 @@ final class ProgressUI {
 		$a = $this->appearance();
 
 		$css = sprintf(
-			'.faracart-widget, #faracart-sticky, #faracart-floating { --faracart-accent:%1$s; --faracart-bg:%2$s; --faracart-border:%3$s; --faracart-text:%4$s; --faracart-radius:%5$dpx; --faracart-bar-height:%6$dpx; }',
+			'.faracart-widget, #faracart-floating { --faracart-accent:%1$s; --faracart-bg:%2$s; --faracart-border:%3$s; --faracart-text:%4$s; --faracart-radius:%5$dpx; --faracart-bar-height:%6$dpx; }',
 			$a['accent'],
 			$a['bg'],
 			$a['border'],
@@ -814,33 +799,6 @@ final class ProgressUI {
 	/** Render the product widget at the bottom boundary. */
 	public function render_product_widget_bottom() {
 		$this->render_widget( 'product', 'compact', 'bottom' );
-	}
-
-	/**
-	 * Render the sticky bottom progress bar.
-	 *
-	 * Gated on the 'sticky' location being enabled (Phase 18: the
-	 * frontend_locations setting), so stores can turn the bar off from
-	 * Settings. The JS keeps it hidden until the cart has progress to
-	 * show; the container itself is inert markup.
-	 *
-	 * @return void
-	 */
-	public function render_sticky_bar() {
-		if ( is_admin() || ! $this->is_enabled() || ! $this->page_needs_widget() ) {
-			return;
-		}
-
-		if ( ! in_array( 'sticky', $this->locations(), true ) ) {
-			return;
-		}
-
-		// Phase 32 (advanced sticky bar): the configured position renders as
-		// a class so the stylesheet can anchor the bar to the top edge.
-		$position = 'top' === $this->settings->get( 'sticky_position', 'bottom' ) ? ' faracart-sticky--top' : '';
-
-		// phpcs:ignore WordPress.Security.EscapeOutput -- static markup.
-		echo '<div id="faracart-sticky" class="faracart-sticky' . esc_attr( $position ) . '" aria-hidden="true"></div>';
 	}
 
 	/**
@@ -1033,7 +991,7 @@ final class ProgressUI {
 	/**
 	 * Localized reward type labels for the JS reward status component.
 	 *
-	 * Phase 32 adds the countdown, gift-picker and sticky-bar strings.
+	 * Phase 32 adds the countdown and gift-picker strings.
 	 *
 	 * @return array<string, string>
 	 */
@@ -1048,7 +1006,6 @@ final class ProgressUI {
 			'countdown_ended'  => __( 'Ended', 'faracart' ),
 			'gift_picker'      => __( 'Pick your free gift', 'faracart' ),
 			'gift_chosen'      => __( 'Gift added to your cart', 'faracart' ),
-			'dismiss'          => __( 'Dismiss', 'faracart' ),
 			// Design-template storefront copy (the six progress templates).
 			'shopping_goal'    => __( 'Shopping goal', 'faracart' ),
 			'progress'         => __( 'Progress', 'faracart' ),

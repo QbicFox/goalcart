@@ -316,9 +316,6 @@
             "Animate the button and drawer": [
                 "انیمیشن دکمه و کشو"
             ],
-            "Appear delay (seconds)": [
-                "تأخیر نمایش (ثانیه)"
-            ],
             "Appearance": [
                 "ظاهر"
             ],
@@ -387,9 +384,6 @@
             ],
             "Auto (toward screen center)": [
                 "خودکار (به سمت مرکز صفحه)"
-            ],
-            "Auto-hide": [
-                "پنهانشدن خودکار"
             ],
             "Average Basket Increase": [
                 "افزایش میانگین سبد خرید"
@@ -625,9 +619,6 @@
             "Compact": [
                 "فشرده"
             ],
-            "Compact shows only the progress; full adds the message and reward.": [
-                "حالت فشرده فقط پیشرفت را نشان می‌دهد؛ حالت کامل پیام و پاداش را نیز اضافه می‌کند."
-            ],
             "Compare": [
                 "مقایسه"
             ],
@@ -762,9 +753,6 @@
             ],
             "Could not save the settings. Please try again.": [
                 "ذخیرهٔ تنظیمات ممکن نشد. لطفاً دوباره تلاش کنید."
-            ],
-            "Countdown in sticky bar": [
-                "شمارش معکوس در نوار چسبان"
             ],
             "Countdown timer": [
                 "تایمر شمارش معکوس"
@@ -969,12 +957,6 @@
             ],
             "Dismiss how FaraCart works": [
                 "بستن توضیح طرز کار فراکارت"
-            ],
-            "Dismissible": [
-                "قابل بستن"
-            ],
-            "Dismissible bars hide via the close button; auto-hide bars collapse after a few seconds and reappear on scroll.": [
-                "نوارهای قابل بستن با دکمهٔ بستن پنهان می‌شوند؛ نوارهای پنهانشوندهٔ خودکار پس از چند ثانیه جمع می‌شوند و با اسکرول دوباره ظاهر می‌شوند."
             ],
             "Display": [
                 "نمایش"
@@ -1210,9 +1192,6 @@
             "Frontend": [
                 "فرانت‌اند"
             ],
-            "Full": [
-                "کامل"
-            ],
             "Full-screen dashboard": [
                 "داشبورد تمام‌صفحه"
             ],
@@ -1405,9 +1384,6 @@
             "How is this calculated?": [
                 "این چگونه محاسبه می‌شود؟"
             ],
-            "How long after page load before the bar appears.": [
-                "چند ثانیه پس از بارگذاری صفحه نوار ظاهر شود."
-            ],
             "How many times customers reached a goal target. Completion is not the same as purchase.": [
                 "چند بار مشتریان به آستانهٔ هدف رسیدند. تکمیل با خرید یکی نیست."
             ],
@@ -1575,9 +1551,6 @@
             ],
             "Limited stock remaining.": [
                 "موجودی محدود باقی مانده است."
-            ],
-            "List the gap-closing product suggestions in the bar.": [
-                "محصولات پیشنهادیِ پرکنندهٔ فاصله را در نوار فهرست کنید."
             ],
             "Live preview": [
                 "پیش‌نمایش زنده"
@@ -2458,9 +2431,6 @@
             "Show the closest goal only": [
                 "فقط نزدیک‌ترین هدف را نمایش بده"
             ],
-            "Show the deadline countdown inside the sticky bar.": [
-                "شمارش معکوس مهلت را داخل نوار چسبان نشان بده."
-            ],
             "Show the first goal only": [
                 "فقط اولین هدف را نمایش بده"
             ],
@@ -2560,12 +2530,6 @@
             "Status": [
                 "وضعیت"
             ],
-            "Sticky bar": [
-                "نوار چسبان"
-            ],
-            "Sticky bottom bar": [
-                "نوار پایین چسبان"
-            ],
             "Store average": [
                 "میانگین فروشگاه"
             ],
@@ -2583,9 +2547,6 @@
             ],
             "Suggestion ranking": [
                 "رتبهبندی پیشنهادها"
-            ],
-            "Suggestions in sticky bar": [
-                "پیشنهادها در نوار چسبان"
             ],
             "Sun": [
                 "یکشنبه"
@@ -2646,9 +2607,6 @@
             ],
             "The admin app is not built yet (%s is missing). Run npm install && npm run build inside the admin-app directory, or start npm run dev in a local\/development environment for hot reload.": [
                 "برنامهٔ مدیریت هنوز ساخته نشده است (%s وجود ندارد). در پوشهٔ admin-app دستور npm install && npm run build را اجرا کنید، یا برای بارگذاری خودکار در محیط محلی\/توسعه، npm run dev را اجرا کنید."
-            ],
-            "The advanced sticky bottom\/top bar (Phase 32): position, behavior, countdown and suggestions.": [
-                "نوار چسبان پیشرفتهٔ پایین\/بالا (فاز ۳۲): موقعیت، رفتار، شمارش معکوس و پیشنهادها."
             ],
             "The calculation includes product cost\/margin, reward cost, shipping cost and incremental revenue.": [
                 "محاسبه شامل هزینه\/حاشیهٔ محصول، هزینهٔ پاداش، هزینهٔ ارسال و فروش افزایشی است."
@@ -3075,9 +3033,6 @@
             ],
             "Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons.": [
                 "جای دکمه — به‌طور جداگانه برای دسکتاپ و موبایل. موبایل می‌تواند از موقعیت دسکتاپ استفاده کند یا موقعیت خودش را داشته باشد تا هرگز با ناوبری موبایل یا دکمه‌های چسبان سبد خرید تداخل نکند."
-            ],
-            "Where the sticky bar docks.": [
-                "جایی که نوار چسبان قرار می‌گیرد."
             ],
             "Whether the widgets render on small screens (≤782px).": [
                 "آیا ویجت‌ها در صفحه‌های کوچک (≤۷۸۲ پیکسل) نمایش داده می‌شوند."

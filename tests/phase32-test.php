@@ -16,7 +16,7 @@
  *    rules that milestones inherit (GoalRepository engine path)
  *  - free gift selection: the Reward model reads gift_products + choose
  *    mode, and the REST goal payload round-trips the new keys
- *  - settings: Phase 32 defaults (countdown / celebration / sticky /
+ *  - settings: Phase 32 defaults (countdown / celebration /
  *    suggestions_ranking) and the REST schema + sanitizer
  *  - frontend payload: countdown_end appears on goals and campaign groups
  *    and the gift picker data rides on the reward
@@ -370,12 +370,6 @@ $all_before = $settings->all();
 $d = $settings->defaults();
 check( 'frontend_countdown defaults true', true === $d['frontend_countdown'] );
 check( 'frontend_celebrate defaults true', true === $d['frontend_celebrate'] );
-check( 'sticky_position defaults bottom', 'bottom' === $d['sticky_position'] );
-check( 'sticky_behavior defaults dismissible', 'dismissible' === $d['sticky_behavior'] );
-check( 'sticky_delay defaults 0', 0 === $d['sticky_delay'] );
-check( 'sticky_countdown defaults false', false === $d['sticky_countdown'] );
-check( 'sticky_suggestions defaults false', false === $d['sticky_suggestions'] );
-check( 'sticky_display defaults compact', 'compact' === $d['sticky_display'] );
 check( 'suggestions_ranking defaults balanced', 'balanced' === $d['suggestions_ranking'] );
 
 $settings->set_many( $all_before );

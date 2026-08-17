@@ -480,10 +480,6 @@ msgstr "انیمیشن به‌روزرسانی پیشرفت"
 msgid "Animate the button and drawer"
 msgstr "انیمیشن دکمه و کشو"
 
-#: admin-app/src/routes/Settings.tsx:592
-msgid "Appear delay (seconds)"
-msgstr "تأخیر نمایش (ثانیه)"
-
 #: admin-app/src/components/layout/navigation.ts:68
 #: admin-app/src/routes/Appearance.tsx:469
 #: admin-app/src/routes/Appearance.tsx:484
@@ -600,10 +596,6 @@ msgstr "خودکار (واحد پول فروشگاه)"
 #: admin-app/src/routes/Settings.tsx:1173
 msgid "Auto (toward screen center)"
 msgstr "خودکار (به سمت مرکز صفحه)"
-
-#: admin-app/src/routes/Settings.tsx:567
-msgid "Auto-hide"
-msgstr "پنهانشدن خودکار"
 
 #: admin-app/src/routes/RevenueOverview.tsx:378
 msgid "Average Basket Increase"
@@ -985,10 +977,6 @@ msgstr "اهداف زیرشرطی را با منطق و/یا ترکیب کنید
 msgid "Compact"
 msgstr "فشرده"
 
-#: admin-app/src/routes/Settings.tsx:574
-msgid "Compact shows only the progress; full adds the message and reward."
-msgstr "حالت فشرده فقط پیشرفت را نشان می‌دهد؛ حالت کامل پیام و پاداش را نیز اضافه می‌کند."
-
 #: admin-app/src/routes/RevenueOverview.tsx:710
 msgid "Compare"
 msgstr "مقایسه"
@@ -1187,10 +1175,6 @@ msgstr "ثبت رویداد ممکن نشد."
 #: includes/REST/SettingsController.php:206
 msgid "Could not save the settings. Please try again."
 msgstr "ذخیرهٔ تنظیمات ممکن نشد. لطفاً دوباره تلاش کنید."
-
-#: admin-app/src/routes/Settings.tsx:606
-msgid "Countdown in sticky bar"
-msgstr "شمارش معکوس در نوار چسبان"
 
 #: admin-app/src/routes/Settings.tsx:521
 msgid "Countdown timer"
@@ -1507,14 +1491,6 @@ msgstr "رد کردن"
 msgid "Dismiss how FaraCart works"
 msgstr "بستن توضیح طرز کار فراکارت"
 
-#: admin-app/src/routes/Settings.tsx:566
-msgid "Dismissible"
-msgstr "قابل بستن"
-
-#: admin-app/src/routes/Settings.tsx:561
-msgid "Dismissible bars hide via the close button; auto-hide bars collapse after a few seconds and reappear on scroll."
-msgstr "نوارهای قابل بستن با دکمهٔ بستن پنهان می‌شوند؛ نوارهای پنهانشوندهٔ خودکار پس از چند ثانیه جمع می‌شوند و با اسکرول دوباره ظاهر می‌شوند."
-
 #: admin-app/src/routes/CampaignBuilder.tsx:433
 #: admin-app/src/routes/GoalBuilder.tsx:376
 msgid "Display"
@@ -1599,7 +1575,6 @@ msgstr "هر خریدار حداکثر %d بار می‌تواند این هدف
 #: admin-app/src/routes/Recommendations.tsx:155
 msgid "EUR — Euro"
 msgstr "EUR — یورو"
-
 
 msgid "Economics"
 msgstr "اقتصاد"
@@ -1880,10 +1855,6 @@ msgstr "جمعه"
 msgid "Frontend"
 msgstr "فرانت‌اند"
 
-#: admin-app/src/routes/Settings.tsx:580
-msgid "Full"
-msgstr "کامل"
-
 #: admin-app/src/routes/Settings.tsx:464
 msgid "Full-screen dashboard"
 msgstr "داشبورد تمام‌صفحه"
@@ -2161,10 +2132,6 @@ msgstr "فراکارت چه عملکردی داشت؟ فروش منتسب، سف
 msgid "How is this calculated?"
 msgstr "این چگونه محاسبه می‌شود؟"
 
-#: admin-app/src/routes/Settings.tsx:593
-msgid "How long after page load before the bar appears."
-msgstr "چند ثانیه پس از بارگذاری صفحه نوار ظاهر شود."
-
 #: admin-app/src/routes/Analytics.tsx:648
 msgid "How many times customers reached a goal target. Completion is not the same as purchase."
 msgstr "چند بار مشتریان به آستانهٔ هدف رسیدند. تکمیل با خرید یکی نیست."
@@ -2413,10 +2380,6 @@ msgstr "دادهٔ محدود — بر پایهٔ سفارش‌های دارای
 #: includes/Analytics/UpsellRanker.php:1193
 msgid "Limited stock remaining."
 msgstr "موجودی محدود باقی مانده است."
-
-#: admin-app/src/routes/Settings.tsx:616
-msgid "List the gap-closing product suggestions in the bar."
-msgstr "محصولات پیشنهادیِ پرکنندهٔ فاصله را در نوار فهرست کنید."
 
 #: admin-app/src/routes/Appearance.tsx:616
 msgid "Live preview"
@@ -3702,10 +3665,6 @@ msgstr "نمایش محصولات پیشنهادی که به رسیدن به ه�
 msgid "Show the closest goal only"
 msgstr "فقط نزدیک‌ترین هدف را نمایش بده"
 
-#: admin-app/src/routes/Settings.tsx:607
-msgid "Show the deadline countdown inside the sticky bar."
-msgstr "شمارش معکوس مهلت را داخل نوار چسبان نشان بده."
-
 #: admin-app/src/routes/Settings.tsx:411
 msgid "Show the first goal only"
 msgstr "فقط اولین هدف را نمایش بده"
@@ -3843,14 +3802,6 @@ msgstr "شروع در"
 msgid "Status"
 msgstr "وضعیت"
 
-#: admin-app/src/routes/Settings.tsx:540
-msgid "Sticky bar"
-msgstr "نوار چسبان"
-
-#: admin-app/src/routes/Settings.tsx:127
-msgid "Sticky bottom bar"
-msgstr "نوار پایین چسبان"
-
 #: admin-app/src/routes/RevenueOverview.tsx:719
 msgid "Store average"
 msgstr "میانگین فروشگاه"
@@ -3881,10 +3832,6 @@ msgstr "جمع فرعی (پیش از تخفیف‌ها)"
 #: admin-app/src/routes/Settings.tsx:723
 msgid "Suggestion ranking"
 msgstr "رتبهبندی پیشنهادها"
-
-#: admin-app/src/routes/Settings.tsx:615
-msgid "Suggestions in sticky bar"
-msgstr "پیشنهادها در نوار چسبان"
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:31
 msgid "Sun"
@@ -3976,10 +3923,6 @@ msgstr "متن"
 #: includes/Admin/AssetLoader.php:112
 msgid "The admin app is not built yet (%s is missing). Run npm install && npm run build inside the admin-app directory, or start npm run dev in a local/development environment for hot reload."
 msgstr "برنامهٔ مدیریت هنوز ساخته نشده است (%s وجود ندارد). در پوشهٔ admin-app دستور npm install && npm run build را اجرا کنید، یا برای بارگذاری خودکار در محیط محلی/توسعه، npm run dev را اجرا کنید."
-
-#: admin-app/src/routes/Settings.tsx:541
-msgid "The advanced sticky bottom/top bar (Phase 32): position, behavior, countdown and suggestions."
-msgstr "نوار چسبان پیشرفتهٔ پایین/بالا (فاز ۳۲): موقعیت، رفتار، شمارش معکوس و پیشنهادها."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:228
 msgid "The calculation includes product cost/margin, reward cost, shipping cost and incremental revenue."
@@ -4571,10 +4514,6 @@ msgstr "کجا و چگونه ویجت‌های فروشگاه ظاهر می‌ش
 #: admin-app/src/routes/Settings.tsx:1075
 msgid "Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons."
 msgstr "جای دکمه — به‌طور جداگانه برای دسکتاپ و موبایل. موبایل می‌تواند از موقعیت دسکتاپ استفاده کند یا موقعیت خودش را داشته باشد تا هرگز با ناوبری موبایل یا دکمه‌های چسبان سبد خرید تداخل نکند."
-
-#: admin-app/src/routes/Settings.tsx:551
-msgid "Where the sticky bar docks."
-msgstr "جایی که نوار چسبان قرار می‌گیرد."
 
 #: admin-app/src/routes/Settings.tsx:509
 msgid "Whether the widgets render on small screens (≤782px)."

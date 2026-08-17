@@ -72,11 +72,10 @@ class Settings {
 		'conflict_resolution'   => 'cumulative',       // cumulative | best | first (Phase 26)
 		'calculation_mode'      => 'subtotal',         // subtotal | discounted_subtotal | total
 
-		// Frontend (P18-T02). Phase 32 adds the countdown + celebration
-		// toggles and the advanced sticky-bar surface.
+		// Frontend (P18-T02). Phase 32 adds the countdown + celebration toggles.
 		'frontend_template'     => 'template-1',
 		'frontend_animation'    => true,
-		'frontend_locations'    => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ),
+		'frontend_locations'    => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' ),
 		'frontend_position'     => 'top',               // top | bottom for page widgets
 		'frontend_mobile'       => 'show',             // show | hide
 		'frontend_bar_height'   => 10,
@@ -89,14 +88,6 @@ class Settings {
 		'frontend_custom_css'   => '',
 		'frontend_countdown'    => true,               // Phase 32: live countdown chips on goals with an end time.
 		'frontend_celebrate'    => true,               // Phase 32: completion celebration animation.
-
-		// Phase 32 (advanced sticky bar).
-		'sticky_position'       => 'bottom',           // bottom | top
-		'sticky_behavior'       => 'dismissible',      // dismissible | auto_hide
-		'sticky_delay'          => 0,                  // seconds before the bar appears (0 = immediately)
-		'sticky_countdown'      => false,              // show the countdown chip in the bar
-		'sticky_suggestions'    => false,              // show the top suggestion in the bar
-		'sticky_display'        => 'compact',          // compact | full
 
 		// Floating widget (the floating goals/campaigns button + drawer).
 		// Each position object carries the physical side the admin chose

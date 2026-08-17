@@ -7,6 +7,7 @@ import Alert from '@mui/material/Alert';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import FormControl from '@mui/material/FormControl';
+import Grid from '@mui/material/Grid';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import Paper from '@mui/material/Paper';
@@ -25,6 +26,7 @@ import PageContainer from '../components/PageContainer';
 import PreviewWidget from '../components/preview/PreviewWidget';
 import { tokensFromSettings } from '../components/preview/types';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
+import { useFullscreen } from '../providers/FullscreenProvider';
 import { useStickyBarActions } from '../providers/ActionBarProvider';
 import SchemaForm from '../templates/SchemaForm';
 import { templateById, useTemplates } from '../templates/useTemplates';
@@ -278,13 +280,16 @@ function TemplateSettingsPanel({
  * Appearance (pluggable template engine): the storefront progress UI is
  * template-driven, independently for Goals and Campaigns.
  *
+ *  - the layout mirrors the Goal/Campaign builders: a two-column grid
+ *    with the settings on the right (RTL) and a sticky live preview on
+ *    the left (single column on small screens),
  *  - Tabs switch between the Goal and Campaign scopes (only one is visible
  *    at a time),
  *  - a dropdown lists every registered template for the active scope,
  *    defaulting to that scope's current default template,
- *  - selecting a template shows only that template's live preview + the
- *    schema-driven appearance form — mounted lazily, so no inactive
- *    template's form ever sits in the DOM,
+ *  - selecting a template shows only that template's live preview (left
+ *    column) + the schema-driven appearance form (right column) — mounted
+ *    lazily, so no inactive template's form ever sits in the DOM,
  *  - the save action persists the scope default + every edited template's
  *    appearance through `POST /faracart/v1/settings` as `template_defaults`
  *    + `template_settings` (identical semantics to the previous layout).
@@ -295,6 +300,7 @@ function TemplateSettingsPanel({
 export default function Appearance() {
   const queryClient = useQueryClient();
   const { notify } = useSnackbar();
+  const { fullscreen } = useFullscreen();
   const templatesQuery = useTemplates();
   const settingsQuery = useQuery({ queryKey: ['settings'], queryFn: fetchSettingsEnvelope });
 
@@ -308,6 +314,11 @@ export default function Appearance() {
       return 'USD';
     }
   }, []);
+
+  // The sticky preview column sticks below the WP admin bar in embedded
+  // mode (32px) and flush in full-screen mode where the app's own header
+  // is fixed and the content area scrolls internally.
+  const stickyTop = fullscreen ? 8 : 40;
 
   // Active tab: 0 = Goal, 1 = Campaign.
   const [tab, setTab] = useState(0);
@@ -535,139 +546,150 @@ export default function Appearance() {
         'faracart'
       )}
     >
-      <Stack spacing={3}>
-        <Tabs
-          value={tab}
-          onChange={(_event, next) => setTab(next)}
-          variant="fullWidth"
-          sx={{ borderBottom: 1, borderColor: 'divider' }}
-          aria-label={__('Template scope', 'faracart')}
-        >
-          <Tab
-            id="appearance-tab-goal"
-            aria-controls="appearance-panel-goal"
-            icon={<RocketLaunchIcon />}
-            iconPosition="start"
-            label={__('Goal', 'faracart')}
-          />
-          <Tab
-            id="appearance-tab-campaign"
-            aria-controls="appearance-panel-campaign"
-            icon={<StorefrontIcon />}
-            iconPosition="start"
-            label={__('Campaign', 'faracart')}
-          />
-        </Tabs>
+      <Grid container spacing={3}>
+        {/* Right column (RTL): the appearance settings — the scope tabs,
+            the template dropdown and the schema-driven appearance form. */}
+        <Grid size={{ xs: 12, md: 7, lg: 8 }}>
+          <Stack spacing={3}>
+            <Tabs
+              value={tab}
+              onChange={(_event, next) => setTab(next)}
+              variant="fullWidth"
+              sx={{ borderBottom: 1, borderColor: 'divider' }}
+              aria-label={__('Template scope', 'faracart')}
+            >
+              <Tab
+                id="appearance-tab-goal"
+                aria-controls="appearance-panel-goal"
+                icon={<RocketLaunchIcon />}
+                iconPosition="start"
+                label={__('Goal', 'faracart')}
+              />
+              <Tab
+                id="appearance-tab-campaign"
+                aria-controls="appearance-panel-campaign"
+                icon={<StorefrontIcon />}
+                iconPosition="start"
+                label={__('Campaign', 'faracart')}
+              />
+            </Tabs>
 
-        <Paper
-          variant="outlined"
-          role="tabpanel"
-          id={`appearance-panel-${scope}`}
-          aria-labelledby={`appearance-tab-${scope}`}
-          sx={{ p: { xs: 2.5, md: 3 } }}
-        >
-          <Stack spacing={2.5}>
-            <Box>
-              <Typography variant="h6" component="h3" gutterBottom>
-                {isCampaign ? __('Campaign template', 'faracart') : __('Goal template', 'faracart')}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                {isCampaign
-                  ? __(
-                      'The default template that renders a whole campaign on the storefront (e.g. the milestone chain).',
-                      'faracart'
-                    )
-                  : __(
-                      'The default template for every goal that does not pin its own on the Goal Builder.',
+            <Paper
+              variant="outlined"
+              role="tabpanel"
+              id={`appearance-panel-${scope}`}
+              aria-labelledby={`appearance-tab-${scope}`}
+              sx={{ p: { xs: 2.5, md: 3 } }}
+            >
+              <Stack spacing={2.5}>
+                <Box>
+                  <Typography variant="h6" component="h3" gutterBottom>
+                    {isCampaign
+                      ? __('Campaign template', 'faracart')
+                      : __('Goal template', 'faracart')}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {isCampaign
+                      ? __(
+                          'The default template that renders a whole campaign on the storefront (e.g. the milestone chain).',
+                          'faracart'
+                        )
+                      : __(
+                          'The default template for every goal that does not pin its own on the Goal Builder.',
+                          'faracart'
+                        )}
+                  </Typography>
+                </Box>
+
+                {/* Template dropdown — list the active scope's registered templates. */}
+                <FormControl size="small" fullWidth>
+                  <InputLabel id="appearance-template-label">
+                    {isCampaign
+                      ? __('Campaign template', 'faracart')
+                      : __('Goal template', 'faracart')}
+                  </InputLabel>
+                  <Select
+                    labelId="appearance-template-label"
+                    label={
+                      isCampaign
+                        ? __('Campaign template', 'faracart')
+                        : __('Goal template', 'faracart')
+                    }
+                    value={selectedId}
+                    onChange={(event) =>
+                      setDefaults((prev) => ({ ...prev, [scope]: String(event.target.value) }))
+                    }
+                  >
+                    {isCampaign && (
+                      <MenuItem value="">
+                        <em>{__('No campaign template', 'faracart')}</em>
+                      </MenuItem>
+                    )}
+                    {scopeTemplates.map((template) => (
+                      <MenuItem key={template.id} value={template.id}>
+                        {template.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                {scopeTemplates.length === 0 && (
+                  <Alert severity="info" variant="outlined">
+                    {__(
+                      'No templates are registered for this scope yet. Add one on the backend template registry.',
                       'faracart'
                     )}
-              </Typography>
-            </Box>
-
-            {/* Template dropdown — list the active scope's registered templates. */}
-            <FormControl size="small" fullWidth>
-              <InputLabel id="appearance-template-label">
-                {isCampaign ? __('Campaign template', 'faracart') : __('Goal template', 'faracart')}
-              </InputLabel>
-              <Select
-                labelId="appearance-template-label"
-                label={
-                  isCampaign ? __('Campaign template', 'faracart') : __('Goal template', 'faracart')
-                }
-                value={selectedId}
-                onChange={(event) =>
-                  setDefaults((prev) => ({ ...prev, [scope]: String(event.target.value) }))
-                }
-              >
-                {isCampaign && (
-                  <MenuItem value="">
-                    <em>{__('No campaign template', 'faracart')}</em>
-                  </MenuItem>
+                  </Alert>
                 )}
-                {scopeTemplates.map((template) => (
-                  <MenuItem key={template.id} value={template.id}>
-                    {template.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
 
-            {scopeTemplates.length === 0 && (
-              <Alert severity="info" variant="outlined">
-                {__(
-                  'No templates are registered for this scope yet. Add one on the backend template registry.',
-                  'faracart'
+                {!definition && !isCampaign && scopeTemplates.length > 0 && (
+                  <Alert severity="warning" variant="outlined">
+                    {__(
+                      'The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here.',
+                      'faracart'
+                    )}
+                  </Alert>
                 )}
-              </Alert>
-            )}
 
-            {!definition && !isCampaign && scopeTemplates.length > 0 && (
-              <Alert severity="warning" variant="outlined">
-                {__(
-                  'The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here.',
-                  'faracart'
-                )}
-              </Alert>
-            )}
-
-            {/* Live preview — always shown when a template is selected, or
-                for the campaign scope (where '' = no template is a valid choice). */}
-            {(definition || isCampaign) && (
-              <Box>
-                <Typography
-                  variant="overline"
-                  color="text.secondary"
-                  sx={{ display: 'block', mb: 1 }}
-                >
-                  {__('Live preview', 'faracart')}
-                </Typography>
-                <Box sx={{ maxWidth: 440 }}>
-                  <ScopeLivePreview
+                {definition && (
+                  <TemplateSettingsPanel
                     scope={scope}
-                    id={selectedId}
+                    definition={definition}
                     drafts={drafts}
-                    templates={scopeTemplates}
-                    tokens={tokens}
-                    currency={currency}
+                    onChange={(id, next) =>
+                      setDrafts((prev) => ({ ...prev, [scope]: { ...prev[scope], [id]: next } }))
+                    }
+                    onReset={resetTemplate}
                   />
-                </Box>
-              </Box>
-            )}
+                )}
+              </Stack>
+            </Paper>
+          </Stack>
+        </Grid>
 
-            {definition && (
-              <TemplateSettingsPanel
+        {/* Left column (RTL): the sticky live preview. Sticky only on
+            desktop — on small screens the preview flows after the
+            settings in a single column. Always shown when a template is
+            selected, or for the campaign scope (where '' = no template
+            is a valid choice). */}
+        <Grid size={{ xs: 12, md: 5, lg: 4 }}>
+          <Box sx={{ position: { xs: 'static', md: 'sticky' }, top: stickyTop }}>
+            <Typography variant="overline" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+              {__('Live preview', 'faracart')}
+            </Typography>
+            {(definition || isCampaign) && (
+              <ScopeLivePreview
                 scope={scope}
-                definition={definition}
+                id={selectedId}
                 drafts={drafts}
-                onChange={(id, next) =>
-                  setDrafts((prev) => ({ ...prev, [scope]: { ...prev[scope], [id]: next } }))
-                }
-                onReset={resetTemplate}
+                templates={scopeTemplates}
+                tokens={tokens}
+                currency={currency}
               />
             )}
-          </Stack>
-        </Paper>
-      </Stack>
+          </Box>
+        </Grid>
+      </Grid>
     </PageContainer>
   );
 }

@@ -156,14 +156,13 @@ function currencyOptions(current?: string): Array<{ value: string; label: string
   return [...CURRENCY_OPTIONS, { value: current, label: current }];
 }
 
-/** The six storefront widget locations as a checkbox group. */
+/** The storefront widget locations as a checkbox group. */
 const LOCATION_OPTIONS: Array<{ value: FrontendLocation; label: string }> = [
   { value: 'cart', label: __('Cart page', 'faracart') },
   { value: 'mini-cart', label: __('Mini cart', 'faracart') },
   { value: 'checkout', label: __('Checkout', 'faracart') },
   { value: 'shop', label: __('Shop / archives', 'faracart') },
   { value: 'product', label: __('Product pages', 'faracart') },
-  { value: 'sticky', label: __('Sticky bottom bar', 'faracart') },
 ];
 
 function LocationField({
@@ -743,91 +742,6 @@ export default function Settings() {
                     label={__('Celebration animation', 'faracart')}
                     description={__(
                       'Play a confetti burst when a goal is reached (Phase 32).',
-                      'faracart'
-                    )}
-                  />
-                </Stack>
-              </SectionCard>
-
-              <SectionCard
-                title={__('Sticky bar', 'faracart')}
-                description={__(
-                  'The advanced sticky bottom/top bar (Phase 32): position, behavior, countdown and suggestions.',
-                  'faracart'
-                )}
-              >
-                <Stack spacing={2}>
-                  <SelectField
-                    control={control}
-                    name="sticky_position"
-                    label={__('Position', 'faracart')}
-                    description={__('Where the sticky bar docks.', 'faracart')}
-                    options={[
-                      { value: 'bottom', label: __('Bottom', 'faracart') },
-                      { value: 'top', label: __('Top', 'faracart') },
-                    ]}
-                  />
-                  <SelectField
-                    control={control}
-                    name="sticky_behavior"
-                    label={__('Behavior', 'faracart')}
-                    description={__(
-                      'Dismissible bars hide via the close button; auto-hide bars collapse after a few seconds and reappear on scroll.',
-                      'faracart'
-                    )}
-                    options={[
-                      { value: 'dismissible', label: __('Dismissible', 'faracart') },
-                      { value: 'auto_hide', label: __('Auto-hide', 'faracart') },
-                    ]}
-                  />
-                  <SelectField
-                    control={control}
-                    name="sticky_display"
-                    label={__('Layout', 'faracart')}
-                    description={__(
-                      'Compact shows only the progress; full adds the message and reward.',
-                      'faracart'
-                    )}
-                    options={[
-                      { value: 'compact', label: __('Compact', 'faracart') },
-                      { value: 'full', label: __('Full', 'faracart') },
-                    ]}
-                  />
-                  <Controller
-                    control={control}
-                    name="sticky_delay"
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        type="number"
-                        size="small"
-                        fullWidth
-                        label={__('Appear delay (seconds)', 'faracart')}
-                        helperText={__(
-                          'How long after page load before the bar appears.',
-                          'faracart'
-                        )}
-                        value={Number(field.value)}
-                        onChange={(event) => field.onChange(Number(event.target.value) || 0)}
-                        sx={{ maxWidth: 360 }}
-                      />
-                    )}
-                  />
-                  <BooleanField
-                    control={control}
-                    name="sticky_countdown"
-                    label={__('Countdown in sticky bar', 'faracart')}
-                    description={__(
-                      'Show the deadline countdown inside the sticky bar.',
-                      'faracart'
-                    )}
-                  />
-                  <BooleanField
-                    control={control}
-                    name="sticky_suggestions"
-                    label={__('Suggestions in sticky bar', 'faracart')}
-                    description={__(
-                      'List the gap-closing product suggestions in the bar.',
                       'faracart'
                     )}
                   />

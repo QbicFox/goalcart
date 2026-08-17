@@ -16,8 +16,7 @@
  *  - the store-wide calculation mode filter (amount goals follow it,
  *    quantity-style goals stay untouched)
  *  - frontend (P18-T02): locations follow the frontend_locations setting,
- *    the sticky bar is gated on the 'sticky' location, and the frontend
- *    config carries currencyDisplay + mobile
+ *    and the frontend config carries currencyDisplay + mobile
  *  - general (P18-T01): default_goal_behavior (all | first | closest)
  *    narrows the progress payload, and the progress cache serves the
  *    stored payload (P18-T04 performance caching)
@@ -164,7 +163,7 @@ check( 'currency_display defaults to symbol', 'symbol' === $d['currency_display'
 check( 'default_goal_behavior defaults to all', 'all' === $d['default_goal_behavior'] );
 check( 'conflict_resolution defaults to cumulative', 'cumulative' === $d['conflict_resolution'] );
 check( 'calculation_mode defaults to subtotal', 'subtotal' === $d['calculation_mode'] );
-check( 'frontend_locations defaults to six locations', 6 === count( $d['frontend_locations'] ) );
+check( 'frontend_locations defaults to five locations', 5 === count( $d['frontend_locations'] ) );
 check( 'frontend_position defaults to top', 'top' === $d['frontend_position'] );
 check( 'frontend_mobile defaults to show', 'show' === $d['frontend_mobile'] );
 check( 'include_tax defaults false', false === $d['calculation_include_tax'] );
@@ -223,7 +222,7 @@ check( 'invalid mobile rejected', is_wp_error( rest_validate_value_from_schema( 
 
 check( 'frontend_locations items enum', isset( $save['frontend_locations']['items']['enum'] ) );
 check( 'unknown location item rejected', is_wp_error( rest_validate_value_from_schema( array( 'cart', 'bogus' ), $save['frontend_locations'], 'frontend_locations' ) ) );
-check( 'valid locations accepted', true === rest_validate_value_from_schema( array( 'cart', 'sticky' ), $save['frontend_locations'], 'frontend_locations' ) );
+check( 'valid locations accepted', true === rest_validate_value_from_schema( array( 'cart', 'product' ), $save['frontend_locations'], 'frontend_locations' ) );
 
 check( 'calculation_include_tax boolean schema', 'boolean' === $save['calculation_include_tax']['type'] );
 check( 'performance_caching boolean schema', 'boolean' === $save['performance_caching']['type'] );
@@ -247,7 +246,7 @@ try {
 	$req->set_param( 'calculation_mode', 'bogus' );
 	$req->set_param( 'frontend_position', 'bogus' );
 	$req->set_param( 'frontend_mobile', 'bogus' );
-	$req->set_param( 'frontend_locations', array( 'cart', 'bogus', 'sticky', 'sticky' ) );
+	$req->set_param( 'frontend_locations', array( 'cart', 'bogus', 'product', 'product' ) );
 	$req->set_param( 'calculation_include_tax', true );
 	$req->set_param( 'calculation_include_discount', false );
 	$req->set_param( 'calculation_include_shipping', false );
@@ -277,7 +276,7 @@ try {
 	check( 'invalid mode falls back to subtotal', 'subtotal' === $data['calculation_mode'] );
 	check( 'invalid position falls back to top', 'top' === $data['frontend_position'] );
 	check( 'invalid mobile falls back to show', 'show' === $data['frontend_mobile'] );
-	check( 'locations filtered + deduped', array( 'cart', 'sticky' ) === $data['frontend_locations'] );
+	check( 'locations filtered + deduped', array( 'cart', 'product' ) === $data['frontend_locations'] );
 	check( 'include_tax persisted true', true === $data['calculation_include_tax'] );
 	check( 'include_discount persisted false', false === $data['calculation_include_discount'] );
 	check( 'include_shipping persisted false', false === $data['calculation_include_shipping'] );
@@ -436,11 +435,10 @@ $settings->set_many( $all_before );
 // ---------------------------------------------------------------------------
 echo "\n== 4. Frontend settings ==\n";
 
-check( 'default locations are the six', array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ) === $ui->locations() );
+check( 'default locations are the five', array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' ) === $ui->locations() );
 
 $settings->set( 'frontend_locations', array( 'cart', 'checkout' ) );
 check( 'locations follow the setting', array( 'cart', 'checkout' ) === $ui->locations() );
-check( 'sticky gated off with location', false === in_array( 'sticky', $ui->locations(), true ) );
 
 add_filter( 'faracart_frontend_locations', function () {
 	return array( 'shop' );
@@ -448,8 +446,7 @@ add_filter( 'faracart_frontend_locations', function () {
 check( 'locations filter overrides', array( 'shop' ) === $ui->locations() );
 remove_all_filters( 'faracart_frontend_locations' );
 
-$settings->set( 'frontend_locations', array( 'cart', 'mini-cart', 'checkout', 'shop', 'product', 'sticky' ) );
-check( 'sticky location back on', true === in_array( 'sticky', $ui->locations(), true ) );	// Deterministic baseline: the stored option may already hold non-default
+$settings->set( 'frontend_locations', array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' ) );	// Deterministic baseline: the stored option may already hold non-default
 	// values (e.g. a dev site saved currency 'name'), so pin the settings
 	// before asserting the config passthrough.
 	$settings->set( 'currency_display', 'symbol' );
