@@ -262,7 +262,7 @@ class SettingsController extends BaseController {
 				'type'  => 'array',
 				'items' => array(
 					'type' => 'string',
-					'enum' => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' ),
+					'enum' => Settings::DISPLAY_LOCATIONS,
 				),
 			),
 			'frontend_position'     => array( 'type' => 'string', 'enum' => array( 'top', 'bottom' ) ),
@@ -352,7 +352,7 @@ class SettingsController extends BaseController {
 			'properties'           => array(
 				'preset'   => array(
 					'type' => 'string',
-					'enum' => array( 'top-left', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-right' ),
+					'enum' => Settings::FLOATING_PRESETS,
 				),
 				'offset_x' => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 200 ),
 				'offset_y' => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 200 ),
@@ -364,68 +364,17 @@ class SettingsController extends BaseController {
 	/**
 	 * Normalize a floating-button position object.
 	 *
-	 * Validates the preset enum and clamps the offsets so a malformed
-	 * stored or submitted value can never reach the storefront; anything
-	 * unknown falls back to the documented default.
-	 *
-	 * Legacy values (pre-preset installs stored horizontal/vertical) are
-	 * migrated to the equivalent preset so old settings keep their visual
-	 * result — the preset becomes the authoritative position control.
+	 * Delegates to the single shared implementation on Settings (the same
+	 * logic the read-time self-heal uses): validates the preset enum,
+	 * clamps the offsets, migrates legacy horizontal/vertical axes to the
+	 * equivalent preset, and falls back to the documented default.
 	 *
 	 * @param mixed $value   Raw position value.
 	 * @param mixed $default The setting's default position array.
 	 * @return array<string, string|int>
 	 */
 	protected function sanitize_floating_position( $value, $default ) {
-		$default = is_array( $default ) ? $default : array(
-			'preset'   => 'bottom-right',
-			'offset_x' => 20,
-			'offset_y' => 80,
-		);
-
-		if ( ! is_array( $value ) ) {
-			return $default;
-		}
-
-		$presets = array( 'top-left', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-right' );
-
-		if ( isset( $value['preset'] ) && in_array( $value['preset'], $presets, true ) ) {
-			$preset = $value['preset'];
-		} elseif ( isset( $value['horizontal'] ) && isset( $value['vertical'] ) ) {
-			// Legacy migration: horizontal × vertical → the matching preset.
-			$preset = $this->preset_from_axes( $value['horizontal'], $value['vertical'], $default['preset'] );
-		} else {
-			$preset = $default['preset'];
-		}
-
-		return array(
-			'preset'   => $preset,
-			'offset_x' => isset( $value['offset_x'] ) ? min( 200, max( 0, (int) $value['offset_x'] ) ) : (int) $default['offset_x'],
-			'offset_y' => isset( $value['offset_y'] ) ? min( 200, max( 0, (int) $value['offset_y'] ) ) : (int) $default['offset_y'],
-		);
-	}
-
-	/**
-	 * Map a legacy horizontal × vertical axes pair to a position preset.
-	 *
-	 * @param mixed  $horizontal 'left' | 'right' (or anything else).
-	 * @param mixed  $vertical   'top' | 'center' | 'bottom' (or anything else).
-	 * @param string $fallback   The preset to return for unknown axes.
-	 * @return string
-	 */
-	protected function preset_from_axes( $horizontal, $vertical, $fallback ) {
-		$presets = array(
-			'left_top'    => 'top-left',
-			'right_top'   => 'top-right',
-			'left_center' => 'center-left',
-			'right_center'=> 'center-right',
-			'left_bottom' => 'bottom-left',
-			'right_bottom'=> 'bottom-right',
-		);
-
-		$key = sanitize_key( $horizontal ) . '_' . sanitize_key( $vertical );
-
-		return isset( $presets[ $key ] ) ? $presets[ $key ] : $fallback;
+		return Settings::normalize_floating_position( $value, $default );
 	}
 
 	/**
@@ -616,9 +565,8 @@ class SettingsController extends BaseController {
 				return in_array( $value, array( 'balanced', 'price', 'popularity' ), true ) ? $value : $defaults['suggestions_ranking'];
 
 			case 'frontend_locations':
-				$allowed  = array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' );
-				$cleaned  = array_filter( array_map( 'sanitize_key', (array) $value ), function ( $location ) use ( $allowed ) {
-					return in_array( $location, $allowed, true );
+				$cleaned  = array_filter( array_map( 'sanitize_key', (array) $value ), function ( $location ) {
+					return in_array( $location, Settings::DISPLAY_LOCATIONS, true );
 				} );
 
 				return array_values( array_unique( $cleaned ) );

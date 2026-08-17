@@ -49,6 +49,26 @@ class Settings {
 	const GOAL_TEMPLATES = array( 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6' );
 
 	/**
+	 * The storefront widget locations the frontend_locations setting
+	 * accepts. Single source of truth shared by the read-time
+	 * normalization (Settings::all) and the REST schema / sanitizer
+	 * (SettingsController), so the three can never drift apart.
+	 *
+	 * @var array<int, string>
+	 */
+	const DISPLAY_LOCATIONS = array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' );
+
+	/**
+	 * The floating-button position presets the floating_desktop /
+	 * floating_mobile settings accept. Single source of truth shared by
+	 * the read-time normalization (Settings::all), the REST schema and
+	 * the save sanitizer, so the three can never drift apart.
+	 *
+	 * @var array<int, string>
+	 */
+	const FLOATING_PRESETS = array( 'top-left', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-right' );
+
+	/**
 	 * Default settings, merged with stored values on load.
 	 * * The frontend_* keys are the Phase 12 progress-template surface
  * (template variant + appearance tokens consumed by the storefront
@@ -239,6 +259,20 @@ class Settings {
 			if ( ! in_array( (string) $this->settings['frontend_template'], self::GOAL_TEMPLATES, true ) ) {
 				$this->settings['frontend_template'] = $this->defaults['frontend_template'];
 			}
+
+			// Self-heal the remaining schema-constrained settings the same
+			// way: values persisted by older plugin versions are out of the
+			// current REST schema — the retired 'sticky' display location,
+			// and the pre-preset horizontal/vertical floating positions. The
+			// Settings page echoes the served values back on save, so an
+			// out-of-schema stored value would be rejected with a 400
+			// (invalid-parameter errors) before the sanitizer ever runs.
+			// Normalizing on read keeps every consumer (the admin GET, the
+			// Appearance page, the storefront) schema-safe, and the next
+			// save persists the normalized values.
+			$this->settings['frontend_locations'] = $this->normalize_locations( $this->settings['frontend_locations'] );
+			$this->settings['floating_desktop']   = self::normalize_floating_position( $this->settings['floating_desktop'], $this->defaults['floating_desktop'] );
+			$this->settings['floating_mobile']    = self::normalize_floating_position( $this->settings['floating_mobile'], $this->defaults['floating_mobile'] );
 		}
 
 		return $this->settings;
@@ -325,6 +359,90 @@ class Settings {
 	 */
 	public function defaults() {
 		return $this->defaults;
+	}
+
+	/**
+	 * Normalize the stored display locations against the allowed set.
+	 *
+	 * Drops unknown / retired locations (e.g. the old 'sticky' entry) and
+	 * dedupes, so the served value is always a valid REST payload (the
+	 * frontend_locations schema rejects anything outside the enum).
+	 *
+	 * @param mixed $value Raw stored value.
+	 * @return array<int, string>
+	 */
+	protected function normalize_locations( $value ) {
+		$stored = array_map( 'strval', (array) $value );
+
+		return array_values( array_unique( array_intersect( self::DISPLAY_LOCATIONS, $stored ) ) );
+	}
+
+	/**
+	 * Normalize a floating-button position object.
+	 *
+	 * Validates the preset enum and clamps the offsets so a malformed
+	 * stored or submitted value can never reach the admin form or the
+	 * storefront; anything unknown falls back to the documented default.
+	 * Legacy values (pre-preset installs stored horizontal/vertical) are
+	 * migrated to the equivalent preset so old settings keep their visual
+	 * result — the preset becomes the authoritative position control.
+	 *
+	 * Shared by the read-time self-heal (Settings::all) and the REST save
+	 * sanitizer (SettingsController::sanitize_floating_position), so the
+	 * migration logic lives in exactly one place.
+	 *
+	 * @param mixed $value   Raw position value.
+	 * @param mixed $default The setting's default position array.
+	 * @return array<string, string|int>
+	 */
+	public static function normalize_floating_position( $value, $default ) {
+		$default = is_array( $default ) ? $default : array(
+			'preset'   => 'bottom-right',
+			'offset_x' => 20,
+			'offset_y' => 80,
+		);
+
+		if ( ! is_array( $value ) ) {
+			return $default;
+		}
+
+		if ( isset( $value['preset'] ) && in_array( $value['preset'], self::FLOATING_PRESETS, true ) ) {
+			$preset = $value['preset'];
+		} elseif ( isset( $value['horizontal'] ) && isset( $value['vertical'] ) ) {
+			// Legacy migration: horizontal × vertical → the matching preset.
+			$preset = self::preset_from_axes( $value['horizontal'], $value['vertical'], $default['preset'] );
+		} else {
+			$preset = $default['preset'];
+		}
+
+		return array(
+			'preset'   => $preset,
+			'offset_x' => isset( $value['offset_x'] ) ? min( 200, max( 0, (int) $value['offset_x'] ) ) : (int) $default['offset_x'],
+			'offset_y' => isset( $value['offset_y'] ) ? min( 200, max( 0, (int) $value['offset_y'] ) ) : (int) $default['offset_y'],
+		);
+	}
+
+	/**
+	 * Map a legacy horizontal × vertical axes pair to a position preset.
+	 *
+	 * @param mixed  $horizontal 'left' | 'right' (or anything else).
+	 * @param mixed  $vertical   'top' | 'center' | 'bottom' (or anything else).
+	 * @param string $fallback   The preset to return for unknown axes.
+	 * @return string
+	 */
+	protected static function preset_from_axes( $horizontal, $vertical, $fallback ) {
+		$presets = array(
+			'left_top'     => 'top-left',
+			'right_top'    => 'top-right',
+			'left_center'  => 'center-left',
+			'right_center' => 'center-right',
+			'left_bottom'  => 'bottom-left',
+			'right_bottom' => 'bottom-right',
+		);
+
+		$key = sanitize_key( $horizontal ) . '_' . sanitize_key( $vertical );
+
+		return isset( $presets[ $key ] ) ? $presets[ $key ] : $fallback;
 	}
 
 	/**

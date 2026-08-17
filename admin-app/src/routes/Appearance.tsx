@@ -5,6 +5,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import InputLabel from "@mui/material/InputLabel";
@@ -17,14 +18,19 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { __ } from "@wordpress/i18n";
+import { __, sprintf } from "@wordpress/i18n";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { fetchSettingsEnvelope, saveSettings } from "../api/settings";
 import { getBootData } from "../boot";
 import { useSnackbar } from "../components/notifications/SnackbarProvider";
 import PageContainer from "../components/PageContainer";
+import PreviewControls from "../components/preview/PreviewControls";
 import PreviewWidget from "../components/preview/PreviewWidget";
-import { tokensFromSettings } from "../components/preview/types";
+import {
+	PRESET_PERCENTS,
+	tokensFromSettings,
+	type PreviewPreset,
+} from "../components/preview/types";
 import { useStickyBarActions } from "../providers/ActionBarProvider";
 import { useFullscreen } from "../providers/FullscreenProvider";
 import SchemaForm from "../templates/SchemaForm";
@@ -41,12 +47,22 @@ import type {
 const SCOPES: TemplateScope[] = ["goal", "campaign"];
 
 /**
- * A sample in-progress goal for the live previews — the reference
- * design's demo values (82%: 1,650,000 of 2,000,000, 350,000 left) plus
- * two sample recommended products so every template demonstrates its
- * actual capabilities. Preview-only; never used as production data.
+ * A sample goal for the live previews — the reference design's demo
+ * values scaled to a preview-state fraction (0 = empty cart → 1 =
+ * completed), plus two sample recommended products so every template
+ * demonstrates its actual capabilities. Preview-only; never used as
+ * production data.
  */
-function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
+function sampleGoalAt(
+	fraction: number,
+	overrides: Partial<ProgressGoal> = {},
+): ProgressGoal {
+	const target = overrides.target ?? 2000000;
+	const percentage = Math.min(100, Math.round(fraction * 100));
+	const completed = fraction >= 1;
+	const current = Math.round(target * fraction);
+	const remaining = Math.max(0, target - current);
+
 	return {
 		goal_id: 1,
 		campaign_id: 0,
@@ -56,16 +72,22 @@ function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
 		icon: "🎯",
 		template: "template-1",
 		template_settings: {},
-		current: 1650000,
-		target: 2000000,
-		remaining: 350000,
-		percentage: 82,
-		completed: false,
-		state: "nearly_complete",
-		message: __("Only %s left to reach your goal", "faracart").replace(
-			"%s",
-			"350,000",
-		),
+		current,
+		target,
+		remaining,
+		percentage,
+		completed,
+		state: completed
+			? "completed"
+			: percentage >= 80
+				? "nearly_complete"
+				: "progressing",
+		message: completed
+			? __("You reached your goal!", "faracart")
+			: __("Only %s left to reach your goal", "faracart").replace(
+					"%s",
+					remaining.toLocaleString(),
+				),
 		reward: { type: "free_shipping", value: null, max_value: null, meta: {} },
 		suggestions: [
 			{
@@ -97,34 +119,25 @@ function sampleGoal(overrides: Partial<ProgressGoal> = {}): ProgressGoal {
 	};
 }
 
-/** Three sample milestones for the campaign previews. */
-function sampleMilestones(): ProgressGoal[] {
+/** Three sample milestones for the campaign previews, at a state fraction. */
+function sampleMilestonesAt(fraction: number): ProgressGoal[] {
 	return [
-		sampleGoal({
+		sampleGoalAt(fraction, {
 			goal_id: 1,
 			goal_name: __("Free shipping", "faracart"),
 			target: 100,
-			current: 93,
-			remaining: 7,
-			percentage: 93,
 			reward: { type: "free_shipping", value: null, max_value: null, meta: {} },
 		}),
-		sampleGoal({
+		sampleGoalAt(fraction, {
 			goal_id: 2,
 			goal_name: __("Free gift", "faracart"),
 			target: 200,
-			current: 93,
-			remaining: 107,
-			percentage: 46,
 			reward: { type: "free_gift", value: null, max_value: null, meta: {} },
 		}),
-		sampleGoal({
+		sampleGoalAt(fraction, {
 			goal_id: 3,
 			goal_name: __("10% off", "faracart"),
 			target: 300,
-			current: 93,
-			remaining: 207,
-			percentage: 31,
 			reward: {
 				type: "percent_discount",
 				value: 10,
@@ -139,6 +152,9 @@ function sampleMilestones(): ProgressGoal[] {
  * The live preview of one template with its current draft appearance —
  * rendered through PreviewWidget (the same component the Phase 15 preview
  * dialogs use), so what the merchant sees here matches the storefront.
+ * Framed like the Goal/Campaign builder preview (PreviewPanel): a chip
+ * header (progress + template), the rendered widget on a gray stage, and
+ * the Preview state control (empty cart → completed) below.
  */
 function ScopeLivePreview({
 	scope,
@@ -147,6 +163,8 @@ function ScopeLivePreview({
 	templates,
 	tokens,
 	currency,
+	preset,
+	onPresetChange,
 }: {
 	scope: TemplateScope;
 	id: string;
@@ -154,6 +172,8 @@ function ScopeLivePreview({
 	templates: TemplateDefinition[];
 	tokens: ReturnType<typeof tokensFromSettings>;
 	currency: string;
+	preset: PreviewPreset;
+	onPresetChange: (preset: PreviewPreset) => void;
 }) {
 	if (scope === "campaign" && id === "") {
 		return (
@@ -174,21 +194,14 @@ function ScopeLivePreview({
 
 	const settings = drafts[scope][id] ?? definition.settings;
 	const animation = bool(settings, "animation", true);
+	// The sample goals scale with the chosen preview state (empty → done).
+	const fraction = PRESET_PERCENTS[preset];
 
-	if (scope === "goal") {
-		return (
-			<PreviewWidget
-				goals={[sampleGoal()]}
-				currency={currency}
-				tokens={tokens}
-				templateOverride={id}
-				settingsOverride={settings}
-				rewardState="locked"
-				animation={animation}
-			/>
-		);
-	}
-
+	// The sample milestones must carry the campaign's id so PreviewWidget's
+	// grouping (goal.campaign_id → campaign) actually joins them into the
+	// campaign and renders it through the selected campaign template —
+	// otherwise they fall through as standalone goal cards and the campaign
+	// preview always shows the wrong (basic) rendering.
 	const campaign: ProgressCampaign = {
 		campaign_id: 999,
 		name: __("Sample campaign", "faracart"),
@@ -196,23 +209,75 @@ function ScopeLivePreview({
 		settings,
 	};
 
-	// The sample milestones must carry the campaign's id so PreviewWidget's
-	// grouping (goal.campaign_id → campaign) actually joins them into the
-	// campaign and renders it through the selected campaign template —
-	// otherwise they fall through as standalone goal cards and the campaign
-	// preview always shows the wrong (basic) rendering.
+	const goals =
+		scope === "goal"
+			? [sampleGoalAt(fraction)]
+			: sampleMilestonesAt(fraction).map((goal) => ({
+					...goal,
+					campaign_id: campaign.campaign_id,
+				}));
+
+	const completedCount = goals.filter((goal) => goal.completed).length;
+	const percent = Math.round(goals[0].percentage);
+	const stateLabel =
+		scope === "campaign"
+			? sprintf(
+					/* translators: %1$d: completed milestones, %2$d: total milestones. */
+					__("%1$d/%2$d milestones", "faracart"),
+					completedCount,
+					goals.length,
+				)
+			: sprintf(__("%d%% progress", "faracart"), percent);
+
 	return (
-		<PreviewWidget
-			goals={sampleMilestones().map((goal) => ({
-				...goal,
-				campaign_id: campaign.campaign_id,
-			}))}
-			campaigns={[campaign]}
-			currency={currency}
-			tokens={tokens}
-			rewardState="locked"
-			animation={animation}
-		/>
+		<Stack spacing={2}>
+			{/* The rendered preview — the same frame the Goal/Campaign
+            builders use (chips + gray stage). */}
+			<Paper
+				variant="outlined"
+				sx={{ p: { xs: 2, md: 3 }, bgcolor: "#f6f7f7" }}
+			>
+				<Box
+					sx={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "space-between",
+						mb: 2,
+						gap: 1,
+					}}
+				>
+					<Chip size="small" variant="outlined" label={stateLabel} />
+					<Chip size="small" variant="outlined" label={definition.label} />
+				</Box>
+
+				{scope === "goal" ? (
+					<PreviewWidget
+						goals={goals}
+						currency={currency}
+						tokens={tokens}
+						templateOverride={id}
+						settingsOverride={settings}
+						rewardState="auto"
+						animation={animation}
+					/>
+				) : (
+					<PreviewWidget
+						goals={goals}
+						campaigns={[campaign]}
+						currency={currency}
+						tokens={tokens}
+						rewardState="auto"
+						animation={animation}
+					/>
+				)}
+			</Paper>
+
+			{/* Preview state — the same control the Goal/Campaign builders
+            use, so the appearance preview shows any progress state. */}
+			<Paper variant="outlined" sx={{ p: 2.5 }}>
+				<PreviewControls value={{ preset }} onApplyPreset={onPresetChange} />
+			</Paper>
+		</Stack>
 	);
 }
 
@@ -331,6 +396,10 @@ export default function Appearance() {
 	// Active tab: 0 = Goal, 1 = Campaign.
 	const [tab, setTab] = useState(0);
 	const scope = SCOPES[tab];
+
+	// Preview-state preset for the live preview (the same control the
+	// Goal/Campaign builders use: empty cart → completed).
+	const [preset, setPreset] = useState<PreviewPreset>("50");
 
 	// Working copy: scope defaults + per-template default appearance.
 	// Seeded once from the registry payload, whose `settings` field already
@@ -735,6 +804,8 @@ export default function Appearance() {
 								templates={scopeTemplates}
 								tokens={tokens}
 								currency={currency}
+								preset={preset}
+								onPresetChange={setPreset}
 							/>
 						)}
 					</Box>

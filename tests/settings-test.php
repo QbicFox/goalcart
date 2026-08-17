@@ -340,6 +340,60 @@ try {
 
 $settings->set_many( $all_before );
 
+// Self-heal (regression): values persisted by older versions that are
+// now out of the current REST schema — the retired 'sticky' display
+// location and the pre-preset horizontal/vertical floating positions —
+// are normalized on read. Without this the Settings page echoes them
+// back and the REST schema rejects the save with a 400 (the exact
+// "invalid parameter(s): frontend_locations, floating_desktop,
+// floating_mobile" failure). Wrapped in a transaction so the option row
+// always reverts, exactly like the blocks above.
+$wpdb->query( 'START TRANSACTION' );
+
+try {
+	$stored                       = get_option( Settings::OPTION_NAME, array() );
+	$stored                       = is_array( $stored ) ? $stored : array();
+	$stored['frontend_locations'] = array( 'cart', 'sticky', 'product' );
+	$stored['floating_desktop']   = array(
+		'horizontal' => 'left',
+		'vertical'   => 'bottom',
+		'offset_x'   => 25,
+		'offset_y'   => 90,
+	);
+	$stored['floating_mobile']    = array(
+		'horizontal' => 'right',
+		'vertical'   => 'top',
+		'offset_x'   => 12,
+		'offset_y'   => 40,
+	);
+	update_option( Settings::OPTION_NAME, $stored, false );
+	wp_cache_delete( Settings::OPTION_NAME, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+
+	$fresh = new Settings();
+	$all   = $fresh->all();
+
+	check( 'retired sticky location filtered on read', array( 'cart', 'product' ) === $all['frontend_locations'] );
+	check( 'legacy desktop axes migrate to a preset', 'bottom-left' === $all['floating_desktop']['preset'] && 25 === $all['floating_desktop']['offset_x'] && 90 === $all['floating_desktop']['offset_y'] );
+	check( 'legacy mobile axes migrate to a preset', 'top-right' === $all['floating_mobile']['preset'] && 12 === $all['floating_mobile']['offset_x'] && 40 === $all['floating_mobile']['offset_y'] );
+
+	// The served shape now validates against the REST schema, so a full
+	// Settings-page save round-trips without a 400.
+	$save = $settings_ctrl->save_args();
+	check( 'normalized locations pass schema', true === rest_validate_value_from_schema( $all['frontend_locations'], $save['frontend_locations'], 'frontend_locations' ) );
+	check( 'normalized desktop position passes schema', true === rest_validate_value_from_schema( $all['floating_desktop'], $save['floating_desktop'], 'floating_desktop' ) );
+	check( 'normalized mobile position passes schema', true === rest_validate_value_from_schema( $all['floating_mobile'], $save['floating_mobile'], 'floating_mobile' ) );
+} finally {
+	$wpdb->query( 'ROLLBACK' );
+
+	// ROLLBACK reverts the option row; drop the caches so later sections
+	// read the reverted (pre-block) value.
+	wp_cache_delete( Settings::OPTION_NAME, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+}
+
+$settings->set_many( $all_before );
+
 // ---------------------------------------------------------------------------
 // 3. Goal calculation toggles (P18-T03)
 // ---------------------------------------------------------------------------
