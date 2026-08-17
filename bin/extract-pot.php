@@ -118,13 +118,15 @@ function gc_i18n_extract_file( $path, $root ) {
 
 	$patterns = array(
 		// __( 'text', 'faracart' ) / _e / esc_html__ / esc_attr__ / esc_html_e.
-		'/\\b(?:__|_e|esc_html__|esc_attr__|esc_html_e|esc_attr_e)\\(\\s*(' . $q . ')(?:\\s*,\\s*(' . $q . '))?\\s*\\)/s' => array( 'msgid' => 1, 'domain' => 2 ),
+		// The optional trailing comma before ')' tolerates the prettier
+		// multi-line call style (a domain argument followed by ',').
+		'/\\b(?:__|_e|esc_html__|esc_attr__|esc_html_e|esc_attr_e)\\(\\s*(' . $q . ')(?:\\s*,\\s*(' . $q . '))?\\s*,?\\s*\\)/s' => array( 'msgid' => 1, 'domain' => 2 ),
 		// _x( 'text', 'context', 'faracart' ) / _ex / esc_html_x / esc_attr_x.
-		'/\\b(?:_x|_ex|esc_html_x|esc_attr_x)\\(\\s*(' . $q . ')\\s*,\\s*(' . $q . ')(?:\\s*,\\s*(' . $q . '))?\\s*\\)/s' => array( 'msgid' => 1, 'msgctxt' => 2, 'domain' => 3 ),
+		'/\\b(?:_x|_ex|esc_html_x|esc_attr_x)\\(\\s*(' . $q . ')\\s*,\\s*(' . $q . ')(?:\\s*,\\s*(' . $q . '))?\\s*,?\\s*\\)/s' => array( 'msgid' => 1, 'msgctxt' => 2, 'domain' => 3 ),
 		// _n( 'single', 'plural', $count, 'faracart' ).
-		'/\\b_n\\(\\s*(' . $q . ')\\s*,\\s*(' . $q . ')\\s*,\\s*[^,)]+\\s*,\\s*(' . $q . ')\\s*\\)/s' => array( 'msgid' => 1, 'msgid_plural' => 2, 'domain' => 3 ),
+		'/\\b_n\\(\\s*(' . $q . ')\\s*,\\s*(' . $q . ')\\s*,\\s*[^,)]+\\s*,\\s*(' . $q . ')\\s*,?\\s*\\)/s' => array( 'msgid' => 1, 'msgid_plural' => 2, 'domain' => 3 ),
 		// _nx( 'single', 'plural', $count, 'context', 'faracart' ).
-		'/\\b_nx\\(\\s*(' . $q . ')\\s*,\\s*(' . $q . ')\\s*,\\s*[^,)]+\\s*,\\s*(' . $q . ')\\s*,\\s*(' . $q . ')\\s*\\)/s' => array( 'msgid' => 1, 'msgid_plural' => 2, 'msgctxt' => 3, 'domain' => 4 ),
+		'/\\b_nx\\(\\s*(' . $q . ')\\s*,\\s*(' . $q . ')\\s*,\\s*[^,)]+\\s*,\\s*(' . $q . ')\\s*,\\s*(' . $q . ')\\s*,?\\s*\\)/s' => array( 'msgid' => 1, 'msgid_plural' => 2, 'msgctxt' => 3, 'domain' => 4 ),
 	);
 
 	$entries = array();

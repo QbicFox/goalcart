@@ -18,8 +18,9 @@
  *                     source attribution; a rank-endpoint fallback
  *                     closes money-goal gaps)
  *   FloatingWidget   floating goals/campaigns button + progress drawer
- *                     (physical left/right × top/center/bottom position,
- *                     per-device settings, safe-area aware, RTL-safe)
+ *                     (position preset + offsets, per-device settings,
+ *                     drawer always opens toward the screen center,
+ *                     safe-area aware, RTL-safe)
  *
  * Every eligible goal renders as its own card, stacked in a shared
  * wrapper (`.faracart-widget__goals`) — a campaign's milestones each get
@@ -70,11 +71,14 @@
 	// Floating widget (floating goals/campaigns button + drawer) state:
 	// whether the drawer is open, whether the button/drawer markup was
 	// built once (the payload only rebuilds the drawer content), the
-	// drawer content fingerprint (rebuild only when the goals changed)
+	// drawer content fingerprint (rebuild only when the goals changed),
+	// the resolved drawer direction + button side (re-applied on resize)
 	// and the default button glyph.
 	var floatingOpen = false;
 	var floatingBuilt = false;
 	var floatingFingerprint = null;
+	var floatingDirection = 'right';
+	var floatingButtonSide = 'right';
 	var FLOATING_DEFAULT_ICON = '\uD83D\uDED2'; // shopping cart
 
 	// The template ids the floating drawer accepts when resolving a goal's
@@ -2534,10 +2538,6 @@
 				: floating.showDesktop !== false,
 			buttonSize: Math.min( 96, Math.max( 32, Number( floating.buttonSize ) || 56 ) ),
 			animation: floating.animation !== false,
-			drawerDirection: ( floating.drawerDirection === 'left' || floating.drawerDirection === 'right'
-				|| floating.drawerDirection === 'up' || floating.drawerDirection === 'down' )
-				? floating.drawerDirection
-				: 'auto',
 			icon: String( floating.icon || '' ),
 			label: String( floating.label || '' ),
 			labels: floating.labels || {},
@@ -2599,15 +2599,14 @@
 	 * zoom), and the mobile safe-area insets ride along on anchored sides.
 	 *
 	 * @param {HTMLElement} container   The #faracart-floating element.
-	 * @param {Object}      position    { horizontal, vertical, offset_x, offset_y }.
+	 * @param {Object}      position    { preset, offset_x, offset_y }.
 	 * @param {number}      buttonSize  Button diameter (px).
 	 * @param {Object}      safeInsets  { top, right, bottom, left } px.
 	 * @return {void}
 	 */
 	function applyFloatingPosition( container, position, buttonSize, safeInsets ) {
-		var horizontal = ( position && position.horizontal === 'left' ) ? 'left' : 'right';
-		var vertical = ( position && position.vertical === 'top' ) ? 'top'
-			: ( ( position && position.vertical === 'center' ) ? 'center' : 'bottom' );
+		var horizontal = floatingButtonSide( position );
+		var vertical = floatingVerticalAxis( position );
 		var offsetX = Math.max( 0, Number( ( position && position.offset_x ) || 0 ) );
 		var offsetY = Math.max( 0, Number( ( position && position.offset_y ) || 0 ) );
 
@@ -2623,12 +2622,16 @@
 		offsetY = Math.min( offsetY, maxY );
 
 		// Reset the previous anchors (and the center transform) first.
-		container.classList.remove( 'faracart-floating--center' );
+		container.classList.remove( 'faracart-floating--center', 'faracart-floating--button-left', 'faracart-floating--button-right' );
 		container.style.removeProperty( 'left' );
 		container.style.removeProperty( 'right' );
 		container.style.removeProperty( 'top' );
 		container.style.removeProperty( 'bottom' );
 		container.style.removeProperty( '--faracart-fy' );
+
+		// The button-side class tells the CSS which way an up/down drawer
+		// aligns (always toward the screen center).
+		container.classList.add( 'faracart-floating--button-' + horizontal );
 
 		if ( horizontal === 'left' ) {
 			container.style.left = ( offsetX + safeInsets.left ) + 'px';
@@ -2651,86 +2654,69 @@
 	}
 
 	/**
-	 * The drawer opening direction for the button's current rect.
+	 * The drawer opening direction for a position preset.
 	 *
-	 * 'auto' opens toward the screen center horizontally when the panel
-	 * fits — it never points off-screen — and an explicit direction that
-	 * has no room flips to the side with the most free space (the opposite
-	 * side first, then the vertical/horizontal axis). This is the
-	 * safe-positioning guard that keeps the drawer inside the viewport.
+	 * The drawer always opens from the button toward the screen center,
+	 * so the direction is fully determined by the preset: top presets
+	 * open down, bottom presets open up, center-left opens right and
+	 * center-right opens left. There is no admin direction setting.
 	 *
-	 * @param {DOMRect} rect     The button's bounding rect.
-	 * @param {string}  requested 'auto' | 'left' | 'right' | 'up' | 'down'.
+	 * @param {Object} position { preset, offset_x, offset_y }.
 	 * @return {string} 'left' | 'right' | 'up' | 'down'.
 	 */
-	function resolveFloatingDrawerDirection( rect, requested ) {
-		var vw = window.innerWidth || document.documentElement.clientWidth || 0;
-		var vh = window.innerHeight || document.documentElement.clientHeight || 0;
-		var minWidth = 280;
-		var minHeight = 240;
-		var order = [ 'left', 'right', 'up', 'down' ];
-		var free = {
-			left: rect.left,
-			right: vw - rect.right,
-			up: rect.top,
-			down: vh - rect.bottom,
-		};
+	function floatingDrawerDirection( position ) {
+		var preset = ( position && position.preset ) || 'bottom-right';
 
-		function best() {
-			var direction = 'left';
-			var space = -1;
-
-			for ( var i = 0; i < order.length; i++ ) {
-				if ( free[ order[ i ] ] > space ) {
-					direction = order[ i ];
-					space = free[ order[ i ] ];
-				}
-			}
-
-			return direction;
+		if ( preset === 'top-left' || preset === 'top-right' ) {
+			return 'down';
 		}
 
-		if ( requested === 'left' || requested === 'right' ) {
-			if ( free[ requested ] >= minWidth ) {
-				return requested;
-			}
-
-			var oppositeX = requested === 'left' ? 'right' : 'left';
-			if ( free[ oppositeX ] >= minWidth ) {
-				return oppositeX;
-			}
-
-			return free.up >= free.down ? 'up' : 'down';
+		if ( preset === 'bottom-left' || preset === 'bottom-right' ) {
+			return 'up';
 		}
 
-		if ( requested === 'up' || requested === 'down' ) {
-			if ( free[ requested ] >= minHeight ) {
-				return requested;
-			}
-
-			var oppositeY = requested === 'up' ? 'down' : 'up';
-			if ( free[ oppositeY ] >= minHeight ) {
-				return oppositeY;
-			}
-
-			return free.left >= free.right ? 'left' : 'right';
+		if ( preset === 'center-left' ) {
+			return 'right';
 		}
 
-		// auto: toward the screen center horizontally when it fits,
-		// otherwise the vertical side with the most room, otherwise the
-		// single largest free side.
-		var center = rect.left + ( rect.right - rect.left ) / 2;
-		var towardCenter = center < vw / 2 ? 'right' : 'left';
+		return 'left'; // center-right (and any fallback).
+	}
 
-		if ( free[ towardCenter ] >= minWidth ) {
-			return towardCenter;
+	/**
+	 * The physical screen side the button hugs for a position preset.
+	 *
+	 * Up/down drawers align toward the center using this side (a left
+	 * button's drawer extends right; a right button's extends left).
+	 *
+	 * @param {Object} position { preset, offset_x, offset_y }.
+	 * @return {string} 'left' | 'right'.
+	 */
+	function floatingButtonSide( position ) {
+		var preset = ( position && position.preset ) || 'bottom-right';
+
+		return ( preset === 'top-left' || preset === 'center-left' || preset === 'bottom-left' )
+			? 'left'
+			: 'right';
+	}
+
+	/**
+	 * The vertical anchor for a position preset ('top' | 'center' | 'bottom').
+	 *
+	 * @param {Object} position { preset, offset_x, offset_y }.
+	 * @return {string}
+	 */
+	function floatingVerticalAxis( position ) {
+		var preset = ( position && position.preset ) || 'bottom-right';
+
+		if ( preset === 'top-left' || preset === 'top-right' ) {
+			return 'top';
 		}
 
-		if ( free.up >= minHeight || free.down >= minHeight ) {
-			return free.up >= free.down ? 'up' : 'down';
+		if ( preset === 'center-left' || preset === 'center-right' ) {
+			return 'center';
 		}
 
-		return best();
+		return 'bottom';
 	}
 
 	/**
@@ -2738,27 +2724,30 @@
 	 *
 	 * The stylesheet already scrolls the panel internally (overflow: auto
 	 * + max-height), but the anchored panel can still extend past the
-	 * viewport edges — a vertically centered drawer on a button at the
-	 * very top/bottom, or a horizontally centered up/down drawer on a
-	 * button at the very left/right. This measures the (still hidden)
-	 * panel and clamps its anchor so it always stays fully on screen, and
-	 * caps the height by the space actually available from the button, so
-	 * the internal scrollbar is always reachable.
+	 * viewport edges — a side drawer on a button at the very top/bottom,
+	 * or an up/down drawer that grows past the opposite edge on a small
+	 * screen. This measures the (still hidden) panel and clamps its
+	 * anchor so it always stays fully on screen, and caps the height by
+	 * the space actually available from the button, so the internal
+	 * scrollbar is always reachable.
 	 *
 	 * @param {HTMLElement} drawer      The drawer element.
 	 * @param {DOMRect}     buttonRect  The button's bounding rect.
 	 * @param {string}      direction   'left' | 'right' | 'up' | 'down'.
+	 * @param {string}      buttonSide  'left' | 'right' (the preset's side).
 	 * @return {void}
 	 */
-	function constrainFloatingDrawer( drawer, buttonRect, direction ) {
+	function constrainFloatingDrawer( drawer, buttonRect, direction, buttonSide ) {
 		var vw = window.innerWidth || document.documentElement.clientWidth || 0;
 		var vh = window.innerHeight || document.documentElement.clientHeight || 0;
 		var margin = 12;
+		var gap = 12;
 
 		// Reset any previous constraints (the direction can change between
 		// opens, and the viewport can shrink).
 		drawer.style.removeProperty( 'top' );
 		drawer.style.removeProperty( 'left' );
+		drawer.style.removeProperty( 'right' );
 		drawer.style.removeProperty( 'max-height' );
 
 		// Cap the height by the space actually available from the button
@@ -2780,28 +2769,55 @@
 		var height = drawer.offsetHeight || Math.max( 120, Math.round( maxHeight ) );
 
 		if ( direction === 'left' || direction === 'right' ) {
-			// The stylesheet centers the panel on the button (top:50% +
-			// translateY(-50%)); pin the anchor so the panel fits.
+			// The stylesheet centers the panel vertically on the button
+			// (top:50% + translateY(-50%)); pin the anchor so it fits.
 			var centerY = buttonRect.top + buttonRect.height / 2;
 			var top = Math.min( Math.max( margin + height / 2, centerY ), vh - margin - height / 2 );
 			drawer.style.top = top + 'px';
+
+			// The panel opens horizontally from the button (toward the
+			// center); clamp so it never spills off the opposite edge.
+			var sideLeft = direction === 'right'
+				? buttonRect.right + gap
+				: buttonRect.left - gap - width;
+			drawer.style.left = clampViewport( sideLeft, width, vw, margin ) + 'px';
+			drawer.style.right = 'auto';
 		} else {
-			// The stylesheet centers the panel on the button (left:50% +
-			// translateX(-50%)); pin the anchor so the panel fits.
-			var centerX = buttonRect.left + buttonRect.width / 2;
-			var left = Math.min( Math.max( margin + width / 2, centerX ), vw - margin - width / 2 );
-			drawer.style.left = left + 'px';
+			// The panel opens up/down from the button, aligned toward the
+			// screen center (button-left → extends right, button-right →
+			// extends left); clamp horizontally so it always fits.
+			var centerLeft = buttonSide === 'left'
+				? buttonRect.right + gap
+				: buttonRect.left - gap - width;
+			drawer.style.left = clampViewport( centerLeft, width, vw, margin ) + 'px';
+			drawer.style.right = 'auto';
 		}
+	}
+
+	/**
+	 * Clamp a drawer left coordinate so the panel stays fully inside the
+	 * viewport (never past either edge, even on tiny screens).
+	 *
+	 * @param {number} left    The desired left coordinate (px).
+	 * @param {number} width   The panel width (px).
+	 * @param {number} vw      Viewport width (px).
+	 * @param {number} margin  Minimum edge gap (px).
+	 * @return {number}
+	 */
+	function clampViewport( left, width, vw, margin ) {
+		var min = margin;
+		var max = Math.max( margin, vw - width - margin );
+
+		return Math.min( Math.max( min, left ), max );
 	}
 
 	/**
 	 * Toggle the floating drawer open/closed.
 	 *
-	 * The direction is resolved at open time against the button's live
-	 * rect (it can move with scroll/resize), so an 'auto' direction always
-	 * opens toward the screen center and a configured direction never
-	 * points off-screen. The panel is then constrained to the viewport so
-	 * its internal scroll area is always reachable.
+	 * The direction always comes from the position preset (toward the
+	 * screen center) — there is no admin direction setting. The panel is
+	 * then constrained to the viewport so its internal scroll area is
+	 * always reachable.
 	 *
 	 * @param {boolean} open Whether the drawer should open.
 	 * @return {void}
@@ -2818,17 +2834,20 @@
 		if ( floatingOpen ) {
 			var drawer = container.querySelector( '.faracart-floating__drawer' );
 			var button = container.querySelector( '.faracart-floating__button' );
-			var direction = 'left';
+			var position = floatingConfig().position;
+			var direction = floatingDrawerDirection( position );
+			var buttonSide = floatingButtonSide( position );
 
-			if ( button ) {
-				direction = resolveFloatingDrawerDirection( button.getBoundingClientRect(), floatingConfig().drawerDirection );
-			}
+			// Remember for the resize handler (the button can move with
+			// scroll/resize while the drawer is open).
+			floatingDirection = direction;
+			floatingButtonSide = buttonSide;
 
 			container.classList.remove( 'faracart-floating--dir-left', 'faracart-floating--dir-right', 'faracart-floating--dir-up', 'faracart-floating--dir-down' );
 			container.classList.add( 'faracart-floating--dir-' + direction );
 
 			if ( drawer && button ) {
-				constrainFloatingDrawer( drawer, button.getBoundingClientRect(), direction );
+				constrainFloatingDrawer( drawer, button.getBoundingClientRect(), direction, buttonSide );
 			}
 
 			container.classList.add( 'faracart-floating--open' );
@@ -3079,25 +3098,17 @@
 			safe( function () {
 				// Re-constrain an open drawer: the viewport (and possibly the
 				// device position) changed, so the panel must stay on screen
-				// with its scroll area reachable.
+				// with its scroll area reachable. The direction/side come
+				// from the position preset and were stored at open time.
 				if ( floatingOpen ) {
 					var container = document.getElementById( FLOATING_ID );
 
 					if ( container ) {
 						var drawer = container.querySelector( '.faracart-floating__drawer' );
 						var button = container.querySelector( '.faracart-floating__button' );
-						var direction = 'left';
-
-						if ( container.classList.contains( 'faracart-floating--dir-right' ) ) {
-							direction = 'right';
-						} else if ( container.classList.contains( 'faracart-floating--dir-up' ) ) {
-							direction = 'up';
-						} else if ( container.classList.contains( 'faracart-floating--dir-down' ) ) {
-							direction = 'down';
-						}
 
 						if ( drawer && button ) {
-							constrainFloatingDrawer( drawer, button.getBoundingClientRect(), direction );
+							constrainFloatingDrawer( drawer, button.getBoundingClientRect(), floatingDirection, floatingButtonSide );
 						}
 					}
 				}

@@ -28,10 +28,8 @@ import { useWatch } from 'react-hook-form';
 
 import { fetchSettingsEnvelope, saveSettings } from '../api/settings';
 import { setBootCurrency, setBootCurrencyDisplay } from '../boot';
-import FloatingWidgetPreview from '../components/floating/FloatingWidgetPreview';
 import {
   FLOATING_PRESETS,
-  presetForPosition,
   resolveFloatingPosition,
   type FloatingDevice,
   type FloatingDraft,
@@ -40,7 +38,6 @@ import {
 } from '../components/floating/floating';
 import SectionCard from '../components/goal-builder/SectionCard';
 import PageContainer from '../components/PageContainer';
-import { tokensFromSettings } from '../components/preview/types';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
 import { useStickyBarActions } from '../providers/ActionBarProvider';
 import { useFullscreen } from '../providers/FullscreenProvider';
@@ -267,12 +264,9 @@ function HookRow({ type, hook, description }: { type: string; hook: string; desc
 
 /**
  * One floating-widget position card (desktop or mobile): the position
- * preset, the horizontal/vertical anchors and the pixel offsets.
- *
- * The preset select derives its value from the current position (it shows
- * 'Custom' when the position is not one of the six presets) and applies
- * the preset's anchors via setValue — the offset fields stay untouched
- * so a preset never clobbers the admin's fine-tuning.
+ * preset (the only position control) plus the pixel offsets that
+ * fine-tune it. The drawer always opens toward the screen center from
+ * the chosen preset — there is no separate direction setting.
  */
 function FloatingPositionCard({
   device,
@@ -286,7 +280,7 @@ function FloatingPositionCard({
   onApplyPreset: (preset: FloatingPreset) => void;
 }) {
   const base = device === 'desktop' ? 'floating_desktop' : 'floating_mobile';
-  const preset = presetForPosition(position);
+  const preset = position.preset;
 
   return (
     <Paper variant="outlined" sx={{ p: 2.5, height: '100%' }}>
@@ -321,48 +315,17 @@ function FloatingPositionCard({
             }
           }}
           helperText={__(
-            'A quick position; the horizontal/vertical fields and offsets below fine-tune it.',
+            'The button corner/edge — the drawer always opens toward the screen center from it. The offsets below fine-tune the exact spot.',
             'faracart'
           )}
           sx={{ maxWidth: 360 }}
         >
-          <MenuItem value="" disabled>
-            {__('Custom', 'faracart')}
-          </MenuItem>
           {FLOATING_PRESETS.map((candidate) => (
             <MenuItem key={candidate.value} value={candidate.value}>
               {candidate.label}
             </MenuItem>
           ))}
         </TextField>
-
-        <SelectField
-          control={control}
-          name={`${base}.horizontal` as Path<FaraCartSettings>}
-          label={__('Horizontal position', 'faracart')}
-          description={__(
-            'A physical side — the button keeps this exact side in RTL stores.',
-            'faracart'
-          )}
-          options={[
-            { value: 'left', label: __('Left', 'faracart') },
-            { value: 'right', label: __('Right', 'faracart') },
-          ]}
-        />
-        <SelectField
-          control={control}
-          name={`${base}.vertical` as Path<FaraCartSettings>}
-          label={__('Vertical position', 'faracart')}
-          description={__(
-            'Top and bottom offset from the matching edge; center positions the button on the viewport midline.',
-            'faracart'
-          )}
-          options={[
-            { value: 'top', label: __('Top', 'faracart') },
-            { value: 'center', label: __('Center', 'faracart') },
-            { value: 'bottom', label: __('Bottom', 'faracart') },
-          ]}
-        />
 
         <Controller
           control={control}
@@ -393,7 +356,7 @@ function FloatingPositionCard({
               fullWidth
               label={__('Vertical offset (px)', 'faracart')}
               helperText={__(
-                'Distance from the chosen edge — or from the midline when the position is center (0–200).',
+                'Distance from the chosen edge — or from the midline when the preset is centered (0–200).',
                 'faracart'
               )}
               value={Number(field.value) || 0}
@@ -454,9 +417,9 @@ export default function Settings() {
     values: data,
   });
 
-  // Live form values: the Floating tab's preview reads the current draft
-  // (including the appearance tokens edited on other tabs), so every
-  // change renders immediately without a page reload.
+  // Live form values: the Floating tab's position cards read the current
+  // draft so a preset/offset change reflects immediately (e.g. the mobile
+  // "reuse desktop" toggle) without a page reload.
   const watched = useWatch({ control }) as Partial<FaraCartSettings>;
   const floatingDraft = watched as FloatingDraft;
   const resolvedFloatingPosition = resolveFloatingPosition(floatingDraft);
@@ -990,7 +953,7 @@ export default function Settings() {
               <SectionCard
                 title={__('Position & display', 'faracart')}
                 description={__(
-                  'Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons.',
+                  'Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons. The progress drawer always opens toward the screen center.',
                   'faracart'
                 )}
               >
@@ -1011,8 +974,7 @@ export default function Settings() {
                         control={control}
                         position={resolvedFloatingPosition.desktop}
                         onApplyPreset={(preset) => {
-                          setValue('floating_desktop.horizontal', preset.horizontal);
-                          setValue('floating_desktop.vertical', preset.vertical);
+                          setValue('floating_desktop.preset', preset.value);
                         }}
                       />
                     </Grid>
@@ -1042,8 +1004,7 @@ export default function Settings() {
                           control={control}
                           position={resolvedFloatingPosition.mobile}
                           onApplyPreset={(preset) => {
-                            setValue('floating_mobile.horizontal', preset.horizontal);
-                            setValue('floating_mobile.vertical', preset.vertical);
+                            setValue('floating_mobile.preset', preset.value);
                           }}
                         />
                       )}
@@ -1054,7 +1015,7 @@ export default function Settings() {
 
               <SectionCard
                 title={__('Display', 'faracart')}
-                description={__('The button look and the drawer behavior.', 'faracart')}
+                description={__('The button look.', 'faracart')}
               >
                 <Stack spacing={2}>
                   <Controller
@@ -1074,22 +1035,6 @@ export default function Settings() {
                         sx={{ maxWidth: 360 }}
                       />
                     )}
-                  />
-                  <SelectField
-                    control={control}
-                    name="floating_drawer_direction"
-                    label={__('Drawer opening direction', 'faracart')}
-                    description={__(
-                      'Which way the progress drawer opens from the button. Auto opens toward the screen center and never points off-screen.',
-                      'faracart'
-                    )}
-                    options={[
-                      { value: 'auto', label: __('Auto (toward screen center)', 'faracart') },
-                      { value: 'left', label: __('Left', 'faracart') },
-                      { value: 'right', label: __('Right', 'faracart') },
-                      { value: 'up', label: __('Up', 'faracart') },
-                      { value: 'down', label: __('Down', 'faracart') },
-                    ]}
                   />
                   <BooleanField
                     control={control}
@@ -1135,16 +1080,6 @@ export default function Settings() {
                     )}
                   />
                 </Stack>
-              </SectionCard>
-
-              <SectionCard
-                title={__('Live preview', 'faracart')}
-                description={__(
-                  'The floating button exactly as it will appear — position, size, icon and drawer direction update live.',
-                  'faracart'
-                )}
-              >
-                <FloatingWidgetPreview draft={floatingDraft} tokens={tokensFromSettings(watched)} />
               </SectionCard>
             </Stack>
           )}

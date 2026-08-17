@@ -477,25 +477,19 @@ export type FrontendPosition = 'top' | 'bottom';
 /** Storefront mobile behavior (Phase 18, frontend_mobile). */
 export type MobileBehavior = 'show' | 'hide';
 
-/** Floating-widget horizontal anchor — a PHYSICAL side (left | right). */
-export type FloatingHorizontal = 'left' | 'right';
-
-/** Floating-widget vertical anchor (top | center | bottom). */
-export type FloatingVertical = 'top' | 'center' | 'bottom';
-
-/** Floating-widget drawer opening direction ('auto' = toward screen center). */
-export type FloatingDrawerDirection = 'auto' | 'left' | 'right' | 'up' | 'down';
+/** The named floating-button position presets (the only position control). */
+export type FloatingPreset =
+  'top-left' | 'top-right' | 'center-left' | 'center-right' | 'bottom-left' | 'bottom-right';
 
 /**
- * One floating-widget position object (desktop or mobile). The axes are
- * physical sides the admin picks explicitly — they must keep their
- * visual result in RTL, so they are never logical start/end.
+ * One floating-widget position object (desktop or mobile). The preset
+ * picks the physical side/edge — it must keep its visual result in RTL,
+ * so the presets are never logical start/end. The drawer always opens
+ * toward the screen center from the chosen preset.
  */
 export interface FloatingPosition {
-  /** The physical side the button hugs (left | right). */
-  horizontal: FloatingHorizontal;
-  /** The physical edge/axis (top | center | bottom). */
-  vertical: FloatingVertical;
+  /** The named position preset (top/center/bottom × left/right). */
+  preset: FloatingPreset;
   /** Horizontal offset in px from the chosen side. */
   offset_x: number;
   /** Vertical offset in px from the chosen edge (or the center axis). */
@@ -698,10 +692,11 @@ export interface FaraCartSettings {
   frontend_celebrate: boolean;
 
   // Floating widget (floating goals/campaigns button + drawer). The
-  // position axes are physical sides (left/right × top/center/bottom)
-  // plus pixel offsets; mobile can reuse the desktop position
-  // (floating_mobile_use_desktop) or pin its own so the button never
-  // clashes with mobile UI.
+  // position preset is the only position control (physical sides, RTL
+  // stable); pixel offsets fine-tune it. Mobile can reuse the desktop
+  // position (floating_mobile_use_desktop) or pin its own so the button
+  // never clashes with mobile UI. The drawer always opens toward the
+  // screen center — no direction setting.
   floating_enabled: boolean;
   floating_desktop: FloatingPosition;
   floating_mobile: FloatingPosition;
@@ -710,7 +705,6 @@ export interface FaraCartSettings {
   floating_show_mobile: boolean;
   floating_button_size: number;
   floating_animation: boolean;
-  floating_drawer_direction: FloatingDrawerDirection;
   /** Custom button glyph/emoji ('' = the default cart glyph). */
   floating_icon: string;
   /** Custom button tooltip/label ('' = the default label). */

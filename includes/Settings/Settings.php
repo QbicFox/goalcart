@@ -90,29 +90,28 @@ class Settings {
 		'frontend_celebrate'    => true,               // Phase 32: completion celebration animation.
 
 		// Floating widget (the floating goals/campaigns button + drawer).
-		// Each position object carries the physical side the admin chose
-		// (left/right × top/center/bottom) plus pixel offsets. Desktop is
-		// the default; mobile can reuse it (floating_mobile_use_desktop)
-		// or pin its own so the button never clashes with mobile UI.
+		// The position preset is the only position control — it picks a
+		// physical side/edge (RTL stable) and the drawer always opens
+		// toward the screen center from it; pixel offsets fine-tune the
+		// spot. Desktop is the default; mobile can reuse it
+		// (floating_mobile_use_desktop) or pin its own so the button never
+		// clashes with mobile UI.
 		'floating_enabled'            => false,
 		'floating_desktop'            => array(
-			'horizontal' => 'right',   // left | right
-			'vertical'   => 'bottom',  // top | center | bottom
-			'offset_x'   => 20,        // px from the chosen side
-			'offset_y'   => 80,        // px from the chosen edge / center
+			'preset'   => 'bottom-right',  // top/center/bottom × left/right
+			'offset_x' => 20,              // px from the chosen side
+			'offset_y' => 80,              // px from the chosen edge / center
 		),
 		'floating_mobile'             => array(
-			'horizontal' => 'right',
-			'vertical'   => 'bottom',
-			'offset_x'   => 16,
-			'offset_y'   => 100,
+			'preset'   => 'bottom-right',
+			'offset_x' => 16,
+			'offset_y' => 100,
 		),
 		'floating_mobile_use_desktop' => true,          // mobile reuses the desktop position
 		'floating_show_desktop'       => true,
 		'floating_show_mobile'        => true,
 		'floating_button_size'        => 56,            // px (diameter)
 		'floating_animation'          => true,
-		'floating_drawer_direction'   => 'auto',        // auto | left | right | up | down
 		'floating_icon'               => '',            // custom glyph/emoji ('' = default)
 		'floating_label'              => '',            // custom tooltip/label ('' = default)
 

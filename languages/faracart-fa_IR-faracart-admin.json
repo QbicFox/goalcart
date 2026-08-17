@@ -145,17 +145,11 @@
             "A goal target or an explicit remaining amount is required to rank upsells.": [
                 "برای رتبه‌بندی پیشنهاد خرید، به یک هدف یا مقدار باقیماندهٔ صریح نیاز است."
             ],
-            "A physical side — the button keeps this exact side in RTL stores.": [
-                "یک سمت فیزیکی — دکمه در فروشگاه‌های راست‌به‌چپ دقیقاً همین سمت را حفظ می‌کند."
-            ],
             "A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side.": [
                 "یک عدد صحیح مثبت. وقتی خریدار به این تعداد تکمیل برسد، تکمیل‌های بعدی (و پاداش‌ها) از سمت سرور مسدود می‌شوند."
             ],
             "A qualifying WooCommerce order was actually associated with this goal — a purchase, not a goal completion.": [
                 "یک سفارش واجد شرایط ووکامرس واقعاً به این هدف مرتبط شده — یک خرید، نه یک تکمیل هدف."
-            ],
-            "A quick position; the horizontal\/vertical fields and offsets below fine-tune it.": [
-                "یک موقعیت سریع؛ فیلدهای افقی\/عمودی و آفست‌های زیر آن را دقیق‌تر تنظیم می‌کنند."
             ],
             "A start later than the end means “after start OR before end” (crosses midnight).": [
                 "شروع بعد از پایان یعنی «بعد از شروع یا قبل از پایان» (گذر از نیمهشب)."
@@ -382,9 +376,6 @@
             "Auto (store currency)": [
                 "خودکار (واحد پول فروشگاه)"
             ],
-            "Auto (toward screen center)": [
-                "خودکار (به سمت مرکز صفحه)"
-            ],
             "Average Basket Increase": [
                 "افزایش میانگین سبد خرید"
             ],
@@ -564,9 +555,6 @@
             ],
             "Celebration animation": [
                 "انیمیشن جشن"
-            ],
-            "Center": [
-                "مرکز"
             ],
             "Center left": [
                 "مرکز چپ"
@@ -805,9 +793,6 @@
             "Current target: %1$s": [
                 "آستانهٔ فعلی: %1$s"
             ],
-            "Custom": [
-                "سفارشی"
-            ],
             "Custom CSS": [
                 "CSS سفارشی"
             ],
@@ -973,9 +958,6 @@
             "Distance": [
                 "فاصله"
             ],
-            "Distance from the chosen edge — or from the midline when the position is center (0–200).": [
-                "فاصله از لبهٔ انتخابی — یا از خط وسط وقتی موقعیت «مرکز» است (۰–۲۰۰)."
-            ],
             "Distance from the chosen side (0–200).": [
                 "فاصله از سمت انتخابی (۰–۲۰۰)."
             ],
@@ -990,12 +972,6 @@
             ],
             "Distinct quantity": [
                 "تعداد متمایز"
-            ],
-            "Down": [
-                "پایین"
-            ],
-            "Drawer opening direction": [
-                "جهت باز شدن کشو"
             ],
             "Drives money-based goals (subtotal \/ total).": [
                 "اهداف مبتنی بر مبلغ (جمع فرعی \/ کل) را هدایت می‌کند."
@@ -1053,9 +1029,6 @@
             ],
             "Enable floating widget": [
                 "فعال‌سازی ویجت شناور"
-            ],
-            "Enable the floating widget to preview it.": [
-                "برای پیش‌نمایش، ویجت شناور را فعال کنید."
             ],
             "Ended": [
                 "پایان‌یافته"
@@ -1366,9 +1339,6 @@
             "Horizontal offset (px)": [
                 "آفست افقی (پیکسل)"
             ],
-            "Horizontal position": [
-                "موقعیت افقی"
-            ],
             "How Estimated Profit becomes available": [
                 "چگونه سود تخمینی در دسترس می‌شود"
             ],
@@ -1533,12 +1503,6 @@
             ],
             "Leave empty to apply to the whole cart.": [
                 "برای اعمال روی کل سبد، خالی بگذارید."
-            ],
-            "Left": [
-                "چپ"
-            ],
-            "Left\/right and top\/bottom are physical sides — the button stays exactly here in RTL stores.": [
-                "چپ\/راست و بالا\/پایین سمت‌های فیزیکی هستند — دکمه در فروشگاه‌های راست‌به‌چپ دقیقاً همین‌جا می‌ماند."
             ],
             "Limit": [
                 "محدودیت"
@@ -1999,9 +1963,6 @@
             "Preview %s": [
                 "پیش‌نمایش %s"
             ],
-            "Preview device": [
-                "دستگاه پیش‌نمایش"
-            ],
             "Preview item": [
                 "اقلام پیش‌نمایش"
             ],
@@ -2262,9 +2223,6 @@
             ],
             "Rewards and shipping costs were higher than the estimated incremental margin.": [
                 "هزینه‌های پاداش و ارسال بیشتر از حاشیهٔ افزایشی تخمینی بودند."
-            ],
-            "Right": [
-                "راست"
             ],
             "Ring": [
                 "حلقه"
@@ -2563,12 +2521,6 @@
             "The accessible label and tooltip for the button (leave empty for the default).": [
                 "برچسب و راهنمای در دسترس دکمه (برای پیش‌فرض، خالی بگذارید)."
             ],
-            "The button is hidden on this device (visibility disabled or the widget is off).": [
-                "دکمه در این دستگاه مخفی است (نمایش غیرفعال است یا ویجت خاموش است)."
-            ],
-            "The button look and the drawer behavior.": [
-                "ظاهر دکمه و رفتار کشو."
-            ],
             "The button position on desktop screens.": [
                 "موقعیت دکمه در صفحه‌نمایش‌های دسکتاپ."
             ],
@@ -2652,9 +2604,6 @@
             ],
             "The discount never applies to these products.": [
                 "این تخفیف هرگز روی این محصولات اعمال نمی‌شود."
-            ],
-            "The floating button exactly as it will appear — position, size, icon and drawer direction update live.": [
-                "دکمهٔ شناور دقیقاً همان‌طور که نمایش داده می‌شود — موقعیت، اندازه، آیکن و جهت کشو به‌صورت زنده به‌روز می‌شوند."
             ],
             "The funnel and the direct vs assisted models behind FaraCart’s attributed revenue.": [
                 "قیف و مدل‌های مستقیم در برابر کمکی پشت فروش منتسب فراکارت."
@@ -2815,9 +2764,6 @@
             "Top": [
                 "بالا"
             ],
-            "Top and bottom offset from the matching edge; center positions the button on the viewport midline.": [
-                "آفست بالا و پایین از لبهٔ متناظر؛ «مرکز» دکمه را روی خط وسط صفحه قرار می‌دهد."
-            ],
             "Top campaigns": [
                 "کمپین‌های برتر"
             ],
@@ -2896,9 +2842,6 @@
             "Unlocked": [
                 "فعال شد"
             ],
-            "Up": [
-                "بالا"
-            ],
             "Updating…": [
                 "در حال به‌روزرسانی…"
             ],
@@ -2940,9 +2883,6 @@
             ],
             "Vertical offset (px)": [
                 "آفست عمودی (پیکسل)"
-            ],
-            "Vertical position": [
-                "موقعیت عمودی"
             ],
             "View": [
                 "مشاهده"
@@ -3031,9 +2971,6 @@
             "Where and how the storefront widgets appear.": [
                 "کجا و چگونه ویجت‌های فروشگاه ظاهر می‌شوند."
             ],
-            "Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons.": [
-                "جای دکمه — به‌طور جداگانه برای دسکتاپ و موبایل. موبایل می‌تواند از موقعیت دسکتاپ استفاده کند یا موقعیت خودش را داشته باشد تا هرگز با ناوبری موبایل یا دکمه‌های چسبان سبد خرید تداخل نکند."
-            ],
             "Whether the widgets render on small screens (≤782px).": [
                 "آیا ویجت‌ها در صفحه‌های کوچک (≤۷۸۲ پیکسل) نمایش داده می‌شوند."
             ],
@@ -3042,9 +2979,6 @@
             ],
             "Which goals generated purchases, sales and profit? Completion is not the same as purchase.": [
                 "کدام اهداف خرید، فروش و سود ایجاد کردند؟ تکمیل با خرید یکی نیست."
-            ],
-            "Which way the progress drawer opens from the button. Auto opens toward the screen center and never points off-screen.": [
-                "کشوی پیشرفت از دکمه به کدام سمت باز شود. «خودکار» به سمت مرکز صفحه باز می‌شود و هرگز به بیرون صفحه اشاره نمی‌کند."
             ],
             "Why this product": [
                 "چرا این محصول"
@@ -3295,6 +3229,9 @@
             "Compact dark bar — icon, progress, remaining amount and a small CTA.": [
                 "نوار تیره فشرده — آیکون، پیشرفت، مبلغ باقی‌مانده و یک دکمه کوچک."
             ],
+            "Distance from the chosen edge — or from the midline when the preset is centered (0–200).": [
+                "فاصله از لبهٔ انتخابی — یا از خط وسط وقتی پیش‌تنظیم «مرکز» است (۰–۲۰۰)."
+            ],
             "Gold accent color": [
                 "رنگ تأکیدی طلایی"
             ],
@@ -3369,6 +3306,15 @@
             ],
             "Text color": [
                 "رنگ متن"
+            ],
+            "The button corner\/edge — the drawer always opens toward the screen center from it. The offsets below fine-tune the exact spot.": [
+                "گوشه\/لبهٔ دکمه — کشو همیشه از آن به سمت مرکز صفحه باز می‌شود. آفست‌های زیر نقطهٔ دقیق را تنظیم می‌کنند."
+            ],
+            "The button look.": [
+                "ظاهر دکمه."
+            ],
+            "Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons. The progress drawer always opens toward the screen center.": [
+                "جای دکمه — به‌طور جداگانه برای دسکتاپ و موبایل. موبایل می‌تواند از موقعیت دسکتاپ استفاده کند یا موقعیت خودش را داشته باشد تا هرگز با ناوبری موبایل یا دکمه‌های چسبان سبد خرید تداخل نکند. کشوی پیشرفت همیشه به سمت مرکز صفحه باز می‌شود."
             ]
         }
     }

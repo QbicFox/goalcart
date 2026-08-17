@@ -1565,10 +1565,13 @@
 	transition: none;
 }
 
-/* The drawer panel: opens from the button in the configured direction
- * (physical, so the admin's choice is stable in RTL). The anchor offset
- * rides on the transform so the open/close scale animation composes with
- * it; the panel scrolls internally and never exceeds the viewport. */
+/* The drawer panel: opens from the button toward the screen center —
+ * the direction follows the position preset (top presets open down,
+ * bottom presets open up, center presets open sideways) and up/down
+ * drawers align toward the center based on which side the button hugs
+ * (the JS flags it from the preset). The anchor offset rides on the
+ * transform so the open/close scale animation composes with it; the
+ * panel scrolls internally and never exceeds the viewport. */
 
 .faracart-floating__drawer {
 	position: absolute;
@@ -1604,14 +1607,26 @@
 
 .faracart-floating--dir-up .faracart-floating__drawer {
 	bottom: calc( 100% + 0.75rem );
-	left: 50%;
-	transform: translateX(-50%) scale(0.94);
+	transform: scale(0.94);
 }
 
 .faracart-floating--dir-down .faracart-floating__drawer {
 	top: calc( 100% + 0.75rem );
-	left: 50%;
-	transform: translateX(-50%) scale(0.94);
+	transform: scale(0.94);
+}
+
+/* Up/down drawers align toward the screen center: a button on the left
+ * side extends its drawer rightward, a button on the right side
+ * leftward (the JS flags the side from the position preset). */
+
+.faracart-floating--button-left.faracart-floating--dir-up .faracart-floating__drawer,
+.faracart-floating--button-left.faracart-floating--dir-down .faracart-floating__drawer {
+	left: calc( 100% + 0.75rem );
+}
+
+.faracart-floating--button-right.faracart-floating--dir-up .faracart-floating__drawer,
+.faracart-floating--button-right.faracart-floating--dir-down .faracart-floating__drawer {
+	right: calc( 100% + 0.75rem );
 }
 
 .faracart-floating--open .faracart-floating__drawer {
@@ -1620,8 +1635,9 @@
 	transform: scale(1);
 }
 
-/* The open-state transform must keep the anchor for the direction (the
- * generic .faracart-floating--open rule above only flips the scale). */
+/* The open-state transform must keep the vertical anchor for side
+ * drawers (the generic .faracart-floating--open rule above only flips
+ * the scale). */
 
 .faracart-floating--dir-left.faracart-floating--open .faracart-floating__drawer {
 	transform: translateY(-50%) scale(1);
@@ -1629,14 +1645,6 @@
 
 .faracart-floating--dir-right.faracart-floating--open .faracart-floating__drawer {
 	transform: translateY(-50%) scale(1);
-}
-
-.faracart-floating--dir-up.faracart-floating--open .faracart-floating__drawer {
-	transform: translateX(-50%) scale(1);
-}
-
-.faracart-floating--dir-down.faracart-floating--open .faracart-floating__drawer {
-	transform: translateX(-50%) scale(1);
 }
 
 .faracart-floating__close {

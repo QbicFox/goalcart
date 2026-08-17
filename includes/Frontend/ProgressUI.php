@@ -530,8 +530,10 @@ final class ProgressUI {
 	 * Carries the master toggle, the per-device position (desktop always;
 	 * mobile reused from desktop when floating_mobile_use_desktop is on),
 	 * the per-device visibility flags and the display options (button
-	 * size, animation, drawer direction, custom icon/label). Every value
-	 * is normalized so a malformed stored setting can never reach the JS.
+	 * size, animation, custom icon/label). The drawer always opens toward
+	 * the screen center from the position preset — no direction setting.
+	 * Every value is normalized so a malformed stored setting can never
+	 * reach the JS.
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -548,11 +550,6 @@ final class ProgressUI {
 			'showMobile'       => (bool) $this->settings->get( 'floating_show_mobile', true ),
 			'buttonSize'       => min( 96, max( 32, (int) $this->settings->get( 'floating_button_size', 56 ) ) ),
 			'animation'        => (bool) $this->settings->get( 'floating_animation', true ),
-			'drawerDirection'  => in_array(
-				$this->settings->get( 'floating_drawer_direction', 'auto' ),
-				array( 'auto', 'left', 'right', 'up', 'down' ),
-				true
-			) ? $this->settings->get( 'floating_drawer_direction', 'auto' ) : 'auto',
 			'icon'             => trim( sanitize_text_field( (string) $this->settings->get( 'floating_icon', '' ) ) ),
 			'label'            => trim( sanitize_text_field( (string) $this->settings->get( 'floating_label', '' ) ) ),
 			'labels'           => array(
@@ -565,6 +562,11 @@ final class ProgressUI {
 	/**
 	 * One floating-widget position object (desktop or mobile), normalized.
 	 *
+	 * The preset is the only position control. Legacy stored values that
+	 * still carry horizontal/vertical axes (pre-preset installs) are
+	 * migrated to the matching preset so old settings keep their visual
+	 * result without any error.
+	 *
 	 * @param string $scope 'desktop' | 'mobile'.
 	 * @return array<string, string|int>
 	 */
@@ -575,16 +577,44 @@ final class ProgressUI {
 		$stored   = $this->settings->get( $key, array() );
 		$stored   = is_array( $stored ) ? $stored : array();
 
+		$presets = array( 'top-left', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-right' );
+
+		if ( isset( $stored['preset'] ) && in_array( $stored['preset'], $presets, true ) ) {
+			$preset = $stored['preset'];
+		} elseif ( isset( $stored['horizontal'] ) && isset( $stored['vertical'] ) ) {
+			$preset = $this->preset_from_axes( $stored['horizontal'], $stored['vertical'], $default['preset'] ?? 'bottom-right' );
+		} else {
+			$preset = $default['preset'] ?? 'bottom-right';
+		}
+
 		return array(
-			'horizontal' => isset( $stored['horizontal'] ) && in_array( $stored['horizontal'], array( 'left', 'right' ), true )
-				? $stored['horizontal']
-				: ( $default['horizontal'] ?? 'right' ),
-			'vertical' => isset( $stored['vertical'] ) && in_array( $stored['vertical'], array( 'top', 'center', 'bottom' ), true )
-				? $stored['vertical']
-				: ( $default['vertical'] ?? 'bottom' ),
+			'preset'   => $preset,
 			'offset_x' => isset( $stored['offset_x'] ) ? min( 200, max( 0, (int) $stored['offset_x'] ) ) : (int) ( $default['offset_x'] ?? 20 ),
 			'offset_y' => isset( $stored['offset_y'] ) ? min( 200, max( 0, (int) $stored['offset_y'] ) ) : (int) ( $default['offset_y'] ?? 80 ),
 		);
+	}
+
+	/**
+	 * Map a legacy horizontal × vertical axes pair to a position preset.
+	 *
+	 * @param mixed  $horizontal 'left' | 'right' (or anything else).
+	 * @param mixed  $vertical   'top' | 'center' | 'bottom' (or anything else).
+	 * @param string $fallback   The preset to return for unknown axes.
+	 * @return string
+	 */
+	protected function preset_from_axes( $horizontal, $vertical, $fallback ) {
+		$presets = array(
+			'left_top'     => 'top-left',
+			'right_top'    => 'top-right',
+			'left_center'  => 'center-left',
+			'right_center' => 'center-right',
+			'left_bottom'  => 'bottom-left',
+			'right_bottom' => 'bottom-right',
+		);
+
+		$key = sanitize_key( $horizontal ) . '_' . sanitize_key( $vertical );
+
+		return isset( $presets[ $key ] ) ? $presets[ $key ] : $fallback;
 	}
 
 	/**

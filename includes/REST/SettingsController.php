@@ -288,10 +288,6 @@ class SettingsController extends BaseController {
 			'floating_show_mobile'        => $bool,
 			'floating_button_size'        => array( 'type' => 'integer', 'minimum' => 32, 'maximum' => 96 ),
 			'floating_animation'          => $bool,
-			'floating_drawer_direction'   => array(
-				'type' => 'string',
-				'enum' => array( 'auto', 'left', 'right', 'up', 'down' ),
-			),
 			'floating_icon'               => array( 'type' => 'string' ),
 			'floating_label'              => array( 'type' => 'string' ),
 
@@ -342,9 +338,10 @@ class SettingsController extends BaseController {
 	 * The REST arg schema for one floating-button position object.
 	 *
 	 * Shared by floating_desktop and floating_mobile so the two can never
-	 * drift apart. The horizontal axis is a physical side (left | right)
-	 * the admin picks explicitly — it must keep its visual result in RTL,
-	 * so it is not a logical start/end.
+	 * drift apart. The position preset is the only position control — it
+	 * picks a physical side/edge that must keep its visual result in RTL,
+	 * so it is never a logical start/end. The drawer always opens toward
+	 * the screen center from the preset; there is no direction setting.
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
@@ -353,10 +350,12 @@ class SettingsController extends BaseController {
 			'type'                 => 'object',
 			'default'              => array(),
 			'properties'           => array(
-				'horizontal' => array( 'type' => 'string', 'enum' => array( 'left', 'right' ) ),
-				'vertical'   => array( 'type' => 'string', 'enum' => array( 'top', 'center', 'bottom' ) ),
-				'offset_x'   => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 200 ),
-				'offset_y'   => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 200 ),
+				'preset'   => array(
+					'type' => 'string',
+					'enum' => array( 'top-left', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-right' ),
+				),
+				'offset_x' => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 200 ),
+				'offset_y' => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 200 ),
 			),
 			'additionalProperties' => false,
 		);
@@ -365,9 +364,13 @@ class SettingsController extends BaseController {
 	/**
 	 * Normalize a floating-button position object.
 	 *
-	 * Validates the enums and clamps the offsets so a malformed stored or
-	 * submitted value can never reach the storefront; anything unknown
-	 * falls back to the documented default.
+	 * Validates the preset enum and clamps the offsets so a malformed
+	 * stored or submitted value can never reach the storefront; anything
+	 * unknown falls back to the documented default.
+	 *
+	 * Legacy values (pre-preset installs stored horizontal/vertical) are
+	 * migrated to the equivalent preset so old settings keep their visual
+	 * result — the preset becomes the authoritative position control.
 	 *
 	 * @param mixed $value   Raw position value.
 	 * @param mixed $default The setting's default position array.
@@ -375,26 +378,54 @@ class SettingsController extends BaseController {
 	 */
 	protected function sanitize_floating_position( $value, $default ) {
 		$default = is_array( $default ) ? $default : array(
-			'horizontal' => 'right',
-			'vertical'   => 'bottom',
-			'offset_x'   => 20,
-			'offset_y'   => 80,
+			'preset'   => 'bottom-right',
+			'offset_x' => 20,
+			'offset_y' => 80,
 		);
 
 		if ( ! is_array( $value ) ) {
 			return $default;
 		}
 
+		$presets = array( 'top-left', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-right' );
+
+		if ( isset( $value['preset'] ) && in_array( $value['preset'], $presets, true ) ) {
+			$preset = $value['preset'];
+		} elseif ( isset( $value['horizontal'] ) && isset( $value['vertical'] ) ) {
+			// Legacy migration: horizontal × vertical → the matching preset.
+			$preset = $this->preset_from_axes( $value['horizontal'], $value['vertical'], $default['preset'] );
+		} else {
+			$preset = $default['preset'];
+		}
+
 		return array(
-			'horizontal' => isset( $value['horizontal'] ) && in_array( $value['horizontal'], array( 'left', 'right' ), true )
-				? $value['horizontal']
-				: $default['horizontal'],
-			'vertical' => isset( $value['vertical'] ) && in_array( $value['vertical'], array( 'top', 'center', 'bottom' ), true )
-				? $value['vertical']
-				: $default['vertical'],
+			'preset'   => $preset,
 			'offset_x' => isset( $value['offset_x'] ) ? min( 200, max( 0, (int) $value['offset_x'] ) ) : (int) $default['offset_x'],
 			'offset_y' => isset( $value['offset_y'] ) ? min( 200, max( 0, (int) $value['offset_y'] ) ) : (int) $default['offset_y'],
 		);
+	}
+
+	/**
+	 * Map a legacy horizontal × vertical axes pair to a position preset.
+	 *
+	 * @param mixed  $horizontal 'left' | 'right' (or anything else).
+	 * @param mixed  $vertical   'top' | 'center' | 'bottom' (or anything else).
+	 * @param string $fallback   The preset to return for unknown axes.
+	 * @return string
+	 */
+	protected function preset_from_axes( $horizontal, $vertical, $fallback ) {
+		$presets = array(
+			'left_top'    => 'top-left',
+			'right_top'   => 'top-right',
+			'left_center' => 'center-left',
+			'right_center'=> 'center-right',
+			'left_bottom' => 'bottom-left',
+			'right_bottom'=> 'bottom-right',
+		);
+
+		$key = sanitize_key( $horizontal ) . '_' . sanitize_key( $vertical );
+
+		return isset( $presets[ $key ] ) ? $presets[ $key ] : $fallback;
 	}
 
 	/**
@@ -574,9 +605,6 @@ class SettingsController extends BaseController {
 
 			case 'floating_button_size':
 				return min( 96, max( 32, (int) $value ) );
-
-			case 'floating_drawer_direction':
-				return in_array( $value, array( 'auto', 'left', 'right', 'up', 'down' ), true ) ? $value : $defaults['floating_drawer_direction'];
 
 			case 'floating_icon':
 				return trim( sanitize_text_field( (string) $value ) );
