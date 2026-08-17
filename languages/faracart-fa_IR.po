@@ -81,7 +81,7 @@ msgstr "%d روز قبل از سفارش"
 
 #: admin-app/src/routes/Goals.tsx:115
 msgid "%d times"
-msgstr "٪d بار"
+msgstr "%d بار"
 
 #: admin-app/src/templates/rewardLabel.ts:22
 #: includes/Goals/MessageEngine.php:310
@@ -107,7 +107,7 @@ msgstr "%s بهترین عملکرد شماست"
 
 #: includes/Analytics/GoalRecommendationEngine.php:706
 msgid "%s of existing orders are within reach of this threshold (below it by up to %s%%)."
-msgstr "%s از سفارش‌های موجود در دسترس این آستانه هستند (تا %s٪ پایین‌تر از آن)."
+msgstr "%s از سفارش‌های موجود به این آستانه نزدیک هستند (تا %s٪ پایین‌تر از آن)."
 
 #: admin-app/src/routes/Dashboard.tsx
 msgid "%s purchased orders"
@@ -115,7 +115,7 @@ msgstr "%s سفارش خریداری‌شده"
 
 #: admin-app/src/routes/Dashboard.tsx:156
 msgid "%s uses cart goals — like “spend %s more for free shipping” — to encourage bigger carts. Goals, rewards and progress bars are configured from the Goals page."
-msgstr "%s از هدفهای سبد خرید استفاده میکند — مانند «%s بیشتر برای ارسال رایگان» — تا سبدهای بزرگتری تشویق شوند. هدفها، پاداشها و نوارهای پیشرفت از صفحهٔ «اهداف» پیکربندی میشوند."
+msgstr "%s از هدفهای سبد خرید استفاده می‌کند — مانند «%s بیشتر برای ارسال رایگان» — تا سبدهای بزرگتری تشویق شوند. هدفها، پاداشها و نوارهای پیشرفت از صفحهٔ «اهداف» پیکربندی می‌شوند."
 
 #: admin-app/src/components/goal-builder/TargetFields.tsx:66
 msgid "(amount)"
@@ -198,7 +198,7 @@ msgstr "نردبانی از نقاط و اهداف با نوار زیر آن."
 
 #: includes/Analytics/UpsellRanker.php:293
 msgid "A goal target or an explicit remaining amount is required to rank upsells."
-msgstr "برای رتبه‌بندی فروش بیشتر، به یک هدف یا مقدار باقیماندهٔ صریح نیاز است."
+msgstr "برای رتبه‌بندی پیشنهاد خرید، به یک هدف یا مقدار باقیماندهٔ صریح نیاز است."
 
 #: admin-app/src/routes/GoalBuilder.tsx:426
 msgid "A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side."
@@ -215,7 +215,7 @@ msgstr "شروع بعد از پایان یعنی «بعد از شروع یا ق�
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:384
 msgid "A window that crosses midnight (e.g. 22:00–06:00) counts the hours after start and before end."
-msgstr "بازهٔ عبورکننده از نیمهشب (مثلاً ۲۲:۰۰ تا ۰۶:۰۰) ساعات بعد از شروع و قبل از پایان را شامل میشود."
+msgstr "بازهٔ عبورکننده از نیمهشب (مثلاً ۲۲:۰۰ تا ۰۶:۰۰) ساعات بعد از شروع و قبل از پایان را شامل می‌شود."
 
 #: admin-app/src/routes/GoalBuilder.tsx:346
 msgid "AND (all children required)"
@@ -227,7 +227,7 @@ msgstr "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاه�
 
 #: admin-app/src/routes/Recommendations.tsx:160
 msgid "AOV ratio"
-msgstr "نسبت به میانگین ارزش سفارش"
+msgstr "نسبت میانگین ارزش سفارش"
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:89
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:108
@@ -414,7 +414,7 @@ msgstr "خیلی نزدیکید! تنها {remaining} باقی مانده است
 
 #: admin-app/src/routes/Recommendations.tsx:166
 msgid "Already at share"
-msgstr "سهم رسیده به آستانه"
+msgstr "سهمِ رسیده به آستانه"
 
 #: admin-app/src/components/goal-builder/goalTypes.tsx:27
 #: admin-app/src/routes/Goals.tsx:52
@@ -926,7 +926,7 @@ msgstr "فشرده"
 
 #: admin-app/src/routes/Settings.tsx:574
 msgid "Compact shows only the progress; full adds the message and reward."
-msgstr "حالت فشرده فقط پیشرفت را نشان میدهد؛ حالت کامل پیام و پاداش را نیز اضافه میکند."
+msgstr "حالت فشرده فقط پیشرفت را نشان می‌دهد؛ حالت کامل پیام و پاداش را نیز اضافه می‌کند."
 
 #: admin-app/src/routes/RevenueOverview.tsx:710
 msgid "Compare"
@@ -1056,7 +1056,7 @@ msgstr "فیلد بهای تمام‌شده (_wc_cog_cost)"
 
 #: includes/Admin/ProductCostField.php:113
 msgid "Cost per unit (FaraCart)"
-msgstr "هزینهٔ هر واحد (هدف سبد خرید)"
+msgstr "هزینهٔ هر واحد (فراکارت)"
 
 #: admin-app/src/routes/GoalPerformance.tsx:416
 msgid "Costs"
@@ -1117,7 +1117,7 @@ msgstr "بارگذاری تنظیمات ممکن نشد."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:328
 msgid "Could not load upsell analytics."
-msgstr "بارگذاری تحلیل‌های فروش بیشتر ممکن نشد."
+msgstr "بارگذاری تحلیل‌های پیشنهاد خرید ممکن نشد."
 
 #: includes/REST/TrackController.php:253
 msgid "Could not record the event."
@@ -1230,7 +1230,7 @@ msgstr "مسیر مشتری"
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:38
 msgid "Customer picks from a list"
-msgstr "مشتری از یک فهرست انتخاب میکند"
+msgstr "مشتری از یک فهرست انتخاب می‌کند"
 
 #: admin-app/src/routes/GoalBuilder.tsx:377
 msgid "Customer-facing copy and template for the progress widget."
@@ -1448,7 +1448,7 @@ msgstr "قابل بستن"
 
 #: admin-app/src/routes/Settings.tsx:561
 msgid "Dismissible bars hide via the close button; auto-hide bars collapse after a few seconds and reappear on scroll."
-msgstr "نوارهای قابل بستن با دکمهٔ بستن پنهان میشوند؛ نوارهای پنهانشوندهٔ خودکار پس از چند ثانیه جمع میشوند و با اسکرول دوباره ظاهر میشوند."
+msgstr "نوارهای قابل بستن با دکمهٔ بستن پنهان می‌شوند؛ نوارهای پنهانشوندهٔ خودکار پس از چند ثانیه جمع می‌شوند و با اسکرول دوباره ظاهر می‌شوند."
 
 #: admin-app/src/routes/CampaignBuilder.tsx:433
 #: admin-app/src/routes/GoalBuilder.tsx:376
@@ -1809,7 +1809,7 @@ msgstr "محصول هدیه"
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:217
 msgid "Gift products (customer picks one)"
-msgstr "محصولات هدیه (مشتری یکی را انتخاب میکند)"
+msgstr "محصولات هدیه (مشتری یکی را انتخاب می‌کند)"
 
 #: admin-app/src/routes/CampaignBuilder.tsx:293
 msgid "Give the campaign a name."
@@ -2020,7 +2020,7 @@ msgstr "عملکرد تاریخی"
 
 #: includes/Analytics/UpsellRanker.php:1209
 msgid "Historical upsell performance: %d impressions, %d orders (%s conversion)."
-msgstr "عملکرد تاریخی فروش بیشتر: %d نمایش، %d سفارش (%s تبدیل)."
+msgstr "عملکرد تاریخی پیشنهاد خرید: %d نمایش، %d سفارش (%s تبدیل)."
 
 #: admin-app/src/routes/Recommendations.tsx:156
 msgid "History"
@@ -2333,7 +2333,7 @@ msgstr "مشتریان واردشده"
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:216
 msgid "Logged-in customers whose lifetime spend and order count meet the thresholds below."
-msgstr "مشتریان واردشده که مجموع خرید و تعداد سفارش آنها آستانههای زیر را برآورده میکند."
+msgstr "مشتریان واردشده که مجموع خرید و تعداد سفارش آنها آستانههای زیر را برآورده می‌کنند."
 
 #: admin-app/src/routes/Settings.tsx:758
 msgid "Logging"
@@ -2392,7 +2392,7 @@ msgstr "میانهٔ ارزش سفارش"
 
 #: admin-app/src/routes/Recommendations.tsx:163
 msgid "Median ratio"
-msgstr "نسبت به میانهٔ ارزش سفارش"
+msgstr "نسبت میانهٔ ارزش سفارش"
 
 #: admin-app/src/routes/GoalPerformance.tsx:139
 #: admin-app/src/routes/Recommendations.tsx:41
@@ -2554,7 +2554,7 @@ msgstr "هنوز هدفی وجود ندارد — ابتدا در صفحهٔ «�
 
 #: includes/Analytics/UpsellRanker.php:1215
 msgid "No historical upsell performance data yet — conversion scored neutral."
-msgstr "هنوز دادهٔ عملکرد تاریخی فروش بیشتر وجود ندارد — تبدیل خنثی در نظر گرفته شد."
+msgstr "هنوز دادهٔ عملکرد تاریخی پیشنهاد خرید وجود ندارد — تبدیل خنثی در نظر گرفته شد."
 
 #: admin-app/src/components/CampaignPreviewDialog.tsx:159
 msgid "No milestones in this campaign yet."
@@ -2605,7 +2605,7 @@ msgstr "هنوز قالبی برای این محدوده ثبت نشده است.
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:340
 msgid "No upsell activity yet"
-msgstr "هنوز فعالیتی برای فروش بیشتر ثبت نشده است"
+msgstr "هنوز فعالیتی برای پیشنهاد خرید ثبت نشده است"
 
 #: admin-app/src/routes/Goals.tsx:71
 #: admin-app/src/routes/Recommendations.tsx:202
@@ -2702,11 +2702,11 @@ msgstr "فقط رویدادهای هدف در این بازه قبل از سفا
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:304
 msgid "Only products carrying any of these tags count toward the goal. Leave empty to count every product."
-msgstr "فقط محصولاتی که هر یک از این برچسبها را دارند در هدف محاسبه میشوند. برای شمارش همهٔ محصولات خالی بگذارید."
+msgstr "فقط محصولاتی که هر یک از این برچسبها را دارند در هدف محاسبه می‌شوند. برای شمارش همهٔ محصولات خالی بگذارید."
 
 #: admin-app/src/components/goal-builder/TargetFields.tsx:163
 msgid "Only products carrying any of these tags count toward the target."
-msgstr "فقط محصولاتی که هر یک از این برچسبها را دارند در هدف محاسبه میشوند."
+msgstr "فقط محصولاتی که هر یک از این برچسبها را دارند در هدف محاسبه می‌شوند."
 
 #: admin-app/src/components/goal-builder/TargetFields.tsx:133
 msgid "Only products in these categories count toward the target."
@@ -2714,7 +2714,7 @@ msgstr "فقط محصولات این دسته‌بندی‌ها به سمت هد
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:194
 msgid "Only shoppers with no completed orders see this goal. Guests always qualify."
-msgstr "فقط خریدارانی که سفارش تکمیلشده ندارند این هدف را میبینند. مهمانها همیشه واجد شرایط هستند."
+msgstr "فقط خریدارانی که سفارش تکمیلشده ندارند این هدف را می‌بینند. مهمانها همیشه واجد شرایط هستند."
 
 #: admin-app/src/components/goal-builder/TargetFields.tsx:148
 msgid "Only these products count toward the target. Variations are matched by their parent product."
@@ -2758,7 +2758,7 @@ msgstr "فرصت بهینه‌سازی"
 
 #: admin-app/src/routes/CampaignBuilder.tsx:376
 msgid "Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Goals inherit these rules unless they pin their own."
-msgstr "قوانین اختیاری فاز ۳۲: کمپین را فقط در روزهای انتخابشده و/یا در یک بازهٔ زمانی روزانه اجرا کنید. اهداف این قوانین را به ارث میبرند مگر اینکه قوانین خودشان را داشته باشند."
+msgstr "قوانین اختیاری فاز ۳۲: کمپین را فقط در روزهای انتخابشده و/یا در یک بازهٔ زمانی روزانه اجرا کنید. اهداف این قوانین را به ارث می‌برند مگر اینکه قوانین خودشان را داشته باشند."
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:148
 #: admin-app/src/components/goal-builder/RewardFields.tsx:402
@@ -3013,7 +3013,7 @@ msgstr "محصولات"
 
 #: admin-app/src/components/goal-builder/TargetFields.tsx:178
 msgid "Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target."
-msgstr "محصولاتی که هر یک از این ویژگیها (مثلاً pa_color) را دارند در هدف محاسبه میشوند."
+msgstr "محصولاتی که هر یک از این ویژگیها (مثلاً pa_color) را دارند در هدف محاسبه می‌شوند."
 
 #: admin-app/src
 msgid "Products priced close to the amount remaining until the goal usually make a better suggestion."
@@ -3172,7 +3172,7 @@ msgstr "رسیدن به مبلغ یا تعداد محصولات مشخص."
 
 #: admin-app/src/routes/Recommendations.tsx:165
 msgid "Reach share"
-msgstr "سهم در دسترس"
+msgstr "سهمِ نزدیک به آستانه"
 
 #: admin-app/src/routes/Recommendations.tsx:153
 msgid "Reachability"
@@ -3646,11 +3646,11 @@ msgstr "پیشنهادهای خرید هوشمند هدف غیرفعال هست�
 
 #: includes/Analytics/RevenueRepository.php:677
 msgid "Smart upsell ranking is not available."
-msgstr "رتبه‌بندی فروش بیشتر هوشمند در دسترس نیست."
+msgstr "رتبه‌بندی پیشنهاد خرید هوشمند در دسترس نیست."
 
 #: includes/Analytics/UpsellRanker.php:277
 msgid "Smart upsells are disabled."
-msgstr "فروش بیشتر هوشمند غیرفعال است."
+msgstr "پیشنهاد خرید هوشمند غیرفعال است."
 
 #: admin-app/src/routes/GoalPerformance.tsx:738
 msgid "Some orders do not have complete cost information."
@@ -3768,7 +3768,7 @@ msgstr "برچسبها"
 #: admin-app/src/components/goal-builder/TargetFields.tsx:97
 #: admin-app/src/routes/GoalBuilder.tsx:323
 msgid "Target"
-msgstr "هدف"
+msgstr "آستانه"
 
 #: admin-app/src/routes/GoalPerformance.tsx:362
 msgid "Target: %s"
@@ -3854,7 +3854,7 @@ msgstr "سبد باید حداقل این تعداد اقلام داشته با�
 
 #: admin-app/src/components/goal-builder/RewardFields.tsx:225
 msgid "The customer chooses one free gift from this list once the goal is reached. The first product is the storefront default."
-msgstr "مشتری پس از رسیدن به هدف، یک هدیهٔ رایگان از این فهرست انتخاب میکند. اولین محصول، پیشفرض فروشگاه است."
+msgstr "مشتری پس از رسیدن به هدف، یک هدیهٔ رایگان از این فهرست انتخاب می‌کند. اولین محصول، پیش‌فرض فروشگاه است."
 
 #: admin-app/src/routes/Appearance.tsx:554
 msgid "The default template for every goal that does not pin its own on the Goal Builder."
@@ -3898,11 +3898,11 @@ msgstr "به‌روزرسانی هدف ممکن نشد."
 
 #: includes/Analytics/UpsellRanker.php:294
 msgid "The goal gap is already closed — no upsells needed."
-msgstr "شکاف هدف از قبل بسته شده است — نیازی به فروش بیشتر نیست."
+msgstr "شکاف هدف از قبل بسته شده است — نیازی به پیشنهاد خرید نیست."
 
 #: admin-app/src/components/goal-builder/ConditionFields.tsx:264
 msgid "The goal only applies when the cart ships to one of these zones. Leave empty for every zone."
-msgstr "هدف فقط زمانی اعمال میشود که سبد به یکی از این مناطق ارسال شود. برای همهٔ مناطق خالی بگذارید."
+msgstr "هدف فقط زمانی اعمال می‌شود که سبد به یکی از این مناطق ارسال شود. برای همهٔ مناطق خالی بگذارید."
 
 #: includes/REST/PreviewController.php:287
 msgid "The goal or campaign could not be found."
@@ -3962,7 +3962,7 @@ msgstr "محصولی که به‌عنوان هدیه به سبد اضافه می
 
 #: admin-app/src/components/goal-builder/TargetFields.tsx:193
 msgid "The product attribute that identifies the brand (typically pa_brand)."
-msgstr "ویژگی محصولی که برند را مشخص میکند (معمولاً pa_brand)."
+msgstr "ویژگی محصولی که برند را مشخص می‌کند (معمولاً pa_brand)."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:126
 msgid "The product breakdown could not be loaded."
@@ -4003,7 +4003,7 @@ msgstr "آستانه‌ای که مشتریان باید به آن برسند."
 
 #: includes/Admin/ProductCostField.php:76
 msgid "The unit cost FaraCart uses for Estimated Profit, Goal economics and upsell margin scoring. Leave empty when unknown."
-msgstr "هزینهٔ هر واحدی که هدف سبد خرید برای «سود تخمینی»، اقتصاد هدف و امتیازدهی حاشیهٔ سودِ پیشنهاد خرید به کار می‌برد. اگر نامشخص است خالی بگذارید."
+msgstr "هزینهٔ هر واحدی که فراکارت برای «سود تخمینی»، اقتصاد هدف و امتیازدهی حاشیهٔ سودِ پیشنهاد خرید به کار می‌برد. اگر نامشخص است خالی بگذارید."
 
 #: admin-app/src/routes/Analytics.tsx:901
 msgid "These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting."
@@ -4172,7 +4172,7 @@ msgstr "روش ناشناخته"
 
 #: includes/REST/UpsellController.php:252
 msgid "Unknown upsell event type."
-msgstr "نوع رویداد فروش بیشتر ناشناخته است."
+msgstr "نوع رویداد پیشنهاد خرید ناشناخته است."
 
 #: admin-app/src/routes/GoalBuilder.tsx:407
 #: admin-app/src/routes/Goals.tsx:106
@@ -4194,15 +4194,15 @@ msgstr "عملکرد پیشنهاد خرید"
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:341
 msgid "Upsell impressions and orders are recorded once the storefront reports them. Widen the date range or check that tracking is enabled."
-msgstr "نمایش‌ها و سفارش‌های فروش بیشتر پس از گزارش‌دهی فروشگاه ثبت می‌شوند. بازهٔ تاریخ را گسترش دهید یا مطمئن شوید ردیابی فعال است."
+msgstr "نمایش‌ها و سفارش‌های پیشنهاد خرید پس از گزارش‌دهی فروشگاه ثبت می‌شوند. بازهٔ تاریخ را گسترش دهید یا مطمئن شوید ردیابی فعال است."
 
 #: admin-app/src/routes/GoalPerformance.tsx:84
 msgid "Upsell-assisted"
-msgstr "کمک‌شده توسط پیشنهاد فروش"
+msgstr "کمک‌شده توسط پیشنهاد خرید"
 
 #: admin-app/src/routes/Recommendations.tsx:215
 msgid "Upsell-assisted completions"
-msgstr "تکمیل‌های کمک‌شده توسط پیشنهاد فروش"
+msgstr "تکمیل‌های کمک‌شده توسط پیشنهاد خرید"
 
 #: admin-app/src/components/layout/navigation.ts:62
 #: admin-app/src/routes/GoalPerformance.tsx:439
@@ -4350,7 +4350,7 @@ msgstr "کجا و چگونه ویجت‌های فروشگاه ظاهر می‌ش
 
 #: admin-app/src/routes/Settings.tsx:551
 msgid "Where the sticky bar docks."
-msgstr "جایی که نوار چسبان قرار میگیرد."
+msgstr "جایی که نوار چسبان قرار می‌گیرد."
 
 #: admin-app/src/routes/Settings.tsx:509
 msgid "Whether the widgets render on small screens (≤782px)."
@@ -4399,7 +4399,7 @@ msgstr "فیلد قیمت تمام‌شده ووکامرس (_cost)"
 
 #: includes/Analytics/UpsellRanker.php:1236
 msgid "WooCommerce upsell of a cart item"
-msgstr "فروش بیشتر ووکامرس برای یک قلم سبد"
+msgstr "پیشنهاد خرید ووکامرس برای یک قلم سبد"
 
 #: includes/Compatibility.php:134
 msgid "WordPress %1$s or newer is required (current: %2$s)."
@@ -4522,7 +4522,7 @@ msgstr "در یک برچسب با سبد مشترک است"
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:138
 msgid "upsell score"
-msgstr "امتیاز فروش بیشتر"
+msgstr "امتیاز پیشنهاد خرید"
 
 #: admin-app/src/components/dashboard/TrendIndicator.tsx
 msgid "vs previous period"
