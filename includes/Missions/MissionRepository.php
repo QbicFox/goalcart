@@ -617,7 +617,7 @@ protected function sanitize_column( $type, $value ) {
 
 		// The conditions JSON stores the condition/composite keys the Mission
 		// model reads as first-class properties; spread them onto the row so
-		// persisted category/product/composite/tag/attribute/brand missions and
+		// persisted category/product/composite/tag/attribute missions and
 		// the Phase 32 customer/cart/shipping conditions evaluate correctly.
 		if ( isset( $row['conditions'] ) && is_array( $row['conditions'] ) ) {
 			foreach ( array(

@@ -143,7 +143,7 @@ final class CartIntegration {
 
 		// Preload categories once per build (one batched query) and hand
 		// them to from_cart so no per-item term queries run. Phase 32
-		// (brand/tag/attribute missions) preloads tags and attribute
+		// (tag/attribute missions) preloads tags and attribute
 		// taxonomies the same way. Phase 18: the Mission Calculation settings
 		// refine the snapshot (tax / discount / shipping / sale / virtual
 		// inclusion), unless the caller passed explicit overrides.

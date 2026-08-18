@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-17T10:27:30Z\n"
+"POT-Creation-Date: 2026-08-18T06:21:29Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,7 +85,7 @@ msgid "%d times"
 msgstr ""
 
 #: admin-app/src/templates/rewardLabel.ts:22
-#: includes/Missions/MessageEngine.php:339
+#: includes/Missions/MessageEngine.php:333
 msgid "%d%% discount"
 msgstr ""
 
@@ -95,7 +95,7 @@ msgid "%d%% progress"
 msgstr ""
 
 #: includes/Campaigns/CampaignRepository.php:224
-#: includes/Missions/MissionRepository.php:414
+#: includes/Missions/MissionRepository.php:411
 msgid "%s (copy)"
 msgstr ""
 
@@ -103,7 +103,7 @@ msgstr ""
 msgid "%s completion rate"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1052
+#: includes/Frontend/ProgressUI.php:1024
 msgid "%s is active"
 msgstr ""
 
@@ -112,7 +112,7 @@ msgid "%s is your top performer"
 msgstr ""
 
 #: admin-app/src/templates/renderers/missionShared.tsx:30
-#: includes/Frontend/ProgressUI.php:1044
+#: includes/Frontend/ProgressUI.php:1016
 msgid "%s left"
 msgstr ""
 
@@ -124,15 +124,15 @@ msgstr ""
 msgid "%s purchased orders"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:67
+#: admin-app/src/components/mission-builder/TargetFields.tsx:59
 msgid "(amount)"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:65
+#: admin-app/src/components/mission-builder/TargetFields.tsx:57
 msgid "(items)"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:62
+#: admin-app/src/components/mission-builder/TargetFields.tsx:54
 msgid "(weight units)"
 msgstr ""
 
@@ -249,12 +249,12 @@ msgstr ""
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:91
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:119
 #: admin-app/src/templates/renderers/missionShared.tsx:317
-#: includes/Frontend/ProgressUI.php:1045
+#: includes/Frontend/ProgressUI.php:1017
 msgid "Add"
 msgstr ""
 
 #: admin-app/src/templates/renderers/missionShared.tsx:39
-#: includes/Frontend/ProgressUI.php:1046
+#: includes/Frontend/ProgressUI.php:1018
 msgid "Add %s more"
 msgstr ""
 
@@ -308,7 +308,7 @@ msgid "Add product costs to unlock Estimated Profit — FaraCart never invents a
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:103
-#: includes/Frontend/ProgressUI.php:1049
+#: includes/Frontend/ProgressUI.php:1021
 msgid "Add these products to reach your mission faster:"
 msgstr ""
 
@@ -424,7 +424,7 @@ msgstr ""
 msgid "Allowed shipping zones"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1055
+#: includes/Frontend/ProgressUI.php:1027
 msgid "Almost there!"
 msgstr ""
 
@@ -432,7 +432,7 @@ msgstr ""
 msgid "Almost there! Only %s left"
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:206
+#: includes/Missions/MessageEngine.php:202
 msgid "Almost there! Only {remaining} left"
 msgstr ""
 
@@ -440,7 +440,7 @@ msgstr ""
 msgid "Already at share"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:27
+#: admin-app/src/components/mission-builder/missionTypes.tsx:25
 #: admin-app/src/routes/Missions.tsx:50
 msgid "Amount"
 msgstr ""
@@ -550,7 +550,7 @@ msgstr ""
 msgid "At least one of these coupon codes must be applied for the mission to count."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:75
+#: admin-app/src/components/mission-builder/missionTypes.tsx:72
 msgid "Attribute"
 msgstr ""
 
@@ -574,7 +574,7 @@ msgstr ""
 msgid "Attributed sales"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:199
+#: admin-app/src/components/mission-builder/TargetFields.tsx:190
 msgid "Attributes"
 msgstr ""
 
@@ -752,14 +752,6 @@ msgstr ""
 msgid "Bottom right"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:81
-msgid "Brand"
-msgstr ""
-
-#: admin-app/src/components/mission-builder/TargetFields.tsx:214
-msgid "Brand attribute"
-msgstr ""
-
 #: includes/Templates/Mission/Template1.php:128
 #: includes/Templates/Mission/Template1.php:134
 #: includes/Templates/Mission/Template1.php:140
@@ -837,7 +829,7 @@ msgid "Caching and what the storefront measures."
 msgstr ""
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:118
-#: admin-app/src/components/mission-builder/TargetFields.tsx:136
+#: admin-app/src/components/mission-builder/TargetFields.tsx:127
 msgid "Calculate against"
 msgstr ""
 
@@ -908,19 +900,18 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:24
 #: admin-app/src/components/mission-builder/TargetFields.tsx:30
 #: admin-app/src/components/mission-builder/TargetFields.tsx:36
-#: admin-app/src/components/mission-builder/TargetFields.tsx:43
-#: admin-app/src/components/mission-builder/TargetFields.tsx:49
-#: admin-app/src/components/mission-builder/TargetFields.tsx:55
+#: admin-app/src/components/mission-builder/TargetFields.tsx:42
+#: admin-app/src/components/mission-builder/TargetFields.tsx:47
 #: admin-app/src/routes/Settings.tsx:621
 msgid "Cart total (incl. tax & shipping)"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:153
-#: admin-app/src/components/mission-builder/TargetFields.tsx:154
+#: admin-app/src/components/mission-builder/TargetFields.tsx:145
 msgid "Categories"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:45
+#: admin-app/src/components/mission-builder/missionTypes.tsx:43
 #: admin-app/src/routes/Missions.tsx:53
 msgid "Category"
 msgstr ""
@@ -1038,7 +1029,7 @@ msgstr ""
 msgid "Colors"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:64
+#: admin-app/src/components/mission-builder/missionTypes.tsx:62
 msgid "Combine child missions with AND/OR logic."
 msgstr ""
 
@@ -1073,7 +1064,7 @@ msgstr ""
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:59
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:82
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:86
-#: includes/Frontend/ProgressUI.php:1050
+#: includes/Frontend/ProgressUI.php:1022
 msgid "Completed"
 msgstr ""
 
@@ -1107,7 +1098,7 @@ msgstr ""
 msgid "Completions where the customer also saw a product recommendation for this mission in the same session (UPSELL_REFACTOR §30)."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:63
+#: admin-app/src/components/mission-builder/missionTypes.tsx:61
 #: admin-app/src/routes/Missions.tsx:56
 msgid "Composite"
 msgstr ""
@@ -1146,7 +1137,7 @@ msgid "Conflict resolution"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:55
-#: includes/Frontend/ProgressUI.php:1056
+#: includes/Frontend/ProgressUI.php:1028
 msgid "Congratulations!"
 msgstr ""
 
@@ -1266,11 +1257,11 @@ msgstr ""
 msgid "Could not load upsell analytics."
 msgstr ""
 
-#: includes/REST/TrackController.php:268
+#: includes/REST/TrackController.php:255
 msgid "Could not record the event."
 msgstr ""
 
-#: includes/REST/SettingsController.php:207
+#: includes/REST/SettingsController.php:215
 msgid "Could not save the settings. Please try again."
 msgstr ""
 
@@ -1283,8 +1274,8 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:46
 #: admin-app/src/routes/Missions.tsx:46
 #: admin-app/src/templates/rewardLabel.ts:12
-#: includes/Frontend/ProgressUI.php:1034
-#: includes/Missions/MessageEngine.php:358
+#: includes/Frontend/ProgressUI.php:1006
+#: includes/Missions/MessageEngine.php:352
 msgid "Coupon"
 msgstr ""
 
@@ -1553,9 +1544,8 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:23
 #: admin-app/src/components/mission-builder/TargetFields.tsx:29
 #: admin-app/src/components/mission-builder/TargetFields.tsx:35
-#: admin-app/src/components/mission-builder/TargetFields.tsx:42
-#: admin-app/src/components/mission-builder/TargetFields.tsx:48
-#: admin-app/src/components/mission-builder/TargetFields.tsx:54
+#: admin-app/src/components/mission-builder/TargetFields.tsx:41
+#: admin-app/src/components/mission-builder/TargetFields.tsx:46
 #: admin-app/src/routes/Settings.tsx:617
 msgid "Discounted subtotal"
 msgstr ""
@@ -1606,7 +1596,7 @@ msgstr ""
 msgid "Distinct orders associated with this mission in the selected period."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:39
+#: admin-app/src/components/mission-builder/missionTypes.tsx:37
 #: admin-app/src/routes/Missions.tsx:52
 msgid "Distinct quantity"
 msgstr ""
@@ -1685,7 +1675,7 @@ msgstr ""
 msgid "Enable floating widget"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1036
+#: includes/Frontend/ProgressUI.php:1008
 msgid "Ended"
 msgstr ""
 
@@ -1694,7 +1684,7 @@ msgstr ""
 msgid "Ends at"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1035
+#: includes/Frontend/ProgressUI.php:1007
 msgid "Ends in"
 msgstr ""
 
@@ -1756,15 +1746,15 @@ msgstr ""
 msgid "Estimated, not guaranteed."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:83
+#: admin-app/src/components/mission-builder/TargetFields.tsx:75
 msgid "Example: if the target is 10 items, a cart with 7 items is 70% of the way there."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:77
+#: admin-app/src/components/mission-builder/TargetFields.tsx:69
 msgid "Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:88
+#: admin-app/src/components/mission-builder/TargetFields.tsx:80
 msgid "Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there."
 msgstr ""
 
@@ -1814,7 +1804,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:49
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:67
-#: includes/Frontend/ProgressUI.php:1053
+#: includes/Frontend/ProgressUI.php:1025
 msgid "Expired"
 msgstr ""
 
@@ -1876,7 +1866,7 @@ msgid "FaraCart:"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:184
-#: includes/Frontend/ProgressUI.php:1058
+#: includes/Frontend/ProgressUI.php:1030
 msgid "Finish today — your reward is waiting"
 msgstr ""
 
@@ -1889,7 +1879,7 @@ msgid "First order only"
 msgstr ""
 
 #: admin-app/src/templates/rewardLabel.ts:30
-#: includes/Missions/MessageEngine.php:350
+#: includes/Missions/MessageEngine.php:344
 msgid "Fixed %s off"
 msgstr ""
 
@@ -1903,8 +1893,8 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:44
 #: admin-app/src/routes/Missions.tsx:44
 #: admin-app/src/templates/rewardLabel.ts:10
-#: includes/Frontend/ProgressUI.php:1032
-#: includes/Missions/MessageEngine.php:345
+#: includes/Frontend/ProgressUI.php:1004
+#: includes/Missions/MessageEngine.php:339
 msgid "Fixed discount"
 msgstr ""
 
@@ -1922,8 +1912,8 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:45
 #: admin-app/src/routes/Missions.tsx:45
 #: admin-app/src/templates/rewardLabel.ts:11
-#: includes/Frontend/ProgressUI.php:1033
-#: includes/Missions/MessageEngine.php:355
+#: includes/Frontend/ProgressUI.php:1005
+#: includes/Missions/MessageEngine.php:349
 msgid "Free gift"
 msgstr ""
 
@@ -1934,8 +1924,8 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:42
 #: admin-app/src/routes/Missions.tsx:42
 #: admin-app/src/templates/rewardLabel.ts:8
-#: includes/Frontend/ProgressUI.php:1030
-#: includes/Missions/MessageEngine.php:332
+#: includes/Frontend/ProgressUI.php:1002
+#: includes/Missions/MessageEngine.php:326
 msgid "Free shipping"
 msgstr ""
 
@@ -1973,7 +1963,7 @@ msgstr ""
 msgid "Generate a coupon from these rules"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1038
+#: includes/Frontend/ProgressUI.php:1010
 msgid "Gift added to your cart"
 msgstr ""
 
@@ -2253,7 +2243,7 @@ msgstr ""
 msgid "Invalid product id."
 msgstr ""
 
-#: includes/REST/TrackController.php:182
+#: includes/REST/TrackController.php:174
 #: includes/REST/UpsellController.php:213
 msgid "Invalid tracking nonce."
 msgstr ""
@@ -2356,7 +2346,7 @@ msgstr ""
 msgid "Loading the mission…"
 msgstr ""
 
-#: includes/REST/SearchController.php:409
+#: includes/REST/SearchController.php:408
 msgid "Locations not covered by your other zones"
 msgstr ""
 
@@ -2505,7 +2495,7 @@ msgid "Mission Views"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:94
-#: includes/Frontend/ProgressUI.php:1051
+#: includes/Frontend/ProgressUI.php:1023
 msgid "Mission completed"
 msgstr ""
 
@@ -2700,7 +2690,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:109
 #: includes/Frontend/ProgressUI.php:522
-#: includes/Frontend/ProgressUI.php:1059
+#: includes/Frontend/ProgressUI.php:1031
 msgid "No recommendations available right now."
 msgstr ""
 
@@ -2718,7 +2708,7 @@ msgstr ""
 msgid "No sales data yet"
 msgstr ""
 
-#: includes/REST/SettingsController.php:197
+#: includes/REST/SettingsController.php:205
 msgid "No settings were provided to save."
 msgstr ""
 
@@ -2783,7 +2773,7 @@ msgstr ""
 msgid "Once"
 msgstr ""
 
-#: includes/Database/Installer.php:393
+#: includes/Database/Installer.php:494
 msgid "Once Weekly"
 msgstr ""
 
@@ -2816,7 +2806,7 @@ msgid "Only %1$s of completed missions were followed by an attributed purchase."
 msgstr ""
 
 #: admin-app/src/templates/renderers/missionShared.tsx:294
-#: includes/Frontend/ProgressUI.php:1048
+#: includes/Frontend/ProgressUI.php:1020
 msgid "Only %s"
 msgstr ""
 
@@ -2836,11 +2826,11 @@ msgstr ""
 msgid "Only products carrying any of these tags count toward the mission. Leave empty to count every product."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:188
+#: admin-app/src/components/mission-builder/TargetFields.tsx:179
 msgid "Only products carrying any of these tags count toward the target."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:158
+#: admin-app/src/components/mission-builder/TargetFields.tsx:149
 msgid "Only products in these categories count toward the target."
 msgstr ""
 
@@ -2848,11 +2838,11 @@ msgstr ""
 msgid "Only shoppers with no completed orders see this mission. Guests always qualify."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:173
+#: admin-app/src/components/mission-builder/TargetFields.tsx:164
 msgid "Only these products count toward the target. Variations are matched by their parent product."
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:224
+#: includes/Missions/MessageEngine.php:220
 msgid "Only {remaining} left to reach your mission"
 msgstr ""
 
@@ -2960,7 +2950,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:131
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:116
-#: includes/Frontend/ProgressUI.php:1042
+#: includes/Frontend/ProgressUI.php:1014
 msgid "Paid"
 msgstr ""
 
@@ -2973,8 +2963,8 @@ msgid "Percentage"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:25
-#: includes/Frontend/ProgressUI.php:1031
-#: includes/Missions/MessageEngine.php:336
+#: includes/Frontend/ProgressUI.php:1003
+#: includes/Missions/MessageEngine.php:330
 msgid "Percentage discount"
 msgstr ""
 
@@ -3001,7 +2991,7 @@ msgstr ""
 msgid "Pick the default progress template and tune its appearance — separately for Missions and Campaigns."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1037
+#: includes/Frontend/ProgressUI.php:1009
 msgid "Pick your free gift"
 msgstr ""
 
@@ -3083,7 +3073,7 @@ msgstr ""
 msgid "Processing + completed orders."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:51
+#: admin-app/src/components/mission-builder/missionTypes.tsx:49
 #: admin-app/src/routes/Analytics.tsx:565
 #: admin-app/src/routes/Analytics.tsx:1214
 #: admin-app/src/routes/Missions.tsx:54
@@ -3138,12 +3128,12 @@ msgid "Product tags"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:164
-#: admin-app/src/components/mission-builder/TargetFields.tsx:169
+#: admin-app/src/components/mission-builder/TargetFields.tsx:160
 #: admin-app/src/routes/UpsellAnalytics.tsx:435
 msgid "Products"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:203
+#: admin-app/src/components/mission-builder/TargetFields.tsx:194
 msgid "Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target."
 msgstr ""
 
@@ -3181,7 +3171,7 @@ msgid "Profit not estimated yet"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:100
-#: includes/Frontend/ProgressUI.php:1041
+#: includes/Frontend/ProgressUI.php:1013
 msgid "Progress"
 msgstr ""
 
@@ -3274,10 +3264,9 @@ msgstr ""
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:25
 #: admin-app/src/components/mission-builder/TargetFields.tsx:27
 #: admin-app/src/components/mission-builder/TargetFields.tsx:33
-#: admin-app/src/components/mission-builder/TargetFields.tsx:40
-#: admin-app/src/components/mission-builder/TargetFields.tsx:46
-#: admin-app/src/components/mission-builder/TargetFields.tsx:52
-#: admin-app/src/components/mission-builder/missionTypes.tsx:33
+#: admin-app/src/components/mission-builder/TargetFields.tsx:39
+#: admin-app/src/components/mission-builder/TargetFields.tsx:44
+#: admin-app/src/components/mission-builder/missionTypes.tsx:31
 #: admin-app/src/routes/Missions.tsx:51
 msgid "Quantity"
 msgstr ""
@@ -3286,39 +3275,35 @@ msgstr ""
 msgid "Raw interaction metrics from the event log — impressions, completions, revenue and suggestions."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:28
+#: admin-app/src/components/mission-builder/missionTypes.tsx:26
 msgid "Reach a cart amount — subtotal, total or discounted subtotal."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:40
+#: admin-app/src/components/mission-builder/missionTypes.tsx:38
 msgid "Reach a number of distinct products in the cart."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:58
+#: admin-app/src/components/mission-builder/missionTypes.tsx:56
 msgid "Reach a total cart weight."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:34
+#: admin-app/src/components/mission-builder/missionTypes.tsx:32
 msgid "Reach a total item quantity in the cart."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:46
+#: admin-app/src/components/mission-builder/missionTypes.tsx:44
 msgid "Reach an amount or quantity across chosen categories."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:76
+#: admin-app/src/components/mission-builder/missionTypes.tsx:73
 msgid "Reach an amount or quantity across products with chosen attributes."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:70
+#: admin-app/src/components/mission-builder/missionTypes.tsx:68
 msgid "Reach an amount or quantity across products with chosen tags."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:82
-msgid "Reach an amount or quantity of one brand (a product attribute)."
-msgstr ""
-
-#: admin-app/src/components/mission-builder/missionTypes.tsx:52
+#: admin-app/src/components/mission-builder/missionTypes.tsx:50
 msgid "Reach an amount or quantity of specific products."
 msgstr ""
 
@@ -3375,7 +3360,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:137
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:124
-#: includes/Frontend/ProgressUI.php:1043
+#: includes/Frontend/ProgressUI.php:1015
 msgid "Remaining"
 msgstr ""
 
@@ -3454,7 +3439,7 @@ msgstr ""
 msgid "Reward type"
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:215
+#: includes/Missions/MessageEngine.php:211
 msgid "Reward unlocked: {reward}"
 msgstr ""
 
@@ -3580,7 +3565,7 @@ msgstr ""
 msgid "Search and select…"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:325
+#: admin-app/src/components/mission-builder/TargetFields.tsx:301
 msgid "Search attributes…"
 msgstr ""
 
@@ -3681,7 +3666,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:129
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:65
-#: includes/Frontend/ProgressUI.php:1040
+#: includes/Frontend/ProgressUI.php:1012
 msgid "Shopping mission"
 msgstr ""
 
@@ -3907,9 +3892,8 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:22
 #: admin-app/src/components/mission-builder/TargetFields.tsx:28
 #: admin-app/src/components/mission-builder/TargetFields.tsx:34
-#: admin-app/src/components/mission-builder/TargetFields.tsx:41
-#: admin-app/src/components/mission-builder/TargetFields.tsx:47
-#: admin-app/src/components/mission-builder/TargetFields.tsx:53
+#: admin-app/src/components/mission-builder/TargetFields.tsx:40
+#: admin-app/src/components/mission-builder/TargetFields.tsx:45
 #: admin-app/src/routes/Settings.tsx:613
 msgid "Subtotal (before discounts)"
 msgstr ""
@@ -3930,16 +3914,16 @@ msgstr ""
 msgid "Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {mission_name}."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:69
+#: admin-app/src/components/mission-builder/missionTypes.tsx:67
 msgid "Tag"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:184
+#: admin-app/src/components/mission-builder/TargetFields.tsx:175
 msgid "Tags"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:102
-#: admin-app/src/components/mission-builder/TargetFields.tsx:122
+#: admin-app/src/components/mission-builder/TargetFields.tsx:113
 #: admin-app/src/routes/MissionBuilder.tsx:377
 msgid "Target"
 msgstr ""
@@ -4120,27 +4104,27 @@ msgstr ""
 msgid "The internal identity of the mission."
 msgstr ""
 
-#: includes/REST/MissionsController.php:244
+#: includes/REST/MissionsController.php:224
 msgid "The mission could not be created."
 msgstr ""
 
-#: includes/REST/MissionsController.php:301
+#: includes/REST/MissionsController.php:281
 msgid "The mission could not be deleted."
 msgstr ""
 
-#: includes/REST/MissionsController.php:336
+#: includes/REST/MissionsController.php:316
 msgid "The mission could not be duplicated."
 msgstr ""
 
-#: includes/REST/MissionsController.php:224
-#: includes/REST/MissionsController.php:265
-#: includes/REST/MissionsController.php:293
-#: includes/REST/MissionsController.php:326
+#: includes/REST/MissionsController.php:204
+#: includes/REST/MissionsController.php:245
+#: includes/REST/MissionsController.php:273
+#: includes/REST/MissionsController.php:306
 #: includes/REST/RecommendationsController.php:149
 msgid "The mission could not be found."
 msgstr ""
 
-#: includes/REST/MissionsController.php:273
+#: includes/REST/MissionsController.php:253
 msgid "The mission could not be updated."
 msgstr ""
 
@@ -4188,10 +4172,6 @@ msgstr ""
 msgid "The product added to the cart as a gift."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:218
-msgid "The product attribute that identifies the brand (typically pa_brand)."
-msgstr ""
-
 #: admin-app/src/routes/UpsellAnalytics.tsx:165
 msgid "The product breakdown could not be loaded."
 msgstr ""
@@ -4228,7 +4208,7 @@ msgstr ""
 msgid "The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:127
+#: admin-app/src/components/mission-builder/TargetFields.tsx:118
 msgid "The threshold shoppers need to reach"
 msgstr ""
 
@@ -4261,7 +4241,7 @@ msgid "This is an analytical estimate based on available WooCommerce cost and or
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:52
-#: includes/Frontend/ProgressUI.php:1054
+#: includes/Frontend/ProgressUI.php:1026
 msgid "This mission has ended"
 msgstr ""
 
@@ -4269,11 +4249,11 @@ msgstr ""
 msgid "This month"
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:189
+#: includes/Missions/MessageEngine.php:185
 msgid "This offer is not active right now."
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:192
+#: includes/Missions/MessageEngine.php:188
 msgid "This offer is not available for your cart."
 msgstr ""
 
@@ -4363,7 +4343,7 @@ msgstr ""
 msgid "Track color"
 msgstr ""
 
-#: includes/REST/TrackController.php:206
+#: includes/REST/TrackController.php:198
 #: includes/REST/UpsellController.php:242
 #: includes/REST/UpsellController.php:264
 #: includes/REST/UpsellController.php:295
@@ -4399,7 +4379,7 @@ msgstr ""
 msgid "Type or pick an existing coupon."
 msgstr ""
 
-#: includes/REST/TrackController.php:218
+#: includes/REST/TrackController.php:210
 msgid "Unknown event type."
 msgstr ""
 
@@ -4497,7 +4477,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:168
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:155
-#: includes/Frontend/ProgressUI.php:1047
+#: includes/Frontend/ProgressUI.php:1019
 msgid "View products"
 msgstr ""
 
@@ -4532,7 +4512,7 @@ msgstr ""
 msgid "Wednesday"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:57
+#: admin-app/src/components/mission-builder/missionTypes.tsx:55
 #: admin-app/src/routes/Missions.tsx:55
 msgid "Weight"
 msgstr ""
@@ -4627,7 +4607,7 @@ msgid "Window"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:177
-#: includes/Frontend/ProgressUI.php:1057
+#: includes/Frontend/ProgressUI.php:1029
 msgid "With a purchase of"
 msgstr ""
 
@@ -4684,12 +4664,12 @@ msgstr ""
 msgid "You are not allowed to access this endpoint."
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:201
+#: includes/Missions/MessageEngine.php:197
 msgid "You have already completed this mission."
 msgstr ""
 
 #: admin-app/src/routes/Appearance.tsx:86
-#: includes/Missions/MessageEngine.php:218
+#: includes/Missions/MessageEngine.php:214
 msgid "You reached your mission!"
 msgstr ""
 

@@ -3,9 +3,8 @@
  * FaraCart Phase 32 tests (Advanced V2 features).
  *
  * Boots WordPress and exercises the Phase 32 surface:
- *
- *  - mission types: tag / attribute / brand missions evaluate against the
- *    product tags and attribute taxonomies on the cart items
+ *	 *  - mission types: tag / attribute missions evaluate against the
+	 *    product tags and attribute taxonomies on the cart items
  *  - customer conditions: roles, guest/logged-in state, first-order and
  *    VIP missions gate eligibility (guest semantics for first-order)
  *  - shipping-zone conditions: the mission applies only in configured zones
@@ -90,9 +89,9 @@ function mission( array $data ) {
 $engine = new MissionEngine();
 
 // ---------------------------------------------------------------------------
-// 1. Tag / attribute / brand mission types (Phase 32)
+// 1. Tag / attribute mission types (Phase 32)
 // ---------------------------------------------------------------------------
-echo "\n== 1. Tag / attribute / brand missions ==\n";
+echo "\n== 1. Tag / attribute missions ==\n";
 
 $store_cart = ctx(
 	array( 'subtotal' => 130, 'total' => 130 ),
@@ -128,23 +127,10 @@ $r = $engine->evaluate(
 	mission( array( 'type' => Mission::TYPE_ATTRIBUTE, 'target' => 1, 'attributes' => array( 'pa_brand' ), 'calculation_mode' => Mission::MODE_QUANTITY ) ),
 	$store_cart
 );
-check( 'attribute mission matches pa_brand items (qty 1)', near( $r->current(), 1 ) );
-
-$r = $engine->evaluate( mission( array( 'type' => Mission::TYPE_BRAND, 'target' => 40, 'attributes' => array( 'pa_brand' ) ) ), $store_cart );
-check( 'brand mission amount = brand line sum (40)', near( $r->current(), 40 ) );
-
-$r = $engine->evaluate(
-	mission( array( 'type' => Mission::TYPE_BRAND, 'target' => 1, 'calculation_mode' => Mission::MODE_QUANTITY ) ),
-	$store_cart
-);
-check( 'brand mission defaults to pa_brand taxonomy (qty 1)', near( $r->current(), 1 ) );
-
-check( 'brand_taxonomy accessor', 'pa_brand' === mission( array( 'type' => Mission::TYPE_BRAND ) )->brand_taxonomy() );
-
-$types = $engine->registry()->types();
-check( 'registry supports tag', in_array( Mission::TYPE_TAG, $types, true ) );
-check( 'registry supports attribute', in_array( Mission::TYPE_ATTRIBUTE, $types, true ) );
-check( 'registry supports brand', in_array( Mission::TYPE_BRAND, $types, true ) );
+check( 'attribute mission matches pa_brand items (qty 1)', near( $r->current(), 1 ) );	$types = $engine->registry()->types();
+	check( 'registry supports tag', in_array( Mission::TYPE_TAG, $types, true ) );
+	check( 'registry supports attribute', in_array( Mission::TYPE_ATTRIBUTE, $types, true ) );
+	check( 'registry does not support brand', ! in_array( 'brand', $types, true ) );
 
 // ---------------------------------------------------------------------------
 // 2. Customer conditions (Phase 32)

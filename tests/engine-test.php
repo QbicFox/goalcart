@@ -532,14 +532,12 @@ echo "\n== 17. Unknown type ==\n";
 
 $r = $engine->evaluate( mission( array( 'type' => 'mystery', 'target' => 50 ) ), $cart );
 check( 'unknown type ineligible', ! $r->eligible() );
-check( 'unknown type reason', MissionResult::REASON_UNKNOWN_TYPE === $r->reason() );
-
-$types = $engine->registry()->types();
-sort( $types );
-check(
-    'registry exposes all 10 types',
-    array( 'amount', 'attribute', 'brand', 'category', 'composite', 'distinct_quantity', 'product', 'quantity', 'tag', 'weight' ) === $types
-);
+check( 'unknown type reason', MissionResult::REASON_UNKNOWN_TYPE === $r->reason() );	$types = $engine->registry()->types();
+	sort( $types );
+	check(
+	    'registry exposes all 9 types',
+	    array( 'amount', 'attribute', 'category', 'composite', 'distinct_quantity', 'product', 'quantity', 'tag', 'weight' ) === $types
+	);
 
 // ---------------------------------------------------------------------------
 // Summary

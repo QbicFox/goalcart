@@ -35,7 +35,7 @@ const MODE_OPTIONS: Record<string, Array<{ value: string; label: string }>> = {
     { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
     { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
   ],
-  // Phase 32 (brand/tag/attribute conditions): the category family.
+  // Phase 32 (tag/attribute conditions): the category family.
   tag: [
     { value: 'quantity', label: __('Quantity', 'faracart') },
     { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
@@ -43,12 +43,6 @@ const MODE_OPTIONS: Record<string, Array<{ value: string; label: string }>> = {
     { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
   ],
   attribute: [
-    { value: 'quantity', label: __('Quantity', 'faracart') },
-    { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
-    { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
-    { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
-  ],
-  brand: [
     { value: 'quantity', label: __('Quantity', 'faracart') },
     { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
     { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
@@ -97,9 +91,9 @@ function targetExample(type: MissionType, mode: string): string {
  * sees irrelevant controls:
  *
  * - amount / quantity / distinct_quantity / weight: a single target
- * - category / product / tag / attribute / brand: target + calculation
- *   basis + a picker for the scoped entities (Phase 32 adds tags,
- *   attribute taxonomies and brands)
+ * - category / product / tag / attribute: target + calculation
+ *   basis + a picker for the scoped entities (Phase 32 adds tags and
+ *   attribute taxonomies)
  * - composite: operator + children are edited in their own section
  */
 export default function TargetFields({ values, onValueChange }: TargetFieldsProps) {
@@ -202,21 +196,6 @@ export default function TargetFields({ values, onValueChange }: TargetFieldsProp
             onChange={(attributes) => patch({ attributes })}
             helperText={__(
               'Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target.',
-              'faracart'
-            )}
-          />
-        </Grid>
-      )}
-
-      {type === 'brand' && (
-        <Grid size={{ xs: 12, sm: 8, lg: 6 }}>
-          <TaxonomyAutocomplete
-            label={__('Brand attribute', 'faracart')}
-            value={values.attributes.length > 0 ? [values.attributes[0]] : []}
-            multiple={false}
-            onChange={(attributes) => patch({ attributes })}
-            helperText={__(
-              'The product attribute that identifies the brand (typically pa_brand).',
               'faracart'
             )}
           />

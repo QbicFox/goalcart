@@ -142,9 +142,9 @@ class MilestoneChainTemplate extends AbstractTemplate {
 				'type'    => 'number',
 				'label'   => __( 'Corner radius (px)', 'faracart' ),
 				'group'   => __( 'Shape', 'faracart' ),
-				'default' => 10,
+				'default' => 2,
 				'min'     => 0,
-				'max'     => 40,
+				'max'     => 5,
 			),
 			'barHeight'       => array(
 				'type'    => 'number',

@@ -26,10 +26,9 @@ final class Mission {
 	/**
 	 * Mission types.
 	 *
-	 * Phase 32 (Advanced V2): tag, attribute and brand missions extend the
+	 * Phase 32 (Advanced V2): tag and attribute missions extend the
 	 * category/product family — the amount or quantity restricted to
-	 * products carrying the configured tags / attribute taxonomies /
-	 * brand attribute.
+	 * products carrying the configured tags / attribute taxonomies.
 	 */
 	const TYPE_AMOUNT            = 'amount';
 	const TYPE_QUANTITY          = 'quantity';
@@ -40,7 +39,6 @@ final class Mission {
 	const TYPE_COMPOSITE         = 'composite';
 	const TYPE_TAG               = 'tag';
 	const TYPE_ATTRIBUTE         = 'attribute';
-	const TYPE_BRAND             = 'brand';
 
 	/**
 	 * Calculation bases for amount-style missions.
@@ -147,7 +145,7 @@ final class Mission {
 	protected $tags;
 
 	/**
-	 * Global attribute taxonomy slugs for attribute/brand missions (Phase 32),
+	 * Global attribute taxonomy slugs for attribute missions (Phase 32),
 	 * e.g. array( 'pa_color' ) or array( 'pa_brand' ).
 	 *
 	 * @var string[]
@@ -579,26 +577,12 @@ final class Mission {
 	}
 
 	/**
-	 * Global attribute taxonomy slugs (attribute / brand missions).
+	 * Global attribute taxonomy slugs (attribute missions).
 	 *
 	 * @return string[]
 	 */
 	public function attributes() {
 		return $this->attributes;
-	}
-
-	/**
-	 * The brand taxonomy for brand missions (first configured attribute, else
-	 * the conventional pa_brand).
-	 *
-	 * @return string
-	 */
-	public function brand_taxonomy() {
-		if ( ! empty( $this->attributes ) ) {
-			return (string) $this->attributes[0];
-		}
-
-		return (string) apply_filters( 'faracart_brand_taxonomy', 'pa_brand' );
 	}
 
 	/**

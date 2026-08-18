@@ -9,7 +9,6 @@ namespace FaraCart\Missions;
 
 use FaraCart\Missions\Evaluators\AmountEvaluator;
 use FaraCart\Missions\Evaluators\AttributeEvaluator;
-use FaraCart\Missions\Evaluators\BrandEvaluator;
 use FaraCart\Missions\Evaluators\CategoryEvaluator;
 use FaraCart\Missions\Evaluators\CompositeEvaluator;
 use FaraCart\Missions\Evaluators\DistinctQuantityEvaluator;
@@ -43,11 +42,10 @@ class MissionEvaluatorRegistry {
 			Mission::TYPE_PRODUCT           => ProductEvaluator::class,
 			Mission::TYPE_WEIGHT            => WeightEvaluator::class,
 			Mission::TYPE_COMPOSITE         => CompositeEvaluator::class,
-			// Phase 32 (brand/tag/attribute conditions) — the category
-			// family extended to tags, attribute taxonomies and brands.
+			// Phase 32 (tag/attribute conditions) — the category family
+			// extended to tags and attribute taxonomies.
 			Mission::TYPE_TAG               => TagEvaluator::class,
 			Mission::TYPE_ATTRIBUTE         => AttributeEvaluator::class,
-			Mission::TYPE_BRAND             => BrandEvaluator::class,
 		);
 	}
 

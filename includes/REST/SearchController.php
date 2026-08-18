@@ -88,7 +88,7 @@ class SearchController extends BaseController {
 			)
 		);
 
-		// Phase 32 (brand/tag/attribute conditions): tag terms, global
+		// Phase 32 (tag/attribute conditions): tag terms, global
 		// attribute taxonomies and shipping zones for the mission builder.
 		register_rest_route(
 			self::NAMESPACE,
@@ -355,8 +355,7 @@ class SearchController extends BaseController {
 	/**
 	 * List global product attribute taxonomies (e.g. pa_color, pa_brand).
 	 *
-	 * The mission builder stores the selected taxonomy slugs; brand missions
-	 * store their brand taxonomy the same way.
+	 * The mission builder stores the selected taxonomy slugs.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response

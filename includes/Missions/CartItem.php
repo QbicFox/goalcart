@@ -85,7 +85,7 @@ final class CartItem {
 	protected $categories;
 
 	/**
-	 * Product tag term IDs (Phase 32: tag / brand / attribute missions).
+	 * Product tag term IDs (Phase 32: tag / attribute missions).
 	 *
 	 * @var int[]
 	 */

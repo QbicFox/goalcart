@@ -61,8 +61,7 @@ export type MissionType =
   | 'weight'
   | 'composite'
   | 'tag'
-  | 'attribute'
-  | 'brand';
+  | 'attribute';
 
 export type RewardType =
   'free_shipping' | 'percent_discount' | 'fixed_discount' | 'free_gift' | 'coupon' | null;
@@ -162,7 +161,7 @@ export interface MissionChildInput {
   calculation_mode: string;
   categories: number[];
   products: number[];
-  /** Phase 32: tag / attribute / brand child scopes. */
+  /** Phase 32: tag / attribute child scopes. */
   tags?: number[];
   attributes?: string[];
 }
@@ -170,7 +169,7 @@ export interface MissionChildInput {
 /**
  * The payload accepted by `POST /missions` and `PUT /missions/{id}` (Phase 9
  * builder form model — mirrors the Mission REST payload without the
- * server-managed id/timestamps). Phase 32 adds the tag/attribute/brand
+ * server-managed id/timestamps). Phase 32 adds the tag/attribute
  * scopes and the customer/order/cart/shipping condition keys.
  */
 export interface MissionInput {

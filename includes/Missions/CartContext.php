@@ -252,7 +252,7 @@ final class CartContext {
 				? array_map( 'intval', (array) $category_map[ $category_product_id ] )
 				: ( function_exists( 'wp_get_post_terms' ) ? wp_get_post_terms( $category_product_id, 'product_cat', array( 'fields' => 'ids' ) ) : array() );
 
-			// Phase 32 (brand/tag/attribute missions): tags and attribute
+			// Phase 32 (tag/attribute missions): tags and attribute
 			// taxonomies are preloaded in the same batched way as categories
 			// (CartIntegration builds one object-terms query + one product
 			// attribute pass), so no per-item queries run on the storefront.
@@ -769,8 +769,7 @@ final class CartContext {
 
 	/**
 	 * Attribute-restricted value: quantity or amount (Phase 32). Matches
-	 * products carrying ANY of the configured attribute taxonomies (brand
-	 * missions configure their brand taxonomy here).
+	 * products carrying ANY of the configured attribute taxonomies.
 	 *
 	 * @param string[] $taxonomies Global attribute taxonomy slugs.
 	 * @param string   $mode       quantity | subtotal | total | discounted_subtotal.

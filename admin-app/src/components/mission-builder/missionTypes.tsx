@@ -7,7 +7,6 @@ import PaymentsIcon from '@mui/icons-material/Payments';
 import ScaleIcon from '@mui/icons-material/Scale';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import StyleIcon from '@mui/icons-material/Style';
-import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 import { __ } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
 
@@ -75,11 +74,5 @@ export const MISSION_TYPES: MissionTypeDefinition[] = [
     label: __('Attribute', 'faracart'),
     description: __('Reach an amount or quantity across products with chosen attributes.', 'faracart'),
     icon: <StyleIcon />,
-  },
-  {
-    value: 'brand',
-    label: __('Brand', 'faracart'),
-    description: __('Reach an amount or quantity of one brand (a product attribute).', 'faracart'),
-    icon: <WorkspacePremiumIcon />,
   },
 ];

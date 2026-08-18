@@ -399,10 +399,9 @@ class MissionsController extends BaseController {
 					Mission::TYPE_PRODUCT,
 					Mission::TYPE_WEIGHT,
 					Mission::TYPE_COMPOSITE,
-					// Phase 32 (brand/tag/attribute conditions).
+					// Phase 32 (tag/attribute conditions).
 					Mission::TYPE_TAG,
 					Mission::TYPE_ATTRIBUTE,
-					Mission::TYPE_BRAND,
 				),
 			),
 			'target'            => array(
@@ -451,7 +450,7 @@ class MissionsController extends BaseController {
 				// its safe scalar type before the payload reaches the DB.
 				'sanitize_callback' => array( $this, 'sanitize_children' ),
 			),
-			// Phase 32 (Advanced V2): brand/tag/attribute mission types plus
+			// Phase 32 (Advanced V2): tag/attribute mission types plus
 			// the customer/order/cart/shipping condition keys — validated
 			// and cast here so a bad value can never reach the conditions
 			// JSON.

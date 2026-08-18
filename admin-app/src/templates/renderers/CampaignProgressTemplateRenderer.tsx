@@ -27,7 +27,7 @@ export default function CampaignProgressTemplateRenderer({
   const accent = str(settings, 'accent', '#2271b1');
   const bg = str(settings, 'bg', '#ffffff');
   const border = str(settings, 'border', '#dcdcde');
-  const radius = settings.radius === undefined ? 10 : Number(settings.radius) || 0;
+  const radius = settings.radius === undefined ? 2 : Number(settings.radius) || 0;
 
   let top: (typeof missions)[number] | null = null;
   for (const mission of missions) {
