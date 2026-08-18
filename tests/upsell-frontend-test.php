@@ -410,8 +410,8 @@ echo "\n== 7. Frontend asset wiring ==\n";
 $frontend_js = (string) file_get_contents( FARACART_PATH . 'assets/js/frontend.js' );
 $frontend_css = (string) file_get_contents( FARACART_PATH . 'assets/css/frontend.css' );
 
-check( 'frontend JS defines the upsell panel component', false !== strpos( $frontend_js, 'function upsellPanel' ) );
-check( 'frontend JS reports upsell events to the upsell track endpoint', false !== strpos( $frontend_js, 'function sendUpsellTrack' ) && false !== strpos( $frontend_js, 'upsells.trackEndpoint' ) );
+check( 'frontend JS defines the upsell panel component', false !== strpos( $frontend_js, 'const upsellPanel = (' ) );
+check( 'frontend JS reports upsell events to the upsell track endpoint', false !== strpos( $frontend_js, 'const sendUpsellTrack = (' ) && false !== strpos( $frontend_js, 'upsells.trackEndpoint' ) );
 check( 'frontend JS reports upsell_impression once per mission+product', false !== strpos( $frontend_js, 'reportedUpsellImpressions' ) && false !== strpos( $frontend_js, "'upsell_impression'" ) );
 check( 'frontend JS reports upsell_clicked on add', false !== strpos( $frontend_js, "'upsell_clicked'" ) );
 check( 'frontend JS reports upsell_added after a successful add', false !== strpos( $frontend_js, "'upsell_added'" ) );

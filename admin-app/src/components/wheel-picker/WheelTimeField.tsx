@@ -13,6 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import { __ } from '@wordpress/i18n';
 import { useState } from 'react';
 
+import WheelField from './WheelField';
 import WheelTimePicker from './WheelTimePicker';
 
 export interface WheelTimeFieldProps {
@@ -97,7 +98,12 @@ export default function WheelTimeField({ value, onChange, label, helperText }: W
       <Dialog open={open} onClose={() => setOpen(false)} maxWidth="xs" fullWidth>
         <DialogTitle>{label ?? __('Time', 'faracart')}</DialogTitle>
         <DialogContent>
-          <WheelTimePicker value={draft} onChange={setDraft} valueLabel={draft || undefined} />
+          {/* Framed exactly like the datetime picker's modal so the
+              highlight band + muted rows (scoped to .faracart-wheel)
+              apply — a bare picker renders without them. */}
+          <WheelField label="" valueLabel={draft || undefined}>
+            <WheelTimePicker value={draft} onChange={setDraft} />
+          </WheelField>
         </DialogContent>
         <DialogActions>
           <Button size="small" onClick={() => setOpen(false)}>

@@ -49,7 +49,7 @@
  *
  * @package FaraCart
  */
-( function () {
+( () => {
 	'use strict';
 
 	var cfg = window.faracartFrontend || null;
@@ -78,7 +78,9 @@
 	var floatingBuilt = false;
 	var floatingFingerprint = null;
 	var floatingDirection = 'right';
-	var floatingButtonSide = 'right';
+	// The button side remembered at open time for the resize handler.
+	// (Named *State so it never shadows the floatingButtonSide() resolver.)
+	var floatingButtonSideState = 'right';
 	var FLOATING_DEFAULT_ICON = '\uD83D\uDED2'; // shopping cart
 
 	// The template ids the floating drawer accepts when resolving a mission's
@@ -133,7 +135,7 @@
 	 * @param {Function} fn Callback to run.
 	 * @return {*} Result or null.
 	 */
-	function safe( fn ) {
+	const safe = ( fn ) => {
 		try {
 			return fn();
 		} catch ( error ) {
@@ -152,7 +154,7 @@
 	 * @param {string} [text]   Text content.
 	 * @return {HTMLElement}
 	 */
-	function el( tag, klass, text ) {
+	const el = ( tag, klass, text ) => {
 		var node = document.createElement( tag );
 		if ( klass ) {
 			node.className = klass;
@@ -187,7 +189,7 @@
 	 *                          transient "updating" state.
 	 * @return {void}
 	 */
-	function fetchProgress( done, ended ) {
+	const fetchProgress = ( done, ended ) => {
 		var request = new XMLHttpRequest();
 		var separator = cfg.endpoint.indexOf( '?' ) >= 0 ? '&' : '?';
 		var myEpoch = ++fetchEpoch;
@@ -201,7 +203,7 @@
 		}
 		activeFetch = request;
 
-		function finish() {
+		const finish = () => {
 			// Only the CURRENT request may release the "updating" state; a
 			// superseded request's late callback is a no-op.
 			if ( activeFetch === request ) {
@@ -215,7 +217,7 @@
 		request.open( 'GET', cfg.endpoint + separator + '_=' + Date.now(), true );
 		request.timeout = 10000;
 
-		request.onload = function () {
+		request.onload = () => {
 			if ( myEpoch !== fetchEpoch ) {
 				finish();
 				return;
@@ -226,7 +228,7 @@
 				return;
 			}
 
-			safe( function () {
+			safe( () => {
 				var payload = JSON.parse( request.responseText );
 				if ( payload && payload.data ) {
 					// Self-healing tracking nonce: every /progress response
@@ -253,13 +255,13 @@
 			finish();
 		};
 
-		request.onerror = function () { finish(); };
-		request.ontimeout = function () { finish(); };
+		request.onerror = () => { finish(); };
+		request.ontimeout = () => { finish(); };
 		// Safety net: fires on success, error, timeout AND abort, so the
 		// "updating" state can never linger behind a request that ends in
 		// any way (finish() is idempotent — the activeFetch guard makes
 		// superseded requests no-ops).
-		request.onloadend = function () { finish(); };
+		request.onloadend = () => { finish(); };
 		request.send();
 	}
 
@@ -274,7 +276,7 @@
 	 * @param {Object} data      Optional event fields.
 	 * @return {void}
 	 */
-	function sendTrack( eventType, data ) {
+	const sendTrack = ( eventType, data ) => {
 		if ( ! tracking || ! tracking.endpoint ) {
 			return;
 		}
@@ -331,7 +333,7 @@
 	 * @param {Object} data      Optional event fields.
 	 * @return {void}
 	 */
-	function sendUpsellTrack( eventType, data ) {
+	const sendUpsellTrack = ( eventType, data ) => {
 		if ( ! upsells || ! upsells.trackEndpoint || ! tracking || ! tracking.nonce ) {
 			return;
 		}
@@ -385,7 +387,7 @@
 	 *                          object, or null on any failure.
 	 * @return {void}
 	 */
-	function fetchUpsells( missionId, done ) {
+	const fetchUpsells = ( missionId, done ) => {
 		var request = new XMLHttpRequest();
 		var separator = upsells.endpoint.indexOf( '?' ) >= 0 ? '&' : '?';
 		var url = upsells.endpoint + separator
@@ -396,20 +398,20 @@
 		request.open( 'GET', url, true );
 		request.timeout = 10000;
 
-		request.onload = function () {
+		request.onload = () => {
 			if ( request.status < 200 || request.status >= 300 ) {
 				done( null );
 				return;
 			}
 
-			safe( function () {
+			safe( () => {
 				var payload = JSON.parse( request.responseText );
 				done( payload && payload.data ? payload.data : null );
 			} );
 		};
 
-		request.onerror = function () { done( null ); };
-		request.ontimeout = function () { done( null ); };
+		request.onerror = () => { done( null ); };
+		request.ontimeout = () => { done( null ); };
 		request.send();
 	}
 
@@ -422,7 +424,7 @@
 	 * @param {Array} missions Progress mission entries.
 	 * @return {number}
 	 */
-	function cartValue( missions ) {
+	const cartValue = ( missions ) => {
 		if ( ! missions ) {
 			return 0;
 		}
@@ -446,7 +448,7 @@
 	 * @param {Object} data Progress payload data.
 	 * @return {void}
 	 */
-	function trackMissions( data ) {
+	const trackMissions = ( data ) => {
 		var missions = ( data && data.missions ) || [];
 		var value = cartValue( missions );
 
@@ -533,7 +535,7 @@
 	 * @param {string} currency ISO code.
 	 * @return {string}
 	 */
-	function formatMoney( value, currency ) {
+	const formatMoney = ( value, currency ) => {
 		try {
 			return new Intl.NumberFormat( uiLocale, {
 				style: 'currency',
@@ -555,7 +557,7 @@
 	 * @param {Object} item Catalog item.
 	 * @return {string}
 	 */
-	function formatProductPrice( item ) {
+	const formatProductPrice = ( item ) => {
 		if ( item && item.price !== null && item.price !== undefined && item.price !== '' ) {
 			return formatMoney( item.price, cfg.currency );
 		}
@@ -572,7 +574,7 @@
 	 *
 	 * @return {boolean}
 	 */
-	function mobileHidden() {
+	const mobileHidden = () => {
 		if ( ! cfg || cfg.mobile !== 'hide' ) {
 			return false;
 		}
@@ -597,13 +599,13 @@
 	 * @param {Object} data Progress payload data.
 	 * @return {string}
 	 */
-	function payloadFingerprint( data ) {
+	const payloadFingerprint = ( data ) => {
 		var missions = ( data && data.missions ) || [];
 		var parts = [];
 
 		for ( var i = 0; i < missions.length; i++ ) {
 			var mission = missions[ i ] || {};
-			var suggestionIds = ( mission.suggestions || [] ).map( function ( suggestion ) {
+			var suggestionIds = ( mission.suggestions || [] ).map( ( suggestion ) => {
 				return String( suggestion.id || 0 ) + ':' + String( suggestion.name || '' );
 			} ).join( ',' );
 
@@ -639,7 +641,7 @@
 	 * @param {number} value Number.
 	 * @return {string}
 	 */
-	function formatNumber( value ) {
+	const formatNumber = ( value ) => {
 		try {
 			return new Intl.NumberFormat( uiLocale ).format( Number( value ) || 0 );
 		} catch ( error ) {
@@ -654,7 +656,7 @@
 	 * @param {string} fallback Fallback text.
 	 * @return {string}
 	 */
-	function uiLabel( key, fallback ) {
+	const uiLabel = ( key, fallback ) => {
 		return ( cfg.labels && cfg.labels[ key ] ) ? String( cfg.labels[ key ] ) : String( fallback );
 	}
 
@@ -664,7 +666,7 @@
 	 * @param {string} end ISO local-time timestamp.
 	 * @return {string}
 	 */
-	function countdownText( end ) {
+	const countdownText = ( end ) => {
 		var ms = Date.parse( String( end || '' ) ) - Date.now();
 
 		if ( isNaN( ms ) ) {
@@ -681,7 +683,7 @@
 		var minutes = Math.floor( ( total % 3600 ) / 60 );
 		var seconds = total % 60;
 
-		function pad2( n ) {
+		const pad2 = ( n ) => {
 			return n < 10 ? '0' + n : '' + n;
 		}
 
@@ -700,7 +702,7 @@
 	 * @param {Object} entry Mission or campaign group with countdown_end.
 	 * @return {HTMLElement|null}
 	 */
-	function countdownPanel( entry ) {
+	const countdownPanel = ( entry ) => {
 		if ( ! entry || ! entry.countdown_end || cfg.countdown === false ) {
 			return null;
 		}
@@ -724,7 +726,7 @@
 	 * @param {string} url Candidate URL.
 	 * @return {boolean}
 	 */
-	function isSafeUrl( url ) {
+	const isSafeUrl = ( url ) => {
 		var value = String( url || '' ).trim();
 
 		if ( ! value ) {
@@ -744,7 +746,7 @@
 	 * @param {Array} missions Progress mission entries.
 	 * @return {Object|null}
 	 */
-	function featuredMission( missions ) {
+	const featuredMission = ( missions ) => {
 		if ( ! missions || ! missions.length ) {
 			return null;
 		}
@@ -768,7 +770,7 @@
 	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement}
 	 */
-	function progressBar( mission ) {
+	const progressBar = ( mission ) => {
 		var track = el( 'div', 'faracart-progress' );
 		var fill = el( 'div', 'faracart-progress__fill' );
 		var percent = Math.max( 0, Math.min( 100, Number( mission.percentage ) || 0 ) );
@@ -790,7 +792,7 @@
 	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement}
 	 */
-	function missionMessage( mission ) {
+	const missionMessage = ( mission ) => {
 		return el( 'p', 'faracart-message', String( mission.message || '' ) );
 	}
 
@@ -804,7 +806,7 @@
 	 * @param {Object} mission Progress mission entry.
 	 * @return {boolean}
 	 */
-	function rewardBlocked( mission ) {
+	const rewardBlocked = ( mission ) => {
 		return !!( mission.conflict && mission.conflict.resolved === false );
 	}
 
@@ -814,7 +816,7 @@
 	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement|null}
 	 */
-	function rewardStatus( mission ) {
+	const rewardStatus = ( mission ) => {
 		var reward = mission.reward || null;
 
 		if ( ! reward || ! reward.type ) {
@@ -849,7 +851,7 @@
 	 * @param {Object} item Recommendation item.
 	 * @return {string} 'suggestion' | 'upsell' | 'both' | ''.
 	 */
-	function recommendationSource( item ) {
+	const recommendationSource = ( item ) => {
 		var src = String( ( item && item.source ) || '' );
 
 		if ( src === 'suggestion' || src === 'both' ) {
@@ -869,7 +871,7 @@
 	 * @param {string} fallback Fallback text.
 	 * @return {string}
 	 */
-	function upsellLabel( key, fallback ) {
+	const upsellLabel = ( key, fallback ) => {
 		return ( upsells && upsells.labels && upsells.labels[ key ] )
 			? String( upsells.labels[ key ] )
 			: String( fallback );
@@ -887,7 +889,7 @@
 	 * @param {Object} mission The mission the ranking belongs to.
 	 * @return {HTMLElement}
 	 */
-	function upsellRow( item, mission ) {
+	const upsellRow = ( item, mission ) => {
 		var row = el( 'div', 'faracart-upsell' );
 
 		row.setAttribute( 'data-faracart-upsell-product', String( item.product_id || item.id || 0 ) );
@@ -945,7 +947,7 @@
 	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement|null}
 	 */
-	function upsellPanel( mission ) {
+	const upsellPanel = ( mission ) => {
 		var missionId = String( mission.mission_id || 0 );
 
 		if ( ! missionId ) {
@@ -980,7 +982,7 @@
 		var cacheKey = missionId + ':' + Math.round( remaining );
 		var cached = upsellRankCache[ cacheKey ] || null;
 
-		function renderRows( rows ) {
+		const renderRows = ( rows ) => {
 			list.replaceChildren();
 
 			if ( ! rows.length ) {
@@ -1027,7 +1029,7 @@
 			return panel;
 		}
 
-		function fill( payload ) {
+		const fill = ( payload ) => {
 			if ( ! payload ) {
 				// Network/parse failure: drop the panel entirely — never a
 				// broken half-rendered widget.
@@ -1049,10 +1051,10 @@
 		// Loading state: a subtle placeholder; the fetch fills the list.
 		list.appendChild( el( 'div', 'faracart-upsells__loading', '…' ) );
 
-		fetchUpsells( missionId, function ( payload ) {
+		fetchUpsells( missionId, ( payload ) => {
 			upsellRankCache[ cacheKey ] = payload;
 
-			safe( function () {
+			safe( () => {
 				// The widget re-rendered while the fetch was in flight —
 				// this panel is detached; the fresh one will fetch itself.
 				if ( ! list.isConnected ) {
@@ -1087,7 +1089,7 @@
 	 * @param {HTMLElement} button The clicked add button.
 	 * @return {void}
 	 */
-	function upsellAdd( button ) {
+	const upsellAdd = ( button ) => {
 		// The unified upsell rows AND the template-4 recommend rows share
 		// the same data attributes, so one handler serves both.
 		var row = button.closest ? button.closest( '.faracart-upsell, .faracart-recommend' ) : null;
@@ -1127,7 +1129,7 @@
 			ajaxUrl = String( params.wc_ajax_url ).replace( /%%endpoint%%/g, 'add_to_cart' );
 		}
 
-		function success() {
+		const success = () => {
 			button.textContent = upsellLabel( 'added', 'Added' );
 			button.disabled = true;
 
@@ -1146,12 +1148,12 @@
 			emitCartChanged();
 		}
 
-		function restore() {
+		const restore = () => {
 			button.textContent = upsellLabel( 'add', 'Add to cart' );
 			button.disabled = false;
 		}
 
-		function go( url ) {
+		const go = ( url ) => {
 			if ( url && isSafeUrl( url ) ) {
 				window.location.href = url;
 			}
@@ -1173,12 +1175,12 @@
 		request.open( 'POST', ajaxUrl, true );
 		request.setRequestHeader( 'Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8' );
 
-		request.onload = function () {
+		request.onload = () => {
 			var ok = request.status >= 200 && request.status < 300;
 			var errored = false;
 
 			if ( ok ) {
-				safe( function () {
+				safe( () => {
 					var parsed = JSON.parse( request.responseText );
 
 					if ( parsed && ( parsed.error || parsed.result === 'error' ) ) {
@@ -1197,8 +1199,8 @@
 			}
 		};
 
-		request.onerror = function () { restore(); go( permalink ); };
-		request.ontimeout = function () { restore(); go( permalink ); };
+		request.onerror = () => { restore(); go( permalink ); };
+		request.ontimeout = () => { restore(); go( permalink ); };
 		request.send( 'product_id=' + encodeURIComponent( productId ) + '&quantity=1' );
 	}
 
@@ -1213,7 +1215,7 @@
 	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement|null}
 	 */
-	function giftPicker( mission ) {
+	const giftPicker = ( mission ) => {
 		var reward = mission.reward || null;
 
 		if ( ! reward || reward.type !== 'free_gift' || ! reward.gift || ! reward.gift.length ) {
@@ -1275,7 +1277,7 @@
 	 * @param {HTMLElement} button The gift button clicked.
 	 * @return {void}
 	 */
-	function claimGift( button ) {
+	const claimGift = ( button ) => {
 		var missionId = button.getAttribute( 'data-faracart-gift-mission' ) || '0';
 		var productId = button.getAttribute( 'data-faracart-gift-product' ) || '0';
 
@@ -1305,7 +1307,7 @@
 		request.setRequestHeader( 'Content-Type', 'application/json' );
 		request.timeout = 10000;
 
-		request.onload = function () {
+		request.onload = () => {
 			if ( request.status >= 200 && request.status < 300 ) {
 				emitCartChanged();
 				return;
@@ -1317,11 +1319,11 @@
 			button.classList.remove( 'faracart-gift-picker__button--pending' );
 		};
 
-		request.onerror = function () {
+		request.onerror = () => {
 			button.disabled = false;
 			button.classList.remove( 'faracart-gift-picker__button--pending' );
 		};
-		request.ontimeout = function () {
+		request.ontimeout = () => {
 			button.disabled = false;
 			button.classList.remove( 'faracart-gift-picker__button--pending' );
 		};
@@ -1336,7 +1338,7 @@
 	 * @param {Object}      mission     Mission this card renders (may be null).
 	 * @return {string}
 	 */
-	function widgetTemplate( container, mission ) {
+	const widgetTemplate = ( container, mission ) => {
 		var override = container.getAttribute( 'data-faracart-template' );
 		var names = [ 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6', 'milestone_chain', 'campaign_progress' ];
 
@@ -1371,7 +1373,7 @@
 	 * @param {Object}      settings Resolved template settings.
 	 * @return {void}
 	 */
-	function applyTemplateSettings( node, settings ) {
+	const applyTemplateSettings = ( node, settings ) => {
 		if ( ! settings || typeof settings !== 'object' ) {
 			return;
 		}
@@ -1431,7 +1433,7 @@
 	 * @param {string} css Custom CSS.
 	 * @return {void}
 	 */
-	function applyTemplateCss( css ) {
+	const applyTemplateCss = ( css ) => {
 		if ( ! css ) {
 			return;
 		}
@@ -1454,7 +1456,7 @@
 	 * @param {string} value Input string.
 	 * @return {number}
 	 */
-	function hashString( value ) {
+	const hashString = ( value ) => {
 		var hash = 5381;
 
 		for ( var i = 0; i < value.length; i++ ) {
@@ -1470,7 +1472,7 @@
 	 * @param {number} value Raw progress value.
 	 * @return {number}
 	 */
-	function clampPercent( value ) {
+	const clampPercent = ( value ) => {
 		return Math.max( 0, Math.min( 100, Number( value ) || 0 ) );
 	}
 
@@ -1482,7 +1484,7 @@
 	 * @param {string} fallback Fallback glyph.
 	 * @return {HTMLElement}
 	 */
-	function tplIcon( mission, fallback ) {
+	const tplIcon = ( mission, fallback ) => {
 		var icon = String( mission.icon || '' ).trim();
 
 		return el( 'span', 'faracart-tpl-icon', icon || fallback );
@@ -1498,7 +1500,7 @@
 	 * @param {string} klass    Extra class ('' = none).
 	 * @return {HTMLElement|null}
 	 */
-	function tplCta( mission, currency, label, klass ) {
+	const tplCta = ( mission, currency, label, klass ) => {
 		var items = ( mission.suggestions && mission.suggestions.length ) ? mission.suggestions : [];
 
 		if ( ! items.length ) {
@@ -1524,7 +1526,7 @@
 	 * @param {string} currency ISO currency code.
 	 * @return {string}
 	 */
-	function remainingLabel( mission, currency ) {
+	const remainingLabel = ( mission, currency ) => {
 		var amount = mission.is_money
 			? formatMoney( mission.remaining, currency )
 			: formatNumber( mission.remaining );
@@ -1539,7 +1541,7 @@
 	 * @param {string} currency ISO currency code.
 	 * @return {string}
 	 */
-	function addMoreLabel( mission, currency ) {
+	const addMoreLabel = ( mission, currency ) => {
 		var amount = mission.is_money
 			? formatMoney( mission.remaining, currency )
 			: formatNumber( mission.remaining );
@@ -1561,7 +1563,7 @@
 	 * @param {string} inner      'percent' | 'check' | ''.
 	 * @return {HTMLElement}
 	 */
-	function circularSvg( percent, size, stroke, trackColor, accent, inner ) {
+	const circularSvg = ( percent, size, stroke, trackColor, accent, inner ) => {
 		var radius = ( size - stroke ) / 2;
 		var circumference = 2 * Math.PI * radius;
 		var NS = 'http://www.w3.org/2000/svg';
@@ -1627,7 +1629,7 @@
 	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement}
 	 */
-	function recommendRow( item, mission ) {
+	const recommendRow = ( item, mission ) => {
 		var row = el( 'div', 'faracart-recommend' );
 		var productId = String( item.id || item.product_id || 0 );
 
@@ -1678,7 +1680,7 @@
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t1Panel( mission, currency ) {
+	const t1Panel = ( mission, currency ) => {
 		var settings = mission.template_settings || {};
 		var percent = clampPercent( mission.percentage );
 		var accent = settings.accent || '#f97316';
@@ -1768,7 +1770,7 @@
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t2Panel( mission, currency ) {
+	const t2Panel = ( mission, currency ) => {
 		var settings = mission.template_settings || {};
 		var panel = el( 'div', 'faracart-t2' );
 
@@ -1814,7 +1816,7 @@
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t3Panel( mission, currency ) {
+	const t3Panel = ( mission, currency ) => {
 		var settings = mission.template_settings || {};
 		var percent = clampPercent( mission.percentage );
 		var accent = settings.accent || '#6366f1';
@@ -1885,7 +1887,7 @@
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t4Panel( mission, currency ) {
+	const t4Panel = ( mission, currency ) => {
 		var settings = mission.template_settings || {};
 		var accent = settings.accent || '#2563eb';
 		var headerBg = settings.headerBg || accent;
@@ -1941,7 +1943,7 @@
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t5Panel( mission, currency ) {
+	const t5Panel = ( mission, currency ) => {
 		var settings = mission.template_settings || {};
 		var accent = settings.accent || '#4ade80';
 		var panel = el( 'div', 'faracart-t5' );
@@ -1987,7 +1989,7 @@
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function t6Panel( mission, currency ) {
+	const t6Panel = ( mission, currency ) => {
 		var settings = mission.template_settings || {};
 		var percent = clampPercent( mission.percentage );
 		var gold = settings.accent || '#d4af37';
@@ -2066,7 +2068,7 @@
 	 * @param {string}  template Template variant.
 	 * @return {HTMLElement}
 	 */
-	function templateBody( mission, currency, template, showBar ) {
+	const templateBody = ( mission, currency, template, showBar ) => {
 		switch ( template ) {
 			case 'template-1':
 				return t1Panel( mission, currency );
@@ -2099,7 +2101,7 @@
 	 * @param {string} template Template variant.
 	 * @return {HTMLElement}
 	 */
-	function missionContainer( mission, currency, variant, template ) {
+	const missionContainer = ( mission, currency, variant, template ) => {
 		// The Phase 13 message state (inactive / unavailable / progressing /
 		// nearly_complete / completed / reward_activated) lands as a modifier
 		// class so the stylesheet can highlight near-completion etc.
@@ -2189,7 +2191,7 @@
 	 * @param {Object}      mission Progress mission entry.
 	 * @return {void}
 	 */
-	function celebrate( card, mission ) {
+	const celebrate = ( card, mission ) => {
 		celebrated[ String( mission.mission_id || 0 ) ] = true;
 
 		card.classList.add( 'faracart-card--celebrate' );
@@ -2208,7 +2210,7 @@
 
 		card.appendChild( confetti );
 
-		window.setTimeout( function () {
+		window.setTimeout( () => {
 			try {
 				confetti.remove();
 			} catch ( error ) {}
@@ -2229,7 +2231,7 @@
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function campaignChain( missions, campaign, currency ) {
+	const campaignChain = ( missions, campaign, currency ) => {
 		var settings = campaign.settings || {};
 		var panel = el( 'div', 'faracart-chain faracart-template--' + campaign.template );
 
@@ -2303,7 +2305,7 @@
 	 * @param {string} currency ISO currency code.
 	 * @return {HTMLElement}
 	 */
-	function campaignProgress( missions, campaign, currency ) {
+	const campaignProgress = ( missions, campaign, currency ) => {
 		var settings = campaign.settings || {};
 		var panel = el( 'div', 'faracart-campaign faracart-template--' + campaign.template );
 
@@ -2388,7 +2390,7 @@
 	 * @param {Object}      data      Progress payload data.
 	 * @return {void}
 	 */
-	function renderWidget( container, data ) {
+	const renderWidget = ( container, data ) => {
 		if ( ! container ) {
 			return;
 		}
@@ -2503,7 +2505,7 @@
 	 *
 	 * @return {boolean}
 	 */
-	function isMobileViewport() {
+	const isMobileViewport = () => {
 		if ( ! window.matchMedia ) {
 			return false;
 		}
@@ -2522,7 +2524,7 @@
 	 *
 	 * @return {Object}
 	 */
-	function floatingConfig() {
+	const floatingConfig = () => {
 		var floating = cfg.floating || {};
 		var device = isMobileViewport() ? 'mobile' : 'desktop';
 		var position = ( device === 'mobile' && ! floating.mobileUseDesktop )
@@ -2554,7 +2556,7 @@
 	 */
 	var floatingInsetCache = null;
 
-	function floatingSafeInsets() {
+	const floatingSafeInsets = () => {
 		if ( floatingInsetCache ) {
 			return floatingInsetCache;
 		}
@@ -2566,7 +2568,7 @@
 			return floatingInsetCache;
 		}
 
-		function readInset( side ) {
+		const readInset = ( side ) => {
 			try {
 				var probe = el( 'div', '' );
 				probe.setAttribute( 'style', 'position:fixed;visibility:hidden;pointer-events:none;left:0;top:0;padding-' + side + ':env(safe-area-inset-' + side + ');' );
@@ -2604,7 +2606,7 @@
 	 * @param {Object}      safeInsets  { top, right, bottom, left } px.
 	 * @return {void}
 	 */
-	function applyFloatingPosition( container, position, buttonSize, safeInsets ) {
+	const applyFloatingPosition = ( container, position, buttonSize, safeInsets ) => {
 		var horizontal = floatingButtonSide( position );
 		var vertical = floatingVerticalAxis( position );
 		var offsetX = Math.max( 0, Number( ( position && position.offset_x ) || 0 ) );
@@ -2664,7 +2666,7 @@
 	 * @param {Object} position { preset, offset_x, offset_y }.
 	 * @return {string} 'left' | 'right' | 'up' | 'down'.
 	 */
-	function floatingDrawerDirection( position ) {
+	const floatingDrawerDirection = ( position ) => {
 		var preset = ( position && position.preset ) || 'bottom-right';
 
 		if ( preset === 'top-left' || preset === 'top-right' ) {
@@ -2691,7 +2693,7 @@
 	 * @param {Object} position { preset, offset_x, offset_y }.
 	 * @return {string} 'left' | 'right'.
 	 */
-	function floatingButtonSide( position ) {
+	const floatingButtonSide = ( position ) => {
 		var preset = ( position && position.preset ) || 'bottom-right';
 
 		return ( preset === 'top-left' || preset === 'center-left' || preset === 'bottom-left' )
@@ -2705,7 +2707,7 @@
 	 * @param {Object} position { preset, offset_x, offset_y }.
 	 * @return {string}
 	 */
-	function floatingVerticalAxis( position ) {
+	const floatingVerticalAxis = ( position ) => {
 		var preset = ( position && position.preset ) || 'bottom-right';
 
 		if ( preset === 'top-left' || preset === 'top-right' ) {
@@ -2737,7 +2739,7 @@
 	 * @param {string}      buttonSide  'left' | 'right' (the preset's side).
 	 * @return {void}
 	 */
-	function constrainFloatingDrawer( drawer, buttonRect, direction, buttonSide ) {
+	const constrainFloatingDrawer = ( drawer, buttonRect, direction, buttonSide ) => {
 		var vw = window.innerWidth || document.documentElement.clientWidth || 0;
 		var vh = window.innerHeight || document.documentElement.clientHeight || 0;
 		var margin = 12;
@@ -2804,7 +2806,7 @@
 	 * @param {number} margin  Minimum edge gap (px).
 	 * @return {number}
 	 */
-	function clampViewport( left, width, vw, margin ) {
+	const clampViewport = ( left, width, vw, margin ) => {
 		var min = margin;
 		var max = Math.max( margin, vw - width - margin );
 
@@ -2822,7 +2824,7 @@
 	 * @param {boolean} open Whether the drawer should open.
 	 * @return {void}
 	 */
-	function setFloatingOpen( open ) {
+	const setFloatingOpen = ( open ) => {
 		var container = document.getElementById( FLOATING_ID );
 
 		if ( ! container ) {
@@ -2841,7 +2843,7 @@
 			// Remember for the resize handler (the button can move with
 			// scroll/resize while the drawer is open).
 			floatingDirection = direction;
-			floatingButtonSide = buttonSide;
+			floatingButtonSideState = buttonSide;
 
 			container.classList.remove( 'faracart-floating--dir-left', 'faracart-floating--dir-right', 'faracart-floating--dir-up', 'faracart-floating--dir-down' );
 			container.classList.add( 'faracart-floating--dir-' + direction );
@@ -2866,7 +2868,7 @@
 	 * @param {Object} mission Progress mission entry.
 	 * @return {string}
 	 */
-	function floatingTemplate( mission ) {
+	const floatingTemplate = ( mission ) => {
 		if ( mission && mission.template && FLOATING_TEMPLATES.indexOf( mission.template ) !== -1 ) {
 			return mission.template;
 		}
@@ -2889,7 +2891,7 @@
 	 * @param {Object} data Progress payload data.
 	 * @return {void}
 	 */
-	function renderFloatingDrawer( data ) {
+	const renderFloatingDrawer = ( data ) => {
 		var container = document.getElementById( FLOATING_ID );
 
 		if ( ! container ) {
@@ -2948,7 +2950,7 @@
 	 * @param {HTMLElement} container The #faracart-floating element.
 	 * @return {void}
 	 */
-	function buildFloating( container ) {
+	const buildFloating = ( container ) => {
 		if ( floatingBuilt ) {
 			return;
 		}
@@ -2968,23 +2970,23 @@
 		close.textContent = '\u00D7';
 		drawer.appendChild( close );
 
-		button.addEventListener( 'click', function () {
+		button.addEventListener( 'click', () => {
 			setFloatingOpen( ! floatingOpen );
 		} );
 
-		close.addEventListener( 'click', function () {
+		close.addEventListener( 'click', () => {
 			setFloatingOpen( false );
 		} );
 
 		// Close on outside click and Escape (never while the shopper is
 		// interacting inside the drawer).
-		document.addEventListener( 'click', function ( event ) {
+		document.addEventListener( 'click', ( event ) => {
 			if ( floatingOpen && container && ! container.contains( event.target ) ) {
 				setFloatingOpen( false );
 			}
 		} );
 
-		document.addEventListener( 'keydown', function ( event ) {
+		document.addEventListener( 'keydown', ( event ) => {
 			if ( floatingOpen && ( event.key === 'Escape' || event.key === 'Esc' ) ) {
 				setFloatingOpen( false );
 			}
@@ -3006,7 +3008,7 @@
 	 * @param {Object} data Progress payload data.
 	 * @return {void}
 	 */
-	function renderFloating( data ) {
+	const renderFloating = ( data ) => {
 		var container = document.getElementById( FLOATING_ID );
 
 		if ( ! container ) {
@@ -3077,25 +3079,25 @@
 	 *
 	 * @return {void}
 	 */
-	function bindFloatingResize() {
+	const bindFloatingResize = () => {
 		if ( ! cfg.floating || ! cfg.floating.enabled ) {
 			return;
 		}
 
 		var timer = null;
 
-		window.addEventListener( 'resize', function () {
+		window.addEventListener( 'resize', () => {
 			if ( timer ) {
 				window.clearTimeout( timer );
 			}
 
-			timer = window.setTimeout( function () {
+			timer = window.setTimeout( () => {
 			timer = null;
 			// Orientation/rotation changes safe-area insets; the next
 			// render re-measures them.
 			floatingInsetCache = null;
 
-			safe( function () {
+			safe( () => {
 				// Re-constrain an open drawer: the viewport (and possibly the
 				// device position) changed, so the panel must stay on screen
 				// with its scroll area reachable. The direction/side come
@@ -3108,7 +3110,7 @@
 						var button = container.querySelector( '.faracart-floating__button' );
 
 						if ( drawer && button ) {
-							constrainFloatingDrawer( drawer, button.getBoundingClientRect(), floatingDirection, floatingButtonSide );
+							constrainFloatingDrawer( drawer, button.getBoundingClientRect(), floatingDirection, floatingButtonSideState );
 						}
 					}
 				}
@@ -3140,7 +3142,7 @@
 	 * @param {boolean} on Whether the widgets are refreshing.
 	 * @return {void}
 	 */
-	function setUpdating( on ) {
+	const setUpdating = ( on ) => {
 		var containers = document.querySelectorAll( WIDGET_SELECTOR );
 
 		for ( var i = 0; i < containers.length; i++ ) {
@@ -3158,16 +3160,16 @@
 	 *                                     (cart-change refreshes).
 	 * @return {void}
 	 */
-	function refresh( options ) {
-		safe( function () {
+	const refresh = ( options ) => {
+		safe( () => {
 			options = options || {};
 
 			if ( options.updating ) {
 				setUpdating( true );
 			}
 
-			fetchProgress( function ( data ) {
-				safe( function () {
+			fetchProgress( ( data ) => {
+				safe( () => {
 					var containers = document.querySelectorAll( WIDGET_SELECTOR );
 					var fingerprint = payloadFingerprint( data );
 
@@ -3190,8 +3192,8 @@
 
 					trackMissions( data );
 				} );
-			}, function () {
-				safe( function () {
+			}, () => {
+				safe( () => {
 					setUpdating( false );
 				} );
 			} );
@@ -3223,11 +3225,11 @@
 	 *
 	 * @return {void}
 	 */
-	function refreshAfterCartChange() {
+	const refreshAfterCartChange = () => {
 		if ( cartRefreshTimer ) {
 			window.clearTimeout( cartRefreshTimer );
 		}
-		cartRefreshTimer = window.setTimeout( function () {
+		cartRefreshTimer = window.setTimeout( () => {
 			cartRefreshTimer = null;
 			refresh( { updating: true } );
 		}, 150 );
@@ -3235,7 +3237,7 @@
 		if ( cartFollowUpTimer ) {
 			window.clearTimeout( cartFollowUpTimer );
 		}
-		cartFollowUpTimer = window.setTimeout( function () {
+		cartFollowUpTimer = window.setTimeout( () => {
 			cartFollowUpTimer = null;
 			refresh();
 		}, 700 );
@@ -3254,7 +3256,7 @@
 	 *
 	 * @return {void}
 	 */
-	function emitCartChanged() {
+	const emitCartChanged = () => {
 		try {
 			document.body.dispatchEvent( new CustomEvent( 'faracart:cart-changed', { bubbles: true } ) );
 		} catch ( error ) {
@@ -3267,7 +3269,7 @@
 	 *
 	 * @return {void}
 	 */
-	function bindCartChangedBridge() {
+	const bindCartChangedBridge = () => {
 		document.body.addEventListener( 'faracart:cart-changed', refreshAfterCartChange );
 	}
 
@@ -3281,7 +3283,7 @@
 	 *
 	 * @return {void}
 	 */
-	function bindCartEvents() {
+	const bindCartEvents = () => {
 		var events = [
 			'added_to_cart',
 			'removed_from_cart',
@@ -3298,7 +3300,7 @@
 		];
 
 		if ( window.jQuery ) {
-			safe( function () {
+			safe( () => {
 				window.jQuery( document.body ).on( events.join( ' ' ), emitCartChanged );
 			} );
 		} else {
@@ -3325,7 +3327,7 @@
 	 *
 	 * @return {void}
 	 */
-	function bindBlockStore() {
+	const bindBlockStore = () => {
 		// The blocks package dispatches these native DOM events on
 		// document.body for block-driven add/remove actions.
 		document.body.addEventListener( 'wc-blocks_added_to_cart', emitCartChanged );
@@ -3339,7 +3341,7 @@
 
 		// A compact fingerprint of the cart store state: the server-computed
 		// cartHash when available, otherwise item keys + quantities.
-		function cartFingerprint() {
+		const cartFingerprint = () => {
 			try {
 				var store = wpData.select( 'wc/store/cart' );
 
@@ -3379,8 +3381,8 @@
 		// version; the fingerprint guard keeps unrelated store changes
 		// silent. (Newer versions accept a store-name second argument, but
 		// the global form degrades safely everywhere.)
-		wpData.subscribe( function () {
-			safe( function () {
+		wpData.subscribe( () => {
+			safe( () => {
 				var fingerprint = cartFingerprint();
 
 				if ( fingerprint === null || fingerprint === lastCartFingerprint ) {
@@ -3408,11 +3410,11 @@
 	 *
 	 * @return {void}
 	 */
-	function bindUpsellPanel() {
+	const bindUpsellPanel = () => {
 		// Bound unconditionally: the template-4 recommend add buttons must
 		// work even when the smart-upsell ranking panel is disabled (they
 		// add suggestion products through the same public wc-ajax surface).
-		document.body.addEventListener( 'click', function ( event ) {
+		document.body.addEventListener( 'click', ( event ) => {
 			var target = event.target;
 
 			while ( target && target !== document.body ) {
@@ -3457,12 +3459,12 @@
 	 *
 	 * @return {void}
 	 */
-	function bindGiftPicker() {
+	const bindGiftPicker = () => {
 		if ( ! cfg.giftEndpoint || ! cfg.giftNonce ) {
 			return;
 		}
 
-		document.body.addEventListener( 'click', function ( event ) {
+		document.body.addEventListener( 'click', ( event ) => {
 			var target = event.target;
 
 			while ( target && target !== document.body ) {
@@ -3483,9 +3485,9 @@
 	 *
 	 * @return {void}
 	 */
-	function bindCountdownTicker() {
-		window.setInterval( function () {
-			safe( function () {
+	const bindCountdownTicker = () => {
+		window.setInterval( () => {
+			safe( () => {
 				var nodes = document.querySelectorAll( '.faracart-countdown__time' );
 
 				for ( var i = 0; i < nodes.length; i++ ) {
@@ -3504,7 +3506,7 @@
 	 *
 	 * @return {void}
 	 */
-	function init() {
+	const init = () => {
 		bindCartChangedBridge();
 		bindCartEvents();
 		bindBlockStore();
@@ -3528,7 +3530,7 @@
 
 	// Run once the DOM is ready (or immediately if already interactive).
 	if ( 'loading' === document.readyState ) {
-		document.addEventListener( 'DOMContentLoaded', function () {
+		document.addEventListener( 'DOMContentLoaded', () => {
 			safe( init );
 		} );
 	} else {
