@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-18T07:54:19Z\n"
+"POT-Creation-Date: 2026-08-18T09:03:42Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -179,7 +179,7 @@ msgstr ""
 msgid "A connected ladder of the campaign milestones — dots, targets and rewards — with an overall progress bar."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1057
+#: admin-app/src/routes/Settings.tsx:978
 msgid "A custom glyph/emoji shown inside the button (leave empty for the default cart icon)."
 msgstr ""
 
@@ -187,7 +187,7 @@ msgstr ""
 msgid "A deterministic coupon is created per customer."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:917
+#: admin-app/src/routes/Settings.tsx:819
 msgid "A floating missions/campaigns button with a progress drawer — always reachable while shopping."
 msgstr ""
 
@@ -283,7 +283,7 @@ msgstr ""
 msgid "Add costs"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:730
+#: admin-app/src/routes/Settings.tsx:1022
 msgid "Add line taxes to the subtotal-style money bases."
 msgstr ""
 
@@ -358,8 +358,8 @@ msgstr ""
 
 #: admin-app/src/routes/MissionPerformance.tsx:602
 #: admin-app/src/routes/RevenueOverview.tsx:440
-#: admin-app/src/routes/Settings.tsx:531
-#: admin-app/src/routes/Settings.tsx:832
+#: admin-app/src/routes/Settings.tsx:586
+#: admin-app/src/routes/Settings.tsx:1133
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:147
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:153
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:166
@@ -457,7 +457,7 @@ msgstr ""
 msgid "Analysis is based on a moderate number of customer sessions."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:795
+#: admin-app/src/routes/Settings.tsx:1090
 msgid "Analytics tracking"
 msgstr ""
 
@@ -469,7 +469,7 @@ msgstr ""
 msgid "Analyzing: %1$s – %2$s"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:677
+#: admin-app/src/routes/Settings.tsx:767
 msgid "Animate progress"
 msgstr ""
 
@@ -484,7 +484,7 @@ msgstr ""
 msgid "Animate progress updates"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1042
+#: admin-app/src/routes/Settings.tsx:963
 msgid "Animate the button and drawer"
 msgstr ""
 
@@ -499,7 +499,7 @@ msgstr ""
 msgid "Appearance saved."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:879
+#: admin-app/src/routes/Settings.tsx:1183
 msgid "Appended to the storefront widget stylesheet (tags are stripped)."
 msgstr ""
 
@@ -514,14 +514,15 @@ msgstr ""
 msgid "Appended to the widget styles. Applied only while this template renders."
 msgstr ""
 
+#: admin-app/src/components/wheel-picker/WheelDateField.tsx:115
 #: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:117
-#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:107
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:113
 #: admin-app/src/routes/MissionPerformance.tsx:323
 #: admin-app/src/routes/Recommendations.tsx:734
 msgid "Apply"
 msgstr ""
 
-#: admin-app/src/components/date-range/CustomRangePicker.tsx:77
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:68
 msgid "Apply range"
 msgstr ""
 
@@ -594,7 +595,7 @@ msgstr ""
 msgid "Attribution window"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:142
+#: admin-app/src/routes/Settings.tsx:147
 msgid "Auto (store currency)"
 msgstr ""
 
@@ -689,7 +690,7 @@ msgstr ""
 msgid "Bahman"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:819
+#: admin-app/src/routes/Settings.tsx:1114
 msgid "Balanced"
 msgstr ""
 
@@ -735,7 +736,7 @@ msgstr ""
 msgid "Best performer"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:598
+#: admin-app/src/routes/Settings.tsx:661
 msgid "Best reward only"
 msgstr ""
 
@@ -754,7 +755,7 @@ msgstr ""
 msgid "Border"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:657
+#: admin-app/src/routes/Settings.tsx:726
 msgid "Bottom"
 msgstr ""
 
@@ -796,11 +797,11 @@ msgstr ""
 msgid "Button color"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1056
+#: admin-app/src/routes/Settings.tsx:977
 msgid "Button icon"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1073
+#: admin-app/src/routes/Settings.tsx:994
 msgid "Button label / tooltip"
 msgstr ""
 
@@ -810,7 +811,7 @@ msgstr ""
 msgid "Button radius (px)"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1030
+#: admin-app/src/routes/Settings.tsx:946
 msgid "Button size (px)"
 msgstr ""
 
@@ -834,11 +835,11 @@ msgstr ""
 msgid "CTR"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:786
+#: admin-app/src/routes/Settings.tsx:1081
 msgid "Cache progress payloads"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:780
+#: admin-app/src/routes/Settings.tsx:1072
 msgid "Caching and what the storefront measures."
 msgstr ""
 
@@ -847,7 +848,7 @@ msgstr ""
 msgid "Calculate against"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:605
+#: admin-app/src/routes/Settings.tsx:668
 msgid "Calculation mode"
 msgstr ""
 
@@ -885,8 +886,9 @@ msgid "Campaigns bundle multiple missions into scheduled, prioritized milestones
 msgstr ""
 
 #: admin-app/src/components/ConfirmDialog.tsx:59
+#: admin-app/src/components/wheel-picker/WheelDateField.tsx:112
 #: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:114
-#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:104
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:110
 #: admin-app/src/routes/CampaignBuilder.tsx:288
 #: admin-app/src/routes/MissionBuilder.tsx:262
 msgid "Cancel"
@@ -904,7 +906,7 @@ msgstr ""
 msgid "Cart missions drive the storefront progress bars and rewards."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:158
+#: admin-app/src/routes/Settings.tsx:165
 msgid "Cart page"
 msgstr ""
 
@@ -918,7 +920,7 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:36
 #: admin-app/src/components/mission-builder/TargetFields.tsx:43
 #: admin-app/src/components/mission-builder/TargetFields.tsx:49
-#: admin-app/src/routes/Settings.tsx:621
+#: admin-app/src/routes/Settings.tsx:684
 msgid "Cart total (incl. tax & shipping)"
 msgstr ""
 
@@ -932,7 +934,7 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:705
+#: admin-app/src/routes/Settings.tsx:804
 msgid "Celebration animation"
 msgstr ""
 
@@ -944,11 +946,11 @@ msgstr ""
 msgid "Center right"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:820
+#: admin-app/src/routes/Settings.tsx:1117
 msgid "Cheapest first"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:160
+#: admin-app/src/routes/Settings.tsx:167
 msgid "Checkout"
 msgstr ""
 
@@ -960,7 +962,7 @@ msgstr ""
 msgid "Children are evaluated against the same cart. AND requires every child, OR completes at the best child."
 msgstr ""
 
-#: admin-app/src/components/date-range/CustomRangePicker.tsx:67
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:58
 msgid "Choose a start and end date."
 msgstr ""
 
@@ -972,12 +974,14 @@ msgstr ""
 msgid "Classic cotton t-shirt"
 msgstr ""
 
+#: admin-app/src/components/wheel-picker/WheelDateField.tsx:77
+#: admin-app/src/components/wheel-picker/WheelDateField.tsx:86
 #: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:79
 #: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:88
 #: admin-app/src/components/wheel-picker/WheelField.tsx:42
 #: admin-app/src/components/wheel-picker/WheelField.tsx:43
-#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:73
-#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:82
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:74
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:83
 msgid "Clear"
 msgstr ""
 
@@ -1000,7 +1004,7 @@ msgstr ""
 msgid "Collapse all"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:796
+#: admin-app/src/routes/Settings.tsx:1091
 msgid "Collect mission and suggestion events. Keep the missions running while turning event collection off."
 msgstr ""
 
@@ -1157,7 +1161,7 @@ msgstr ""
 msgid "Confirm"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:582
+#: admin-app/src/routes/Settings.tsx:645
 msgid "Conflict resolution"
 msgstr ""
 
@@ -1274,7 +1278,7 @@ msgstr ""
 msgid "Could not load the sales overview."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:499
+#: admin-app/src/routes/Settings.tsx:532
 msgid "Could not load the settings."
 msgstr ""
 
@@ -1290,7 +1294,7 @@ msgstr ""
 msgid "Could not save the settings. Please try again."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:696
+#: admin-app/src/routes/Settings.tsx:795
 msgid "Countdown timer"
 msgstr ""
 
@@ -1332,11 +1336,11 @@ msgstr ""
 msgid "Create your first Mission"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:590
+#: admin-app/src/routes/Settings.tsx:653
 msgid "Cumulative — all rewards stack"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:558
+#: admin-app/src/routes/Settings.tsx:612
 msgid "Currency"
 msgstr ""
 
@@ -1357,7 +1361,7 @@ msgstr ""
 msgid "Current target: %1$s"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:878
+#: admin-app/src/routes/Settings.tsx:1182
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:152
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:171
 #: includes/Templates/Mission/Template1.php:201
@@ -1443,6 +1447,10 @@ msgstr ""
 msgid "Data sufficiency"
 msgstr ""
 
+#: admin-app/src/components/wheel-picker/WheelDateField.tsx:102
+msgid "Date"
+msgstr ""
+
 #: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:104
 msgid "Date and time"
 msgstr ""
@@ -1467,11 +1475,11 @@ msgstr ""
 msgid "Day window starts"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:839
+#: admin-app/src/routes/Settings.tsx:1143
 msgid "Debug mode"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:833
+#: admin-app/src/routes/Settings.tsx:1134
 msgid "Debugging, logging and the developer surface."
 msgstr ""
 
@@ -1483,11 +1491,11 @@ msgstr ""
 msgid "Default (no campaign template)"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:568
+#: admin-app/src/routes/Settings.tsx:622
 msgid "Default mission behavior"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:606
+#: admin-app/src/routes/Settings.tsx:669
 msgid "Default money basis for missions that do not set their own."
 msgstr ""
 
@@ -1520,7 +1528,7 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:290
+#: admin-app/src/routes/Settings.tsx:312
 msgid "Desktop"
 msgstr ""
 
@@ -1528,7 +1536,7 @@ msgstr ""
 msgid "Detailed Activity"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:892
+#: admin-app/src/routes/Settings.tsx:1196
 msgid "Developer hooks"
 msgstr ""
 
@@ -1583,7 +1591,7 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:35
 #: admin-app/src/components/mission-builder/TargetFields.tsx:42
 #: admin-app/src/components/mission-builder/TargetFields.tsx:48
-#: admin-app/src/routes/Settings.tsx:617
+#: admin-app/src/routes/Settings.tsx:680
 msgid "Discounted subtotal"
 msgstr ""
 
@@ -1593,19 +1601,19 @@ msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:493
 #: admin-app/src/routes/MissionBuilder.tsx:430
-#: admin-app/src/routes/Settings.tsx:1017
+#: admin-app/src/routes/Settings.tsx:933
 msgid "Display"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:649
+#: admin-app/src/routes/Settings.tsx:718
 msgid "Display locations"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:938
+#: admin-app/src/routes/Settings.tsx:844
 msgid "Display the button on desktop screens."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:946
+#: admin-app/src/routes/Settings.tsx:855
 msgid "Display the button on mobile screens."
 msgstr ""
 
@@ -1613,11 +1621,11 @@ msgstr ""
 msgid "Distance"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:358
+#: admin-app/src/routes/Settings.tsx:386
 msgid "Distance from the chosen edge — or from the midline when the preset is centered (0–200)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:340
+#: admin-app/src/routes/Settings.tsx:363
 msgid "Distance from the chosen side (0–200)."
 msgstr ""
 
@@ -1704,11 +1712,11 @@ msgstr ""
 msgid "Enable"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:549
+#: admin-app/src/routes/Settings.tsx:603
 msgid "Enable FaraCart"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:926
+#: admin-app/src/routes/Settings.tsx:828
 msgid "Enable floating widget"
 msgstr ""
 
@@ -1915,7 +1923,7 @@ msgstr ""
 msgid "Finish today — your reward is waiting"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:594
+#: admin-app/src/routes/Settings.tsx:657
 msgid "First matching mission only"
 msgstr ""
 
@@ -1943,11 +1951,11 @@ msgstr ""
 msgid "Fixed discount"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:535
+#: admin-app/src/routes/Settings.tsx:571
 msgid "Floating"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:916
+#: admin-app/src/routes/Settings.tsx:818
 msgid "Floating widget"
 msgstr ""
 
@@ -1990,12 +1998,12 @@ msgstr ""
 msgid "From"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:523
-#: admin-app/src/routes/Settings.tsx:642
+#: admin-app/src/routes/Settings.tsx:566
+#: admin-app/src/routes/Settings.tsx:708
 msgid "Frontend"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:628
+#: admin-app/src/routes/Settings.tsx:694
 msgid "Full-screen dashboard"
 msgstr ""
 
@@ -2003,8 +2011,8 @@ msgstr ""
 msgid "Funnel"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:519
-#: admin-app/src/routes/Settings.tsx:542
+#: admin-app/src/routes/Settings.tsx:561
+#: admin-app/src/routes/Settings.tsx:593
 msgid "General"
 msgstr ""
 
@@ -2077,11 +2085,11 @@ msgstr ""
 msgid "Hide interaction details"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:690
+#: admin-app/src/routes/Settings.tsx:788
 msgid "Hide on mobile"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:629
+#: admin-app/src/routes/Settings.tsx:695
 msgid "Hide the WordPress admin chrome and let the dashboard fill the whole browser window."
 msgstr ""
 
@@ -2114,7 +2122,7 @@ msgstr ""
 msgid "History"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:339
+#: admin-app/src/routes/Settings.tsx:362
 msgid "Horizontal offset (px)"
 msgstr ""
 
@@ -2126,7 +2134,7 @@ msgstr ""
 msgid "How Estimated Profit becomes available"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:583
+#: admin-app/src/routes/Settings.tsx:646
 msgid "How completed missions grant rewards when several compete: combine them, grant only the highest-priority matching mission, or grant only the best reward. Per-mission exclusive flags and priorities are respected in every mode."
 msgstr ""
 
@@ -2151,7 +2159,7 @@ msgstr ""
 msgid "How many times the same shopper may complete this mission. Each completion cycle grants the reward once; after the limit is reached the mission no longer appears as completable for that shopper."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:569
+#: admin-app/src/routes/Settings.tsx:623
 msgid "How multiple active missions are presented when the shopper has no campaign."
 msgstr ""
 
@@ -2163,7 +2171,7 @@ msgstr ""
 msgid "How related this product is to the items already in the customer’s cart."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:814
+#: admin-app/src/routes/Settings.tsx:1109
 msgid "How suggested products are ordered (Phase 32 advanced upsell ranking)."
 msgstr ""
 
@@ -2175,11 +2183,11 @@ msgstr ""
 msgid "How this mission competes when several missions are active. Lower priority numbers win first; a mission inside a campaign is also ordered by its campaign priority."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:144
+#: admin-app/src/routes/Settings.tsx:149
 msgid "IRR — Iranian rial"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:143
+#: admin-app/src/routes/Settings.tsx:148
 msgid "IRT — Iranian toman"
 msgstr ""
 
@@ -2225,23 +2233,23 @@ msgstr ""
 msgid "Inactive missions never evaluate on the storefront."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:738
+#: admin-app/src/routes/Settings.tsx:1030
 msgid "Include discounts"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:756
+#: admin-app/src/routes/Settings.tsx:1048
 msgid "Include sale items"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:747
+#: admin-app/src/routes/Settings.tsx:1039
 msgid "Include shipping"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:729
+#: admin-app/src/routes/Settings.tsx:1021
 msgid "Include taxes"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:765
+#: admin-app/src/routes/Settings.tsx:1057
 msgid "Include virtual products"
 msgstr ""
 
@@ -2407,7 +2415,7 @@ msgstr ""
 msgid "Locations not covered by your other zones"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:857
+#: admin-app/src/routes/Settings.tsx:1161
 msgid "Log file"
 msgstr ""
 
@@ -2419,7 +2427,7 @@ msgstr ""
 msgid "Logged-in customers whose lifetime spend and order count meet the thresholds below."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:848
+#: admin-app/src/routes/Settings.tsx:1152
 msgid "Logging"
 msgstr ""
 
@@ -2458,7 +2466,7 @@ msgstr ""
 msgid "Margin"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:543
+#: admin-app/src/routes/Settings.tsx:594
 msgid "Master toggle, display and default behavior."
 msgstr ""
 
@@ -2496,7 +2504,7 @@ msgstr ""
 msgid "Milestones"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:159
+#: admin-app/src/routes/Settings.tsx:166
 msgid "Mini cart"
 msgstr ""
 
@@ -2528,8 +2536,8 @@ msgstr ""
 msgid "Mission"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:528
-#: admin-app/src/routes/Settings.tsx:719
+#: admin-app/src/routes/Settings.tsx:576
+#: admin-app/src/routes/Settings.tsx:1011
 msgid "Mission Calculation"
 msgstr ""
 
@@ -2616,15 +2624,15 @@ msgstr ""
 msgid "Missions define what you want shoppers to reach — a cart amount, quantity, category spend and more. Create your first mission to start."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:290
+#: admin-app/src/routes/Settings.tsx:313
 msgid "Mobile"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:683
+#: admin-app/src/routes/Settings.tsx:776
 msgid "Mobile behavior"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:995
+#: admin-app/src/routes/Settings.tsx:911
 msgid "Mobile reuses the desktop position. Turn the toggle above off to configure a separate mobile position."
 msgstr ""
 
@@ -2653,7 +2661,7 @@ msgstr ""
 msgid "More customer activity is needed for a more reliable analysis."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:821
+#: admin-app/src/routes/Settings.tsx:1121
 msgid "Most popular first"
 msgstr ""
 
@@ -3051,8 +3059,8 @@ msgstr ""
 msgid "Percentage off"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:530
-#: admin-app/src/routes/Settings.tsx:779
+#: admin-app/src/routes/Settings.tsx:581
+#: admin-app/src/routes/Settings.tsx:1071
 msgid "Performance"
 msgstr ""
 
@@ -3068,7 +3076,7 @@ msgstr ""
 msgid "Pick your free gift"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:706
+#: admin-app/src/routes/Settings.tsx:805
 msgid "Play a confetti burst when a mission is reached (Phase 32)."
 msgstr ""
 
@@ -3076,12 +3084,12 @@ msgstr ""
 msgid "Please select another mission."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:480
-#: admin-app/src/routes/Settings.tsx:494
+#: admin-app/src/routes/Settings.tsx:513
+#: admin-app/src/routes/Settings.tsx:527
 msgid "Plugin-wide configuration."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:508
+#: admin-app/src/routes/Settings.tsx:541
 msgid "Plugin-wide configuration. Changes apply immediately."
 msgstr ""
 
@@ -3093,15 +3101,15 @@ msgstr ""
 msgid "Popularity"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:654
+#: admin-app/src/routes/Settings.tsx:723
 msgid "Position"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:954
+#: admin-app/src/routes/Settings.tsx:866
 msgid "Position & display"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:306
+#: admin-app/src/routes/Settings.tsx:329
 msgid "Position preset"
 msgstr ""
 
@@ -3187,11 +3195,11 @@ msgstr ""
 msgid "Product margin data is not available — profitability scored neutral."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:162
+#: admin-app/src/routes/Settings.tsx:169
 msgid "Product pages"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:804
+#: admin-app/src/routes/Settings.tsx:1099
 msgid "Product suggestions"
 msgstr ""
 
@@ -3599,14 +3607,14 @@ msgstr ""
 msgid "Save changes"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:471
+#: admin-app/src/routes/Settings.tsx:504
 msgid "Save settings"
 msgstr ""
 
 #: admin-app/src/routes/Appearance.tsx:588
 #: admin-app/src/routes/CampaignBuilder.tsx:282
 #: admin-app/src/routes/MissionBuilder.tsx:256
-#: admin-app/src/routes/Settings.tsx:471
+#: admin-app/src/routes/Settings.tsx:503
 msgid "Saving…"
 msgstr ""
 
@@ -3671,7 +3679,7 @@ msgstr ""
 msgid "Select a mission to apply the recommendation to."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:787
+#: admin-app/src/routes/Settings.tsx:1082
 msgid "Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer mission evaluations, at the cost of a brief staleness window after cart changes."
 msgstr ""
 
@@ -3692,13 +3700,13 @@ msgid "Set up product costs"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:69
-#: admin-app/src/routes/Settings.tsx:479
-#: admin-app/src/routes/Settings.tsx:493
-#: admin-app/src/routes/Settings.tsx:507
+#: admin-app/src/routes/Settings.tsx:512
+#: admin-app/src/routes/Settings.tsx:526
+#: admin-app/src/routes/Settings.tsx:540
 msgid "Settings"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:431
+#: admin-app/src/routes/Settings.tsx:462
 msgid "Settings saved."
 msgstr ""
 
@@ -3736,7 +3744,7 @@ msgstr ""
 msgid "Shipping destination"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:161
+#: admin-app/src/routes/Settings.tsx:168
 msgid "Shop / archives"
 msgstr ""
 
@@ -3746,11 +3754,11 @@ msgstr ""
 msgid "Shopping mission"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:697
+#: admin-app/src/routes/Settings.tsx:796
 msgid "Show a live countdown to the mission/campaign deadline (Phase 32)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:574
+#: admin-app/src/routes/Settings.tsx:630
 msgid "Show all missions"
 msgstr ""
 
@@ -3783,16 +3791,16 @@ msgstr ""
 msgid "Show milestone targets"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:937
+#: admin-app/src/routes/Settings.tsx:843
 msgid "Show on desktop"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:689
-#: admin-app/src/routes/Settings.tsx:945
+#: admin-app/src/routes/Settings.tsx:784
+#: admin-app/src/routes/Settings.tsx:854
 msgid "Show on mobile"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:805
+#: admin-app/src/routes/Settings.tsx:1100
 msgid "Show recommended products that help reach the mission."
 msgstr ""
 
@@ -3810,15 +3818,15 @@ msgstr ""
 msgid "Show the call-to-action"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:576
+#: admin-app/src/routes/Settings.tsx:638
 msgid "Show the closest mission only"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:575
+#: admin-app/src/routes/Settings.tsx:634
 msgid "Show the first mission only"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:927
+#: admin-app/src/routes/Settings.tsx:829
 msgid "Show the floating button on widget pages whenever the cart has an eligible mission."
 msgstr ""
 
@@ -3887,7 +3895,7 @@ msgstr ""
 msgid "Skipped — lower priority"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:678
+#: admin-app/src/routes/Settings.tsx:768
 msgid "Slide the progress-bar fill on updates."
 msgstr ""
 
@@ -3907,7 +3915,7 @@ msgstr ""
 msgid "Smart upsells are disabled."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1043
+#: admin-app/src/routes/Settings.tsx:964
 msgid "Smooth open/close transitions for the floating button and its drawer."
 msgstr ""
 
@@ -3960,7 +3968,7 @@ msgstr ""
 msgid "Store-wide comparison is not available in this window."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:664
+#: admin-app/src/routes/Settings.tsx:733
 msgid "Store-wide progress widget variant."
 msgstr ""
 
@@ -3970,11 +3978,11 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:34
 #: admin-app/src/components/mission-builder/TargetFields.tsx:41
 #: admin-app/src/components/mission-builder/TargetFields.tsx:47
-#: admin-app/src/routes/Settings.tsx:613
+#: admin-app/src/routes/Settings.tsx:676
 msgid "Subtotal (before discounts)"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:813
+#: admin-app/src/routes/Settings.tsx:1108
 msgid "Suggestion ranking"
 msgstr ""
 
@@ -4009,36 +4017,36 @@ msgid "Target: %s"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/DisplayFields.tsx:76
-#: admin-app/src/routes/Settings.tsx:663
+#: admin-app/src/routes/Settings.tsx:732
 msgid "Template"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:666
+#: admin-app/src/routes/Settings.tsx:740
 #: includes/Templates/Mission/Template1.php:38
 msgid "Template 1"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:667
+#: admin-app/src/routes/Settings.tsx:744
 #: includes/Templates/Mission/Template2.php:39
 msgid "Template 2"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:668
+#: admin-app/src/routes/Settings.tsx:748
 #: includes/Templates/Mission/Template3.php:38
 msgid "Template 3"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:669
+#: admin-app/src/routes/Settings.tsx:752
 #: includes/Templates/Mission/Template4.php:39
 msgid "Template 4"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:670
+#: admin-app/src/routes/Settings.tsx:756
 #: includes/Templates/Mission/Template5.php:38
 msgid "Template 5"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:671
+#: admin-app/src/routes/Settings.tsx:760
 #: includes/Templates/Mission/Template6.php:38
 msgid "Template 6"
 msgstr ""
@@ -4065,7 +4073,7 @@ msgstr ""
 msgid "Text color"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1074
+#: admin-app/src/routes/Settings.tsx:995
 msgid "The accessible label and tooltip for the button (leave empty for the default)."
 msgstr ""
 
@@ -4073,19 +4081,19 @@ msgstr ""
 msgid "The admin app is not built yet (%s is missing). Run npm install && npm run build inside the admin-app directory, or start npm run dev in a local/development environment for hot reload."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:317
+#: admin-app/src/routes/Settings.tsx:340
 msgid "The button corner/edge — the drawer always opens toward the screen center from it. The offsets below fine-tune the exact spot."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1018
+#: admin-app/src/routes/Settings.tsx:934
 msgid "The button look."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:294
+#: admin-app/src/routes/Settings.tsx:317
 msgid "The button position on desktop screens."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:295
+#: admin-app/src/routes/Settings.tsx:318
 msgid "The button position on mobile screens — handy when the button must clear mobile navigation or sticky cart buttons."
 msgstr ""
 
@@ -4136,7 +4144,7 @@ msgstr ""
 msgid "The cart must contain at least this many items."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:559
+#: admin-app/src/routes/Settings.tsx:613
 msgid "The currency unit shown on FaraCart amounts. “Auto” follows the store currency."
 msgstr ""
 
@@ -4240,7 +4248,7 @@ msgstr ""
 msgid "The page you are looking for does not exist."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:893
+#: admin-app/src/routes/Settings.tsx:1197
 msgid "The plugin’s public actions and filters — a reference for theme and plugin developers."
 msgstr ""
 
@@ -4260,7 +4268,7 @@ msgstr ""
 msgid "The recommended target must be greater than zero."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1031
+#: admin-app/src/routes/Settings.tsx:947
 msgid "The round button diameter (32–96)."
 msgstr ""
 
@@ -4349,7 +4357,7 @@ msgstr ""
 msgid "Thursday"
 msgstr ""
 
-#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:98
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:99
 msgid "Time"
 msgstr ""
 
@@ -4365,7 +4373,7 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: admin-app/src/components/date-range/CustomRangePicker.tsx:54
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:49
 msgid "To"
 msgstr ""
 
@@ -4387,7 +4395,7 @@ msgstr ""
 msgid "Too many requests. Please try again shortly."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:656
+#: admin-app/src/routes/Settings.tsx:725
 msgid "Top"
 msgstr ""
 
@@ -4455,7 +4463,7 @@ msgstr ""
 msgid "Tuesday"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:550
+#: admin-app/src/routes/Settings.tsx:604
 msgid "Turn the storefront missions, rewards and progress bars on or off."
 msgstr ""
 
@@ -4523,7 +4531,7 @@ msgstr ""
 msgid "Use global default"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:964
+#: admin-app/src/routes/Settings.tsx:876
 msgid "Use the desktop position on mobile"
 msgstr ""
 
@@ -4539,7 +4547,7 @@ msgstr ""
 msgid "Variation falls back to its parent product"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:357
+#: admin-app/src/routes/Settings.tsx:385
 msgid "Vertical offset (px)"
 msgstr ""
 
@@ -4629,23 +4637,23 @@ msgstr ""
 msgid "What the mission measures."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:739
+#: admin-app/src/routes/Settings.tsx:1031
 msgid "When off, cart coupons and discounts do not reduce the discounted-subtotal basis."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:757
+#: admin-app/src/routes/Settings.tsx:1049
 msgid "When off, products currently on sale are excluded from every mission."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:766
+#: admin-app/src/routes/Settings.tsx:1058
 msgid "When off, virtual and downloadable products are excluded from every mission."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:965
+#: admin-app/src/routes/Settings.tsx:877
 msgid "When on, mobile reuses the desktop position and the separate mobile fields are hidden."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:748
+#: admin-app/src/routes/Settings.tsx:1040
 msgid "When on, shipping charges count toward the cart-total basis."
 msgstr ""
 
@@ -4661,19 +4669,19 @@ msgstr ""
 msgid "When this mission is reached, every lower-priority mission is skipped and never grants its reward. Higher-priority missions are unaffected."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:643
+#: admin-app/src/routes/Settings.tsx:709
 msgid "Where and how the storefront widgets appear."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:955
+#: admin-app/src/routes/Settings.tsx:867
 msgid "Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons. The progress drawer always opens toward the screen center."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:684
+#: admin-app/src/routes/Settings.tsx:777
 msgid "Whether the widgets render on small screens (≤782px)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:720
+#: admin-app/src/routes/Settings.tsx:1012
 msgid "Which cart money counts toward missions. Defaults match the storefront behavior before these options existed."
 msgstr ""
 
@@ -4731,11 +4739,11 @@ msgstr ""
 msgid "WordPress %1$s or newer is required (current: %2$s)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:840
+#: admin-app/src/routes/Settings.tsx:1144
 msgid "Write detailed (debug-level) entries to the plugin log when logging is enabled."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:849
+#: admin-app/src/routes/Settings.tsx:1153
 msgid "Write errors (and debug entries when debug mode is on) to a log file."
 msgstr ""
 

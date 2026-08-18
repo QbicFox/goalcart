@@ -2745,6 +2745,19 @@
 		var margin = 12;
 		var gap = 12;
 
+		// The drawer is absolutely positioned inside the fixed button
+		// container, so its left/top offsets are relative to the container
+		// — not the viewport. The clamps below run in viewport coordinates
+		// (buttonRect, vw, vh), so every applied offset is converted back
+		// by subtracting the container's own viewport rect; otherwise a
+		// bottom-right button would push the panel off-screen (e.g. a
+		// clamped left:12px lands 12px right of the container, which sits
+		// at the screen edge).
+		var container = drawer.parentElement;
+		var containerRect = container ? container.getBoundingClientRect() : null;
+		var originLeft = containerRect ? containerRect.left : buttonRect.left;
+		var originTop = containerRect ? containerRect.top : buttonRect.top;
+
 		// Reset any previous constraints (the direction can change between
 		// opens, and the viewport can shrink).
 		drawer.style.removeProperty( 'top' );
@@ -2775,14 +2788,14 @@
 			// (top:50% + translateY(-50%)); pin the anchor so it fits.
 			var centerY = buttonRect.top + buttonRect.height / 2;
 			var top = Math.min( Math.max( margin + height / 2, centerY ), vh - margin - height / 2 );
-			drawer.style.top = top + 'px';
+			drawer.style.top = ( top - originTop ) + 'px';
 
 			// The panel opens horizontally from the button (toward the
 			// center); clamp so it never spills off the opposite edge.
 			var sideLeft = direction === 'right'
 				? buttonRect.right + gap
 				: buttonRect.left - gap - width;
-			drawer.style.left = clampViewport( sideLeft, width, vw, margin ) + 'px';
+			drawer.style.left = ( clampViewport( sideLeft, width, vw, margin ) - originLeft ) + 'px';
 			drawer.style.right = 'auto';
 		} else {
 			// The panel opens up/down from the button, aligned toward the
@@ -2791,7 +2804,7 @@
 			var centerLeft = buttonSide === 'left'
 				? buttonRect.right + gap
 				: buttonRect.left - gap - width;
-			drawer.style.left = clampViewport( centerLeft, width, vw, margin ) + 'px';
+			drawer.style.left = ( clampViewport( centerLeft, width, vw, margin ) - originLeft ) + 'px';
 			drawer.style.right = 'auto';
 		}
 	}

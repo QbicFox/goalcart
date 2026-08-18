@@ -526,6 +526,10 @@ msgstr "تاریخ و ساعت"
 msgid "Time"
 msgstr "ساعت"
 
+#: admin-app/src/components/wheel-picker/WheelDateField.tsx:95
+msgid "Date"
+msgstr "تاریخ"
+
 #: admin-app/src/components/wheel-picker/WheelDatePicker.tsx:23
 msgid "Year"
 msgstr "سال"

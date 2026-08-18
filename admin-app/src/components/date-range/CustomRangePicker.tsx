@@ -6,8 +6,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
 
-import { formatDay, normalizeBounds } from '../../date-range/dateRange';
-import WheelDatePicker from '../wheel-picker/WheelDatePicker';
+import { normalizeBounds } from '../../date-range/dateRange';
+import { formatDateTime } from '../../lib/calendar';
+import WheelDateField from '../wheel-picker/WheelDateField';
 
 interface CustomRangePickerProps {
   /** Initial bounds (`Y-m-d`), already normalized. */
@@ -17,11 +18,11 @@ interface CustomRangePickerProps {
 }
 
 /**
- * Custom date-range editor (calendar-aware wheel pickers).
+ * Custom date-range editor (calendar-aware wheel date fields).
  *
- * Two linked wheel date pickers — start then end — whose calendars follow
- * the WordPress admin language (Jalali for `fa_*`). The user picks two
- * `Y-m-d` dates and the picker calls `onApply` with the normalized
+ * Two input-style wheel date fields — start then end — whose calendars
+ * follow the WordPress admin language (Jalali for `fa_*`). The user picks
+ * two `Y-m-d` dates and the picker calls `onApply` with the normalized
  * bounds, so the REST layer and URL params keep the same format (see
  * `date-range/dateRange.ts`).
  *
@@ -44,18 +45,8 @@ export default function CustomRangePicker({ from, to, onApply }: CustomRangePick
   return (
     <Box sx={{ width: 288, maxWidth: '100%' }}>
       <Stack spacing={1.25}>
-        <WheelDatePicker
-          label={__('From', 'faracart')}
-          value={start}
-          onChange={setStart}
-          valueLabel={start ? formatDay(start) : undefined}
-        />
-        <WheelDatePicker
-          label={__('To', 'faracart')}
-          value={end}
-          onChange={setEnd}
-          valueLabel={end ? formatDay(end) : undefined}
-        />
+        <WheelDateField label={__('From', 'faracart')} value={start} onChange={setStart} />
+        <WheelDateField label={__('To', 'faracart')} value={end} onChange={setEnd} />
       </Stack>
 
       <Divider sx={{ my: 1.5 }} />
@@ -63,7 +54,7 @@ export default function CustomRangePicker({ from, to, onApply }: CustomRangePick
       {/* Selection summary / prompt */}
       <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
         {start && end
-          ? `${formatDay(start)} – ${formatDay(end)}`
+          ? `${formatDateTime(start)} – ${formatDateTime(end)}`
           : __('Choose a start and end date.', 'faracart')}
       </Typography>
 
