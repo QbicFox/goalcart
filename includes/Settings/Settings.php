@@ -40,11 +40,12 @@ class Settings
 	/**
 	 * The storefront mission template ids the frontend_template setting
 	 * accepts. Single source of truth shared by the REST schema
-	 * (SettingsController::save_args), the sanitizer and the read-time
-	 * self-heal, so the three can never drift apart. Only the six current
-	 * design templates are valid; retired pre-design ids (basic /
-	 * percentage / milestone / card / ring) are never mapped — stored
-	 * values outside this list self-heal to the default.
+	 * (SettingsController::save_args) and the save sanitizer. Only the six
+	 * current design templates are valid; retired pre-design ids (basic /
+	 * percentage / milestone / card / ring) are never mapped — the
+	 * Installer 0.7.1 migration repairs stored values, and consumers
+	 * (TemplateEngine, ProgressUI) fall back to template-1 for anything
+	 * unregistered.
 	 *
 	 * @var array<int, string>
 	 */
@@ -52,9 +53,8 @@ class Settings
 
 	/**
 	 * The storefront widget locations the frontend_locations setting
-	 * accepts. Single source of truth shared by the read-time
-	 * normalization (Settings::all) and the REST schema / sanitizer
-	 * (SettingsController), so the three can never drift apart.
+	 * accepts. Single source of truth shared by the REST schema / sanitizer
+	 * (SettingsController).
 	 *
 	 * @var array<int, string>
 	 */
@@ -250,59 +250,6 @@ class Settings
 		if (null === $this->settings) {
 			$stored = get_option(self::OPTION_NAME, array());
 			$this->settings = wp_parse_args(is_array($stored) ? $stored : array(), $this->defaults);
-
-			// Self-heal a corrupted frontend_template. The setting only
-			// accepts the six design template ids (template-1 … template-6)
-			// via the REST schema; a stored value outside that enum (e.g. a
-			// retired pre-design id such as 'card' or 'ring' back-synced by
-			// an older version before the sync was removed) is served to the
-			// Settings page and rejected on the next save with a 400.
-			// Falling back to the default keeps every consumer schema-safe —
-			// the TemplateEngine already resolves template_defaults.mission
-			// before frontend_template, so the storefront template
-			// selection is unaffected.
-			if (! in_array((string) $this->settings['frontend_template'], self::MISSION_TEMPLATES, true)) {
-				$this->settings['frontend_template'] = $this->defaults['frontend_template'];
-			}
-
-			// Self-heal the remaining schema-constrained settings the same
-			// way: values persisted by older plugin versions are out of the
-			// current REST schema — the retired 'sticky' display location,
-			// and the pre-preset horizontal/vertical floating positions. The
-			// Settings page echoes the served values back on save, so an
-			// out-of-schema stored value would be rejected with a 400
-			// (invalid-parameter errors) before the sanitizer ever runs.
-			// Normalizing on read keeps every consumer (the admin GET, the
-			// Appearance page, the storefront) schema-safe, and the next
-			// save persists the normalized values.
-			$this->settings['frontend_locations'] = $this->normalize_locations($this->settings['frontend_locations']);
-			$this->settings['floating_desktop']   = self::normalize_floating_position($this->settings['floating_desktop'], $this->defaults['floating_desktop']);
-			$this->settings['floating_mobile']    = self::normalize_floating_position($this->settings['floating_mobile'], $this->defaults['floating_mobile']);
-
-			// Terminology migration (Goal → Mission): stored settings written
-			// by pre-rename versions use the legacy 'goal' scope key and the
-			// default_goal_behavior key. Normalizing on read keeps the stored
-			// values reachable under the canonical names — the settings page
-			// echoes the served (normalized) values back on the next save,
-			// permanently migrating the option without losing data.
-			//
-			// The legacy keys MUST also be dropped from the served payload:
-			// template_defaults is additionalProperties:false and
-			// template_settings rejects unknown scopes in its validate
-			// callback, so echoing a stored 'goal' key back on save would
-			// 400 with rest_invalid_param before the sanitizer ever runs
-			// (same failure mode as the retired sticky/floating values).
-			$this->settings['default_mission_behavior'] = $this->settings['default_goal_behavior'] ?? $this->defaults['default_mission_behavior'];
-			unset($this->settings['default_goal_behavior']);
-
-			foreach (array('template_defaults', 'template_settings', 'template_versions') as $group) {
-				if (isset($this->settings[$group]['goal'])) {
-					if (! isset($this->settings[$group]['mission'])) {
-						$this->settings[$group]['mission'] = $this->settings[$group]['goal'];
-					}
-					unset($this->settings[$group]['goal']);
-				}
-			}
 		}
 
 		return $this->settings;
@@ -398,35 +345,18 @@ class Settings
 	}
 
 	/**
-	 * Normalize the stored display locations against the allowed set.
-	 *
-	 * Drops unknown / retired locations (e.g. the old 'sticky' entry) and
-	 * dedupes, so the served value is always a valid REST payload (the
-	 * frontend_locations schema rejects anything outside the enum).
-	 *
-	 * @param mixed $value Raw stored value.
-	 * @return array<int, string>
-	 */
-	protected function normalize_locations($value)
-	{
-		$stored = array_map('strval', (array) $value);
-
-		return array_values(array_unique(array_intersect(self::DISPLAY_LOCATIONS, $stored)));
-	}
-
-	/**
 	 * Normalize a floating-button position object.
 	 *
 	 * Validates the preset enum and clamps the offsets so a malformed
-	 * stored or submitted value can never reach the admin form or the
-	 * storefront; anything unknown falls back to the documented default.
-	 * Legacy values (pre-preset installs stored horizontal/vertical) are
-	 * migrated to the equivalent preset so old settings keep their visual
-	 * result — the preset becomes the authoritative position control.
+	 * submitted value can never reach the admin form or the storefront;
+	 * anything unknown falls back to the documented default. Pre-preset
+	 * horizontal × vertical values (older stored settings, or legacy
+	 * clients) are migrated to the equivalent preset so they keep their
+	 * visual result — the preset is the authoritative position control.
 	 *
-	 * Shared by the read-time self-heal (Settings::all) and the REST save
-	 * sanitizer (SettingsController::sanitize_floating_position), so the
-	 * migration logic lives in exactly one place.
+	 * Shared by the REST save sanitizer (SettingsController::
+	 * sanitize_floating_position) and the Installer 0.7.1 settings-option
+	 * migration, so the normalization logic lives in exactly one place.
 	 *
 	 * @param mixed $value   Raw position value.
 	 * @param mixed $default The setting's default position array.

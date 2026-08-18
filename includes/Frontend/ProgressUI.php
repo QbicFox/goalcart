@@ -562,10 +562,10 @@ final class ProgressUI {
 	/**
 	 * One floating-widget position object (desktop or mobile), normalized.
 	 *
-	 * The preset is the only position control. Legacy stored values that
-	 * still carry horizontal/vertical axes (pre-preset installs) are
-	 * migrated to the matching preset so old settings keep their visual
-	 * result without any error.
+	 * The preset is the only position control; unknown presets fall back to
+	 * the default and offsets are clamped so a malformed stored value can
+	 * never reach the JS. (Pre-preset horizontal/vertical values were
+	 * migrated once by the Installer 0.7.1 settings-option repair.)
 	 *
 	 * @param string $scope 'desktop' | 'mobile'.
 	 * @return array<string, string|int>
@@ -578,43 +578,15 @@ final class ProgressUI {
 		$stored   = is_array( $stored ) ? $stored : array();
 
 		$presets = array( 'top-left', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-right' );
-
-		if ( isset( $stored['preset'] ) && in_array( $stored['preset'], $presets, true ) ) {
-			$preset = $stored['preset'];
-		} elseif ( isset( $stored['horizontal'] ) && isset( $stored['vertical'] ) ) {
-			$preset = $this->preset_from_axes( $stored['horizontal'], $stored['vertical'], $default['preset'] ?? 'bottom-right' );
-		} else {
-			$preset = $default['preset'] ?? 'bottom-right';
-		}
+		$preset  = isset( $stored['preset'] ) && in_array( $stored['preset'], $presets, true )
+			? $stored['preset']
+			: ( $default['preset'] ?? 'bottom-right' );
 
 		return array(
 			'preset'   => $preset,
 			'offset_x' => isset( $stored['offset_x'] ) ? min( 200, max( 0, (int) $stored['offset_x'] ) ) : (int) ( $default['offset_x'] ?? 20 ),
 			'offset_y' => isset( $stored['offset_y'] ) ? min( 200, max( 0, (int) $stored['offset_y'] ) ) : (int) ( $default['offset_y'] ?? 80 ),
 		);
-	}
-
-	/**
-	 * Map a legacy horizontal × vertical axes pair to a position preset.
-	 *
-	 * @param mixed  $horizontal 'left' | 'right' (or anything else).
-	 * @param mixed  $vertical   'top' | 'center' | 'bottom' (or anything else).
-	 * @param string $fallback   The preset to return for unknown axes.
-	 * @return string
-	 */
-	protected function preset_from_axes( $horizontal, $vertical, $fallback ) {
-		$presets = array(
-			'left_top'     => 'top-left',
-			'right_top'    => 'top-right',
-			'left_center'  => 'center-left',
-			'right_center' => 'center-right',
-			'left_bottom'  => 'bottom-left',
-			'right_bottom' => 'bottom-right',
-		);
-
-		$key = sanitize_key( $horizontal ) . '_' . sanitize_key( $vertical );
-
-		return isset( $presets[ $key ] ) ? $presets[ $key ] : $fallback;
 	}
 
 	/**

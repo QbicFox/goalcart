@@ -621,12 +621,6 @@ class FrontendController extends BaseController {
 			'campaign_id'  => $mission->campaign_id(),
 			'mission_name'    => $mission->name(),
 			'mission_type'    => $mission->type(),
-			// Legacy aliases (Goal → Mission rename): the canonical keys are
-			// mission_*; the old goal_* keys stay in the payload so existing
-			// storefront consumers keep reading the same values.
-			'goal_id'      => $mission->id(),
-			'goal_name'    => $mission->name(),
-			'goal_type'    => $mission->type(),
 			'is_money'     => $this->is_money_mission( $mission ),
 			'icon'         => $this->mission_icon( $mission ),
 			// The effective template + settings (item override → scope

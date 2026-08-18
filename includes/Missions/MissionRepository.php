@@ -310,7 +310,6 @@ public function create( array $data ) {
 		 * @param int $mission_id New mission id.
 		 */
 		do_action( 'faracart_missions_changed', (int) $wpdb->insert_id );
-		do_action( 'faracart_goals_changed', (int) $wpdb->insert_id ); // Legacy alias (Goal → Mission rename).
 	}
 
 	return $inserted ? (int) $wpdb->insert_id : 0;
@@ -357,7 +356,6 @@ public function update( $mission_id, array $data ) {
 		 * @param int $mission_id Mission id.
 		 */
 		do_action( 'faracart_missions_changed', (int) $mission_id );
-		do_action( 'faracart_goals_changed', (int) $mission_id ); // Legacy alias (Goal → Mission rename).
 	}
 
 	return false !== $updated;
@@ -388,7 +386,6 @@ public function delete( $mission_id ) {
 		 * @param int $mission_id Mission id.
 		 */
 		do_action( 'faracart_missions_changed', (int) $mission_id );
-		do_action( 'faracart_goals_changed', (int) $mission_id ); // Legacy alias (Goal → Mission rename).
 	}
 
 	return false !== $deleted;

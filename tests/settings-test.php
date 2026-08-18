@@ -303,145 +303,89 @@ try {
 // mutated it) so the remaining sections run against the defaults.
 $settings->set_many( $all_before );
 
-// Self-heal (regression): a corrupted frontend_template — a retired
-// pre-design id like 'ring' back-synced by an older version — is
-// normalized to the default on read. Without this the Settings page
-// echoes the out-of-enum value back and the REST schema rejects the save
-// with a 400. Wrapped in a transaction so the option row always reverts,
-// exactly like the section above.
+// Upgrade repair (0.7.1): values older versions could persist that the
+// current REST schema rejects — a retired frontend_template id ('ring'),
+// the retired 'sticky' display location, pre-preset horizontal/vertical
+// floating positions and the pre-rename (Goal → Mission) 'goal' scope
+// keys — are sanitized exactly once by
+// Installer::maybe_migrate_settings_option() during the version bump.
+// The former read-time self-healing in Settings::all() was removed in
+// favor of this migration, so a stored option is only ever repaired on
+// the upgrade. Wrapped in a transaction so the option row always
+// reverts, exactly like the section above.
 $wpdb->query( 'START TRANSACTION' );
 
 try {
-	$stored                      = get_option( Settings::OPTION_NAME, array() );
-	$stored                      = is_array( $stored ) ? $stored : array();
-	$stored['frontend_template'] = 'ring';
-	update_option( Settings::OPTION_NAME, $stored, false );
-	wp_cache_delete( Settings::OPTION_NAME, 'options' );
-	wp_cache_delete( 'alloptions', 'options' );
-
-	$fresh = new Settings();
-	check( 'invalid frontend_template self-heals on read', 'template-1' === $fresh->all()['frontend_template'] );
-
-	$stored['frontend_template'] = 'template-2';
-	update_option( Settings::OPTION_NAME, $stored, false );
-	wp_cache_delete( Settings::OPTION_NAME, 'options' );
-	wp_cache_delete( 'alloptions', 'options' );
-
-	$fresh = new Settings();
-	check( 'valid frontend_template passes through', 'template-2' === $fresh->all()['frontend_template'] );
-} finally {
-	$wpdb->query( 'ROLLBACK' );
-
-	// ROLLBACK reverts the option row; drop the caches so later sections
-	// read the reverted (pre-block) value.
-	wp_cache_delete( Settings::OPTION_NAME, 'options' );
-	wp_cache_delete( 'alloptions', 'options' );
-}
-
-$settings->set_many( $all_before );
-
-// Self-heal (regression): values persisted by older versions that are
-// now out of the current REST schema — the retired 'sticky' display
-// location and the pre-preset horizontal/vertical floating positions —
-// are normalized on read. Without this the Settings page echoes them
-// back and the REST schema rejects the save with a 400 (the exact
-// "invalid parameter(s): frontend_locations, floating_desktop,
-// floating_mobile" failure). Wrapped in a transaction so the option row
-// always reverts, exactly like the blocks above.
-$wpdb->query( 'START TRANSACTION' );
-
-try {
-	$stored                       = get_option( Settings::OPTION_NAME, array() );
-	$stored                       = is_array( $stored ) ? $stored : array();
-	$stored['frontend_locations'] = array( 'cart', 'sticky', 'product' );
-	$stored['floating_desktop']   = array(
+	$stored                          = get_option( Settings::OPTION_NAME, array() );
+	$stored                          = is_array( $stored ) ? $stored : array();
+	$stored['frontend_template']     = 'ring';
+	$stored['frontend_locations']    = array( 'cart', 'sticky', 'product' );
+	$stored['floating_desktop']      = array(
 		'horizontal' => 'left',
 		'vertical'   => 'bottom',
 		'offset_x'   => 25,
 		'offset_y'   => 90,
 	);
-	$stored['floating_mobile']    = array(
+	$stored['floating_mobile']       = array(
 		'horizontal' => 'right',
 		'vertical'   => 'top',
 		'offset_x'   => 12,
 		'offset_y'   => 40,
 	);
-	update_option( Settings::OPTION_NAME, $stored, false );
-	wp_cache_delete( Settings::OPTION_NAME, 'options' );
-	wp_cache_delete( 'alloptions', 'options' );
-
-	$fresh = new Settings();
-	$all   = $fresh->all();
-
-	check( 'retired sticky location filtered on read', array( 'cart', 'product' ) === $all['frontend_locations'] );
-	check( 'legacy desktop axes migrate to a preset', 'bottom-left' === $all['floating_desktop']['preset'] && 25 === $all['floating_desktop']['offset_x'] && 90 === $all['floating_desktop']['offset_y'] );
-	check( 'legacy mobile axes migrate to a preset', 'top-right' === $all['floating_mobile']['preset'] && 12 === $all['floating_mobile']['offset_x'] && 40 === $all['floating_mobile']['offset_y'] );
-
-	// The served shape now validates against the REST schema, so a full
-	// Settings-page save round-trips without a 400.
-	$save = $settings_ctrl->save_args();
-	check( 'normalized locations pass schema', true === rest_validate_value_from_schema( $all['frontend_locations'], $save['frontend_locations'], 'frontend_locations' ) );
-	check( 'normalized desktop position passes schema', true === rest_validate_value_from_schema( $all['floating_desktop'], $save['floating_desktop'], 'floating_desktop' ) );
-	check( 'normalized mobile position passes schema', true === rest_validate_value_from_schema( $all['floating_mobile'], $save['floating_mobile'], 'floating_mobile' ) );
-} finally {
-	$wpdb->query( 'ROLLBACK' );
-
-	// ROLLBACK reverts the option row; drop the caches so later sections
-	// read the reverted (pre-block) value.
-	wp_cache_delete( Settings::OPTION_NAME, 'options' );
-	wp_cache_delete( 'alloptions', 'options' );
-}
-
-$settings->set_many( $all_before );
-
-// Self-heal (regression): settings persisted by pre-rename (Goal →
-// Mission) versions carry the legacy 'goal' scope key inside
-// template_defaults / template_settings / template_versions plus the
-// default_goal_behavior key. The served payload must migrate them to the
-// canonical 'mission' scope AND drop the legacy keys — otherwise the
-// Settings page echoes 'goal' back and the REST schema rejects the save
-// (template_defaults is additionalProperties:false and
-// validate_template_settings only knows mission/campaign) with a 400
-// ("invalid parameter(s): template_settings"). Wrapped in a transaction
-// so the option row always reverts, exactly like the blocks above.
-$wpdb->query( 'START TRANSACTION' );
-
-try {
-	$stored                      = get_option( Settings::OPTION_NAME, array() );
-	$stored                      = is_array( $stored ) ? $stored : array();
 	$stored['default_goal_behavior'] = 'first';
-	$stored['template_defaults'] = array( 'goal' => 'template-3', 'campaign' => '' );
-	$stored['template_settings'] = array( 'goal' => array(), 'campaign' => array() );
-	$stored['template_versions'] = array( 'goal' => array( 'template-1' => 1 ), 'campaign' => array() );
+	// The live option may already carry a canonical key; drop it so the
+	// migration must migrate the legacy key (a stored canonical value
+	// wins when both are present).
+	unset( $stored['default_mission_behavior'] );
+	$stored['template_defaults']     = array( 'goal' => 'template-3', 'campaign' => '' );
+	$stored['template_settings']     = array( 'goal' => array(), 'campaign' => array() );
+	$stored['template_versions']     = array( 'goal' => array( 'template-1' => 1 ), 'campaign' => array() );
 	update_option( Settings::OPTION_NAME, $stored, false );
 	wp_cache_delete( Settings::OPTION_NAME, 'options' );
 	wp_cache_delete( 'alloptions', 'options' );
 
+	$migrate = new \ReflectionMethod( \FaraCart\Database\Installer::class, 'maybe_migrate_settings_option' );
+	$migrate->setAccessible( true );
+	$migrate->invoke( null );
+
+	$repaired = get_option( Settings::OPTION_NAME, array() );
+	check( 'retired frontend_template repaired by the migration', 'template-1' === $repaired['frontend_template'] );
+	check( 'retired sticky location dropped by the migration', array( 'cart', 'product' ) === $repaired['frontend_locations'] );
+	check( 'legacy desktop axes migrate to a preset', 'bottom-left' === $repaired['floating_desktop']['preset'] && 25 === $repaired['floating_desktop']['offset_x'] && 90 === $repaired['floating_desktop']['offset_y'] );
+	check( 'legacy mobile axes migrate to a preset', 'top-right' === $repaired['floating_mobile']['preset'] && 12 === $repaired['floating_mobile']['offset_x'] && 40 === $repaired['floating_mobile']['offset_y'] );
+	check( 'legacy default_goal_behavior migrates and is dropped', 'first' === $repaired['default_mission_behavior'] && ! array_key_exists( 'default_goal_behavior', $repaired ) );
+	check( 'legacy goal scope migrates in template_defaults', 'template-3' === $repaired['template_defaults']['mission'] && ! array_key_exists( 'goal', $repaired['template_defaults'] ) );
+	check( 'legacy goal scope migrates in template_settings', is_array( $repaired['template_settings']['mission'] ) && ! array_key_exists( 'goal', $repaired['template_settings'] ) );
+	check( 'legacy goal scope migrates in template_versions', isset( $repaired['template_versions']['mission']['template-1'] ) && ! array_key_exists( 'goal', $repaired['template_versions'] ) );
+
+	// Idempotent: re-running the migration on the cleaned option changes
+	// nothing, and a valid frontend_template passes through untouched.
+	$clean_before = get_option( Settings::OPTION_NAME, array() );
+	$migrate->invoke( null );
+	check( 'migration is a no-op on an already-clean option', $clean_before === get_option( Settings::OPTION_NAME, array() ) );
+
+	$stored2                      = get_option( Settings::OPTION_NAME, array() );
+	$stored2['frontend_template'] = 'template-2';
+	update_option( Settings::OPTION_NAME, $stored2, false );
+	wp_cache_delete( Settings::OPTION_NAME, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+	$migrate->invoke( null );
+	check( 'valid frontend_template passes through the migration', 'template-2' === get_option( Settings::OPTION_NAME, array() )['frontend_template'] );
+
+	// After the repair, Settings::all() serves the stored values verbatim
+	// (no read-time self-healing) and the served shape validates against
+	// the REST schema, so a full Settings-page save round-trips.
 	$fresh = new Settings();
 	$all   = $fresh->all();
+	check( 'served settings reflect the repaired option', 'template-2' === $all['frontend_template'] && 'bottom-left' === $all['floating_desktop']['preset'] );
 
-	check( 'legacy default_goal_behavior migrates and is dropped', 'first' === $all['default_mission_behavior'] && ! array_key_exists( 'default_goal_behavior', $all ) );
-	check( 'legacy goal scope migrates in template_defaults', 'template-3' === $all['template_defaults']['mission'] && ! array_key_exists( 'goal', $all['template_defaults'] ) );
-	check( 'legacy goal scope migrates in template_settings', is_array( $all['template_settings']['mission'] ) && ! array_key_exists( 'goal', $all['template_settings'] ) );
-	check( 'legacy goal scope migrates in template_versions', isset( $all['template_versions']['mission']['template-1'] ) && ! array_key_exists( 'goal', $all['template_versions'] ) );
-
-	// The served shape now validates against the REST schema, so a full
-	// Settings-page save round-trips without a 400.
 	$save = $settings_ctrl->save_args();
-	check( 'normalized template_defaults pass schema', true === rest_validate_value_from_schema( $all['template_defaults'], $save['template_defaults'], 'template_defaults' ) );
-	check( 'normalized template_settings pass schema', true === rest_validate_value_from_schema( $all['template_settings'], $save['template_settings'], 'template_settings' ) );
+	check( 'repaired locations pass schema', true === rest_validate_value_from_schema( $all['frontend_locations'], $save['frontend_locations'], 'frontend_locations' ) );
+	check( 'repaired template_defaults pass schema', true === rest_validate_value_from_schema( $all['template_defaults'], $save['template_defaults'], 'template_defaults' ) );
 
-	// A legacy 'goal' scope posted directly (a pre-rename client) is
-	// accepted and migrated instead of rejected.
-	$req = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
-	$req->set_body_params( array(
-		'template_defaults' => array( 'goal' => 'template-2' ),
-		'template_settings' => array( 'goal' => array() ),
-	) );
-	$resp = $settings_ctrl->handle_save( $req );
-	$data = $resp->get_data()['data'];
-	check( 'legacy goal scope save round-trips without 400', ! is_wp_error( $resp ) && isset( $data['template_defaults']['mission'] ) && 'template-2' === $data['template_defaults']['mission'] );
-	check( 'legacy goal scope not persisted verbatim', ! isset( $data['template_defaults']['goal'] ) && ! isset( $data['template_settings']['goal'] ) );
+	// The canonical 'mission' scope is the only supported API shape now —
+	// a pre-rename 'goal' scope is rejected by the schema.
+	check( 'goal scope rejected by the template_defaults schema', is_wp_error( rest_validate_value_from_schema( array( 'goal' => 'template-2' ), $save['template_defaults'], 'template_defaults' ) ) );
 } finally {
 	$wpdb->query( 'ROLLBACK' );
 

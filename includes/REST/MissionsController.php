@@ -90,14 +90,9 @@ class MissionsController extends BaseController {
 	 * @return void
 	 */
 	public function register_routes() {
-		// Canonical routes. Legacy `/goals` aliases are registered after
-		// these so existing integrations keep working after the Goal →
-		// Mission rename (see register_legacy_routes()).
 		foreach ( $this->route_specs() as $spec ) {
 			register_rest_route( self::NAMESPACE, $spec[0], $spec[1] );
 		}
-
-		$this->register_legacy_routes();
 	}
 
 	/**
@@ -162,21 +157,6 @@ class MissionsController extends BaseController {
 				),
 			),
 		);
-	}
-
-	/**
-	 * Register deprecated `/goals` route aliases (Goal → Mission rename).
-	 *
-	 * The same callbacks serve both paths so existing integrations and
-	 * stored bookmarks that still call `/faracart/v1/goals` keep working.
-	 *
-	 * @return void
-	 */
-	protected function register_legacy_routes() {
-		foreach ( $this->route_specs() as $spec ) {
-			$path = str_replace( '/missions', '/goals', $spec[0] );
-			register_rest_route( self::NAMESPACE, $path, $spec[1] );
-		}
 	}
 
 	/**
@@ -682,7 +662,7 @@ class MissionsController extends BaseController {
 		if ( isset( $clean['template_settings'] ) ) {
 			$template_id = isset( $clean['template_id'] ) && '' !== $clean['template_id']
 				? (string) $clean['template_id']
-				: ( isset( $clean['template'] ) ? (string) $clean['template'] : '' );
+				: '';
 
 			$template = $this->templates()->registry()->has( $template_id )
 				? $this->templates()->registry()->get( $template_id )

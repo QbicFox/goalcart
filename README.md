@@ -1,6 +1,6 @@
 # FaraCart for WooCommerce
 
-FaraCart increases Average Order Value (AOV) by showing WooCommerce shoppers cart goals, progress
+FaraCart increases Average Order Value (AOV) by showing WooCommerce shoppers cart missions, progress
 bars, rewards, milestones, and smart product suggestions that close the gap to the next reward.
 
 > **Note:** This plugin is under active development following the roadmap in `AGENT.md`.

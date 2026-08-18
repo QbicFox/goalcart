@@ -79,8 +79,15 @@ if ( ! defined( 'FARACART_DB_VERSION' ) ) {
  *         goal_target / goal_completed column to mission_id /
  *         mission_target / mission_completed, and the matching indexes
  *         and foreign keys. Data is preserved in place.
+ * 0.7.1 = One-time repair of the stored settings option: values older
+ *         versions could persist that the current REST schema rejects
+ *         (retired template ids in frontend_template, the retired 'sticky'
+ *         location, pre-preset floating axes, and the pre-rename 'goal'
+ *         scope keys) are sanitized during the upgrade — the read-time
+ *         self-healing in Settings::all() was removed in favor of this
+ *         migration.
  */
-	define( 'FARACART_DB_VERSION', '0.7.0' );
+	define( 'FARACART_DB_VERSION', '0.7.1' );
 }
 
 // Load the Composer autoloader (PSR-4: FaraCart\ => includes/).

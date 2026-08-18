@@ -374,10 +374,10 @@ class SettingsController extends BaseController
 	/**
 	 * Normalize a floating-button position object.
 	 *
-	 * Delegates to the single shared implementation on Settings (the same
-	 * logic the read-time self-heal uses): validates the preset enum,
-	 * clamps the offsets, migrates legacy horizontal/vertical axes to the
-	 * equivalent preset, and falls back to the documented default.
+	 * Delegates to the single shared implementation on Settings: validates
+	 * the preset enum, clamps the offsets, migrates pre-preset
+	 * horizontal/vertical axes to the equivalent preset, and falls back to
+	 * the documented default.
 	 *
 	 * @param mixed $value   Raw position value.
 	 * @param mixed $default The setting's default position array.
@@ -425,26 +425,19 @@ class SettingsController extends BaseController
 	{
 		if (! is_array($value)) {
 			return false;
-		}
-
-		foreach (array_keys($value) as $scope) {
-			// Legacy alias (Goal → Mission rename): a 'goal' scope posted by
-			// a pre-rename client validates against the mission registry and
-			// is migrated by the sanitizer.
-			$registry_scope = ('goal' === $scope) ? 'mission' : $scope;
-
-			if (! in_array($registry_scope, array('mission', 'campaign'), true)) {
+		}		foreach ( array_keys( $value ) as $scope ) {
+			if ( ! in_array( $scope, array( 'mission', 'campaign' ), true ) ) {
 				return false;
 			}
 
-			$per_template = $value[$scope];
+			$per_template = $value[ $scope ];
 
-			if (! is_array($per_template)) {
+			if ( ! is_array( $per_template ) ) {
 				return false;
 			}
 
-			foreach (array_keys($per_template) as $template_id) {
-				if (! $this->templates()->is_registered($registry_scope, $template_id)) {
+			foreach ( array_keys( $per_template ) as $template_id ) {
+				if ( ! $this->templates()->is_registered( $scope, $template_id ) ) {
 					return false;
 				}
 			}
@@ -468,22 +461,12 @@ class SettingsController extends BaseController
 
 		if (! is_array($value)) {
 			return $clean;
-		}
-
-		foreach (array('mission', 'campaign') as $scope) {
-			// Legacy alias (Goal → Mission rename): a 'goal' scope posted by
-			// a pre-rename client is migrated into the canonical mission scope
-			// (a canonical mission scope wins when both are present).
-			$source = $scope;
-			if ('mission' === $scope && isset($value['goal']) && ! isset($value['mission'])) {
-				$source = 'goal';
-			}
-
-			if (! isset($value[$source]) || ! is_array($value[$source])) {
+		}		foreach ( array( 'mission', 'campaign' ) as $scope ) {
+			if ( ! isset( $value[ $scope ] ) || ! is_array( $value[ $scope ] ) ) {
 				continue;
 			}
 
-			$clean[$scope] = $this->templates()->sanitize_scope_settings($scope, $value[$source]);
+			$clean[ $scope ] = $this->templates()->sanitize_scope_settings( $scope, $value[ $scope ] );
 		}
 
 		return $clean;
@@ -601,17 +584,6 @@ class SettingsController extends BaseController
 				return array_values(array_unique($cleaned));
 
 			case 'template_defaults':
-				// Legacy alias (Goal → Mission rename): migrate a 'goal'
-				// scope posted by a pre-rename client into the canonical
-				// mission scope (a canonical mission scope wins when both
-				// are present) and drop the legacy key.
-				if (is_array($value)) {
-					if (isset($value['goal']) && ! isset($value['mission'])) {
-						$value['mission'] = $value['goal'];
-					}
-					unset($value['goal']);
-				}
-
 				return $value;
 
 			case 'frontend_template':

@@ -91,8 +91,6 @@ export interface DisplaySettingsInput {
   message?: string;
   completed_message?: string;
   icon?: string;
-  /** Legacy pre-engine template variant (kept for backward compatibility). */
-  template?: string;
   /** Pluggable template engine: the mission's own template id ('' = default). */
   template_id?: string;
   /** Pluggable template engine: per-mission override of the template's appearance. */

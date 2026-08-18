@@ -80,12 +80,6 @@ class MissionEvaluatorRegistry {
 			 * @param array<string, string> $classes Mission type => evaluator class.
 			 */
 			$classes = apply_filters( 'faracart_mission_evaluator_classes', $classes );
-
-			// Legacy alias (Goal → Mission rename): stores that registered
-			// custom evaluators through the old filter keep working.
-			if ( has_filter( 'faracart_goal_evaluator_classes' ) ) {
-				$classes = apply_filters( 'faracart_goal_evaluator_classes', $classes );
-			}
 		}
 
 		foreach ( $classes as $type => $class ) {

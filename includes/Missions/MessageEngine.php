@@ -92,10 +92,6 @@ final class MessageEngine {
 		'reward',
 		'mission_name',
 		'campaign_name',
-		// Legacy alias: {goal_name} templates written before the Goal →
-		// Mission rename still resolve (the canonical placeholder is
-		// {mission_name}).
-		'goal_name',
 	);
 
 	/**
@@ -270,8 +266,6 @@ final class MessageEngine {
 			'remaining_quantity' => $this->format_number( (float) $remaining_quantity, false ),
 			'reward'             => $this->reward_label( $mission ),
 			'mission_name'       => $mission->name(),
-			// Legacy alias for {goal_name} templates (see VARIABLES).
-			'goal_name'          => $mission->name(),
 			'campaign_name'      => $campaign_name,
 		);
 	}

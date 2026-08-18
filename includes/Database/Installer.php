@@ -140,6 +140,13 @@ class Installer {
 			self::maybe_migrate_goal_to_mission();
 		}
 
+		// 0.7.1: repair stored settings that older versions could persist
+		// but the current REST schema rejects. One-time, version-gated —
+		// never a permanent runtime check (see the method docblock).
+		if ( version_compare( $installed, '0.7.1', '<' ) ) {
+			self::maybe_migrate_settings_option();
+		}
+
 		self::maybe_create_tables();
 		self::maybe_schedule_events();
 		update_option( self::DB_VERSION_OPTION, FARACART_DB_VERSION, false );
@@ -296,6 +303,100 @@ class Installer {
 					$wpdb->query( "ALTER TABLE `{$table}` RENAME INDEX `{$old}` TO `{$new}`" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				}
 			}
+		}
+	}
+
+	/**
+	 * Repair the stored settings option (0.7.1).
+	 *
+	 * Older versions could persist values that the current REST schema
+	 * rejects (the Settings page echoes the served values back on save, so
+	 * an out-of-schema stored value fails the next save with a 400):
+	 *
+	 *  - a `frontend_template` outside the six design ids (a pre-engine
+	 *    back-sync wrote retired ids such as 'card'/'ring' into it),
+	 *  - the retired 'sticky' display location,
+	 *  - pre-preset horizontal/vertical floating positions,
+	 *  - the pre-rename (Goal → Mission) 'goal' scope keys and
+	 *    `default_goal_behavior`.
+	 *
+	 * The repair runs exactly once per store during the upgrade to 0.7.1
+	 * and is idempotent, so re-runs and fresh installs (no stored option)
+	 * are no-ops. This replaces the former read-time self-healing in
+	 * Settings::all() — the sanitization is a migration, not a permanent
+	 * runtime check.
+	 *
+	 * @return void
+	 */
+	protected static function maybe_migrate_settings_option() {
+		$option = get_option( \FaraCart\Settings\Settings::OPTION_NAME, null );
+
+		if ( ! is_array( $option ) ) {
+			return;
+		}
+
+		$settings = new \FaraCart\Settings\Settings();
+		$defaults = $settings->defaults();
+		$changed  = false;
+
+		// Retired / unknown frontend_template ids fall back to the default.
+		if ( isset( $option['frontend_template'] ) && ! in_array( (string) $option['frontend_template'], \FaraCart\Settings\Settings::MISSION_TEMPLATES, true ) ) {
+			$option['frontend_template'] = $defaults['frontend_template'];
+			$changed                     = true;
+		}
+
+		// Retired / unknown display locations are dropped (e.g. 'sticky').
+		if ( isset( $option['frontend_locations'] ) && is_array( $option['frontend_locations'] ) ) {
+			$locations = array_values( array_unique( array_intersect(
+				\FaraCart\Settings\Settings::DISPLAY_LOCATIONS,
+				array_map( 'strval', $option['frontend_locations'] )
+			) ) );
+
+			if ( $locations !== $option['frontend_locations'] ) {
+				$option['frontend_locations'] = $locations;
+				$changed                      = true;
+			}
+		}
+
+		// Pre-preset floating positions (horizontal × vertical axes) are
+		// migrated to the matching preset through the shared normalizer.
+		foreach ( array( 'floating_desktop', 'floating_mobile' ) as $key ) {
+			if ( ! isset( $option[ $key ] ) ) {
+				continue;
+			}
+
+			$normalized = \FaraCart\Settings\Settings::normalize_floating_position( $option[ $key ], $defaults[ $key ] );
+
+			if ( $normalized !== $option[ $key ] ) {
+				$option[ $key ] = $normalized;
+				$changed        = true;
+			}
+		}
+
+		// Pre-rename (Goal → Mission) settings keys are migrated to the
+		// canonical names and dropped.
+		if ( array_key_exists( 'default_goal_behavior', $option ) ) {
+			if ( ! array_key_exists( 'default_mission_behavior', $option ) ) {
+				$option['default_mission_behavior'] = $option['default_goal_behavior'];
+			}
+
+			unset( $option['default_goal_behavior'] );
+			$changed = true;
+		}
+
+		foreach ( array( 'template_defaults', 'template_settings', 'template_versions' ) as $group ) {
+			if ( isset( $option[ $group ] ) && is_array( $option[ $group ] ) && array_key_exists( 'goal', $option[ $group ] ) ) {
+				if ( ! array_key_exists( 'mission', $option[ $group ] ) ) {
+					$option[ $group ]['mission'] = $option[ $group ]['goal'];
+				}
+
+				unset( $option[ $group ]['goal'] );
+				$changed = true;
+			}
+		}
+
+		if ( $changed ) {
+			update_option( \FaraCart\Settings\Settings::OPTION_NAME, $option, false );
 		}
 	}
 
