@@ -166,6 +166,9 @@
             "AOV ratio": [
                 "نسبت میانگین ارزش سفارش"
             ],
+            "Aban": [
+                "آبان"
+            ],
             "Accent color": [
                 "رنگ تأکید"
             ],
@@ -328,6 +331,27 @@
             "Apply range": [
                 "اعمال بازه"
             ],
+            "Date and time": [
+                "تاریخ و ساعت"
+            ],
+            "Time": [
+                "ساعت"
+            ],
+            "Year": [
+                "سال"
+            ],
+            "Month": [
+                "ماه"
+            ],
+            "Day": [
+                "روز"
+            ],
+            "Hour": [
+                "ساعت"
+            ],
+            "Minute": [
+                "دقیقه"
+            ],
             "Apply recommendation": [
                 "اعمال پیشنهاد"
             ],
@@ -418,6 +442,9 @@
             "Avg. shipping": [
                 "میانگین هزینهٔ ارسال"
             ],
+            "Azar": [
+                "آذر"
+            ],
             "Back to Dashboard": [
                 "بازگشت به داشبورد"
             ],
@@ -432,6 +459,9 @@
             ],
             "Background": [
                 "پس‌زمینه"
+            ],
+            "Bahman": [
+                "بهمن"
             ],
             "Balanced": [
                 "متوازن"
@@ -579,6 +609,9 @@
             ],
             "Circular gauge — the target as a filled ring with the percentage centered.": [
                 "نمودار حلقه‌ای — ماموریت به‌صورت حلقه پر شده با درصد در مرکز."
+            ],
+            "Clear": [
+                "پاک کردن"
             ],
             "Click a product row for its full score breakdown.": [
                 "برای مشاهدهٔ جزئیات کامل امتیاز، روی ردیف محصول کلیک کنید."
@@ -907,6 +940,9 @@
             "Device width": [
                 "عرض دستگاه"
             ],
+            "Dey": [
+                "دی"
+            ],
             "Difference": [
                 "تفاوت"
             ],
@@ -1039,6 +1075,9 @@
             "Ends in": [
                 "پایان در"
             ],
+            "Esfand": [
+                "اسفند"
+            ],
             "Est. profit %1$s": [
                 "سود تخمینی %1$s"
             ],
@@ -1123,6 +1162,9 @@
             "Fallback icon": [
                 "آیکون جایگزین"
             ],
+            "Farvardin": [
+                "فروردین"
+            ],
             "Find better Mission targets and reward configurations using your store data.": [
                 "با استفاده از داده‌های فروشگاه‌تان، آستانهٔ ماموریت و پیکربندی پاداش بهتری بیابید."
             ],
@@ -1162,6 +1204,9 @@
             "Friday": [
                 "جمعه"
             ],
+            "From": [
+                "از"
+            ],
             "Frontend": [
                 "فرانت‌اند"
             ],
@@ -1194,6 +1239,12 @@
             ],
             "Give the mission a name.": [
                 "برای این ماموریت یک نام وارد کنید."
+            ],
+            "Khordad": [
+                "خرداد"
+            ],
+            "Mehr": [
+                "مهر"
             ],
             "Mission": [
                 "ماموریت"
@@ -1633,6 +1684,9 @@
             "Monday": [
                 "دوشنبه"
             ],
+            "Mordad": [
+                "مرداد"
+            ],
             "More customer activity is needed for a more reliable analysis.": [
                 "برای تحلیل مطمئن‌تر، فعالیت بیشتری از مشتریان لازم است."
             ],
@@ -1884,6 +1938,9 @@
             ],
             "Orders are attributed once they reach a revenue-producing status. No mission-influenced orders were found in this range.": [
                 "سفارش‌ها پس از رسیدن به وضعیت فروشزا انتساب داده می‌شوند. در این بازه هیچ سفارش متأثر از ماموریتی یافت نشد."
+            ],
+            "Ordibehesht": [
+                "اردیبهشت"
             ],
             "Overview": [
                 "نمای کلی"
@@ -2338,6 +2395,9 @@
             "Settings saved.": [
                 "تنظیمات ذخیره شد."
             ],
+            "Shahrivar": [
+                "شهریور"
+            ],
             "Shape": [
                 "شکل"
             ],
@@ -2746,8 +2806,14 @@
             "Times each user can complete": [
                 "تعداد دفعات تکمیل توسط هر کاربر"
             ],
+            "Tir": [
+                "تیر"
+            ],
             "Title": [
                 "عنوان"
+            ],
+            "To": [
+                "تا"
             ],
             "To see the best optimization recommendation for a mission, first choose one of your store missions.": [
                 "برای مشاهده بهترین پیشنهاد بهینه‌سازی برای یک ماموریت، ابتدا یکی از ماموریت‌های فروشگاه را انتخاب کنید."

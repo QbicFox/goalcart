@@ -240,6 +240,10 @@ msgstr "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاه�
 msgid "AOV ratio"
 msgstr "نسبت میانگین ارزش سفارش"
 
+#: admin-app/src/lib/calendar.ts:133
+msgid "Aban"
+msgstr "آبان"
+
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:100
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:119
 #: includes/Templates/Mission/Template1.php:69
@@ -514,6 +518,34 @@ msgstr "اعمال"
 msgid "Apply range"
 msgstr "اعمال بازه"
 
+#: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:93
+msgid "Date and time"
+msgstr "تاریخ و ساعت"
+
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:98
+msgid "Time"
+msgstr "ساعت"
+
+#: admin-app/src/components/wheel-picker/WheelDatePicker.tsx:23
+msgid "Year"
+msgstr "سال"
+
+#: admin-app/src/components/wheel-picker/WheelDatePicker.tsx:23
+msgid "Month"
+msgstr "ماه"
+
+#: admin-app/src/components/wheel-picker/WheelDatePicker.tsx:23
+msgid "Day"
+msgstr "روز"
+
+#: admin-app/src/components/wheel-picker/WheelTimePicker.tsx:21
+msgid "Hour"
+msgstr "ساعت"
+
+#: admin-app/src/components/wheel-picker/WheelTimePicker.tsx:21
+msgid "Minute"
+msgstr "دقیقه"
+
 #: admin-app/src/routes/MissionPerformance.tsx:299
 #: admin-app/src/routes/Recommendations.tsx:343
 msgid "Apply recommendation"
@@ -653,6 +685,10 @@ msgstr "میانگین حاشیهٔ سود"
 msgid "Avg. shipping"
 msgstr "میانگین هزینهٔ ارسال"
 
+#: admin-app/src/lib/calendar.ts:134
+msgid "Azar"
+msgstr "آذر"
+
 #: admin-app/src/routes/NotFound.tsx:20
 msgid "Back to Dashboard"
 msgstr "بازگشت به داشبورد"
@@ -678,6 +714,10 @@ msgstr "بازگشت به ماموریت‌ها"
 #: includes/Templates/Mission/Template6.php:81
 msgid "Background"
 msgstr "پس‌زمینه"
+
+#: admin-app/src/lib/calendar.ts:136
+msgid "Bahman"
+msgstr "بهمن"
 
 #: admin-app/src/routes/Settings.tsx:819
 msgid "Balanced"
@@ -915,6 +955,11 @@ msgstr "تاریخ شروع و پایان را انتخاب کنید."
 #: includes/Templates/Mission/RingTemplate.php:47
 msgid "Circular gauge — the target as a filled ring with the percentage centered."
 msgstr "نمودار حلقه‌ای — ماموریت به‌صورت حلقه پر شده با درصد در مرکز."
+
+#: admin-app/src/components/wheel-picker/WheelField.tsx:42
+#: admin-app/src/components/wheel-picker/WheelField.tsx:43
+msgid "Clear"
+msgstr "پاک کردن"
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:560
 msgid "Click a product row for its full score breakdown."
@@ -1467,6 +1512,10 @@ msgstr "قلاب‌های توسعه‌دهنده"
 msgid "Device width"
 msgstr "عرض دستگاه"
 
+#: admin-app/src/lib/calendar.ts:135
+msgid "Dey"
+msgstr "دی"
+
 #: admin-app/src/routes/RevenueOverview.tsx:711
 msgid "Difference"
 msgstr "تفاوت"
@@ -1668,6 +1717,10 @@ msgstr "پایان در"
 msgid "Ends in"
 msgstr "پایان در"
 
+#: admin-app/src/lib/calendar.ts:137
+msgid "Esfand"
+msgstr "اسفند"
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:198
 msgid "Est. profit %1$s"
 msgstr "سود تخمینی %1$s"
@@ -1797,6 +1850,10 @@ msgstr "کلاس CSS اضافی"
 msgid "Fallback icon"
 msgstr "آیکون جایگزین"
 
+#: admin-app/src/lib/calendar.ts:126
+msgid "Farvardin"
+msgstr "فروردین"
+
 #: admin-app/src/routes/Dashboard.tsx:209
 msgid "Find better Mission targets and reward configurations using your store data."
 msgstr "با استفاده از داده‌های فروشگاه‌تان، آستانهٔ ماموریت و پیکربندی پاداش بهتری بیابید."
@@ -1872,6 +1929,10 @@ msgstr "جمعه"
 msgid "Friday"
 msgstr "جمعه"
 
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:48
+msgid "From"
+msgstr "از"
+
 #: admin-app/src/routes/Settings.tsx:523
 #: admin-app/src/routes/Settings.tsx:642
 msgid "Frontend"
@@ -1917,6 +1978,14 @@ msgstr "به کمپین یک نام بدهید."
 #: admin-app/src/routes/MissionBuilder.tsx:330
 msgid "Give the mission a name."
 msgstr "برای این ماموریت یک نام وارد کنید."
+
+#: admin-app/src/lib/calendar.ts:128
+msgid "Khordad"
+msgstr "خرداد"
+
+#: admin-app/src/lib/calendar.ts:132
+msgid "Mehr"
+msgstr "مهر"
 
 #: admin-app/src/components/revenue/RevenueToolbar.tsx:57
 #: admin-app/src/routes/Analytics.tsx:180
@@ -2557,6 +2626,10 @@ msgstr "دوشنبه"
 msgid "Monday"
 msgstr "دوشنبه"
 
+#: admin-app/src/lib/calendar.ts:130
+msgid "Mordad"
+msgstr "مرداد"
+
 #: admin-app/src/routes/MissionPerformance.tsx:123
 msgid "More customer activity is needed for a more reliable analysis."
 msgstr "برای تحلیل مطمئن‌تر، فعالیت بیشتری از مشتریان لازم است."
@@ -2908,6 +2981,10 @@ msgstr "سفارش‌های تحلیل‌شده"
 #: admin-app/src/routes/AttributionDashboard.tsx:116
 msgid "Orders are attributed once they reach a revenue-producing status. No mission-influenced orders were found in this range."
 msgstr "سفارش‌ها پس از رسیدن به وضعیت فروشزا انتساب داده می‌شوند. در این بازه هیچ سفارش متأثر از ماموریتی یافت نشد."
+
+#: admin-app/src/lib/calendar.ts:127
+msgid "Ordibehesht"
+msgstr "اردیبهشت"
 
 #: admin-app/src/components/layout/navigation.ts:54
 #: admin-app/src/routes/Dashboard.tsx:581
@@ -3590,6 +3667,10 @@ msgstr "تنظیمات"
 msgid "Settings saved."
 msgstr "تنظیمات ذخیره شد."
 
+#: admin-app/src/lib/calendar.ts:131
+msgid "Shahrivar"
+msgstr "شهریور"
+
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:125
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:133
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:144
@@ -4180,9 +4261,17 @@ msgstr "پنجشنبه"
 msgid "Times each user can complete"
 msgstr "تعداد دفعات تکمیل توسط هر کاربر"
 
+#: admin-app/src/lib/calendar.ts:129
+msgid "Tir"
+msgstr "تیر"
+
 #: admin-app/src/components/mission-builder/DisplayFields.tsx:65
 msgid "Title"
 msgstr "عنوان"
+
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:54
+msgid "To"
+msgstr "تا"
 
 #: admin-app/src/routes/Recommendations.tsx:615
 msgid "To see the best optimization recommendation for a mission, first choose one of your store missions."

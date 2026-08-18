@@ -13,6 +13,8 @@ import { __ } from '@wordpress/i18n';
 
 import { fetchSettingsEnvelope } from '../../api/settings';
 import { searchCoupons, searchProducts, searchTags, searchZones } from '../../api/search';
+import WheelDateTimeField from '../wheel-picker/WheelDateTimeField';
+import WheelTimeField from '../wheel-picker/WheelTimeField';
 import type { MissionInput } from '../../types';
 import EntityAutocomplete from './EntityAutocomplete';
 
@@ -315,14 +317,14 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
         </Typography>
         <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextFieldDate
+            <WheelDateTimeField
               label={__('Starts at', 'faracart')}
               value={values.starts_at}
               onChange={(starts_at) => patch({ starts_at })}
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <TextFieldDate
+            <WheelDateTimeField
               label={__('Ends at', 'faracart')}
               value={values.ends_at}
               onChange={(ends_at) => patch({ ends_at })}
@@ -360,23 +362,17 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
           </Box>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
+              <WheelTimeField
                 label={__('Day window starts', 'faracart')}
-                type="time"
-                fullWidth
                 value={values.schedule_start_time}
-                onChange={(event) => patch({ schedule_start_time: event.target.value })}
-                slotProps={{ inputLabel: { shrink: true } }}
+                onChange={(next) => patch({ schedule_start_time: next })}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
+              <WheelTimeField
                 label={__('Day window ends', 'faracart')}
-                type="time"
-                fullWidth
                 value={values.schedule_end_time}
-                onChange={(event) => patch({ schedule_end_time: event.target.value })}
-                slotProps={{ inputLabel: { shrink: true } }}
+                onChange={(next) => patch({ schedule_end_time: next })}
               />
             </Grid>
           </Grid>
@@ -442,37 +438,3 @@ function CouponPicker({ value, onChange }: CouponPickerProps) {
   );
 }
 
-interface TextFieldDateProps {
-  label: string;
-  value: string | null;
-  onChange: (value: string | null) => void;
-}
-
-/** datetime-local input mapping to/from the API's 'Y-m-d H:i:s'. */
-function TextFieldDate({ label, value, onChange }: TextFieldDateProps) {
-  // datetime-local expects '2026-08-07T14:30'; the API stores
-  // '2026-08-07 14:30:00'.
-  const inputValue = value ? value.replace(' ', 'T').slice(0, 16) : '';
-
-  return (
-    <TextField
-      label={label}
-      type="datetime-local"
-      fullWidth
-      size="small"
-      value={inputValue}
-      onChange={(event) => {
-        const raw = event.target.value;
-
-        if ('' === raw) {
-          onChange(null);
-          return;
-        }
-
-        // '2026-08-07T14:30' → '2026-08-07 14:30:00'.
-        onChange(raw.replace('T', ' ') + ':00');
-      }}
-      slotProps={{ inputLabel: { shrink: true } }}
-    />
-  );
-}

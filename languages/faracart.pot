@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-18T06:21:29Z\n"
+"POT-Creation-Date: 2026-08-18T07:54:19Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "X-Domain: faracart\n"
 
 #: admin-app/src/routes/Analytics.tsx:85
-#: admin-app/src/routes/CampaignBuilder.tsx:43
+#: admin-app/src/routes/CampaignBuilder.tsx:45
 #: admin-app/src/routes/Missions.tsx:43
 #: admin-app/src/templates/rewardLabel.ts:9
 msgid "% discount"
@@ -124,15 +124,15 @@ msgstr ""
 msgid "%s purchased orders"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:59
+#: admin-app/src/components/mission-builder/TargetFields.tsx:61
 msgid "(amount)"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:57
+#: admin-app/src/components/mission-builder/TargetFields.tsx:59
 msgid "(items)"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:54
+#: admin-app/src/components/mission-builder/TargetFields.tsx:56
 msgid "(weight units)"
 msgstr ""
 
@@ -204,11 +204,11 @@ msgstr ""
 msgid "A qualifying WooCommerce order was actually associated with this mission — a purchase, not a mission completion."
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:487
+#: admin-app/src/routes/CampaignBuilder.tsx:483
 msgid "A start later than the end means “after start OR before end” (crosses midnight)."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:384
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:380
 msgid "A window that crosses midnight (e.g. 22:00–06:00) counts the hours after start and before end."
 msgstr ""
 
@@ -222,6 +222,10 @@ msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:160
 msgid "AOV ratio"
+msgstr ""
+
+#: admin-app/src/lib/calendar.ts:133
+msgid "Aban"
 msgstr ""
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:100
@@ -238,7 +242,7 @@ msgstr ""
 msgid "Actions"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:379
+#: admin-app/src/routes/CampaignBuilder.tsx:381
 #: admin-app/src/routes/Campaigns.tsx:44
 #: admin-app/src/routes/MissionBuilder.tsx:356
 #: admin-app/src/routes/Missions.tsx:61
@@ -258,7 +262,7 @@ msgstr ""
 msgid "Add %s more"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:598
+#: admin-app/src/routes/CampaignBuilder.tsx:593
 msgid "Add a milestone"
 msgstr ""
 
@@ -266,7 +270,7 @@ msgstr ""
 msgid "Add automatically"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:323
+#: admin-app/src/routes/CampaignBuilder.tsx:325
 #: admin-app/src/routes/Campaigns.tsx:128
 msgid "Add campaign"
 msgstr ""
@@ -400,7 +404,7 @@ msgstr ""
 msgid "All missions"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:615
+#: admin-app/src/routes/CampaignBuilder.tsx:610
 msgid "All missions are already milestones of this campaign."
 msgstr ""
 
@@ -416,11 +420,11 @@ msgstr ""
 msgid "All statuses"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:131
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:133
 msgid "Allowed customer roles"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:260
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:262
 msgid "Allowed shipping zones"
 msgstr ""
 
@@ -440,7 +444,7 @@ msgstr ""
 msgid "Already at share"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:25
+#: admin-app/src/components/mission-builder/missionTypes.tsx:26
 #: admin-app/src/routes/Missions.tsx:50
 msgid "Amount"
 msgstr ""
@@ -510,12 +514,14 @@ msgstr ""
 msgid "Appended to the widget styles. Applied only while this template renders."
 msgstr ""
 
+#: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:117
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:107
 #: admin-app/src/routes/MissionPerformance.tsx:323
 #: admin-app/src/routes/Recommendations.tsx:734
 msgid "Apply"
 msgstr ""
 
-#: admin-app/src/components/date-range/CustomRangePicker.tsx:240
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:77
 msgid "Apply range"
 msgstr ""
 
@@ -546,11 +552,11 @@ msgstr ""
 msgid "Assisted revenue"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:435
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:431
 msgid "At least one of these coupon codes must be applied for the mission to count."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:72
+#: admin-app/src/components/mission-builder/missionTypes.tsx:74
 msgid "Attribute"
 msgstr ""
 
@@ -574,7 +580,7 @@ msgstr ""
 msgid "Attributed sales"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:190
+#: admin-app/src/components/mission-builder/TargetFields.tsx:193
 msgid "Attributes"
 msgstr ""
 
@@ -649,6 +655,10 @@ msgstr ""
 msgid "Avg. shipping"
 msgstr ""
 
+#: admin-app/src/lib/calendar.ts:134
+msgid "Azar"
+msgstr ""
+
 #: admin-app/src/routes/NotFound.tsx:20
 msgid "Back to Dashboard"
 msgstr ""
@@ -657,7 +667,7 @@ msgstr ""
 msgid "Back to WordPress Admin"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:330
+#: admin-app/src/routes/CampaignBuilder.tsx:332
 msgid "Back to campaigns"
 msgstr ""
 
@@ -673,6 +683,10 @@ msgstr ""
 #: includes/Templates/Mission/Template4.php:82
 #: includes/Templates/Mission/Template6.php:81
 msgid "Background"
+msgstr ""
+
+#: admin-app/src/lib/calendar.ts:136
+msgid "Bahman"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:819
@@ -697,7 +711,7 @@ msgstr ""
 msgid "Baseball cap"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:340
+#: admin-app/src/routes/CampaignBuilder.tsx:342
 #: admin-app/src/routes/MissionBuilder.tsx:317
 msgid "Basic information"
 msgstr ""
@@ -829,7 +843,7 @@ msgid "Caching and what the storefront measures."
 msgstr ""
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:118
-#: admin-app/src/components/mission-builder/TargetFields.tsx:127
+#: admin-app/src/components/mission-builder/TargetFields.tsx:130
 msgid "Calculate against"
 msgstr ""
 
@@ -846,7 +860,7 @@ msgstr ""
 msgid "Campaign #%d"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:310
+#: admin-app/src/routes/CampaignBuilder.tsx:312
 msgid "Campaign editor"
 msgstr ""
 
@@ -857,7 +871,7 @@ msgstr ""
 #: admin-app/src/routes/Appearance.tsx:695
 #: admin-app/src/routes/Appearance.tsx:715
 #: admin-app/src/routes/Appearance.tsx:722
-#: admin-app/src/routes/CampaignBuilder.tsx:707
+#: admin-app/src/routes/CampaignBuilder.tsx:702
 msgid "Campaign template"
 msgstr ""
 
@@ -871,7 +885,9 @@ msgid "Campaigns bundle multiple missions into scheduled, prioritized milestones
 msgstr ""
 
 #: admin-app/src/components/ConfirmDialog.tsx:59
-#: admin-app/src/routes/CampaignBuilder.tsx:286
+#: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:114
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:104
+#: admin-app/src/routes/CampaignBuilder.tsx:288
 #: admin-app/src/routes/MissionBuilder.tsx:262
 msgid "Cancel"
 msgstr ""
@@ -892,7 +908,7 @@ msgstr ""
 msgid "Cart page"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:274
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:276
 msgid "Cart state"
 msgstr ""
 
@@ -900,18 +916,18 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:24
 #: admin-app/src/components/mission-builder/TargetFields.tsx:30
 #: admin-app/src/components/mission-builder/TargetFields.tsx:36
-#: admin-app/src/components/mission-builder/TargetFields.tsx:42
-#: admin-app/src/components/mission-builder/TargetFields.tsx:47
+#: admin-app/src/components/mission-builder/TargetFields.tsx:43
+#: admin-app/src/components/mission-builder/TargetFields.tsx:49
 #: admin-app/src/routes/Settings.tsx:621
 msgid "Cart total (incl. tax & shipping)"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:153
-#: admin-app/src/components/mission-builder/TargetFields.tsx:145
+#: admin-app/src/components/mission-builder/TargetFields.tsx:148
 msgid "Categories"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:43
+#: admin-app/src/components/mission-builder/missionTypes.tsx:44
 #: admin-app/src/routes/Missions.tsx:53
 msgid "Category"
 msgstr ""
@@ -944,7 +960,7 @@ msgstr ""
 msgid "Children are evaluated against the same cart. AND requires every child, OR completes at the best child."
 msgstr ""
 
-#: admin-app/src/components/date-range/CustomRangePicker.tsx:229
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:67
 msgid "Choose a start and end date."
 msgstr ""
 
@@ -954,6 +970,15 @@ msgstr ""
 
 #: admin-app/src/routes/Appearance.tsx:95
 msgid "Classic cotton t-shirt"
+msgstr ""
+
+#: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:79
+#: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:88
+#: admin-app/src/components/wheel-picker/WheelField.tsx:42
+#: admin-app/src/components/wheel-picker/WheelField.tsx:43
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:73
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:82
+msgid "Clear"
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:560
@@ -1029,7 +1054,7 @@ msgstr ""
 msgid "Colors"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:62
+#: admin-app/src/components/mission-builder/missionTypes.tsx:63
 msgid "Combine child missions with AND/OR logic."
 msgstr ""
 
@@ -1098,7 +1123,7 @@ msgstr ""
 msgid "Completions where the customer also saw a product recommendation for this mission in the same session (UPSELL_REFACTOR §30)."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:61
+#: admin-app/src/components/mission-builder/missionTypes.tsx:62
 #: admin-app/src/routes/Missions.tsx:56
 msgid "Composite"
 msgstr ""
@@ -1221,7 +1246,7 @@ msgstr ""
 msgid "Could not load the attribution dashboard."
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:315
+#: admin-app/src/routes/CampaignBuilder.tsx:317
 msgid "Could not load the campaign."
 msgstr ""
 
@@ -1271,7 +1296,7 @@ msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:28
 #: admin-app/src/routes/Analytics.tsx:88
-#: admin-app/src/routes/CampaignBuilder.tsx:46
+#: admin-app/src/routes/CampaignBuilder.tsx:48
 #: admin-app/src/routes/Missions.tsx:46
 #: admin-app/src/templates/rewardLabel.ts:12
 #: includes/Frontend/ProgressUI.php:1006
@@ -1295,7 +1320,7 @@ msgstr ""
 msgid "Create Mission"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:283
+#: admin-app/src/routes/CampaignBuilder.tsx:285
 msgid "Create campaign"
 msgstr ""
 
@@ -1362,7 +1387,7 @@ msgstr ""
 msgid "Customer-facing copy and template for the progress widget."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:114
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:116
 msgid "Customers"
 msgstr ""
 
@@ -1396,7 +1421,7 @@ msgstr ""
 msgid "Daily attributed sales and purchased orders trend"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:471
+#: admin-app/src/routes/CampaignBuilder.tsx:472
 msgid "Daily from"
 msgstr ""
 
@@ -1404,7 +1429,7 @@ msgstr ""
 msgid "Daily impressions, completions and revenue trend"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:482
+#: admin-app/src/routes/CampaignBuilder.tsx:480
 msgid "Daily until"
 msgstr ""
 
@@ -1418,6 +1443,10 @@ msgstr ""
 msgid "Data sufficiency"
 msgstr ""
 
+#: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:104
+msgid "Date and time"
+msgstr ""
+
 #: admin-app/src/components/date-range/DateRangeFilter.tsx:82
 msgid "Date range"
 msgstr ""
@@ -1426,11 +1455,15 @@ msgstr ""
 msgid "Date range filter"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:374
+#: admin-app/src/components/wheel-picker/WheelDatePicker.tsx:32
+msgid "Day"
+msgstr ""
+
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:373
 msgid "Day window ends"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:364
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:366
 msgid "Day window starts"
 msgstr ""
 
@@ -1446,7 +1479,7 @@ msgstr ""
 msgid "Default (mission templates)"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:713
+#: admin-app/src/routes/CampaignBuilder.tsx:708
 msgid "Default (no campaign template)"
 msgstr ""
 
@@ -1482,7 +1515,7 @@ msgstr ""
 msgid "Delete this mission?"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:359
+#: admin-app/src/routes/CampaignBuilder.tsx:361
 #: admin-app/src/routes/MissionBuilder.tsx:336
 msgid "Description"
 msgstr ""
@@ -1497,6 +1530,10 @@ msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:892
 msgid "Developer hooks"
+msgstr ""
+
+#: admin-app/src/lib/calendar.ts:135
+msgid "Dey"
 msgstr ""
 
 #: admin-app/src/routes/RevenueOverview.tsx:711
@@ -1544,8 +1581,8 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:23
 #: admin-app/src/components/mission-builder/TargetFields.tsx:29
 #: admin-app/src/components/mission-builder/TargetFields.tsx:35
-#: admin-app/src/components/mission-builder/TargetFields.tsx:41
-#: admin-app/src/components/mission-builder/TargetFields.tsx:46
+#: admin-app/src/components/mission-builder/TargetFields.tsx:42
+#: admin-app/src/components/mission-builder/TargetFields.tsx:48
 #: admin-app/src/routes/Settings.tsx:617
 msgid "Discounted subtotal"
 msgstr ""
@@ -1554,7 +1591,7 @@ msgstr ""
 msgid "Dismiss"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:498
+#: admin-app/src/routes/CampaignBuilder.tsx:493
 #: admin-app/src/routes/MissionBuilder.tsx:430
 #: admin-app/src/routes/Settings.tsx:1017
 msgid "Display"
@@ -1596,7 +1633,7 @@ msgstr ""
 msgid "Distinct orders associated with this mission in the selected period."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:37
+#: admin-app/src/components/mission-builder/missionTypes.tsx:38
 #: admin-app/src/routes/Missions.tsx:52
 msgid "Distinct quantity"
 msgstr ""
@@ -1634,9 +1671,9 @@ msgstr ""
 msgid "Edit %s"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:295
-#: admin-app/src/routes/CampaignBuilder.tsx:309
-#: admin-app/src/routes/CampaignBuilder.tsx:323
+#: admin-app/src/routes/CampaignBuilder.tsx:297
+#: admin-app/src/routes/CampaignBuilder.tsx:311
+#: admin-app/src/routes/CampaignBuilder.tsx:325
 msgid "Edit campaign"
 msgstr ""
 
@@ -1679,13 +1716,17 @@ msgstr ""
 msgid "Ended"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:326
-#: admin-app/src/routes/CampaignBuilder.tsx:410
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:328
+#: admin-app/src/routes/CampaignBuilder.tsx:412
 msgid "Ends at"
 msgstr ""
 
 #: includes/Frontend/ProgressUI.php:1007
 msgid "Ends in"
+msgstr ""
+
+#: admin-app/src/lib/calendar.ts:137
+msgid "Esfand"
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:198
@@ -1746,19 +1787,19 @@ msgstr ""
 msgid "Estimated, not guaranteed."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:75
+#: admin-app/src/components/mission-builder/TargetFields.tsx:77
 msgid "Example: if the target is 10 items, a cart with 7 items is 70% of the way there."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:69
+#: admin-app/src/components/mission-builder/TargetFields.tsx:71
 msgid "Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:80
+#: admin-app/src/components/mission-builder/TargetFields.tsx:82
 msgid "Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:99
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:101
 msgid "Excluded products"
 msgstr ""
 
@@ -1865,6 +1906,10 @@ msgstr ""
 msgid "FaraCart:"
 msgstr ""
 
+#: admin-app/src/lib/calendar.ts:126
+msgid "Farvardin"
+msgstr ""
+
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:184
 #: includes/Frontend/ProgressUI.php:1030
 msgid "Finish today — your reward is waiting"
@@ -1874,7 +1919,7 @@ msgstr ""
 msgid "First matching mission only"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:191
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:193
 msgid "First order only"
 msgstr ""
 
@@ -1890,7 +1935,7 @@ msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:26
 #: admin-app/src/routes/Analytics.tsx:86
-#: admin-app/src/routes/CampaignBuilder.tsx:44
+#: admin-app/src/routes/CampaignBuilder.tsx:46
 #: admin-app/src/routes/Missions.tsx:44
 #: admin-app/src/templates/rewardLabel.ts:10
 #: includes/Frontend/ProgressUI.php:1004
@@ -1909,7 +1954,7 @@ msgstr ""
 #: admin-app/src/components/mission-builder/RewardFields.tsx:27
 #: admin-app/src/routes/Analytics.tsx:87
 #: admin-app/src/routes/Appearance.tsx:133
-#: admin-app/src/routes/CampaignBuilder.tsx:45
+#: admin-app/src/routes/CampaignBuilder.tsx:47
 #: admin-app/src/routes/Missions.tsx:45
 #: admin-app/src/templates/rewardLabel.ts:11
 #: includes/Frontend/ProgressUI.php:1005
@@ -1921,7 +1966,7 @@ msgstr ""
 #: admin-app/src/routes/Analytics.tsx:84
 #: admin-app/src/routes/Appearance.tsx:69
 #: admin-app/src/routes/Appearance.tsx:127
-#: admin-app/src/routes/CampaignBuilder.tsx:42
+#: admin-app/src/routes/CampaignBuilder.tsx:44
 #: admin-app/src/routes/Missions.tsx:42
 #: admin-app/src/templates/rewardLabel.ts:8
 #: includes/Frontend/ProgressUI.php:1002
@@ -1933,12 +1978,16 @@ msgstr ""
 msgid "Free shipping unlocked"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:29
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:31
 msgid "Fri"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:54
+#: admin-app/src/routes/CampaignBuilder.tsx:56
 msgid "Friday"
+msgstr ""
+
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:48
+msgid "From"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:523
@@ -1979,7 +2028,7 @@ msgstr ""
 msgid "Gift products (customer picks one)"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:353
+#: admin-app/src/routes/CampaignBuilder.tsx:355
 msgid "Give the campaign a name."
 msgstr ""
 
@@ -2000,7 +2049,7 @@ msgstr ""
 msgid "Good performance"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:324
+#: admin-app/src/routes/CampaignBuilder.tsx:326
 msgid "Group missions into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds."
 msgstr ""
 
@@ -2008,7 +2057,7 @@ msgstr ""
 msgid "Group missions into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:156
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:158
 msgid "Guests (not logged in)"
 msgstr ""
 
@@ -2069,6 +2118,10 @@ msgstr ""
 msgid "Horizontal offset (px)"
 msgstr ""
 
+#: admin-app/src/components/wheel-picker/WheelTimePicker.tsx:28
+msgid "Hour"
+msgstr ""
+
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:212
 msgid "How Estimated Profit becomes available"
 msgstr ""
@@ -2114,7 +2167,7 @@ msgstr ""
 msgid "How suggested products are ordered (Phase 32 advanced upsell ranking)."
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:499
+#: admin-app/src/routes/CampaignBuilder.tsx:494
 msgid "How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own mission card."
 msgstr ""
 
@@ -2164,7 +2217,7 @@ msgstr ""
 msgid "Inactive"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:382
+#: admin-app/src/routes/CampaignBuilder.tsx:384
 msgid "Inactive campaigns never evaluate their missions on the storefront."
 msgstr ""
 
@@ -2222,12 +2275,12 @@ msgstr ""
 msgid "Influenced sales"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:354
+#: admin-app/src/routes/CampaignBuilder.tsx:356
 #: admin-app/src/routes/MissionBuilder.tsx:331
 msgid "Internal name shown in the admin."
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:364
+#: admin-app/src/routes/CampaignBuilder.tsx:366
 msgid "Internal notes about this campaign."
 msgstr ""
 
@@ -2258,6 +2311,10 @@ msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:897
 msgid "Key Insights"
+msgstr ""
+
+#: admin-app/src/lib/calendar.ts:128
+msgid "Khordad"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:256
@@ -2292,15 +2349,15 @@ msgstr ""
 msgid "Learn how"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:333
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:335
 msgid "Leave both empty to run the mission at all times. Local site time is used."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:175
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:177
 msgid "Leave both unchecked to allow everyone."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:132
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:134
 msgid "Leave empty to allow every role. Guests never match a role restriction."
 msgstr ""
 
@@ -2338,7 +2395,7 @@ msgstr ""
 msgid "Loading product…"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:296
+#: admin-app/src/routes/CampaignBuilder.tsx:298
 msgid "Loading the campaign…"
 msgstr ""
 
@@ -2354,11 +2411,11 @@ msgstr ""
 msgid "Log file"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:172
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:174
 msgid "Logged-in customers"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:216
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:218
 msgid "Logged-in customers whose lifetime spend and order count meet the thresholds below."
 msgstr ""
 
@@ -2371,7 +2428,7 @@ msgstr ""
 msgid "Low"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:422
+#: admin-app/src/routes/CampaignBuilder.tsx:424
 #: admin-app/src/routes/MissionBuilder.tsx:517
 msgid "Lower numbers win conflicts."
 msgstr ""
@@ -2422,6 +2479,10 @@ msgstr ""
 msgid "Medium"
 msgstr ""
 
+#: admin-app/src/lib/calendar.ts:132
+msgid "Mehr"
+msgstr ""
+
 #: admin-app/src/components/mission-builder/DisplayFields.tsx:139
 msgid "Message (in progress)"
 msgstr ""
@@ -2430,7 +2491,7 @@ msgstr ""
 msgid "Milestone chain"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:512
+#: admin-app/src/routes/CampaignBuilder.tsx:507
 #: admin-app/src/routes/Campaigns.tsx:170
 msgid "Milestones"
 msgstr ""
@@ -2443,16 +2504,20 @@ msgstr ""
 msgid "Minimal inline strip — icon, title, remaining amount and a slim bar."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:240
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:242
 msgid "Minimum completed orders"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:278
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:280
 msgid "Minimum items in cart"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:229
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:231
 msgid "Minimum lifetime spend"
+msgstr ""
+
+#: admin-app/src/components/wheel-picker/WheelTimePicker.tsx:28
+msgid "Minute"
 msgstr ""
 
 #: admin-app/src/components/revenue/RevenueToolbar.tsx:57
@@ -2568,12 +2633,20 @@ msgstr ""
 msgid "Moderate data"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:25
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:27
 msgid "Mon"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:50
+#: admin-app/src/routes/CampaignBuilder.tsx:52
 msgid "Monday"
+msgstr ""
+
+#: admin-app/src/components/wheel-picker/WheelDatePicker.tsx:32
+msgid "Month"
+msgstr ""
+
+#: admin-app/src/lib/calendar.ts:130
+msgid "Mordad"
 msgstr ""
 
 #: admin-app/src/routes/MissionPerformance.tsx:123
@@ -2584,23 +2657,19 @@ msgstr ""
 msgid "Most popular first"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:572
+#: admin-app/src/routes/CampaignBuilder.tsx:567
 msgid "Move down"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:561
+#: admin-app/src/routes/CampaignBuilder.tsx:556
 msgid "Move up"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:345
+#: admin-app/src/routes/CampaignBuilder.tsx:347
 #: admin-app/src/routes/Campaigns.tsx:169
 #: admin-app/src/routes/MissionBuilder.tsx:322
 #: admin-app/src/routes/Missions.tsx:281
 msgid "Name"
-msgstr ""
-
-#: admin-app/src/components/date-range/CustomRangePicker.tsx:154
-msgid "Next month"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:32
@@ -2671,7 +2740,7 @@ msgstr ""
 msgid "No missions yet"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:614
+#: admin-app/src/routes/CampaignBuilder.tsx:609
 msgid "No missions yet — create a mission on the Missions page first."
 msgstr ""
 
@@ -2695,7 +2764,7 @@ msgid "No recommendations available right now."
 msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:23
-#: admin-app/src/routes/CampaignBuilder.tsx:639
+#: admin-app/src/routes/CampaignBuilder.tsx:634
 msgid "No reward"
 msgstr ""
 
@@ -2822,23 +2891,23 @@ msgstr ""
 msgid "Only mission events within this window before an order are attributed to it."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:304
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:306
 msgid "Only products carrying any of these tags count toward the mission. Leave empty to count every product."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:179
+#: admin-app/src/components/mission-builder/TargetFields.tsx:182
 msgid "Only products carrying any of these tags count toward the target."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:149
+#: admin-app/src/components/mission-builder/TargetFields.tsx:152
 msgid "Only products in these categories count toward the target."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:194
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:196
 msgid "Only shoppers with no completed orders see this mission. Guests always qualify."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:164
+#: admin-app/src/components/mission-builder/TargetFields.tsx:167
 msgid "Only these products count toward the target. Variations are matched by their parent product."
 msgstr ""
 
@@ -2878,7 +2947,7 @@ msgstr ""
 msgid "Optimization opportunity"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:436
+#: admin-app/src/routes/CampaignBuilder.tsx:438
 msgid "Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Missions inherit these rules unless they pin their own."
 msgstr ""
 
@@ -2891,7 +2960,7 @@ msgstr ""
 msgid "Optional icon shown next to the progress bar."
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:476
+#: admin-app/src/routes/CampaignBuilder.tsx:475
 msgid "Optional start of the daily window."
 msgstr ""
 
@@ -2927,6 +2996,10 @@ msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:116
 msgid "Orders are attributed once they reach a revenue-producing status. No mission-influenced orders were found in this range."
+msgstr ""
+
+#: admin-app/src/lib/calendar.ts:127
+msgid "Ordibehesht"
 msgstr ""
 
 #: includes/Templates/Mission/Template1.php:144
@@ -3045,7 +3118,6 @@ msgstr ""
 msgid "Preview state"
 msgstr ""
 
-#: admin-app/src/components/date-range/CustomRangePicker.tsx:144
 #: admin-app/src/date-range/dateRange.ts:112
 msgid "Previous month"
 msgstr ""
@@ -3058,7 +3130,7 @@ msgstr ""
 msgid "Price gap"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:418
+#: admin-app/src/routes/CampaignBuilder.tsx:420
 #: admin-app/src/routes/Campaigns.tsx:172
 #: admin-app/src/routes/MissionBuilder.tsx:512
 #: admin-app/src/routes/Missions.tsx:285
@@ -3069,11 +3141,11 @@ msgstr ""
 msgid "Priority & conflicts"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:245
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:247
 msgid "Processing + completed orders."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:49
+#: admin-app/src/components/mission-builder/missionTypes.tsx:50
 #: admin-app/src/routes/Analytics.tsx:565
 #: admin-app/src/routes/Analytics.tsx:1214
 #: admin-app/src/routes/Missions.tsx:54
@@ -3123,17 +3195,17 @@ msgstr ""
 msgid "Product suggestions"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:297
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:299
 msgid "Product tags"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:164
-#: admin-app/src/components/mission-builder/TargetFields.tsx:160
+#: admin-app/src/components/mission-builder/TargetFields.tsx:163
 #: admin-app/src/routes/UpsellAnalytics.tsx:435
 msgid "Products"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:194
+#: admin-app/src/components/mission-builder/TargetFields.tsx:197
 msgid "Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target."
 msgstr ""
 
@@ -3264,9 +3336,9 @@ msgstr ""
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:25
 #: admin-app/src/components/mission-builder/TargetFields.tsx:27
 #: admin-app/src/components/mission-builder/TargetFields.tsx:33
-#: admin-app/src/components/mission-builder/TargetFields.tsx:39
-#: admin-app/src/components/mission-builder/TargetFields.tsx:44
-#: admin-app/src/components/mission-builder/missionTypes.tsx:31
+#: admin-app/src/components/mission-builder/TargetFields.tsx:40
+#: admin-app/src/components/mission-builder/TargetFields.tsx:46
+#: admin-app/src/components/mission-builder/missionTypes.tsx:32
 #: admin-app/src/routes/Missions.tsx:51
 msgid "Quantity"
 msgstr ""
@@ -3275,35 +3347,35 @@ msgstr ""
 msgid "Raw interaction metrics from the event log — impressions, completions, revenue and suggestions."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:26
+#: admin-app/src/components/mission-builder/missionTypes.tsx:27
 msgid "Reach a cart amount — subtotal, total or discounted subtotal."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:38
+#: admin-app/src/components/mission-builder/missionTypes.tsx:39
 msgid "Reach a number of distinct products in the cart."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:56
+#: admin-app/src/components/mission-builder/missionTypes.tsx:57
 msgid "Reach a total cart weight."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:32
+#: admin-app/src/components/mission-builder/missionTypes.tsx:33
 msgid "Reach a total item quantity in the cart."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:44
+#: admin-app/src/components/mission-builder/missionTypes.tsx:45
 msgid "Reach an amount or quantity across chosen categories."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:73
+#: admin-app/src/components/mission-builder/missionTypes.tsx:75
 msgid "Reach an amount or quantity across products with chosen attributes."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:68
+#: admin-app/src/components/mission-builder/missionTypes.tsx:69
 msgid "Reach an amount or quantity across products with chosen tags."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:50
+#: admin-app/src/components/mission-builder/missionTypes.tsx:51
 msgid "Reach an amount or quantity of specific products."
 msgstr ""
 
@@ -3341,7 +3413,7 @@ msgstr ""
 msgid "Recommended target"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:435
+#: admin-app/src/routes/CampaignBuilder.tsx:437
 msgid "Recurring schedule"
 msgstr ""
 
@@ -3364,7 +3436,7 @@ msgstr ""
 msgid "Remaining"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:583
+#: admin-app/src/routes/CampaignBuilder.tsx:578
 msgid "Remove"
 msgstr ""
 
@@ -3373,16 +3445,16 @@ msgstr ""
 msgid "Remove condition"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:343
-#: admin-app/src/routes/CampaignBuilder.tsx:450
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:345
+#: admin-app/src/routes/CampaignBuilder.tsx:452
 msgid "Repeat on days (optional)"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:434
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:430
 msgid "Required coupons in cart"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:300
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:302
 msgid "Required product tags"
 msgstr ""
 
@@ -3510,11 +3582,11 @@ msgstr ""
 msgid "Sample campaign"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:30
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:32
 msgid "Sat"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:55
+#: admin-app/src/routes/CampaignBuilder.tsx:57
 msgid "Saturday"
 msgstr ""
 
@@ -3522,7 +3594,7 @@ msgstr ""
 msgid "Save appearance"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:282
+#: admin-app/src/routes/CampaignBuilder.tsx:284
 #: admin-app/src/routes/MissionBuilder.tsx:258
 msgid "Save changes"
 msgstr ""
@@ -3532,19 +3604,19 @@ msgid "Save settings"
 msgstr ""
 
 #: admin-app/src/routes/Appearance.tsx:588
-#: admin-app/src/routes/CampaignBuilder.tsx:280
+#: admin-app/src/routes/CampaignBuilder.tsx:282
 #: admin-app/src/routes/MissionBuilder.tsx:256
 #: admin-app/src/routes/Settings.tsx:471
 msgid "Saving…"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:314
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:316
 #: admin-app/src/routes/Campaigns.tsx:173
 #: admin-app/src/routes/Missions.tsx:286
 msgid "Schedule"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:394
+#: admin-app/src/routes/CampaignBuilder.tsx:396
 msgid "Schedule & priority"
 msgstr ""
 
@@ -3565,7 +3637,7 @@ msgstr ""
 msgid "Search and select…"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:301
+#: admin-app/src/components/mission-builder/TargetFields.tsx:304
 msgid "Search attributes…"
 msgstr ""
 
@@ -3634,6 +3706,10 @@ msgstr ""
 msgid "Shadow intensity"
 msgstr ""
 
+#: admin-app/src/lib/calendar.ts:131
+msgid "Shahrivar"
+msgstr ""
+
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:125
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:133
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:144
@@ -3656,7 +3732,7 @@ msgstr ""
 msgid "Shipping cost"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:257
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:259
 msgid "Shipping destination"
 msgstr ""
 
@@ -3865,8 +3941,8 @@ msgstr ""
 msgid "Start collecting performance data"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:319
-#: admin-app/src/routes/CampaignBuilder.tsx:403
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:321
+#: admin-app/src/routes/CampaignBuilder.tsx:405
 msgid "Starts at"
 msgstr ""
 
@@ -3892,8 +3968,8 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:22
 #: admin-app/src/components/mission-builder/TargetFields.tsx:28
 #: admin-app/src/components/mission-builder/TargetFields.tsx:34
-#: admin-app/src/components/mission-builder/TargetFields.tsx:40
-#: admin-app/src/components/mission-builder/TargetFields.tsx:45
+#: admin-app/src/components/mission-builder/TargetFields.tsx:41
+#: admin-app/src/components/mission-builder/TargetFields.tsx:47
 #: admin-app/src/routes/Settings.tsx:613
 msgid "Subtotal (before discounts)"
 msgstr ""
@@ -3902,11 +3978,11 @@ msgstr ""
 msgid "Suggestion ranking"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:31
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:33
 msgid "Sun"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:56
+#: admin-app/src/routes/CampaignBuilder.tsx:58
 msgid "Sunday"
 msgstr ""
 
@@ -3914,16 +3990,16 @@ msgstr ""
 msgid "Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {mission_name}."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:67
+#: admin-app/src/components/mission-builder/missionTypes.tsx:68
 msgid "Tag"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:175
+#: admin-app/src/components/mission-builder/TargetFields.tsx:178
 msgid "Tags"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:102
-#: admin-app/src/components/mission-builder/TargetFields.tsx:113
+#: admin-app/src/components/mission-builder/TargetFields.tsx:116
 #: admin-app/src/routes/MissionBuilder.tsx:377
 msgid "Target"
 msgstr ""
@@ -4044,7 +4120,7 @@ msgstr ""
 msgid "The campaign status was updated."
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:197
+#: admin-app/src/routes/CampaignBuilder.tsx:199
 msgid "The campaign was created."
 msgstr ""
 
@@ -4052,11 +4128,11 @@ msgstr ""
 msgid "The campaign was deleted."
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:196
+#: admin-app/src/routes/CampaignBuilder.tsx:198
 msgid "The campaign was updated."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:284
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:286
 msgid "The cart must contain at least this many items."
 msgstr ""
 
@@ -4088,7 +4164,7 @@ msgstr ""
 msgid "The funnel and the direct vs assisted models behind FaraCart’s attributed revenue."
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:341
+#: admin-app/src/routes/CampaignBuilder.tsx:343
 msgid "The identity and lifecycle of the campaign."
 msgstr ""
 
@@ -4132,7 +4208,7 @@ msgstr ""
 msgid "The mission gap is already closed — no upsells needed."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:264
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:266
 msgid "The mission only applies when the cart ships to one of these zones. Leave empty for every zone."
 msgstr ""
 
@@ -4156,7 +4232,7 @@ msgstr ""
 msgid "The mission was updated."
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:513
+#: admin-app/src/routes/CampaignBuilder.tsx:508
 msgid "The ordered missions of the campaign. Shoppers unlock each mission in order as their cart grows."
 msgstr ""
 
@@ -4208,7 +4284,7 @@ msgstr ""
 msgid "The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/TargetFields.tsx:118
+#: admin-app/src/components/mission-builder/TargetFields.tsx:121
 msgid "The threshold shoppers need to reach"
 msgstr ""
 
@@ -4224,7 +4300,7 @@ msgstr ""
 msgid "These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:103
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:105
 msgid "These products never count toward the mission, even when they would otherwise qualify."
 msgstr ""
 
@@ -4265,20 +4341,32 @@ msgstr ""
 msgid "This threshold is %s above the median order value (%s)."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:28
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:30
 msgid "Thu"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:53
+#: admin-app/src/routes/CampaignBuilder.tsx:55
 msgid "Thursday"
+msgstr ""
+
+#: admin-app/src/components/wheel-picker/WheelTimeField.tsx:98
+msgid "Time"
 msgstr ""
 
 #: admin-app/src/routes/MissionBuilder.tsx:477
 msgid "Times each user can complete"
 msgstr ""
 
+#: admin-app/src/lib/calendar.ts:129
+msgid "Tir"
+msgstr ""
+
 #: admin-app/src/components/mission-builder/DisplayFields.tsx:65
 msgid "Title"
+msgstr ""
+
+#: admin-app/src/components/date-range/CustomRangePicker.tsx:54
+msgid "To"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:615
@@ -4335,7 +4423,7 @@ msgstr ""
 msgid "Total lift"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:234
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:236
 msgid "Total paid across all orders."
 msgstr ""
 
@@ -4359,11 +4447,11 @@ msgstr ""
 msgid "Try again"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:26
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:28
 msgid "Tue"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:51
+#: admin-app/src/routes/CampaignBuilder.tsx:53
 msgid "Tuesday"
 msgstr ""
 
@@ -4431,7 +4519,7 @@ msgid "Upsells shows which products help customers reach Missions and generate a
 msgstr ""
 
 #: admin-app/src/components/mission-builder/DisplayFields.tsx:125
-#: admin-app/src/routes/CampaignBuilder.tsx:750
+#: admin-app/src/routes/CampaignBuilder.tsx:745
 msgid "Use global default"
 msgstr ""
 
@@ -4443,7 +4531,7 @@ msgstr ""
 msgid "User menu"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:213
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:215
 msgid "VIP customers only"
 msgstr ""
 
@@ -4504,15 +4592,15 @@ msgstr ""
 msgid "We couldn’t load your analytics. Your Missions are still working normally."
 msgstr ""
 
-#: admin-app/src/components/mission-builder/ConditionFields.tsx:27
+#: admin-app/src/components/mission-builder/ConditionFields.tsx:29
 msgid "Wed"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:52
+#: admin-app/src/routes/CampaignBuilder.tsx:54
 msgid "Wednesday"
 msgstr ""
 
-#: admin-app/src/components/mission-builder/missionTypes.tsx:55
+#: admin-app/src/components/mission-builder/missionTypes.tsx:56
 #: admin-app/src/routes/Missions.tsx:55
 msgid "Weight"
 msgstr ""
@@ -4565,7 +4653,7 @@ msgstr ""
 msgid "When product cost is recorded, its profit is also considered in the ranking."
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:395
+#: admin-app/src/routes/CampaignBuilder.tsx:397
 msgid "When the campaign runs, and how it competes with other campaigns."
 msgstr ""
 
@@ -4651,6 +4739,10 @@ msgstr ""
 msgid "Write errors (and debug entries when debug mode is on) to a log file."
 msgstr ""
 
+#: admin-app/src/components/wheel-picker/WheelDatePicker.tsx:32
+msgid "Year"
+msgstr ""
+
 #: admin-app/src/components/mission-builder/RewardFields.tsx:33
 msgid "Yes (stack with other rewards)"
 msgstr ""
@@ -4708,7 +4800,7 @@ msgstr ""
 msgid "e.g. Free shipping over 500K"
 msgstr ""
 
-#: admin-app/src/routes/CampaignBuilder.tsx:349
+#: admin-app/src/routes/CampaignBuilder.tsx:351
 msgid "e.g. Summer Sale"
 msgstr ""
 

@@ -366,8 +366,11 @@ check( 'admin format.ts is locale-driven (Intl + boot.locale)', false !== strpos
 $date_range_src = read_source( $root . '/admin-app/src/date-range/dateRange.ts' );
 check( 'admin date range formats via Intl.DateTimeFormat', false !== strpos( $date_range_src, 'Intl.DateTimeFormat' ) && false !== strpos( $date_range_src, 'boot.locale' ) );
 
+$calendar_src = read_source( $root . '/admin-app/src/lib/calendar.ts' );
+check( 'wheel date picker is calendar-aware (Intl + boot.locale)', false !== strpos( $calendar_src, 'Intl.DateTimeFormat' ) && false !== strpos( $calendar_src, 'boot.locale' ) );
+
 $picker_src = read_source( $root . '/admin-app/src/components/date-range/CustomRangePicker.tsx' );
-check( 'custom range picker formats via Intl.DateTimeFormat', false !== strpos( $picker_src, 'Intl.DateTimeFormat' ) && false !== strpos( $picker_src, 'boot.locale' ) );
+check( 'custom range picker uses the calendar-aware wheel picker', false !== strpos( $picker_src, 'WheelDatePicker' ) );
 
 $analytics_src = read_source( $root . '/admin-app/src/routes/Analytics.tsx' );
 check( 'analytics formats via Intl.DateTimeFormat', false !== strpos( $analytics_src, 'Intl.DateTimeFormat' ) && false !== strpos( $analytics_src, 'boot.locale' ) );

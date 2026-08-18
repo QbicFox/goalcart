@@ -30,6 +30,8 @@ import PreviewPanel from '../components/preview/PreviewPanel';
 import { usePreview } from '../components/preview/usePreview';
 import SectionCard from '../components/mission-builder/SectionCard';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
+import WheelDateTimeField from '../components/wheel-picker/WheelDateTimeField';
+import WheelTimeField from '../components/wheel-picker/WheelTimeField';
 import { useStickyBarActions } from '../providers/ActionBarProvider';
 import { useFullscreen } from '../providers/FullscreenProvider';
 import PageContainer from '../components/PageContainer';
@@ -399,14 +401,14 @@ export default function CampaignBuilder() {
             >
               <Grid container spacing={2} sx={{ alignItems: 'flex-start' }}>
                 <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-                  <TextFieldDate
+                  <WheelDateTimeField
                     label={__('Starts at', 'faracart')}
                     value={values.starts_at}
                     onChange={(starts_at) => patch({ starts_at })}
                   />
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-                  <TextFieldDate
+                  <WheelDateTimeField
                     label={__('Ends at', 'faracart')}
                     value={values.ends_at}
                     onChange={(ends_at) => patch({ ends_at })}
@@ -465,30 +467,23 @@ export default function CampaignBuilder() {
                       })}
                     </Stack>
                   </Box>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-                  <TextField
+                </Grid>                <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
+                  <WheelTimeField
                     label={__('Daily from', 'faracart')}
-                    type="time"
-                    fullWidth
                     value={scheduleStart}
-                    onChange={(event) => patchDisplay({ schedule_start_time: event.target.value })}
+                    onChange={(next) => patchDisplay({ schedule_start_time: next })}
                     helperText={__('Optional start of the daily window.', 'faracart')}
-                    slotProps={{ inputLabel: { shrink: true } }}
                   />
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
-                  <TextField
+                  <WheelTimeField
                     label={__('Daily until', 'faracart')}
-                    type="time"
-                    fullWidth
                     value={scheduleEnd}
-                    onChange={(event) => patchDisplay({ schedule_end_time: event.target.value })}
+                    onChange={(next) => patchDisplay({ schedule_end_time: next })}
                     helperText={__(
                       'A start later than the end means “after start OR before end” (crosses midnight).',
                       'faracart'
                     )}
-                    slotProps={{ inputLabel: { shrink: true } }}
                   />
                 </Grid>
               </Grid>
@@ -761,33 +756,3 @@ function CampaignDisplayFields({
   );
 }
 
-interface TextFieldDateProps {
-  label: string;
-  value: string | null;
-  onChange: (value: string | null) => void;
-}
-
-/** datetime-local input mapping to/from the API's 'Y-m-d H:i:s'. */
-function TextFieldDate({ label, value, onChange }: TextFieldDateProps) {
-  const inputValue = value ? value.replace(' ', 'T').slice(0, 16) : '';
-
-  return (
-    <TextField
-      label={label}
-      type="datetime-local"
-      fullWidth
-      value={inputValue}
-      onChange={(event) => {
-        const raw = event.target.value;
-
-        if ('' === raw) {
-          onChange(null);
-          return;
-        }
-
-        onChange(raw.replace('T', ' ') + ':00');
-      }}
-      slotProps={{ inputLabel: { shrink: true } }}
-    />
-  );
-}

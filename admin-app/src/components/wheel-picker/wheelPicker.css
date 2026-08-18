@@ -1,0 +1,35 @@
+/**
+ * ncdai/react-wheel-picker — admin styling.
+ *
+ * The package is unstyled (data-attribute hooks); this sheet aligns the
+ * wheels with the MUI admin theme: muted option rows, a highlighted
+ * center band for the selected value and a visible focus ring.
+ */
+
+/* The wheel itself: inherit the admin font, keep the item rows muted. */
+.faracart-wheel [data-rwp] {
+  font-size: 13px;
+}
+
+.faracart-wheel [data-rwp-option] {
+  font-size: 13px;
+  color: #50575e;
+}
+
+/* The center band: the selected value sits in a subtle accent strip. */
+.faracart-wheel [data-rwp-highlight-wrapper] {
+  border-top: 1px solid rgba(34, 113, 177, 0.28);
+  border-bottom: 1px solid rgba(34, 113, 177, 0.28);
+  background: rgba(34, 113, 177, 0.07);
+}
+
+.faracart-wheel [data-rwp-highlight-item] {
+  color: #1d2327;
+  font-weight: 700;
+}
+
+/* Visible focus ring (the base stylesheet removes the default outline). */
+.faracart-wheel [data-rwp]:focus-visible {
+  box-shadow: inset 0 0 0 1px #2271b1;
+  border-radius: 4px;
+}
