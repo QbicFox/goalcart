@@ -394,6 +394,65 @@ try {
 
 $settings->set_many( $all_before );
 
+// Self-heal (regression): settings persisted by pre-rename (Goal →
+// Mission) versions carry the legacy 'goal' scope key inside
+// template_defaults / template_settings / template_versions plus the
+// default_goal_behavior key. The served payload must migrate them to the
+// canonical 'mission' scope AND drop the legacy keys — otherwise the
+// Settings page echoes 'goal' back and the REST schema rejects the save
+// (template_defaults is additionalProperties:false and
+// validate_template_settings only knows mission/campaign) with a 400
+// ("invalid parameter(s): template_settings"). Wrapped in a transaction
+// so the option row always reverts, exactly like the blocks above.
+$wpdb->query( 'START TRANSACTION' );
+
+try {
+	$stored                      = get_option( Settings::OPTION_NAME, array() );
+	$stored                      = is_array( $stored ) ? $stored : array();
+	$stored['default_goal_behavior'] = 'first';
+	$stored['template_defaults'] = array( 'goal' => 'template-3', 'campaign' => '' );
+	$stored['template_settings'] = array( 'goal' => array(), 'campaign' => array() );
+	$stored['template_versions'] = array( 'goal' => array( 'template-1' => 1 ), 'campaign' => array() );
+	update_option( Settings::OPTION_NAME, $stored, false );
+	wp_cache_delete( Settings::OPTION_NAME, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+
+	$fresh = new Settings();
+	$all   = $fresh->all();
+
+	check( 'legacy default_goal_behavior migrates and is dropped', 'first' === $all['default_mission_behavior'] && ! array_key_exists( 'default_goal_behavior', $all ) );
+	check( 'legacy goal scope migrates in template_defaults', 'template-3' === $all['template_defaults']['mission'] && ! array_key_exists( 'goal', $all['template_defaults'] ) );
+	check( 'legacy goal scope migrates in template_settings', is_array( $all['template_settings']['mission'] ) && ! array_key_exists( 'goal', $all['template_settings'] ) );
+	check( 'legacy goal scope migrates in template_versions', isset( $all['template_versions']['mission']['template-1'] ) && ! array_key_exists( 'goal', $all['template_versions'] ) );
+
+	// The served shape now validates against the REST schema, so a full
+	// Settings-page save round-trips without a 400.
+	$save = $settings_ctrl->save_args();
+	check( 'normalized template_defaults pass schema', true === rest_validate_value_from_schema( $all['template_defaults'], $save['template_defaults'], 'template_defaults' ) );
+	check( 'normalized template_settings pass schema', true === rest_validate_value_from_schema( $all['template_settings'], $save['template_settings'], 'template_settings' ) );
+
+	// A legacy 'goal' scope posted directly (a pre-rename client) is
+	// accepted and migrated instead of rejected.
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
+	$req->set_body_params( array(
+		'template_defaults' => array( 'goal' => 'template-2' ),
+		'template_settings' => array( 'goal' => array() ),
+	) );
+	$resp = $settings_ctrl->handle_save( $req );
+	$data = $resp->get_data()['data'];
+	check( 'legacy goal scope save round-trips without 400', ! is_wp_error( $resp ) && isset( $data['template_defaults']['mission'] ) && 'template-2' === $data['template_defaults']['mission'] );
+	check( 'legacy goal scope not persisted verbatim', ! isset( $data['template_defaults']['goal'] ) && ! isset( $data['template_settings']['goal'] ) );
+} finally {
+	$wpdb->query( 'ROLLBACK' );
+
+	// ROLLBACK reverts the option row; drop the caches so later sections
+	// read the reverted (pre-block) value.
+	wp_cache_delete( Settings::OPTION_NAME, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+}
+
+$settings->set_many( $all_before );
+
 // ---------------------------------------------------------------------------
 // 3. Mission calculation toggles (P18-T03)
 // ---------------------------------------------------------------------------

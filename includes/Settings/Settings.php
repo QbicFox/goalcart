@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Settings management for FaraCart.
  *
@@ -10,7 +11,7 @@ namespace FaraCart\Settings;
 use FaraCart\Missions\Mission;
 use FaraCart\Hooks\HookManager;
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 /**
  * Class Settings
@@ -26,7 +27,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * Mirrors the reference plugin (WooInsights\Settings\Settings).
  */
-class Settings {
+class Settings
+{
 
 	/**
 	 * Option name holding the settings array.
@@ -46,7 +48,7 @@ class Settings {
 	 *
 	 * @var array<int, string>
 	 */
-	const MISSION_TEMPLATES = array( 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6' );
+	const MISSION_TEMPLATES = array('template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6');
 
 	/**
 	 * The storefront widget locations the frontend_locations setting
@@ -56,7 +58,7 @@ class Settings {
 	 *
 	 * @var array<int, string>
 	 */
-	const DISPLAY_LOCATIONS = array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' );
+	const DISPLAY_LOCATIONS = array('cart', 'mini-cart', 'checkout', 'shop', 'product');
 
 	/**
 	 * The floating-button position presets the floating_desktop /
@@ -66,18 +68,18 @@ class Settings {
 	 *
 	 * @var array<int, string>
 	 */
-	const FLOATING_PRESETS = array( 'top-left', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-right' );
+	const FLOATING_PRESETS = array('top-left', 'top-right', 'center-left', 'center-right', 'bottom-left', 'bottom-right');
 
 	/**
 	 * Default settings, merged with stored values on load.
 	 * * The frontend_* keys are the Phase 12 progress-template surface
- * (template variant + appearance tokens consumed by the storefront
- * widgets and the Appearance admin page). Phase 18 adds the general /
- * mission-calculation / performance / advanced sections without touching
- * these.
- *
- * @var array<string, mixed>
- */
+	 * (template variant + appearance tokens consumed by the storefront
+	 * widgets and the Appearance admin page). Phase 18 adds the general /
+	 * mission-calculation / performance / advanced sections without touching
+	 * these.
+	 *
+	 * @var array<string, mixed>
+	 */
 	protected $defaults = array(
 		// General (P18-T01).
 		'enabled'               => true,
@@ -95,7 +97,7 @@ class Settings {
 		// Frontend (P18-T02). Phase 32 adds the countdown + celebration toggles.
 		'frontend_template'     => 'template-1',
 		'frontend_animation'    => true,
-		'frontend_locations'    => array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' ),
+		'frontend_locations'    => array('cart', 'mini-cart', 'checkout', 'shop', 'product'),
 		'frontend_position'     => 'top',               // top | bottom for page widgets
 		'frontend_mobile'       => 'show',             // show | hide
 		'frontend_bar_height'   => 10,
@@ -186,21 +188,22 @@ class Settings {
 	protected $settings;
 
 	/** * Register settings hooks.
- *
- * Phase 18 wires the settings into behavior here: the store-wide default
- * money basis (calculation_mode) applies to any mission that does not pin
- * its own mode, through the faracart_default_calculation_mode filter
- * (Mission::default_calculation_mode). The remaining settings are read
- * directly by their consumers (ProgressUI, FrontendController,
- * CartIntegration, Tracker) through the same service instance.
- *
- * @param HookManager $hooks Hook manager.
- * @return void
- */
-	public function register( HookManager $hooks ) {
+	 *
+	 * Phase 18 wires the settings into behavior here: the store-wide default
+	 * money basis (calculation_mode) applies to any mission that does not pin
+	 * its own mode, through the faracart_default_calculation_mode filter
+	 * (Mission::default_calculation_mode). The remaining settings are read
+	 * directly by their consumers (ProgressUI, FrontendController,
+	 * CartIntegration, Tracker) through the same service instance.
+	 *
+	 * @param HookManager $hooks Hook manager.
+	 * @return void
+	 */
+	public function register(HookManager $hooks)
+	{
 		$hooks->add_filter(
 			'faracart_default_calculation_mode',
-			array( $this, 'apply_default_calculation_mode' ),
+			array($this, 'apply_default_calculation_mode'),
 			10,
 			2
 		);
@@ -218,18 +221,19 @@ class Settings {
 	 * @param string $type Mission type.
 	 * @return string
 	 */
-	public function apply_default_calculation_mode( $mode, $type ) {
-		if ( in_array(
+	public function apply_default_calculation_mode($mode, $type)
+	{
+		if (in_array(
 			(string) $type,
-			array( Mission::TYPE_QUANTITY, Mission::TYPE_DISTINCT_QUANTITY, Mission::TYPE_WEIGHT, Mission::TYPE_PRODUCT ),
+			array(Mission::TYPE_QUANTITY, Mission::TYPE_DISTINCT_QUANTITY, Mission::TYPE_WEIGHT, Mission::TYPE_PRODUCT),
 			true
-		) ) {
+		)) {
 			return (string) $mode;
 		}
 
-		$configured = $this->get( 'calculation_mode', Mission::MODE_SUBTOTAL );
+		$configured = $this->get('calculation_mode', Mission::MODE_SUBTOTAL);
 
-		if ( in_array( $configured, array( Mission::MODE_SUBTOTAL, Mission::MODE_DISCOUNTED_SUBTOTAL, Mission::MODE_TOTAL ), true ) ) {
+		if (in_array($configured, array(Mission::MODE_SUBTOTAL, Mission::MODE_DISCOUNTED_SUBTOTAL, Mission::MODE_TOTAL), true)) {
 			return $configured;
 		}
 
@@ -241,10 +245,11 @@ class Settings {
 	 *
 	 * @return array<string, mixed>
 	 */
-	public function all() {
-		if ( null === $this->settings ) {
-			$stored = get_option( self::OPTION_NAME, array() );
-			$this->settings = wp_parse_args( is_array( $stored ) ? $stored : array(), $this->defaults );
+	public function all()
+	{
+		if (null === $this->settings) {
+			$stored = get_option(self::OPTION_NAME, array());
+			$this->settings = wp_parse_args(is_array($stored) ? $stored : array(), $this->defaults);
 
 			// Self-heal a corrupted frontend_template. The setting only
 			// accepts the six design template ids (template-1 … template-6)
@@ -256,7 +261,7 @@ class Settings {
 			// the TemplateEngine already resolves template_defaults.mission
 			// before frontend_template, so the storefront template
 			// selection is unaffected.
-			if ( ! in_array( (string) $this->settings['frontend_template'], self::MISSION_TEMPLATES, true ) ) {
+			if (! in_array((string) $this->settings['frontend_template'], self::MISSION_TEMPLATES, true)) {
 				$this->settings['frontend_template'] = $this->defaults['frontend_template'];
 			}
 
@@ -270,9 +275,9 @@ class Settings {
 			// Normalizing on read keeps every consumer (the admin GET, the
 			// Appearance page, the storefront) schema-safe, and the next
 			// save persists the normalized values.
-			$this->settings['frontend_locations'] = $this->normalize_locations( $this->settings['frontend_locations'] );
-			$this->settings['floating_desktop']   = self::normalize_floating_position( $this->settings['floating_desktop'], $this->defaults['floating_desktop'] );
-			$this->settings['floating_mobile']    = self::normalize_floating_position( $this->settings['floating_mobile'], $this->defaults['floating_mobile'] );
+			$this->settings['frontend_locations'] = $this->normalize_locations($this->settings['frontend_locations']);
+			$this->settings['floating_desktop']   = self::normalize_floating_position($this->settings['floating_desktop'], $this->defaults['floating_desktop']);
+			$this->settings['floating_mobile']    = self::normalize_floating_position($this->settings['floating_mobile'], $this->defaults['floating_mobile']);
 
 			// Terminology migration (Goal → Mission): stored settings written
 			// by pre-rename versions use the legacy 'goal' scope key and the
@@ -280,11 +285,22 @@ class Settings {
 			// values reachable under the canonical names — the settings page
 			// echoes the served (normalized) values back on the next save,
 			// permanently migrating the option without losing data.
+			//
+			// The legacy keys MUST also be dropped from the served payload:
+			// template_defaults is additionalProperties:false and
+			// template_settings rejects unknown scopes in its validate
+			// callback, so echoing a stored 'goal' key back on save would
+			// 400 with rest_invalid_param before the sanitizer ever runs
+			// (same failure mode as the retired sticky/floating values).
 			$this->settings['default_mission_behavior'] = $this->settings['default_goal_behavior'] ?? $this->defaults['default_mission_behavior'];
+			unset($this->settings['default_goal_behavior']);
 
-			foreach ( array( 'template_defaults', 'template_settings', 'template_versions' ) as $group ) {
-				if ( isset( $this->settings[ $group ]['goal'] ) && ! isset( $this->settings[ $group ]['mission'] ) ) {
-					$this->settings[ $group ]['mission'] = $this->settings[ $group ]['goal'];
+			foreach (array('template_defaults', 'template_settings', 'template_versions') as $group) {
+				if (isset($this->settings[$group]['goal'])) {
+					if (! isset($this->settings[$group]['mission'])) {
+						$this->settings[$group]['mission'] = $this->settings[$group]['goal'];
+					}
+					unset($this->settings[$group]['goal']);
 				}
 			}
 		}
@@ -299,10 +315,11 @@ class Settings {
 	 * @param mixed  $default Fallback value when the key is missing.
 	 * @return mixed
 	 */
-	public function get( $key, $default = null ) {
+	public function get($key, $default = null)
+	{
 		$settings = $this->all();
 
-		return array_key_exists( $key, $settings ) ? $settings[ $key ] : $default;
+		return array_key_exists($key, $settings) ? $settings[$key] : $default;
 	}
 
 	/**
@@ -312,9 +329,10 @@ class Settings {
 	 * @param mixed  $value New value.
 	 * @return $this
 	 */
-	public function set( $key, $value ) {
+	public function set($key, $value)
+	{
 		$this->all();
-		$this->settings[ $key ] = $value;
+		$this->settings[$key] = $value;
 
 		return $this;
 	}
@@ -325,11 +343,12 @@ class Settings {
 	 * @param array<string, mixed> $values Key/value pairs.
 	 * @return $this
 	 */
-	public function set_many( array $values ) {
+	public function set_many(array $values)
+	{
 		$this->all();
 
-		foreach ( $values as $key => $value ) {
-			$this->settings[ $key ] = $value;
+		foreach ($values as $key => $value) {
+			$this->settings[$key] = $value;
 		}
 
 		return $this;
@@ -345,14 +364,15 @@ class Settings {
 	 *
 	 * @return bool
 	 */
-	public function save() {
+	public function save()
+	{
 		$all = $this->all();
 
-		if ( $all === get_option( self::OPTION_NAME, null ) ) {
+		if ($all === get_option(self::OPTION_NAME, null)) {
 			return true;
 		}
 
-		return update_option( self::OPTION_NAME, $all, false );
+		return update_option(self::OPTION_NAME, $all, false);
 	}
 
 	/**
@@ -360,7 +380,8 @@ class Settings {
 	 *
 	 * @return $this
 	 */
-	public function reset() {
+	public function reset()
+	{
 		$this->settings = $this->defaults;
 
 		return $this;
@@ -371,7 +392,8 @@ class Settings {
 	 *
 	 * @return array<string, mixed>
 	 */
-	public function defaults() {
+	public function defaults()
+	{
 		return $this->defaults;
 	}
 
@@ -385,10 +407,11 @@ class Settings {
 	 * @param mixed $value Raw stored value.
 	 * @return array<int, string>
 	 */
-	protected function normalize_locations( $value ) {
-		$stored = array_map( 'strval', (array) $value );
+	protected function normalize_locations($value)
+	{
+		$stored = array_map('strval', (array) $value);
 
-		return array_values( array_unique( array_intersect( self::DISPLAY_LOCATIONS, $stored ) ) );
+		return array_values(array_unique(array_intersect(self::DISPLAY_LOCATIONS, $stored)));
 	}
 
 	/**
@@ -409,30 +432,31 @@ class Settings {
 	 * @param mixed $default The setting's default position array.
 	 * @return array<string, string|int>
 	 */
-	public static function normalize_floating_position( $value, $default ) {
-		$default = is_array( $default ) ? $default : array(
+	public static function normalize_floating_position($value, $default)
+	{
+		$default = is_array($default) ? $default : array(
 			'preset'   => 'bottom-right',
 			'offset_x' => 20,
 			'offset_y' => 80,
 		);
 
-		if ( ! is_array( $value ) ) {
+		if (! is_array($value)) {
 			return $default;
 		}
 
-		if ( isset( $value['preset'] ) && in_array( $value['preset'], self::FLOATING_PRESETS, true ) ) {
+		if (isset($value['preset']) && in_array($value['preset'], self::FLOATING_PRESETS, true)) {
 			$preset = $value['preset'];
-		} elseif ( isset( $value['horizontal'] ) && isset( $value['vertical'] ) ) {
+		} elseif (isset($value['horizontal']) && isset($value['vertical'])) {
 			// Legacy migration: horizontal × vertical → the matching preset.
-			$preset = self::preset_from_axes( $value['horizontal'], $value['vertical'], $default['preset'] );
+			$preset = self::preset_from_axes($value['horizontal'], $value['vertical'], $default['preset']);
 		} else {
 			$preset = $default['preset'];
 		}
 
 		return array(
 			'preset'   => $preset,
-			'offset_x' => isset( $value['offset_x'] ) ? min( 200, max( 0, (int) $value['offset_x'] ) ) : (int) $default['offset_x'],
-			'offset_y' => isset( $value['offset_y'] ) ? min( 200, max( 0, (int) $value['offset_y'] ) ) : (int) $default['offset_y'],
+			'offset_x' => isset($value['offset_x']) ? min(200, max(0, (int) $value['offset_x'])) : (int) $default['offset_x'],
+			'offset_y' => isset($value['offset_y']) ? min(200, max(0, (int) $value['offset_y'])) : (int) $default['offset_y'],
 		);
 	}
 
@@ -444,7 +468,8 @@ class Settings {
 	 * @param string $fallback   The preset to return for unknown axes.
 	 * @return string
 	 */
-	protected static function preset_from_axes( $horizontal, $vertical, $fallback ) {
+	protected static function preset_from_axes($horizontal, $vertical, $fallback)
+	{
 		$presets = array(
 			'left_top'     => 'top-left',
 			'right_top'    => 'top-right',
@@ -454,9 +479,9 @@ class Settings {
 			'right_bottom' => 'bottom-right',
 		);
 
-		$key = sanitize_key( $horizontal ) . '_' . sanitize_key( $vertical );
+		$key = sanitize_key($horizontal) . '_' . sanitize_key($vertical);
 
-		return isset( $presets[ $key ] ) ? $presets[ $key ] : $fallback;
+		return isset($presets[$key]) ? $presets[$key] : $fallback;
 	}
 
 	/**
@@ -471,22 +496,23 @@ class Settings {
 	 *
 	 * @return string Uppercase ISO-4217 code.
 	 */
-	public function currency() {
-		$configured = strtoupper( trim( (string) $this->get( 'currency', '' ) ) );
+	public function currency()
+	{
+		$configured = strtoupper(trim((string) $this->get('currency', '')));
 
-		if ( '' !== $configured ) {
-			$configured = (string) apply_filters( 'faracart_currency', $configured );
+		if ('' !== $configured) {
+			$configured = (string) apply_filters('faracart_currency', $configured);
 
 			return '' !== $configured ? $configured : 'USD';
 		}
 
-		$store = function_exists( 'get_woocommerce_currency' ) ? (string) get_woocommerce_currency() : 'USD';
+		$store = function_exists('get_woocommerce_currency') ? (string) get_woocommerce_currency() : 'USD';
 
 		/**
 		 * Filter the resolved display currency.
 		 *
 		 * @param string $currency Uppercase ISO-4217 code.
 		 */
-		return (string) apply_filters( 'faracart_currency', $store );
+		return (string) apply_filters('faracart_currency', $store);
 	}
 }

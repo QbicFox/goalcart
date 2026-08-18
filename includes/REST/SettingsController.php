@@ -1,4 +1,5 @@
 <?php
+
 /**
  * REST controller for plugin settings.
  *
@@ -12,7 +13,7 @@ use FaraCart\Settings\Settings;
 use FaraCart\Templates\TemplateEngine;
 use FaraCart\Utils\Logger;
 
-defined( 'ABSPATH' ) || exit;
+defined('ABSPATH') || exit;
 
 /**
  * Class SettingsController
@@ -26,15 +27,16 @@ defined( 'ABSPATH' ) || exit;
  *    keys are ignored, and the persisted values are returned so the UI can
  *    sync its state.
  *	 * The persisted option (Settings::OPTION_NAME) drives every consumer
-	 * (storefront widgets, mission calculation, tracking, the admin display
-	 * mode), so saving here changes behavior immediately. Phase 18 adds the
-	 * full surface — general, frontend, mission calculation, performance,
-	 * advanced — to the schema and sanitizer, and the GET response carries
-	 * the developer-hooks reference in meta for the Advanced tab.
-	 *
-	 * Mirrors the reference plugin (WooInsights\REST\SettingsController).
-	 */
-class SettingsController extends BaseController {
+ * (storefront widgets, mission calculation, tracking, the admin display
+ * mode), so saving here changes behavior immediately. Phase 18 adds the
+ * full surface — general, frontend, mission calculation, performance,
+ * advanced — to the schema and sanitizer, and the GET response carries
+ * the developer-hooks reference in meta for the Advanced tab.
+ *
+ * Mirrors the reference plugin (WooInsights\REST\SettingsController).
+ */
+class SettingsController extends BaseController
+{
 
 	/**
 	 * Settings instance.
@@ -59,7 +61,8 @@ class SettingsController extends BaseController {
 	 * @param Settings         $settings Settings instance.
 	 * @param TemplateEngine|null $templates Template engine (optional).
 	 */
-	public function __construct( Settings $settings, ?TemplateEngine $templates = null ) {
+	public function __construct(Settings $settings, ?TemplateEngine $templates = null)
+	{
 		$this->settings = $settings;
 		$this->templates = $templates;
 	}
@@ -69,9 +72,10 @@ class SettingsController extends BaseController {
 	 *
 	 * @return TemplateEngine
 	 */
-	protected function templates() {
-		if ( null === $this->templates ) {
-			$this->templates = \FaraCart\Plugin::instance()->container()->get( TemplateEngine::class );
+	protected function templates()
+	{
+		if (null === $this->templates) {
+			$this->templates = \FaraCart\Plugin::instance()->container()->get(TemplateEngine::class);
 		}
 
 		return $this->templates;
@@ -83,8 +87,9 @@ class SettingsController extends BaseController {
 	 * @param HookManager $hooks Hook manager.
 	 * @return void
 	 */
-	public function register( HookManager $hooks ) {
-		$hooks->add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+	public function register(HookManager $hooks)
+	{
+		$hooks->add_action('rest_api_init', array($this, 'register_routes'));
 	}
 
 	/**
@@ -92,13 +97,14 @@ class SettingsController extends BaseController {
 	 *
 	 * @return void
 	 */
-	public function register_routes() {
+	public function register_routes()
+	{
 		register_rest_route(
 			self::NAMESPACE,
 			'/settings',
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
-				'callback'            => array( $this, 'handle_get' ),
+				'callback'            => array($this, 'handle_get'),
 				'permission_callback' => $this->get_permission_callback(),
 				'args'                => array(),
 			)
@@ -109,7 +115,7 @@ class SettingsController extends BaseController {
 			'/settings',
 			array(
 				'methods'             => \WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'handle_save' ),
+				'callback'            => array($this, 'handle_save'),
 				'permission_callback' => $this->get_permission_callback(),
 				'args'                => $this->save_args(),
 			)
@@ -126,7 +132,8 @@ class SettingsController extends BaseController {
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
-	public function handle_get( $request ) {
+	public function handle_get($request)
+	{
 		$meta = array(
 			// Phase 18 (Advanced → developer hooks): the reference list of
 			// public faracart_* hooks, rendered by the Settings page.
@@ -136,11 +143,11 @@ class SettingsController extends BaseController {
 			'roles' => $this->role_options(),
 		);
 
-		if ( $this->settings->get( 'logging_enabled', false ) ) {
+		if ($this->settings->get('logging_enabled', false)) {
 			$meta['log_path'] = Logger::path();
 		}
 
-		return $this->success( $this->settings->all(), $meta );
+		return $this->success($this->settings->all(), $meta);
 	}
 
 	/**
@@ -153,17 +160,18 @@ class SettingsController extends BaseController {
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response|\WP_Error
 	 */
-	public function handle_save( $request ) {
+	public function handle_save($request)
+	{
 		$values = $request->get_params();
 
 		$clean = array();
 
-		foreach ( $this->settings->defaults() as $key => $default ) {
-			if ( ! array_key_exists( $key, $values ) ) {
+		foreach ($this->settings->defaults() as $key => $default) {
+			if (! array_key_exists($key, $values)) {
 				continue;
 			}
 
-			$clean[ $key ] = $this->sanitize_setting( $key, $values[ $key ] );
+			$clean[$key] = $this->sanitize_setting($key, $values[$key]);
 		}
 
 		// Template-engine bookkeeping: saving per-template settings records
@@ -182,29 +190,29 @@ class SettingsController extends BaseController {
 		// template_defaults.mission → frontend_template → template-1. Old
 		// pre-design ids are never mapped.
 
-		if ( isset( $clean['template_settings'] ) ) {
+		if (isset($clean['template_settings'])) {
 			// Defense in depth: the REST arg schema runs the same sanitizer
 			// on real dispatches; sanitizing here too keeps direct saves
 			// schema-safe, so a bad template_settings payload can never be
 			// persisted.
-			$clean['template_settings'] = $this->sanitize_template_settings( $clean['template_settings'] );
+			$clean['template_settings'] = $this->sanitize_template_settings($clean['template_settings']);
 			$clean['template_versions'] = $this->templates()->versions();
 		}
 
-		if ( empty( $clean ) ) {
+		if (empty($clean)) {
 			return $this->error(
 				'faracart_settings_empty',
-				__( 'No settings were provided to save.', 'faracart' ),
+				__('No settings were provided to save.', 'faracart'),
 				400
 			);
 		}
 
-		$this->settings->set_many( $clean );
+		$this->settings->set_many($clean);
 
-		if ( ! $this->settings->save() ) {
+		if (! $this->settings->save()) {
 			return $this->error(
 				'faracart_settings_save_failed',
-				__( 'Could not save the settings. Please try again.', 'faracart' ),
+				__('Could not save the settings. Please try again.', 'faracart'),
 				500
 			);
 		}
@@ -212,7 +220,7 @@ class SettingsController extends BaseController {
 		// Phase 18 (Advanced → logging): record the save when logging is
 		// enabled, and fire the developer-hooks action (Phase 28 API) so
 		// integrations can react to configuration changes.
-		Logger::write( 'Settings saved: ' . wp_json_encode( $clean ), 'debug' );
+		Logger::write('Settings saved: ' . wp_json_encode($clean), 'debug');
 
 		/**
 		 * Fires after plugin settings are persisted through the REST API.
@@ -220,9 +228,9 @@ class SettingsController extends BaseController {
 		 * @param array<string, mixed> $clean     Sanitized key/value pairs.
 		 * @param Settings             $settings  Settings service.
 		 */
-		do_action( 'faracart_settings_saved', $clean, $this->settings );
+		do_action('faracart_settings_saved', $clean, $this->settings);
 
-		return $this->success( $this->settings->all() );
+		return $this->success($this->settings->all());
 	}
 
 	/**
@@ -235,21 +243,22 @@ class SettingsController extends BaseController {
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
-	public function save_args() {
-		$bool = array( 'type' => 'boolean' );
+	public function save_args()
+	{
+		$bool = array('type' => 'boolean');
 
 		return array(
 			// General (P18-T01).
 			'enabled'               => $bool,
 			'fullscreen_dashboard'  => $bool,
 			// Display currency unit override ('' = follow the store currency).
-			'currency'              => array( 'type' => 'string' ),
-			'currency_display'      => array( 'type' => 'string', 'enum' => array( 'symbol', 'code', 'name' ) ),
-			'default_mission_behavior' => array( 'type' => 'string', 'enum' => array( 'all', 'first', 'closest' ) ),
-			'conflict_resolution'   => array( 'type' => 'string', 'enum' => array( 'cumulative', 'best', 'first' ) ),
+			'currency'              => array('type' => 'string'),
+			'currency_display'      => array('type' => 'string', 'enum' => array('symbol', 'code', 'name')),
+			'default_mission_behavior' => array('type' => 'string', 'enum' => array('all', 'first', 'closest')),
+			'conflict_resolution'   => array('type' => 'string', 'enum' => array('cumulative', 'best', 'first')),
 			'calculation_mode'      => array(
 				'type' => 'string',
-				'enum' => array( 'subtotal', 'discounted_subtotal', 'total' ),
+				'enum' => array('subtotal', 'discounted_subtotal', 'total'),
 			),
 
 			// Frontend (P18-T02).
@@ -265,16 +274,16 @@ class SettingsController extends BaseController {
 					'enum' => Settings::DISPLAY_LOCATIONS,
 				),
 			),
-			'frontend_position'     => array( 'type' => 'string', 'enum' => array( 'top', 'bottom' ) ),
-			'frontend_mobile'       => array( 'type' => 'string', 'enum' => array( 'show', 'hide' ) ),
-			'frontend_bar_height'   => array( 'type' => 'integer', 'minimum' => 4, 'maximum' => 48 ),
-			'frontend_accent'       => array( 'type' => 'string' ),
-			'frontend_bg'           => array( 'type' => 'string' ),
-			'frontend_border'       => array( 'type' => 'string' ),
-			'frontend_text'         => array( 'type' => 'string' ),
-			'frontend_radius'       => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 40 ),
-			'frontend_css_class'    => array( 'type' => 'string' ),
-			'frontend_custom_css'   => array( 'type' => 'string' ),
+			'frontend_position'     => array('type' => 'string', 'enum' => array('top', 'bottom')),
+			'frontend_mobile'       => array('type' => 'string', 'enum' => array('show', 'hide')),
+			'frontend_bar_height'   => array('type' => 'integer', 'minimum' => 4, 'maximum' => 48),
+			'frontend_accent'       => array('type' => 'string'),
+			'frontend_bg'           => array('type' => 'string'),
+			'frontend_border'       => array('type' => 'string'),
+			'frontend_text'         => array('type' => 'string'),
+			'frontend_radius'       => array('type' => 'integer', 'minimum' => 0, 'maximum' => 40),
+			'frontend_css_class'    => array('type' => 'string'),
+			'frontend_custom_css'   => array('type' => 'string'),
 			// Phase 32 (countdown + celebration).
 			'frontend_countdown'    => $bool,
 			'frontend_celebrate'    => $bool,
@@ -286,10 +295,10 @@ class SettingsController extends BaseController {
 			'floating_mobile_use_desktop' => $bool,
 			'floating_show_desktop'       => $bool,
 			'floating_show_mobile'        => $bool,
-			'floating_button_size'        => array( 'type' => 'integer', 'minimum' => 32, 'maximum' => 96 ),
+			'floating_button_size'        => array('type' => 'integer', 'minimum' => 32, 'maximum' => 96),
 			'floating_animation'          => $bool,
-			'floating_icon'               => array( 'type' => 'string' ),
-			'floating_label'              => array( 'type' => 'string' ),
+			'floating_icon'               => array('type' => 'string'),
+			'floating_label'              => array('type' => 'string'),
 
 			// Mission Calculation (P18-T03).
 			'calculation_include_tax'      => $bool,
@@ -305,7 +314,7 @@ class SettingsController extends BaseController {
 			// Phase 32 (advanced upsell ranking).
 			'suggestions_ranking'     => array(
 				'type' => 'string',
-				'enum' => array( 'balanced', 'price', 'popularity' ),
+				'enum' => array('balanced', 'price', 'popularity'),
 			),
 
 			// Advanced (P18-T05).
@@ -318,18 +327,18 @@ class SettingsController extends BaseController {
 				'type'                 => 'object',
 				'default'              => array(),
 				'properties'           => array(
-					'mission'     => array( 'type' => 'string' ),
-					'campaign' => array( 'type' => 'string' ),
+					'mission'     => array('type' => 'string'),
+					'campaign' => array('type' => 'string'),
 				),
 				'additionalProperties' => false,
-				'validate_callback'    => array( $this, 'validate_template_defaults' ),
+				'validate_callback'    => array($this, 'validate_template_defaults'),
 			),
 			'template_settings' => array(
 				'type'                 => 'object',
 				'default'              => array(),
 				'additionalProperties' => true,
-				'validate_callback'    => array( $this, 'validate_template_settings' ),
-				'sanitize_callback'    => array( $this, 'sanitize_template_settings' ),
+				'validate_callback'    => array($this, 'validate_template_settings'),
+				'sanitize_callback'    => array($this, 'sanitize_template_settings'),
 			),
 		);
 	}
@@ -345,7 +354,8 @@ class SettingsController extends BaseController {
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */
-	protected function floating_position_schema() {
+	protected function floating_position_schema()
+	{
 		return array(
 			'type'                 => 'object',
 			'default'              => array(),
@@ -354,8 +364,8 @@ class SettingsController extends BaseController {
 					'type' => 'string',
 					'enum' => Settings::FLOATING_PRESETS,
 				),
-				'offset_x' => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 200 ),
-				'offset_y' => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 200 ),
+				'offset_x' => array('type' => 'integer', 'minimum' => 0, 'maximum' => 200),
+				'offset_y' => array('type' => 'integer', 'minimum' => 0, 'maximum' => 200),
 			),
 			'additionalProperties' => false,
 		);
@@ -373,8 +383,9 @@ class SettingsController extends BaseController {
 	 * @param mixed $default The setting's default position array.
 	 * @return array<string, string|int>
 	 */
-	protected function sanitize_floating_position( $value, $default ) {
-		return Settings::normalize_floating_position( $value, $default );
+	protected function sanitize_floating_position($value, $default)
+	{
+		return Settings::normalize_floating_position($value, $default);
 	}
 
 	/**
@@ -383,19 +394,20 @@ class SettingsController extends BaseController {
 	 * @param mixed $value Raw template_defaults value.
 	 * @return bool
 	 */
-	public function validate_template_defaults( $value ) {
-		if ( ! is_array( $value ) ) {
+	public function validate_template_defaults($value)
+	{
+		if (! is_array($value)) {
 			return false;
 		}
 
-		foreach ( array( 'mission', 'campaign' ) as $scope ) {
-			if ( ! array_key_exists( $scope, $value ) ) {
+		foreach (array('mission', 'campaign') as $scope) {
+			if (! array_key_exists($scope, $value)) {
 				continue;
 			}
 
-			$id = (string) $value[ $scope ];
+			$id = (string) $value[$scope];
 
-			if ( '' !== $id && ! $this->templates()->is_registered( $scope, $id ) ) {
+			if ('' !== $id && ! $this->templates()->is_registered($scope, $id)) {
 				return false;
 			}
 		}
@@ -409,24 +421,30 @@ class SettingsController extends BaseController {
 	 * @param mixed $value Raw template_settings value.
 	 * @return bool
 	 */
-	public function validate_template_settings( $value ) {
-		if ( ! is_array( $value ) ) {
+	public function validate_template_settings($value)
+	{
+		if (! is_array($value)) {
 			return false;
 		}
 
-		foreach ( array_keys( $value ) as $scope ) {
-			if ( ! in_array( $scope, array( 'mission', 'campaign' ), true ) ) {
+		foreach (array_keys($value) as $scope) {
+			// Legacy alias (Goal → Mission rename): a 'goal' scope posted by
+			// a pre-rename client validates against the mission registry and
+			// is migrated by the sanitizer.
+			$registry_scope = ('goal' === $scope) ? 'mission' : $scope;
+
+			if (! in_array($registry_scope, array('mission', 'campaign'), true)) {
 				return false;
 			}
 
-			$per_template = $value[ $scope ];
+			$per_template = $value[$scope];
 
-			if ( ! is_array( $per_template ) ) {
+			if (! is_array($per_template)) {
 				return false;
 			}
 
-			foreach ( array_keys( $per_template ) as $template_id ) {
-				if ( ! $this->templates()->is_registered( $scope, $template_id ) ) {
+			foreach (array_keys($per_template) as $template_id) {
+				if (! $this->templates()->is_registered($registry_scope, $template_id)) {
 					return false;
 				}
 			}
@@ -441,22 +459,31 @@ class SettingsController extends BaseController {
 	 * @param mixed $value Raw template_settings value.
 	 * @return array<string, array<string, mixed>>
 	 */
-	public function sanitize_template_settings( $value ) {
+	public function sanitize_template_settings($value)
+	{
 		$clean = array(
 			'mission'     => array(),
 			'campaign' => array(),
 		);
 
-		if ( ! is_array( $value ) ) {
+		if (! is_array($value)) {
 			return $clean;
 		}
 
-		foreach ( array( 'mission', 'campaign' ) as $scope ) {
-			if ( ! isset( $value[ $scope ] ) || ! is_array( $value[ $scope ] ) ) {
+		foreach (array('mission', 'campaign') as $scope) {
+			// Legacy alias (Goal → Mission rename): a 'goal' scope posted by
+			// a pre-rename client is migrated into the canonical mission scope
+			// (a canonical mission scope wins when both are present).
+			$source = $scope;
+			if ('mission' === $scope && isset($value['goal']) && ! isset($value['mission'])) {
+				$source = 'goal';
+			}
+
+			if (! isset($value[$source]) || ! is_array($value[$source])) {
 				continue;
 			}
 
-			$clean[ $scope ] = $this->templates()->sanitize_scope_settings( $scope, $value[ $scope ] );
+			$clean[$scope] = $this->templates()->sanitize_scope_settings($scope, $value[$source]);
 		}
 
 		return $clean;
@@ -467,16 +494,17 @@ class SettingsController extends BaseController {
 	 *
 	 * @return array<string, string>
 	 */
-	protected function role_options() {
-		if ( ! function_exists( 'wp_roles' ) ) {
+	protected function role_options()
+	{
+		if (! function_exists('wp_roles')) {
 			return array();
 		}
 
 		$roles = wp_roles()->get_names();
 		$names = array();
 
-		foreach ( (array) $roles as $slug => $name ) {
-			$names[ (string) $slug ] = translate_user_role( $name );
+		foreach ((array) $roles as $slug => $name) {
+			$names[(string) $slug] = translate_user_role($name);
 		}
 
 		return $names;
@@ -495,10 +523,11 @@ class SettingsController extends BaseController {
 	 * @param mixed  $value Raw value from the request.
 	 * @return mixed
 	 */
-	protected function sanitize_setting( $key, $value ) {
+	protected function sanitize_setting($key, $value)
+	{
 		$defaults = $this->settings->defaults();
 
-		switch ( $key ) {
+		switch ($key) {
 			case 'fullscreen_dashboard':
 			case 'enabled':
 			case 'frontend_animation':
@@ -526,75 +555,89 @@ class SettingsController extends BaseController {
 				// An uppercase 3-letter ISO-4217 code, or '' to follow the
 				// WooCommerce store currency. Anything else falls back to the
 				// default (empty = store currency).
-				$code = strtoupper( trim( (string) $value ) );
+				$code = strtoupper(trim((string) $value));
 
-				return '' !== $code && preg_match( '/^[A-Z]{3}$/', $code ) ? $code : $defaults['currency'];
+				return '' !== $code && preg_match('/^[A-Z]{3}$/', $code) ? $code : $defaults['currency'];
 
 			case 'currency_display':
-				return in_array( $value, array( 'symbol', 'code', 'name' ), true ) ? $value : $defaults['currency_display'];
+				return in_array($value, array('symbol', 'code', 'name'), true) ? $value : $defaults['currency_display'];
 
 			case 'default_mission_behavior':
-				return in_array( $value, array( 'all', 'first', 'closest' ), true ) ? $value : $defaults['default_mission_behavior'];
+				return in_array($value, array('all', 'first', 'closest'), true) ? $value : $defaults['default_mission_behavior'];
 
 			case 'conflict_resolution':
-				return in_array( $value, array( 'cumulative', 'best', 'first' ), true ) ? $value : $defaults['conflict_resolution'];
+				return in_array($value, array('cumulative', 'best', 'first'), true) ? $value : $defaults['conflict_resolution'];
 
 			case 'calculation_mode':
-				return in_array( $value, array( 'subtotal', 'discounted_subtotal', 'total' ), true ) ? $value : $defaults['calculation_mode'];
+				return in_array($value, array('subtotal', 'discounted_subtotal', 'total'), true) ? $value : $defaults['calculation_mode'];
 
 			case 'frontend_position':
-				return in_array( $value, array( 'top', 'bottom' ), true ) ? $value : $defaults['frontend_position'];
+				return in_array($value, array('top', 'bottom'), true) ? $value : $defaults['frontend_position'];
 
 			case 'frontend_mobile':
-				return in_array( $value, array( 'show', 'hide' ), true ) ? $value : $defaults['frontend_mobile'];
+				return in_array($value, array('show', 'hide'), true) ? $value : $defaults['frontend_mobile'];
 
 			case 'floating_desktop':
 			case 'floating_mobile':
-				return $this->sanitize_floating_position( $value, $defaults[ $key ] );
+				return $this->sanitize_floating_position($value, $defaults[$key]);
 
 			case 'floating_button_size':
-				return min( 96, max( 32, (int) $value ) );
+				return min(96, max(32, (int) $value));
 
 			case 'floating_icon':
-				return trim( sanitize_text_field( (string) $value ) );
+				return trim(sanitize_text_field((string) $value));
 
 			case 'floating_label':
-				return trim( sanitize_text_field( (string) $value ) );
+				return trim(sanitize_text_field((string) $value));
 
 			case 'suggestions_ranking':
-				return in_array( $value, array( 'balanced', 'price', 'popularity' ), true ) ? $value : $defaults['suggestions_ranking'];
+				return in_array($value, array('balanced', 'price', 'popularity'), true) ? $value : $defaults['suggestions_ranking'];
 
 			case 'frontend_locations':
-				$cleaned  = array_filter( array_map( 'sanitize_key', (array) $value ), function ( $location ) {
-					return in_array( $location, Settings::DISPLAY_LOCATIONS, true );
-				} );
+				$cleaned  = array_filter(array_map('sanitize_key', (array) $value), function ($location) {
+					return in_array($location, Settings::DISPLAY_LOCATIONS, true);
+				});
 
-				return array_values( array_unique( $cleaned ) );
+				return array_values(array_unique($cleaned));
+
+			case 'template_defaults':
+				// Legacy alias (Goal → Mission rename): migrate a 'goal'
+				// scope posted by a pre-rename client into the canonical
+				// mission scope (a canonical mission scope wins when both
+				// are present) and drop the legacy key.
+				if (is_array($value)) {
+					if (isset($value['goal']) && ! isset($value['mission'])) {
+						$value['mission'] = $value['goal'];
+					}
+					unset($value['goal']);
+				}
+
+				return $value;
 
 			case 'frontend_template':
-				return in_array( $value, Settings::MISSION_TEMPLATES, true ) ? $value : $defaults['frontend_template'];
+				return in_array($value, Settings::MISSION_TEMPLATES, true) ? $value : $defaults['frontend_template'];
 
 			case 'frontend_bar_height':
-				return min( 48, max( 4, (int) $value ) );
+				return min(48, max(4, (int) $value));
 
 			case 'frontend_accent':
 			case 'frontend_bg':
 			case 'frontend_border':
 			case 'frontend_text':
-				$color = sanitize_hex_color( $value );
+				$color = sanitize_hex_color($value);
 
-				return $color ? $color : $defaults[ $key ];
+				return $color ? $color : $defaults[$key];
 
 			case 'frontend_radius':
-				return min( 40, max( 0, (int) $value ) );
+				return min(40, max(0, (int) $value));
 
 			case 'frontend_css_class':
-				return trim( sanitize_text_field( (string) $value ) );
+				return trim(sanitize_text_field((string) $value));
 
 			case 'frontend_custom_css':
 				// Admin-authored CSS (manage_options gate on the route); keep
 				// it tag-free and bounded.
-				return substr( trim( wp_strip_all_tags( (string) $value ) ), 0, 16000 );
+				return substr(trim(wp_strip_all_tags((string) $value)), 0, 16000);
 
 			default:
 				return $value;
