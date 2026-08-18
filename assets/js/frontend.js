@@ -2928,7 +2928,6 @@
 		var currency = ( data && data.currency ) || cfg.currency;
 		var widget = el( 'div', 'faracart-widget faracart-widget--full' );
 		var stack = el( 'div', 'faracart-widget__missions' );
-		var count = 0;
 
 		for ( var i = 0; i < missions.length; i++ ) {
 			var mission = missions[ i ];
@@ -2938,14 +2937,9 @@
 			}
 
 			stack.appendChild( missionContainer( mission, currency, 'compact', floatingTemplate( mission ) ) );
-			count++;
-
-			if ( count >= 3 ) {
-				break;
-			}
 		}
 
-		if ( count ) {
+		if ( stack.childNodes.length ) {
 			widget.appendChild( stack );
 			drawer.appendChild( widget );
 		}

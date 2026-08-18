@@ -1578,7 +1578,7 @@
 	z-index: 1;
 	min-width: 260px;
 	max-width: min( 340px, calc( 100vw - 2rem ) );
-	max-height: calc( 100vh - 2rem );
+	max-height: 220px;
 	overflow: auto;
 	/* Scrolling inside the drawer must never scroll the page behind it. */
 	overscroll-behavior: contain;
