@@ -913,7 +913,7 @@ class FrontendController extends BaseController {
 		}
 
 		foreach ( WC()->cart->get_cart() as $item ) {
-			if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id ) {
+			if ( ! empty( $item['faracart_gift_mission'] ) && (int) $item['faracart_gift_mission'] === (int) $mission_id ) {
 				return true;
 			}
 		}

@@ -31,7 +31,7 @@ defined( 'ABSPATH' ) || exit;
  *               ordering; the order's incremental value is attributed
  *               (split equally across the direct missions — deterministic,
  *               never double counted)
- *  - assisted → the session was exposed to the mission (goal_view) but never
+ *  - assisted → the session was exposed to the mission (mission_view) but never
  *               progressed it; the order total is recorded as assisted
  *               revenue with zero incremental value
  *
@@ -293,7 +293,7 @@ final class AttributionEngine {
 		}
 
 		// 3. Model selection: progressed/completed missions are direct; missions
-		// with only exposure (goal_view) are assisted. The incremental
+		// with only exposure (mission_view) are assisted. The incremental
 		// amount is the order total above the cart value at first exposure,
 		// split equally across the direct missions (never double counted).
 		$direct   = array();
@@ -436,9 +436,9 @@ final class AttributionEngine {
 					 WHERE user_id = %d AND event_type IN (%s, %s, %s, %s)
 					 ORDER BY created_at DESC, id DESC LIMIT 1",
 					(int) $data['user_id'],
-					RevenueTracker::EVENT_GOAL_VIEW,
-					RevenueTracker::EVENT_GOAL_PROGRESS,
-					RevenueTracker::EVENT_GOAL_COMPLETED,
+					RevenueTracker::EVENT_MISSION_VIEW,
+					RevenueTracker::EVENT_MISSION_PROGRESS,
+					RevenueTracker::EVENT_MISSION_COMPLETED,
 					RevenueTracker::EVENT_CART_VALUE
 				),
 				ARRAY_A
@@ -485,9 +485,9 @@ final class AttributionEngine {
 				   AND created_at >= %s AND created_at <= %s
 				 ORDER BY created_at ASC, id ASC",
 				$session_id,
-				RevenueTracker::EVENT_GOAL_VIEW,
-				RevenueTracker::EVENT_GOAL_PROGRESS,
-				RevenueTracker::EVENT_GOAL_COMPLETED,
+				RevenueTracker::EVENT_MISSION_VIEW,
+				RevenueTracker::EVENT_MISSION_PROGRESS,
+				RevenueTracker::EVENT_MISSION_COMPLETED,
 				$cutoff,
 				$order_date
 			),
@@ -509,7 +509,7 @@ final class AttributionEngine {
 			}
 
 			switch ( $row['event_type'] ) {
-				case RevenueTracker::EVENT_GOAL_VIEW:
+				case RevenueTracker::EVENT_MISSION_VIEW:
 					$missions[ $mission_id ]['viewed'] = true;
 
 					// Baseline = cart value at first exposure.
@@ -518,11 +518,11 @@ final class AttributionEngine {
 					}
 					break;
 
-				case RevenueTracker::EVENT_GOAL_PROGRESS:
+				case RevenueTracker::EVENT_MISSION_PROGRESS:
 					$missions[ $mission_id ]['progressed'] = true;
 					break;
 
-				case RevenueTracker::EVENT_GOAL_COMPLETED:
+				case RevenueTracker::EVENT_MISSION_COMPLETED:
 					$missions[ $mission_id ]['completed'] = true;
 					break;
 			}
@@ -604,9 +604,9 @@ final class AttributionEngine {
 		list( $attrib_sql, $attrib_params ) = $this->attribution_where( $args );
 
 		$counts = array(
-			RevenueTracker::EVENT_GOAL_VIEW      => 0,
-			RevenueTracker::EVENT_GOAL_PROGRESS  => 0,
-			RevenueTracker::EVENT_GOAL_COMPLETED => 0,
+			RevenueTracker::EVENT_MISSION_VIEW      => 0,
+			RevenueTracker::EVENT_MISSION_PROGRESS  => 0,
+			RevenueTracker::EVENT_MISSION_COMPLETED => 0,
 		);
 
 		foreach ( $counts as $type => $_unused ) {
@@ -625,12 +625,12 @@ final class AttributionEngine {
 			)
 		);
 
-		$views = $counts[ RevenueTracker::EVENT_GOAL_VIEW ];
-		$completed = $counts[ RevenueTracker::EVENT_GOAL_COMPLETED ];
+		$views = $counts[ RevenueTracker::EVENT_MISSION_VIEW ];
+		$completed = $counts[ RevenueTracker::EVENT_MISSION_COMPLETED ];
 
 		return array(
 			'views'            => $views,
-			'progressed'       => $counts[ RevenueTracker::EVENT_GOAL_PROGRESS ],
+			'progressed'       => $counts[ RevenueTracker::EVENT_MISSION_PROGRESS ],
 			'completed'        => $completed,
 			'converted'        => $converted,
 			'completion_rate'  => $views > 0 ? round( $completed / $views, 4 ) : null,
@@ -665,9 +665,9 @@ final class AttributionEngine {
 				 LIMIT %d",
 				array_merge(
 					array(
-						RevenueTracker::EVENT_GOAL_VIEW,
-						RevenueTracker::EVENT_GOAL_PROGRESS,
-						RevenueTracker::EVENT_GOAL_COMPLETED,
+						RevenueTracker::EVENT_MISSION_VIEW,
+						RevenueTracker::EVENT_MISSION_PROGRESS,
+						RevenueTracker::EVENT_MISSION_COMPLETED,
 					),
 					$params,
 					array( max( 1, $limit ) )
@@ -973,7 +973,7 @@ final class AttributionEngine {
 	 * added / upsell_order purchases from the raw upsell_events log — the
 	 * same source the Upsell Performance page reads, so the numbers always
 	 * agree) and the upsell-assisted completion count: distinct sessions
-	 * that completed the mission (a goal_completed revenue event in the
+	 * that completed the mission (a mission_completed revenue event in the
 	 * window) AND saw a product recommendation for that mission (any upsell
 	 * funnel event in the same session+mission). This is a reliable linkage —
 	 * both events are session-scoped and mission-scoped — so the metric is
@@ -1016,7 +1016,7 @@ final class AttributionEngine {
 			);
 		}
 
-		// Assisted completions: sessions with a goal_completed event that
+		// Assisted completions: sessions with a mission_completed event that
 		// also saw a recommendation (impression/clicked/added) for the mission.
 		// The window applies to the completion event (revenue_where); the
 		// upsell join is window-free but session+mission-scoped, which is the
@@ -1039,7 +1039,7 @@ final class AttributionEngine {
 						RevenueTracker::EVENT_UPSELL_IMPRESSION,
 						RevenueTracker::EVENT_UPSELL_CLICKED,
 						RevenueTracker::EVENT_UPSELL_ADDED,
-						RevenueTracker::EVENT_GOAL_COMPLETED,
+						RevenueTracker::EVENT_MISSION_COMPLETED,
 						(int) $mission_id,
 					),
 					$event_params
@@ -1080,7 +1080,7 @@ final class AttributionEngine {
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$events} WHERE event_type = %s AND mission_id = %d AND {$where}",
-				array_merge( array( RevenueTracker::EVENT_GOAL_COMPLETED, (int) $mission_id ), $params )
+				array_merge( array( RevenueTracker::EVENT_MISSION_COMPLETED, (int) $mission_id ), $params )
 			)
 		);
 	}

@@ -116,7 +116,7 @@ totals are reset; the tax component is a Phase 6 refinement (shipping is exclude
 reward evaluation anyway).
 
 The engine only touches what it granted: applied coupons are tracked per mission in the
-session (`faracart_applied_coupons`), automatic gifts in `faracart_gift_goals`, and
+session (`faracart_applied_coupons`), automatic gifts in `faracart_gift_missions`, and
 session writes are skipped when the value did not change (no per-pass session
 churn). The shopper's own coupons are never removed.
 

@@ -599,7 +599,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'quantity'            => 1,
 		'data'                => $gift_product,
 		'faracart_gift'       => true,
-		'faracart_gift_goal'  => 1,
+		'faracart_gift_mission'  => 1,
 		'faracart_gift_product' => 42,
 		'faracart_gift_mode'  => Reward::GIFT_AUTOMATIC,
 		'line_subtotal'       => 50.0,
@@ -624,7 +624,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'quantity'            => 1,
 		'data'                => $gift_product,
 		'faracart_gift'       => true,
-		'faracart_gift_goal'  => 2,
+		'faracart_gift_mission'  => 2,
 		'faracart_gift_product' => 42,
 		'faracart_gift_mode'  => Reward::GIFT_CHOOSE,
 		'line_subtotal'       => 50.0,
@@ -639,7 +639,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 		'quantity'            => 1,
 		'data'                => $gift_product,
 		'faracart_gift'       => true,
-		'faracart_gift_goal'  => 99999999,
+		'faracart_gift_mission'  => 99999999,
 		'faracart_gift_product' => 42,
 		'line_subtotal'       => 50.0,
 		'line_total'          => 50.0,
@@ -700,7 +700,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) ) {
 	// restored (repository lookup fails before any cart mutation).
 	$cart->removed_cart_contents['gift1'] = $cart->cart_contents['gift1'];
 	unset( $cart->cart_contents['gift1'] );
-	$cart->removed_cart_contents['gift1']['faracart_gift_goal'] = 99999999;
+	$cart->removed_cart_contents['gift1']['faracart_gift_mission'] = 99999999;
 	$re->restore_removed_gift( 'gift1', $cart );
 	check( 'orphaned mission gift not restored', ! isset( $cart->cart_contents['gift1'] ) );
 
@@ -812,7 +812,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'quantity'              => 1,
 			'data'                  => wc_get_product( $product_id ),
 			'faracart_gift'         => true,
-			'faracart_gift_goal'    => $mission_id,
+			'faracart_gift_mission'    => $mission_id,
 			'faracart_gift_product' => $product_id,
 			'line_subtotal'         => 50.0,
 			'line_total'            => 50.0,
@@ -826,13 +826,13 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$cart->remove_cart_item( 'giftX' );
 		$restored_key = null;
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( ! empty( $item['faracart_gift_goal'] ) && $mission_id === (int) $item['faracart_gift_goal'] ) {
+			if ( ! empty( $item['faracart_gift_mission'] ) && $mission_id === (int) $item['faracart_gift_mission'] ) {
 				$restored_key = $key;
 				break;
 			}
 		}
 		check( 'removed gift restored by the engine', null !== $restored_key );
-		check( 'restored gift keeps the mission marker', null !== $restored_key && $mission_id === (int) $cart->cart_contents[ $restored_key ]['faracart_gift_goal'] );
+		check( 'restored gift keeps the mission marker', null !== $restored_key && $mission_id === (int) $cart->cart_contents[ $restored_key ]['faracart_gift_mission'] );
 		check( 'restored gift is zero-priced', null !== $restored_key && isset( $cart->cart_contents[ $restored_key ]['data'] ) && $cart->cart_contents[ $restored_key ]['data'] instanceof \WC_Product && near( 0, $cart->cart_contents[ $restored_key ]['data']->get_price() ) );
 
 		// The qualifying line survived untouched.
@@ -865,7 +865,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			'quantity'              => 1,
 			'data'                  => wc_get_product( $product_id ),
 			'faracart_gift'         => true,
-			'faracart_gift_goal'    => $mission_id,
+			'faracart_gift_mission'    => $mission_id,
 			'faracart_gift_product' => $product_id,
 			'line_subtotal'         => 50.0,
 			'line_total'            => 50.0,
@@ -894,7 +894,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 		$still_restored = false;
 
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( ! empty( $item['faracart_gift_goal'] ) && $mission_id === (int) $item['faracart_gift_goal'] ) {
+			if ( ! empty( $item['faracart_gift_mission'] ) && $mission_id === (int) $item['faracart_gift_mission'] ) {
 				$still_restored = true;
 				break;
 			}
@@ -1056,7 +1056,7 @@ if ( class_exists( 'WC_Cart' ) && class_exists( 'WC_Product_Simple' ) && class_e
 			$lines = array();
 
 			foreach ( $cart->get_cart() as $key => $item ) {
-				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id ) {
+				if ( ! empty( $item['faracart_gift_mission'] ) && (int) $item['faracart_gift_mission'] === (int) $mission_id ) {
 					$lines[ $key ] = $item;
 				}
 			}

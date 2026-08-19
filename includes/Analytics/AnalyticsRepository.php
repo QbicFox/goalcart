@@ -18,8 +18,8 @@ defined( 'ABSPATH' ) || exit;
  * Phase 16 (Analytics Foundation — Metrics) — the read layer over the
  * append-only `analytics_events` table, computing the dashboard metrics:
  *
- *  - impressions                    goal_impression event count
- *  - completions                    goal_completed + reward_activated count
+ *  - impressions                    mission_impression event count
+ *  - completions                    mission_completed + reward_activated count
  *  - completion rate                completions / impressions
  *  - average cart value             AVG(cart_value) at mission impression
  *  - revenue on completed missions     SUM(cart_value) at completion events
@@ -80,7 +80,7 @@ final class AnalyticsRepository {
 	 * @return int
 	 */
 	public function impressions( array $filters = array() ) {
-		return $this->count( Tracker::EVENT_GOAL_IMPRESSION, $filters );
+		return $this->count( Tracker::EVENT_MISSION_IMPRESSION, $filters );
 	}
 
 	/**
@@ -90,7 +90,7 @@ final class AnalyticsRepository {
 	 * @return int
 	 */
 	public function completions( array $filters = array() ) {
-		return $this->count( Tracker::EVENT_GOAL_COMPLETED, $filters )
+		return $this->count( Tracker::EVENT_MISSION_COMPLETED, $filters )
 			+ $this->count( Tracker::EVENT_REWARD_ACTIVATED, $filters );
 	}
 
@@ -124,7 +124,7 @@ final class AnalyticsRepository {
 	public function average_cart_value( array $filters = array() ) {
 		global $wpdb;
 
-		$where = $this->where( Tracker::EVENT_GOAL_IMPRESSION, $filters );
+		$where = $this->where( Tracker::EVENT_MISSION_IMPRESSION, $filters );
 		$sql   = 'SELECT AVG(cart_value) FROM ' . Schema::table( 'analytics_events' )
 			. ' ' . $where['sql'] . ' AND cart_value > 0';
 
@@ -149,7 +149,7 @@ final class AnalyticsRepository {
 		$parts  = $this->clauses( null, $filters );
 		$parts['clauses'][] = 'event_type IN (%s, %s)';
 		$parts['clauses'][] = 'cart_value IS NOT NULL';
-		$parts['values'][]  = Tracker::EVENT_GOAL_COMPLETED;
+		$parts['values'][]  = Tracker::EVENT_MISSION_COMPLETED;
 		$parts['values'][]  = Tracker::EVENT_REWARD_ACTIVATED;
 
 		$sql = 'SELECT SUM(cart_value) FROM ' . Schema::table( 'analytics_events' )
@@ -240,10 +240,10 @@ final class AnalyticsRepository {
 
 		$values = array_merge(
 			array(
-				Tracker::EVENT_GOAL_IMPRESSION,
-				Tracker::EVENT_GOAL_COMPLETED,
+				Tracker::EVENT_MISSION_IMPRESSION,
+				Tracker::EVENT_MISSION_COMPLETED,
 				Tracker::EVENT_REWARD_ACTIVATED,
-				Tracker::EVENT_GOAL_COMPLETED,
+				Tracker::EVENT_MISSION_COMPLETED,
 				Tracker::EVENT_REWARD_ACTIVATED,
 			),
 			$parts['values']
@@ -314,10 +314,10 @@ final class AnalyticsRepository {
 
 		$values = array_merge(
 			array(
-				Tracker::EVENT_GOAL_IMPRESSION,
-				Tracker::EVENT_GOAL_COMPLETED,
+				Tracker::EVENT_MISSION_IMPRESSION,
+				Tracker::EVENT_MISSION_COMPLETED,
 				Tracker::EVENT_REWARD_ACTIVATED,
-				Tracker::EVENT_GOAL_COMPLETED,
+				Tracker::EVENT_MISSION_COMPLETED,
 				Tracker::EVENT_REWARD_ACTIVATED,
 			),
 			$parts['values'],
@@ -360,10 +360,10 @@ final class AnalyticsRepository {
 
 		$values = array_merge(
 			array(
-				Tracker::EVENT_GOAL_IMPRESSION,
-				Tracker::EVENT_GOAL_COMPLETED,
+				Tracker::EVENT_MISSION_IMPRESSION,
+				Tracker::EVENT_MISSION_COMPLETED,
 				Tracker::EVENT_REWARD_ACTIVATED,
-				Tracker::EVENT_GOAL_COMPLETED,
+				Tracker::EVENT_MISSION_COMPLETED,
 				Tracker::EVENT_REWARD_ACTIVATED,
 			),
 			$parts['values'],

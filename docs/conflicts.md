@@ -98,7 +98,7 @@ payload carry per mission:
 
 `resolved: false` means the mission's reward is blocked by a conflict, with the machine-readable
 `reason`. The storefront widget (`assets/js/frontend.js`) renders a suppressed reward as
-**locked** (never unlocked) and reports `goal_completed` instead of `reward_activated` for
+**locked** (never unlocked) and reports `mission_completed` instead of `reward_activated` for
 it; the admin preview shows a "Blocked — …" chip explaining why.
 
 ## 6. Admin UI communication

@@ -228,11 +228,11 @@ try {
 	$session_b = str_repeat( 'cd', 16 );
 
 	// --- Session funnel events (the Phase 33.1 tracker, deduped). ---
-	$tracker->record( 'goal_view', array( 'mission_id' => 101, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_progress', array( 'mission_id' => 101, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_completed', array( 'mission_id' => 101, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_view', array( 'mission_id' => 202, 'cart_value' => 800000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_view', array( 'mission_id' => 303, 'cart_value' => 750000, 'mission_target' => 1000000, 'session_id' => $session_b ) );
+	$tracker->record( 'mission_view', array( 'mission_id' => 101, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'mission_progress', array( 'mission_id' => 101, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'mission_completed', array( 'mission_id' => 101, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'mission_view', array( 'mission_id' => 202, 'cart_value' => 800000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'mission_view', array( 'mission_id' => 303, 'cart_value' => 750000, 'mission_target' => 1000000, 'session_id' => $session_b ) );
 
 	// --- Store-wide baseline BEFORE the fixture orders (leftover dev-DB
 	// orders must not skew the AOV / shipping assertions). ---
@@ -333,7 +333,7 @@ try {
 	);
 	check( 'viewed-only mission attributed as assisted', null !== $assisted_row && AttributionEngine::MODEL_ASSISTED === $assisted_row['model'] );
 	check( 'assisted row carries zero incremental value', null !== $assisted_row && close( 0, $assisted_row['incremental_value'] ) );
-	check( 'assisted row not marked completed', null !== $assisted_row && 0 === (int) $assisted_row['goal_completed'] );
+	check( 'assisted row not marked completed', null !== $assisted_row && 0 === (int) $assisted_row['mission_completed'] );
 
 	$event = $wpdb->get_row(
 		$wpdb->prepare(

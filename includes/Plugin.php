@@ -183,7 +183,7 @@ final class Plugin {
 		$this->hooks()->register( $this->container->get( Tracker::class ) );
 
 		// Revenue optimization (Phase 33.1): the revenue event tracker
-		// records the attribution funnel (goal_view → progress → completed
+		// records the attribution funnel (mission_view → progress → completed
 		// → order_paid) and the upsell funnel into their dedicated logs,
 		// with idempotent dedup and the weekly retention cleanup cron.
 		$this->hooks()->register( $this->container->get( RevenueTracker::class ) );

@@ -88,7 +88,7 @@ final class RewardEngine {
 	 * Session keys owned by the engine.
 	 */
 	const SESSION_COUPONS = 'faracart_applied_coupons';
-	const SESSION_GIFTS   = 'faracart_gift_goals';
+	const SESSION_GIFTS   = 'faracart_gift_missions';
 
 	/**
 	 * Mission engine used to evaluate missions against the cart.
@@ -727,7 +727,7 @@ final class RewardEngine {
 
 			if ( $chosen <= 0 ) {
 				foreach ( $cart->get_cart() as $item ) {
-					if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id ) {
+					if ( ! empty( $item['faracart_gift_mission'] ) && (int) $item['faracart_gift_mission'] === (int) $mission_id ) {
 						$chosen = isset( $item['faracart_gift_product'] ) ? (int) $item['faracart_gift_product'] : 0;
 						break;
 					}
@@ -745,7 +745,7 @@ final class RewardEngine {
 		// lookup and the line no longer looks mandatory by default.
 		foreach ( $desired as $mission_id => $product_id ) {
 			foreach ( $cart->get_cart() as $key => $item ) {
-				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id && ! isset( $item['faracart_gift_mode'] ) ) {
+				if ( ! empty( $item['faracart_gift_mission'] ) && (int) $item['faracart_gift_mission'] === (int) $mission_id && ! isset( $item['faracart_gift_mode'] ) ) {
 					$mode = Reward::GIFT_AUTOMATIC;
 
 					if ( isset( $results[ (int) $mission_id ] ) && $results[ (int) $mission_id ]->reward() instanceof Reward ) {
@@ -792,11 +792,11 @@ final class RewardEngine {
 		}
 
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( empty( $item['faracart_gift_goal'] ) || ! isset( $considered[ (int) $item['faracart_gift_goal'] ] ) ) {
+			if ( empty( $item['faracart_gift_mission'] ) || ! isset( $considered[ (int) $item['faracart_gift_mission'] ] ) ) {
 				continue;
 			}
 
-			$gift_mission    = (int) $item['faracart_gift_goal'];
+			$gift_mission    = (int) $item['faracart_gift_mission'];
 			$gift_product = isset( $item['faracart_gift_product'] ) ? (int) $item['faracart_gift_product'] : 0;
 
 			if ( ! isset( $desired_by_mission[ $gift_mission ] ) || $desired_by_mission[ $gift_mission ] !== $gift_product ) {
@@ -866,7 +866,7 @@ final class RewardEngine {
 		// of stacking a second gift. The engine-removal flag suppresses the
 		// restore handler so the stale line stays gone.
 		foreach ( $cart->get_cart() as $key => $item ) {
-			if ( empty( $item['faracart_gift_goal'] ) || (int) $item['faracart_gift_goal'] !== $mission_id ) {
+			if ( empty( $item['faracart_gift_mission'] ) || (int) $item['faracart_gift_mission'] !== $mission_id ) {
 				continue;
 			}
 
@@ -954,7 +954,7 @@ final class RewardEngine {
 
 		try {
 			foreach ( $cart->get_cart() as $key => $item ) {
-				if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id ) {
+				if ( ! empty( $item['faracart_gift_mission'] ) && (int) $item['faracart_gift_mission'] === (int) $mission_id ) {
 					$cart->remove_cart_item( $key );
 				}
 			}
@@ -1008,8 +1008,8 @@ final class RewardEngine {
 			return Reward::GIFT_AUTOMATIC === $item['faracart_gift_mode'];
 		}
 
-		if ( ! empty( $item['faracart_gift_goal'] ) && null !== $this->repository ) {
-			$mission = $this->repository->find( (int) $item['faracart_gift_goal'] );
+		if ( ! empty( $item['faracart_gift_mission'] ) && null !== $this->repository ) {
+			$mission = $this->repository->find( (int) $item['faracart_gift_mission'] );
 
 			if ( $mission ) {
 				return Reward::from_mission( $mission )->is_gift_automatic();
@@ -1068,7 +1068,7 @@ final class RewardEngine {
 			? $cart->removed_cart_contents[ $cart_item_key ]
 			: null;
 
-		if ( ! is_array( $removed ) || empty( $removed['faracart_gift'] ) || empty( $removed['faracart_gift_goal'] ) ) {
+		if ( ! is_array( $removed ) || empty( $removed['faracart_gift'] ) || empty( $removed['faracart_gift_mission'] ) ) {
 			return;
 		}
 
@@ -1076,7 +1076,7 @@ final class RewardEngine {
 			return;
 		}
 
-		$mission_id = (int) $removed['faracart_gift_goal'];
+		$mission_id = (int) $removed['faracart_gift_mission'];
 		$mission    = $this->repository->find( $mission_id );
 
 		if ( ! $mission || ! $mission->is_active() ) {

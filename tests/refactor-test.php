@@ -273,14 +273,14 @@ try {
 	$sessions[] = $session_a;
 	$sessions[] = $session_b;
 
-	foreach ( array( 'goal_view', 'goal_progress', 'goal_completed' ) as $type ) {
+	foreach ( array( 'mission_view', 'mission_progress', 'mission_completed' ) as $type ) {
 		$tracker->record( $type, array( 'mission_id' => $mission_id, 'cart_value' => 3000000, 'mission_target' => 5000000, 'session_id' => $session_a ) );
 	}
 	$tracker->record_upsell( RevenueTracker::EVENT_UPSELL_IMPRESSION, array( 'mission_id' => $mission_id, 'product_id' => (int) $post_id, 'session_id' => $session_a, 'cart_value' => 3000000 ) );
 	$tracker->record_upsell( RevenueTracker::EVENT_UPSELL_CLICKED, array( 'mission_id' => $mission_id, 'product_id' => (int) $post_id, 'session_id' => $session_a, 'cart_value' => 3000000 ) );
 
 	// Session B: completes the mission with no upsell exposure → not assisted.
-	foreach ( array( 'goal_view', 'goal_progress', 'goal_completed' ) as $type ) {
+	foreach ( array( 'mission_view', 'mission_progress', 'mission_completed' ) as $type ) {
 		$tracker->record( $type, array( 'mission_id' => $mission_id, 'cart_value' => 3000000, 'mission_target' => 5000000, 'session_id' => $session_b ) );
 	}
 

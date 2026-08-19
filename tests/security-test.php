@@ -180,7 +180,7 @@ foreach ( $routes['/faracart/v1/track'] as $handler ) {
 check( 'track route declares the nonce arg', isset( $schema['nonce'] ) && ! empty( $schema['nonce']['required'] ) );
 
 $req  = new \WP_REST_Request( 'POST', '/faracart/v1/track' );
-$req->set_param( 'event_type', 'goal_impression' );
+$req->set_param( 'event_type', 'mission_impression' );
 $req->set_param( 'nonce', 'bogus-nonce' );
 $resp = $server->dispatch( $req );
 check( 'bad nonce rejected (403)', 403 === $resp->get_status() );
@@ -304,7 +304,7 @@ try {
 	// non-negative amount.
 	$session = str_repeat( 'a', 32 );
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/track' );
-	$req->set_param( 'event_type', 'goal_progress' );
+	$req->set_param( 'event_type', 'mission_progress' );
 	$req->set_param( 'mission_id', 0 );
 	$req->set_param( 'campaign_id', 0 );
 	$req->set_param( 'product_id', 0 );
@@ -319,7 +319,7 @@ try {
 		$wpdb->prepare(
 			"SELECT cart_value, meta FROM {$events_table} WHERE session_id = %s AND event_type = %s ORDER BY id DESC LIMIT 1",
 			$session,
-			Tracker::EVENT_GOAL_PROGRESS
+			Tracker::EVENT_MISSION_PROGRESS
 		),
 		ARRAY_A
 	);

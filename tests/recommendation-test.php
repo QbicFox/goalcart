@@ -390,8 +390,8 @@ try {
 	for ( $i = 0; $i < 12; $i++ ) {
 		$session = str_repeat( sprintf( '%02d', $i ), 16 );
 		$sessions[] = $session;
-		$tracker->record( 'goal_view', array( 'mission_id' => 101, 'cart_value' => 500000, 'mission_target' => 1000000, 'session_id' => $session ) );
-		$tracker->record( 'goal_completed', array( 'mission_id' => 101, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session ) );
+		$tracker->record( 'mission_view', array( 'mission_id' => 101, 'cart_value' => 500000, 'mission_target' => 1000000, 'session_id' => $session ) );
+		$tracker->record( 'mission_completed', array( 'mission_id' => 101, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session ) );
 	}
 
 	// Backdate the events into the analysis window so the mission history

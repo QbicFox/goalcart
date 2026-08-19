@@ -1942,7 +1942,7 @@ Progress:
 Implementation notes (see `tests/revenue-foundation-test.php`, 66 checks):
 
 - **Event model** — `RevenueTracker` owns two raw logs: `revenue_events`
-  (the attribution funnel goal_view → goal_progress → goal_completed →
+  (the attribution funnel mission_view → mission_progress → mission_completed →
   order_paid, each row carrying cart_value, mission_target and
   incremental_value) and `upsell_events` (impression → clicked → added →
   order per product per session). The Phase 16 `Tracker`/`analytics_events`
@@ -1958,7 +1958,7 @@ Implementation notes (see `tests/revenue-foundation-test.php`, 66 checks):
   FK-resilient insert pattern as the Phase 16 tracker.
 - **Deduplication** — idempotent recording by design: view/completion /
   impression/click dedup per session+mission(+product) within a 24 h window,
-  goal_progress within 30 min, order_paid / upsell_order exactly once per
+  mission_progress within 30 min, order_paid / upsell_order exactly once per
   order (the unique order_mission_model key also guards the attribution
   layer).
 - **Privacy-safe sessions** — reuses the anonymous 32-hex `Session`

@@ -18,9 +18,9 @@ defined( 'ABSPATH' ) || exit;
  * Phase 16 (Analytics Foundation) — records the seven mission-cart events
  * into the `analytics_events` table:
  *
- *  - goal_impression          a mission widget was shown to a shopper
- *  - goal_progress            the widget reported a progress percentage
- *  - goal_completed           a mission's target was reached (no reward)
+ *  - mission_impression          a mission widget was shown to a shopper
+ *  - mission_progress            the widget reported a progress percentage
+ *  - mission_completed           a mission's target was reached (no reward)
  *  - reward_activated         a mission's target was reached (with reward)
  *  - suggestion_impression    a suggested product was shown
  *  - suggestion_clicked       a shopper clicked a suggested product
@@ -63,9 +63,9 @@ final class Tracker {
 	/**
 	 * Event types.
 	 */
-	const EVENT_GOAL_IMPRESSION         = 'goal_impression';
-	const EVENT_GOAL_PROGRESS           = 'goal_progress';
-	const EVENT_GOAL_COMPLETED          = 'goal_completed';
+	const EVENT_MISSION_IMPRESSION         = 'mission_impression';
+	const EVENT_MISSION_PROGRESS           = 'mission_progress';
+	const EVENT_MISSION_COMPLETED          = 'mission_completed';
 	const EVENT_REWARD_ACTIVATED        = 'reward_activated';
 	const EVENT_SUGGESTION_IMPRESSION   = 'suggestion_impression';
 	const EVENT_SUGGESTION_CLICKED      = 'suggestion_clicked';
@@ -124,9 +124,9 @@ final class Tracker {
 	 */
 	public static function event_types() {
 		return array(
-			self::EVENT_GOAL_IMPRESSION,
-			self::EVENT_GOAL_PROGRESS,
-			self::EVENT_GOAL_COMPLETED,
+			self::EVENT_MISSION_IMPRESSION,
+			self::EVENT_MISSION_PROGRESS,
+			self::EVENT_MISSION_COMPLETED,
 			self::EVENT_REWARD_ACTIVATED,
 			self::EVENT_SUGGESTION_IMPRESSION,
 			self::EVENT_SUGGESTION_CLICKED,

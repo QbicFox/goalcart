@@ -51,8 +51,8 @@ required. Later phases extend existing payloads and rebuild the React presentati
 
 ```text
 Storefront events                     Order lifecycle
-  goal_view / goal_progress /          woocommerce_payment_complete
-  goal_completed / order_paid /        woocommerce_order_status_completed
+  mission_view / mission_progress /          woocommerce_payment_complete
+  mission_completed / order_paid /        woocommerce_order_status_completed
   upsell_*  (RevenueTracker)           → AttributionEngine::attribute_order()
         │                                          │
         ▼                                          ▼
@@ -159,7 +159,7 @@ The spec's §18 definition `conversion_rate = converted / completions` **matches
 existing implementation exactly** (`AttributionEngine::funnel()`:
 `conversion_rate = $completed > 0 ? converted / completed : null`). "Purchased" is the
 existing `converted` (distinct attributed orders), and "mission completion ≠ purchase" is
-already the engine's core rule (`goal_completed` flag ≠ an associated order).
+already the engine's core rule (`mission_completed` flag ≠ an associated order).
 
 | Requested metric (Improvement.md) | Existing field | Where |
 | --- | --- | --- |

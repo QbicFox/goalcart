@@ -348,20 +348,20 @@ into a `faracart_invalid_nonce` (403).
 
 | Event | When | Dedup |
 |---|---|---|
-| `goal_impression` | an eligible mission renders in a widget | once per mission per page session |
-| `goal_progress` | the mission's percentage changes | per mission + percentage |
-| `goal_completed` | a mission without a reward reaches 100% | once per mission per page session |
+| `mission_impression` | an eligible mission renders in a widget | once per mission per page session |
+| `mission_progress` | the mission's percentage changes | per mission + percentage |
+| `mission_completed` | a mission without a reward reaches 100% | once per mission per page session |
 | `reward_activated` | a mission with a reward reaches 100% | once per mission per page session |
 | `suggestion_impression` | a suggested product renders | once per mission + product per page session |
 | `suggestion_clicked` | a suggestion link is clicked | every click (delegated listener) |
 
 `cart_value` is the first money mission's current value at event time;
-`goal_progress` carries the rounded `percentage` in `meta`. Suggestion
+`mission_progress` carries the rounded `percentage` in `meta`. Suggestion
 clicks are reported through a delegated `document.body` click listener
 using the `data-faracart-suggestion-id` / `data-faracart-mission-id`
 attributes the widget puts on each suggestion link.
 
-`goal_impression` is deliberately gated on an *eligible* mission rendering —
+`mission_impression` is deliberately gated on an *eligible* mission rendering —
 no payload fetch, no ineligible mission, no bot-poll, no event. Reports use
 `navigator.sendBeacon` when available (so they survive page unload) with
 an XHR fallback, and the events fire on every widget refresh, deduped

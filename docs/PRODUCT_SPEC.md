@@ -177,7 +177,7 @@ The MVP is defined by the roadmap's feature list. Each item below states its req
 |---|---|---|---|
 | 18 | **Product suggestions** | Suggest products that close the remaining gap, ranked per §2.5. | 14 |
 | 19 | **Campaign scheduling** | Campaigns activate/deactivate automatically by start/end date. | 10 |
-| 20 | **Basic analytics** | Track `goal_impression`, `goal_progress`, `goal_completed`, `reward_activated`, `suggestion_impression`, `suggestion_clicked`, `suggested_product_added`; report impressions, completions, completion rate, AOV, mission revenue, suggestion CTR/add-to-cart rate — with privacy by default (no unnecessary PII). | 16 |
+| 20 | **Basic analytics** | Track `mission_impression`, `mission_progress`, `mission_completed`, `reward_activated`, `suggestion_impression`, `suggestion_clicked`, `suggested_product_added`; report impressions, completions, completion rate, AOV, mission revenue, suggestion CTR/add-to-cart rate — with privacy by default (no unnecessary PII). | 16 |
 
 ### 4.5 Explicit deferrals (out of MVP)
 

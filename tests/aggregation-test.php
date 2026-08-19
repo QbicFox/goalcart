@@ -211,10 +211,10 @@ try {
 		), $extra ) );
 	};
 
-	$event( 'goal_view', 101, 700000, '2026-08-05 10:00:00' );
-	$event( 'goal_progress', 101, 900000, '2026-08-05 10:30:00' );
-	$event( 'goal_completed', 101, 1050000, '2026-08-05 11:00:00' );
-	$event( 'goal_view', 202, 800000, '2026-08-05 11:30:00', array( 'session_id' => $session_b ) );
+	$event( 'mission_view', 101, 700000, '2026-08-05 10:00:00' );
+	$event( 'mission_progress', 101, 900000, '2026-08-05 10:30:00' );
+	$event( 'mission_completed', 101, 1050000, '2026-08-05 11:00:00' );
+	$event( 'mission_view', 202, 800000, '2026-08-05 11:30:00', array( 'session_id' => $session_b ) );
 
 	// --- Attribution rows on the same day. ---
 	$wpdb->insert( $attrib_table, array(
@@ -224,7 +224,7 @@ try {
 		'model'             => 'direct',
 		'order_total'       => 1050000,
 		'incremental_value' => 350000,
-		'goal_completed'    => 1,
+		'mission_completed'    => 1,
 		'created_at'        => '2026-08-05 12:00:00',
 	) );
 
@@ -235,7 +235,7 @@ try {
 		'model'             => 'assisted',
 		'order_total'       => 800000,
 		'incremental_value' => 0,
-		'goal_completed'    => 0,
+		'mission_completed'    => 0,
 		'created_at'        => '2026-08-05 12:30:00',
 	) );
 
@@ -253,9 +253,9 @@ try {
 	);
 
 	check( 'daily row for the direct mission exists', null !== $row_101 );
-	check( 'daily views = goal_view count', null !== $row_101 && 1 === (int) $row_101['views'] );
-	check( 'daily progressions = goal_progress count', null !== $row_101 && 1 === (int) $row_101['progressions'] );
-	check( 'daily completions = goal_completed count', null !== $row_101 && 1 === (int) $row_101['completions'] );
+	check( 'daily views = mission_view count', null !== $row_101 && 1 === (int) $row_101['views'] );
+	check( 'daily progressions = mission_progress count', null !== $row_101 && 1 === (int) $row_101['progressions'] );
+	check( 'daily completions = mission_completed count', null !== $row_101 && 1 === (int) $row_101['completions'] );
 	check( 'daily conversions = distinct attributed orders', null !== $row_101 && 1 === (int) $row_101['conversions'] );
 	check( 'daily revenue = influenced order totals', null !== $row_101 && close( 1050000, $row_101['revenue'] ) );
 	check( 'daily incremental revenue = direct incremental', null !== $row_101 && close( 350000, $row_101['incremental_revenue'] ) );

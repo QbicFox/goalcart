@@ -249,64 +249,64 @@ try {
 
 	// --- Scenario A: full cost data (mission 501). ---
 	$s1 = $session( 1 );
-	$record( 'goal_view', 501, $s1, 600 );
-	$record( 'goal_progress', 501, $s1, 800 );
-	$record( 'goal_completed', 501, $s1, 1000 );
+	$record( 'mission_view', 501, $s1, 600 );
+	$record( 'mission_progress', 501, $s1, 800 );
+	$record( 'mission_completed', 501, $s1, 1000 );
 	$s2 = $session( 2 );
-	$record( 'goal_view', 501, $s2, 1500 );
-	$record( 'goal_completed', 501, $s2, 2000 );
+	$record( 'mission_view', 501, $s2, 1500 );
+	$record( 'mission_completed', 501, $s2, 2000 );
 
 	// --- Scenario B: no cost data (mission 502). ---
 	$s3 = $session( 3 );
-	$record( 'goal_view', 502, $s3, 500 );
-	$record( 'goal_completed', 502, $s3, 1000 );
+	$record( 'mission_view', 502, $s3, 500 );
+	$record( 'mission_completed', 502, $s3, 1000 );
 
 	// --- Scenario C: partial cost data (mission 503). ---
 	$s4 = $session( 4 );
-	$record( 'goal_view', 503, $s4, 600 );
-	$record( 'goal_completed', 503, $s4, 1000 );
+	$record( 'mission_view', 503, $s4, 600 );
+	$record( 'mission_completed', 503, $s4, 1000 );
 	$s5 = $session( 5 );
-	$record( 'goal_view', 503, $s5, 600 );
-	$record( 'goal_completed', 503, $s5, 1000 );
+	$record( 'mission_view', 503, $s5, 600 );
+	$record( 'mission_completed', 503, $s5, 1000 );
 
 	// --- Scenario D: zero profit (mission 504). ---
 	$s6 = $session( 6 );
-	$record( 'goal_view', 504, $s6, 500 );
-	$record( 'goal_completed', 504, $s6, 1000 );
+	$record( 'mission_view', 504, $s6, 500 );
+	$record( 'mission_completed', 504, $s6, 1000 );
 
 	// --- Scenario E: negative profit (mission 505). ---
 	$s7 = $session( 7 );
-	$record( 'goal_view', 505, $s7, 500 );
-	$record( 'goal_completed', 505, $s7, 1000 );
+	$record( 'mission_view', 505, $s7, 500 );
+	$record( 'mission_completed', 505, $s7, 1000 );
 
 	// --- Scenario F: completed but never purchased (mission 506). ---
 	$s8 = $session( 8 );
-	$record( 'goal_view', 506, $s8, 400 );
+	$record( 'mission_view', 506, $s8, 400 );
 	$s9 = $session( 9 );
-	$record( 'goal_view', 506, $s9, 500 );
-	$record( 'goal_completed', 506, $s9, 900 );
+	$record( 'mission_view', 506, $s9, 500 );
+	$record( 'mission_completed', 506, $s9, 900 );
 
 	// --- Scenario G: mixed direct + assisted (missions 507/508). ---
 	$s11 = $session( 11 );
-	$record( 'goal_view', 507, $s11, 700 );
-	$record( 'goal_progress', 507, $s11, 900 );
-	$record( 'goal_view', 508, $s11, 700 );
+	$record( 'mission_view', 507, $s11, 700 );
+	$record( 'mission_progress', 507, $s11, 900 );
+	$record( 'mission_view', 508, $s11, 700 );
 
 	// --- Scenario H: direct+direct incremental split (missions 509/510). ---
 	$s12 = $session( 12 );
-	$record( 'goal_view', 509, $s12, 600 );
-	$record( 'goal_progress', 509, $s12, 800 );
-	$record( 'goal_view', 510, $s12, 600 );
-	$record( 'goal_progress', 510, $s12, 800 );
+	$record( 'mission_view', 509, $s12, 600 );
+	$record( 'mission_progress', 509, $s12, 800 );
+	$record( 'mission_view', 510, $s12, 600 );
+	$record( 'mission_progress', 510, $s12, 800 );
 
 	// --- Scenario I: date filtering (mission 511, backdated). ---
 	$s13 = $session( 13 );
-	$record( 'goal_view', 511, $s13, 500 );
-	$record( 'goal_completed', 511, $s13, 1000 );
+	$record( 'mission_view', 511, $s13, 500 );
+	$record( 'mission_completed', 511, $s13, 1000 );
 
 	// --- Scenario J: no completions → null purchase rate (mission 512). ---
 	$s10 = $session( 10 );
-	$record( 'goal_view', 512, $s10, 300 );
+	$record( 'mission_view', 512, $s10, 300 );
 
 	// Backdate the mission-511 events so the funnel respects the January window
 	// (the tracker stamps current_time; the engine reads stored dates).

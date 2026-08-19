@@ -1,7 +1,7 @@
 # FaraCart — Revenue Attribution (Phase 33.2)
 
 > **Phase 33 / Tasks P33-T02.** Turns the Phase 33.1 revenue event funnel
-> (`goal_view` → `goal_progress` → `goal_completed` → `order_paid`) into
+> (`mission_view` → `mission_progress` → `mission_completed` → `order_paid`) into
 > per-order mission attribution and measurable revenue metrics. Services:
 > `FaraCart\Analytics\AttributionEngine` and
 > `FaraCart\Analytics\RewardCostEstimator`. Storage: `mission_attribution`
@@ -39,7 +39,7 @@ exposure)` — how much the customer added after seeing the mission. When
 several missions are direct on one order, the incremental value is split
 equally across them (deterministic, never double counted).
 
-**Mission completion** — a `goal_completed` event in the session marks the
+**Mission completion** — a `mission_completed` event in the session marks the
 attribution row `mission_completed = 1` (a completion is *not* a conversion;
 only an associated order is).
 

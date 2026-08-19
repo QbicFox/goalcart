@@ -12,11 +12,11 @@
  *    expected index is present
  *  - event model: the revenue + upsell event whitelists are exposed and
  *    validated (a bogus type is rejected, a valid one accepted)
- *  - event recording: goal_view / goal_progress / goal_completed /
+ *  - event recording: mission_view / mission_progress / mission_completed /
  *    order_paid land in revenue_events with cart value, mission target and
  *    incremental value; upsell events land in upsell_events
- *  - deduplication: goal_view is recorded once per session+mission in its
- *    24h window, goal_progress within 30 min, order_paid once per order,
+ *  - deduplication: mission_view is recorded once per session+mission in its
+ *    24h window, mission_progress within 30 min, order_paid once per order,
  *    upsell_impression once per session+mission+product
  *  - privacy: rows store only anonymous session ids and numeric
  *    aggregates — no email/ip fields exist in the table, and a malformed
@@ -175,9 +175,9 @@ $revenue_types = RevenueTracker::revenue_event_types();
 $upsell_types  = RevenueTracker::upsell_event_types();
 
 check( 'revenue whitelist has five types', 5 === count( $revenue_types ) );
-check( 'goal_view whitelisted', in_array( 'goal_view', $revenue_types, true ) );
-check( 'goal_progress whitelisted', in_array( 'goal_progress', $revenue_types, true ) );
-check( 'goal_completed whitelisted', in_array( 'goal_completed', $revenue_types, true ) );
+check( 'mission_view whitelisted', in_array( 'mission_view', $revenue_types, true ) );
+check( 'mission_progress whitelisted', in_array( 'mission_progress', $revenue_types, true ) );
+check( 'mission_completed whitelisted', in_array( 'mission_completed', $revenue_types, true ) );
 check( 'order_paid whitelisted', in_array( 'order_paid', $revenue_types, true ) );
 check( 'cart_value whitelisted', in_array( 'cart_value', $revenue_types, true ) );
 
@@ -187,10 +187,10 @@ check( 'upsell_clicked whitelisted', in_array( 'upsell_clicked', $upsell_types, 
 check( 'upsell_added whitelisted', in_array( 'upsell_added', $upsell_types, true ) );
 check( 'upsell_order whitelisted', in_array( 'upsell_order', $upsell_types, true ) );
 
-check( 'is_revenue_event accepts goal_view', RevenueTracker::is_revenue_event( 'goal_view' ) );
+check( 'is_revenue_event accepts mission_view', RevenueTracker::is_revenue_event( 'mission_view' ) );
 check( 'is_revenue_event rejects bogus type', ! RevenueTracker::is_revenue_event( 'bogus' ) );
 check( 'is_upsell_event accepts upsell_clicked', RevenueTracker::is_upsell_event( 'upsell_clicked' ) );
-check( 'is_upsell_event rejects a revenue type', ! RevenueTracker::is_upsell_event( 'goal_view' ) );
+check( 'is_upsell_event rejects a revenue type', ! RevenueTracker::is_upsell_event( 'mission_view' ) );
 
 // ---------------------------------------------------------------------------
 // 4. Recording, dedup and privacy (rolled back)
@@ -239,32 +239,32 @@ $upsell_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_table}" )
 		$session = str_repeat( 'ab', 16 );
 
 	// 4.1 Record the funnel: view → progress → completed → order_paid.
-	$view_id = $tracker->record( 'goal_view', array(
+	$view_id = $tracker->record( 'mission_view', array(
 		'mission_id'     => 101,
 		'campaign_id' => 5,
 		'cart_value'  => 700000,
 		'mission_target' => 1000000,
 		'session_id'  => $session,
 	) );
-	check( 'goal_view recorded', $view_id > 0 );
+	check( 'mission_view recorded', $view_id > 0 );
 
-	$progress_id = $tracker->record( 'goal_progress', array(
+	$progress_id = $tracker->record( 'mission_progress', array(
 		'mission_id'           => 101,
 		'cart_value'        => 900000,
 		'mission_target'       => 1000000,
 		'incremental_value' => 200000,
 		'session_id'        => $session,
 	) );
-	check( 'goal_progress recorded', $progress_id > 0 );
+	check( 'mission_progress recorded', $progress_id > 0 );
 
-	$completed_id = $tracker->record( 'goal_completed', array(
+	$completed_id = $tracker->record( 'mission_completed', array(
 		'mission_id'           => 101,
 		'cart_value'        => 1050000,
 		'mission_target'       => 1000000,
 		'incremental_value' => 150000,
 		'session_id'        => $session,
 	) );
-	check( 'goal_completed recorded', $completed_id > 0 );
+	check( 'mission_completed recorded', $completed_id > 0 );
 
 	$order_id = $tracker->record( 'order_paid', array(
 		'mission_id'           => 101,
@@ -289,19 +289,19 @@ $upsell_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_table}" )
 	check( 'completed row carries the session id', null !== $row && $session === $row['session_id'] );
 	check( 'completed row has no product (not an upsell)', null !== $row && null === $row['product_id'] );
 
-	// 4.3 Dedup: goal_view is idempotent within its 24h window.
-	$again = $tracker->record( 'goal_view', array(
+	// 4.3 Dedup: mission_view is idempotent within its 24h window.
+	$again = $tracker->record( 'mission_view', array(
 		'mission_id'     => 101,
 		'campaign_id' => 5,
 		'cart_value'  => 710000,
 		'mission_target' => 1000000,
 		'session_id'  => $session,
 	) );
-	check( 'duplicate goal_view within window deduped', 0 === $again );
+	check( 'duplicate mission_view within window deduped', 0 === $again );
 
 	// A different session sees the same mission → allowed (fresh exposure).
 	$other_session = str_repeat( 'cd', 16 );
-	$other_view = $tracker->record( 'goal_view', array(
+	$other_view = $tracker->record( 'mission_view', array(
 		'mission_id'     => 101,
 		'cart_value'  => 800000,
 		'mission_target' => 1000000,
@@ -310,7 +310,7 @@ $upsell_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_table}" )
 	check( 'same mission new session records a fresh view', $other_view > 0 );
 
 	// Same session, a DIFFERENT mission → recorded (per-mission dedup).
-	$mission_2_view = $tracker->record( 'goal_view', array(
+	$mission_2_view = $tracker->record( 'mission_view', array(
 		'mission_id'     => 202,
 		'cart_value'  => 700000,
 		'mission_target' => 1500000,
@@ -318,15 +318,15 @@ $upsell_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_table}" )
 	) );
 	check( 'same session different mission records', $mission_2_view > 0 );
 
-	// 4.4 Dedup: goal_completed once per session+mission; order_paid once per
+	// 4.4 Dedup: mission_completed once per session+mission; order_paid once per
 	// order (even for a different session).
-	$completed_again = $tracker->record( 'goal_completed', array(
+	$completed_again = $tracker->record( 'mission_completed', array(
 		'mission_id'     => 101,
 		'cart_value'  => 1050000,
 		'mission_target' => 1000000,
 		'session_id'  => $session,
 	) );
-	check( 'duplicate goal_completed deduped', 0 === $completed_again );
+	check( 'duplicate mission_completed deduped', 0 === $completed_again );
 
 	$order_again = $tracker->record( 'order_paid', array(
 		'mission_id'    => 101,
@@ -398,7 +398,7 @@ $upsell_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_table}" )
 	// A malformed session id falls back to the request's own cookie session
 	// (never an error, never a stored PII string): the event still lands,
 	// but its session_id is a well-formed anonymous 32-hex id.
-	$bad_session = $tracker->record( 'goal_view', array(
+	$bad_session = $tracker->record( 'mission_view', array(
 		'mission_id'    => 101,
 		'session_id' => 'not-a-valid-session-id-!!!',
 	) );
@@ -410,7 +410,7 @@ $upsell_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_table}" )
 	// 4.9 FK resilience: revenue/upsell events reference missions with ON
 	// DELETE SET NULL, so an event reported after its mission was deleted
 	// must not be dropped — the tracker retries once without the FK ids.
-	$ghost = $tracker->record( 'goal_view', array(
+	$ghost = $tracker->record( 'mission_view', array(
 		'mission_id'    => 999999,
 		'session_id' => $other_session,
 	) );
@@ -448,7 +448,7 @@ $upsell_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_table}" )
 
 	// 4.7 Gating: with analytics disabled the tracker records nothing.
 	$settings->set( 'analytics_enabled', false );
-	$gated = $tracker->record( 'goal_view', array(
+	$gated = $tracker->record( 'mission_view', array(
 		'mission_id'     => 303,
 		'session_id'  => $session,
 	) );
@@ -459,7 +459,7 @@ $upsell_before  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$upsell_table}" )
 	// verify run_cleanup() purges it (keeping the fresh rows).
 	$old = date( 'Y-m-d H:i:s', strtotime( current_time( 'mysql' ) ) - ( RevenueTracker::RETENTION_DAYS + 2 ) * DAY_IN_SECONDS );
 	$wpdb->insert( $revenue_table, array(
-		'event_type'  => 'goal_view',
+		'event_type'  => 'mission_view',
 		'mission_id'     => 404,
 		'session_id'  => $session,
 		'created_at'  => $old,

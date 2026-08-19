@@ -1334,9 +1334,9 @@ Measure whether FaraCart actually increases revenue.
 
 At minimum:
 
-- goal_impression
-- goal_progress
-- goal_completed
+- mission_impression
+- mission_progress
+- mission_completed
 - reward_activated
 - suggestion_impression
 - suggestion_clicked
@@ -1770,7 +1770,7 @@ Conflict resolution picker, mission builder → Priority & conflicts (priority +
 Exclusive toggle), Missions list Exclusive chip, campaign priority in the
 campaign builder, and a "Blocked — …" conflict chip in the mission/campaign
 preview; the storefront renders a suppressed reward as locked and tracks
-`goal_completed` instead of `reward_activated` for it.
+`mission_completed` instead of `reward_activated` for it.
 
 ---
 

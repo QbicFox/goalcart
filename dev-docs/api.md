@@ -135,7 +135,7 @@ Never cached (`Cache-Control: no-store`). Self-healing tracking nonce included.
 POST /faracart/v1/track
 ```
 
-Nonce-guarded analytics event reporting. Event types: `goal_impression`, `goal_progress`, `goal_completed`, `reward_activated`, `suggestion_impression`, `suggestion_clicked`.
+Nonce-guarded analytics event reporting. Event types: `mission_impression`, `mission_progress`, `mission_completed`, `reward_activated`, `suggestion_impression`, `suggestion_clicked`.
 
 `suggested_product_added` is server-side only (attributed on `woocommerce_add_to_cart`).
 

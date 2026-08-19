@@ -147,6 +147,13 @@ class Installer {
 			self::maybe_migrate_settings_option();
 		}
 
+		// 0.7.2: rewrite the legacy Goal analytics event names to Mission in
+		// the stored event_type values (the 0.7.0 migration renamed the
+		// tables/columns, not the data values). One-time, version-gated.
+		if ( version_compare( $installed, '0.7.2', '<' ) ) {
+			self::maybe_migrate_goal_event_names();
+		}
+
 		self::maybe_create_tables();
 		self::maybe_schedule_events();
 		update_option( self::DB_VERSION_OPTION, FARACART_DB_VERSION, false );
@@ -397,6 +404,49 @@ class Installer {
 
 		if ( $changed ) {
 			update_option( \FaraCart\Settings\Settings::OPTION_NAME, $option, false );
+		}
+	}
+
+	/**
+	 * Rewrite the legacy Goal analytics event names to Mission (0.7.2).
+	 *
+	 * The 0.7.0 migration renamed the tables/columns/indexes but left the
+	 * stored `event_type` values (`goal_view`, `goal_impression`,
+	 * `goal_progress`, `goal_completed`) untouched. This pass rewrites those
+	 * values in place so the application layer can use the canonical Mission
+	 * event names without losing the historical rows. Idempotent (each
+	 * UPDATE only matches the old value) and guarded by a table-existence
+	 * check so a fresh install skips it entirely.
+	 *
+	 * @return void
+	 */
+	protected static function maybe_migrate_goal_event_names() {
+		global $wpdb;
+
+		$analytics_table = Schema::table( 'analytics_events' );
+		$revenue_table   = Schema::table( 'revenue_events' );
+
+		$renames = array(
+			'goal_impression' => 'mission_impression',
+			'goal_view'       => 'mission_view',
+			'goal_progress'   => 'mission_progress',
+			'goal_completed'  => 'mission_completed',
+		);
+
+		foreach ( array( $analytics_table, $revenue_table ) as $table ) {
+			if ( ! self::table_exists( $table ) ) {
+				continue;
+			}
+
+			foreach ( $renames as $old => $new ) {
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE `{$table}` SET event_type = %s WHERE event_type = %s", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+						$new,
+						$old
+					)
+				);
+			}
 		}
 	}
 

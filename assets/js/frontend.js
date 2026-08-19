@@ -458,7 +458,7 @@
 
 			if ( ! reportedImpressions[ missionId ] && mission.eligible !== false ) {
 				reportedImpressions[ missionId ] = true;
-				sendTrack( 'goal_impression', {
+				sendTrack( 'mission_impression', {
 					mission_id: missionId,
 					campaign_id: mission.campaign_id || 0,
 					cart_value: value,
@@ -471,7 +471,7 @@
 			// mission never renders a widget — no ghost events for hidden ones).
 			if ( mission.eligible !== false && reportedProgress[ missionId ] !== percentage ) {
 				reportedProgress[ missionId ] = percentage;
-				sendTrack( 'goal_progress', {
+				sendTrack( 'mission_progress', {
 					mission_id: missionId,
 					campaign_id: mission.campaign_id || 0,
 					cart_value: value,
@@ -483,7 +483,7 @@
 				reportedCompletions[ missionId ] = true;
 				// A conflict-suppressed reward never reports as activated
 				// (Phase 26): only the completion is recorded.
-				sendTrack( mission.reward && mission.reward.type && ! rewardBlocked( mission ) ? 'reward_activated' : 'goal_completed', {
+				sendTrack( mission.reward && mission.reward.type && ! rewardBlocked( mission ) ? 'reward_activated' : 'mission_completed', {
 					mission_id: missionId,
 					campaign_id: mission.campaign_id || 0,
 					cart_value: value,

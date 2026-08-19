@@ -79,9 +79,9 @@ Printed as `window.faracartFrontend` at `wp_footer` priority 5:
 
 | Event | When | Dedup |
 |---|---|---|
-| `goal_impression` | Mission renders in widget | once per mission per session |
-| `goal_progress` | Percentage changes | per mission + percentage |
-| `goal_completed` | Mission without reward reaches 100% | once per session |
+| `mission_impression` | Mission renders in widget | once per mission per session |
+| `mission_progress` | Percentage changes | per mission + percentage |
+| `mission_completed` | Mission without reward reaches 100% | once per session |
 | `reward_activated` | Mission with reward reaches 100% | once per session |
 | `suggestion_impression` | Suggested product renders | once per mission + product |
 | `suggestion_clicked` | Suggestion link clicked | every click |

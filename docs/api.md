@@ -452,7 +452,7 @@ Response:
 Semantics:
 
 - `summary` is the seven Phase 16 metrics (impressions, completions =
-  goal_completed + reward_activated, completion rate, average cart value
+  mission_completed + reward_activated, completion rate, average cart value
   at impression, revenue associated with completed missions, suggestion
   CTR, suggestion add-to-cart rate), all with zero-denominator guards.
 - `trend` is one daily point per day of the window (default last 30
@@ -611,7 +611,7 @@ Notes:
   same-type non-stacking reward never both grants and displays as won;
   a mission the shopper already completed the configured maximum times
   renders locked too) — the widget renders such a reward as locked,
-  never unlocked, and the analytics layer records `goal_completed`
+  never unlocked, and the analytics layer records `mission_completed`
   instead of `reward_activated` for it. The same fragment appears in the
   admin preview payload, which renders a "Blocked — …" chip for
   suppressed milestones. The reasons are always exactly what the live
@@ -678,12 +678,12 @@ Body args (all typed in the route arg schema):
 | `campaign_id` | int ≥ 0 | 0 | Campaign the mission belongs to |
 | `product_id` | int ≥ 0 | 0 | Suggested product (suggestion events) |
 | `cart_value` | number ≥ 0 | 0 | Cart money value at event time |
-| `percentage` | number 0–100 | 0 | Progress percentage (goal_progress), stored in `meta` |
+| `percentage` | number 0–100 | 0 | Progress percentage (mission_progress), stored in `meta` |
 | `session_id` | string | cookie | Anonymous session id; the request cookie is the fallback |
 | `nonce` | string (required) | — | `faracart_track` nonce from the tracking config |
 
-Event types (whitelist): `goal_impression`, `goal_progress`,
-`goal_completed`, `reward_activated`, `suggestion_impression`,
+Event types (whitelist): `mission_impression`, `mission_progress`,
+`mission_completed`, `reward_activated`, `suggestion_impression`,
 `suggestion_clicked` — plus `suggested_product_added`, which is
 **server-side only** (attributed on `woocommerce_add_to_cart`, never
 accepted from the client, so a conversion can never be self-reported).

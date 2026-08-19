@@ -86,8 +86,12 @@ if ( ! defined( 'FARACART_DB_VERSION' ) ) {
  *         scope keys) are sanitized during the upgrade — the read-time
  *         self-healing in Settings::all() was removed in favor of this
  *         migration.
+ * 0.7.2 = Rewrite the stored Goal analytics event names (goal_view /
+ *         goal_impression / goal_progress / goal_completed) to their
+ *         Mission equivalents in the analytics_events and revenue_events
+ *         event_type values. Data is preserved in place.
  */
-	define( 'FARACART_DB_VERSION', '0.7.1' );
+	define( 'FARACART_DB_VERSION', '0.7.2' );
 }
 
 // Load the Composer autoloader (PSR-4: FaraCart\ => includes/).

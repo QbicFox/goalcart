@@ -19,8 +19,8 @@ defined( 'ABSPATH' ) || exit;
  * Phase 33.1 (Analytics Foundation) — the event model + recorder behind the
  * Phase 33 revenue-optimization engine. It owns two raw event logs:
  *
- *  - `revenue_events`  — the attribution funnel (goal_view → goal_progress
- *    → goal_completed → order_paid), each row carrying the cart value, the
+ *  - `revenue_events`  — the attribution funnel (mission_view → mission_progress
+ *    → mission_completed → order_paid), each row carrying the cart value, the
  *    mission target and the incremental value. This is the deterministic
  *    input for direct/assisted attribution, incremental cart value and
  *    AOV analysis (Phase 33.2).
@@ -38,9 +38,9 @@ defined( 'ABSPATH' ) || exit;
  * type has a dedup rule so repeated reports (page refreshes, poll loops,
  * cart sync passes) never double-count:
  *
- *  - goal_view / goal_completed / upsell_impression / upsell_clicked are
+ *  - mission_view / mission_completed / upsell_impression / upsell_clicked are
  *    deduped per session+mission (+product) within a sliding window (24h);
- *  - goal_progress is deduped within a short window (30 min) — significant
+ *  - mission_progress is deduped within a short window (30 min) — significant
  *    cart moves still record, refresh noise does not;
  *  - order_paid / upsell_order are deduped per order (an order is
  *    attributed exactly once).
@@ -61,9 +61,9 @@ final class RevenueTracker {
 	/**
 	 * Event types (revenue_events).
 	 */
-	const EVENT_GOAL_VIEW       = 'goal_view';
-	const EVENT_GOAL_PROGRESS   = 'goal_progress';
-	const EVENT_GOAL_COMPLETED  = 'goal_completed';
+	const EVENT_MISSION_VIEW       = 'mission_view';
+	const EVENT_MISSION_PROGRESS   = 'mission_progress';
+	const EVENT_MISSION_COMPLETED  = 'mission_completed';
 	const EVENT_ORDER_PAID      = 'order_paid';
 	const EVENT_CART_VALUE      = 'cart_value';
 
@@ -119,7 +119,7 @@ final class RevenueTracker {
 	const DEDUP_WINDOW_DAILY = DAY_IN_SECONDS;
 
 	/**
-	 * Dedup window for goal_progress events (seconds).
+	 * Dedup window for mission_progress events (seconds).
 	 *
 	 * @var int
 	 */
@@ -192,9 +192,9 @@ final class RevenueTracker {
 	 */
 	public static function revenue_event_types() {
 		return array(
-			self::EVENT_GOAL_VIEW,
-			self::EVENT_GOAL_PROGRESS,
-			self::EVENT_GOAL_COMPLETED,
+			self::EVENT_MISSION_VIEW,
+			self::EVENT_MISSION_PROGRESS,
+			self::EVENT_MISSION_COMPLETED,
 			self::EVENT_ORDER_PAID,
 			self::EVENT_CART_VALUE,
 			self::EVENT_RECOMMENDATION_APPLIED,
@@ -396,7 +396,7 @@ final class RevenueTracker {
 	/**
 	 * Whether a duplicate revenue event exists within its dedup window.
 	 *
-	 * goal_view / goal_completed dedup per session+mission in 24h; progress
+	 * mission_view / mission_completed dedup per session+mission in 24h; progress
 	 * in 30 min; order events once per order. The query is a single
 	 * indexed lookup (session_id + mission_id + event_type, created_at).
 	 *
@@ -467,7 +467,7 @@ final class RevenueTracker {
 			return $count > 0;
 		}
 
-		$window = self::EVENT_GOAL_PROGRESS === $event_type
+		$window = self::EVENT_MISSION_PROGRESS === $event_type
 			? self::DEDUP_WINDOW_PROGRESS
 			: self::DEDUP_WINDOW_DAILY;
 

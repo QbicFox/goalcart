@@ -56,7 +56,7 @@ Append-only event log (`docs/PRODUCT_SPEC.md` §5.5 / Phase 16). Stored in `fara
 |---|---|---|
 | id | `id` | `bigint(20) unsigned AUTO_INCREMENT` |
 | mission / campaign | `mission_id` / `campaign_id` | nullable FKs |
-| event type | `event_type` | `varchar(40)` — `goal_impression`, `goal_progress`, `goal_completed`, `reward_activated`, `suggestion_impression`, `suggestion_clicked`, `suggested_product_added` |
+| event type | `event_type` | `varchar(40)` — `mission_impression`, `mission_progress`, `mission_completed`, `reward_activated`, `suggestion_impression`, `suggestion_clicked`, `suggested_product_added` |
 | session / customer | `session_id` (32-char anon id), `user_id` | privacy-first: anonymous session id, never raw IP |
 | cart/order context | `cart_value` `decimal(19,4)`, `order_id`, `product_id` | order/product reference WooCommerce data by ID as plain indexed columns (no FKs into WC tables — see §2) |
 | value | `cart_value` + `meta` | `meta` JSON carries event-specific payload (e.g. `percentage`) |
@@ -83,7 +83,7 @@ fields (`mission_target`, `incremental_value`) plus order ids and feeds Phase 33
 | Domain field | Column | Notes |
 |---|---|---|
 | id | `id` | `bigint(20) unsigned AUTO_INCREMENT` |
-| event type | `event_type` | `varchar(40)` — `goal_view`, `goal_progress`, `goal_completed`, `order_paid`, `cart_value` |
+| event type | `event_type` | `varchar(40)` — `mission_view`, `mission_progress`, `mission_completed`, `order_paid`, `cart_value` |
 | mission / campaign / product | `mission_id` / `campaign_id` / `product_id` | nullable ids (no FKs into WC tables — see §2) |
 | order | `order_id` | nullable, plain indexed column (HPOS-safe) |
 | session / user | `session_id` (32-char anon id), `user_id` | privacy-first, mirrors §1.3 |
@@ -110,7 +110,7 @@ input for the Phase 33.5 Smart Upsell ranking.
 
 **Write path (P33.1):** `RevenueTracker::record()` / `record_upsell()` with strict whitelists and
 idempotent dedup — views/completions/impressions/clicks dedup per session+mission(+product) within a
-24 h window, `goal_progress` within 30 min, and `order_paid` / `upsell_order` exactly once per
+24 h window, `mission_progress` within 30 min, and `order_paid` / `upsell_order` exactly once per
 order. The `order_dedup` unique key on `(event_type, order_id)` backs the per-order contract at the
 database level (concurrent double-reports fail the INSERT). Events reported after their mission was
 deleted are retried once without the FK ids so they are never silently dropped (the FK's `SET NULL`
@@ -128,7 +128,7 @@ aggregated table instead of scanning the raw event log on every admin request.
 |---|---|---|
 | date | `report_date` | `date` — the aggregated day |
 | mission | `mission_id` | nullable FK (`SET NULL` on mission deletion) |
-| funnel | `views` / `progressions` / `completions` / `conversions` | `int unsigned` — goal_view / goal_progress / goal_completed counts and distinct attributed orders |
+| funnel | `views` / `progressions` / `completions` / `conversions` | `int unsigned` — mission_view / mission_progress / mission_completed counts and distinct attributed orders |
 | revenue | `revenue` `decimal(19,4)` | totals of the orders the mission influenced that day |
 | incremental | `incremental_revenue` `decimal(19,4)` | direct (driven) incremental value |
 | cost | `reward_cost` `decimal(19,4)` | estimated reward cost of the day's completed missions |

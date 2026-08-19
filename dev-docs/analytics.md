@@ -10,9 +10,9 @@ FaraCart measures whether missions actually increase revenue through a multi-lay
 
 | Event | When | Source |
 |---|---|---|
-| `goal_impression` | Mission renders in widget | Client-reported |
-| `goal_progress` | Progress percentage changes | Client-reported |
-| `goal_completed` | Mission reaches 100% (no reward) | Client-reported |
+| `mission_impression` | Mission renders in widget | Client-reported |
+| `mission_progress` | Progress percentage changes | Client-reported |
+| `mission_completed` | Mission reaches 100% (no reward) | Client-reported |
 | `reward_activated` | Mission with reward reaches 100% | Client-reported |
 | `suggestion_impression` | Suggested product renders | Client-reported |
 | `suggestion_clicked` | Suggestion link clicked | Client-reported |

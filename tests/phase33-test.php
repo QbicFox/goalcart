@@ -165,35 +165,35 @@ try {
 		) );
 	}
 
-	// --- goal_view dedups per session+mission within 24h. ---
-	$id1 = $tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	$id2 = $tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	check( 'goal_view records once per session+mission (24h)', $id1 > 0 && 0 === $id2 );
+	// --- mission_view dedups per session+mission within 24h. ---
+	$id1 = $tracker->record( 'mission_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$id2 = $tracker->record( 'mission_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	check( 'mission_view records once per session+mission (24h)', $id1 > 0 && 0 === $id2 );
 
-	$id3 = $tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 800000, 'mission_target' => 1000000, 'session_id' => $session_b ) );
-	check( 'goal_view records for a different session', $id3 > 0 );
+	$id3 = $tracker->record( 'mission_view', array( 'mission_id' => 401, 'cart_value' => 800000, 'mission_target' => 1000000, 'session_id' => $session_b ) );
+	check( 'mission_view records for a different session', $id3 > 0 );
 
-	$id4 = $tracker->record( 'goal_view', array( 'mission_id' => 402, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	check( 'goal_view records for a different mission', $id4 > 0 );
+	$id4 = $tracker->record( 'mission_view', array( 'mission_id' => 402, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	check( 'mission_view records for a different mission', $id4 > 0 );
 
 	// A view older than the 24h window records again (dedup is windowed).
 	$wpdb->update( $revenue_table, array( 'created_at' => date( 'Y-m-d H:i:s', strtotime( '-2 days' ) ) ), array( 'id' => $id1 ) );
-	$id5 = $tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	check( 'goal_view outside the 24h window records again', $id5 > 0 );
+	$id5 = $tracker->record( 'mission_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	check( 'mission_view outside the 24h window records again', $id5 > 0 );
 
-	// --- goal_progress dedups within 30 min, records after. ---
-	$p1 = $tracker->record( 'goal_progress', array( 'mission_id' => 401, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	$p2 = $tracker->record( 'goal_progress', array( 'mission_id' => 401, 'cart_value' => 910000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	check( 'goal_progress dedups within 30 min', $p1 > 0 && 0 === $p2 );
+	// --- mission_progress dedups within 30 min, records after. ---
+	$p1 = $tracker->record( 'mission_progress', array( 'mission_id' => 401, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$p2 = $tracker->record( 'mission_progress', array( 'mission_id' => 401, 'cart_value' => 910000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	check( 'mission_progress dedups within 30 min', $p1 > 0 && 0 === $p2 );
 
 	$wpdb->update( $revenue_table, array( 'created_at' => date( 'Y-m-d H:i:s', strtotime( '-1 hour' ) ) ), array( 'id' => $p1 ) );
-	$p3 = $tracker->record( 'goal_progress', array( 'mission_id' => 401, 'cart_value' => 950000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	check( 'goal_progress outside the 30 min window records again', $p3 > 0 );
+	$p3 = $tracker->record( 'mission_progress', array( 'mission_id' => 401, 'cart_value' => 950000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	check( 'mission_progress outside the 30 min window records again', $p3 > 0 );
 
-	// --- goal_completed dedups per session+mission (24h). ---
-	$c1 = $tracker->record( 'goal_completed', array( 'mission_id' => 401, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	$c2 = $tracker->record( 'goal_completed', array( 'mission_id' => 401, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	check( 'goal_completed dedups within 24h', $c1 > 0 && 0 === $c2 );
+	// --- mission_completed dedups per session+mission (24h). ---
+	$c1 = $tracker->record( 'mission_completed', array( 'mission_id' => 401, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$c2 = $tracker->record( 'mission_completed', array( 'mission_id' => 401, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	check( 'mission_completed dedups within 24h', $c1 > 0 && 0 === $c2 );
 
 	// --- order_paid is exactly-once per order (any session). ---
 	$o1 = $tracker->record( 'order_paid', array( 'order_id' => 99001, 'cart_value' => 1050000, 'session_id' => $session_a ) );
@@ -219,10 +219,10 @@ try {
 
 	// --- Gating: whitelist rejects bogus types; tracking-off records 0. ---
 	check( 'bogus revenue event rejected', 0 === $tracker->record( 'bogus', array( 'session_id' => $session_a ) ) );
-	check( 'revenue type rejected by upsell recorder', 0 === $tracker->record_upsell( 'goal_view', array( 'session_id' => $session_a ) ) );
+	check( 'revenue type rejected by upsell recorder', 0 === $tracker->record_upsell( 'mission_view', array( 'session_id' => $session_a ) ) );
 
 	$settings->set( 'analytics_enabled', false );
-	check( 'tracking-off records nothing', 0 === $tracker->record( 'goal_view', array( 'mission_id' => 401, 'session_id' => $session_a ) ) );
+	check( 'tracking-off records nothing', 0 === $tracker->record( 'mission_view', array( 'mission_id' => 401, 'session_id' => $session_a ) ) );
 	$settings->set( 'analytics_enabled', true );
 
 	// --- Session validation: an invalid id falls back to the cookie. ---
@@ -300,14 +300,14 @@ try {
 	}
 
 	// The complete funnel for session A: view → progress → completed.
-	$tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_progress', array( 'mission_id' => 401, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
-	$tracker->record( 'goal_completed', array( 'mission_id' => 401, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'mission_view', array( 'mission_id' => 401, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'mission_progress', array( 'mission_id' => 401, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'mission_completed', array( 'mission_id' => 401, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
 	// Exposed-only mission 402 in the same session.
-	$tracker->record( 'goal_view', array( 'mission_id' => 402, 'cart_value' => 800000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
+	$tracker->record( 'mission_view', array( 'mission_id' => 402, 'cart_value' => 800000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
 
 	// A second session (B) only views mission 401.
-	$tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 500000, 'mission_target' => 1000000, 'session_id' => $session_b ) );
+	$tracker->record( 'mission_view', array( 'mission_id' => 401, 'cart_value' => 500000, 'mission_target' => 1000000, 'session_id' => $session_b ) );
 
 	// Attribute an order for session A: 401 is direct (progressed +
 	// completed), 402 is assisted (viewed only).
@@ -731,7 +731,7 @@ check( 'cleanup scheduled weekly', 'faracart_weekly' === $intervals[ RevenueTrac
 // Regression: the retention cleanup is bounded and respects the filter.
 $wpdb->query( 'START TRANSACTION' );
 try {
-	$old = $tracker->record( 'goal_view', array( 'mission_id' => 401, 'cart_value' => 100, 'mission_target' => 1000000, 'session_id' => $session_c ) );
+	$old = $tracker->record( 'mission_view', array( 'mission_id' => 401, 'cart_value' => 100, 'mission_target' => 1000000, 'session_id' => $session_c ) );
 	$wpdb->update( $revenue_table, array( 'created_at' => date( 'Y-m-d H:i:s', strtotime( '-200 days' ) ) ), array( 'id' => $old ) );
 
 	add_filter( 'faracart_revenue_retention_days', function () {

@@ -307,9 +307,9 @@ try {
 	) );
 
 	$session = 't01' . str_repeat( 'ab', 14 );
-	$tracker->record( 'goal_view', array( 'mission_id' => 606, 'cart_value' => 600, 'mission_target' => 1000000, 'session_id' => $session ) );
-	$tracker->record( 'goal_progress', array( 'mission_id' => 606, 'cart_value' => 800, 'mission_target' => 1000000, 'session_id' => $session ) );
-	$tracker->record( 'goal_completed', array( 'mission_id' => 606, 'cart_value' => 1000, 'mission_target' => 1000000, 'session_id' => $session ) );
+	$tracker->record( 'mission_view', array( 'mission_id' => 606, 'cart_value' => 600, 'mission_target' => 1000000, 'session_id' => $session ) );
+	$tracker->record( 'mission_progress', array( 'mission_id' => 606, 'cart_value' => 800, 'mission_target' => 1000000, 'session_id' => $session ) );
+	$tracker->record( 'mission_completed', array( 'mission_id' => 606, 'cart_value' => 1000, 'mission_target' => 1000000, 'session_id' => $session ) );
 
 	// Order on the costed product → order margin = 0.6, incremental = 400.
 	$settings->set( 'analytics_enabled', false );

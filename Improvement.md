@@ -322,7 +322,7 @@ The user must immediately understand that:
 
 Use the existing attribution/order association logic.
 
-Do not count `goal_completed` as a purchase.
+Do not count `mission_completed` as a purchase.
 
 A purchase must be associated with an actual revenue-producing WooCommerce order according to the existing AttributionEngine rules.
 

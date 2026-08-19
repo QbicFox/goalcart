@@ -390,7 +390,7 @@ foreach ( $orders as $descriptor ) {
 
 	// Funnel events (only for mission sessions).
 	if ( 0 !== $mission_id ) {
-		$rid = $tracker->record( RevenueTracker::EVENT_GOAL_VIEW, $context + array(
+		$rid = $tracker->record( RevenueTracker::EVENT_MISSION_VIEW, $context + array(
 			'cart_value' => max( 1, (int) floor( $subtotal * 0.3 ) ),
 		) );
 		if ( $rid ) {
@@ -398,7 +398,7 @@ foreach ( $orders as $descriptor ) {
 		}
 
 		if ( in_array( $mode, array( 'progressed', 'completed' ), true ) ) {
-			$rid = $tracker->record( RevenueTracker::EVENT_GOAL_PROGRESS, $context + array(
+			$rid = $tracker->record( RevenueTracker::EVENT_MISSION_PROGRESS, $context + array(
 				'cart_value' => max( 1, (int) floor( $subtotal * 0.7 ) ),
 			) );
 			if ( $rid ) {
@@ -407,7 +407,7 @@ foreach ( $orders as $descriptor ) {
 		}
 
 		if ( 'completed' === $mode ) {
-			$rid = $tracker->record( RevenueTracker::EVENT_GOAL_COMPLETED, $context + array(
+			$rid = $tracker->record( RevenueTracker::EVENT_MISSION_COMPLETED, $context + array(
 				'cart_value' => (int) $subtotal,
 			) );
 			if ( $rid ) {

@@ -1426,9 +1426,9 @@ final class UpsellRanker {
 					 WHERE user_id = %d AND event_type IN (%s, %s, %s, %s)
 					 ORDER BY created_at DESC, id DESC LIMIT 1",
 					$user_id,
-					RevenueTracker::EVENT_GOAL_VIEW,
-					RevenueTracker::EVENT_GOAL_PROGRESS,
-					RevenueTracker::EVENT_GOAL_COMPLETED,
+					RevenueTracker::EVENT_MISSION_VIEW,
+					RevenueTracker::EVENT_MISSION_PROGRESS,
+					RevenueTracker::EVENT_MISSION_COMPLETED,
 					RevenueTracker::EVENT_CART_VALUE
 				),
 				ARRAY_A

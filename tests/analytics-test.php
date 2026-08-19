@@ -131,9 +131,9 @@ check( 'is_valid rejects empty', false === Session::is_valid( '' ) );
 echo "\n== 3. Event whitelist ==\n";
 
 $expected = array(
-	'goal_impression',
-	'goal_progress',
-	'goal_completed',
+	'mission_impression',
+	'mission_progress',
+	'mission_completed',
 	'reward_activated',
 	'suggestion_impression',
 	'suggestion_clicked',
@@ -178,25 +178,25 @@ try {
 	// 4.1 Master gate: disabled master toggle blocks recording.
 	$enabled_before = $settings->get( 'enabled', true );
 	$settings->set( 'enabled', false );
-	check( 'disabled master toggle blocks recording', 0 === $tracker->record( Tracker::EVENT_GOAL_IMPRESSION ) );
+	check( 'disabled master toggle blocks recording', 0 === $tracker->record( Tracker::EVENT_MISSION_IMPRESSION ) );
 	check( 'disabled master toggle blocks add-to-cart attribution', ! $tracker->handle_add_to_cart( 'k', 5 ) );
 	$settings->set( 'enabled', true );
 
-	// 4.2 The faracart_tracking_enabled filter blocks recording. goal_progress
+	// 4.2 The faracart_tracking_enabled filter blocks recording. mission_progress
 	// is used for the gate checks (not any metric) so the metrics seed below
 	// stays exact.
 	add_filter( 'faracart_tracking_enabled', '__return_false' );
-	check( 'tracking filter blocks recording', 0 === $tracker->record( Tracker::EVENT_GOAL_PROGRESS ) );
+	check( 'tracking filter blocks recording', 0 === $tracker->record( Tracker::EVENT_MISSION_PROGRESS ) );
 	remove_filter( 'faracart_tracking_enabled', '__return_false' );
-	check( 'filter removal restores recording', $tracker->record( Tracker::EVENT_GOAL_PROGRESS ) > 0 );
+	check( 'filter removal restores recording', $tracker->record( Tracker::EVENT_MISSION_PROGRESS ) > 0 );
 
 	// 4.3 Unknown event type never records.
 	check( 'unknown event type not recorded', 0 === $tracker->record( 'not_an_event' ) );
 
-	// 4.4 Full event recording with every context key (goal_progress does
+	// 4.4 Full event recording with every context key (mission_progress does
 	// not feed any metric, so the seed stays exact).
 	$event_id = $tracker->record(
-		Tracker::EVENT_GOAL_PROGRESS,
+		Tracker::EVENT_MISSION_PROGRESS,
 		array(
 			'mission_id'     => $seed_mission_id,
 			'campaign_id' => $seed_campaign_id,
@@ -209,7 +209,7 @@ try {
 	check( 'event recorded', $event_id > 0 );
 
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$events_table} WHERE id = %d", $event_id ), ARRAY_A );
-	check( 'event row carries event_type', is_array( $row ) && Tracker::EVENT_GOAL_PROGRESS === $row['event_type'] );
+	check( 'event row carries event_type', is_array( $row ) && Tracker::EVENT_MISSION_PROGRESS === $row['event_type'] );
 	check( 'event row carries mission_id', is_array( $row ) && $seed_mission_id === (int) $row['mission_id'] );
 	check( 'event row carries campaign_id', is_array( $row ) && $seed_campaign_id === (int) $row['campaign_id'] );
 	check( 'event row carries cart_value', is_array( $row ) && near( 500.25, $row['cart_value'] ) );
@@ -231,7 +231,7 @@ try {
 	// with reward), 3 suggestion impressions, 2 suggestion clicks, 1
 	// suggested_product_added.
 	foreach ( array( 100, 200, 300, 0 ) as $value ) {
-		$tracker->record( Tracker::EVENT_GOAL_IMPRESSION, array(
+		$tracker->record( Tracker::EVENT_MISSION_IMPRESSION, array(
 			'mission_id'     => $seed_mission_id,
 			'campaign_id' => $seed_campaign_id,
 			'cart_value'  => $value,
@@ -239,7 +239,7 @@ try {
 		) );
 	}
 
-	$tracker->record( Tracker::EVENT_GOAL_COMPLETED, array(
+	$tracker->record( Tracker::EVENT_MISSION_COMPLETED, array(
 		'mission_id'     => $seed_mission_id,
 		'campaign_id' => $seed_campaign_id,
 		'cart_value'  => 300,
@@ -306,7 +306,7 @@ try {
 	// 4.9b FK resilience: an event whose mission was deleted records without
 	// the FK id instead of being dropped entirely (the FK's SET NULL
 	// semantics for the deleted row).
-	$ghost_id = $tracker->record( Tracker::EVENT_GOAL_PROGRESS, array(
+	$ghost_id = $tracker->record( Tracker::EVENT_MISSION_PROGRESS, array(
 		'mission_id'    => 99999999,
 		'session_id' => $seed_session,
 	) );
@@ -361,12 +361,12 @@ try {
 	check( 'track route has nonce arg', isset( $schema['nonce'] ) );
 
 	$validate = $schema['event_type']['validate_callback'];
-	check( 'whitelisted event type passes schema', true === $validate( 'goal_impression' ) );
+	check( 'whitelisted event type passes schema', true === $validate( 'mission_impression' ) );
 	check( 'unknown event type fails schema', false === $validate( 'hack_event' ) );
 
 	// Anonymous dispatch without a valid nonce → 403.
 	$req  = new \WP_REST_Request( 'POST', '/faracart/v1/track' );
-	$req->set_param( 'event_type', 'goal_impression' );
+	$req->set_param( 'event_type', 'mission_impression' );
 	$req->set_param( 'nonce', 'bogus' );
 	$resp = $server->dispatch( $req );
 	check( 'bad nonce rejected (403)', 403 === $resp->get_status() );
@@ -374,7 +374,7 @@ try {
 	// Valid nonce dispatch records an event end-to-end.
 	$good_nonce = wp_create_nonce( Tracker::TRACK_NONCE_ACTION );
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/track' );
-	$req->set_param( 'event_type', 'goal_progress' );
+	$req->set_param( 'event_type', 'mission_progress' );
 	$req->set_param( 'mission_id', $seed_mission_id );
 	$req->set_param( 'cart_value', 250 );
 	$req->set_param( 'percentage', 50 );
@@ -386,7 +386,7 @@ try {
 
 	$dispatch_id = (int) $body['data']['id'];
 	$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$events_table} WHERE id = %d", $dispatch_id ), ARRAY_A );
-	check( 'dispatched event recorded', is_array( $row ) && Tracker::EVENT_GOAL_PROGRESS === $row['event_type'] );
+	check( 'dispatched event recorded', is_array( $row ) && Tracker::EVENT_MISSION_PROGRESS === $row['event_type'] );
 	check( 'dispatched event carries percentage meta', is_array( $row ) && false !== strpos( (string) $row['meta'], '50' ) );
 
 	// 4.12 The frontend config print (window.faracartTracking).

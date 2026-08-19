@@ -105,7 +105,7 @@ final class FreeGiftApplicator implements RewardApplicator {
 		// returning false here lets the reconcile pass revoke it instead of
 		// treating it as already applied.
 		foreach ( $cart->get_cart() as $item ) {
-			if ( ! empty( $item['faracart_gift_goal'] ) && (int) $item['faracart_gift_goal'] === (int) $mission_id ) {
+			if ( ! empty( $item['faracart_gift_mission'] ) && (int) $item['faracart_gift_mission'] === (int) $mission_id ) {
 				$current = isset( $item['faracart_gift_product'] ) ? (int) $item['faracart_gift_product'] : 0;
 
 				return $current === $gift_id;
@@ -119,7 +119,7 @@ final class FreeGiftApplicator implements RewardApplicator {
 			array(),
 			array(
 				'faracart_gift'         => true,
-				'faracart_gift_goal'    => (int) $mission_id,
+				'faracart_gift_mission'    => (int) $mission_id,
 				'faracart_gift_product' => (int) $gift_id,
 				'faracart_gift_mode'    => $reward->gift_add_mode(),
 			)

@@ -18,8 +18,8 @@ defined( 'ABSPATH' ) || exit;
  *
  * Phase 16 (Analytics Foundation — Events): registers and handles
  * `POST /faracart/v1/track`, the public endpoint the storefront JS uses
- * to report analytics events (goal_impression, goal_progress,
- * goal_completed, reward_activated, suggestion_impression,
+ * to report analytics events (mission_impression, mission_progress,
+ * mission_completed, reward_activated, suggestion_impression,
  * suggestion_clicked).
  *
  * The endpoint is public — guests are the analytics population — so
@@ -34,7 +34,7 @@ defined( 'ABSPATH' ) || exit;
 	 * client can never self-report a conversion.
 	 *
 	 * Known limitation (documented): the remaining six events — including
-	 * goal_completed / reward_activated — are client-reported, so a
+	 * mission_completed / reward_activated — are client-reported, so a
 	 * determined visitor holding the page nonce could inflate completion
 	 * metrics. This matches the reference plugin's client-side analytics
 	 * trust boundary (and the JS dedupes per page session); the dashboard
@@ -227,7 +227,7 @@ class TrackController extends BaseController {
 		// cart_value a non-negative money amount.
 		$percentage = round( min( 100.0, max( 0.0, (float) $request->get_param( 'percentage' ) ) ), 2 );
 
-		// percentage is only meaningful on goal_progress; keep the meta JSON
+		// percentage is only meaningful on mission_progress; keep the meta JSON
 		// clean (no spurious keys) for every other event type.
 		$meta = array();
 

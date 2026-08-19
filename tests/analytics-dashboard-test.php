@@ -208,7 +208,7 @@ try {
 
 	$seed_a_impressions = array();
 	foreach ( array( 100, 200, 300 ) as $value ) {
-		$seed_a_impressions[] = $tracker->record( Tracker::EVENT_GOAL_IMPRESSION, array(
+		$seed_a_impressions[] = $tracker->record( Tracker::EVENT_MISSION_IMPRESSION, array(
 			'mission_id'     => $mission_a,
 			'campaign_id' => $campaign_x,
 			'cart_value'  => $value,
@@ -216,7 +216,7 @@ try {
 		) );
 	}
 
-	$tracker->record( Tracker::EVENT_GOAL_COMPLETED, array(
+	$tracker->record( Tracker::EVENT_MISSION_COMPLETED, array(
 		'mission_id'     => $mission_a,
 		'campaign_id' => $campaign_x,
 		'cart_value'  => 300,
@@ -230,14 +230,14 @@ try {
 	) );
 
 	foreach ( array( 50, 60 ) as $value ) {
-		$tracker->record( Tracker::EVENT_GOAL_IMPRESSION, array(
+		$tracker->record( Tracker::EVENT_MISSION_IMPRESSION, array(
 			'mission_id'    => $mission_b,
 			'cart_value' => $value,
 			'session_id' => $session,
 		) );
 	}
 
-	$mission_b_completion = $tracker->record( Tracker::EVENT_GOAL_COMPLETED, array(
+	$mission_b_completion = $tracker->record( Tracker::EVENT_MISSION_COMPLETED, array(
 		'mission_id'    => $mission_b,
 		'cart_value' => 60,
 		'session_id' => $session,
