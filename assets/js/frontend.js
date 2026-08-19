@@ -1,5 +1,5 @@
 /**
- * FaraCart storefront progress widgets (Phase 11).
+ * FaraCart storefront progress widgets.
  *
  * Vanilla JS, no build step — mirrors the reference plugin's frontend
  * convention (assets/js + a single inline window config + a
@@ -59,10 +59,10 @@
 		return;
 	}
 
-	// Phase 27 (Internationalization): format numbers/money in the site
+	// Internationalization: format numbers/money in the site
 	// locale (from the PHP config) so digits and grouping match the store
 	// language — Persian digits for fa_IR, etc. Undefined falls back to
-	// the browser default, preserving the pre-Phase-27 behavior.
+	// the browser default, preserving the previous behavior.
 	var uiLocale = ( cfg && cfg.locale ) ? String( cfg.locale ).replace( '_', '-' ) : undefined;
 
 	var WIDGET_SELECTOR = '[data-faracart-widget]';
@@ -87,7 +87,7 @@
 	// card (the same ids widgetTemplate honors, minus per-container overrides).
 	var FLOATING_TEMPLATES = [ 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6', 'milestone_chain', 'campaign_progress' ];
 
-	// Phase 16 analytics: window.faracartTracking (printed by the Tracker)
+	// analytics: window.faracartTracking (printed by the Tracker)
 	// carries the track endpoint, the nonce and the session id. Absent =
 	// tracking disabled — every tracker call is a guarded no-op.
 	var tracking = window.faracartTracking || null;
@@ -101,7 +101,7 @@
 	var reportedSuggestionImpressions = {};
 	var reportedProgress = {};
 
-	// Phase 33.7 (Frontend Upsell Integration): the smart upsell panel
+	// Frontend Upsell Integration: the smart upsell panel
 	// config (endpoint, track endpoint, limit, labels). Absent = the
 	// panel is disabled and every upsell call is a guarded no-op.
 	var upsells = cfg.upsells || null;
@@ -114,7 +114,7 @@
 	// not move, instead of refetching on every poll.
 	var upsellRankCache = {};
 
-	// Phase 23 (Performance → update only changed UI fragments): each
+	// Performance → update only changed UI fragments: each
 	// widget records a fingerprint of the payload it last rendered.
 	// refresh() skips the DOM rebuild for containers whose fingerprint is
 	// unchanged (the poll interval and cart events fire refresh() even
@@ -122,11 +122,11 @@
 	// changed are touched.
 	var renderedFingerprints = {};
 
-	// Phase 32: per-session state for the celebration animation (one burst
+	// per-session state for the celebration animation (one burst
 	// per mission).
 	var celebrated = {};
 
-	// Confetti palette (Phase 32 celebration).
+	// Confetti palette (celebration).
 	var CONFETTI_COLORS = [ '#2271b1', '#00a32a', '#d63638', '#f0b849', '#7e5af5', '#2c7a7b' ];
 
 	/**
@@ -240,7 +240,7 @@
 						tracking.nonce = payload.data.tracking_nonce;
 					}
 
-					// Phase 32 (free gift selection): the payload also
+					// free gift selection: the payload also
 					// mints a fresh gift nonce every poll, so a long-lived
 					// cart page never outlives its gift-claim nonce window
 					// (adopt it before the shopper claims a gift).
@@ -266,7 +266,7 @@
 	}
 
 	/**
-	 * Report an analytics event to the track endpoint (Phase 16).
+	 * Report an analytics event to the track endpoint.
 	 *
 	 * Fire-and-forget, must never throw: a failed report (network, JSON
 	 * body, disabled endpoint) must not disturb the storefront. Uses
@@ -318,14 +318,11 @@
 	}
 
 	/**
-	 * Report an upsell interaction to the upsell track endpoint (Phase
-	 * 33.7).
+	 * Report an upsell interaction to the upsell track endpoint.
 	 *
 	 * The smart upsell funnel (impression / clicked / added) posts to the
-	 * public `POST /faracart/v1/upsell/track` route — NOT the Phase 16
-	 * track endpoint, which only whitelists the mission/reward events. The
-	 * route reuses the same tracking nonce + session id the Phase 16
-	 * tracker already holds, so no second nonce is needed. Fire-and-forget
+	 * public `POST /faracart/v1/upsell/track` route — NOT the track endpoint, which only whitelists the mission/reward events. The
+	 * route reuses the same tracking nonce + session id the tracker already holds, so no second nonce is needed. Fire-and-forget
 	 * and must never throw, exactly like sendTrack.
 	 *
 	 * @param {string} eventType upsell_impression | upsell_clicked |
@@ -375,7 +372,7 @@
 	}
 
 	/**
-	 * Fetch the ranked upsell products for one mission (Phase 33.7).
+	 * Fetch the ranked upsell products for one mission.
 	 *
 	 * GETs the public rank endpoint with just mission_id + limit — the
 	 * server computes the remaining gap from the live cart, so the client
@@ -439,7 +436,7 @@
 	}
 
 	/**
-	 * Report the per-mission analytics events for a payload (Phase 16).
+	 * Report the per-mission analytics events for a payload.
 	 *
 	 * Runs after every render: impressions once per mission per session,
 	 * progress when the percentage changed, completion events once per
@@ -482,7 +479,7 @@
 			if ( mission.completed && ! reportedCompletions[ missionId ] ) {
 				reportedCompletions[ missionId ] = true;
 				// A conflict-suppressed reward never reports as activated
-				// (Phase 26): only the completion is recorded.
+				//: only the completion is recorded.
 				sendTrack( mission.reward && mission.reward.type && ! rewardBlocked( mission ) ? 'reward_activated' : 'mission_completed', {
 					mission_id: missionId,
 					campaign_id: mission.campaign_id || 0,
@@ -491,9 +488,7 @@
 			}
 
 			// Unified recommendations preserve source attribution in the
-			// existing funnels: suggestion-sourced items feed the Phase 16
-			// suggestion funnel, upsell-sourced items feed the Phase 33.5
-			// upsell funnel, and 'both' items feed both — one impression per
+			// existing funnels: suggestion-sourced items feed the // suggestion funnel, upsell-sourced items feed the // upsell funnel, and 'both' items feed both — one impression per
 			// mission + product per session per funnel, never duplicates.
 			if ( mission.suggestions && mission.suggestions.length ) {
 				for ( var j = 0; j < mission.suggestions.length; j++ ) {
@@ -527,7 +522,7 @@
 	/**
 	 * Format a money amount with the store currency.
 	 *
-	 * Phase 18 (Settings → General → currency display): the config's
+	 * Settings → General → currency display: the config's
 	 * currencyDisplay (symbol | code | name) becomes Intl's currencyDisplay
 	 * option, so stores can show $100, USD 100 or US dollars.
 	 *
@@ -568,7 +563,7 @@
 	/**
 	 * Whether the widgets should hide on this viewport.
 	 *
-	 * Phase 18 (Settings → Frontend → mobile behavior): when the config
+	 * Settings → Frontend → mobile behavior: when the config
 	 * says 'hide', widgets are suppressed on small screens (the WP admin
 	 * mobile breakpoint of 782px).
 	 *
@@ -590,7 +585,7 @@
 	 * A stable fingerprint of the parts of the progress payload the
 	 * widgets render, plus the viewport-driven mobile state.
 	 *
-	 * Phase 23 (Performance → update only changed UI fragments): two
+	 * Performance → update only changed UI fragments: two
 	 * payloads with the same fingerprint render identically, so refresh()
 	 * skips the DOM rebuild for a container that already shows it. The
 	 * mobile state is folded in so a resize that crosses the breakpoint
@@ -661,7 +656,7 @@
 	}
 
 	/**
-	 * The live countdown text for an ISO end timestamp (Phase 32).
+	 * The live countdown text for an ISO end timestamp.
 	 *
 	 * @param {string} end ISO local-time timestamp.
 	 * @return {string}
@@ -693,7 +688,7 @@
 	}
 
 	/**
-	 * Countdown chip for a mission/campaign with an end time (Phase 32).
+	 * Countdown chip for a mission/campaign with an end time.
 	 *
 	 * The chip carries the end timestamp on a data attribute; a single
 	 * global ticker (started in init) rewrites the readout every second
@@ -797,7 +792,7 @@
 	}
 
 	/**
-	 * Whether a mission's reward is suppressed by a conflict (Phase 26).
+	 * Whether a mission's reward is suppressed by a conflict.
 	 *
 	 * The progress payload resolves conflicts with the same rules the
 	 * reward engine grants with; a suppressed reward must never render as
@@ -878,7 +873,7 @@
 	}
 
 	/**
-	 * One upsell product row (Phase 33.7).
+	 * One upsell product row.
 	 *
 	 * Image, name (link), server-formatted price and an add-to-cart
 	 * button. The ids, the permalink and the current cart value ride on
@@ -941,8 +936,7 @@
 	 * the suggestion pool (the result is cached per mission:remaining so
 	 * cart-change re-renders reuse it). Every rendered product reports
 	 * one impression per session per funnel (suggestion-sourced rows feed
-	 * the Phase 16 suggestion funnel, upsell-sourced rows the Phase 33.7
-	 * upsell funnel, 'both' rows feed both).
+	 * the suggestion funnel, upsell-sourced rows the upsell funnel, 'both' rows feed both).
 	 *
 	 * @param {Object} mission Progress mission entry.
 	 * @return {HTMLElement|null}
@@ -1070,11 +1064,11 @@
 
 	/**
 	 * Add a unified recommendation to the cart (Suggestions + Upsells
-	 * consolidation, ex Phase 33.7).
+	 * consolidation, ex ).
 	 *
 	 * Reports the click up front with source attribution — suggestion-
-	 * sourced items feed the Phase 16 suggestion funnel, upsell-sourced
-	 * items the Phase 33.7 upsell funnel, 'both' items feed both (rank-
+	 * sourced items feed the suggestion funnel, upsell-sourced
+	 * items the upsell funnel, 'both' items feed both (rank-
 	 * endpoint fallback rows carry no source and belong to the upsell
 	 * funnel; suggestion adds are attributed server-side from their
 	 * impressions). Then adds through WooCommerce's own public
@@ -1205,7 +1199,7 @@
 	}
 
 	/**
-	 * GiftPicker — the shopper's free-gift selection (Phase 32).
+	 * GiftPicker — the shopper's free-gift selection.
 	 *
 	 * Renders for completed missions whose free-gift reward is in "choose"
 	 * mode: one button per candidate gift. Clicking claims the gift through
@@ -2102,7 +2096,7 @@
 	 * @return {HTMLElement}
 	 */
 	const missionContainer = ( mission, currency, variant, template ) => {
-		// The Phase 13 message state (inactive / unavailable / progressing /
+		// The message state (inactive / unavailable / progressing /
 		// nearly_complete / completed / reward_activated) lands as a modifier
 		// class so the stylesheet can highlight near-completion etc.
 		var stateClass = mission.state ? ' faracart-state--' + mission.state : '';
@@ -2152,7 +2146,7 @@
 			card.appendChild( missionMessage( mission ) );
 		}
 
-		// Phase 32 (countdown + free gift selection): the deadline chip and
+		// countdown + free gift selection: the deadline chip and
 		// the gift picker render at the bottom of the full card.
 		var countdown = countdownPanel( mission );
 		if ( countdown ) {
@@ -2181,7 +2175,7 @@
 
 	/**
 	 * Celebration — a confetti burst + pulse when a mission completes
-	 * (Phase 32).
+	 *.
 	 *
 	 * Runs once per mission per session (the `celebrated` map). The pieces are
 	 * plain CSS-animated spans removed after the animation, so nothing
@@ -2292,7 +2286,7 @@
 	}
 
 	/**
-	 * Campaign progress (pluggable engine, campaign scope — Phase 32).
+	 * Campaign progress (pluggable engine, campaign scope — ).
 	 *
 	 * Renders the whole campaign as one readout: title, a "n / m"
 	 * milestone counter, one bar driven by the top milestone, the reward
@@ -2398,14 +2392,14 @@
 		var missions = ( data && data.missions ) || [];
 		var variant = 'compact' === container.getAttribute( 'data-faracart-variant' ) ? 'compact' : 'full';
 
-		// The animation toggle (Phase 12) freezes the fill transition via a
+		// The animation toggle  freezes the fill transition via a
 		// class; re-render in place on every refresh so live cart updates
 		// (AJAX add-to-cart, quantity changes, fragment refreshes) always
 		// show the current progress — no mount-once freeze.
 		container.classList.toggle( 'faracart-widget--no-anim', false === cfg.animation );
 		container.replaceChildren();
 
-		// Phase 18 (mobile behavior): hide the widget on small screens.
+		// mobile behavior: hide the widget on small screens.
 		if ( mobileHidden() ) {
 			container.classList.add( 'faracart-widget--mobile-hidden' );
 			return;
@@ -2460,7 +2454,7 @@
 					continue;
 				}
 
-				// Phase 32: the second campaign template — one overall bar.
+				// the second campaign template — one overall bar.
 				if ( 'campaign_progress' === campaign.template ) {
 					stack.appendChild( campaignProgress( groupMissions, campaign, data.currency || cfg.currency ) );
 					rendered++;
@@ -2472,7 +2466,7 @@
 				var mission = groupMissions[ j ];
 				var card = missionContainer( mission, data.currency || cfg.currency, variant, widgetTemplate( container, mission ) );
 
-				// Phase 32 (celebration): one confetti burst + pulse per
+				// celebration: one confetti burst + pulse per
 				// completed mission per session.
 				if ( mission.completed && cfg.celebrate && ! celebrated[ String( mission.mission_id || 0 ) ] ) {
 					celebrate( card, mission );
@@ -3134,7 +3128,7 @@
 	 * Re-runs mount discovery so containers added by fragment refreshes
 	 * (mini cart) get mounted after the DOM swap.
 	 *
-	 * Phase 23 (Performance → update only changed UI fragments): each
+	 * Performance → update only changed UI fragments: each
 	 * container is skipped when the payload fingerprint matches its last
 	 * render AND it already holds content — a freshly swapped container
  * (mini-cart fragment refresh) is empty, so it always mounts.
@@ -3409,8 +3403,8 @@
 	 * One listener on document.body covers every widget's panel: the add
 	 * buttons run the AJAX add-to-cart flow, and the product name links
 	 * report the click. Attribution follows the row's merged source —
-	 * suggestion-sourced items keep the Phase 16 suggestion funnel,
-	 * upsell-sourced items the Phase 33.7 upsell funnel, 'both' items
+	 * suggestion-sourced items keep the suggestion funnel,
+	 * upsell-sourced items the upsell funnel, 'both' items
 	 * feed both (rank-endpoint fallback rows carry no source and belong
 	 * to the upsell funnel). The ids and source ride on the row's data
 	 * attributes.
@@ -3459,7 +3453,7 @@
 	}
 
 	/**
-	 * Bind the delegated gift-picker click handler (Phase 32).
+	 * Bind the delegated gift-picker click handler.
 	 *
 	 * One listener on document.body covers every widget's picker buttons;
 	 * the ids ride on the button's data attributes.
@@ -3485,7 +3479,7 @@
 	}
 
 	/**
-	 * Start the countdown ticker (Phase 32).
+	 * Start the countdown ticker.
 	 *
 	 * One interval rewrites every `.faracart-countdown__time` readout from
 	 * its data attribute every second — no widget re-render involved.
@@ -3522,7 +3516,7 @@
 		bindCountdownTicker();
 		bindFloatingResize();
 
-		// Phase 18 (mobile behavior): re-render when the viewport crosses
+		// mobile behavior: re-render when the viewport crosses
 		// the mobile breakpoint so hidden widgets appear/disappear live.
 		if ( cfg.mobile === 'hide' ) {
 			window.addEventListener( 'resize', refresh );

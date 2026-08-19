@@ -4,11 +4,11 @@
  *
  * Boots WordPress, then exercises the RewardEngine, the reward applicators
  * and the RewardSafety guards against synthetic Mission / MissionResult /
- * CartContext objects — the same pure-value-object approach as the Phase 4
+ * CartContext objects — the same pure-value-object approach as the
  * engine tests. The WooCommerce-only application path (live cart mutations)
  * is guarded by design and not simulated here.
  *
- * Run: php tests/reward-test.php   (from the plugin directory)
+ * Run: php tests/reward-test.php (from the plugin directory)
  *
  * The script only reads state; it does not activate the plugin, create
  * products, or write to the database.
@@ -117,7 +117,7 @@ $json = Reward::from_mission(
         array(
             'reward_type'  => Reward::TYPE_FREE_GIFT,
             // A legacy mission that still stores the removed 'optional' add
-            // mode (pre-Phase-33 data) must read as automatic so the mode
+            // mode (previous data) must read as automatic so the mode
             // can never surface in the UI or the engine again.
             'reward_meta'  => json_encode( array( 'gift_product_id' => 42, 'gift_add_mode' => 'optional' ) ),
         )

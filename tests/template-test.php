@@ -1,6 +1,6 @@
 <?php
 /**
- * FaraCart pluggable template engine tests (Phase 12 → engine).
+ * FaraCart pluggable template engine tests (→ engine).
  *
  * Boots WordPress and exercises the template engine end to end:
  *
@@ -35,7 +35,7 @@
  * Settings flips are in-memory and restored; DB writes run inside
  * transactions and are rolled back, with residue asserted.
  *
- * Run: php tests/template-test.php   (from the plugin directory)
+ * Run: php tests/template-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).

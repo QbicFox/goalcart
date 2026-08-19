@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class MessageEngine
  *
- * Phase 13 (Dynamic Messaging) — a reusable, UI-independent message
+ * Dynamic Messaging — a reusable, UI-independent message
  * template engine. Given a Mission + MissionResult it decides the message
  * state (inactive / unavailable / progressing / nearly complete /
  * completed / reward activated) and renders a localized message from a
@@ -30,8 +30,8 @@ defined( 'ABSPATH' ) || exit;
  * every value is formatted locale-aware (currency via `wc_price` when
  * WooCommerce is active, plain numbers via `number_format_i18n`).
  *
- * The engine is stateless and database-free (Phase 4 contract) — callers
- * supply the Mission + MissionResult. The frontend controller (Phase 7) renders
+ * The engine is stateless and database-free (contract) — callers
+ * supply the Mission + MissionResult. The frontend controller  renders
  * every progress message through this service.
  */
 final class MessageEngine {
@@ -102,7 +102,7 @@ final class MessageEngine {
 	 *  - unavailable       mission cannot apply to this cart/shopper
 	 *  - completion_limit_reached
 	 *                      the shopper already completed this mission the
-	 *                      configured maximum number of times (Phase 36)
+	 *                      configured maximum number of times 
 	 *  - progressing       eligible, target not reached, below the
 	 *                      "nearly complete" threshold
 	 *  - nearly_complete   eligible, >= NEARLY_COMPLETE_PERCENTAGE
@@ -113,7 +113,7 @@ final class MessageEngine {
 	 * @param MissionResult               $result     Evaluation result.
 	 * @param array<string, mixed>|null $completion Optional completion status
 	 *                      (completion_limit / completion_count /
-	 *                      remaining_completions / can_complete, Phase 36);
+	 *                      remaining_completions / can_complete);
 	 *                      when it says the shopper cannot complete the mission
 	 *                      again, the limit state wins over every
 	 *                      progress/completion state (the mission is no longer
@@ -153,7 +153,7 @@ final class MessageEngine {
 	 *                                      floats or strings; formatted by
 	 *                                      the engine.
 	 * @param array<string, mixed>|null $completion Optional completion status
-	 *                                      (Phase 36) forwarded to state().
+	 *                                       forwarded to state().
 	 * @return string
 	 */
 	public function message( Mission $mission, MissionResult $result, array $extra = array(), $completion = null ) {
@@ -187,7 +187,7 @@ final class MessageEngine {
 			case self::STATE_UNAVAILABLE:
 				return __( 'This offer is not available for your cart.', 'faracart' );
 
-			// Phase 36 (per-user completion limit): the shopper already
+			// per-user completion limit: the shopper already
 			// completed this mission the configured maximum number of times —
 			// the plain "you've done this" copy, never the reward-unlocked
 			// claim (no reward can be granted again). The per-mission Display

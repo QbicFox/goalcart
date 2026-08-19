@@ -19,7 +19,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class AnalyticsController
  *
- * Phase 17 (Analytics Dashboard) — the single read-only endpoint powering
+ * Analytics Dashboard — the single read-only endpoint powering
  * the admin dashboard page:
  *
  *  - `GET /faracart/v1/analytics` — summary KPIs, daily trend, and the
@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * The response envelope is:
  *
- *  - data.summary              — the seven Phase 16 metrics over the
+ *  - data.summary              — the seven metrics over the
  *    filtered window (impressions, completions, completion rate,
  *    average cart value, revenue influenced, suggestion CTR,
  *    suggestion add-to-cart rate)
@@ -60,7 +60,7 @@ class AnalyticsController extends BaseController {
 
 	/**
 	 * Cached revenue repository — purchase/profit metrics for the extended
-	 * summary (Phase 2).
+	 * summary.
 	 *
 	 * @var RevenueRepository
 	 */
@@ -157,7 +157,7 @@ class AnalyticsController extends BaseController {
 			'suggestion_add_to_cart_rate' => $this->analytics->suggestion_add_to_cart_rate( $filters ),
 		);
 
-		// Phase 2 (Backend/Data Layer — Improvement.md §37/§38): the same
+		// Backend/Data Layer — Improvement.md §37/§38: the same
 		// payload now also carries the purchase/profit metrics derived from
 		// the existing attribution layer (same date range + mission filters,
 		// cached through the revenue repository). Null when the active
@@ -173,7 +173,7 @@ class AnalyticsController extends BaseController {
 				'top_campaigns'        => $this->analytics->top_campaigns( $filters, $limit ),
 				'top_missions'            => $this->analytics->top_missions( $filters, $limit ),
 				'top_suggested_products' => $this->analytics->top_suggested_products( $filters, $limit ),
-				// Phase 6 — per-mission purchase comparison rows (§27), same
+				// per-mission purchase comparison rows (§27), same
 				// shape as /revenue/missions, sliced by the same filters; null
 				// when the active filter cannot be expressed in attribution.
 				'mission_comparison'      => $this->revenue->mission_comparison( $filters ),
@@ -218,13 +218,13 @@ class AnalyticsController extends BaseController {
 					'coverage_pct'          => null,
 					'available'             => false,
 				),
-				// Phase 3: the cost sources are a constant; the store-wide
+				// the cost sources are a constant; the store-wide
 				// signal is unknown for a filter attribution cannot express
 				// (null — the UI must not claim "no cost data" here).
 				'cost_sources'       => RewardCostEstimator::COST_SOURCES,
 				'store_has_cost_data'=> null,
 				'profit_details'     => null,
-				// Phase 6 — the attribution funnel + assisted/influenced
+				// the attribution funnel + assisted/influenced
 				// revenue are also unexpressible for such filters: null.
 				'funnel'             => null,
 				'assisted_sales'     => null,
@@ -245,7 +245,7 @@ class AnalyticsController extends BaseController {
 			'cost_sources'       => $purchase['cost_sources'],
 			'store_has_cost_data'=> (bool) $purchase['store_has_cost_data'],
 			'profit_details'     => $purchase['profit_details'],
-			// Phase 6 — the full attribution funnel (views → progressed →
+			// the full attribution funnel (views → progressed →
 			// completed → purchased) plus the assisted/influenced revenue
 			// splits, so the analytics page renders the funnel (§23), the
 			// completion-vs-purchase comparison (§25) and the advanced

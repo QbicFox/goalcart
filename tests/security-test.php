@@ -3,7 +3,7 @@
  * FaraCart security hardening tests (P22-T01 / P22-T02 / P22-T03 / P22-T04).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then audits
- * the Phase 22 security posture end-to-end:
+ * the security posture end-to-end:
  *
  *  - P22-T01 PHP:
  *      nonce verification on the public track route (bad → 403, good →
@@ -35,7 +35,7 @@
  * explicitly, and the absence of any residue is asserted afterwards. No
  * products or users are created.
  *
- * Run: php tests/security-test.php   (from the plugin directory)
+ * Run: php tests/security-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -448,7 +448,7 @@ try {
 	$admin_payload = $missions_ctrl->handle_get( $req )->get_data()['data'];
 	check( 'admin detail keeps reward_meta', isset( $admin_payload['reward_meta']['coupon_code'] ) );
 
-	// ...but the public progress payload must never echo it.
+	//...but the public progress payload must never echo it.
 	$cart = WC()->cart;
 	$cart->cart_contents['sec1'] = array(
 		'key'               => 'sec1',

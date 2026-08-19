@@ -99,8 +99,8 @@ if ( file_exists( FARACART_PATH . 'vendor/autoload.php' ) ) {
 	require_once FARACART_PATH . 'vendor/autoload.php';
 }
 
-// Bootstrap the plugin core (Phase 2: Plugin Foundation). The Plugin
-// singleton registers activation/deactivation hooks, schema migrations,
+// Bootstrap the plugin core. The Plugin singleton registers
+// activation/deactivation hooks, schema migrations,
 // and every component hook through the HookManager. boot() runs at file
 // scope (not deferred) so that register_activation_hook is always
 // registered in time during the activation request.

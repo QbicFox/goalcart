@@ -23,7 +23,7 @@ import type { FixedRangePreset } from '../../date-range/types';
 const CustomRangePicker = lazy(() => import('./CustomRangePicker'));
 
 /**
- * Date-range filter (Phase 17), shown in the analytics filter toolbar.
+ * Date-range filter, shown in the analytics filter toolbar.
  * Presets (Today / Yesterday / Last 7 / Last 30) apply instantly;
  * "Custom" opens a lazy-loaded month-grid picker. The selection is
  * shared via DateRangeContext and persists to URL + storage.

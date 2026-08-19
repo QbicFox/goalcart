@@ -60,9 +60,9 @@ defined( 'ABSPATH' ) || exit;
  * injection container, resolves the core services, and applies every
  * registered action/filter hook through the HookManager.
  *
- * Service set is intentionally minimal during the foundation phase; the
- * Tracker, REST controllers and report services are added by later
- * phases through the same register_services() wiring.
+ * Service set is intentionally minimal; the
+ * Tracker, REST controllers and report services are added later
+ * through the same register_services() wiring.
  */
 final class Plugin {
 
@@ -141,7 +141,7 @@ final class Plugin {
 
 		$this->booted = true;
 
-		// Activation / deactivation hooks (Phase 2: Plugin Foundation).
+		// Activation / deactivation hooks (Plugin Foundation).
 		register_activation_hook( FARACART_FILE, array( Installer::class, 'activate' ) );
 		register_deactivation_hook( FARACART_FILE, array( Installer::class, 'deactivate' ) );
 
@@ -156,7 +156,7 @@ final class Plugin {
 		$this->hooks()->add_action( 'plugins_loaded', array( Installer::class, 'maybe_upgrade' ) );
 		$this->hooks()->add_action( 'admin_init', array( Installer::class, 'maybe_upgrade' ) );
 
-		// Load the text domain (Phase 2: translation loading).
+		// Load the text domain (translation loading).
 		$this->hooks()->add_action( 'init', array( $this, 'load_textdomain' ) );
 
 		// Custom cron intervals must be registered on every request
@@ -177,31 +177,31 @@ final class Plugin {
 		$this->hooks()->register( $this->reward_engine() );
 		$this->hooks()->register( $this->admin() );
 
-		// Analytics (Phase 16): session cookie, event recording, the
+		// Analytics: session cookie, event recording, the
 		// frontend config print and the server-side suggested-product
 		// attribution all register through the Tracker.
 		$this->hooks()->register( $this->container->get( Tracker::class ) );
 
-		// Revenue optimization (Phase 33.1): the revenue event tracker
+		// Revenue optimization: the revenue event tracker
 		// records the attribution funnel (mission_view → progress → completed
 		// → order_paid) and the upsell funnel into their dedicated logs,
 		// with idempotent dedup and the weekly retention cleanup cron.
 		$this->hooks()->register( $this->container->get( RevenueTracker::class ) );
 
-		// Revenue attribution (Phase 33.2): associates paid orders with the
+		// Revenue attribution: associates paid orders with the
 		// missions that influenced their session (direct/assisted models) and
 		// exposes the revenue metrics — incremental cart value, mission-driven
 		// / assisted revenue, AOV, reward cost and profit impact.
 		$this->hooks()->register( $this->container->get( AttributionEngine::class ) );
 
-		// Per-user mission completion limit (Phase 36): the order-lifecycle
+		// Per-user mission completion limit: the order-lifecycle
 		// hooks — stamping the anonymous session on checkout and recording
 		// one completion cycle per met mission when the order is paid — keep
 		// the server-side completion history in sync with every order
 		// (idempotent via the order_mission unique key).
 		$this->hooks()->register( $this->container->get( CompletionService::class ) );
 
-		// Aggregation & performance (Phase 33.3): the daily aggregator
+		// Aggregation & performance: the daily aggregator
 		// pre-computes revenue_daily + upsell_stats on a bounded cron job, and
 		// the revenue repository serves the cached summaries (overview, mission
 		// performance, daily trend, product stats, mission recommendations) with
@@ -210,13 +210,13 @@ final class Plugin {
 		$this->hooks()->register( $this->container->get( DailyAggregator::class ) );
 		$this->hooks()->register( $this->container->get( RevenueRepository::class ) );
 
-		// Smart mission recommendation (Phase 33.4): the deterministic
+		// Smart mission recommendation: the deterministic
 		// threshold recommendation engine — AOV/median/distribution/shipping
 		// /margin analyzers, candidate scoring, confidence and explanations —
 		// served read-only through the cached revenue repository.
 		$this->hooks()->register( $this->container->get( RecommendationsController::class ) );
 
-		// Smart upsell (Phase 33.5): the deterministic product-ranking
+		// Smart upsell: the deterministic product-ranking
 		// engine (candidate collection, price-gap/relevance/inventory
 		// /popularity/margin/conversion scorers, composite weighted score)
 		// attributes upsell_order events server-side when a paid order
@@ -225,7 +225,7 @@ final class Plugin {
 		$this->hooks()->register( $this->container->get( UpsellRanker::class ) );
 		$this->hooks()->register( $this->container->get( UpsellController::class ) );
 
-		// Revenue optimization admin reads (Phase 33.6): the overview /
+		// Revenue optimization admin reads: the overview /
 		// attribution / mission-performance endpoints serving the React Admin
 		// Revenue section through the cached repository layer.
 		$this->hooks()->register( $this->container->get( RevenueController::class ) );
@@ -237,11 +237,11 @@ final class Plugin {
 		$this->hooks()->register( $this->container->get( ProductCostField::class ) );
 		$this->hooks()->register( $this->container->get( OrderCostSnapshot::class ) );
 
-		// Storefront progress UI (Phase 11): shortcode, display-location
+		// Storefront progress UI: shortcode, display-location
 		// injection, floating widget and frontend assets.
 		$this->hooks()->register( $this->container->get( ProgressUI::class ) );
 
-		// REST controllers (Phase 7): each registers its routes on
+		// REST controllers: each registers its routes on
 		// rest_api_init through the same HookManager.
 		$this->hooks()->register( $this->container->get( MissionsController::class ) );
 		$this->hooks()->register( $this->container->get( SettingsController::class ) );
@@ -279,19 +279,19 @@ final class Plugin {
 			return new Settings();
 		} );
 
-		// Mission engine (Phase 4): stateless calculation engine, resolved
+		// Mission engine: stateless calculation engine, resolved
 		// lazily on first use by the frontend integration / REST layers.
 		$this->container->singleton( MissionEngine::class, function () {
 			return new MissionEngine();
 		} );
 
-		// Mission repository (Phase 5): loads active missions from the database so
+		// Mission repository: loads active missions from the database so
 		// the reward engine can decide rewards on the live cart.
 		$this->container->singleton( MissionRepository::class, function () {
 			return new MissionRepository();
 		} );
 
-		// Per-user mission completion limit (Phase 36): the authoritative
+		// Per-user mission completion limit: the authoritative
 		// completion service — per-user counts over the mission_completions
 		// history, the can_complete eligibility rule, and the
 		// transactional order-time recording — consumed by the reward
@@ -306,7 +306,7 @@ final class Plugin {
 			);
 		} );
 
-		// Message engine (Phase 13): stateless dynamic-message template
+		// Message engine: stateless dynamic-message template
 		// engine — state detection, variable substitution and localized
 		// per-state copy, consumed by the frontend REST layer. The resolved
 		// display currency rides along so server-rendered amounts are
@@ -315,10 +315,9 @@ final class Plugin {
 			return new MessageEngine( $container->get( Settings::class )->currency() );
 		} );
 
-		// Suggestion engine (Phase 14): product recommendations that close
+		// Suggestion engine: product recommendations that close
 		// the mission gap — six sources, stock filter, relevance + price
-		// proximity ranking — consumed by the frontend REST layer. Phase 32
-		// (advanced upsell ranking) reads the suggestions_ranking mode.
+		// proximity ranking — consumed by the frontend REST layer. // (advanced upsell ranking) reads the suggestions_ranking mode.
 		$this->container->singleton( SuggestionEngine::class, function ( Container $container ) {
 			return new SuggestionEngine( $container->get( Settings::class ) );
 		} );
@@ -335,8 +334,8 @@ final class Plugin {
 			);
 		} );
 
-		// Analytics (Phase 16): anonymous session, event recorder, and the
-		// metrics repository consumed by the Phase 17 dashboard. The
+		// Analytics: anonymous session, event recorder, and the
+		// metrics repository consumed by the dashboard. The
 		// Tracker registers the session cookie, the frontend config print
 		// and the add-to-cart attribution hook.
 		$this->container->singleton( Session::class, function () {
@@ -354,7 +353,7 @@ final class Plugin {
 			return new AnalyticsRepository();
 		} );
 
-		// Revenue event tracker (Phase 33.1): owns the revenue_events and
+		// Revenue event tracker: owns the revenue_events and
 		// upsell_events logs — whitelisted, deduped, privacy-safe recording
 		// plus the weekly retention cleanup cron.
 		$this->container->singleton( RevenueTracker::class, function ( Container $container ) {
@@ -364,7 +363,7 @@ final class Plugin {
 			);
 		} );
 
-		// Reward cost / profit impact estimator (Phase 33.2): deterministic
+		// Reward cost / profit impact estimator: deterministic
 		// reward-cost models per type, product margin detection (only when
 		// the store provides cost data) and profit impact with graceful
 		// degradation to revenue-only analytics.
@@ -372,7 +371,7 @@ final class Plugin {
 			return new RewardCostEstimator();
 		} );
 
-		// Revenue attribution engine (Phase 33.2): order association on
+		// Revenue attribution engine: order association on
 		// payment, direct/assisted attribution into mission_attribution, and
 		// the SQL-aggregated metric reads (funnel, incremental cart value,
 		// mission-driven/assisted revenue, AOV, shipping stats).
@@ -386,7 +385,7 @@ final class Plugin {
 			);
 		} );
 
-		// Daily revenue aggregation (Phase 33.3): the bounded cron job that
+		// Daily revenue aggregation: the bounded cron job that
 		// pre-computes revenue_daily + upsell_stats from the raw logs through
 		// the attribution engine's daily_metrics (same definitions as the
 		// live reads, so the aggregated history never drifts).
@@ -397,7 +396,7 @@ final class Plugin {
 			);
 		} );
 
-		// Smart mission recommendation engine (Phase 33.4): the deterministic
+		// Smart mission recommendation engine: the deterministic
 		// threshold recommender — store-order analysis (AOV, median,
 		// distribution), shipping/margin analyzers, candidate generation +
 		// weighted scoring, confidence and plain-English explanations. Pure
@@ -410,11 +409,11 @@ final class Plugin {
 			);
 		} );
 
-		// Cached revenue summaries (Phase 33.3/33.4): overview / mission
+		// Cached revenue summaries: overview / mission
 		// performance / daily trend / product stats / mission recommendations
 		// with generation-versioned transients and invalidation on order,
 		// mission, product and aggregation changes.
-		// Smart upsell ranking engine (Phase 33.5): the deterministic
+		// Smart upsell ranking engine: the deterministic
 		// product-ranking engine — candidate collection from the mission/cart
 		// context (manual, historical, category, WC-endorsed, taxonomy
 		// overlap, best sellers), six normalized component scorers
@@ -432,7 +431,7 @@ final class Plugin {
 			);
 		} );
 
-		// Cached revenue summaries (Phase 33.3/33.4/33.5): overview / mission
+		// Cached revenue summaries: overview / mission
 		// performance / daily trend / product stats / mission recommendations
 		// / upsell ranking + analytics with generation-versioned transients
 		// and invalidation on order, mission, product and aggregation changes.
@@ -445,16 +444,16 @@ final class Plugin {
 			);
 		} );
 
-		// Cart integration (Phase 6): the single source of the live-cart
+		// Cart integration: the single source of the live-cart
 		// snapshot — memoized, lifecycle-aware, with batched category
 		// preloading — consumed by the reward engine (and later REST/frontend).
 		$this->container->singleton( CartIntegration::class, function ( Container $container ) {
-			// Phase 18 (Mission Calculation): the snapshot service applies the
+			// Mission Calculation: the snapshot service applies the
 			// tax / discount / shipping / sale / virtual inclusion settings.
 			return new CartIntegration( $container->get( Settings::class ) );
 		} );
 
-		// Reward engine (Phase 5): decoupled from mission calculation — consumes
+		// Reward engine: decoupled from mission calculation — consumes
 		// MissionResult objects, applies rewards on the WooCommerce cart.
 		$this->container->singleton( RewardEngine::class, function ( Container $container ) {
 			return new RewardEngine(
@@ -467,8 +466,8 @@ final class Plugin {
 			);
 		} );
 
-		// Campaign repository (Phase 7): read-only campaign access for the
-		// REST layer; extended with CRUD by Phase 10 (Campaign Builder).
+		// Campaign repository: read-only campaign access for the
+		// REST layer; extended with CRUD by (Campaign Builder).
 		$this->container->singleton( CampaignRepository::class, function () {
 			return new CampaignRepository();
 		} );
@@ -488,7 +487,7 @@ final class Plugin {
 			);
 		} );
 
-		// REST controllers (Phase 7: REST API / AJAX Layer) — admin CRUD,
+		// REST controllers (REST API / AJAX Layer) — admin CRUD,
 		// settings, search, campaigns and the public cart-progress endpoint.
 		$this->container->singleton( MissionsController::class, function ( Container $container ) {
 			return new MissionsController(
@@ -516,9 +515,9 @@ final class Plugin {
 		} );
 
 		$this->container->singleton( FrontendController::class, function ( Container $container ) {
-			// Phase 18 (Settings): mission behavior, the suggestions gate and
+			// Settings: mission behavior, the suggestions gate and
 			// the optional progress cache all read the settings service.
-			// Phase 26 (Conflict & Priority Engine): the reward engine is
+			// Conflict & Priority Engine: the reward engine is
 			// injected so the payload resolves 'best' with real computed
 			// amounts and mirrors stacking suppression — the display is
 			// always what the live cart grants.
@@ -535,11 +534,11 @@ final class Plugin {
 			);
 		} );
 
-		// Admin preview system (Phase 15): evaluates a mission/campaign against
+		// Admin preview system: evaluates a mission/campaign against
 		// a SIMULATED cart through the real engine, reusing the frontend
 		// controller's shared payload shape — never touches the live cart.
 		$this->container->singleton( PreviewController::class, function ( Container $container ) {
-			// Phase 26 (Conflict & Priority Engine): the preview resolves
+			// Conflict & Priority Engine: the preview resolves
 			// conflicts across completed milestones with the store's
 			// configured resolution mode — including computed 'best' scores
 			// and stacking suppression via the reward engine — so admins
@@ -555,13 +554,13 @@ final class Plugin {
 			);
 		} );
 
-		// Public track endpoint (Phase 16): nonce-guarded, per-IP rate
+		// Public track endpoint: nonce-guarded, per-IP rate
 		// limited — the storefront JS reports events through it.
 		$this->container->singleton( TrackController::class, function ( Container $container ) {
 			return new TrackController( $container->get( Tracker::class ) );
 		} );
 
-		// Public gift-selection endpoint (Phase 32): nonce-guarded, per-IP
+		// Public gift-selection endpoint: nonce-guarded, per-IP
 		// rate limited — the storefront gift picker claims a chosen free
 		// gift through the reward engine.
 		$this->container->singleton( GiftController::class, function ( Container $container ) {
@@ -571,11 +570,11 @@ final class Plugin {
 			);
 		} );
 
-		// Analytics dashboard endpoint (Phase 17): admin-only read of the
-		// Phase 16 metrics repository — summary, daily trend and the top
+		// Analytics dashboard endpoint: admin-only read of the
+		// metrics repository — summary, daily trend and the top
 		// campaigns / missions / suggested products lists, all filterable.
 		$this->container->singleton( AnalyticsController::class, function ( Container $container ) {
-			// RevenueRepository powers the Phase 2 purchase/profit fields of
+			// RevenueRepository powers the purchase/profit fields of
 			// the /analytics summary (same cached attribution layer as the
 			// revenue endpoints).
 			return new AnalyticsController(
@@ -591,7 +590,7 @@ final class Plugin {
 			return new TemplatesController( $container->get( TemplateEngine::class ) );
 		} );
 
-		// Mission recommendation endpoints (Phase 33.4 + UPSELL_REFACTOR §41):
+		// Mission recommendation endpoints (UPSELL_REFACTOR §41):
 		// the read-only deterministic threshold recommendation served
 		// through the cached revenue repository, plus the apply write path
 		// (explicit admin confirmation → mission target update + the
@@ -605,10 +604,10 @@ final class Plugin {
 			);
 		} );
 
-		// Upsell endpoints (Phase 33.5/33.7): the public nonce-guarded
+		// Upsell endpoints: the public nonce-guarded
 		// upsell event tracking route (impression/clicked/added into the
-		// Phase 33.1 upsell_events log — upsell_order is attributed
-		// server-side on payment), the Phase 33.7 public storefront rank
+		// upsell_events log — upsell_order is attributed
+		// server-side on payment), the public storefront rank
 		// route (live-cart mission gap + deterministic ranking — the
 		// injected ranker/cart/engine/missions serve it directly, no
 		// per-cart transient churn) plus the admin ranking + analytics
@@ -623,7 +622,7 @@ final class Plugin {
 			);
 		} );
 
-		// Revenue optimization admin reads (Phase 33.6 + UPSELL_REFACTOR
+		// Revenue optimization admin reads (UPSELL_REFACTOR
 		// §25): the overview / attribution / mission-performance endpoints
 		// serving the React Admin Revenue section through the cached
 		// revenue repository, plus the product-cost coverage read.
@@ -657,7 +656,7 @@ final class Plugin {
 			return new OrderCostSnapshot( $container->get( RewardCostEstimator::class ) );
 		} );
 
-		// Storefront progress UI (Phase 11): renders widget containers and
+		// Storefront progress UI: renders widget containers and
 		// enqueues the vanilla frontend JS/CSS (assets/js, assets/css).
 		$this->container->singleton( ProgressUI::class, function ( Container $container ) {
 			return new ProgressUI( $container->get( Settings::class ) );
@@ -692,7 +691,7 @@ final class Plugin {
 	}
 
 	/**
-	 * Get the mission engine (Phase 4).
+	 * Get the mission engine.
 	 *
 	 * @return MissionEngine
 	 */
@@ -701,7 +700,7 @@ final class Plugin {
 	}
 
 	/**
-	 * Get the reward engine (Phase 5).
+	 * Get the reward engine.
 	 *
 	 * @return RewardEngine
 	 */
@@ -710,7 +709,7 @@ final class Plugin {
 	}
 
 	/**
-	 * Get the cart integration service (Phase 6).
+	 * Get the cart integration service.
 	 *
 	 * @return CartIntegration
 	 */

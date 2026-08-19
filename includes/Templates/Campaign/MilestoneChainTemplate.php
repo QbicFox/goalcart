@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
  * Class MilestoneChainTemplate
  *
  * The first Campaign-scoped template: the multi-milestone chain from the
- * Phase 10 example — the campaign's milestones render as one connected
+ * example — the campaign's milestones render as one connected
  * ladder (dots + labels + rewards) with a progress bar underneath,
  * instead of each mission rendering its own standalone card.
  *

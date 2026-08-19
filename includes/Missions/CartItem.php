@@ -56,7 +56,7 @@ final class CartItem {
 	protected $line_total;
 
 	/**
-	 * Tax charged on this line (Phase 18: the `include_tax` calculation
+	 * Tax charged on this line (the `include_tax` calculation
 	 * toggle folds line taxes into the money bases).
 	 *
 	 * @var float
@@ -85,7 +85,7 @@ final class CartItem {
 	protected $categories;
 
 	/**
-	 * Product tag term IDs (Phase 32: tag / attribute missions).
+	 * Product tag term IDs (tag / attribute missions).
 	 *
 	 * @var int[]
 	 */
@@ -93,7 +93,7 @@ final class CartItem {
 
 	/**
 	 * Global attribute taxonomy slugs present on the product, e.g.
-	 * array( 'pa_color', 'pa_brand' ) (Phase 32).
+	 * array( 'pa_color', 'pa_brand' ).
 	 *
 	 * @var string[]
 	 */

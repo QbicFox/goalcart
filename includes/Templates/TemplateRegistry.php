@@ -22,10 +22,10 @@ defined( 'ABSPATH' ) || exit;
  * Class TemplateRegistry
  *
  * Maps template ids to template classes and resolves them lazily — the
- * same convention as MissionEvaluatorRegistry (Phase 4) and
- * RewardApplicatorRegistry (Phase 5). The class map is filterable through
+ * same convention as MissionEvaluatorRegistry  and
+ * RewardApplicatorRegistry. The class map is filterable through
  * `faracart_template_classes`, so a future template (including third-party
- * templates from the Phase 28 developer API) registers by adding an entry
+ * templates from the developer API) registers by adding an entry
  * to the map — no changes to the registry core, the Settings UI, the
  * builders, the REST layer or the preview system.
  *
@@ -42,7 +42,7 @@ class TemplateRegistry {
 	 * The six design templates (template-1 … template-6 — the Classic
 	 * Progress Card, Minimal Inline Cart Mission, Circular Progress, Product
 	 * Recommendation + Mission, Compact Floating / Sticky Mission and Premium /
-	 * Elegant E-commerce Style) replace the original Phase 12 Mission
+	 * Elegant E-commerce Style) replace the original Mission
 	 * templates (basic, percentage, milestone, card) and the Ring gauge.
 	 * The old ids are no longer registered and are never mapped — a
 	 * persisted old id falls back to the scope default / store-wide

@@ -4,7 +4,7 @@
  * Filters / P17-T03 Charts).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
- * exercises the Phase 17 analytics layer:
+ * exercises the analytics layer:
  *
  *  - service wiring: AnalyticsController resolves from the container and
  *    the GET /analytics route is registered
@@ -27,7 +27,7 @@
  * transients) happen inside a single database transaction that is rolled
  * back; absence of residue is asserted afterwards.
  *
- * Run: php tests/analytics-dashboard-test.php   (from the plugin directory)
+ * Run: php tests/analytics-dashboard-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -303,16 +303,16 @@ try {
 	check( 'suggestion CTR is 0.3333', near( 0.3333, $summary['suggestion_ctr'] ) );
 	check( 'suggestion add-to-cart rate is 0.5', near( 0.5, $summary['suggestion_add_to_cart_rate'] ) );
 
-	// 3.3b Phase 2 extension (Improvement.md §37/§38): the summary now also
+	// 3.3b extension (Improvement.md §37/§38): the summary now also
 	// carries the purchase/profit fields derived from the attribution
-	// layer. The legacy Phase 17 fields above stay untouched.
+	// layer. The legacy fields above stay untouched.
 	foreach ( array( 'progressed', 'purchased_orders', 'purchase_rate', 'attributed_sales', 'estimated_profit', 'profit_available', 'profit_reason', 'profit_reason_code' ) as $key ) {
 		check( "summary extended with {$key}", array_key_exists( $key, $summary ) );
 	}
 	check( 'summary extended with cost_coverage', isset( $summary['cost_coverage'] ) && is_array( $summary['cost_coverage'] ) );
 	check( 'summary extended with profit_details', isset( $summary['profit_details'] ) && is_array( $summary['profit_details'] ) );
 
-	// Phase 6 (Analytics Redesign — Improvement.md §21–§30): the summary
+	// Analytics Redesign — Improvement.md §21–§30: the summary
 	// also exposes the attribution funnel (views → progressed → completed
 	// → purchased) and the assisted/influenced revenue splits, and the
 	// payload carries the per-mission comparison rows (§27) — all additive.
@@ -420,13 +420,13 @@ try {
 	$summary = $resp->get_data()['data']['summary'];
 	check( 'product filter CTR', near( 0.5, $summary['suggestion_ctr'] ) );
 
-	// Phase 2: product_id cannot be expressed in attribution, so the
+	// product_id cannot be expressed in attribution, so the
 	// purchase fields degrade to null (never a fabricated number) while
-	// the Phase 17 fields keep working.
+	// the fields keep working.
 	check( 'product filter purchase fields null', null === $summary['purchased_orders'] && null === $summary['attributed_sales'] && null === $summary['estimated_profit'] );
 	check( 'product filter legacy impressions intact', array_key_exists( 'impressions', $summary ) );
 
-	// Phase 6: the mission comparison rows respect the filters (§27) — a
+	// the mission comparison rows respect the filters (§27) — a
 	// mission filter narrows them to that mission, an unmatched filter yields
 	// no rows, and a product filter cannot be expressed in attribution
 	// (null, never a fabricated list).

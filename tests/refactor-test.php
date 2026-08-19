@@ -31,7 +31,7 @@
  * 701+, sessions "t70"-style and products with the "R7 " prefix, so they
  * never collide with live store traffic or other suites' residue.
  *
- * Run: php tests/refactor-test.php   (from the plugin directory)
+ * Run: php tests/refactor-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file.
@@ -89,7 +89,7 @@ function close( $a, $b, $eps = 0.01 ) {
 	return abs( (float) $a - (float) $b ) < $eps;
 }
 
-// The Phase 33 tables are created by Installer::maybe_upgrade(), which runs
+// The tables are created by Installer::maybe_upgrade(), which runs
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 

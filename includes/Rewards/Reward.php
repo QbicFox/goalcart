@@ -47,7 +47,7 @@ final class Reward {
 	 *
 	 * 'automatic' silently adds the single configured gift product once
 	 * the mission is reached (mandatory — the shopper cannot remove it).
-	 * Phase 32 (free gift selection) adds 'choose': the shopper picks one
+	 * (free gift selection) adds 'choose': the shopper picks one
 	 * gift from the configured `gift_products` list through the storefront
 	 * widget picker. The former 'optional' mode was removed (its auto-add
 	 * but shopper-removable behavior blurred the mandatory/selectable
@@ -158,7 +158,7 @@ final class Reward {
 	protected $gift_product_id;
 
 	/**
-	 * Candidate gift product ids for the choose mode (Phase 32).
+	 * Candidate gift product ids for the choose mode.
 	 *
 	 * @var int[]
 	 */

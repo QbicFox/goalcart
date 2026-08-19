@@ -2,33 +2,33 @@
 /**
  * FaraCart WooCommerce compatibility tests (P19-T01 / P19-T02).
  *
- * Boots WordPress + WooCommerce and verifies the Phase 19 must-test matrix
+ * Boots WordPress + WooCommerce and verifies the must-test matrix
  * against the installed WooCommerce version:
  *
- *  - classic Cart        : woocommerce_before_cart widget hook
- *  - Cart Block          : render_block('woocommerce/cart') widget injection
- *  - classic Checkout    : woocommerce_before_checkout_form widget hook
- *  - Checkout Block      : render_block('woocommerce/checkout') injection
- *  - Mini Cart           : woocommerce_after_mini_cart + mini-cart block
- *  - variable products   : variations resolve categories from the parent
- *  - product variations  : variation_id is preserved on the context items
- *  - coupons             : apply/remove hooks invalidate the cart cache
- *  - sale prices         : on-sale exclusion path (include_sale)
- *  - tax                 : include_tax folds line taxes into the bases
- *  - shipping zones      : zone + method restrictions on free shipping
- *  - guest checkout      : is_guest default for anonymous carts
- *  - logged-in users     : user_id is captured on the context
- *  - HPOS                : custom_order_tables compatibility declared and
+ *  - classic Cart       : woocommerce_before_cart widget hook
+ *  - Cart Block         : render_block('woocommerce/cart') widget injection
+ *  - classic Checkout   : woocommerce_before_checkout_form widget hook
+ *  - Checkout Block     : render_block('woocommerce/checkout') injection
+ *  - Mini Cart          : woocommerce_after_mini_cart + mini-cart block
+ *  - variable products  : variations resolve categories from the parent
+ *  - product variations : variation_id is preserved on the context items
+ *  - coupons            : apply/remove hooks invalidate the cart cache
+ *  - sale prices        : on-sale exclusion path (include_sale)
+ *  - tax                : include_tax folds line taxes into the bases
+ *  - shipping zones     : zone + method restrictions on free shipping
+ *  - guest checkout     : is_guest default for anonymous carts
+ *  - logged-in users    : user_id is captured on the context
+ *  - HPOS               : custom_order_tables compatibility declared and
  *                          the public FeaturesUtil API is used
  *
  * Read-only like the other suites: no DB writes, no product creation, no
  * cart mutation. Full-cart integration logic itself is exercised by the
- * Phase 6 cart-integration suite; this suite pins the WooCommerce version
+ *  cart-integration suite; this suite pins the WooCommerce version
  * contract down so a WooCommerce update that breaks a public API shows up
  * here first (P19-T02 — never rely on undocumented internals, only the
  * supported public hooks/APIs below).
  *
- * Run: php tests/woocommerce-compatibility-test.php   (from the plugin directory)
+ * Run: php tests/woocommerce-compatibility-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).

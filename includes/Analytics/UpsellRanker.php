@@ -1,6 +1,6 @@
 <?php
 /**
- * Smart upsell ranking engine for FaraCart (Phase 33.5).
+ * Smart upsell ranking engine for FaraCart.
  *
  * @package FaraCart
  */
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class UpsellRanker
  *
- * Phase 33.5 (Smart Upsell) — the deterministic ranking engine that
+ * Smart Upsell — the deterministic ranking engine that
  * answers "which products should be recommended to help this customer
  * reach the mission?" with a fully transparent, weighted composite score.
  * No LLM/AI: every component is computed from the store's product data,
@@ -55,11 +55,10 @@ defined( 'ABSPATH' ) || exit;
  * Historical learning (P33-35): upsell impressions/clicks/adds are
  * reported by the storefront through the public
  * `POST /faracart/v1/upsell/track` endpoint (UpsellController) into the
- * Phase 33.1 upsell_events log; `upsell_order` events are attributed
+ * upsell_events log; `upsell_order` events are attributed
  * server-side when a paid order completes (a product that was shown /
  * clicked / added in the ordering session gets the order's upsell_order
- * event — the "purchased after recommendation" signal). The Phase 33.3
- * DailyAggregator rebuilds upsell_stats from that log, and the
+ * event — the "purchased after recommendation" signal). The * DailyAggregator rebuilds upsell_stats from that log, and the
  * conversion scorer reads the aggregates — deterministic historical
  * scoring, no black-box model (P33-35).
  *
@@ -482,7 +481,7 @@ final class UpsellRanker {
 	}
 
 	/**
-	 * One product's upsell score breakdown + historical stats (Phase 33.5).
+	 * One product's upsell score breakdown + historical stats.
 	 *
 	 * The per-product endpoint's data source: the product is scored through
 	 * the same component math as rank() (in the given cart/mission context, or

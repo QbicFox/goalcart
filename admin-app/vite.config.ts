@@ -14,12 +14,12 @@ import { defineConfig } from 'vite';
  * - React, MUI, TanStack Query and React Router are bundled into the app
  *   (no `wp.element` dependency) to avoid conflicts with other admin plugins.
  *
- * Phase 23 (Performance → minimize bundle size): `manualChunks` splits the
+ * Performance → minimize bundle size: `manualChunks` splits the
  * heavy, rarely-changing vendors into their own cacheable chunks so the
  * entry and the route chunks stay small and browser caches survive app
  * releases. The reference plugin (WooInsights) ships the same minimal
  * config without manualChunks — a documented deviation (AGENT.md rule 15)
- * driven by the Phase 23 roadmap requirement to minimize bundle size; the
+ * driven by the roadmap requirement to minimize bundle size; the
  * routing/base/manifest architecture is unchanged, only chunk grouping is
  * added. Module-groups use the id-prefix function form so Rollup resolves
  * transitive vendor deps into their owning group automatically.
@@ -44,7 +44,7 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       input: 'src/main.tsx',
-      // Phase 23: vendor chunk groups. Module ids are absolute paths from
+      // vendor chunk groups. Module ids are absolute paths from
       // node_modules; the prefix function assigns each to a stable group so
       // React, MUI, TanStack, recharts and the date pickers each live in a
       // separate cacheable chunk instead of one ~600 kB main bundle.

@@ -13,7 +13,7 @@ interface MissionTypePickerProps {
 }
 
 /**
- * Mission type selector (Phase 9: Mission Builder → Mission Type). Renders one
+ * Mission type selector (Mission Builder → Mission Type). Renders one
  * tappable card per engine-supported type so the choice is visual.
  */
 export default function MissionTypePicker({ value, onChange }: MissionTypePickerProps) {

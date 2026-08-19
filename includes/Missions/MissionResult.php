@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * current, target, remaining, percentage, completed, reward_state,
  * eligible, and a reason when not eligible. Immutable once built.
  *
- * reward_state semantics (Phase 5 activates the reward):
+ * reward_state semantics (activates the reward):
  *  - not_applicable  mission is not eligible for this cart/shopper
  *  - locked          eligible, target not reached yet
  *  - unlocked        eligible and target reached — the reward engine may
@@ -34,7 +34,7 @@ final class MissionResult {
 	/**
 	 * Eligibility reasons.
 	 *
-	 * Phase 32 (Advanced V2) adds the customer/order/cart/shipping
+	 * Advanced V2 adds the customer/order/cart/shipping
 	 * condition reasons: customer_conditions (roles / customer state),
 	 * first_order_only, vip_only, shipping_zone and cart_conditions
 	 * (required coupons / minimum items).

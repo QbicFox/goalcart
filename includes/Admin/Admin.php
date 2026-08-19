@@ -18,9 +18,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * Registers the admin menu, enqueues the React admin app (built by Vite
  * in admin-app/), and renders the dashboard mount point. The dashboard
- * UI itself is implemented in Phase 8 (React Admin Foundation); this
+ * UI itself is implemented in React Admin Foundation; this
  * class provides the page shell, capability checks and boot data
- * plumbing from the foundation phase.
+ * plumbing.
  */
 class Admin {
 
@@ -95,7 +95,7 @@ class Admin {
 	 * Register the top-level admin menu page.
 	 *
 	 * The capability is filterable so stores can restrict access without
-	 * touching the plugin (Phase 2: capability checks).
+	 * touching the plugin (capability checks).
 	 *
 	 * @return void
 	 */

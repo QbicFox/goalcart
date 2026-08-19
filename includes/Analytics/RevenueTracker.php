@@ -1,6 +1,6 @@
 <?php
 /**
- * Revenue event tracker for FaraCart (Phase 33.1 — Analytics Foundation).
+ * Revenue event tracker for FaraCart (Analytics Foundation).
  *
  * @package FaraCart
  */
@@ -16,20 +16,20 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class RevenueTracker
  *
- * Phase 33.1 (Analytics Foundation) — the event model + recorder behind the
- * Phase 33 revenue-optimization engine. It owns two raw event logs:
+ * Analytics Foundation — the event model + recorder behind the
+ * revenue-optimization engine. It owns two raw event logs:
  *
  *  - `revenue_events`  — the attribution funnel (mission_view → mission_progress
  *    → mission_completed → order_paid), each row carrying the cart value, the
  *    mission target and the incremental value. This is the deterministic
  *    input for direct/assisted attribution, incremental cart value and
- *    AOV analysis (Phase 33.2).
+ *    AOV analysis.
  *  - `upsell_events`   — the upsell interaction funnel (impression →
  *    clicked → added → order) per product per session. This is the input
  *    for the historical conversion signal the Smart Upsell Engine reads
- *    (Phase 33.5) and the per-product aggregates (upsell_stats).
+ *     and the per-product aggregates (upsell_stats).
  *
- * The Phase 16 Tracker (analytics_events) stays untouched: those rows are
+ * The Tracker (analytics_events) stays untouched: those rows are
  * the lightweight dashboard counters reported by the storefront JS,
  * while RevenueTracker rows are server-side attribution data gated by the
  * revenue feature flag.
@@ -49,7 +49,7 @@ defined( 'ABSPATH' ) || exit;
  * cookie), numeric aggregates (cart_value, mission_target, incremental_value)
  * and plugin/WooCommerce ids — never IPs, emails, addresses or payment
  * data. user_id is stored only when the shopper is logged in (an id, not
- * personal data), mirroring the Phase 16 Tracker.
+ * personal data), mirroring the Tracker.
  *
  * Cleanup (P33.1): a weekly cron event (CLEANUP_EVENT, scheduled by the
  * Installer through cron_events()) purges rows older than the retention
@@ -166,7 +166,7 @@ final class RevenueTracker {
 	 * Gated by the master plugin toggle + the analytics setting (the same
 	 * base gates as Tracker::tracking_enabled()) plus the dedicated
 	 * faracart_revenue_tracking_enabled filter, so stores can run the
-	 * lightweight Phase 16 dashboard while switching the revenue
+	 * lightweight dashboard while switching the revenue
 	 * attribution pipeline off.
 	 *
 	 * @return bool
@@ -565,7 +565,7 @@ final class RevenueTracker {
 	 * retention window, bounding the query with LIMIT so a very large log
 	 * is drained over several runs instead of locking the table. Also
 	 * clears the aggregated rows that reference purged sessions' products
-	 * (upsell_stats are rebuilt by the Phase 33.3 aggregator; stale rows
+	 * (upsell_stats are rebuilt by the aggregator; stale rows
 	 * for deleted products are dropped here as a best-effort sweep).
 	 *
 	 * @return int Number of deleted rows.

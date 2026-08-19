@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class CampaignsController
  *
- * Campaign endpoints (Phase 10 — Campaign Builder):
+ * Campaign endpoints (Campaign Builder):
  *
  *  - `GET    /faracart/v1/campaigns`      — campaign list (mission_count each)
  *  - `GET    /faracart/v1/campaigns/{id}` — a single campaign + milestones
@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * The payload mirrors the campaigns table plus an ordered `missions` array
  * of mission ids that becomes the campaign's milestone ordering
- * (`missions.campaign_id` + `missions.menu_order`, Phase 10). Admin-only
+ * (`missions.campaign_id` + `missions.menu_order`). Admin-only
  * (manage_options, P07-T04).
  */
 class CampaignsController extends BaseController {

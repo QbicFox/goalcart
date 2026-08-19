@@ -32,7 +32,7 @@
  * outrank the LIVE catalog's best sellers — the same live-DB robustness
  * the other suites rely on.
  *
- * Run: php tests/unified-recommendation-test.php   (from the plugin directory)
+ * Run: php tests/unified-recommendation-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -68,7 +68,7 @@ use FaraCart\Recommendations\ProductRecommendationEngine;
 use FaraCart\Settings\Settings;
 use FaraCart\Suggestions\SuggestionEngine;
 
-// The Phase 33 tables back the ranker's per-product stats (created by
+// The tables back the ranker's per-product stats (created by
 // Installer::maybe_upgrade(), which never fires in CLI after wp-load).
 Installer::maybe_create_tables();
 
@@ -112,12 +112,12 @@ function make_cat( $name, $slug ) {
 /**
  * Create a product inside the active transaction.
  *
- * @param string $name       Product name.
- * @param float  $price      Price.
+ * @param string $name Product name.
+ * @param float  $price Price.
  * @param int[]  $categories product_cat term ids.
- * @param string $stock      instock|outofstock.
- * @param int    $sales      total_sales.
- * @param int[]  $upsells    Upsell product ids.
+ * @param string $stock instock|outofstock.
+ * @param int    $sales total_sales.
+ * @param int[]  $upsells Upsell product ids.
  * @return int New product id.
  */
 function make_product( $name, $price, $categories = array(), $stock = 'instock', $sales = 0, $upsells = array() ) {

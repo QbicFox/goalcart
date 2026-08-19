@@ -4,7 +4,7 @@
  * / P16-T04 Privacy).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
- * exercises the Phase 16 analytics layer:
+ * exercises the analytics layer:
  *
  *  - service wiring: Session / Tracker / AnalyticsRepository resolve
  *    from the container and register their hooks
@@ -32,7 +32,7 @@
  * database transaction that is rolled back; absence of residue is
  * asserted afterwards.
  *
- * Run: php tests/analytics-test.php   (from the plugin directory)
+ * Run: php tests/analytics-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -284,7 +284,7 @@ try {
 	check( 'suggestion CTR is 0.6667', near( 0.6667, $repo->suggestion_ctr() ) );
 	check( 'suggestion add-to-cart rate is 0.5', near( 0.5, $repo->suggestion_add_to_cart_rate() ) );
 
-	// 4.7 Metrics respect campaign / mission filters (Phase 17 slices).
+	// 4.7 Metrics respect campaign / mission filters (slices).
 	check( 'impressions filtered by campaign', 4 === $repo->impressions( array( 'campaign_id' => $seed_campaign_id ) ) );
 	check( 'impressions filtered by other campaign', 0 === $repo->impressions( array( 'campaign_id' => 99 ) ) );
 	check( 'impressions filtered by mission', 4 === $repo->impressions( array( 'mission_id' => $seed_mission_id ) ) );
@@ -425,7 +425,7 @@ exit( $failures > 0 ? 1 : 0 );
 /**
  * The registered priority of a callback on a hook.
  *
- * @param string   $tag      Hook name.
+ * @param string   $tag Hook name.
  * @param callable $callback Registered callback.
  * @return int|false
  */

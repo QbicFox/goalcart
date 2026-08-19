@@ -1,8 +1,8 @@
 <?php
 /**
- * FaraCart conflict & priority engine tests (Phase 26).
+ * FaraCart conflict & priority engine tests.
  *
- * Boots WordPress and exercises the Phase 26 deterministic behavior when
+ * Boots WordPress and exercises the deterministic behavior when
  * multiple missions/campaigns are active:
  *
  *  - ConflictResolver: cumulative / best / first modes, mutually
@@ -24,7 +24,7 @@
  * upgrade + seeded missions/campaigns) run inside a transaction that is
  * rolled back, and residue is asserted.
  *
- * Run: php tests/conflict-test.php   (from the plugin directory)
+ * Run: php tests/conflict-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -270,7 +270,7 @@ $wpdb        = $GLOBALS['wpdb'];
 $missions_table = Schema::table( 'missions' );
 $camp_table  = Schema::table( 'campaigns' );
 
-// Ensure the Phase 26 schema is applied (the missions.exclusive column is
+// Ensure the schema is applied (the missions.exclusive column is
 // declared by Schema::create_statements() and dbDelta adds missing
 // columns idempotently — the same upgrade a live install runs).
 Installer::maybe_create_tables();

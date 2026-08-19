@@ -18,7 +18,7 @@ const Appearance = lazy(() => import('./routes/Appearance'));
 const Settings = lazy(() => import('./routes/Settings'));
 const MissionBuilder = lazy(() => import('./routes/MissionBuilder'));
 const CampaignBuilder = lazy(() => import('./routes/CampaignBuilder'));
-// Phase 33.6 (React Admin) — the Revenue Optimization section.
+// React Admin — the Revenue Optimization section.
 const RevenueOverview = lazy(() => import('./routes/RevenueOverview'));
 const MissionPerformance = lazy(() => import('./routes/MissionPerformance'));
 const AttributionDashboard = lazy(() => import('./routes/AttributionDashboard'));
@@ -40,14 +40,14 @@ function lazyRoute(element: ReactNode) {
 }
 
 /**
- * Hash-based data router (Phase 8: React Admin Foundation).
+ * Hash-based data router (React Admin Foundation).
  *
  * Uses `createHashRouter` (a data router) rather than the declarative
  * `<HashRouter>` so data-router hooks (e.g. `useBlocker` for unsaved
  * changes, as the reference Settings page uses) are available later. The
  * URL shape is unchanged — still `#/route` inside the single admin page.
  *
- * `DateRangeProvider` (Phase 17) sits inside the router — it syncs the
+ * `DateRangeProvider`  sits inside the router — it syncs the
  * analytics date range with the URL hash params via `useSearchParams` —
  * and above the layout so routed pages can share the selection.
  *

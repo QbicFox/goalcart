@@ -1,6 +1,6 @@
 <?php
 /**
- * FaraCart Phase 33.7 (Frontend Upsell Integration) tests.
+ * FaraCart Frontend Upsell Integration tests.
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
  * exercises the storefront upsell surface end to end:
@@ -28,7 +28,7 @@
  * database transaction that is rolled back, the live cart is emptied,
  * and the absence of any residue is asserted afterwards.
  *
- * Run: php tests/upsell-frontend-test.php   (from the plugin directory)
+ * Run: php tests/upsell-frontend-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file.
@@ -93,7 +93,7 @@ function route_exists( $routes, $pattern ) {
 	return isset( $routes[ $pattern ] );
 }
 
-// The Phase 33 tables are created by Installer::maybe_upgrade(), which
+// The tables are created by Installer::maybe_upgrade(), which
 // runs on plugins_loaded / admin_init — neither fires in CLI after
 // wp-load.
 Installer::maybe_create_tables();
@@ -372,7 +372,7 @@ $leftover_products = get_posts(
 check( 'no P33.7 fixture products remain', 0 === count( $leftover_products ) );
 
 // ---------------------------------------------------------------------------
-// 6. Storefront config (Phase 33.7 frontend contract)
+// 6. Storefront config (frontend contract)
 // ---------------------------------------------------------------------------
 echo "\n== 6. Storefront config ==\n";
 

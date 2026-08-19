@@ -205,7 +205,7 @@ function CustomerJourneyFunnel({ funnel }: { funnel: RevenueSummary['funnel'] })
 }
 
 /**
- * Sales Performance (Phase 4 redesign of the Revenue Overview).
+ * Sales Performance (redesign of the Revenue Overview).
  *
  * Answers the store owner's questions at a glance — how much did Mission
  * Cart sell, how many customers purchased, how profitable was it — with

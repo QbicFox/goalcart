@@ -32,11 +32,11 @@ interface PreviewWidgetProps {
   settingsOverride?: TemplateSettingsValue | null;
   /** Reward chip state: auto (from completion) or forced. */
   rewardState: PreviewRewardState;
-  /** Whether the bar fill animates (Phase 12 `frontend_animation`). */
+  /** Whether the bar fill animates (`frontend_animation`). */
   animation: boolean;
 }
 
-/** Human-readable reason a mission was suppressed by a conflict (Phase 26). */
+/** Human-readable reason a mission was suppressed by a conflict. */
 function conflictReasonLabel(reason: string): string {
   switch (reason) {
     case 'exclusive':
@@ -82,7 +82,7 @@ function effectiveSettings(
   return { ...base, ...own };
 }
 
-/** The reward chip — locked or unlocked (mirrors .faracart-reward). */
+/** The reward chip — locked or unlocked (mirrors.faracart-reward). */
 function RewardChip({ label, state }: { label: string; state: 'locked' | 'unlocked' }) {
   const unlocked = state === 'unlocked';
 
@@ -110,7 +110,7 @@ function RewardChip({ label, state }: { label: string; state: 'locked' | 'unlock
   );
 }
 
-/** The Phase 14 suggestion list (name + server-formatted price). */
+/** The suggestion list (name + server-formatted price). */
 function SuggestionList({
   mission,
   currency,
@@ -219,7 +219,7 @@ function MissionCard({
       {/* Template body (pluggable template engine). */}
       <Renderer mission={mission} currency={currency} settings={settings} animation={animation} />
 
-      {/* MissionMessage (Phase 13 state styling). */}
+      {/* MissionMessage (state styling). */}
       {showMessage && (
         <Typography
           sx={{
@@ -232,7 +232,7 @@ function MissionCard({
         </Typography>
       )}
 
-      {/* Conflict resolution note (Phase 26). */}
+      {/* Conflict resolution note. */}
       {mission.conflict && mission.conflict.resolved === false && (
         <Box sx={{ mt: 1 }}>
           <Chip
@@ -244,7 +244,7 @@ function MissionCard({
         </Box>
       )}
 
-      {/* SuggestionList (Phase 14) — hidden for template-4 whose body
+      {/* SuggestionList  — hidden for template-4 whose body
           already renders the recommended products. */}
       {showSuggestions && <SuggestionList mission={mission} currency={currency} tokens={tokens} />}
     </Box>
@@ -252,8 +252,7 @@ function MissionCard({
 }
 
 /**
- * The storefront progress widget, rendered in React for the Phase 15
- * admin preview. Mirrors the component flow of assets/js/frontend.js —
+ * The storefront progress widget, rendered in React for the admin preview. Mirrors the component flow of assets/js/frontend.js —
  * campaign groups render through their campaign template (e.g. the
  * milestone chain), everything else as one MissionContainer card per
  * eligible mission — with the resolved template settings, so the admin sees

@@ -25,7 +25,7 @@ interface AppProvidersProps {
  * - TanStack Query client
  * - Full-screen dashboard mode provider
  * - Shared Snackbar notifications provider
- * - Sticky bottom action bar provider (Phase 33.7) — pages register
+ * - Sticky bottom action bar provider  — pages register
  *   their save/reset buttons; AdminLayout renders them pinned to the
  *   bottom of the dashboard.
  *
@@ -62,7 +62,7 @@ export default function AppProviders({ children }: AppProvidersProps) {
 
   // The RTL flip uses the stylis plugin from the MUI guide: it swaps
   // left/right in the generated CSS (margins, padding, borders, floats,
-  // text-align, ...), so the entire dashboard — custom sx styles and MUI
+  // text-align,...), so the entire dashboard — custom sx styles and MUI
   // components alike — mirrors for RTL sites. LTR sites keep the default
   // plugin chain (prefixer only).
   const cache = useMemo(() => {

@@ -1,15 +1,15 @@
 <?php
 /**
- * FaraCart — full regression runner (Improvement.md Phase 10).
+ * FaraCart — full regression runner (Improvement.md).
  *
  * Runs every tests/*-test.php suite in a fresh PHP process, captures each
  * suite's Checks/Failures summary, and reports a verdict:
  *
- *   PASS        failures === 0
- *   DRIFT       failures > 0 but the suite is in the documented live-store
+ *   PASS failures === 0
+ *   DRIFT failures > 0 but the suite is in the documented live-store
  *               drift set below (environment data, not a code regression);
  *               a "growth" warning prints when actual > documented baseline
- *   REGRESSION  failures > 0 and NOT in the drift set — the gate
+ *   REGRESSION failures > 0 and NOT in the drift set — the gate
  *
  * A suite that produces NO summary (crash/hang) is always a regression.
  * A suite whose check count drops below its documented baseline is also

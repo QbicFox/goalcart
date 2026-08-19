@@ -1,6 +1,6 @@
 <?php
 /**
- * Per-user mission completion limit service (Phase 36).
+ * Per-user mission completion limit service.
  *
  * @package FaraCart
  */
@@ -42,16 +42,16 @@ defined( 'ABSPATH' ) || exit;
  * log: one row per (mission, order, identity) recorded when an order
  * becomes revenue-producing.
  *
- * Identity (Phase 18/19): logged-in shoppers count by `user_id` (their
+ * Identity: logged-in shoppers count by `user_id` (their
  * WordPress/WooCommerce id); guests count by the existing anonymous
  * `Session` id, which is stamped onto the order at checkout
  * (`_faracart_session`) so a guest order is always attributable to the
  * browsing session that placed it — no new tracking system. Counts are
  * never merged across the two identities (a guest who logs in starts a
- * separate logged-in count — Phase 20 limitation, deliberately not
+ * separate logged-in count — limitation, deliberately not
  * guessed via heuristics).
  *
- * Completion cycles (Phase 12/13): progress is per-cart and reset by the
+ * Completion cycles: progress is per-cart and reset by the
  * normal mission lifecycle; a completion is ONE successful cycle (an order
  * that met the mission). Progress and the completion count stay separate —
  * recording here never touches progress, and resetting progress never
@@ -136,7 +136,7 @@ final class CompletionService {
 	 *
 	 *  - `woocommerce_checkout_create_order`   stamps the anonymous session
 	 *    id on the order so a guest order is attributable to the session
-	 *    that placed it (reliable guest counting, Phase 18).
+	 *    that placed it (reliable guest counting).
 	 *  - `woocommerce_payment_complete`        records completions when a
 	 *    gateway marks the order paid (primary).
 	 *  - `woocommerce_order_status_completed`  backstop for manual/offline
@@ -217,7 +217,7 @@ final class CompletionService {
 	/**
 	 * How many times this identity has completed the mission.
 	 *
-	 * A single indexed COUNT — never a full-table load (Phase 22/24).
+	 * A single indexed COUNT — never a full-table load.
 	 * Results are cached per request for the current identity.
 	 *
 	 * @param int    $mission_id    Mission id.
@@ -277,7 +277,7 @@ final class CompletionService {
 	 * Batch completion counts for several missions and one identity.
 	 *
 	 * One grouped COUNT query instead of one per mission — the storefront
-	 * payload path (Phase 22: only calculate when mission/user context
+	 * payload path (only calculate when mission/user context
 	 * requires it, and then cheaply).
 	 *
 	 * @param int[]  $mission_ids    Mission ids.
@@ -523,7 +523,7 @@ final class CompletionService {
 	 * Record one successful completion cycle (transactional, race-safe).
 	 *
 	 * For a limited mission the count + insert run inside a transaction with
-	 * a row lock on the mission (`SELECT ... FOR UPDATE`), so two concurrent
+	 * a row lock on the mission (`SELECT... FOR UPDATE`), so two concurrent
 	 * requests both see the pre-insert count and exactly one of them can
 	 * cross the limit — the invariant
 	 * `successful completions for one identity + one mission <= limit`
@@ -594,7 +594,7 @@ final class CompletionService {
 			$wpdb->query( 'COMMIT' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 
 			// A successful write must refresh the per-request count cache
-			// (Phase 21: after completion, update cached eligibility) so a
+			// (after completion, update cached eligibility) so a
 			// second check later in the same request — storefront re-read,
 			// double-submit, reward reconcile — sees the new count instead
 			// of the stale pre-write value.
@@ -612,7 +612,7 @@ final class CompletionService {
 
 	/**
 	 * Refresh the per-request count cache for one mission after a successful
-	 * write (Phase 21 cache rule: eligibility is identity-keyed and must
+	 * write (cache rule: eligibility is identity-keyed and must
 	 * be updated the moment a completion is recorded).
 	 *
 	 * @param int    $mission_id      Mission id.

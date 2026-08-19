@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class Tracker
  *
- * Phase 16 (Analytics Foundation) — records the seven mission-cart events
+ * Analytics Foundation — records the seven mission-cart events
  * into the `analytics_events` table:
  *
  *  - mission_impression          a mission widget was shown to a shopper
@@ -148,7 +148,7 @@ final class Tracker {
 	 * The master tracking toggle: enabled + analytics settings + consent
 	 * filter.
 	 *
-	 * Phase 18 (Settings → Performance → analytics): the `analytics_enabled`
+	 * Settings → Performance → analytics: the `analytics_enabled`
 	 * setting is the dedicated event-collection toggle — stores can keep
 	 * the missions running while switching the analytics pipeline off (e.g.
 	 * consent concerns). Used by the REST handler and the add-to-cart hook

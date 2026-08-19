@@ -281,7 +281,7 @@ $pick_date = function ( $window ) {
 $prev_analytics = (bool) $settings->get( 'analytics_enabled', true );
 $settings->set( 'analytics_enabled', false );
 
-$orders = array(); // list of order descriptors for phase two.
+$orders = array(); // List of order descriptors.
 $dates  = array();
 $counts = array( 'plain' => 0, 'assisted' => 0, 'progressed' => 0, 'completed' => 0 );
 
@@ -366,7 +366,7 @@ for ( $i = 1; $i <= $order_total; $i++ ) {
 
 $settings->set( 'analytics_enabled', true );
 
-// Phase two: funnel events + attribution + upsell events (tracking on).
+// funnel events + attribution + upsell events (tracking on).
 $backdate = function ( $table, $id, $date_mysql ) use ( $wpdb ) {
 	$wpdb->update( $table, array( 'created_at' => $date_mysql ), array( 'id' => (int) $id ) );
 };

@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class ProgressUI
  *
- * Phase 11 (Frontend Progress UI) — the customer-facing widget layer. It
+ * Frontend Progress UI — the customer-facing widget layer. It
  * renders empty widget containers at the display locations and lets the
  * vanilla JS library (`assets/js/frontend.js`, no build step — mirroring
  * the reference plugin's frontend pattern) fetch `/faracart/v1/progress`
@@ -44,7 +44,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Master toggle: the `enabled` setting gates everything, overridable with
  * the `faracart_frontend_enabled` filter. The per-location set is
- * filterable via `faracart_frontend_locations` (Phase 18 wires the
+ * filterable via `faracart_frontend_locations` (wires the
  * frontend settings to it). Logged-in site admins browsing the
  * storefront do not see the shopper-facing widgets by default
  * (`is_visible_to_user()`, filterable via `faracart_frontend_visible_to_user`).
@@ -59,7 +59,7 @@ final class ProgressUI {
 	const SHORTCODE = 'faracart_progress';
 
 	/**
-	 * Gutenberg block name rendered server-side (Phase 21).
+	 * Gutenberg block name rendered server-side.
 	 *
 	 * The block renders the same progress widget as the shortcode via a
 	 * render callback, so Gutenberg/Block Editor users can drop the widget
@@ -83,7 +83,7 @@ final class ProgressUI {
 	 * Storefront progress template variants.
 	 *
 	 * The six design templates (template-1 … template-6). The retired
-	 * Phase 12 variants (basic / percentage / milestone / card / ring) are
+	 * variants (basic / percentage / milestone / card / ring) are
 	 * no longer registered and are never mapped — an unregistered value
 	 * falls back to template-1.
 	 *
@@ -131,7 +131,7 @@ final class ProgressUI {
 		// Shortcode registration must wait for 'init' (add_shortcode runs
 		// safely from init onward; the_content is always after init). The
 		// Gutenberg block registers the same init sequencing via
-		// register_block_type (Phase 21).
+		// register_block_type.
 		$hooks->add_action( 'init', array( $this, 'register_shortcode' ) );
 		$hooks->add_action( 'init', array( $this, 'register_block' ) );
 
@@ -157,7 +157,7 @@ final class ProgressUI {
 		$hooks->add_action( 'woocommerce_single_product_summary', array( $this, 'render_product_widget' ), 45 );
 		$hooks->add_action( 'woocommerce_after_single_product_summary', array( $this, 'render_product_widget_bottom' ), 20 );
 
-		// WooCommerce Blocks (Phase 19): the classic WooCommerce actions
+		// WooCommerce Blocks: the classic WooCommerce actions
 		// (woocommerce_before_cart, woocommerce_before_checkout_form) only
 		// fire on the classic templates, so a store running the Cart or
 		// Checkout block never triggers them. The render_block filter is a
@@ -190,7 +190,7 @@ final class ProgressUI {
 	}
 
 	/**
-	 * Register the Gutenberg `faracart/progress` block (Phase 21).
+	 * Register the Gutenberg `faracart/progress` block.
 	 *
 	 * Server-rendered via render_block_type(): the Block Editor inserts a
 	 * faracart/progress block and the render callback below outputs the
@@ -245,7 +245,7 @@ final class ProgressUI {
 	}
 
 	/**
-	 * Render the `faracart/progress` block (Phase 21).
+	 * Render the `faracart/progress` block.
 	 *
 	 * Same contract as the shortcode: an inert, uniquely-id'd widget
 	 * container the storefront JS mounts. Block ids share the shortcode
@@ -315,7 +315,7 @@ final class ProgressUI {
 	/**
 	 * The enabled display locations.
 	 *
-	 * Phase 18 (Settings → Frontend): driven by the `frontend_locations`
+	 * Settings → Frontend: driven by the `frontend_locations`
 	 * setting (the default set ships all five locations), still filterable
 	 * via faracart_frontend_locations. Unknown keys are dropped so a bad
 	 * stored value can never register a location.
@@ -423,12 +423,12 @@ final class ProgressUI {
 	/**
 	 * The frontend config payload (endpoint, labels, page metadata).
 	 *
-	 * Phase 12 adds the active template, the animation flag and the
+	 * adds the active template, the animation flag and the
 	 * resolved appearance tokens so the JS can render template variants
 	 * and mirror the Appearance settings without another round-trip.
-	 * Phase 18 adds the currency display style and the mobile behavior so
+	 * adds the currency display style and the mobile behavior so
 	 * the JS formats money and hides widgets per the Settings page.
-	 * Phase 32 adds the countdown + celebration toggles and the
+	 * adds the countdown + celebration toggles and the
 	 * gift-selection endpoint/nonce.
 	 * Kept as its own method so tests can assert the shape without
 	 * capturing output.
@@ -442,7 +442,7 @@ final class ProgressUI {
 			'endpoint'  => esc_url_raw( rest_url( 'faracart/v1/progress' ) ),
 			'refresh'   => (int) apply_filters( 'faracart_frontend_refresh_interval', 0 ),
 			'currency'  => $this->settings->currency(),
-			// Phase 27 (Internationalization): the site locale reaches the
+			// Internationalization: the site locale reaches the
 			// JS so Intl.NumberFormat renders locale-aware digits and
 			// grouping (e.g. Persian digits for fa_IR) instead of the
 			// browser's default locale.
@@ -455,10 +455,10 @@ final class ProgressUI {
 			'mobile'    => $this->mobile_behavior(),
 			'appearance' => $appearance,
 			'labels'    => $this->reward_labels(),
-			// Phase 32 (countdown + celebration).
+			// (countdown + celebration).
 			'countdown' => (bool) apply_filters( 'faracart_frontend_countdown', $this->settings->get( 'frontend_countdown', true ) ),
 			'celebrate' => (bool) apply_filters( 'faracart_frontend_celebrate', $this->settings->get( 'frontend_celebrate', true ) ),
-			// Phase 32 (free gift selection): the storefront gift picker
+			// free gift selection: the storefront gift picker
 			// posts to this endpoint with this nonce; empty nonce = the
 			// plugin is disabled (picker hidden).
 			'giftEndpoint' => esc_url_raw( rest_url( 'faracart/v1/gift' ) ),
@@ -471,7 +471,7 @@ final class ProgressUI {
 			// sides (the admin's choice must keep its visual result in RTL),
 			// so the JS positions with physical offsets, not logical ones.
 			'floating'  => $this->floating_config(),
-			// Phase 33.7 (Frontend Upsell Integration): the smart upsell
+			// Frontend Upsell Integration: the smart upsell
 			// panel's contract — the public rank endpoint (live-cart mission
 			// gap + deterministic ranking), the nonce-guarded track
 			// endpoint (impression/clicked/added into the upsell_events
@@ -482,7 +482,7 @@ final class ProgressUI {
 	}
 
 	/**
-	 * The storefront smart-upsell panel config (Phase 33.7).
+	 * The storefront smart-upsell panel config.
 	 *
 	 * Mirrors the UpsellRanker gate (master enabled + analytics toggles +
 	 * the faracart_upsells_enabled filter) so the panel only renders when
@@ -602,7 +602,7 @@ final class ProgressUI {
 	/**
 	 * The storefront currency display style.
 	 *
-	 * Phase 18 (Settings → General): symbol | code | name — passed to the
+	 * Settings → General: symbol | code | name — passed to the
 	 * JS so Intl.NumberFormat renders the store currency the configured
 	 * way. Filterable via faracart_currency_display.
 	 *
@@ -617,7 +617,7 @@ final class ProgressUI {
 	/**
 	 * The storefront mobile behavior.
 	 *
-	 * Phase 18 (Settings → Frontend): show | hide — when 'hide', the JS
+	 * Settings → Frontend: show | hide — when 'hide', the JS
 	 * skips rendering widgets on small screens. Filterable via
 	 * faracart_frontend_mobile.
 	 *
@@ -881,7 +881,7 @@ final class ProgressUI {
 	/**
 	 * Place the progress widget around WooCommerce Cart/Checkout blocks.
 	 *
-	 * Phase 19 (WooCommerce Compatibility): the classic template actions
+	 * WooCommerce Compatibility: the classic template actions
 	 * (woocommerce_before_cart, woocommerce_before_checkout_form,
 	 * woocommerce_after_mini_cart) never fire on pages rendered from the
 	 * WooCommerce Blocks Cart/Checkout, so this `render_block` filter is the
@@ -994,7 +994,7 @@ final class ProgressUI {
 		}
 
 		// Direct shortcode in the content, or a Gutenberg page that embeds
-		// the faracart/progress block (Phase 21) — the block renders
+		// the faracart/progress block  — the block renders
 		// server-side, so the storefront assets must load on the page.
 		return has_shortcode( $post->post_content, self::SHORTCODE )
 			|| ( function_exists( 'has_block' ) && has_block( self::BLOCK, $post ) );
@@ -1003,7 +1003,7 @@ final class ProgressUI {
 	/**
 	 * Localized reward type labels for the JS reward status component.
 	 *
-	 * Phase 32 adds the countdown and gift-picker strings.
+	 * adds the countdown and gift-picker strings.
 	 *
 	 * @return array<string, string>
 	 */

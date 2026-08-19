@@ -1,6 +1,6 @@
 <?php
 /**
- * FaraCart Phase 33.6 (React Admin) revenue REST tests.
+ * FaraCart React Admin revenue REST tests.
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
  * exercises the revenue optimization read endpoints that power the new
@@ -13,7 +13,7 @@
  *  - the payload shapes: overview (summary + incremental cart value +
  *    AOV + shipping + daily trend), attribution (same minus trend) and
  *    mission performance (per-mission rows)
- *  - the Phase 33.5 upsell analytics rows carry the Phase 33.6 profit /
+ *  - the upsell analytics rows carry the profit /
  *    margin fields (estimated_profit, profit_available, margin_pct)
  *  - mission-scoped reads return the requested mission only
  *
@@ -22,7 +22,7 @@
  * database transaction that is rolled back, and the absence of any
  * residue is asserted afterwards.
  *
- * Run: php tests/revenue-admin-test.php   (from the plugin directory)
+ * Run: php tests/revenue-admin-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file.
@@ -138,7 +138,7 @@ check( 'overview has shipping', isset( $overview['shipping'] ) );
 check( 'overview has trend', isset( $overview['trend'] ) );
 check( 'overview has generated_at', isset( $overview['generated_at'] ) );	check( 'overview summary has funnel', isset( $overview['summary']['funnel'] ) );
 	check( 'overview funnel has converted', array_key_exists( 'converted', $overview['summary']['funnel'] ) );
-	// Phase 2: profit availability metadata on the overview summary (§38/
+	// profit availability metadata on the overview summary (§38/
 	// §39/§11/§12) — machine-readable reason code, cost coverage and the
 	// profit-model building blocks.
 	check( 'overview summary has profit_reason_code', isset( $overview['summary']['profit_reason_code'] ) );
@@ -174,7 +174,7 @@ if ( ! empty( $missions['items'] ) ) {
 	check( 'mission row has profit_reason_code', array_key_exists( 'profit_reason_code', $first ) );
 	check( 'mission row has cost_coverage', array_key_exists( 'cost_coverage', $first ) );
 	check( 'mission row has profit_details', array_key_exists( 'profit_details', $first ) );
-	// Phase 5 (Mission Performance Redesign): commercial-outcome + detail
+	// Mission Performance Redesign: commercial-outcome + detail
 	// drawer fields — total influenced revenue, the attribution window and
 	// the data-sufficiency signal (Improvement.md §20/§45).
 	check( 'mission row has influenced_revenue', array_key_exists( 'influenced_revenue', $first ) );

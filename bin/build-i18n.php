@@ -2,7 +2,7 @@
 /**
  * Compile FaraCart .po translation files into .mo and JED JSON.
  *
- * Phase 27 (Internationalization): for every `languages/faracart-<locale>.po`
+ * Internationalization: for every `languages/faracart-<locale>.po`
  * this writes:
  *
  *  - `languages/faracart-<locale>.mo`      — GNU gettext machine object
@@ -12,7 +12,7 @@
  *    React admin app, named for WP 7's `load_script_textdomain()`
  *    convention `{domain}-{locale}-{handle}.json` (verified against the
  *    installed core), loaded via `wp_set_script_translations( 'faracart-admin',
- *    'faracart', FARACART_PATH . 'languages' )`.
+ *    'faracart', FARACART_PATH. 'languages' )`.
  *
  * A compact native implementation so translators ship .po files without
  * needing gettext tooling or wp-cli. Run with `--check` to verify every

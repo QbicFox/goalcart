@@ -15,12 +15,12 @@ defined( 'ABSPATH' ) || exit;
  * Class MissionRepository
  *
  * Loads mission definitions from the `faracart_missions` table and turns them
- * into Mission value objects. Phase 5 (Reward Engine) is the first consumer:
+ * into Mission value objects. (Reward Engine) is the first consumer:
  * the RewardEngine reads the active missions once per request to decide which
  * rewards apply to the live cart. Later phases (REST admin, campaigns)
  * extend the same repository.
  *
- * The engine itself stays database-free (Phase 4 contract); persistence
+ * The engine itself stays database-free (contract); persistence
  * concerns live here and in the Schema/Installer pair.
  */
 final class MissionRepository {
@@ -31,7 +31,7 @@ final class MissionRepository {
 	 * Missions inside a campaign sort by their campaign's priority; missions
 	 * without a campaign behave as if their campaign priority were the
 	 * schema default (10), so standalone missions interleave with campaigns
-	 * deterministically (Phase 26).
+	 * deterministically.
 	 *
 	 * @var int
 	 */
@@ -49,7 +49,7 @@ final class MissionRepository {
 	 *
 	 * Ordered by campaign priority (ascending — lower number wins;
 	 * standalone missions compete at DEFAULT_CAMPAIGN_PRIORITY), then mission
-	 * priority, then id — the deterministic Phase 26 conflict-resolution
+	 * priority, then id — the deterministic conflict-resolution
 	 * order the RewardEngine and the storefront payload rely on. Results
 	 * are cached per request so multiple evaluations during one page load
 	 * run a single query.
@@ -130,7 +130,7 @@ final class MissionRepository {
 	}
 
 /**
- * All missions for the admin list, paginated (Phase 7 REST layer).
+ * All missions for the admin list, paginated (REST layer).
  *
  * @param array<string, mixed> $args Optional: page, per_page, status,
  *                                   search (name LIKE).
@@ -495,7 +495,7 @@ protected function sanitize_column( $type, $value ) {
 			return (int) $value;
 
 		case 'int_nullable':
-			// Phase 36 (Per-User Mission Completion Limit): positive int or
+			// Per-User Mission Completion Limit: positive int or
 			// null (unlimited). Empty values and non-positive ints
 			// normalize to null so a payload can never lock a mission to
 			// zero completions.
@@ -543,7 +543,7 @@ protected function sanitize_column( $type, $value ) {
 	 * Pack the condition/composite keys into the conditions JSON.
 	 *
 	 * The Mission model reads categories, products, excluded_products, operator,
-	 * children and the Phase 32 condition keys as first-class properties;
+	 * children and the condition keys as first-class properties;
 	 * they are persisted inside the conditions column. Returns null when
 	 * none of those keys is present in the payload (nothing to write).
 	 *
@@ -557,7 +557,7 @@ protected function sanitize_column( $type, $value ) {
 			'excluded_products',
 			'operator',
 			'children',
-			// Phase 32 (Advanced V2 conditions).
+			// (Advanced V2 conditions).
 			'tags',
 			'attributes',
 			'customer_roles',
@@ -618,7 +618,7 @@ protected function sanitize_column( $type, $value ) {
 		// The conditions JSON stores the condition/composite keys the Mission
 		// model reads as first-class properties; spread them onto the row so
 		// persisted category/product/composite/tag/attribute missions and
-		// the Phase 32 customer/cart/shipping conditions evaluate correctly.
+		// the customer/cart/shipping conditions evaluate correctly.
 		if ( isset( $row['conditions'] ) && is_array( $row['conditions'] ) ) {
 			foreach ( array(
 				'categories',
@@ -657,7 +657,7 @@ protected function sanitize_column( $type, $value ) {
 	 * campaign window applies, and an inactive/out-of-window campaign makes
 	 * the mission inactive.
 	 *
-	 * Phase 32 (advanced scheduled campaigns): a campaign may carry its own
+	 * advanced scheduled campaigns: a campaign may carry its own
 	 * recurring day/time rules inside display_rules; a mission without its own
 	 * rules inherits them, so one campaign window schedules every milestone.
 	 *
@@ -681,7 +681,7 @@ protected function sanitize_column( $type, $value ) {
 				$row['ends_at'] = ( ! empty( $row['ends_at'] ) && $row['ends_at'] < $campaign_ends ) ? $row['ends_at'] : $campaign_ends;
 			}
 
-			// Phase 32 recurring rules: inherit the campaign's day/time
+			// recurring rules: inherit the campaign's day/time
 			// window unless the mission pins its own.
 			$rules = $this->decode_campaign_display_rules( $row );
 

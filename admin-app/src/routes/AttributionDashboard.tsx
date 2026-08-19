@@ -57,7 +57,7 @@ function MetricCard({
 }
 
 /**
- * Attribution Dashboard (Phase 33.6).
+ * Attribution Dashboard.
  *
  * The revenue funnel (views → progressed → completed → converted), the
  * direct vs assisted attribution model split, incremental cart value and

@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  * definitions that the Installer applies with ALTER TABLE (dbDelta cannot
  * manage foreign keys).
  *
- * Phase 3 (Database & Domain Model) defines three entities:
+ * Database & Domain Model defines three entities:
  *
  *  - `missions`            — one row per mission (amount / quantity / category …).
  *                         The MVP reward is embedded on the mission (type,
@@ -32,7 +32,7 @@ defined( 'ABSPATH' ) || exit;
  *  - `campaigns`        — one row per campaign (scheduled, prioritized).
  *                         Missions join to a campaign through
  *                         `missions.campaign_id` + `missions.menu_order`, which
- *                         expresses milestone ordering (Phase 10).
+ *                         expresses milestone ordering.
  *  - `analytics_events` — append-only event log (impressions, progress,
  *                         completions, reward activations, suggestion
  *                         events) feeding the analytics phases (16–17).
@@ -66,13 +66,13 @@ class Schema {
 	/**
 	 * List of all table names managed by the plugin (without prefix).
 	 *
-	 * Phase 33 (Revenue Optimization) adds the five attribution tables:
+	 * Revenue Optimization adds the five attribution tables:
 	 * revenue_events (the raw attribution event log), revenue_daily (daily
 	 * aggregates), mission_attribution (per-order attribution), upsell_events
 	 * (raw upsell interaction log) and upsell_stats (per-product upsell
 	 * aggregates).
 	 *
-	 * Phase 36 (Per-User Mission Completion Limit) adds `mission_completions` —
+	 * Per-User Mission Completion Limit adds `mission_completions` —
 	 * the authoritative server-side completion history (one row per mission
 	 * per order per identity) backing the per-user completion limit.
 	 *
@@ -105,7 +105,7 @@ class Schema {
 		$campaigns = self::table( 'campaigns' );
 		$events    = self::table( 'analytics_events' );
 
-		// Phase 33 (Revenue Optimization): the five attribution tables.
+		// Revenue Optimization: the five attribution tables.
 		$revenue_events = self::table( 'revenue_events' );
 		$revenue_daily  = self::table( 'revenue_daily' );
 		$mission_attrib    = self::table( 'mission_attribution' );
@@ -187,9 +187,9 @@ class Schema {
 				KEY campaign_event (campaign_id, event_type)
 			) ENGINE=InnoDB {$collate};",
 
-			// Phase 33 (Revenue Attribution): the raw revenue-optimization
+			// Revenue Attribution: the raw revenue-optimization
 			// event log. Deliberately separate from analytics_events: those
-			// rows are the lightweight Phase 16 dashboard counters, while
+			// rows are the lightweight dashboard counters, while
 			// revenue_events carries the attribution fields (mission_target,
 			// incremental_value) plus order ids and is only written when the
 			// revenue tracking gate passes (RevenueTracker::tracking_enabled
@@ -223,7 +223,7 @@ class Schema {
 				UNIQUE KEY order_dedup (event_type, order_id)
 			) ENGINE=InnoDB {$collate};",
 
-			// Phase 33 (Aggregation): one row per mission per day — the
+			// Aggregation: one row per mission per day — the
 			// pre-aggregated revenue metrics the dashboard reads instead of
 			// scanning the raw event log on every admin request.
 			$revenue_daily => "CREATE TABLE {$revenue_daily} (
@@ -246,7 +246,7 @@ class Schema {
 				KEY mission_date (mission_id, report_date)
 			) ENGINE=InnoDB {$collate};",
 
-			// Phase 33 (Order attribution): one row per mission per order — the
+			// Order attribution: one row per mission per order — the
 			// deterministic link between an order and the mission(s) that
 			// influenced it, with the attribution model (direct vs assisted)
 			// and the incremental value attributed to the mission.
@@ -270,7 +270,7 @@ class Schema {
 				UNIQUE KEY order_mission_model (order_id, mission_id, model)
 			) ENGINE=InnoDB {$collate};",
 
-			// Phase 33 (Smart Upsell): raw upsell interaction events —
+			// Smart Upsell: raw upsell interaction events —
 			// impression / clicked / added / order per product per session.
 			$upsell_events => "CREATE TABLE {$upsell_events} (
 				id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
@@ -294,7 +294,7 @@ class Schema {
 				UNIQUE KEY order_dedup (event_type, order_id)
 			) ENGINE=InnoDB {$collate};",
 
-			// Phase 33 (Historical Learning): per-product upsell aggregates
+			// Historical Learning: per-product upsell aggregates
 			// rebuilt by the daily aggregator — the conversion signal the
 			// ranking engine reads (impressions, clicks, adds, orders,
 			// revenue, conversion rate).
@@ -311,7 +311,7 @@ class Schema {
 				UNIQUE KEY product_id (product_id)
 			) ENGINE=InnoDB {$collate};",
 
-			// Phase 36 (Per-User Mission Completion Limit): the authoritative
+			// Per-User Mission Completion Limit: the authoritative
 			// server-side completion history. One row per (mission, order,
 			// identity) — a successful completion cycle is recorded here at
 			// order time, and the per-user completion count is a plain
@@ -500,7 +500,7 @@ class Schema {
 	 * ALTER TABLE statements based on this definition.
 	 *
 	 * Only plugin-owned tables get foreign keys (campaigns, missions, the
-	 * analytics event log, and the Phase 33 revenue/upsell tables that
+	 * analytics event log, and the revenue/upsell tables that
 	 * reference plugin missions/campaigns), always ON DELETE SET NULL so
 	 * analytics history and standalone missions survive deletion.
 	 *
@@ -548,7 +548,7 @@ class Schema {
 				'referenced_column' => 'id',
 				'on_delete'         => 'SET NULL',
 			),
-			// Phase 33.1: the revenue/upsell tables reference plugin missions
+			// the revenue/upsell tables reference plugin missions
 			// and campaigns, so they follow the same SET NULL convention as
 			// analytics_events — deleting a mission/campaign never orphans or
 			// cascades away its attribution history.
@@ -592,7 +592,7 @@ class Schema {
 				'referenced_column' => 'id',
 				'on_delete'         => 'SET NULL',
 			),
-			// Phase 36 (Per-User Mission Completion Limit): the completion
+			// Per-User Mission Completion Limit: the completion
 			// history references the mission with the project's standard
 			// SET NULL semantics — deleting a mission preserves the history
 			// rows (they stay countable as orphaned records, matching the

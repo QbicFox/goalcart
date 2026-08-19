@@ -42,10 +42,10 @@ function emptyChild(): MissionChildInput {
 }
 
 /**
- * Mission Builder → Target → Composite children (Phase 9). A composite mission
+ * Mission Builder → Target → Composite children. A composite mission
  * is an AND/OR combination of child missions; this editor maintains the
  * ordered list of child configs (Mission::from_array() payloads) the engine
- * evaluates through the same registry as top-level missions (Phase 4).
+ * evaluates through the same registry as top-level missions.
  */
 export default function CompositeChildrenEditor({
   children,

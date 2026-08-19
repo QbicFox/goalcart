@@ -17,12 +17,12 @@ defined('ABSPATH') || exit;
  * Class Settings
  *
  * Loads, caches, and persists plugin settings in a single WordPress option.
- * Phase 18 (Settings) ships the full surface: general (currency display,
+ * Settings ships the full surface: general (currency display,
  * default mission behavior, default calculation basis), frontend (locations,
  * template, animation, mobile behavior), mission calculation (tax / discount /
  * shipping / sale / virtual inclusion), performance (caching, analytics,
  * suggestions) and advanced (debug mode, logging, custom CSS, developer
- * hooks). Every default below preserves the pre-Phase-18 behavior, so
+ * hooks). Every default below preserves the previous behavior, so
  * existing installs upgrade with no visible change.
  *
  * Mirrors the reference plugin (WooInsights\Settings\Settings).
@@ -72,9 +72,9 @@ class Settings
 
 	/**
 	 * Default settings, merged with stored values on load.
-	 * * The frontend_* keys are the Phase 12 progress-template surface
+	 * * The frontend_* keys are the progress-template surface
 	 * (template variant + appearance tokens consumed by the storefront
-	 * widgets and the Appearance admin page). Phase 18 adds the general /
+	 * widgets and the Appearance admin page). adds the general /
 	 * mission-calculation / performance / advanced sections without touching
 	 * these.
 	 *
@@ -91,10 +91,10 @@ class Settings
 		'currency'              => '',
 		'currency_display'      => 'symbol',           // symbol | code | name
 		'default_mission_behavior' => 'all',              // all | first | closest
-		'conflict_resolution'   => 'cumulative',       // cumulative | best | first (Phase 26)
+		'conflict_resolution'   => 'cumulative',       // cumulative | best | first 
 		'calculation_mode'      => 'subtotal',         // subtotal | discounted_subtotal | total
 
-		// Frontend (P18-T02). Phase 32 adds the countdown + celebration toggles.
+		// Frontend (P18-T02). adds the countdown + celebration toggles.
 		'frontend_template'     => 'template-1',
 		'frontend_animation'    => true,
 		'frontend_locations'    => array('cart', 'mini-cart', 'checkout', 'shop', 'product'),
@@ -108,8 +108,8 @@ class Settings
 		'frontend_radius'       => 10,
 		'frontend_css_class'    => '',
 		'frontend_custom_css'   => '',
-		'frontend_countdown'    => true,               // Phase 32: live countdown chips on missions with an end time.
-		'frontend_celebrate'    => true,               // Phase 32: completion celebration animation.
+		'frontend_countdown'    => true,               // live countdown chips on missions with an end time.
+		'frontend_celebrate'    => true,               // completion celebration animation.
 
 		// Floating widget (the floating missions/campaigns button + drawer).
 		// The position preset is the only position control — it picks a
@@ -138,7 +138,7 @@ class Settings
 		'floating_label'              => '',            // custom tooltip/label ('' = default)
 
 		// Mission Calculation (P18-T03). Each default preserves the
-		// pre-Phase-18 engine behavior: taxes stay out of the subtotal
+		// previous engine behavior: taxes stay out of the subtotal
 		// bases, discounts count, shipping stays in the total basis, and
 		// sale / virtual items always count.
 		'calculation_include_tax'      => false,
@@ -152,7 +152,7 @@ class Settings
 		'analytics_enabled'       => true,
 		'performance_suggestions' => true,
 
-		// Phase 32 (advanced upsell ranking): how the suggestion engine
+		// advanced upsell ranking: how the suggestion engine
 		// ranks candidates — balanced | price | popularity.
 		'suggestions_ranking'     => 'balanced',
 
@@ -189,7 +189,7 @@ class Settings
 
 	/** * Register settings hooks.
 	 *
-	 * Phase 18 wires the settings into behavior here: the store-wide default
+	 * wires the settings into behavior here: the store-wide default
 	 * money basis (calculation_mode) applies to any mission that does not pin
 	 * its own mode, through the faracart_default_calculation_mode filter
 	 * (Mission::default_calculation_mode). The remaining settings are read
@@ -212,7 +212,7 @@ class Settings
 	/**
 	 * Resolve the store-wide default calculation basis.
 	 *
-	 * Applies the Phase 18 `calculation_mode` setting to money-style mission
+	 * Applies the `calculation_mode` setting to money-style mission
 	 * types (amount, category, composite) that do not pin their own mode;
 	 * quantity/distinct-quantity/weight/product missions keep their type
 	 * defaults (they measure items, not money).

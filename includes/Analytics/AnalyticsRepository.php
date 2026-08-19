@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class AnalyticsRepository
  *
- * Phase 16 (Analytics Foundation — Metrics) — the read layer over the
+ * (Analytics Foundation — Metrics) — the read layer over the
  * append-only `analytics_events` table, computing the dashboard metrics:
  *
  *  - impressions                    mission_impression event count
@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
  *  - suggestion CTR                 suggestion_clicked / suggestion_impression
  *  - suggestion add-to-cart rate    suggested_product_added / suggestion_clicked
  *
- * Phase 17 (Analytics Dashboard) adds the dashboard-shaped queries:
+ * Analytics Dashboard adds the dashboard-shaped queries:
  *
  *  - trend()                        daily impression/completion/revenue
  *                                   buckets over a (default 30-day) window
@@ -197,7 +197,7 @@ final class AnalyticsRepository {
 	}
 
 	/**
-	 * Daily trend buckets (Phase 17).
+	 * Daily trend buckets.
 	 *
 	 * One point per day of the (default 30-day) window — days without
 	 * events are filled with zeros so the chart is continuous. Each point
@@ -284,7 +284,7 @@ final class AnalyticsRepository {
 	}
 
 	/**
-	 * Top campaigns by completion volume (Phase 17).
+	 * Top campaigns by completion volume.
 	 *
 	 * @param array<string, mixed> $filters Filters.
 	 * @param int                  $limit   Max entries (1–20).
@@ -330,7 +330,7 @@ final class AnalyticsRepository {
 	}
 
 	/**
-	 * Top missions by completion volume (Phase 17).
+	 * Top missions by completion volume.
 	 *
 	 * @param array<string, mixed> $filters Filters.
 	 * @param int                  $limit   Max entries (1–20).
@@ -376,7 +376,7 @@ final class AnalyticsRepository {
 	}
 
 	/**
-	 * Top suggested products by conversions (Phase 17).
+	 * Top suggested products by conversions.
 	 *
 	 * @param array<string, mixed> $filters Filters.
 	 * @param int                  $limit   Max entries (1–20).

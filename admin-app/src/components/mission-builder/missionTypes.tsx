@@ -19,7 +19,7 @@ export interface MissionTypeDefinition {
   icon: ReactNode;
 }
 
-/** The seven mission types the engine supports (Phase 4), with builder copy. */
+/** The seven mission types the engine supports, with builder copy. */
 export const MISSION_TYPES: MissionTypeDefinition[] = [
   {
     value: 'amount',

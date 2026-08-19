@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class PreviewController
  *
- * Phase 15 (Admin Preview System): lets administrators see the customer
+ * Admin Preview System: lets administrators see the customer
  * experience before publishing.
  *
  *  - `POST /faracart/v1/preview` — evaluates a mission (or a campaign's
@@ -98,14 +98,14 @@ class PreviewController extends BaseController {
 	protected $frontend;
 
 	/**
-	 * Settings instance (conflict-resolution mode, Phase 26).
+	 * Settings instance (conflict-resolution mode).
 	 *
 	 * @var Settings
 	 */
 	protected $settings;
 
 	/**
-	 * Reward engine (Phase 26 display/grant parity): evaluates each
+	 * Reward engine (display/grant parity): evaluates each
 	 * completed milestone's reward against its simulated cart so 'best'
 	 * mode compares real computed amounts and the preview reflects
 	 * stacking suppression exactly like the live cart would.
@@ -131,8 +131,7 @@ class PreviewController extends BaseController {
 	 * @param CampaignRepository $campaigns    Campaign repository.
 	 * @param FrontendController $frontend     Frontend controller (shape_mission).
 	 * @param Settings           $settings     Settings service.
-	 * @param RewardEngine|null  $reward_engine Reward engine (Phase 26
-	 *                                          display/grant parity).
+	 * @param RewardEngine|null  $reward_engine Reward engine (display/grant parity).
 	 * @param TemplateEngine|null $templates   Template engine (optional).
 	 */
 	public function __construct( MissionEngine $engine, MissionRepository $missions, CampaignRepository $campaigns, FrontendController $frontend, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null ) {
@@ -316,7 +315,7 @@ class PreviewController extends BaseController {
 			);
 		}
 
-		// Evaluate every milestone first, then resolve conflicts (Phase 26)
+		// Evaluate every milestone first, then resolve conflicts 
 		// across the completed ones so the preview shows exactly which
 		// milestones grant their rewards — and which are suppressed by the
 		// priority / exclusive / mode rules — before the payload is shaped.
@@ -371,7 +370,7 @@ class PreviewController extends BaseController {
 	/**
 	 * Resolve conflict winners among the previewed missions.
 	 *
-	 * Same contract as the reward engine (Phase 26): completed missions that
+	 * Same contract as the reward engine: completed missions that
 	 * carry a reward compete under the configured resolution mode — 'best'
 	 * compares the real computed reward amounts on each milestone's
 	 * simulated cart — and the per-reward stacking safety applies to the
@@ -548,7 +547,7 @@ class PreviewController extends BaseController {
 
 			foreach ( $missions_in as $milestone ) {
 				// The campaign form submits ordered mission ids; the stored row
-				// carries {id, ...} entries — accept both.
+				// carries {id,...} entries — accept both.
 				$milestone_id = is_array( $milestone )
 					? (int) ( isset( $milestone['id'] ) ? $milestone['id'] : 0 )
 					: (int) $milestone;
@@ -595,7 +594,7 @@ class PreviewController extends BaseController {
 	/**
 	 * Build a preview Mission from a stored repository row.
 	 *
-	 * Publish gating is intentionally ignored (Phase 15 objective: see the
+	 * Publish gating is intentionally ignored (objective: see the
 	 * customer experience BEFORE publishing): the mission is forced active and
 	 * its schedule cleared, so drafts, inactive missions and scheduled
 	 * campaigns evaluate as they will once live.

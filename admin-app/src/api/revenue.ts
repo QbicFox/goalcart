@@ -17,7 +17,7 @@ export interface RevenueWindowParams {
   mission_id?: number;
 }
 
-/** Params for the upsell analytics list (Phase 33.5 analytics mode). */
+/** Params for the upsell analytics list (analytics mode). */
 export interface UpsellAnalyticsParams extends RevenueWindowParams {
   limit?: number;
 }
@@ -50,7 +50,7 @@ function toQuery(params: object): string {
 
 /**
  * Revenue Overview payload from `GET /faracart/v1/revenue/overview`
- * (Phase 33.6): attribution summary + incremental cart value + AOV +
+ *: attribution summary + incremental cart value + AOV +
  * shipping + the daily trend series over the window.
  */
 export async function fetchRevenueOverview(
@@ -63,7 +63,7 @@ export async function fetchRevenueOverview(
 
 /**
  * Attribution Dashboard payload from `GET /faracart/v1/revenue/attribution`
- * (Phase 33.6): the overview minus the trend series.
+ *: the overview minus the trend series.
  */
 export async function fetchRevenueAttribution(
   params: RevenueWindowParams = {}
@@ -75,7 +75,7 @@ export async function fetchRevenueAttribution(
 
 /**
  * Mission Performance rows from `GET /faracart/v1/revenue/missions`
- * (Phase 33.6): per-mission funnel + revenue metrics.
+ *: per-mission funnel + revenue metrics.
  */
 export async function fetchMissionPerformance(
   params: RevenueWindowParams = {}
@@ -85,7 +85,7 @@ export async function fetchMissionPerformance(
 
 /**
  * Top-products upsell analytics table from
- * `GET /faracart/v1/revenue/upsells?analytics=1` (Phase 33.5/33.6).
+ * `GET /faracart/v1/revenue/upsells?analytics=1`.
  */
 export async function fetchUpsellAnalytics(
   params: UpsellAnalyticsParams = {}
@@ -97,7 +97,7 @@ export async function fetchUpsellAnalytics(
 
 /**
  * One product's upsell score breakdown + historical stats from
- * `GET /faracart/v1/revenue/upsells/{product_id}` (Phase 33.5/33.6).
+ * `GET /faracart/v1/revenue/upsells/{product_id}`.
  */
 export async function fetchUpsellProduct(
   productId: number,
@@ -110,7 +110,7 @@ export async function fetchUpsellProduct(
 
 /**
  * Smart mission recommendation payload from
- * `GET /faracart/v1/revenue/mission-recommendations` (Phase 33.4/33.6).
+ * `GET /faracart/v1/revenue/mission-recommendations`.
  */
 export async function fetchMissionRecommendations(
   params: MissionRecommendationsParams = {}

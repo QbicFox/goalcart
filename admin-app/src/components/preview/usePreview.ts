@@ -46,7 +46,7 @@ interface UsePreviewOptions<T> {
 }
 
 /**
- * Shared Phase 15 preview state: the preview-state preset (empty cart →
+ * Shared preview state: the preview-state preset (empty cart →
  * completed), debounced simulated values derived from the preset + the
  * current form target, the preview query (`POST /preview`) and the
  * settings query (appearance tokens).

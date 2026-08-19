@@ -19,8 +19,8 @@ defined( 'ABSPATH' ) || exit;
  * Class ProductRecommendationEngine
  *
  * The single customer-facing recommendation layer. It preserves BOTH
- * internal recommendation strategies — the Phase 14 SuggestionEngine
- * (mission-gap product suggestions) and the Phase 33.5 UpsellRanker (six
+ * internal recommendation strategies — the SuggestionEngine
+ * (mission-gap product suggestions) and the UpsellRanker (six
  * normalized component scorers over the same candidates) — and merges
  * them into ONE ranked, deduplicated list that the storefront renders as
  * a single panel. The customer never sees "suggestions" vs "upsells":
@@ -64,8 +64,7 @@ defined( 'ABSPATH' ) || exit;
  * recommendation request.
  *
  * Extensibility: the final list is filterable via the existing
- * `faracart_suggestions` developer API (same signature the Phase 14
- * engine exposes), so stores keep their custom shaping rules.
+ * `faracart_suggestions` developer API (same signature the engine exposes), so stores keep their custom shaping rules.
  */
 final class ProductRecommendationEngine {
 
@@ -99,14 +98,14 @@ final class ProductRecommendationEngine {
 	const MIN_SCORE = 0.0;
 
 	/**
-	 * Suggestion engine (Phase 14) — the mission-gap candidate half.
+	 * Suggestion engine  — the mission-gap candidate half.
 	 *
 	 * @var SuggestionEngine
 	 */
 	protected $suggestions;
 
 	/**
-	 * Upsell ranker (Phase 33.5) — the normalized 0–100 scorer + the
+	 * Upsell ranker  — the normalized 0–100 scorer + the
 	 * richer candidate half. Its public score_product() scores the
 	 * suggestion-only candidates on the SAME scale.
 	 *
@@ -275,8 +274,7 @@ final class ProductRecommendationEngine {
 
 		/**
 		 * Filters the unified recommendations for a mission before they
-		 * reach the payload — the same developer API the Phase 14
-		 * suggestion engine exposes, now applied to the merged list.
+		 * reach the payload — the same developer API the suggestion engine exposes, now applied to the merged list.
 		 *
 		 * @param array       $items   Shaped unified items.
 		 * @param Mission        $mission    Mission.
@@ -287,7 +285,7 @@ final class ProductRecommendationEngine {
 	}
 
 	/**
-	 * The upsell half of the pool (Phase 33.5 ranker).
+	 * The upsell half of the pool (ranker).
 	 *
 	 * Only money missions with a positive remaining gap produce upsell
 	 * candidates; the ranker's own gate (master enabled + analytics +

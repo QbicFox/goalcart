@@ -1,8 +1,8 @@
 <?php
 /**
- * FaraCart Phase 33.2 tests (Revenue Attribution).
+ * FaraCart tests (Revenue Attribution).
  *
- * Boots WordPress, then exercises the Phase 33.2 revenue attribution
+ * Boots WordPress, then exercises the revenue attribution
  * engine and reward-cost / profit estimator:
  *
  *  - service wiring: AttributionEngine + RewardCostEstimator resolve from
@@ -33,7 +33,7 @@
  * shipping assertions are computed against a baseline captured before the
  * fixture orders, so leftover dev-DB orders cannot skew them.
  *
- * Run: php tests/attribution-test.php   (from the plugin directory)
+ * Run: php tests/attribution-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -88,7 +88,7 @@ function close( $a, $b, $eps = 0.01 ) {
 	return abs( (float) $a - (float) $b ) < $eps;
 }
 
-// The Phase 33 tables are created by Installer::maybe_upgrade(), which runs
+// The tables are created by Installer::maybe_upgrade(), which runs
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 // Ensure the schema exists (dbDelta is idempotent) so the suite tests the
 // real tables, exactly as the plugin would create them.
@@ -227,7 +227,7 @@ try {
 	$session_a = str_repeat( 'ab', 16 );
 	$session_b = str_repeat( 'cd', 16 );
 
-	// --- Session funnel events (the Phase 33.1 tracker, deduped). ---
+	// --- Session funnel events (the tracker, deduped). ---
 	$tracker->record( 'mission_view', array( 'mission_id' => 101, 'cart_value' => 700000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
 	$tracker->record( 'mission_progress', array( 'mission_id' => 101, 'cart_value' => 900000, 'mission_target' => 1000000, 'session_id' => $session_a ) );
 	$tracker->record( 'mission_completed', array( 'mission_id' => 101, 'cart_value' => 1050000, 'mission_target' => 1000000, 'session_id' => $session_a ) );

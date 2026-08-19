@@ -17,7 +17,7 @@ interface DisplayFieldsProps {
 }
 
 /**
- * Mission Builder → Display (Phase 9 + pluggable template engine).
+ * Mission Builder → Display (pluggable template engine).
  *
  * Stores the customer-facing copy and the mission's own template choice in
  * the `display_settings` JSON consumed by the storefront and the template

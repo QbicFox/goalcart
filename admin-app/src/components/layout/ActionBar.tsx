@@ -4,7 +4,7 @@ import { alpha } from "@mui/material/styles";
 import { useActionBar } from "../../providers/ActionBarProvider";
 
 /**
- * The sticky bottom action bar (Phase 33.7 admin UX).
+ * The sticky bottom action bar (admin UX).
  *
  * Rendered once by AdminLayout below the routed content. Pages register
  * their save / reset / cancel buttons through `useStickyBarActions`; the

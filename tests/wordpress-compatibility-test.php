@@ -2,7 +2,7 @@
 /**
  * FaraCart WordPress compatibility tests (P20).
  *
- * Boots WordPress and verifies the Phase 20 (WordPress Compatibility)
+ * Boots WordPress and verifies the WordPress Compatibility
  * checklist against the installed environment:
  *
  *  - supported WordPress / WooCommerce / PHP versions (header + gate)
@@ -17,7 +17,7 @@
  * Read-only like the other suites: no DB writes, no activation executed,
  * no product/cart creation.
  *
- * Run: php tests/wordpress-compatibility-test.php   (from the plugin directory)
+ * Run: php tests/wordpress-compatibility-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -161,7 +161,7 @@ check(
 	false !== has_action( 'init', array( FaraCart\Plugin::instance(), 'load_textdomain' ) )
 );
 // load_textdomain() calls load_plugin_textdomain( 'faracart', false,
-// dirname( FARACART_BASENAME ) . '/languages' ) — the relative path must
+// dirname( FARACART_BASENAME ). '/languages' ) — the relative path must
 // resolve to <plugin>/languages from the plugins dir.
 check(
 	'text domain path resolves to <plugin>/languages',

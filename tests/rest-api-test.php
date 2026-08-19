@@ -3,7 +3,7 @@
  * FaraCart REST API tests (P07-T01 / P07-T02 / P07-T03 / P07-T04).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
- * exercises the Phase 7 REST layer:
+ * exercises the REST layer:
  *
  *  - route registration for every endpoint
  *  - the `{ data, meta, pagination }` response envelope
@@ -12,10 +12,10 @@
  *  - mission CRUD + duplicate, the public /progress payload, search, and
  *    settings — through direct handler calls and one end-to-end server
  *    dispatch
- *  - Phase 12 progress-template settings: sanitization of the template
+ *  - progress-template settings: sanitization of the template
  *    enum, color fallbacks, range clamping, tag-stripping, and the REST
  *    schema validation of the new keys
- *  - Phase 13 dynamic messaging: the public /progress payload carries the
+ *  - dynamic messaging: the public /progress payload carries the
  *    engine-rendered message (no unresolved placeholders) and the message
  *    state
  *
@@ -24,7 +24,7 @@
  * database transaction that is rolled back, and the absence of any
  * residue is asserted afterwards. No products or users are created.
  *
- * Run: php tests/rest-api-test.php   (from the plugin directory)
+ * Run: php tests/rest-api-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -186,7 +186,7 @@ $resp = $campaigns_ctrl->handle_index( new \WP_REST_Request( 'GET', '/faracart/v
 $data = $resp->get_data();
 check( 'campaign list returns envelope', isset( $data['data']['items'] ) && is_array( $data['data']['items'] ) );
 
-// Phase 9: the `ids` param narrows search to exactly the given ids
+// the `ids` param narrows search to exactly the given ids
 // (the mission builder preloads saved product/category/coupon selections).
 $req = new \WP_REST_Request( 'GET', '/faracart/v1/search/products' );
 $req->set_param( 'ids', array( 99999999 ) );
@@ -383,7 +383,7 @@ try {
 	$resp = $settings_ctrl->handle_save( $req );
 	check( 'settings save returns updated value', false === $resp->get_data()['data']['enabled'] );
 
-	// 5.12 Progress-template settings sanitization (Phase 12). Direct
+	// 5.12 Progress-template settings sanitization. Direct
 	// handler calls skip REST schema validation, so the sanitizer itself
 	// must normalize enums, clamp ranges and clean string fields.
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
@@ -411,7 +411,7 @@ try {
 	check( 'valid template accepted by schema', true === rest_validate_value_from_schema( 'template-3', $save['frontend_template'], 'frontend_template' ) );
 	check( 'bar height range in schema', is_wp_error( rest_validate_value_from_schema( 999, $save['frontend_bar_height'], 'frontend_bar_height' ) ) );
 
-	// 5.13 Campaign CRUD + milestone ordering (Phase 10).
+	// 5.13 Campaign CRUD + milestone ordering.
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/campaigns' );
 	$req->set_param( 'name', 'Summer Sale' );
 	$req->set_param( 'description', 'Milestone campaign' );

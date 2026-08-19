@@ -2,7 +2,7 @@
 /**
  * FaraCart smart-suggestion tests (P14-T02 / P14-T03 / P14-T04).
  *
- * Boots WordPress and exercises the Phase 14 SuggestionEngine against
+ * Boots WordPress and exercises the SuggestionEngine against
  * products created inside a single database transaction (rolled back
  * afterwards, caches flushed) so the suite stays read-only like the
  * others:
@@ -17,7 +17,7 @@
  *  - cap at MAX_SUGGESTIONS, dedupe across sources, ghost ids skipped
  *  - the faracart_suggestions filter
  *
- * Run: php tests/suggestion-test.php   (from the plugin directory)
+ * Run: php tests/suggestion-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -89,13 +89,13 @@ function make_cat( $name, $slug ) {
 /**
  * Create a product inside the active transaction.
  *
- * @param string $name       Product name.
- * @param float  $price      Price.
+ * @param string $name Product name.
+ * @param float  $price Price.
  * @param int[]  $categories product_cat term ids.
- * @param string $stock      instock|outofstock.
- * @param int    $sales      total_sales.
- * @param int[]  $upsells    Upsell product ids.
- * @param int[]  $cross      Cross-sell product ids.
+ * @param string $stock instock|outofstock.
+ * @param int    $sales total_sales.
+ * @param int[]  $upsells Upsell product ids.
+ * @param int[]  $cross Cross-sell product ids.
  * @return int New product id.
  */
 function make_product( $name, $price, $categories = array(), $stock = 'instock', $sales = 0, $upsells = array(), $cross = array() ) {

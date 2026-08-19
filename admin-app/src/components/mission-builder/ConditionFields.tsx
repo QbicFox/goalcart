@@ -39,23 +39,20 @@ interface CouponPick {
 }
 
 /**
- * Mission Builder → Conditions (Phase 9 + Phase 32). The mission conditions
+ * Mission Builder → Conditions. The mission conditions
  * surface:
  *
  *  - excluded products (applies to every mission type)
- *  - schedule window + Phase 32 recurring day/time rules
+ *  - schedule window + recurring day/time rules
  *  - customer conditions (roles, guest/logged-in state, first-order,
- *    VIP thresholds) — Phase 32
- *  - shipping-zone conditions — Phase 32
- *  - cart-state conditions (required coupons, minimum items) — Phase 32
- *  - product tag conditions (Phase 32) — a tag-scoped mission also counts
+ *    VIP thresholds) — *  - shipping-zone conditions — *  - cart-state conditions (required coupons, minimum items) — *  - product tag conditions  — a tag-scoped mission also counts
  *    only products carrying the configured tags
  */
 export default function ConditionFields({ values, onValueChange }: ConditionFieldsProps) {
   const patch = (data: Partial<MissionInput>) => onValueChange(data);
   const [roles, setRoles] = useState<Array<{ slug: string; name: string }>>([]);
 
-  // The editable role list rides on the settings GET meta (Phase 32).
+  // The editable role list rides on the settings GET meta.
   useEffect(() => {
     let alive = true;
 
@@ -110,7 +107,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
         </Grid>
       </Grid>
 
-      {/* Customer conditions (Phase 32) */}
+      {/* Customer conditions */}
       <Box>
         <Typography variant="subtitle2" gutterBottom>
           {__('Customers', 'faracart')}
@@ -253,7 +250,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
         </Stack>
       </Box>
 
-      {/* Shipping zones (Phase 32) */}
+      {/* Shipping zones */}
       <Box>
         <Typography variant="subtitle2" gutterBottom>
           {__('Shipping destination', 'faracart')}
@@ -270,7 +267,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
         />
       </Box>
 
-      {/* Cart state (Phase 32) */}
+      {/* Cart state */}
       <Box>
         <Typography variant="subtitle2" gutterBottom>
           {__('Cart state', 'faracart')}
@@ -293,7 +290,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
         </Stack>
       </Box>
 
-      {/* Product tags condition (Phase 32) */}
+      {/* Product tags condition */}
       <Box>
         <Typography variant="subtitle2" gutterBottom>
           {__('Product tags', 'faracart')}
@@ -338,7 +335,7 @@ export default function ConditionFields({ values, onValueChange }: ConditionFiel
           )}
         </Typography>
 
-        {/* Phase 32: recurring day/time window */}
+        {/* recurring day/time window */}
         <Stack spacing={1.5} sx={{ mt: 2 }}>
           <Box>
             <Typography variant="caption" color="text.secondary" component="div" gutterBottom>

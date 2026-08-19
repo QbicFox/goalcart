@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class TagEvaluator
  *
- * Evaluates tag missions (Phase 32): the amount or quantity restricted to
+ * Evaluates tag missions: the amount or quantity restricted to
  * products carrying one or more product tags — the tag counterpart of
  * CategoryEvaluator. Which measure applies is chosen by
  * Mission::calculation_mode ('quantity', or an amount basis such as 'subtotal').

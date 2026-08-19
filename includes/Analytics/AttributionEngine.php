@@ -1,6 +1,6 @@
 <?php
 /**
- * Revenue attribution engine for FaraCart (Phase 33.2).
+ * Revenue attribution engine for FaraCart.
  *
  * @package FaraCart
  */
@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class AttributionEngine
  *
- * Phase 33.2 (Revenue Attribution) — turns the Phase 33.1 revenue event
+ * Revenue Attribution — turns the revenue event
  * funnel into per-order mission attribution and measurable revenue metrics.
  *
  * Order association (P33.2): when an order becomes revenue-producing
@@ -47,8 +47,7 @@ defined( 'ABSPATH' ) || exit;
  * estimated profit impact (graceful: unavailable without margin data).
  *
  * Every read is SQL-aggregated and bounded (METRIC_MAX_ROWS, filterable) so
- * admin/dashboard requests never scan unbounded data; the Phase 33.3
- * aggregator later pre-computes these summaries.
+ * admin/dashboard requests never scan unbounded data; the aggregator later pre-computes these summaries.
  *
  * Data accuracy (P33.2): only revenue-producing order statuses are
  * attributed (REVENUE_STATUSES — processing/completed per WooCommerce
@@ -642,7 +641,7 @@ final class AttributionEngine {
 	 * Incremental cart value: cart value after mission exposure minus the
 	 * value at first exposure, averaged per session.
 	 *
-	 * Bounded (METRIC_MAX_ROWS, filterable) — the Phase 33.3 aggregator
+	 * Bounded (METRIC_MAX_ROWS, filterable) — the aggregator
 	 * pre-computes this daily for large stores.
 	 *
 	 * @param array<string, mixed> $args Optional: mission_id, from, to.
@@ -843,7 +842,7 @@ final class AttributionEngine {
 				// it is false and coverage_pct is null.
 				'available'             => $profit_result['orders_total'] > 0,
 			),
-			// UI-ready availability metadata (Phase 3): the cost sources the
+			// UI-ready availability metadata: the cost sources the
 			// estimator consults and whether the store carries ANY cost data
 			// — the help panel uses this to explain how to make Estimated
 			// Profit available (§10) vs how much of the data is covered (§11).
@@ -856,7 +855,7 @@ final class AttributionEngine {
 	/**
 	 * Per-mission daily aggregate row (the revenue_daily row shape).
 	 *
-	 * Consumed by the Phase 33.3 DailyAggregator so the aggregated table is
+	 * Consumed by the DailyAggregator so the aggregated table is
 	 * computed with the exact same definitions as the live reads
 	 * (funnel counts + attribution summary), keeping the dashboard and the
 	 * pre-aggregated history consistent. The window (from/to) is typically
@@ -942,7 +941,7 @@ final class AttributionEngine {
 				'adds'        => $upsell['adds'],
 				'orders'      => $upsell['orders'],
 			),
-			// Phase 5 (Mission Performance Redesign) — commercial-outcome and
+			// Mission Performance Redesign — commercial-outcome and
 			// detail-drawer fields. All derived from the already-computed
 			// attribution summary + incremental read above (Improvement.md
 			// §20): total influenced order value, the engine's attribution
@@ -1161,7 +1160,7 @@ final class AttributionEngine {
 	/**
 	 * Shipping statistics over the store's orders in the window.
 	 *
-	 * Feeds the Phase 33.4 shipping-aware mission recommendations: average
+	 * Feeds the shipping-aware mission recommendations: average
 	 * shipping cost, free-shipping share and per-method averages.
 	 *
 	 * @param array<string, mixed> $args Optional: from, to.
@@ -1307,7 +1306,7 @@ final class AttributionEngine {
 	 * unavailable (revenue-only analytics) — never invented.
 	 *
 	 * Also returns the cost-data coverage of the same direct orders
-	 * (Improvement.md §11): how many of the orders that carry incremental
+	 * Improvement.md §11: how many of the orders that carry incremental
 	 * revenue have usable cost data. The strict profit model is unchanged —
 	 * the order margin still requires cost data on every line item — the
 	 * counts just let the UI explain "estimated profit is calculated only
@@ -1388,7 +1387,7 @@ final class AttributionEngine {
 	/**
 	 * Store-wide order totals within the window, as plain floats.
 	 *
-	 * Phase 33.4 (Smart Mission Recommendation) entry point: feeds the AOV /
+	 * Smart Mission Recommendation entry point: feeds the AOV /
 	 * median / order-distribution analyzers with the same bounded,
 	 * memoized store scan the AOV and shipping metrics already use — one
 	 * paginated pass per window, never a full-table load. Zero/negative
@@ -1553,7 +1552,7 @@ final class AttributionEngine {
 	/**
 	 * Whether the store carries any product cost data.
 	 *
-	 * Phase 3 availability metadata — delegates to the shared
+	 * availability metadata — delegates to the shared
 	 * RewardCostEstimator so every profit surface (summary, mission metrics,
 	 * empty windows) reports the same store-wide signal.
 	 *

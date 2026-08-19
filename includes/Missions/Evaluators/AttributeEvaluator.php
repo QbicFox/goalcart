@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class AttributeEvaluator
  *
- * Evaluates attribute missions (Phase 32): the amount or quantity restricted
+ * Evaluates attribute missions: the amount or quantity restricted
  * to products carrying ANY of the configured global attribute taxonomies
  * (e.g. pa_color, pa_size) — the attribute counterpart of
  * CategoryEvaluator. Which measure applies is chosen by

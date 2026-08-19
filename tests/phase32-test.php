@@ -1,8 +1,8 @@
 <?php
 /**
- * FaraCart Phase 32 tests (Advanced V2 features).
+ * FaraCart tests (Advanced V2 features).
  *
- * Boots WordPress and exercises the Phase 32 surface:
+ * Boots WordPress and exercises the surface:
  *	 *  - mission types: tag / attribute missions evaluate against the
 	 *    product tags and attribute taxonomies on the cart items
  *  - customer conditions: roles, guest/logged-in state, first-order and
@@ -15,12 +15,12 @@
  *    rules that milestones inherit (MissionRepository engine path)
  *  - free gift selection: the Reward model reads gift_products + choose
  *    mode, and the REST mission payload round-trips the new keys
- *  - settings: Phase 32 defaults (countdown / celebration /
+ *  - settings: defaults (countdown / celebration /
  *    suggestions_ranking) and the REST schema + sanitizer
  *  - frontend payload: countdown_end appears on missions and campaign groups
  *    and the gift picker data rides on the reward
  *
- * Run: php tests/phase32-test.php   (from the plugin directory)
+ * Run: php tests/phase32-test.php (from the plugin directory)
  *
  * The script only reads state; mission/campaign rows are created inside
  * transactions that are rolled back, and settings flips are in-memory
@@ -89,7 +89,7 @@ function mission( array $data ) {
 $engine = new MissionEngine();
 
 // ---------------------------------------------------------------------------
-// 1. Tag / attribute mission types (Phase 32)
+// 1. Tag / attribute mission types
 // ---------------------------------------------------------------------------
 echo "\n== 1. Tag / attribute missions ==\n";
 
@@ -133,7 +133,7 @@ check( 'attribute mission matches pa_brand items (qty 1)', near( $r->current(), 
 	check( 'registry does not support brand', ! in_array( 'brand', $types, true ) );
 
 // ---------------------------------------------------------------------------
-// 2. Customer conditions (Phase 32)
+// 2. Customer conditions
 // ---------------------------------------------------------------------------
 echo "\n== 2. Customer conditions ==\n";
 
@@ -191,7 +191,7 @@ $wpdb_users->query( 'ROLLBACK' );
 wp_cache_delete( $user_id, 'users' );
 
 // ---------------------------------------------------------------------------
-// 3. Shipping-zone conditions (Phase 32)
+// 3. Shipping-zone conditions
 // ---------------------------------------------------------------------------
 echo "\n== 3. Shipping zones ==\n";
 
@@ -205,7 +205,7 @@ $r = $engine->evaluate( $zone_mission, $other );
 check( 'zone mission blocked in other zone', ! $r->eligible() && MissionResult::REASON_SHIPPING_ZONE === $r->reason() );
 
 // ---------------------------------------------------------------------------
-// 4. Cart-state conditions (Phase 32)
+// 4. Cart-state conditions
 // ---------------------------------------------------------------------------
 echo "\n== 4. Cart state ==\n";
 
@@ -225,7 +225,7 @@ $r = $engine->evaluate( $min_items, ctx( array( 'subtotal' => 50, 'total' => 50 
 check( 'min-items mission passes at threshold', $r->eligible() );
 
 // ---------------------------------------------------------------------------
-// 5. Advanced scheduling (Phase 32)
+// 5. Advanced scheduling
 // ---------------------------------------------------------------------------
 echo "\n== 5. Advanced scheduling ==\n";
 
@@ -255,7 +255,7 @@ $r = $engine->evaluate( $night_mission, $user, '2024-06-01 12:00:00' );
 check( 'midnight window blocks midday', ! $r->eligible() );
 
 // ---------------------------------------------------------------------------
-// 6. Campaign schedule folding (Phase 32)
+// 6. Campaign schedule folding
 // ---------------------------------------------------------------------------
 echo "\n== 6. Campaign folding ==\n";
 
@@ -322,7 +322,7 @@ $missions_after = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$missions_table}"
 check( 'mission rows restored on rollback', $missions_before === $missions_after );
 
 // ---------------------------------------------------------------------------
-// 7. Free gift selection (Phase 32)
+// 7. Free gift selection
 // ---------------------------------------------------------------------------
 echo "\n== 7. Free gift selection ==\n";
 
@@ -345,7 +345,7 @@ check( 'gift allowed for a listed candidate', $reward->is_gift_allowed( 6 ) );
 check( 'gift blocked outside the list', ! $reward->is_gift_allowed( 99 ) );
 
 // ---------------------------------------------------------------------------
-// 8. Settings (Phase 32)
+// 8. Settings
 // ---------------------------------------------------------------------------
 echo "\n== 8. Settings ==\n";
 

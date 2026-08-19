@@ -2,7 +2,7 @@ import { getBootData } from '../boot';
 
 /**
  * Format a number as store currency using the site locale + currency from
- * the boot data (Phase 12: currency-aware formatting). Falls back to a
+ * the boot data (currency-aware formatting). Falls back to a
  * plain "1,234" when Intl cannot handle the locale/currency pair.
  */
 export function formatCurrency(value: number, currency?: string): string {

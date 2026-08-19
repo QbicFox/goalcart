@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class RewardSafety
  *
- * Pure, testable rules enforcing the Phase 5 "Reward Safety" guarantees:
+ * Pure, testable rules enforcing the "Reward Safety" guarantees:
  *
  *  - duplicate rewards: a mission's reward is applied at most once, and
  *    non-stacking rewards of the same type never both apply

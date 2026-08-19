@@ -1,8 +1,8 @@
 <?php
 /**
- * FaraCart Phase 33.5 tests (Smart Upsell).
+ * FaraCart tests (Smart Upsell).
  *
- * Boots WordPress, then exercises the Phase 33.5 deterministic
+ * Boots WordPress, then exercises the deterministic
  * product-ranking engine and its endpoints:
  *
  *  - service wiring: UpsellRanker + UpsellController resolve from the
@@ -27,7 +27,7 @@
  * All writes happen inside a single database transaction that is rolled
  * back; the absence of residue is asserted afterwards.
  *
- * Run: php tests/upsell-test.php   (from the plugin directory)
+ * Run: php tests/upsell-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file.
@@ -98,7 +98,7 @@ function close( $a, $b, $eps = 0.01 ) {
 	return abs( (float) $a - (float) $b ) < $eps;
 }
 
-// The Phase 33 tables are created by Installer::maybe_upgrade(), which runs
+// The tables are created by Installer::maybe_upgrade(), which runs
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 
@@ -535,7 +535,7 @@ try {
 	) );
 	check( 'no recommendation history → no upsell_order events', 0 === $written2 );
 
-	// Rebuild upsell_stats (the Phase 33.3 aggregator path) — after the
+	// Rebuild upsell_stats (the aggregator path) — after the
 	// upsell_order rows exist, so the funnel includes the purchases.
 	$rebuilt = $aggregator->aggregate_upsells();
 	check( 'aggregator rebuilds upsell_stats', $rebuilt >= 1 );

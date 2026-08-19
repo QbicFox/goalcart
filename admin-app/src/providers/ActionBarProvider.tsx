@@ -25,7 +25,7 @@ interface ActionBarContextValue {
 const ActionBarContext = createContext<ActionBarContextValue | null>(null);
 
 /**
- * Sticky bottom action bar (Phase 33.7 admin UX).
+ * Sticky bottom action bar (admin UX).
  *
  * The bar itself lives once in the app shell (AdminLayout renders
  * `ActionBar`); pages that own a save / reset / cancel action surface

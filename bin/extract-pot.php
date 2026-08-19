@@ -2,7 +2,7 @@
 /**
  * POT extractor for FaraCart (PHP + admin React strings).
  *
- * Phase 27 (Internationalization): scans the PHP layer (ravis-faracart.php,
+ * Internationalization: scans the PHP layer (ravis-faracart.php,
  * includes/) and the admin React app (admin-app/src) for WordPress
  * translation-function calls and emits `languages/faracart.pot` — the
  * English source template translators work from. Output is deterministic

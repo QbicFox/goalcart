@@ -76,8 +76,7 @@ class HookManager {
 	}
 
 	/**
-	 * The plugin's public developer hooks (Phase 18 → Advanced → developer
-	 * hooks).
+	 * The plugin's public developer hooks (Advanced → developer hooks).
 	 *
 	 * A reference list of the documented faracart_* actions and filters
 	 * surfaced in the admin Settings page (and served in the settings REST

@@ -1,5 +1,5 @@
 /**
- * Global date-range model (Phase 17, mirroring the reference plugin's
+ * Global date-range model (mirroring the reference plugin's
  * date-range module).
  *
  * The analytics page consumes a DateRange through the DateRangeContext

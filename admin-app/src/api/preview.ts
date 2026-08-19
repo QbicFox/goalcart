@@ -21,7 +21,7 @@ export interface PreviewRequest {
 }
 
 /**
- * Evaluate a mission or campaign against a SIMULATED cart (Phase 15).
+ * Evaluate a mission or campaign against a SIMULATED cart.
  *
  * `POST /faracart/v1/preview` — admin-only. The backend builds a synthetic
  * cart context from the simulated amount/quantity and returns the same

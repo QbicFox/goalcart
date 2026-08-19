@@ -22,18 +22,18 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class UpsellController
  *
- * Phase 33.5 (Smart Upsell) — the endpoints behind the ranking engine and
+ * Smart Upsell — the endpoints behind the ranking engine and
  * its historical learning loop:
  *
  *  - `POST /faracart/v1/upsell/track` — public, nonce-guarded (the same
  *    tracking nonce the storefront already holds): the frontend reports
  *    upsell_impression / upsell_clicked / upsell_added events into the
- *    Phase 33.1 upsell_events log. Server-side attribution of upsell_order
+ *    upsell_events log. Server-side attribution of upsell_order
  *    events happens on order payment (UpsellRanker hooks), so a client
  *    can never self-report a purchase. Rate limited per IP.
  *
- *  - `GET /faracart/v1/upsell/rank` — public, per-IP rate limited (Phase
- *    33.7 Frontend Upsell Integration): ranked products that help the
+ *  - `GET /faracart/v1/upsell/rank` — public, per-IP rate limited (Frontend
+ *    Upsell Integration): ranked products that help the
  *    shopper close the live mission gap. The server resolves the mission
  *    (explicit mission_id, or the featured active money mission), computes the
  *    remaining gap from the LIVE cart through the same MissionEngine the
@@ -52,7 +52,7 @@ defined( 'ABSPATH' ) || exit;
  *      - analytics mode (`analytics=1`): the top-products upsell analytics
  *        table (impressions / clicks / adds / orders / conversion /
  *        revenue / estimated profit / upsell score) over the requested
- *        window — the Phase 33.6 Upsell Analytics page's data source.
+ *        window — the Upsell Analytics page's data source.
  *
  *  - `GET /faracart/v1/revenue/upsells/{product_id}` — admin-only: one
  *    product's upsell score breakdown + historical stats, scored in the
@@ -68,7 +68,7 @@ class UpsellController extends BaseController {
 	/**
 	 * Rate-limit budget for the upsell track route (requests per window,
 	 * per IP) — impressions fire on every widget render, so the budget is
-	 * generous like the Phase 16 track route.
+	 * generous like the track route.
 	 *
 	 * @var int
 	 */
@@ -82,7 +82,7 @@ class UpsellController extends BaseController {
 	protected $repository;
 
 	/**
-	 * Deterministic ranking engine (Phase 33.5). The public storefront
+	 * Deterministic ranking engine. The public storefront
 	 * rank route calls it directly (no transient churn per cart state);
 	 * admin reads go through the repository's cached layer.
 	 *
@@ -91,7 +91,7 @@ class UpsellController extends BaseController {
 	protected $ranker;
 
 	/**
-	 * Live-cart snapshot service (Phase 33.7 mission gap calculation).
+	 * Live-cart snapshot service (mission gap calculation).
 	 *
 	 * @var CartIntegration|null
 	 */
@@ -115,10 +115,10 @@ class UpsellController extends BaseController {
 	 * Constructor.
 	 *
 	 * @param RevenueRepository  $repository       Revenue repository.
-	 * @param UpsellRanker|null  $ranker           Ranking engine (Phase
-	 *                                             33.7 direct storefront
-	 *                                             reads; falls back to the
-	 *                                             cached repository read).
+	 * @param UpsellRanker|null  $ranker           Ranking engine (direct
+	 * storefront reads; falls
+	 * back to the cached
+	 * repository read).
 	 * @param CartIntegration|null $cart_integration Live-cart snapshot.
 	 * @param MissionEngine|null    $engine           Mission engine (gap calc).
 	 * @param MissionRepository|null $missions           Mission repository.
@@ -164,7 +164,7 @@ class UpsellController extends BaseController {
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'handle_rank' ),
-				// Public by design (Phase 33.7): guests read their own
+				// Public by design: guests read their own
 				// mission-gap recommendations, so no capability — but the
 				// route is rate limited per IP exactly like /progress and
 				// serves catalog data only.
@@ -200,7 +200,7 @@ class UpsellController extends BaseController {
 	 * Verify the tracking nonce before the public route runs.
 	 *
 	 * Mirrors TrackController: the plugin's own tracking nonce (created in
-	 * the frontend config printed by the Phase 16 Tracker) replaces the
+	 * the frontend config printed by the Tracker) replaces the
 	 * admin capability check, then the per-IP rate limit applies.
 	 *
 	 * @param \WP_REST_Request $request Request object.
@@ -302,7 +302,7 @@ class UpsellController extends BaseController {
 	}
 
 	/**
-	 * Rank products that help close the live mission gap (Phase 33.7).
+	 * Rank products that help close the live mission gap.
 	 *
 	 * The storefront's upsell panel calls this with just mission_id + limit;
 	 * the server resolves the mission (explicit id, else the featured active
@@ -458,7 +458,7 @@ class UpsellController extends BaseController {
 	}
 
 	/**
-	 * The live cart's money context for a mission (Phase 33.7 gap calc).
+	 * The live cart's money context for a mission (gap calc).
 	 *
 	 * Builds the same CartContext the progress widgets evaluate missions
 	 * on, evaluates the mission, and returns its current money value + the
@@ -570,7 +570,7 @@ class UpsellController extends BaseController {
 	}
 
 	/**
-	 * Arg schema for the public storefront rank route (Phase 33.7).
+	 * Arg schema for the public storefront rank route.
 	 *
 	 * mission_id + limit are all the storefront sends; cart / cart_value /
 	 * remaining exist for tests and embedded consumers. When they are

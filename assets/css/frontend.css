@@ -1,10 +1,9 @@
 /**
- * FaraCart storefront progress widgets (Phase 11).
+ * FaraCart storefront progress widgets.
  *
- * Scoped under .faracart-widget / #faracart-floating so styles never
+ * Scoped under.faracart-widget / #faracart-floating so styles never
  * leak into the theme. RTL-aware (logical properties), responsive, and
- * themeable through a small set of CSS custom properties (Phase 12
- * Appearance overrides the same tokens).
+ * themeable through a small set of CSS custom properties (Appearance overrides the same tokens).
  *
  * Tokens:
  *   --faracart-accent        primary bar/reward color
@@ -17,9 +16,9 @@
  *   --faracart-bar-height    progress bar thickness
  *
  * The six design templates (template-1 … template-6): the mission body
- * renders per the active template variant via .faracart-template--*
+ * renders per the active template variant via.faracart-template--*
  * classes, the bar reads --faracart-bar-height, and
- * .faracart-widget--no-anim / .faracart-no-anim disable the fill
+ *.faracart-widget--no-anim /.faracart-no-anim disable the fill
  * transition. The Appearance settings override every token through an
  * inline style block printed by ProgressUI::appearance_css().
  *
@@ -123,7 +122,7 @@
 	transition: opacity 0.15s ease;
 }
 
-/* Phase 18 (Settings → Frontend → mobile behavior = hide). */
+/* Settings → Frontend → mobile behavior = hide. */
 
 .faracart-widget--mobile-hidden {
 	display: none;
@@ -1004,7 +1003,7 @@
 	color: #92400e;
 }
 
-/* Message states (Phase 13): the payload `state` lands as a card class.
+/* Message states: the payload `state` lands as a card class.
    The completed fill color is already handled by
    .faracart-progress--complete, so the state classes only refine copy. */
 
@@ -1169,7 +1168,7 @@
 }
 
 /* ------------------------------------------------------------------ *
- * Countdown (Phase 32)
+ * Countdown
  * ------------------------------------------------------------------ */
 
 .faracart-countdown {
@@ -1196,7 +1195,7 @@
 }
 
 /* ------------------------------------------------------------------ *
- * Free gift picker (Phase 32)
+ * Free gift picker
  * ------------------------------------------------------------------ */
 
 .faracart-gift-picker {
@@ -1277,7 +1276,7 @@
 }
 
 /* ------------------------------------------------------------------ *
- * Celebration (Phase 32)
+ * Celebration
  * ------------------------------------------------------------------ */
 
 .faracart-card--celebrate {
@@ -1324,7 +1323,7 @@
 }
 
 /* ------------------------------------------------------------------ *
- * Campaign progress template (Phase 32, campaign scope)
+ * Campaign progress template (campaign scope)
  * ------------------------------------------------------------------ */
 
 .faracart-campaign {
@@ -1473,7 +1472,7 @@
 	font-size: 13px;
 }
 
-/* Phase 33.7 mobile optimization: on small screens the panel becomes a
+/* mobile optimization: on small screens the panel becomes a
  * swipeable horizontal strip (fixed-width cards + scroll snap), the
  * standard upsell pattern that fits any theme's narrow layouts without
  * stretching the widget.
@@ -1636,7 +1635,7 @@
 }
 
 /* The open-state transform must keep the vertical anchor for side
- * drawers (the generic .faracart-floating--open rule above only flips
+ * drawers (the generic.faracart-floating--open rule above only flips
  * the scale). */
 
 .faracart-floating--dir-left.faracart-floating--open .faracart-floating__drawer {

@@ -29,7 +29,7 @@ final class CartContext {
 	 * Prefix of the negative fees the reward engine adds for discounts.
 	 *
 	 * CartContext excludes these fees from the `total` basis so a reward can
-	 * never change the value it was granted on (reward-loop safety, Phase 5).
+	 * never change the value it was granted on (reward-loop safety).
 	 *
 	 * @var string
 	 */
@@ -97,7 +97,7 @@ final class CartContext {
 	protected $is_guest;
 
 	/**
-	 * Coupon codes currently applied to the cart (Phase 32 cart-state
+	 * Coupon codes currently applied to the cart (cart-state
 	 * conditions).
 	 *
 	 * @var string[]
@@ -105,15 +105,14 @@ final class CartContext {
 	protected $coupons;
 
 	/**
-	 * The shipping zone id matching the cart destination (Phase 32
-	 * shipping-zone missions). 0 when unknown / not calculated.
+	 * The shipping zone id matching the cart destination (shipping-zone missions). 0 when unknown / not calculated.
 	 *
 	 * @var int
 	 */
 	protected $shipping_zone_id;
 
 	/**
-	 * Phase 18 (Mission Calculation): whether line taxes are folded into the
+	 * Mission Calculation: whether line taxes are folded into the
 	 * money bases.
 	 *
 	 * @var bool
@@ -121,7 +120,7 @@ final class CartContext {
 	protected $include_tax;
 
 	/**
-	 * Phase 18 (Mission Calculation): whether cart discounts count toward the
+	 * Mission Calculation: whether cart discounts count toward the
 	 * discounted_subtotal basis.
 	 *
 	 * @var bool
@@ -162,7 +161,7 @@ final class CartContext {
 	 * Extracts the normalized snapshot the engine needs. Amount bases use
 	 * the 'edit' context so raw floats come back (no display rounding).
 	 *
-	 * Timing note (Phase 5): the WooCommerce cart integration evaluates
+	 * Timing note: the WooCommerce cart integration evaluates
 	 * missions on 'woocommerce_before_calculate_totals', which fires AFTER
 	 * WC_Cart::reset_totals() has zeroed the cart's aggregate getters, so
 	 * get_subtotal()/get_total() read 0 at that point. The money bases are
@@ -171,22 +170,22 @@ final class CartContext {
 	 * Post-calculation callers (REST, admin) get the same numbers because
 	 * WC's subtotal is the sum of the line subtotals. The grand `total`
 	 * falls back to the after-discount line value while totals are reset;
-	 * tax is a cart-level refinement for Phase 6 (shipping is excluded
+	 * tax is a cart-level refinement for (shipping is excluded
 	 * below anyway).
 	 *
-	 * Reward-loop safety (Phase 5): FaraCart's own discount fees are
+	 * Reward-loop safety: FaraCart's own discount fees are
 	 * subtracted from the `total` basis, and passing `exclude_shipping`
 	 * removes shipping from `total` and `shipping_total`, so a reward can
 	 * never change the value it was granted on.
 	 *
-	 * Phase 6 (Cart Context): the optional 'categories' arg carries a
+	 * Cart Context: the optional 'categories' arg carries a
 	 * preloaded product-id => category-ids map (built by CartIntegration in
 	 * one batched query) so no per-item term queries run. Category lookups
 	 * use the canonical product id: for variations that is the parent id
 	 * (WooCommerce assigns categories to the parent product), so category
 	 * missions count variations correctly.
 	 *
-	 * Phase 18 (Settings → Mission Calculation): the optional include_*
+	 * Settings → Mission Calculation: the optional include_*
 	 * args refine the snapshot at build time. All five default to today's
 	 * behavior, so an unchanged store calculates exactly as before:
 	 *
@@ -235,7 +234,7 @@ final class CartContext {
 				continue;
 			}
 
-			// Phase 18 exclusion toggles (sale / virtual).
+			// exclusion toggles (sale / virtual).
 			if (
 				( ! $include_sale && method_exists( $product, 'is_on_sale' ) && $product->is_on_sale() )
 				|| ( ! $include_virtual && ( $product->is_virtual() || $product->is_downloadable() ) )
@@ -252,7 +251,7 @@ final class CartContext {
 				? array_map( 'intval', (array) $category_map[ $category_product_id ] )
 				: ( function_exists( 'wp_get_post_terms' ) ? wp_get_post_terms( $category_product_id, 'product_cat', array( 'fields' => 'ids' ) ) : array() );
 
-			// Phase 32 (tag/attribute missions): tags and attribute
+			// tag/attribute missions: tags and attribute
 			// taxonomies are preloaded in the same batched way as categories
 			// (CartIntegration builds one object-terms query + one product
 			// attribute pass), so no per-item queries run on the storefront.
@@ -312,7 +311,7 @@ final class CartContext {
 
 		// Money bases come from the line items — always current, including
 		// while the cart's aggregate totals are reset mid-calculation (see
-		// the timing note above). Phase 18: include_tax folds each line's
+		// the timing note above). include_tax folds each line's
 		// tax into the bases; include_discount=false makes the
 		// discounted_subtotal basis ignore cart discounts.
 		$subtotal = 0.0;
@@ -373,7 +372,7 @@ final class CartContext {
 				'currency'         => isset( $args['currency'] ) ? (string) $args['currency'] : ( function_exists( 'get_woocommerce_currency' ) ? get_woocommerce_currency() : '' ),
 				'user_id'          => isset( $args['user_id'] ) ? (int) $args['user_id'] : ( function_exists( 'get_current_user_id' ) ? (int) get_current_user_id() : 0 ),
 				'is_guest'         => isset( $args['is_guest'] ) ? (bool) $args['is_guest'] : ( function_exists( 'is_user_logged_in' ) ? ! is_user_logged_in() : true ),
-				// Phase 32 (advanced conditions): applied coupon codes and the
+				// advanced conditions: applied coupon codes and the
 				// shipping zone matching the destination are part of the
 				// snapshot so customer/order/cart/shipping conditions can be
 				// evaluated without touching the request state.
@@ -551,7 +550,7 @@ final class CartContext {
 			return $this->total - $this->sum_lines( 'line_total', array_flip( $exclude ) );
 		}
 
-		// Phase 18 (Mission Calculation): the include_tax / include_discount
+		// Mission Calculation: the include_tax / include_discount
 		// flags shape the subtotal-style bases. The precomputed subtotal
 		// already carries the folded tax, so the no-exclusion subtotal path
 		// returns it directly.
@@ -613,7 +612,7 @@ final class CartContext {
 	}
 
 	/**
-	 * Sum line taxes over cart lines (Phase 18: include_tax).
+	 * Sum line taxes over cart lines (include_tax).
 	 *
 	 * @param int[] $only      Flipped product-id set to INCLUDE (exclusion mode).
 	 * @param bool  $excluding When true, $only lists ids to exclude instead.
@@ -745,7 +744,7 @@ final class CartContext {
 	}
 
 	/**
-	 * Tag-restricted value: quantity or amount (Phase 32).
+	 * Tag-restricted value: quantity or amount.
 	 *
 	 * @param int[]  $tag_ids Product tag term ids.
 	 * @param string $mode    quantity | subtotal | total | discounted_subtotal.
@@ -768,7 +767,7 @@ final class CartContext {
 	}
 
 	/**
-	 * Attribute-restricted value: quantity or amount (Phase 32). Matches
+	 * Attribute-restricted value: quantity or amount. Matches
 	 * products carrying ANY of the configured attribute taxonomies.
 	 *
 	 * @param string[] $taxonomies Global attribute taxonomy slugs.

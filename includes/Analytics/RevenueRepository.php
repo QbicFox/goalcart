@@ -1,6 +1,6 @@
 <?php
 /**
- * Cached revenue summaries for FaraCart (Phase 33.3 — Aggregation & Performance).
+ * Cached revenue summaries for FaraCart (Aggregation & Performance).
  *
  * @package FaraCart
  */
@@ -16,8 +16,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class RevenueRepository
  *
- * Phase 33.3 (Aggregation & Performance) — the cached read layer over the
- * Phase 33.2 attribution engine and the Phase 33.3 aggregated tables, so
+ * Aggregation & Performance — the cached read layer over the
+ * attribution engine and the aggregated tables, so
  * admin/dashboard requests never re-run the bounded live queries on every
  * page load:
  *
@@ -31,7 +31,7 @@ defined( 'ABSPATH' ) || exit;
  *                          the engine until the next aggregation tick.
  *  - product_stats()     — per-product upsell aggregates read from
  *                          upsell_stats (rebuilt by DailyAggregator).
- *  - upsell_ranking()    — the Phase 33.5 Smart Upsell ranked products for
+ *  - upsell_ranking()    — the Smart Upsell ranked products for
  *                          a cart + mission context (cached, deterministic).
  *  - upsell_analytics()  — the top-products upsell analytics table
  *                          (impressions/clicks/adds/orders/revenue/profit/
@@ -103,14 +103,14 @@ final class RevenueRepository {
 	protected $repository;
 
 	/**
-	 * Smart mission recommendation engine (Phase 33.4).
+	 * Smart mission recommendation engine.
 	 *
 	 * @var MissionRecommendationEngine
 	 */
 	protected $recommendations;
 
 	/**
-	 * Smart upsell ranking engine (Phase 33.5).
+	 * Smart upsell ranking engine.
 	 *
 	 * @var UpsellRanker
 	 */
@@ -122,7 +122,7 @@ final class RevenueRepository {
 	 * @param AttributionEngine        $engine         Revenue attribution engine.
 	 * @param MissionRepository           $repository     Mission repository.
 	 * @param MissionRecommendationEngine $recommendations Mission recommendation engine.
-	 * @param UpsellRanker|null        $upsells        Upsell ranking engine (Phase 33.5).
+	 * @param UpsellRanker|null        $upsells        Upsell ranking engine.
 	 */
 	public function __construct( AttributionEngine $engine, MissionRepository $repository, MissionRecommendationEngine $recommendations, ?UpsellRanker $upsells = null ) {
 		$this->engine         = $engine;
@@ -194,7 +194,7 @@ final class RevenueRepository {
 	 * Mission Performance rows — every mission (or a filtered subset), cached.
 	 *
 	 * `mission_ids` (optional) restricts the iteration to the listed missions, so
-	 * the Analytics comparison table (Phase 6, §27) can slice the same
+	 * the Analytics comparison table (§27) can slice the same
 	 * cached rows by campaign/reward filters. Additive — existing callers
 	 * that pass only mission_id / from / to behave exactly as before.
 	 *
@@ -383,9 +383,9 @@ final class RevenueRepository {
 
 	/**
 	 * Purchase-focused attribution summary for the legacy Analytics
-	 * endpoint (Phase 2 — Backend/Data Layer).
+	 * endpoint (Backend/Data Layer).
 	 *
-	 * Maps the Phase 17 analytics filters onto the attribution layer and
+	 * Maps the analytics filters onto the attribution layer and
 	 * returns the fields the redesigned Analytics UI needs (purchased
 	 * orders, purchase rate, attributed sales, estimated profit + reason /
 	 * coverage), served through the same cached layer as every other
@@ -485,7 +485,7 @@ final class RevenueRepository {
 	}
 
 	/**
-	 * Per-mission comparison rows for the Analytics page (Phase 6 — Mission
+	 * Per-mission comparison rows for the Analytics page (Mission
 	 * Conversion & Purchase Analysis, Improvement.md §27).
 	 *
 	 * The same cached mission performance rows as `/revenue/missions`, sliced by
@@ -564,7 +564,7 @@ final class RevenueRepository {
 				'coverage_pct'          => null,
 				'available'             => false,
 			),
-			// Phase 3 availability metadata — mirrored from
+			// availability metadata — mirrored from
 			// AttributionEngine::attribution_summary() (see the sync note
 			// above): the cost sources stay constant; the store-wide signal
 			// is read once through the engine.
@@ -660,7 +660,7 @@ final class RevenueRepository {
 	}
 
 	/**
-	 * Smart upsell ranking (Phase 33.5), cached.
+	 * Smart upsell ranking, cached.
 	 *
 	 * The UpsellRanker is deterministic and pure (no writes), so caching
 	 * only skips recomputation; the existing invalidation — order payment/
@@ -688,7 +688,7 @@ final class RevenueRepository {
 	}
 
 	/**
-	 * Top-products upsell analytics table (Phase 33.5), cached.
+	 * Top-products upsell analytics table, cached.
 	 *
 	 * Unlike product_stats() (which reads the pre-aggregated upsell_stats
 	 * table), this read supports the admin analytics window (from/to) and
@@ -696,7 +696,7 @@ final class RevenueRepository {
 	 * — grouped per product, bounded by the same pagination caps as the
 	 * other revenue reads. Each row is enriched with the product's margin
 	 * (when the store provides cost data) and its upsell score computed
-	 * through the same Phase 33.5 component math.
+	 * through the same component math.
 	 *
 	 * @param array<string, mixed> $args Optional: from, to, mission_id, limit.
 	 * @return array<int, array<string, mixed>>
@@ -713,7 +713,7 @@ final class RevenueRepository {
 	}
 
 	/**
-	 * One product's upsell score breakdown + historical stats (Phase 33.5),
+	 * One product's upsell score breakdown + historical stats,
 	 * cached.
 	 *
 	 * @param int                  $product_id Product id.
@@ -814,8 +814,8 @@ final class RevenueRepository {
 				'revenue'     => (float) $row['revenue'],
 			);
 
-			// Scored standalone (no cart context) through the same Phase
-			// 33.5 component math — margin/profit included when the store
+			// Scored standalone (no cart context) through the same
+			// component math — margin/profit included when the store
 			// provides cost data, neutral otherwise.
 			$score = null !== $this->upsells ? $this->upsells->score_product( $product ) : null;
 

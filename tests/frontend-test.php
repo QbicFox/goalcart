@@ -2,7 +2,7 @@
 /**
  * FaraCart frontend progress UI tests (P11-T01 / P11-T02 / P11-T03).
  *
- * Boots WordPress and exercises the Phase 11 storefront widget layer:
+ * Boots WordPress and exercises the storefront widget layer:
  *
  *  - the ProgressUI service resolves from the container
  *  - hook registration for every display location (cart, mini-cart,
@@ -12,14 +12,14 @@
  *  - the frontend config payload (endpoint, currency, reward labels)
  *  - the master enabled gate (settings toggle + faracart_frontend_enabled)
  *  - page gating: the shortcode in a post content enables assets
- *  - progress templates & appearance (Phase 12): config template/
+ *  - progress templates & appearance: config template/
  *    animation/appearance keys, per-widget shortcode template override,
  *    custom container class, token + custom CSS output, template filter
  *
  * Read-only like the other suites: no DB writes, no product/cart
  * creation. Settings are flipped in memory only and restored.
  *
- * Run: php tests/frontend-test.php   (from the plugin directory)
+ * Run: php tests/frontend-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -69,7 +69,7 @@ function check( $label, $cond ) {
  * (the priority form indexes callbacks by unique id, and the callback is
  * an array), so resolve the unique id the way WP_Hook::add_filter does.
  *
- * @param string   $tag      Hook name.
+ * @param string   $tag Hook name.
  * @param callable $callback Registered callback.
  * @return int|false
  */
@@ -197,7 +197,7 @@ check( 'config has a page position key', array_key_exists( 'position', $config )
 check( 'config is RTL-aware', array_key_exists( 'isRtl', $config ) );
 check( 'config labels cover reward types', isset( $config['labels']['free_shipping'], $config['labels']['percent_discount'], $config['labels']['fixed_discount'], $config['labels']['free_gift'], $config['labels']['coupon'] ) );
 
-// Phase 33.7 (Frontend Upsell Integration): the config carries the
+// Frontend Upsell Integration: the config carries the
 // smart-upsell panel contract — public rank endpoint, upsell track
 // endpoint, limit and localized panel labels.
 $upsell_config = $config['upsells'] ?? null;
@@ -232,7 +232,7 @@ check( 'frontend JS stacks one card per eligible mission', false !== strpos( $fr
 check( 'frontend JS skips ineligible missions when rendering', false !== strpos( $frontend_js, 'mission.eligible === false' ) && false !== strpos( $frontend_js, 'continue;' ) );
 check( 'frontend JS renders each mission card with its own template', false !== strpos( $frontend_js, 'missionContainer( mission, data.currency || cfg.currency, variant, widgetTemplate( container, mission ) )' ) );
 
-// Live cart-change refresh (Phase 11): every WooCommerce cart-mutation
+// Live cart-change refresh: every WooCommerce cart-mutation
 // signal must reach the widgets through ONE centralized bridge — the
 // classic jQuery events (incl. coupon / emptied), the Blocks wc-blocks_*
 // DOM events and the wc/store/cart data store — with a supersede guard
@@ -247,7 +247,7 @@ check( 'frontend JS supersedes stale refresh responses', false !== strpos( $fron
 check( 'frontend JS debounces cart-change refreshes', false !== strpos( $frontend_js, 'cartFollowUpTimer' ) && false !== strpos( $frontend_js, 'refresh( { updating: true } )' ) );
 check( 'frontend JS shows a subtle updating state while refreshing', false !== strpos( $frontend_js, 'faracart-widget--updating' ) );
 
-// Self-healing tracking nonce (Phase 28): every /progress response mints
+// Self-healing tracking nonce: every /progress response mints
 // a fresh faracart_track nonce so frontend.js can adopt it after a
 // cached page served an expired or foreign one. The toggles are pinned
 // on (deterministic baseline — the stored option may hold non-default
@@ -493,7 +493,7 @@ add_filter( 'faracart_frontend_template', function () {
 check( 'template filter overrides', 'template-4' === $ui->template() );
 remove_all_filters( 'faracart_frontend_template' );
 
-// Restore the Phase 11-visible defaults.
+// Restore the visible defaults.
 $settings->set( 'frontend_template', 'template-1' );
 $settings->set( 'frontend_css_class', '' );
 $settings->set( 'frontend_custom_css', '' );
@@ -603,11 +603,11 @@ if ( $block_type ) {
 }
 
 // ---------------------------------------------------------------------------
-// 11. Smart Recommendations presentation (Improvement.md Phase 7 / §33–§34)
+// 11. Smart Recommendations presentation (Improvement.md §33–§34)
 // ---------------------------------------------------------------------------
 echo "\n== 11. Recommendations presentation ==\n";
 
-// The Phase 7 redesign simplifies the recommendation presentation: the
+// The redesign simplifies the recommendation presentation: the
 // primary card shows the business outcome first (recommended target,
 // "Confidence: High/Medium/Low" label, expected impact range, expected
 // profit with the §34 unavailable state, plain-English "Why?" bullets)
@@ -648,11 +648,11 @@ check( 'margin factor uses the 0-1 rate formatter (formatPercent)', false !== st
 check( 'coverage percentage is not divided by 100', false !== strpos( $recommendations_tsx, 'formatPercentValue(coverage.product_coverage.coverage_pct)' ) && false === strpos( $recommendations_tsx, 'coverage_pct / 100' ) );
 
 // ---------------------------------------------------------------------------
-// 12. Upsell Analytics presentation (Improvement.md Phase 8 / §35)
+// 12. Upsell Analytics presentation (Improvement.md §35)
 // ---------------------------------------------------------------------------
 echo "\n== 12. Upsell Analytics presentation ==\n";
 
-// The Phase 8 redesign makes purchases/sales the primary metrics: the
+// The redesign makes purchases/sales the primary metrics: the
 // table leads with Product / Orders / Sales / Estimated profit /
 // Conversion and hides the interaction funnel (impressions, clicks,
 // adds, CTR, add-to-cart rate) plus the upsell score behind a "Show
@@ -669,7 +669,7 @@ check( 'upsell funnel rates never fabricate a denominator', false !== strpos( $u
 check( 'upsell top-performing view sorts by purchases then sales', false !== strpos( $upsell_tsx, 'b.orders - a.orders || b.revenue - a.revenue' ) );
 check( 'upsell per-product score breakdown stays available', false !== strpos( $upsell_tsx, 'ProductDetailDialog' ) && false !== strpos( $upsell_tsx, 'Score breakdown' ) );
 
-// 13. UX polish states (Improvement.md Phase 9 / §43-§46)
+// 13. UX polish states (Improvement.md §43-§46)
 // ---------------------------------------------------------------------------
 echo "\n== 13. UX polish states ==\n";
 

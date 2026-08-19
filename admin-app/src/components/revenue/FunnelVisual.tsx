@@ -49,8 +49,8 @@ interface FunnelVisualProps {
 }
 
 /**
- * Revenue funnel visualization (Phase 33.6 Attribution Dashboard / Mission
- * Performance; Phase 5 detail drawer). Four bars whose widths are
+ * Revenue funnel visualization (Attribution Dashboard / Mission
+ * Performance; detail drawer). Four bars whose widths are
  * proportional to each stage's count, with the completion and purchase
  * rates below — a single-glance read of views → progressed → completed →
  * purchased. With `showTransitions`, the percentage carried from each

@@ -46,8 +46,8 @@ final class MissionEngine {
 	 * Evaluate a mission against a cart context.
 	 *
 	 * Pre-evaluation eligibility covers status, the calendar schedule
-	 * window, the recurring day/time rules, target validity and the Phase
-	 * 32 customer/order/cart/shipping conditions.
+	 * window, the recurring day/time rules, target validity and the
+	 * customer/order/cart/shipping conditions.
 	 *
 	 * @param Mission        $mission    Mission to evaluate.
 	 * @param CartContext $context Cart snapshot.
@@ -105,7 +105,7 @@ final class MissionEngine {
 	}
 
 	/**
-	 * The Phase 32 customer/order/cart/shipping condition checks.
+	 * The customer/order/cart/shipping condition checks.
 	 *
 	 * Runs after the shared eligibility pre-checks. Every check is derived
 	 * from the CartContext snapshot (user id, guest flag, applied coupons,
@@ -240,7 +240,7 @@ final class MissionEngine {
 	 * Whether the mission's calendar window AND recurring day/time rules
 	 * contain the given time.
 	 *
-	 * Phase 32 (advanced scheduling): a mission can additionally restrict to
+	 * advanced scheduling: a mission can additionally restrict to
 	 * specific weekdays (1=Mon..7=Sun) and/or a daily time window (the
 	 * window may cross midnight — start > end means "after start OR before
 	 * end").

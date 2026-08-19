@@ -31,7 +31,7 @@ defined( 'ABSPATH' ) || exit;
  *   4. hardcoded fallback — `template-1` (missions only; campaigns with no
  *      template render per-mission cards, the pre-engine behavior)
  *
- * If a stored template_id is not registered (e.g. an old Phase 12 id
+ * If a stored template_id is not registered (e.g. an old id
  * such as 'card', or a template that was removed), resolution falls back
  * to the scope default / store-wide value rather than mapping it to a
  * different template — old template ids are never translated, and a
@@ -196,7 +196,7 @@ final class TemplateEngine {
 	 * Normalize a candidate template id for a scope ('' when invalid).
 	 *
 	 * Only currently registered template ids resolve; anything else
-	 * (an old Phase 12 id such as 'card', or a removed template) returns
+	 * (an old id such as 'card', or a removed template) returns
 	 * '' so resolution falls through to the scope default / store-wide
 	 * value / hardcoded fallback. Old template ids are never translated.
 	 *

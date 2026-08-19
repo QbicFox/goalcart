@@ -44,7 +44,7 @@ final class FreeGiftApplicator implements RewardApplicator {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * Choose mode (Phase 32, free gift selection) surfaces the full gift
+	 * Choose mode (free gift selection) surfaces the full gift
 	 * candidate list so the storefront can render the picker; the chosen
 	 * product is added by the public gift endpoint (never automatically).
 	 */
@@ -84,8 +84,7 @@ final class FreeGiftApplicator implements RewardApplicator {
 	 * {@inheritDoc}
 	 *
 	 * @param int|null $chosen_product_id Optional override: the shopper's
-	 *                                    chosen gift product (Phase 32
-	 *                                    choose mode; ignored otherwise).
+	 *                                    chosen gift product (choose mode; ignored otherwise).
 	 */
 	public function apply( Reward $reward, RewardResult $evaluation, \WC_Cart $cart, $mission_id, $chosen_product_id = null ) {
 		$gift_id = $reward->is_gift_choose()

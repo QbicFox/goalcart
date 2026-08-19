@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class ConflictResolver
  *
- * Phase 26 (Conflict & Priority Engine): the single deterministic rule for
+ * Conflict & Priority Engine: the single deterministic rule for
  * what happens when multiple missions/campaigns are active at the same time.
  *
  * The resolver is pure and stateless — it takes the ACTIVE missions in their
@@ -30,7 +30,7 @@ defined( 'ABSPATH' ) || exit;
  *
  *  - cumulative — every completed mission grants (subject to the per-reward
  *    stacking rules in RewardSafety). The default, preserving the
- *    pre-Phase-26 behavior.
+ *    previous behavior.
  *  - best       — only the completed mission with the most valuable reward
  *    grants. "Value" is the reward's computed discount amount on the
  *    current cart when the caller provides it (RewardEngine pass), else a

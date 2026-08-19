@@ -43,7 +43,7 @@ defined( 'ABSPATH' ) || exit;
 final class CartIntegration {
 
 	/**
-	 * Settings instance (Phase 18: the Mission Calculation toggles).
+	 * Settings instance (the Mission Calculation toggles).
 	 *
 	 * @var Settings
 	 */
@@ -142,9 +142,8 @@ final class CartIntegration {
 		}
 
 		// Preload categories once per build (one batched query) and hand
-		// them to from_cart so no per-item term queries run. Phase 32
-		// (tag/attribute missions) preloads tags and attribute
-		// taxonomies the same way. Phase 18: the Mission Calculation settings
+		// them to from_cart so no per-item term queries run. // (tag/attribute missions) preloads tags and attribute
+		// taxonomies the same way. the Mission Calculation settings
 		// refine the snapshot (tax / discount / shipping / sale / virtual
 		// inclusion), unless the caller passed explicit overrides.
 		$args['categories'] = $this->load_categories( $cart );
@@ -210,8 +209,8 @@ final class CartIntegration {
 	/**
 	 * Merge the Mission Calculation settings into the from_cart args.
 	 *
-	 * Explicit caller args always win; otherwise the Phase 18 settings
-	 * apply (each default preserves the pre-Phase-18 behavior).
+	 * Explicit caller args always win; otherwise the settings
+	 * apply (each default preserves the previous behavior).
 	 *
 	 * @param array<string, mixed> $args Context args.
 	 * @return array<string, mixed>
@@ -317,7 +316,7 @@ final class CartIntegration {
 	}
 
 	/**
-	 * Load product tag ids for every line in one batched query (Phase 32).
+	 * Load product tag ids for every line in one batched query.
 	 *
 	 * Keyed by the canonical product id exactly like load_categories().
 	 *
@@ -329,7 +328,7 @@ final class CartIntegration {
 	}
 
 	/**
-	 * Load the attribute taxonomies present on every line (Phase 32).
+	 * Load the attribute taxonomies present on every line.
 	 *
 	 * Reads each product's attributes in one batched product load (no
 	 * per-item DB queries). Keyed by the canonical product id (the cart

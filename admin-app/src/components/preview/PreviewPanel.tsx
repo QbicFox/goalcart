@@ -22,7 +22,7 @@ interface PreviewPanelProps {
 }
 
 /**
- * The Phase 15 preview frame: the real storefront widget mirror rendered
+ * The preview frame: the real storefront widget mirror rendered
  * ABOVE the (remaining) Preview Settings section, using the full width of
  * its column. Shared by the Mission and Campaign builders (sticky column) so
  * the preview rendering can never drift between the two scopes — the same

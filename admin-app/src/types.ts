@@ -37,7 +37,7 @@ export interface FaraCartBootData {
 
 /**
  * Standard REST response envelope used by the FaraCart API
- * (Phase 7: base controller + response envelope, mirroring the reference).
+ * (base controller + response envelope, mirroring the reference).
  */
 export interface ApiEnvelope<T> {
   data: T;
@@ -76,7 +76,7 @@ export interface RewardMetaInput {
   shipping_zone_ids?: number[];
   shipping_method_ids?: string[];
   gift_product_id?: number;
-  /** Phase 32 (free gift selection): candidate gifts for 'choose' mode. */
+  /** free gift selection: candidate gifts for 'choose' mode. */
   gift_products?: number[];
   gift_add_mode?: 'automatic' | 'choose';
   coupon_code?: string;
@@ -96,7 +96,7 @@ export interface DisplaySettingsInput {
   template_settings?: TemplateSettingsValue;
 }
 
-/** Pluggable template engine (Phase 12): one template scope. */
+/** Pluggable template engine: one template scope. */
 export type TemplateScope = 'mission' | 'campaign';
 
 /** Pluggable template engine: the field types a template schema accepts. */
@@ -150,26 +150,25 @@ export interface ProgressCampaign {
   name: string;
   template: string;
   settings: TemplateSettingsValue;
-  /** Phase 32 (countdown): the latest milestone deadline (ISO local). */
+  /** countdown: the latest milestone deadline (ISO local). */
   countdown_end?: string;
 }
 
-/** A composite child config — a Mission::from_array() payload (Phase 4). */
+/** A composite child config — a Mission::from_array() payload. */
 export interface MissionChildInput {
   type: MissionType;
   target: number;
   calculation_mode: string;
   categories: number[];
   products: number[];
-  /** Phase 32: tag / attribute child scopes. */
+  /** tag / attribute child scopes. */
   tags?: number[];
   attributes?: string[];
 }
 
 /**
- * The payload accepted by `POST /missions` and `PUT /missions/{id}` (Phase 9
- * builder form model — mirrors the Mission REST payload without the
- * server-managed id/timestamps). Phase 32 adds the tag/attribute
+ * The payload accepted by `POST /missions` and `PUT /missions/{id}` (builder form model — mirrors the Mission REST payload without the
+ * server-managed id/timestamps). adds the tag/attribute
  * scopes and the customer/order/cart/shipping condition keys.
  */
 export interface MissionInput {
@@ -203,9 +202,9 @@ export interface MissionInput {
   reward_max_value: number | null;
   reward_meta: RewardMetaInput;
   priority: number;
-  /** Mutually exclusive mission (Phase 26): when reached, lower-priority missions are skipped. */
+  /** Mutually exclusive mission: when reached, lower-priority missions are skipped. */
   exclusive: boolean;
-  /** Per-user completion limit (Phase 36): null = unlimited. */
+  /** Per-user completion limit: null = unlimited. */
   max_completions_per_user: number | null;
   starts_at: string | null;
   ends_at: string | null;
@@ -213,8 +212,8 @@ export interface MissionInput {
 }
 
 /**
- * A mission as served by the Phase 7 REST API (`GET /faracart/v1/missions`).
- * Mirrors the Mission model's payload shape 1:1 (Phase 32 condition keys
+ * A mission as served by the REST API (`GET /faracart/v1/missions`).
+ * Mirrors the Mission model's payload shape 1:1 (condition keys
  * included).
  */
 export interface Mission {
@@ -249,9 +248,9 @@ export interface Mission {
   reward_max_value: number | null;
   reward_meta: RewardMetaInput;
   priority: number;
-  /** Mutually exclusive mission (Phase 26): when reached, lower-priority missions are skipped. */
+  /** Mutually exclusive mission: when reached, lower-priority missions are skipped. */
   exclusive: boolean;
-  /** Per-user completion limit (Phase 36): null = unlimited. */
+  /** Per-user completion limit: null = unlimited. */
   max_completions_per_user: number | null;
   campaign_id: number | null;
   menu_order: number;
@@ -263,7 +262,7 @@ export interface Mission {
   updated_at: string;
 }
 
-/** Message states produced by the Phase 13 MessageEngine. */
+/** Message states produced by the MessageEngine. */
 export type ProgressState =
   'inactive' | 'unavailable' | 'progressing' | 'nearly_complete' | 'completed' | 'reward_activated';
 
@@ -273,7 +272,7 @@ export interface ProgressReward {
   value: number | null;
   max_value: number | null;
   meta: RewardMetaInput;
-  /** Phase 32 (free gift selection): catalog-safe gift list + chosen flag. */
+  /** free gift selection: catalog-safe gift list + chosen flag. */
   gift?: Array<{
     id: number;
     name: string;
@@ -284,7 +283,7 @@ export interface ProgressReward {
   gift_chosen?: boolean;
 }
 
-/** A suggested product in the progress payload (Phase 14). */
+/** A suggested product in the progress payload. */
 export interface SuggestionProduct {
   id: number;
   name: string;
@@ -297,8 +296,7 @@ export interface SuggestionProduct {
 }
 
 /**
- * One mission entry in the public `GET /progress` payload and the Phase 15
- * admin `POST /preview` payload (same shape, built by
+ * One mission entry in the public `GET /progress` payload and the admin `POST /preview` payload (same shape, built by
  * `FrontendController::shape_mission()`).
  */
 export interface ProgressMission {
@@ -324,17 +322,17 @@ export interface ProgressMission {
   reward_state: 'not_applicable' | 'locked' | 'unlocked';
   eligible: boolean;
   reason: string;
-  /** Phase 32 (countdown): the mission's deadline (ISO local, '' = none). */
+  /** countdown: the mission's deadline (ISO local, '' = none). */
   countdown_end?: string;
   /**
-   * Phase 26 conflict resolution: whether this mission won its conflict and
+   * conflict resolution: whether this mission won its conflict and
    * may grant its reward, plus the machine-readable reason when suppressed
    * (lower_priority | exclusive | not_best | not_first).
    */
   conflict: { resolved: boolean; reason: string };
 }
 
-/** Simulated cart values sent to the preview endpoint (Phase 15). */
+/** Simulated cart values sent to the preview endpoint. */
 export interface PreviewSimulated {
   amount: number;
   quantity: number;
@@ -342,7 +340,7 @@ export interface PreviewSimulated {
 
 /**
  * The admin preview endpoint payload (`POST /faracart/v1/preview`,
- * Phase 15). Same per-mission shape as /progress, plus the simulated values
+ * ). Same per-mission shape as /progress, plus the simulated values
  * echoed back so the preview frame can label itself.
  */
 export interface PreviewPayload {
@@ -402,7 +400,7 @@ export interface SearchZone {
   name: string;
 }
 
-/** A milestone inside a campaign (Phase 10 payload shape). */
+/** A milestone inside a campaign (payload shape). */
 export interface CampaignMission {
   id: number;
   name: string;
@@ -413,9 +411,9 @@ export interface CampaignMission {
 }
 
 /**
- * A campaign as served by the Phase 10 REST API
+ * A campaign as served by the REST API
  * (`GET /faracart/v1/campaigns`). Groups missions into scheduled,
- * prioritized milestones (Phase 3 `campaigns` table + `missions.menu_order`).
+ * prioritized milestones (`campaigns` table + `missions.menu_order`).
  */
 export interface Campaign {
   id: number;
@@ -449,29 +447,28 @@ export interface CampaignInput {
 export type FrontendTemplate =
   'template-1' | 'template-2' | 'template-3' | 'template-4' | 'template-5' | 'template-6';
 
-/** Storefront widget display locations (Phase 18, frontend_locations). */
+/** Storefront widget display locations (frontend_locations). */
 export type FrontendLocation = 'cart' | 'mini-cart' | 'checkout' | 'shop' | 'product';
 
-/** Storefront currency display style (Phase 18, currency_display). */
+/** Storefront currency display style (currency_display). */
 export type CurrencyDisplay = 'symbol' | 'code' | 'name';
 
-/** How multiple active missions are presented (Phase 18, default_mission_behavior). */
+/** How multiple active missions are presented (default_mission_behavior). */
 export type MissionBehavior = 'all' | 'first' | 'closest';
 
 /**
- * How completed missions grant rewards when several compete (Phase 26,
- * conflict_resolution): cumulative (all stack), best (only the most
+ * How completed missions grant rewards when several compete (conflict_resolution): cumulative (all stack), best (only the most
  * valuable reward), first (only the highest-priority matching mission).
  */
 export type ConflictResolution = 'cumulative' | 'best' | 'first';
 
-/** Store-wide default money basis (Phase 18, calculation_mode). */
+/** Store-wide default money basis (calculation_mode). */
 export type CalculationMode = 'subtotal' | 'discounted_subtotal' | 'total';
 
 /** Storefront page-widget position (frontend_position). */
 export type FrontendPosition = 'top' | 'bottom';
 
-/** Storefront mobile behavior (Phase 18, frontend_mobile). */
+/** Storefront mobile behavior (frontend_mobile). */
 export type MobileBehavior = 'show' | 'hide';
 
 /** The named floating-button position presets (the only position control). */
@@ -503,7 +500,7 @@ export type ProfitReasonCode =
 
 /**
  * The product-cost sources the backend estimator consults, in order
- * (Improvement.md Phase 3 / §10 + UPSELL_REFACTOR §20). Keys are stable;
+ * (Improvement.md / §10 + UPSELL_REFACTOR §20). Keys are stable;
  * translate them in the UI when explaining where cost data comes from.
  */
 export type CostSource =
@@ -560,8 +557,8 @@ export interface ProfitDetails {
 }
 
 /**
- * The Phase 16/17 summary KPIs computed over the filtered window, plus the
- * Phase 2 purchase/profit metrics derived from the attribution layer
+ * The summary KPIs computed over the filtered window, plus the
+ * purchase/profit metrics derived from the attribution layer
  * (Improvement.md §37) — null when the active filter cannot be expressed
  * in attribution (e.g. product_id) or there is no data yet.
  */
@@ -573,7 +570,7 @@ export interface AnalyticsSummary {
   revenue_influenced: number;
   suggestion_ctr: number;
   suggestion_add_to_cart_rate: number;
-  // Phase 2 — purchase analysis (from the cached attribution layer).
+  // purchase analysis (from the cached attribution layer).
   progressed: number | null;
   purchased_orders: number | null;
   purchase_rate: number | null;
@@ -583,7 +580,7 @@ export interface AnalyticsSummary {
   profit_reason: string | null;
   profit_reason_code: ProfitReasonCode | null;
   cost_coverage: CostCoverage;
-  // Phase 3 — UI-ready profit availability metadata (§10): which cost
+  // UI-ready profit availability metadata (§10): which cost
   // sources are consulted and whether the store carries any cost data.
   // `store_has_cost_data` is null when the filter cannot be expressed in
   // attribution (e.g. product_id).
@@ -591,7 +588,7 @@ export interface AnalyticsSummary {
   store_has_cost_data: boolean | null;
   /** Profit-model building blocks (§12) — null for unsupported filters. */
   profit_details: ProfitDetails | null;
-  // Phase 6 — the full attribution funnel (views → progressed → completed
+  // the full attribution funnel (views → progressed → completed
   // → purchased) so the analytics funnel (§23) and the purchase analysis
   // (§24/§25) render from one self-consistent pipeline, plus the
   // assisted/influenced revenue splits for the advanced attribution
@@ -602,7 +599,7 @@ export interface AnalyticsSummary {
   influenced_sales: number | null;
 }
 
-/** One daily bucket of the Phase 17 trend series. */
+/** One daily bucket of the trend series. */
 export interface AnalyticsTrendPoint {
   date: string; // Y-m-d
   impressions: number;
@@ -620,7 +617,7 @@ export interface AnalyticsTopEntry {
   completion_rate: number;
 }
 
-/** One top suggested product entry (Phase 17). */
+/** One top suggested product entry. */
 export interface AnalyticsSuggestedProduct {
   product_id: number;
   name: string;
@@ -632,7 +629,7 @@ export interface AnalyticsSuggestedProduct {
 }
 
 /**
- * The full Phase 17 dashboard payload served by
+ * The full dashboard payload served by
  * `GET /faracart/v1/analytics`.
  */
 export interface AnalyticsPayload {
@@ -642,7 +639,7 @@ export interface AnalyticsPayload {
   top_missions: AnalyticsTopEntry[];
   top_suggested_products: AnalyticsSuggestedProduct[];
   /**
-   * Phase 6 — per-mission purchase comparison rows (same shape as
+   * per-mission purchase comparison rows (same shape as
    * `/revenue/missions`, §27), sliced by the same filters. Null when the
    * active filter cannot be expressed in attribution (e.g. product_id).
    */
@@ -659,11 +656,11 @@ export interface AggregateResult {
 }
 
 /**
- * The settings object persisted by the Phase 7 REST API
- * (`GET/POST /faracart/v1/settings`). Phase 18 ships the full surface:
+ * The settings object persisted by the REST API
+ * (`GET/POST /faracart/v1/settings`). ships the full surface:
  * general, frontend, mission calculation, performance and advanced.
  *
- * The `frontend_*` keys are the Phase 12 progress-template + appearance
+ * The `frontend_*` keys are the progress-template + appearance
  * surface consumed by the storefront widgets and the Appearance page.
  */
 export interface FaraCartSettings {
@@ -680,7 +677,7 @@ export interface FaraCartSettings {
   conflict_resolution: ConflictResolution;
   calculation_mode: CalculationMode;
 
-  // Frontend (P18-T02). Phase 32 adds the countdown/celebration toggles.
+  // Frontend (P18-T02). adds the countdown/celebration toggles.
   frontend_template: FrontendTemplate;
   frontend_animation: boolean;
   frontend_locations: FrontendLocation[];
@@ -716,7 +713,7 @@ export interface FaraCartSettings {
   /** Custom button tooltip/label ('' = the default label). */
   floating_label: string;
 
-  // Pluggable template engine (Phase 12 → engine): per-scope default
+  // Pluggable template engine (→ engine): per-scope default
   // template ids, per-template default appearance and schema versions.
   template_defaults: Record<TemplateScope, string>;
   template_settings: Record<TemplateScope, Record<string, TemplateSettingsValue>>;
@@ -733,7 +730,7 @@ export interface FaraCartSettings {
   performance_caching: boolean;
   analytics_enabled: boolean;
   performance_suggestions: boolean;
-  /** Phase 32 (advanced upsell ranking): balanced | price | popularity. */
+  /** advanced upsell ranking: balanced | price | popularity. */
   suggestions_ranking: 'balanced' | 'price' | 'popularity';
 
   // Advanced (P18-T05).
@@ -742,7 +739,7 @@ export interface FaraCartSettings {
   developer_hooks: boolean;
 }
 
-/** One entry of the developer-hooks reference (Phase 18 Advanced). */
+/** One entry of the developer-hooks reference (Advanced). */
 export interface DeveloperHook {
   type: 'action' | 'filter';
   hook: string;
@@ -750,15 +747,15 @@ export interface DeveloperHook {
 }
 
 /**
- * Phase 33 revenue optimization types (Phase 33.6 React Admin).
+ * revenue optimization types (React Admin).
  *
- * Every payload mirrors the PHP shapes served by the Phase 33.3–33.5
+ * Every payload mirrors the PHP shapes served by the 33.5
  * repository reads (RevenueRepository) through the REST layer — the
  * overview / attribution / mission-performance endpoints (RevenueController)
  * and the existing mission-recommendations / upsells endpoints.
  */
 
-/** The mission funnel counts + rates (attribution funnel, Phase 33.2). */
+/** The mission funnel counts + rates (attribution funnel). */
 export interface RevenueFunnel {
   views: number;
   progressed: number;
@@ -779,17 +776,17 @@ export interface RevenueSummary {
   profit_impact: number | null;
   profit_available: boolean;
   profit_reason: string | null;
-  // Phase 2 — profit availability metadata (Improvement.md §38/§39/§11/§12).
+  // profit availability metadata (Improvement.md §38/§39/§11/§12).
   profit_reason_code: ProfitReasonCode;
   profit_details: ProfitDetails;
   cost_coverage: CostCoverage;
-  // Phase 3 — UI-ready profit availability metadata (§10).
+  // UI-ready profit availability metadata (§10).
   cost_sources: CostSource[];
   store_has_cost_data: boolean;
   funnel: RevenueFunnel;
 }
 
-/** Incremental cart value analysis (Phase 33.2). */
+/** Incremental cart value analysis. */
 export interface IncrementalCartValue {
   average: number;
   total: number;
@@ -828,7 +825,7 @@ export interface ShippingStats {
   by_method: Record<string, ShippingMethodStats>;
 }
 
-/** One daily bucket of the Phase 33.3 revenue trend series. */
+/** One daily bucket of the revenue trend series. */
 export interface RevenueTrendPoint {
   date: string; // Y-m-d
   views: number;
@@ -874,7 +871,7 @@ export interface MissionPerformanceRow {
   conversion_rate: number | null;
   average_cart_value: number;
   incremental_cart_value: number;
-  // Phase 5 — commercial-outcome + detail-drawer fields (§16/§20): total
+  // commercial-outcome + detail-drawer fields (§16/§20): total
   // influenced order value, the engine's attribution window and the
   // session-count data-sufficiency signal.
   influenced_revenue: number;
@@ -890,7 +887,7 @@ export interface MissionPerformanceRow {
   profit_reason_code: ProfitReasonCode;
   profit_details: ProfitDetails;
   cost_coverage: CostCoverage;
-  // Phase 3 — UI-ready profit availability metadata (§10).
+  // UI-ready profit availability metadata (§10).
   cost_sources: CostSource[];
   store_has_cost_data: boolean;
   // UPSELL_REFACTOR §30/§32/§33 — Smart Upsell linkage: how many of this
@@ -1106,7 +1103,7 @@ export interface RecommendationCandidate {
 
 /**
  * The `GET /faracart/v1/revenue/mission-recommendations` payload — the
- * Recommendations page's data source (Phase 33.4; UICHANGES.md §40
+ * Recommendations page's data source (; UICHANGES.md §40
  * label).
  */
 export interface MissionRecommendationsPayload {
@@ -1131,10 +1128,10 @@ export interface MissionRecommendationsPayload {
 
 /** Extra settings-page meta served alongside the settings payload. */
 export interface SettingsMeta {
-  /** Public faracart_* hooks reference (Phase 18, developer hooks). */
+  /** Public faracart_* hooks reference (developer hooks). */
   hooks?: DeveloperHook[];
   /** Absolute path of the debug log file (present when logging is on). */
   log_path?: string;
-  /** Site roles (slug → display name) for the Phase 32 role conditions. */
+  /** Site roles (slug → display name) for the role conditions. */
   roles?: Record<string, string>;
 }

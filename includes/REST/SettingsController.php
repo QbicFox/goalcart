@@ -18,7 +18,7 @@ defined('ABSPATH') || exit;
 /**
  * Class SettingsController
  *
- * Phase 7 (REST API / AJAX Layer) settings endpoints:
+ * REST API / AJAX Layer settings endpoints:
  *
  *  - `GET  /faracart/v1/settings` — the full settings array (merged with
  *    defaults).
@@ -28,7 +28,7 @@ defined('ABSPATH') || exit;
  *    sync its state.
  *	 * The persisted option (Settings::OPTION_NAME) drives every consumer
  * (storefront widgets, mission calculation, tracking, the admin display
- * mode), so saving here changes behavior immediately. Phase 18 adds the
+ * mode), so saving here changes behavior immediately. adds the
  * full surface — general, frontend, mission calculation, performance,
  * advanced — to the schema and sanitizer, and the GET response carries
  * the developer-hooks reference in meta for the Advanced tab.
@@ -135,10 +135,10 @@ class SettingsController extends BaseController
 	public function handle_get($request)
 	{
 		$meta = array(
-			// Phase 18 (Advanced → developer hooks): the reference list of
+			// Advanced → developer hooks: the reference list of
 			// public faracart_* hooks, rendered by the Settings page.
 			'hooks' => HookManager::documented_hooks(),
-			// Phase 32 (customer-role conditions): the editable role list
+			// customer-role conditions: the editable role list
 			// for the mission builder's role picker.
 			'roles' => $this->role_options(),
 		);
@@ -217,8 +217,8 @@ class SettingsController extends BaseController
 			);
 		}
 
-		// Phase 18 (Advanced → logging): record the save when logging is
-		// enabled, and fire the developer-hooks action (Phase 28 API) so
+		// Advanced → logging: record the save when logging is
+		// enabled, and fire the developer-hooks action (API) so
 		// integrations can react to configuration changes.
 		Logger::write('Settings saved: ' . wp_json_encode($clean), 'debug');
 
@@ -238,7 +238,7 @@ class SettingsController extends BaseController
 	 *
 	 * Each known setting is validated by the REST layer (types, ranges) so
 	 * a bad request fails with a structured 400 before any option is
-	 * touched. Phase 12 adds the storefront progress-template surface
+	 * touched. adds the storefront progress-template surface
 	 * (variant enum, ranges for height/radius, boolean animation).
 	 *
 	 * @return array<string, array<string, mixed>>
@@ -284,7 +284,7 @@ class SettingsController extends BaseController
 			'frontend_radius'       => array('type' => 'integer', 'minimum' => 0, 'maximum' => 40),
 			'frontend_css_class'    => array('type' => 'string'),
 			'frontend_custom_css'   => array('type' => 'string'),
-			// Phase 32 (countdown + celebration).
+			// (countdown + celebration).
 			'frontend_countdown'    => $bool,
 			'frontend_celebrate'    => $bool,
 
@@ -311,7 +311,7 @@ class SettingsController extends BaseController
 			'performance_caching'     => $bool,
 			'analytics_enabled'       => $bool,
 			'performance_suggestions' => $bool,
-			// Phase 32 (advanced upsell ranking).
+			// (advanced upsell ranking).
 			'suggestions_ranking'     => array(
 				'type' => 'string',
 				'enum' => array('balanced', 'price', 'popularity'),

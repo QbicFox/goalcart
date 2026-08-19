@@ -1,9 +1,9 @@
 <?php
 /**
- * FaraCart Phase 3 tests (Profit Availability).
+ * FaraCart tests (Profit Availability).
  *
  * Verifies the actual WooCommerce cost sources behind the estimated-profit
- * model (Improvement.md Phase 3) and the UI-ready availability metadata
+ * model (Improvement.md) and the UI-ready availability metadata
  * added for the Revenue/Analytics redesign:
  *
  *  - cost sources: `_cost`, `_wc_cog_cost` (fallback when `_cost` is
@@ -28,7 +28,7 @@
  * 601+, sessions "t01"-style and products with the "P3 " prefix, so they
  * never collide with live store traffic or other suites' residue.
  *
- * Run: php tests/profit-availability-test.php   (from the plugin directory)
+ * Run: php tests/profit-availability-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file.
@@ -81,7 +81,7 @@ function close( $a, $b, $eps = 0.01 ) {
 	return abs( (float) $a - (float) $b ) < $eps;
 }
 
-// The Phase 33 tables are created by Installer::maybe_upgrade(), which runs
+// The tables are created by Installer::maybe_upgrade(), which runs
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 

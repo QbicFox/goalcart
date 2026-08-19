@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Class MissionsController
- *	 * Phase 7 (REST API / AJAX Layer) admin endpoints for missions:
+ *	 * (REST API / AJAX Layer) admin endpoints for missions:
 	 *
 	 *  - `GET    /faracart/v1/missions`                 — paginated list (status
 	 *    filter + name search)
@@ -399,7 +399,7 @@ class MissionsController extends BaseController {
 					Mission::TYPE_PRODUCT,
 					Mission::TYPE_WEIGHT,
 					Mission::TYPE_COMPOSITE,
-					// Phase 32 (tag/attribute conditions).
+					// (tag/attribute conditions).
 					Mission::TYPE_TAG,
 					Mission::TYPE_ATTRIBUTE,
 				),
@@ -450,7 +450,7 @@ class MissionsController extends BaseController {
 				// its safe scalar type before the payload reaches the DB.
 				'sanitize_callback' => array( $this, 'sanitize_children' ),
 			),
-			// Phase 32 (Advanced V2): tag/attribute mission types plus
+			// Advanced V2: tag/attribute mission types plus
 			// the customer/order/cart/shipping condition keys — validated
 			// and cast here so a bad value can never reach the conditions
 			// JSON.
@@ -507,7 +507,7 @@ class MissionsController extends BaseController {
 				'type'    => 'boolean',
 				'default' => false,
 			),
-			// Phase 36 (Per-User Mission Completion Limit): how many times the
+			// Per-User Mission Completion Limit: how many times the
 			// same user may complete this mission (null = unlimited). The
 			// schema rejects zero, negatives and non-integers; the
 			// repository additionally normalizes anything < 1 to null.
@@ -809,7 +809,7 @@ class MissionsController extends BaseController {
 			'excluded_products' => $this->ints( isset( $row['excluded_products'] ) ? $row['excluded_products'] : array() ),
 			'operator'          => isset( $row['operator'] ) ? (string) $row['operator'] : Mission::OP_AND,
 			'children'          => isset( $row['children'] ) && is_array( $row['children'] ) ? $row['children'] : array(),
-			// Phase 32 condition surface (mirrors the Mission model accessors).
+			// condition surface (mirrors the Mission model accessors).
 			'tags'              => $this->ints( isset( $row['tags'] ) ? $row['tags'] : array() ),
 			'attributes'        => $this->strings( isset( $row['attributes'] ) ? $row['attributes'] : array() ),
 			'customer_roles'    => $this->strings( isset( $row['customer_roles'] ) ? $row['customer_roles'] : array() ),

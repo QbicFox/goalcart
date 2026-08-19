@@ -3,10 +3,10 @@
  * FaraCart settings tests (P18-T01 General / P18-T02 Frontend /
  * P18-T03 Mission Calculation / P18-T04 Performance / P18-T05 Advanced).
  *
- * Boots WordPress and exercises the Phase 18 settings surface:
+ * Boots WordPress and exercises the settings surface:
  *
  *  - defaults: every new setting key ships with the documented default
- *    (each preserves the pre-Phase-18 behavior)
+ *    (each preserves the previous behavior)
  *  - the REST schema covers the new keys (enums for currency display /
  *    mission behavior / calculation mode / mobile, the location enum,
  *    booleans) and the sanitizer normalizes invalid values
@@ -29,7 +29,7 @@
  * (missions, the settings option, the progress-cache transient, the debug
  * log file) are rolled back / removed, and residue is asserted.
  *
- * Run: php tests/settings-test.php   (from the plugin directory)
+ * Run: php tests/settings-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -635,7 +635,7 @@ try {
 
 	// ---- Progress caching (P18-T04) ----
 	// Build the context through the same integration (memoized per cart +
-	// args, so the key in the test matches the controller's). Phase 36:
+	// args, so the key in the test matches the controller's).
 	// the key also embeds the shopper identity — the payload carries
 	// per-user completion status, so a cached payload can never serve
 	// another shopper's counts (the container's CompletionService resolves

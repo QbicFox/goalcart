@@ -150,7 +150,7 @@ function sampleMilestonesAt(fraction: number): ProgressMission[] {
 
 /**
  * The live preview of one template with its current draft appearance —
- * rendered through PreviewWidget (the same component the Phase 15 preview
+ * rendered through PreviewWidget (the same component the preview
  * dialogs use), so what the merchant sees here matches the storefront.
  * Framed like the Mission/Campaign builder preview (PreviewPanel): a chip
  * header (progress + template), the rendered widget on a gray stage, and

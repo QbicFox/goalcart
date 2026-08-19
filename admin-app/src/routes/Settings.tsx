@@ -402,16 +402,16 @@ function FloatingPositionCard({
 }
 
 /* ------------------------------------------------------------------ *
- * Settings page (Phase 18: full surface in six tabs)
+ * Settings page (full surface in six tabs)
  * ------------------------------------------------------------------ */
 
 /**
- * Settings (Phase 18 — the full configuration surface).
+ * Settings (the full configuration surface).
  *
  * Six tabs over a single react-hook-form instance: General, Frontend,
  * Mission Calculation, Performance, Advanced and Floating. Every control
  * maps 1:1 to a persisted setting key validated server-side by the
- * Phase 7 REST schema; saving updates the query data so the form
+ * REST schema; saving updates the query data so the form
  * re-syncs, and the full-screen toggle still previews live through
  * FullscreenProvider.
  *

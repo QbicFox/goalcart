@@ -1,6 +1,6 @@
 <?php
 /**
- * Daily revenue aggregation for FaraCart (Phase 33.3 — Aggregation & Performance).
+ * Daily revenue aggregation for FaraCart (Aggregation & Performance).
  *
  * @package FaraCart
  */
@@ -15,20 +15,19 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class DailyAggregator
  *
- * Phase 33.3 (Aggregation & Performance) — the scheduled job that pre-computes
+ * Aggregation & Performance — the scheduled job that pre-computes
  * the heavy analytics so admin/dashboard reads never scan the raw event log.
  * Two outputs, both built with the exact same definitions as the live reads:
  *
  *  - `revenue_daily`  — one row per mission per day (views, progressions,
  *    completions, conversions, revenue, incremental_revenue, reward_cost,
- *    estimated_profit), filled by aggregate_revenue_day() from the Phase 33.1
- *    revenue_events + mission_attribution logs through the AttributionEngine's
+ *    estimated_profit), filled by aggregate_revenue_day() from the *    revenue_events + mission_attribution logs through the AttributionEngine's
  *    daily_metrics() (same funnel + summary + reward-cost + profit code the
  *    dashboard reads live — the aggregate and the live view can never drift).
  *  - `upsell_stats`   — one row per product (impressions, clicks, adds,
  *    orders, revenue), fully rebuilt by aggregate_upsells() from the
  *    upsell_events log — the historical conversion signal the Smart Upsell
- *    Engine reads (Phase 33.5).
+ *    Engine reads.
  *
  * Scheduling (P33.3): the job runs on the `daily` cron interval through the
  * Installer's cron_events()/cron_intervals() maps, and is gated on the same

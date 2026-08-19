@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class CampaignProgressTemplate
  *
- * The second Campaign-scoped template (Phase 32, campaign templates): a
+ * The second Campaign-scoped template (campaign templates): a
  * single overall progress readout for the whole campaign — the campaign
  * name, a "2 of 4 milestones" counter and one bar driven by the top
  * milestone — instead of the per-mission cards or the milestone ladder. The

@@ -3,13 +3,13 @@
  * FaraCart cart-integration tests (P06-T01 / P06-T02 / P06-T03 / P06-T04).
  *
  * Boots WordPress, then exercises the CartIntegration service — the single
- * source of truth for the live-cart snapshot — and the Phase 6 additions to
+ * source of truth for the live-cart snapshot — and the additions to
  * CartContext::from_cart() (preloaded category map, variation categories
  * resolved from the parent). Read-only like the other suites: no products
  * are created, no database rows are written, and the plugin is not
  * activated.
  *
- * Run: php tests/cart-integration-test.php   (from the plugin directory)
+ * Run: php tests/cart-integration-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).

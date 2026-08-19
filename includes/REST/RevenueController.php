@@ -16,9 +16,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class RevenueController
  *
- * Phase 33.6 (React Admin) — the read-only endpoints behind the Revenue
- * Optimization admin section. All payloads are served through the Phase
- * 33.3 cached repository layer, so repeated admin renders never recompute
+ * React Admin — the read-only endpoints behind the Revenue
+ * Optimization admin section. All payloads are served through the
+ * cached repository layer, so repeated admin renders never recompute
  * the summaries:
  *
  *  - `GET /faracart/v1/revenue/overview` — the Revenue Overview page's
@@ -35,7 +35,7 @@ defined( 'ABSPATH' ) || exit;
  *    rates, average + incremental cart value, attributed + assisted
  *    revenue, reward cost, profit impact) for every mission or one mission.
  *  - `GET /faracart/v1/revenue/cost-coverage` — Product Cost coverage
- *    (UPSELL_REFACTOR §25/§46): how much of the catalog carries cost
+ *    UPSELL_REFACTOR §25/§46: how much of the catalog carries cost
  *    data, so the Mission Optimization UI can show "842 / 1,000 products"
  *    and explain why profit estimates may be unavailable.
  *

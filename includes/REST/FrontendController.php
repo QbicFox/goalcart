@@ -31,7 +31,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class FrontendController
  *
- * Phase 7 (REST API / AJAX Layer) frontend endpoint:
+ * REST API / AJAX Layer frontend endpoint:
  *
  *  - `GET /faracart/v1/progress` — the current cart's mission progress,
  *    exposing only the minimum necessary data (P07-T03):
@@ -42,19 +42,18 @@ defined( 'ABSPATH' ) || exit;
  *    ```
  *
  *    one entry per active mission, plus cart/currency metadata. The progress
- *    widgets (Phase 11) poll this endpoint and re-render.
+ *    widgets  poll this endpoint and re-render.
  *
  *  - `shape_mission()` — the shared per-mission payload shaper, the single
  *    source of truth for the item shape above. It is consumed by this
- *    endpoint and by the Phase 15 PreviewController, so the admin preview
+ *    endpoint and by the PreviewController, so the admin preview
  *    and the storefront payload can never drift.
  * Security (P07-T04): public by design — guests must be able to read
  * their own cart progress — so it requires no capability, returns only
  * aggregate numbers (no PII), and is rate limited per IP. Message copy
- * is rendered by the Phase 13 MessageEngine (state-aware,
+ * is rendered by the MessageEngine (state-aware,
  * display-settings overridable); suggestions come from the unified
- * product recommendation engine (Phase 14 SuggestionEngine + Phase
- * 33.5 UpsellRanker merged into ONE ranked, deduplicated list —
+ * product recommendation engine (SuggestionEngine + UpsellRanker merged into ONE ranked, deduplicated list —
  * published, in-stock products only).
  */
 class FrontendController extends BaseController {
@@ -81,14 +80,14 @@ class FrontendController extends BaseController {
 	protected $cart_integration;
 
 	/**
-	 * Message engine instance (Phase 13: dynamic messaging).
+	 * Message engine instance (dynamic messaging).
 	 *
 	 * @var MessageEngine
 	 */
 	protected $messages;
 
 	/**
-	 * Unified product recommendation engine (Phase 14 + Phase 33.5):
+	 * Unified product recommendation engine :
 	 * merges the suggestion and upsell strategies into ONE ranked,
 	 * deduplicated customer-facing list.
 	 *
@@ -97,14 +96,14 @@ class FrontendController extends BaseController {
 	protected $recommendations;
 
 	/**
-	 * Settings instance (Phase 18: mission behavior, suggestions, caching).
+	 * Settings instance (mission behavior, suggestions, caching).
 	 *
 	 * @var Settings
 	 */
 	protected $settings;
 
 	/**
-	 * Reward engine (Phase 26 display/grant parity): evaluates each
+	 * Reward engine (display/grant parity): evaluates each
 	 * completed mission's reward against the same cart snapshot the engine
 	 * grants with, so 'best' mode compares real computed amounts and the
 	 * payload reflects stacking suppression exactly like the live cart.
@@ -126,7 +125,7 @@ class FrontendController extends BaseController {
 	protected $templates;
 
 	/**
-	 * Per-user completion limit service (Phase 36): the payload carries
+	 * Per-user completion limit service: the payload carries
 	 * each mission's completion status (limit / count / remaining /
 	 * can_complete) for the current shopper, and a mission the shopper has
 	 * already completed the maximum number of times renders the
@@ -153,13 +152,12 @@ class FrontendController extends BaseController {
 	 * @param CartIntegration   $cart_integration Cart snapshot service.
 	 * @param MessageEngine     $messages        Message template engine.
 	 * @param ProductRecommendationEngine $recommendations Unified recommendation
-	 *                                           engine (Phase 14 + Phase 33.5).
+	 *                                           engine.
 	 * @param Settings          $settings        Settings service.
-	 * @param RewardEngine|null $reward_engine   Reward engine (Phase 26
-	 *                                           display/grant parity).
-	 * @param TemplateEngine|null $templates     Template engine (Phase 32).
+	 * @param RewardEngine|null $reward_engine   Reward engine (display/grant parity).
+	 * @param TemplateEngine|null $templates     Template engine.
 	 * @param CompletionService|null $completions Per-user completion limit
-	 *                                           service (Phase 36).
+	 *                                           service.
 	 */
 	public function __construct( MissionEngine $engine, MissionRepository $missions, CartIntegration $cart_integration, MessageEngine $messages, ProductRecommendationEngine $recommendations, Settings $settings, ?RewardEngine $reward_engine = null, ?TemplateEngine $templates = null, ?CompletionService $completions = null ) {
 		$this->engine           = $engine;
@@ -232,7 +230,7 @@ class FrontendController extends BaseController {
 		$context = $this->cart_integration->context( $cart );
 		$missions   = $this->active_missions_for( $this->missions->active_missions(), $context );
 
-		// Phase 18 (Performance → caching): a short-lived transient keyed
+		// Performance → caching: a short-lived transient keyed
 		// by the cart snapshot + missions + behavior settings serves repeat
 		// widget polls without re-evaluating every mission. The key embeds the
 		// cart state, so any cart change produces a fresh payload within
@@ -265,7 +263,7 @@ class FrontendController extends BaseController {
 			'quantity' => $context->total_quantity(),
 		);
 
-		// Phase 26 (Conflict & Priority Engine): the same deterministic
+		// Conflict & Priority Engine: the same deterministic
 		// resolution the reward engine grants with is reflected here, so
 		// every mission's payload says whether it won or was suppressed (and
 		// why). The storefront widgets keep rendering every mission's
@@ -273,7 +271,7 @@ class FrontendController extends BaseController {
 		// state (a suppressed reward never renders as unlocked).
 		$resolved = $this->resolve_conflicts( $missions, $context );
 
-		// Phase 36 (per-user completion limit): one batched completion-count
+		// per-user completion limit: one batched completion-count
 		// query primes the per-request cache so the per-mission shape below
 		// never runs N individual counts on the storefront. The completion
 		// status is user-specific, so the optional progress transient is
@@ -305,7 +303,7 @@ class FrontendController extends BaseController {
 				// poll instead of producing a stream of 403s. See
 				// tracking_nonce().
 				'tracking_nonce' => $this->tracking_nonce(),
-				// Phase 32 (free gift selection): a freshly minted gift nonce
+				// free gift selection: a freshly minted gift nonce
 				// rides on every progress response so the storefront JS can
 				// adopt it before claiming a gift — a long-lived cart page
 				// never outlives its gift nonce window.
@@ -406,7 +404,7 @@ class FrontendController extends BaseController {
 	/**
 	 * Narrow the active missions per the default mission behavior setting.
 	 *
-	 * Phase 18 (Settings → General):
+	 * Settings → General: 
 	 *
 	 *  - all     — every active mission (default)
 	 *  - first   — only the first active mission (repository order)
@@ -449,7 +447,7 @@ class FrontendController extends BaseController {
 	/**
 	 * Resolve conflict winners among the given missions for the payload.
 	 *
-	 * Mirrors the RewardEngine pass (Phase 26) so the payload is always
+	 * Mirrors the RewardEngine pass  so the payload is always
 	 * what the live cart grants: completed missions that carry a reward
 	 * compete under the configured mode ('best' compares the real computed
 	 * reward amounts on the same cart snapshot), and the per-reward
@@ -542,9 +540,9 @@ class FrontendController extends BaseController {
 			$mission_ids[] = $mission->id();
 		}
 
-		// Phase 36: the payload now carries per-user completion status, so
+		// the payload now carries per-user completion status, so
 		// the cache key MUST include the identity — a cached payload can
-		// never serve another shopper's completion counts (Phase 21 rule:
+		// never serve another shopper's completion counts (rule:
 		// identity is part of the cache key).
 		$identity = null !== $this->completions ? $this->completions->context_identity( $context ) : array();
 
@@ -573,7 +571,7 @@ class FrontendController extends BaseController {
 	 *
 	 * Single source of truth for the per-mission payload shape, used by both
 	 * the public `GET /progress` endpoint (live cart) and the admin
-	 * PreviewController (Phase 15, simulated cart) so the two can never
+	 * PreviewController (simulated cart) so the two can never
 	 * drift apart. Mirrors the documented payload in docs/api.md.
 	 *
 	 * @param Mission        $mission    Mission.
@@ -585,7 +583,7 @@ class FrontendController extends BaseController {
 	 * @param bool         $full_reward_meta Whether to expose the full reward
 	 *                             meta (admin preview only — P22 redaction).
 	 * @param array<string, mixed>|null $conflict Conflict payload fragment
-	 *                             (resolved/reason, Phase 26); null = mission
+	 *                             (resolved/reason); null = mission
 	 *                             was not suppressed.
 	 * @return array<string, mixed>
 	 */
@@ -599,7 +597,7 @@ class FrontendController extends BaseController {
 
 		$resolved = $this->templates()->resolve_mission( $mission );
 
-		// Phase 36 (per-user completion limit): the shopper's completion
+		// per-user completion limit: the shopper's completion
 		// status for this mission (completion_limit / completion_count /
 		// remaining_completions / can_complete). Null when the service is
 		// absent (bare constructions). When the shopper can no longer
@@ -641,11 +639,11 @@ class FrontendController extends BaseController {
 			'eligible'     => $result->eligible(),
 			'reason'       => $result->reason(),
 			'conflict'     => $conflict,
-			// Phase 36 (per-user completion limit): the shopper's own
+			// per-user completion limit: the shopper's own
 			// completion status — the storefront reflects it, the server
 			// enforces it.
 			'completion'   => $completion,
-			// Phase 32 (countdown): the mission's deadline as a local-time ISO
+			// countdown: the mission's deadline as a local-time ISO
 			// string ('' when the mission has no end time). The storefront JS
 			// renders a live countdown chip from it.
 			'countdown_end' => $this->countdown_end( $mission ),
@@ -653,7 +651,7 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * The shopper's completion status for a mission (Phase 36).
+	 * The shopper's completion status for a mission.
 	 *
 	 * Null when the completion service is absent (bare constructions). The
 	 * per-request count cache is primed in handle_progress() with one
@@ -674,7 +672,7 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * The mission's deadline for the storefront countdown (Phase 32).
+	 * The mission's deadline for the storefront countdown.
 	 *
 	 * Only an end time in the future is worth counting down to; past and
 	 * empty values render no chip. The stored site-local datetime is
@@ -701,9 +699,9 @@ class FrontendController extends BaseController {
 	/**
 	 * Whether the storefront payload carries product suggestions.
 	 *
-	 * Phase 18 (Settings → Performance → suggestions): an opt-out for
+	 * Settings → Performance → suggestions: an opt-out for
 	 * stores that want the missions without the upsell list. Filterable via
-	 * faracart_suggestions_enabled (the Phase 28 developer API hook).
+	 * faracart_suggestions_enabled (the developer API hook).
 	 *
 	 * @return bool
 	 */
@@ -720,7 +718,7 @@ class FrontendController extends BaseController {
 	 * quantity-mode category/product missions do too. Quantity missions default
 	 * to the subtotal calculation mode (Mission::default_calculation_mode),
 	 * so the type is checked in addition to the mode — keeps the widget
-	 * milestone labels and the Phase 13 message numbers consistent.
+	 * milestone labels and the message numbers consistent.
 	 *
 	 * @param Mission $mission Mission.
 	 * @return bool
@@ -730,7 +728,7 @@ class FrontendController extends BaseController {
 	}
 
 	/**
-	 * The mission's display icon for the card template (Phase 12).
+	 * The mission's display icon for the card template.
 	 *
 	 * Comes from the mission builder's Display section (`display_settings.icon`);
 	 * empty when none was configured — the widget falls back to its own
@@ -782,7 +780,7 @@ class FrontendController extends BaseController {
 			);
 		}
 
-		// Phase 32 (countdown): a campaign group exposes the latest of its
+		// countdown: a campaign group exposes the latest of its
 		// milestones' end times so the storefront can render one countdown
 		// per campaign.
 		foreach ( $missions as $mission ) {
@@ -838,7 +836,7 @@ class FrontendController extends BaseController {
 			'max_value' => $mission->reward_max_value(),
 		);
 
-		// Phase 32 (free gift selection): a choose-mode gift mission exposes
+		// free gift selection: a choose-mode gift mission exposes
 		// the candidate gifts as catalog data (id/name/image/price — store
 		// products, no secrets) so the storefront picker can render; the
 		// gift_chosen flag reflects the live cart. Only rendered for the

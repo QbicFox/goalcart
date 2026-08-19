@@ -3,7 +3,7 @@
  * FaraCart performance tests (P23-T01 / P23-T02 / P23-T03).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then audits
- * the Phase 23 performance posture end-to-end:
+ * the performance posture end-to-end:
  *
  *  - P23-T01 Frontend:
  *      lazy-loaded admin routes (App.tsx), cached server state (React
@@ -28,7 +28,7 @@
  * database transaction that is rolled back, transient keys are deleted
  * explicitly, and the absence of any residue is asserted afterwards.
  *
- * Run: php tests/performance-test.php   (from the plugin directory)
+ * Run: php tests/performance-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).

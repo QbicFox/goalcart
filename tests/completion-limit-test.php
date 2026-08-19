@@ -1,6 +1,6 @@
 <?php
 /**
- * FaraCart per-user completion limit tests (Phase 36).
+ * FaraCart per-user completion limit tests.
  *
  * Boots WordPress and exercises the per-user mission completion limit end to
  * end:
@@ -29,7 +29,7 @@
  * rather than a rollback — the same reason the seeded missions get unique
  * names).
  *
- * Run: php tests/completion-limit-test.php   (from the plugin directory)
+ * Run: php tests/completion-limit-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -228,7 +228,7 @@ $g_lim3 = new Mission( array( 'id' => $mission_lim3, 'status' => 'active', 'max_
 check( 'can_complete true under limit', true === $completions->can_complete( $g_lim3, 7, '' ) );
 check( 'can_complete true for other user', true === $completions->can_complete( $g_lim3, 8, '' ) );
 
-// Mission reset (Phase 14): deleting/recreating progress never touches the
+// Mission reset: deleting/recreating progress never touches the
 // completion history — the count lives in mission_completions, not in any
 // progress row. A fresh evaluation of the same mission still sees the count.
 check( 'reset: count survives a fresh mission object', 2 === $completions->count_for( $mission_lim3, 7, '', true ) );

@@ -56,7 +56,7 @@ export async function searchCoupons(params: SearchParams = {}): Promise<SearchCo
   return data.items;
 }
 
-/** Search product tags via `GET /faracart/v1/search/tags` (Phase 32). */
+/** Search product tags via `GET /faracart/v1/search/tags`. */
 export async function searchTags(params: SearchParams = {}): Promise<SearchTag[]> {
   const data = await apiFetch<SearchList<SearchTag>>(`/search/tags${buildQuery(params)}`);
   return data.items;
@@ -64,7 +64,7 @@ export async function searchTags(params: SearchParams = {}): Promise<SearchTag[]
 
 /**
  * List global attribute taxonomies via `GET /faracart/v1/search/attributes`
- * (Phase 32). `ids` is not applicable — the query uses `q` only.
+ *. `ids` is not applicable — the query uses `q` only.
  */
 export async function searchAttributes(params: SearchParams = {}): Promise<SearchAttribute[]> {
   const query = new URLSearchParams();
@@ -80,7 +80,7 @@ export async function searchAttributes(params: SearchParams = {}): Promise<Searc
   return data.items;
 }
 
-/** List shipping zones via `GET /faracart/v1/search/zones` (Phase 32). */
+/** List shipping zones via `GET /faracart/v1/search/zones`. */
 export async function searchZones(params: SearchParams = {}): Promise<SearchZone[]> {
   const data = await apiFetch<SearchList<SearchZone>>(`/search/zones${buildQuery(params)}`);
   return data.items;

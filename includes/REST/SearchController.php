@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class SearchController
  *
- * Phase 7 (REST API / AJAX Layer) admin search endpoints used by the mission
+ * REST API / AJAX Layer admin search endpoints used by the mission
  * builder to pick products, categories and coupons:
  * *  - `GET /faracart/v1/search/products`    — products/variations by name or
  *    SKU (q), capped at 50 results.
@@ -22,12 +22,12 @@ defined( 'ABSPATH' ) || exit;
  *  - `GET /faracart/v1/search/coupons`     — shop_coupon posts by code.
  *
  * Every route also accepts an `ids` array: when present, the search is
- * narrowed to exactly those ids (Phase 9: the mission builder uses it to
+ * narrowed to exactly those ids (the mission builder uses it to
  * preload already-selected products/categories/coupons when editing a
  * mission, since the search endpoints are the only admin lookup available).
  *
  * Searches are admin-only (manage_options). Results are capped so the
- * builder never loads thousands of products at once (Phase 23 performance
+ * builder never loads thousands of products at once (performance
  * requirement: server-side search, no client-side filtering).
  */
 class SearchController extends BaseController {
@@ -88,7 +88,7 @@ class SearchController extends BaseController {
 			)
 		);
 
-		// Phase 32 (tag/attribute conditions): tag terms, global
+		// tag/attribute conditions: tag terms, global
 		// attribute taxonomies and shipping zones for the mission builder.
 		register_rest_route(
 			self::NAMESPACE,
@@ -392,7 +392,7 @@ class SearchController extends BaseController {
 	}
 
 	/**
-	 * List shipping zones (phase 32 shipping-zone missions).
+	 * List shipping zones (shipping-zone missions).
 	 *
 	 * Zone 0 ("locations not covered by your other zones") is listed with
 	 * its conventional id 0.

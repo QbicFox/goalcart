@@ -42,7 +42,7 @@ class MissionEvaluatorRegistry {
 			Mission::TYPE_PRODUCT           => ProductEvaluator::class,
 			Mission::TYPE_WEIGHT            => WeightEvaluator::class,
 			Mission::TYPE_COMPOSITE         => CompositeEvaluator::class,
-			// Phase 32 (tag/attribute conditions) — the category family
+			// (tag/attribute conditions) — the category family
 			// extended to tags and attribute taxonomies.
 			Mission::TYPE_TAG               => TagEvaluator::class,
 			Mission::TYPE_ATTRIBUTE         => AttributeEvaluator::class,

@@ -42,7 +42,7 @@ interface EstimatedProfitCardProps {
 }
 
 /**
- * The Estimated Profit KPI card (Improvement.md §8/§10–§13, Phase 4).
+ * The Estimated Profit KPI card (Improvement.md §8/§10–§13).
  *
  * Renders every profit data state without ever inventing a number:
  *

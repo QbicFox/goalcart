@@ -35,7 +35,7 @@ const MODE_OPTIONS: Record<string, Array<{ value: string; label: string }>> = {
     { value: 'discounted_subtotal', label: __('Discounted subtotal', 'faracart') },
     { value: 'total', label: __('Cart total (incl. tax & shipping)', 'faracart') },
   ],
-  // Phase 32 (tag/attribute conditions): the category family.
+  // tag/attribute conditions: the category family.
   tag: [
     { value: 'quantity', label: __('Quantity', 'faracart') },
     { value: 'subtotal', label: __('Subtotal (before discounts)', 'faracart') },
@@ -86,13 +86,13 @@ function targetExample(type: MissionType, mode: string): string {
 }
 
 /**
- * Mission Builder → Target (Phase 9): dynamic target configuration for the
+ * Mission Builder → Target: dynamic target configuration for the
  * selected mission type. The fields change with the type so the admin never
  * sees irrelevant controls:
  *
  * - amount / quantity / distinct_quantity / weight: a single target
  * - category / product / tag / attribute: target + calculation
- *   basis + a picker for the scoped entities (Phase 32 adds tags and
+ *   basis + a picker for the scoped entities (adds tags and
  *   attribute taxonomies)
  * - composite: operator + children are edited in their own section
  */
@@ -220,7 +220,7 @@ interface TaxonomyAutocompleteProps {
 }
 
 /**
- * A debounced picker for global attribute taxonomies (Phase 32). Works on
+ * A debounced picker for global attribute taxonomies. Works on
  * taxonomy slugs (strings), backed by `/search/attributes`.
  */
 function TaxonomyAutocomplete({

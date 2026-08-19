@@ -1,6 +1,6 @@
 <?php
 /**
- * FaraCart internationalization tests (Phase 27).
+ * FaraCart internationalization tests.
  *
  * Boots WordPress and verifies the translation posture end-to-end:
  *
@@ -33,7 +33,7 @@
  * The only writes are a temp .po build under sys_get_temp_dir(), which
  * is removed afterwards.
  *
- * Run: php tests/i18n-test.php   (from the plugin directory)
+ * Run: php tests/i18n-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).

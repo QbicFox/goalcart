@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class BaseController
  *
- * Foundation for every FaraCart REST endpoint (Phase 7: REST API / AJAX
+ * Foundation for every FaraCart REST endpoint (REST API / AJAX
  * Layer). Provides:
  *
  *  - the `faracart/v1` namespace (created implicitly by the first
@@ -192,7 +192,7 @@ abstract class BaseController {
 	 * @return \WP_Error
 	 */
 	protected function error( $code, $message, $status = 400, array $data = array() ) {
-		// Phase 18 (Advanced → logging): REST failures land in the debug
+		// Advanced → logging: REST failures land in the debug
 		// log when logging is enabled (error level always writes).
 		Logger::error( $code . ' — ' . $message . ' (HTTP ' . (int) $status . ')' );
 
@@ -253,8 +253,7 @@ abstract class BaseController {
 	 *
 	 * Trade-offs (documented): each call writes a short-lived transient,
 	 * which is a DB write on stores without an object cache — acceptable
-	 * for a lightweight cart-progress poll, revisited by Phase 23
-	 * (Performance Optimization). The key uses REMOTE_ADDR deliberately:
+	 * for a lightweight cart-progress poll, revisited by * (Performance Optimization). The key uses REMOTE_ADDR deliberately:
 	 * trusting X-Forwarded-For would let clients spoof past the limit, and
 	 * behind a proxy all visitors share one bucket (a generous default
 	 * limit keeps that from tripping).

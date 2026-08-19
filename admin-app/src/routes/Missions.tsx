@@ -94,7 +94,7 @@ function targetLabel(mission: Mission): string {
 }
 
 /**
- * The per-user completion limit label (Phase 36): "Unlimited", "Once",
+ * The per-user completion limit label: "Unlimited", "Once",
  * "3 times" — the compact form the list column shows.
  */
 function completionLimitLabel(mission: Mission): string {
@@ -116,14 +116,14 @@ function completionLimitLabel(mission: Mission): string {
 }
 
 /**
- * Missions (Phase 9: Mission Management UI). Professional mission CRUD list:
+ * Missions (Mission Management UI). Professional mission CRUD list:
  *
  * - columns: name, type, reward, status, priority, schedule, completion
  *   stats, actions
  * - actions: create, edit, duplicate, enable/disable, delete, preview
- * - server-side search + status filter + pagination (Phase 23: admin lists)
+ * - server-side search + status filter + pagination (admin lists)
  *
- * Completion stats are a placeholder until the Phase 16/17 analytics
+ * Completion stats are a placeholder until the analytics
  * foundation exposes them.
  */
 export default function Missions() {

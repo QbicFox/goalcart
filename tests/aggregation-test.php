@@ -1,14 +1,14 @@
 <?php
 /**
- * FaraCart Phase 33.3 tests (Aggregation & Performance).
+ * FaraCart tests (Aggregation & Performance).
  *
- * Boots WordPress, then exercises the Phase 33.3 aggregation layer:
+ * Boots WordPress, then exercises the aggregation layer:
  *
  *  - service wiring: DailyAggregator + RevenueRepository resolve from the
  *    container; the daily aggregation cron event is registered with the
  *    'daily' interval and the handlers are wired
  *  - schema: revenue_daily (mission_date composite) + upsell_stats (unique
- *    product_id) exist as the Phase 33.1 schema declares
+ *    product_id) exist as the schema declares
  *  - daily aggregation: aggregate_revenue_day() rolls a day's revenue_events
  *    + mission_attribution rows into revenue_daily with the same definitions as
  *    the live reads (views/progressions/completions/conversions, revenue,
@@ -29,7 +29,7 @@
  * All writes happen inside a single database transaction that is rolled
  * back; the absence of residue is asserted afterwards.
  *
- * Run: php tests/aggregation-test.php   (from the plugin directory)
+ * Run: php tests/aggregation-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -86,7 +86,7 @@ function close( $a, $b, $eps = 0.01 ) {
 	return abs( (float) $a - (float) $b ) < $eps;
 }
 
-// The Phase 33 tables are created by Installer::maybe_upgrade(), which runs
+// The tables are created by Installer::maybe_upgrade(), which runs
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 

@@ -125,14 +125,14 @@ function campaignPresetTargets(
 }
 
 /**
- * Campaign Builder (Phase 10). A form for creating and editing campaigns
+ * Campaign Builder. A form for creating and editing campaigns
  * — Basic information, Schedule, Priority and Milestones (mission ordering)
- * — wired to the Phase 10 REST CRUD endpoints. New campaigns use
+ * — wired to the REST CRUD endpoints. New campaigns use
  * `/campaigns/new`, existing ones `/campaigns/:id/edit`.
  *
  * The page is a two-column layout: the form on the right (RTL) and a
  * sticky live preview on the left, driven by the current form values
- * through the shared Phase 15 preview system.
+ * through the shared preview system.
  */
 export default function CampaignBuilder() {
   const { id } = useParams();
@@ -432,7 +432,7 @@ export default function CampaignBuilder() {
                 </Grid>
               </Grid>
             </SectionCard>{' '}
-            {/* 3. Advanced schedule (Phase 32) */}
+            {/* 3. Advanced schedule */}
             <SectionCard
               title={__('Recurring schedule', 'faracart')}
               description={__(

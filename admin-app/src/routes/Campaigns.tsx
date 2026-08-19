@@ -48,7 +48,7 @@ function statusChip(campaign: Campaign) {
 }
 
 /**
- * Campaigns (Phase 10: Campaign Builder). Full campaign CRUD list:
+ * Campaigns (Campaign Builder). Full campaign CRUD list:
  * name, milestones, status, priority, schedule and actions (create, edit,
  * duplicate, enable/disable, delete, preview). The builder itself lives
  * at `/campaigns/new` and `/campaigns/:id/edit`.

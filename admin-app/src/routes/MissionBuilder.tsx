@@ -146,15 +146,15 @@ function presetTargets(values: MissionInput, fraction: number): { amount: number
 }
 
 /**
- * Mission Builder (Phase 9: Mission Management UI). A seven-section form for
+ * Mission Builder (Mission Management UI). A seven-section form for
  * creating and editing missions — Basic Information, Mission Type, Target,
- * Reward, Conditions, Display and Priority — wired to the Phase 7 REST
+ * Reward, Conditions, Display and Priority — wired to the REST
  * CRUD endpoints. New missions use `/missions/new`, existing ones
  * `/missions/:id/edit`; both render this page.
  *
  * The page is a two-column layout: the form on the right (RTL) and a
  * sticky live preview on the left, driven by the current form values
- * through the shared Phase 15 preview system (POST /preview accepts the
+ * through the shared preview system (POST /preview accepts the
  * unsaved form payload).
  */
 export default function MissionBuilder() {
@@ -436,7 +436,7 @@ export default function MissionBuilder() {
               <DisplayFields values={values} onValueChange={patch} />
             </SectionCard>
 
-            {/* 7. Per-user completion limit (Phase 36) */}
+            {/* 7. Per-user completion limit */}
             <SectionCard
               title={__('Completion limit', 'faracart')}
               description={__(
@@ -499,7 +499,7 @@ export default function MissionBuilder() {
               </Stack>
             </SectionCard>
 
-            {/* 8. Priority & conflicts (Phase 26) */}
+            {/* 8. Priority & conflicts */}
             <SectionCard
               title={__('Priority & conflicts', 'faracart')}
               description={__(

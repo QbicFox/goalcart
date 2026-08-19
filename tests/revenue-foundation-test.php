@@ -1,13 +1,13 @@
 <?php
 /**
- * FaraCart Phase 33.1 tests (Analytics Foundation).
+ * FaraCart tests (Analytics Foundation).
  *
- * Boots WordPress, then exercises the Phase 33.1 revenue analytics
+ * Boots WordPress, then exercises the revenue analytics
  * foundation:
  *
  *  - service wiring: RevenueTracker resolves from the container and its
  *    cleanup cron callback is registered
- *  - schema: the five Phase 33 tables (revenue_events, revenue_daily,
+ *  - schema: the five tables (revenue_events, revenue_daily,
  *    mission_attribution, upsell_events, upsell_stats) exist and every
  *    expected index is present
  *  - event model: the revenue + upsell event whitelists are exposed and
@@ -29,7 +29,7 @@
  * afterwards. The schema tables themselves are verified read-only (they
  * are created by the Installer during the test bootstrap if missing).
  *
- * Run: php tests/revenue-foundation-test.php   (from the plugin directory)
+ * Run: php tests/revenue-foundation-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -77,7 +77,7 @@ function check( $label, $cond ) {
 	}
 }
 
-// The Phase 33 tables are created by Installer::maybe_upgrade(), which runs
+// The tables are created by Installer::maybe_upgrade(), which runs
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 // Ensure the schema exists (dbDelta is idempotent) so the suite tests the
 // real tables, exactly as the plugin would create them.
@@ -103,7 +103,7 @@ check( 'tracker registers hooks through the hook manager', did_action( 'faracart
 	check( 'cleanup handler registered by the tracker', has_action( RevenueTracker::CLEANUP_EVENT ) );
 
 // ---------------------------------------------------------------------------
-// 2. Schema: the five Phase 33 tables exist with their indexes
+// 2. Schema: the five tables exist with their indexes
 // ---------------------------------------------------------------------------
 echo "\n== 2. Schema tables and indexes ==\n";
 

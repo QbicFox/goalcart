@@ -1,6 +1,6 @@
 <?php
 /**
- * Smart mission recommendation engine for FaraCart (Phase 33.4).
+ * Smart mission recommendation engine for FaraCart.
  *
  * @package FaraCart
  */
@@ -16,9 +16,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class MissionRecommendationEngine
  *
- * Phase 33.4 (Smart Mission Recommendation) — answers "what threshold should
+ * Smart Mission Recommendation — answers "what threshold should
  * this store use?" with a fully deterministic, explainable analysis of the
- * store's own order data. No LLM/AI in this phase: every number is computed
+ * store's own order data. No LLM/AI: every number is computed
  * from the store's historical orders, shipping stats and (when present)
  * product margins.
  *

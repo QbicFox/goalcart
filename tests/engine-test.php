@@ -4,14 +4,14 @@
  *
  * Boots WordPress, then runs the MissionEngine against synthetic CartContext
  * snapshots — the engine is UI- and WooCommerce-independent, so every edge
- * case from the phase spec is exercised with plain data:
+ * case from the spec is exercised with plain data:
  *
  *   empty cart | zero target | negative/invalid target | sale prices |
  *   coupons | taxes | shipping costs | virtual products | downloadable
  *   products | variable products | variations | excluded products |
  *   decimal quantities | guest users | logged-in users
  *
- * Run: php tests/engine-test.php   (from the plugin directory)
+ * Run: php tests/engine-test.php (from the plugin directory)
  *
  * The script only reads state; it does not activate the plugin or write
  * to the database.
@@ -66,7 +66,7 @@ function near( $a, $b, $eps = 0.001 ) {
 /**
  * Build a cart context quickly.
  *
- * @param array<string, mixed> $data  Context data.
+ * @param array<string, mixed> $data Context data.
  * @param array[]              $items CartItem payloads.
  * @return CartContext
  */

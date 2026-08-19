@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class CampaignRepository
  *
- * Phase 7 shipped read-only campaign access; Phase 10 (Campaign Builder)
+ * shipped read-only campaign access; (Campaign Builder)
  * extends the same table and repository with the full CRUD surface:
  *
  *  - `create()` / `update()` / `delete()` / `duplicate()`

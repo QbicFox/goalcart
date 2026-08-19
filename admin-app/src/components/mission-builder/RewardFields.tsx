@@ -49,11 +49,11 @@ interface CouponPick extends SearchCoupon {
 }
 
 /**
- * Mission Builder → Reward (Phase 9): dynamic reward configuration. The
+ * Mission Builder → Reward: dynamic reward configuration. The
  * fields shown depend on the reward type (free shipping, percentage/fixed
  * discount, free gift, coupon), and the configuration is flattened into
  * the mission's reward columns + `reward_meta` JSON exactly as the Reward
- * model reads it (Phase 5).
+ * model reads it.
  */
 export default function RewardFields({ values, onValueChange }: RewardFieldsProps) {
   const type = values.reward_type ?? null;
@@ -318,7 +318,7 @@ interface CouponFieldsProps {
 
 /**
  * Coupon reward configuration: use an existing coupon code (searchable)
- * or generate a deterministic coupon from rules (Phase 5 CouponApplicator).
+ * or generate a deterministic coupon from rules (CouponApplicator).
  */
 function CouponFields({ values, meta, patchMeta, patch }: CouponFieldsProps) {
   const generate = meta.coupon_generate ?? false;

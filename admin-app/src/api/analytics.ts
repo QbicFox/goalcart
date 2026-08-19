@@ -1,7 +1,7 @@
 import { apiFetch } from './client';
 import type { AnalyticsPayload, AggregateResult } from '../types';
 
-/** Filters accepted by `GET /faracart/v1/analytics` (Phase 17). */
+/** Filters accepted by `GET /faracart/v1/analytics`. */
 export interface AnalyticsParams {
   from?: string;
   to?: string;

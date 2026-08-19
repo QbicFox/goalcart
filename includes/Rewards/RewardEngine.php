@@ -72,7 +72,7 @@ defined( 'ABSPATH' ) || exit;
  *  - invalid coupons         -> validated before application
  *  - excluded products       -> discount bases exclude them (applicators)
  *
- * Conflict resolution (Phase 26) is enforced here and in ConflictResolver:
+ * Conflict resolution  is enforced here and in ConflictResolver:
  *  - deterministic order     -> active_missions() sorts by campaign
  *                               priority, then mission priority, then id
  *  - cumulative mode         -> every completed mission grants (default)
@@ -119,14 +119,14 @@ final class RewardEngine {
 	protected $registry;
 
 	/**
-	 * Cart integration service (single source of the cart snapshot, Phase 6).
+	 * Cart integration service (single source of the cart snapshot).
 	 *
 	 * @var CartIntegration|null
 	 */
 	protected $cart_integration;
 
 	/**
-	 * Conflict resolver (Phase 26): deterministic winner selection when
+	 * Conflict resolver: deterministic winner selection when
 	 * multiple missions complete — cumulative / best / first modes plus
 	 * mutually exclusive missions.
 	 *
@@ -135,7 +135,7 @@ final class RewardEngine {
 	protected $resolver;
 
 	/**
-	 * Per-user completion limit service (Phase 36). When injected, an
+	 * Per-user completion limit service. When injected, an
 	 * exhausted mission (completion count >= its per-user limit) drops out of
 	 * evaluation entirely — it can never grant a reward, and any reward it
 	 * previously granted is revoked by the normal reconcile pass. Null in
@@ -175,9 +175,9 @@ final class RewardEngine {
 	 * @param MissionRepository|null    $repository       Mission repository.
 	 * @param Settings|null          $settings         Plugin settings.
 	 * @param CartIntegration|null   $cart_integration Cart integration service.
-	 * @param ConflictResolver|null  $resolver         Conflict resolver (Phase 26).
+	 * @param ConflictResolver|null  $resolver         Conflict resolver.
 	 * @param CompletionService|null $completions      Per-user completion limit
-	 *                                                  service (Phase 36); null
+	 *                                                  service ; null
 	 *                                                  disables the limit gate
 	 *                                                  (bare/test constructions).
 	 */
@@ -338,7 +338,7 @@ final class RewardEngine {
 
 			// Evaluation context: FaraCart's own fees and shipping are
 			// excluded so a reward can never un-grant itself. The cart
-			// snapshot comes from the CartIntegration service (Phase 6) —
+			// snapshot comes from the CartIntegration service  —
 			// the single source of truth — falling back to a direct build
 			// when the engine is constructed without it (tests/headless).
 			$context = null !== $this->cart_integration
@@ -347,7 +347,7 @@ final class RewardEngine {
 
 			$missions = $this->repository->active_missions();
 
-			// Phase 36 (per-user completion limit): an exhausted mission (this
+			// per-user completion limit: an exhausted mission (this
 			// identity already completed it the configured maximum times) is
 			// dropped before evaluation, so it can never grant its reward.
 			// Unlimited missions (the default for every existing mission) pass
@@ -538,7 +538,7 @@ final class RewardEngine {
 	/**
 	 * The active conflict-resolution mode from the settings.
 	 *
-	 * Falls back to cumulative (the pre-Phase-26 behavior) when the
+	 * Falls back to cumulative (the previous behavior) when the
 	 * setting is missing or invalid.
 	 *
 	 * @return string ConflictResolver::MODE_* constant.
@@ -808,7 +808,7 @@ final class RewardEngine {
 	}
 
 	/**
-	 * Add the shopper's chosen gift for a completed mission (Phase 32).
+	 * Add the shopper's chosen gift for a completed mission.
 	 *
 	 * Called by the public gift endpoint. The mission must currently be
 	 * completed AND grant a free-gift reward whose gift list allows the
@@ -844,7 +844,7 @@ final class RewardEngine {
 			return false;
 		}
 
-		// Phase 36 (per-user completion limit): an exhausted mission must not
+		// per-user completion limit: an exhausted mission must not
 		// grant its gift — the same authoritative gate the cart sync
 		// applies (an identity that already completed the mission the
 		// configured maximum times cannot claim another reward).

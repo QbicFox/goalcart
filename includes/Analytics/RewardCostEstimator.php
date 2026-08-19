@@ -1,6 +1,6 @@
 <?php
 /**
- * Reward cost & profit impact estimator for FaraCart (Phase 33.2).
+ * Reward cost & profit impact estimator for FaraCart.
  *
  * @package FaraCart
  */
@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class RewardCostEstimator
  *
- * Phase 33.2 (Revenue Attribution) — estimates the cost of mission rewards and
+ * Revenue Attribution — estimates the cost of mission rewards and
  * the profit impact of the revenue the missions influenced, without ever
  * modifying WooCommerce pricing/cost data.
  *
@@ -49,7 +49,7 @@ final class RewardCostEstimator {
 	 * The product-cost sources the estimator consults, in order, plus the
 	 * variation-fallback behavior — stable identifiers the React layer can
 	 * translate for the "how to enable profit" help panel (Improvement.md
-	 * Phase 3 / §10). Labels are kept in the UI layer; these keys never
+	 * / §10). Labels are kept in the UI layer; these keys never
 	 * change across versions.
 	 *
 	 * `_faracart_product_cost` is FaraCart's own product-cost field (the
@@ -273,7 +273,7 @@ final class RewardCostEstimator {
 	/**
 	 * Whether any product in the store carries cost data.
 	 *
-	 * UI-ready availability metadata (Phase 3): one cheap indexed scan
+	 * UI-ready availability metadata: one cheap indexed scan
 	 * (postmeta JOIN posts, LIMIT 1) tells the UI whether Estimated Profit
 	 * can ever become available, letting it distinguish "no cost data
 	 * anywhere" (show the set-up guidance, §10) from "some orders lack
@@ -411,7 +411,7 @@ final class RewardCostEstimator {
 		// equivalent. Deterministic and documented; not a store-cost claim.
 		foreach ( $items as $item ) {
 			// Variation first — the snapshot is stamped with the variation id
-			// (OrderCostSnapshot) and a variation may carry its own cost; the
+			// OrderCostSnapshot and a variation may carry its own cost; the
 			// parent fallback is handled inside product_cost().
 			$product_id = $item->get_variation_id() ? (int) $item->get_variation_id() : (int) $item->get_product_id();
 			$unit_cost  = $this->order_item_unit_cost( $item, $product_id );

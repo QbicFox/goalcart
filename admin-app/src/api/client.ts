@@ -23,9 +23,9 @@ export interface RequestOptions extends Omit<RequestInit, 'headers'> {
  * Fetch helper for the FaraCart REST namespace.
  *
  * Sends the WordPress REST nonce (`X-WP-Nonce`) on every request so the
- * backend authenticates the current admin user (Phase 2 nonce strategy),
+ * backend authenticates the current admin user (nonce strategy),
  * and unwraps the standard `{ data, meta, pagination }` response envelope
- * used by the plugin API (Phase 7).
+ * used by the plugin API.
  *
  * Pass `unwrap = false` when the caller needs the full envelope (data +
  * meta + pagination), e.g. to read pagination totals alongside a list.

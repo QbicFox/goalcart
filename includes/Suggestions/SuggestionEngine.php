@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class SuggestionEngine
  *
- * Phase 14 (Smart Product Suggestions) — turns mission progress into product
+ * Smart Product Suggestions — turns mission progress into product
  * recommendations that close the gap. Given a Mission + MissionResult + the
  * CartContext it gathers candidate products from six sources, filters to
  * suggestible products (published, in stock, priced, not already in the
@@ -44,7 +44,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Suggestions only make sense while there is a gap to close: completed or
  * ineligible missions return an empty list. The final list is filterable via
- * `faracart_suggestions` (Phase 28 developer API). Margin-aware and
+ * `faracart_suggestions` (developer API). Margin-aware and
  * AI-ranked recommendations remain roadmap futures (P14-T05).
  *
  * Queries are bounded (per-source limits, one batched include-load) and
@@ -105,7 +105,7 @@ final class SuggestionEngine {
 	protected $loaded = array();
 
 	/**
-	 * Settings instance (Phase 32: the suggestions_ranking mode). Optional
+	 * Settings instance (the suggestions_ranking mode). Optional
 	 * so bare constructions (tests, headless contexts) keep the default
 	 * balanced scoring.
 	 *
@@ -278,7 +278,7 @@ final class SuggestionEngine {
 			$score += 0.5;
 		}
 
-		// Phase 32 (advanced upsell ranking): the configured mode shapes how
+		// advanced upsell ranking: the configured mode shapes how
 		// price proximity, popularity (total sales) and rating weight the
 		// final score. All three modes keep the manual/relevance/trust
 		// signals above; only the tail differs.

@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Boot data (nonce, REST base, user, caps, locale) is localized on the
  * app script handle so the React shell can authenticate REST requests
- * and render in the site's locale (Phase 2: nonce strategy).
+ * and render in the site's locale (nonce strategy).
  *
  * Mirrors the reference plugin (WooInsights\Admin\AssetLoader).
  */

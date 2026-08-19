@@ -3,7 +3,7 @@
  * FaraCart admin preview tests (P15-T02 / P15-T03).
  *
  * Boots WordPress, fires rest_api_init (never fired in CLI), then
- * exercises the Phase 15 admin preview endpoint:
+ * exercises the admin preview endpoint:
  *
  *  - route registration and arg-schema validation (simulated object,
  *    exactly-one-target rule)
@@ -22,7 +22,7 @@
  * rate-limit transients) happen inside a single database transaction that
  * is rolled back, and the absence of any residue is asserted afterwards.
  *
- * Run: php tests/preview-test.php   (from the plugin directory)
+ * Run: php tests/preview-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).

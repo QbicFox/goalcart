@@ -91,7 +91,7 @@ const COMPONENT_LABELS: Array<{ key: keyof UpsellComponentScores; label: string;
 ];
 
 /**
- * Sort one mode of the analytics rows (client-side views). Phase 8 re-bases
+ * Sort one mode of the analytics rows (client-side views). re-bases
  * the four views on commercial outcomes (§35): "Top performing" is ordered
  * by purchases then sales (what actually converts), "Lowest performing" by
  * the underperformers, "Best conversion" by the purchase rate (products
@@ -276,7 +276,7 @@ function ProductDetailDialog({
 }
 
 /**
- * Upsells (Phase 33.6 engine — UPSELL_REFACTOR §4/§32/§39; UICHANGES.md
+ * Upsells (engine — UPSELL_REFACTOR §4/§32/§39; UICHANGES.md
  * §40 label).
  *
  * The customer-facing recommendation system's admin report: the

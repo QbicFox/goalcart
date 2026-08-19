@@ -1,12 +1,11 @@
 <?php
 /**
- * FaraCart Phase 33.8 tests (Testing & Optimization).
+ * FaraCart regression tests (Testing & Optimization).
  *
- * The Phase 33 regression/quality suite. Phase 33.1–33.7 each shipped a
- * focused suite (revenue-foundation / attribution / aggregation /
- * recommendation / upsell / revenue-admin / upsell-frontend); this suite
- * closes the gaps the phase plan (P33.8) calls out and re-verifies the
- * whole Phase 33 surface as one regression pass:
+ * The regression/quality suite. The earlier suites (revenue-foundation /
+ * attribution / aggregation / recommendation / upsell / revenue-admin /
+ * upsell-frontend) each shipped focused; this suite closes the gaps the
+ * plan calls out and re-verifies the whole surface as one regression pass:
  *
  *  - unit: tracker dedup windows (view/completed 24h, progress 30 min,
  *    order exactly-once, upsell per session+mission+product), session
@@ -32,18 +31,18 @@
  *    grouped rebuild for upsell_stats, no all-missions scans
  *  - cache validation: generation-versioned transients, the bypass
  *    filter, invalidation on order/mission/product/aggregation events
- *  - regression: every Phase 33 service resolves, every route registers,
+ *  - regression: every service resolves, every route registers,
  *    the cron schedule stays intact, and the schema tables/indexes exist
  *
- * Like the other Phase 33 suites, all writes happen inside a single
+ * Like the other suites, all writes happen inside a single
  * database transaction that is rolled back; verification is scoped to
  * THIS suite's fixtures (mission ids 401–403, sessions efef/fefe, orders
  * 99001+) so it never collides with live store traffic or other suites'
  * residue. The suite is intentionally safe to run alongside the other
- * Phase 33 suites as long as they run sequentially (the suites share the
+ * suites as long as they run sequentially (the suites share the
  * missions/revenue tables and must not run in parallel).
  *
- * Run: php tests/phase33-test.php   (from the plugin directory)
+ * Run: php tests/phase33-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file.
@@ -105,7 +104,7 @@ function close( $a, $b, $eps = 0.01 ) {
 	return abs( (float) $a - (float) $b ) < $eps;
 }
 
-// The Phase 33 tables are created by Installer::maybe_upgrade(), which runs
+// The tables are created by Installer::maybe_upgrade(), which runs
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 
@@ -676,7 +675,7 @@ $attrib_idx = $wpdb->get_col(
 );
 check( 'mission_attribution has the order_mission_model unique key', in_array( 'order_mission_model', $attrib_idx, true ) );
 
-// Regression: every Phase 33 service resolves from the container.
+// Regression: every service resolves from the container.
 $services = array(
 	RevenueTracker::class,
 	AttributionEngine::class,

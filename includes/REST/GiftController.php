@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class GiftController
  *
- * Phase 32 (free gift selection): `POST /faracart/v1/gift` — the storefront
+ * free gift selection: `POST /faracart/v1/gift` — the storefront
  * gift picker calls this when the shopper picks one of the candidate gifts
  * of a completed mission configured in "choose" mode. The reward engine
  * validates the mission is currently completed and the product is in the
@@ -29,7 +29,7 @@ defined( 'ABSPATH' ) || exit;
  * the same trust boundary as the track endpoint.
  *
  * The shopper's cart is acquired through CartIntegration::live_cart(), the
- * same Phase 6 single source of truth the progress endpoint uses:
+ * same single source of truth the progress endpoint uses:
  * WooCommerce does not initialize the cart for custom REST routes, so a
  * bare `WC()->cart` check here would see a null cart and reject every
  * claim with "Your cart is empty" even when the session holds a valid

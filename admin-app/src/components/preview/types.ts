@@ -2,7 +2,7 @@
 export type PreviewRewardState = 'auto' | 'locked' | 'unlocked';
 
 /**
- * Simulated cart-state presets (Phase 15 Preview States): empty cart,
+ * Simulated cart-state presets (Preview States): empty cart,
  * 25%, 50%, 75%, completed. The preset fraction drives the simulated
  * amount/quantity internally — the admin never edits raw simulation
  * values; the preview consumes the current form state instead.
@@ -31,8 +31,7 @@ export const PRESET_PERCENTS: Record<PreviewPreset, number> = {
 
 /**
  * Resolved storefront appearance tokens (mirrors the `--faracart-*`
- * custom properties in assets/css/frontend.css, sourced from the Phase 12
- * `frontend_*` settings).
+ * custom properties in assets/css/frontend.css, sourced from the * `frontend_*` settings).
  */
 export interface PreviewTokens {
   accent: string;

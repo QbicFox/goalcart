@@ -1,9 +1,8 @@
 <?php
 /**
- * FaraCart Phase 2 tests (Backend/Data Layer — purchase & profit metrics).
+ * FaraCart tests (Backend/Data Layer — purchase & profit metrics).
  *
- * Exercises the purchase-analysis data layer added for the Revenue &
- * Analytics UX simplification (Improvement.md Phase 2):
+ * Exercises the purchase-analysis data layer added for the Revenue & * Analytics UX simplification (Improvement.md): 
  *
  *  - funnel purchase metrics: views → progressed → completed → purchased,
  *    completion rate (completed/views) and purchase rate
@@ -34,7 +33,7 @@
  * 501–512, sessions s01–s20 and products with the P2. prefix, so they
  * never collide with live store traffic or other suites' residue.
  *
- * Run: php tests/purchase-metrics-test.php   (from the plugin directory)
+ * Run: php tests/purchase-metrics-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file.
@@ -89,7 +88,7 @@ function close( $a, $b, $eps = 0.01 ) {
 	return abs( (float) $a - (float) $b ) < $eps;
 }
 
-// The Phase 33 tables are created by Installer::maybe_upgrade(), which runs
+// The tables are created by Installer::maybe_upgrade(), which runs
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 

@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class Logger
  *
- * Phase 18 (Settings → Advanced → logging / debug mode) — a small file
+ * (Settings → Advanced → logging / debug mode) — a small file
  * logger for the plugin's operational messages.
  *
  * Gating (both read straight from the settings option so any service can

@@ -337,8 +337,8 @@ function buildInsights(summary: AnalyticsSummary, comparison: MissionPerformance
 }
 
 /**
- * Analytics — Mission Conversion & Purchase Analysis (Phase 6 redesign of
- * the Phase 17 dashboard).
+ * Analytics — Mission Conversion & Purchase Analysis (redesign of
+ * the dashboard).
  *
  * Answers "what happens after customers see and complete my missions?" — the
  * purchase funnel (views → progressed → completed → purchased, §23), the

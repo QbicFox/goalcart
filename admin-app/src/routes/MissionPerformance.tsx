@@ -650,7 +650,7 @@ function MissionDetailDrawer({
 }
 
 /**
- * Mission Performance (Phase 5 redesign).
+ * Mission Performance (redesign).
  *
  * Per-mission commercial outcomes from `GET /faracart/v1/revenue/missions`:
  * the funnel counts (viewed → progressed → completed → purchased), the

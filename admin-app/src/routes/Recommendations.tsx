@@ -468,7 +468,7 @@ function AnalyzedData({ payload }: { payload: MissionRecommendationsPayload }) {
 }
 
 /**
- * Recommendations (Phase 33.4 engine — UPSELL_REFACTOR §4/§5/§8;
+ * Recommendations (engine — UPSELL_REFACTOR §4/§5/§8;
  * UICHANGES.md §40 label).
  *
  * The admin-facing surface that answers "what Mission configuration should

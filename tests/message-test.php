@@ -2,7 +2,7 @@
 /**
  * FaraCart dynamic-messaging tests (P13-T01 / P13-T02 / P13-T03 / P13-T04).
  *
- * Boots WordPress and exercises the Phase 13 MessageEngine against
+ * Boots WordPress and exercises the MessageEngine against
  * synthetic Mission + MissionResult pairs (the engine is UI- and
  * database-independent, like the MissionEngine before it):
  *
@@ -22,7 +22,7 @@
  *
  * Read-only like the other suites: no DB writes, no products, no cart.
  *
- * Run: php tests/message-test.php   (from the plugin directory)
+ * Run: php tests/message-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file (tests -> plugin -> plugins -> wp-content -> root).
@@ -188,7 +188,7 @@ check( 'quantity mode: remaining_quantity falls back to remaining', '6' === $var
 check( 'quantity mode: current is plain number', '4' === $vars['current'] );
 
 // Quantity-TYPE missions default to the subtotal mode, so the type itself
-// must also mean "not money" (the Phase 13 fix).
+// must also mean "not money" (the fix).
 $gq2 = mission( array( 'type' => Mission::TYPE_QUANTITY, 'target' => 10, 'name' => 'Ten items' ) );
 $vars = $engine->variables( $gq2, new MissionResult( $gq2, 4, 10 ) );
 check( 'quantity-type mission is not money', '4' === $vars['current'] );

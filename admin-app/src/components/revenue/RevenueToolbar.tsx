@@ -25,7 +25,7 @@ interface RevenueToolbarProps {
 }
 
 /**
- * Shared filter toolbar for the Phase 33.6 Revenue pages: the global
+ * Shared filter toolbar for the Revenue pages: the global
  * date-range filter (DateRangeContext) plus a mission selector and any
  * page-specific extra controls. Keeps every revenue page's filter
  * behavior consistent with the existing Analytics page.

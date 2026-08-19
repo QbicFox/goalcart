@@ -107,7 +107,7 @@ function initialRange(params: URLSearchParams): DateRange {
 }
 
 /**
- * Global date-range provider (Phase 17).
+ * Global date-range provider.
  *
  * Holds the one date-range selection used by the analytics dashboard,
  * persists it to both the URL hash params (shareable deep links) and

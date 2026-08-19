@@ -1,8 +1,8 @@
 <?php
 /**
- * FaraCart Phase 33.4 tests (Smart Mission Recommendation).
+ * FaraCart tests (Smart Mission Recommendation).
  *
- * Boots WordPress, then exercises the Phase 33.4 deterministic
+ * Boots WordPress, then exercises the deterministic
  * mission-threshold recommendation engine and its admin endpoint:
  *
  *  - service wiring: MissionRecommendationEngine + RecommendationsController
@@ -29,7 +29,7 @@
  * back; the absence of residue is asserted afterwards (with the WP
  * options/transient cache flushed so the rollback is visible).
  *
- * Run: php tests/recommendation-test.php   (from the plugin directory)
+ * Run: php tests/recommendation-test.php (from the plugin directory)
  */
 
 // Locate wp-load.php by walking up from this file.
@@ -100,7 +100,7 @@ function close( $a, $b, $eps = 0.01 ) {
 	return abs( (float) $a - (float) $b ) < $eps;
 }
 
-// The Phase 33 tables are created by Installer::maybe_upgrade(), which runs
+// The tables are created by Installer::maybe_upgrade(), which runs
 // on plugins_loaded / admin_init — neither fires in CLI after wp-load.
 Installer::maybe_create_tables();
 

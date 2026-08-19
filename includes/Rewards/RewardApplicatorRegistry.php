@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  * Maps reward types to applicator classes and resolves them lazily. The
  * class map is filterable through 'faracart_reward_applicator_classes' so
  * stores can register custom reward types without touching the core —
- * mirroring the MissionEvaluatorRegistry pattern from Phase 4.
+ * mirroring the MissionEvaluatorRegistry pattern from.
  */
 class RewardApplicatorRegistry {
 

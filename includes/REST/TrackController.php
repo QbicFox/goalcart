@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class TrackController
  *
- * Phase 16 (Analytics Foundation — Events): registers and handles
+ * Analytics Foundation — Events: registers and handles
  * `POST /faracart/v1/track`, the public endpoint the storefront JS uses
  * to report analytics events (mission_impression, mission_progress,
  * mission_completed, reward_activated, suggestion_impression,
@@ -40,7 +40,7 @@ defined( 'ABSPATH' ) || exit;
 	 * trust boundary (and the JS dedupes per page session); the dashboard
 	 * treats these as directional signals, not audited conversion
 	 * counters. Server-side verification of completions/rewards is a
-	 * possible Phase 32 refinement.
+	 * possible refinement.
 	 *
 	 * Mirrors the reference plugin (WooInsights\REST\ClickController).
 	 */

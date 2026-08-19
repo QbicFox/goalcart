@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Class RecommendationsController
  *
- * Phase 33.4 (Smart Mission Recommendation) — the endpoints behind the
+ * Smart Mission Recommendation — the endpoints behind the
  * admin-facing Mission Optimization surface:
  *
  *  - `GET /faracart/v1/revenue/mission-recommendations` — the full
@@ -45,7 +45,7 @@ defined( 'ABSPATH' ) || exit;
  * range).
  *
  * Admin-only (manage_options) and rate limited per user like every other
- * admin endpoint; the payload is served through the Phase 33.3 cached read
+ * admin endpoint; the payload is served through the cached read
  * layer, so repeated admin renders never recompute the analysis. The
  * recommendation engine itself never modifies a mission — applying is an
  * explicit, permission-checked admin action through the apply endpoint.

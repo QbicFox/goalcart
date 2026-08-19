@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * (composite children, tests, REST payloads), so the engine never touches
  * the database itself — persistence is a separate concern.
  *
- * Phase 4 (Mission Engine) defines seven mission types; the three MVP types
+ * Mission Engine defines seven mission types; the three MVP types
  * (amount, quantity, category) plus distinct-quantity, product, weight and
  * composite are all first-class so the engine is complete up front.
  */
@@ -26,7 +26,7 @@ final class Mission {
 	/**
 	 * Mission types.
 	 *
-	 * Phase 32 (Advanced V2): tag and attribute missions extend the
+	 * Advanced V2: tag and attribute missions extend the
 	 * category/product family — the amount or quantity restricted to
 	 * products carrying the configured tags / attribute taxonomies.
 	 */
@@ -138,14 +138,14 @@ final class Mission {
 	protected $children;
 
 	/**
-	 * Product tag term IDs for tag missions (Phase 32).
+	 * Product tag term IDs for tag missions.
 	 *
 	 * @var int[]
 	 */
 	protected $tags;
 
 	/**
-	 * Global attribute taxonomy slugs for attribute missions (Phase 32),
+	 * Global attribute taxonomy slugs for attribute missions,
 	 * e.g. array( 'pa_color' ) or array( 'pa_brand' ).
 	 *
 	 * @var string[]
@@ -153,7 +153,7 @@ final class Mission {
 	protected $attributes;
 
 	/**
-	 * Customer roles allowed to see/complete the mission (Phase 32). Empty =
+	 * Customer roles allowed to see/complete the mission. Empty =
 	 * everyone.
 	 *
 	 * @var string[]
@@ -161,7 +161,7 @@ final class Mission {
 	protected $customer_roles;
 
 	/**
-	 * Required customer state (Phase 32): subset of 'guest' | 'logged_in'.
+	 * Required customer state: subset of 'guest' | 'logged_in'.
 	 * Empty = everyone.
 	 *
 	 * @var string[]
@@ -169,7 +169,7 @@ final class Mission {
 	protected $customer_state;
 
 	/**
-	 * First-order-only mission (Phase 32): applies only to shoppers with zero
+	 * First-order-only mission: applies only to shoppers with zero
 	 * completed orders.
 	 *
 	 * @var bool
@@ -177,7 +177,7 @@ final class Mission {
 	protected $first_order;
 
 	/**
-	 * VIP-only mission (Phase 32): applies only to logged-in customers meeting
+	 * VIP-only mission: applies only to logged-in customers meeting
 	 * the spend/order thresholds.
 	 *
 	 * @var bool
@@ -199,7 +199,7 @@ final class Mission {
 	protected $vip_min_orders;
 
 	/**
-	 * Shipping zone ids the mission applies to (Phase 32). Empty = every zone.
+	 * Shipping zone ids the mission applies to. Empty = every zone.
 	 *
 	 * @var int[]
 	 */
@@ -207,14 +207,14 @@ final class Mission {
 
 	/**
 	 * Coupon codes the cart must have applied for the mission to apply
-	 * (Phase 32 cart-state condition). Empty = no coupon requirement.
+	 * (cart-state condition). Empty = no coupon requirement.
 	 *
 	 * @var string[]
 	 */
 	protected $cart_coupons;
 
 	/**
-	 * Minimum cart item count for the mission to apply (Phase 32 cart-state
+	 * Minimum cart item count for the mission to apply (cart-state
 	 * condition). 0 = no minimum.
 	 *
 	 * @var int
@@ -222,7 +222,7 @@ final class Mission {
 	protected $cart_min_items;
 
 	/**
-	 * Recurring schedule days (Phase 32, advanced scheduling): 1 (Mon) to
+	 * Recurring schedule days (advanced scheduling): 1 (Mon) to
 	 * 7 (Sun), matching PHP date('N'). Empty = every day.
 	 *
 	 * @var int[]
@@ -230,7 +230,7 @@ final class Mission {
 	protected $schedule_days;
 
 	/**
-	 * Recurring schedule day window start 'H:i' (Phase 32). Empty = no
+	 * Recurring schedule day window start 'H:i'. Empty = no
 	 * time window.
 	 *
 	 * @var string
@@ -238,7 +238,7 @@ final class Mission {
 	protected $schedule_start_time;
 
 	/**
-	 * Recurring schedule day window end 'H:i' (Phase 32).
+	 * Recurring schedule day window end 'H:i'.
 	 *
 	 * @var string
 	 */
@@ -257,14 +257,14 @@ final class Mission {
 	protected $ends_at;
 
 	/**
-	 * Priority used for conflict resolution (Phase 26).
+	 * Priority used for conflict resolution.
 	 *
 	 * @var int
 	 */
 	protected $priority;
 
 	/**
-	 * Whether the mission is mutually exclusive (Phase 26).
+	 * Whether the mission is mutually exclusive.
 	 *
 	 * A completed exclusive mission suppresses every lower-priority mission's
 	 * reward; priority above it is still respected.
@@ -274,14 +274,14 @@ final class Mission {
 	protected $exclusive;
 
 	/**
-	 * Maximum completion cycles per user (Phase 36). Null = unlimited.
+	 * Maximum completion cycles per user. Null = unlimited.
 	 *
 	 * @var int|null
 	 */
 	protected $max_completions_per_user;
 
 	/**
-	 * Reward type (Phase 5): free_shipping|percent_discount|fixed_discount.
+	 * Reward type: free_shipping|percent_discount|fixed_discount.
 	 *
 	 * @var string|null
 	 */
@@ -302,7 +302,7 @@ final class Mission {
 	protected $reward_max_value;
 
 	/**
-	 * Extended reward configuration (Phase 5): eligible products/categories,
+	 * Extended reward configuration: eligible products/categories,
 	 * excluded products, stacking rules, shipping zone/method filters, gift
 	 * product, coupon settings. Stored as JSON in `reward_meta`; parsed to
 	 * an array here so the Rewards layer can read it without re-decoding.
@@ -341,7 +341,7 @@ final class Mission {
 	protected $campaign_display_rules;
 
 	/**
-	 * Display configuration (Phase 9 builder): title, message,
+	 * Display configuration (builder): title, message,
 	 * completed_message, icon, template. Stored as JSON in
 	 * `display_settings`; parsed to an array here so the frontend can read
 	 * the card icon without re-decoding.
@@ -427,7 +427,7 @@ final class Mission {
 	 * defaults to the pre-discount subtotal. Explicit configuration always
 	 * wins.
 	 *
-	 * Phase 18 (Settings → Mission Calculation): the store-wide default money
+	 * Settings → Mission Calculation: the store-wide default money
 	 * basis is applied through the faracart_default_calculation_mode
 	 * filter (registered by Settings), so a mission without its own mode
 	 * follows the store default while quantity-style types stay unchanged.
@@ -664,7 +664,7 @@ final class Mission {
 	}
 
 	/**
-	 * Recurring schedule days (1=Mon .. 7=Sun, empty = every day).
+	 * Recurring schedule days (1=Mon.. 7=Sun, empty = every day).
 	 *
 	 * @return int[]
 	 */
@@ -742,7 +742,7 @@ final class Mission {
 	}
 
 	/**
-	 * Whether the mission is mutually exclusive (Phase 26).
+	 * Whether the mission is mutually exclusive.
 	 *
 	 * @return bool
 	 */
@@ -751,7 +751,7 @@ final class Mission {
 	}
 
 	/**
-	 * Maximum completion cycles per user (Phase 36). Null = unlimited.
+	 * Maximum completion cycles per user. Null = unlimited.
 	 *
 	 * @return int|null
 	 */
@@ -781,7 +781,7 @@ final class Mission {
 	}
 
 	/**
-	 * Extended reward configuration array (Phase 5).
+	 * Extended reward configuration array.
 	 *
 	 * @return array<string, mixed>
 	 */
