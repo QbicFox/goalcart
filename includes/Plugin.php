@@ -580,7 +580,8 @@ final class Plugin {
 			// revenue endpoints).
 			return new AnalyticsController(
 				$container->get( AnalyticsRepository::class ),
-				$container->get( RevenueRepository::class )
+				$container->get( RevenueRepository::class ),
+				$container->get( DailyAggregator::class )
 			);
 		} );
 

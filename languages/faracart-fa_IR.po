@@ -3588,6 +3588,15 @@ msgstr "زمان‌بندی تکراری"
 msgid "Refresh"
 msgstr "به‌روزرسانی"
 
+#: admin-app/src/routes/Dashboard.tsx:604
+#: admin-app/src/routes/Dashboard.tsx:612
+msgid "Calculate Analytics"
+msgstr "محاسبه تحلیل‌ها"
+
+#: admin-app/src/routes/Dashboard.tsx:612
+msgid "Calculating…"
+msgstr "در حال محاسبه…"
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:62
 msgid "Relevance"
 msgstr "ارتباط محصول"

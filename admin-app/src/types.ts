@@ -650,6 +650,15 @@ export interface AnalyticsPayload {
 }
 
 /**
+ * Response from `POST /faracart/v1/analytics/aggregate` — on-demand
+ * analytics aggregation results.
+ */
+export interface AggregateResult {
+  days_aggregated: number;
+  products_rebuilt: number;
+}
+
+/**
  * The settings object persisted by the Phase 7 REST API
  * (`GET/POST /faracart/v1/settings`). Phase 18 ships the full surface:
  * general, frontend, mission calculation, performance and advanced.

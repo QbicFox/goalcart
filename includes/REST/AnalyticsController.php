@@ -8,6 +8,7 @@
 namespace FaraCart\REST;
 
 use FaraCart\Analytics\AnalyticsRepository;
+use FaraCart\Analytics\DailyAggregator;
 use FaraCart\Analytics\RewardCostEstimator;
 use FaraCart\Analytics\RevenueRepository;
 use FaraCart\Hooks\HookManager;
@@ -66,14 +67,23 @@ class AnalyticsController extends BaseController {
 	protected $revenue;
 
 	/**
+	 * Daily aggregator for on-demand analytics calculation.
+	 *
+	 * @var DailyAggregator
+	 */
+	protected $aggregator;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AnalyticsRepository $analytics Metrics repository.
 	 * @param RevenueRepository   $revenue   Cached revenue repository.
+	 * @param DailyAggregator     $aggregator Daily aggregator.
 	 */
-	public function __construct( AnalyticsRepository $analytics, RevenueRepository $revenue ) {
+	public function __construct( AnalyticsRepository $analytics, RevenueRepository $revenue, DailyAggregator $aggregator ) {
 		$this->analytics = $analytics;
 		$this->revenue   = $revenue;
+		$this->aggregator = $aggregator;
 	}
 
 	/**
@@ -100,6 +110,17 @@ class AnalyticsController extends BaseController {
 				'callback'            => array( $this, 'handle_get' ),
 				'permission_callback' => $this->get_permission_callback(),
 				'args'                => $this->analytics_args(),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/analytics/aggregate',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'handle_aggregate' ),
+				'permission_callback' => $this->get_permission_callback(),
+				'args'                => array(),
 			)
 		);
 	}
@@ -232,6 +253,36 @@ class AnalyticsController extends BaseController {
 			'funnel'             => $purchase['funnel'],
 			'assisted_sales'     => round( (float) $purchase['mission_assisted_revenue'], 4 ),
 			'influenced_sales'   => round( (float) $purchase['mission_influenced_revenue'], 4 ),
+		);
+	}
+
+	/**
+	 * Trigger the daily analytics aggregation on demand.
+	 *
+	 * POST /faracart/v1/analytics/aggregate — runs the bounded aggregation
+	 * job (revenue_daily + upsell_stats) and returns the results so the
+	 * dashboard can refresh its data immediately.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	public function handle_aggregate( $request ) {
+		$days     = $this->aggregator->aggregate_revenue();
+		$products = $this->aggregator->aggregate_upsells();
+
+		/**
+		 * Fires after a manual analytics aggregation run.
+	 *
+		 * @param int $days     Number of days aggregated into revenue_daily.
+		 * @param int $products Number of products rebuilt in upsell_stats.
+		 */
+		do_action( 'faracart_revenue_aggregated', $days, $products );
+
+		return $this->success(
+			array(
+				'days_aggregated'      => $days,
+				'products_rebuilt'     => $products,
+			)
 		);
 	}
 

@@ -3430,6 +3430,15 @@ msgstr ""
 msgid "Refresh"
 msgstr ""
 
+#: admin-app/src/routes/Dashboard.tsx:604
+#: admin-app/src/routes/Dashboard.tsx:612
+msgid "Calculate Analytics"
+msgstr ""
+
+#: admin-app/src/routes/Dashboard.tsx:612
+msgid "Calculating…"
+msgstr ""
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:62
 msgid "Relevance"
 msgstr ""

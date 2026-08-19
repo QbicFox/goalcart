@@ -1,5 +1,5 @@
 import { apiFetch } from './client';
-import type { AnalyticsPayload } from '../types';
+import type { AnalyticsPayload, AggregateResult } from '../types';
 
 /** Filters accepted by `GET /faracart/v1/analytics` (Phase 17). */
 export interface AnalyticsParams {
@@ -47,4 +47,16 @@ export async function fetchAnalytics(params: AnalyticsParams = {}): Promise<Anal
   const qs = query.toString();
 
   return apiFetch<AnalyticsPayload>(`/analytics${qs ? `?${qs}` : ''}`);
+}
+
+/**
+ * Trigger on-demand analytics aggregation (revenue_daily + upsell_stats).
+ *
+ * POST /faracart/v1/analytics/aggregate — runs the bounded aggregation
+ * job and returns the results so the dashboard can refresh immediately.
+ */
+export async function triggerAnalyticsAggregate(): Promise<AggregateResult> {
+  return apiFetch<AggregateResult>('/analytics/aggregate', {
+    method: 'POST',
+  });
 }

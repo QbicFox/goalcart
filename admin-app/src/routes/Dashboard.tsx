@@ -21,7 +21,7 @@ import Stack from '@mui/material/Stack';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
-import { useMemo, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Bar,
@@ -35,6 +35,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import { triggerAnalyticsAggregate } from '../api/analytics';
 import { fetchMissions } from '../api/missions';
 import { fetchMissionPerformance, fetchRevenueOverview, fetchUpsellAnalytics } from '../api/revenue';
 import { getBootData } from '../boot';
@@ -546,9 +547,21 @@ export default function Dashboard() {
   const previous = comparisonQuery.data?.summary;
   const productsUrl = `${boot.adminUrl}edit.php?post_type=product`;
 
+  const [aggregating, setAggregating] = useState(false);
+
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['revenue'] });
     queryClient.invalidateQueries({ queryKey: ['missions'] });
+  };
+
+  const handleAggregate = async () => {
+    setAggregating(true);
+    try {
+      await triggerAnalyticsAggregate();
+      refresh();
+    } finally {
+      setAggregating(false);
+    }
   };
 
   // Trends are only derived from real previous-period values; a zero or
@@ -587,6 +600,17 @@ export default function Dashboard() {
             <IconButton size="small" onClick={refresh} aria-label={__('Refresh', 'faracart')}>
               <RefreshIcon fontSize="small" />
             </IconButton>
+          </Tooltip>
+          <Tooltip title={__('Calculate Analytics', 'faracart')}>
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={handleAggregate}
+              disabled={aggregating}
+              startIcon={<TrendingUpIcon fontSize="small" />}
+            >
+              {aggregating ? __('Calculating…', 'faracart') : __('Calculate Analytics', 'faracart')}
+            </Button>
           </Tooltip>
         </>
       }
