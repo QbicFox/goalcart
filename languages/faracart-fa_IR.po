@@ -1,20 +1,9 @@
 # Persian (fa_IR) translation of FaraCart.
 # This file is distributed under the same license as the FaraCart plugin (GPL-2.0-or-later).
 #
-
 msgid ""
 msgstr ""
-"Project-Id-Version: FaraCart 0.6.0\n"
-"Report-Msgid-Bugs-To: https://faracart.com/support\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2026-08-14\n"
-"Last-Translator: FaraCart Team <translations@faracart.com>\n"
-"Language-Team: Persian <fa@faracart.com>\n"
-"Language: fa_IR\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Domain: faracart\n"
+"Project-Id-Version: FaraCart 0.6.0\nReport-Msgid-Bugs-To: https://faracart.com/support\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPO-Revision-Date: 2026-08-14\nLast-Translator: FaraCart Team <translations@faracart.com>\nLanguage-Team: Persian <fa@faracart.com>\nLanguage: fa_IR\nPlural-Forms: nplurals=2; plural=(n != 1);\nX-Domain: faracart\n"
 
 #: admin-app/src/routes/Analytics.tsx:85
 #: admin-app/src/routes/CampaignBuilder.tsx:43
@@ -109,16 +98,20 @@ msgid "%s is your top performer"
 msgstr "%s بهترین عملکرد شماست"
 
 #: includes/Analytics/MissionRecommendationEngine.php:706
-msgid "%s of existing orders are within reach of this threshold (below it by up to %s%%)."
-msgstr "%s از سفارش‌های موجود به این آستانه نزدیک هستند (تا %s٪ پایین‌تر از آن)."
+msgid ""
+"%s of existing orders are within reach of this threshold (below it by up to %s%%)."
+msgstr ""
+"%s از سفارش‌های موجود به این آستانه نزدیک هستند (تا %s٪ پایین‌تر از آن)."
 
 #: admin-app/src/routes/Dashboard.tsx:636
 msgid "%s purchased orders"
 msgstr "%s سفارش خریداری‌شده"
 
 #: admin-app/src/routes/Dashboard.tsx:156
-msgid "%s uses cart missions — like “spend %s more for free shipping” — to encourage bigger carts. Missions, rewards and progress bars are configured from the Missions page."
-msgstr "%s از ماموریت‌های سبد خرید استفاده می‌کند — مانند «%s بیشتر برای ارسال رایگان» — تا سبدهای بزرگتری تشویق شوند. ماموریت‌ها، پاداش‌ها و نوارهای پیشرفت از صفحهٔ «ماموریت‌ها» پیکربندی می‌شوند."
+msgid ""
+"%s uses cart missions — like “spend %s more for free shipping” — to encourage bigger carts. Missions, rewards and progress bars are configured from the Missions page."
+msgstr ""
+"%s از ماموریت‌های سبد خرید استفاده می‌کند — مانند «%s بیشتر برای ارسال رایگان» — تا سبدهای بزرگتری تشویق شوند. ماموریت‌ها، پاداش‌ها و نوارهای پیشرفت از صفحهٔ «ماموریت‌ها» پیکربندی می‌شوند."
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:67
 msgid "(amount)"
@@ -184,57 +177,76 @@ msgstr "خلاصه‌ای تجاری از ماموریت‌ها و پیشنها�
 #: admin-app/src/routes/Analytics.tsx:734
 #: admin-app/src/routes/MissionPerformance.tsx:461
 #: admin-app/src/routes/RevenueOverview.tsx:197
-msgid "A completion means the customer reached the mission target. A purchase means a qualifying order was actually associated with the mission."
-msgstr "تکمیل یعنی مشتری به آستانهٔ ماموریت رسید. خرید یعنی یک سفارش واجد شرایط واقعاً به این ماموریت مرتبط شده است."
+msgid ""
+"A completion means the customer reached the mission target. A purchase means a qualifying order was actually associated with the mission."
+msgstr ""
+"تکمیل یعنی مشتری به آستانهٔ ماموریت رسید. خرید یعنی یک سفارش واجد شرایط واقعاً به این ماموریت مرتبط شده است."
 
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:48
-msgid "A connected ladder of the campaign milestones — dots, targets and rewards — with an overall progress bar."
-msgstr "نردبانی متصل از نقاط عطف کمپین — نقاط، ماموریت‌ها و پاداش‌ها — همراه با نوار پیشرفت کلی."
+msgid ""
+"A connected ladder of the campaign milestones — dots, targets and rewards — with an overall progress bar."
+msgstr ""
+"نردبانی متصل از نقاط عطف کمپین — نقاط، آستانه‌ها و پاداش‌ها — همراه با نوار پیشرفت کلی."
 
 #: admin-app/src/routes/Settings.tsx:1057
-msgid "A custom glyph/emoji shown inside the button (leave empty for the default cart icon)."
-msgstr "نمادی سفارشی داخل دکمه نمایش داده می‌شود (برای آیکن پیش‌فرض سبد خرید، خالی بگذارید)."
+msgid ""
+"A custom glyph/emoji shown inside the button (leave empty for the default cart icon)."
+msgstr ""
+"نمادی سفارشی داخل دکمه نمایش داده می‌شود (برای آیکن پیش‌فرض سبد خرید، خالی بگذارید)."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:360
 msgid "A deterministic coupon is created per customer."
-msgstr "برای هر مشتری یک کوپن قطعی ایجاد می‌شود."
+msgstr "برای هر مشتری یک کد تخفیف ثابت و همیشه یکسان ساخته می‌شود."
 
 #: admin-app/src/routes/Settings.tsx:917
-msgid "A floating missions/campaigns button with a progress drawer — always reachable while shopping."
-msgstr "دکمهٔ شناور ماموریت‌ها/کمپین‌ها با کشوی پیشرفت — همیشه هنگام خرید در دسترس است."
+msgid ""
+"A floating missions/campaigns button with a progress drawer — always reachable while shopping."
+msgstr ""
+"دکمهٔ شناور ماموریت‌ها/کمپین‌ها با کشوی پیشرفت — همیشه هنگام خرید در دسترس است."
 
 #: includes/Templates/Mission/MilestoneTemplate.php:43
 msgid "A mission ladder of dots and targets, bar underneath."
-msgstr "نردبانی از نقاط و ماموریت‌ها با نوار زیر آن."
+msgstr "نردبانی از نقاط و آستانه‌ها با نوار زیر آن."
 
 #: includes/Analytics/UpsellRanker.php:293
-msgid "A mission target or an explicit remaining amount is required to rank upsells."
-msgstr "برای رتبه‌بندی پیشنهاد خرید، به یک ماموریت یا مقدار باقیماندهٔ صریح نیاز است."
+msgid ""
+"A mission target or an explicit remaining amount is required to rank upsells."
+msgstr ""
+"برای رتبه‌بندی پیشنهاد خرید، به آستانهٔ ماموریت یا مقدار باقی‌ماندهٔ صریح نیاز است."
 
 #: admin-app/src/routes/MissionBuilder.tsx:483
-msgid "A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side."
-msgstr "یک عدد صحیح مثبت. وقتی خریدار به این تعداد تکمیل برسد، تکمیل‌های بعدی (و پاداش‌ها) از سمت سرور مسدود می‌شوند."
+msgid ""
+"A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side."
+msgstr ""
+"یک عدد صحیح مثبت. وقتی خریدار به این تعداد تکمیل برسد، تکمیل‌های بعدی (و پاداش‌ها) از سمت سرور مسدود می‌شوند."
 
 #: admin-app/src/routes/Analytics.tsx:187
 #: admin-app/src/routes/MissionPerformance.tsx:76
-msgid "A qualifying WooCommerce order was actually associated with this mission — a purchase, not a mission completion."
-msgstr "یک سفارش واجد شرایط ووکامرس واقعاً به این ماموریت مرتبط شده — یک خرید، نه یک تکمیل ماموریت."
+msgid ""
+"A qualifying WooCommerce order was actually associated with this mission — a purchase, not a mission completion."
+msgstr ""
+"یک سفارش واجد شرایط ووکامرس واقعاً به این ماموریت مرتبط شده — یک خرید، نه یک تکمیل ماموریت."
 
 #: admin-app/src/routes/CampaignBuilder.tsx:487
-msgid "A start later than the end means “after start OR before end” (crosses midnight)."
+msgid ""
+"A start later than the end means “after start OR before end” (crosses midnight)."
 msgstr "شروع بعد از پایان یعنی «بعد از شروع یا قبل از پایان» (گذر از نیمهشب)."
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:384
-msgid "A window that crosses midnight (e.g. 22:00–06:00) counts the hours after start and before end."
-msgstr "بازهٔ عبورکننده از نیمهشب (مثلاً ۲۲:۰۰ تا ۰۶:۰۰) ساعات بعد از شروع و قبل از پایان را شامل می‌شود."
+msgid ""
+"A window that crosses midnight (e.g. 22:00–06:00) counts the hours after start and before end."
+msgstr ""
+"بازه‌ای که از نیمه‌شب می‌گذرد (مثلاً ۲۲:۰۰ تا ۰۶:۰۰)، ساعات بعد از شروع و پیش از پایان را شامل می‌شود."
 
 #: admin-app/src/routes/MissionBuilder.tsx:400
 msgid "AND (all children required)"
 msgstr "و (همهٔ زیرشرط‌ها الزامی)"
 
 #: admin-app/src/routes/RevenueOverview.tsx:642
-msgid "AOV comparisons are observed impact — they do not prove that FaraCart caused the difference."
-msgstr "مقایسهٔ میانگین ارزش سفارش، تأثیر مشاهده‌شده است — ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
+msgid ""
+"AOV comparisons are observed impact — they do not prove that FaraCart caused the difference."
+msgstr ""
+"مقایسهٔ میانگین ارزش سفارش، تأثیر مشاهده‌شده است — ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
 
 #: admin-app/src/routes/Recommendations.tsx:160
 msgid "AOV ratio"
@@ -312,8 +324,10 @@ msgid "Add product cost data to see the estimated profit of FaraCart."
 msgstr "برای دیدن سود تخمینی فراکارت، دادهٔ قیمت تمام‌شده را اضافه کنید."
 
 #: admin-app/src/routes/Dashboard.tsx:111
-msgid "Add product costs to unlock Estimated Profit — FaraCart never invents a margin."
-msgstr "برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — فراکارت هرگز حاشیه سود را حدس نمی‌زند."
+msgid ""
+"Add product costs to unlock Estimated Profit — FaraCart never invents a margin."
+msgstr ""
+"برای فعال‌شدن سود تخمینی، هزینه‌های محصول را اضافه کنید — فراکارت هرگز حاشیه سود را حدس نمی‌زند."
 
 #: includes/Frontend/ProgressUI.php:519
 msgid "Add to cart"
@@ -421,7 +435,7 @@ msgstr "همهٔ وضعیت‌ها"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:131
 msgid "Allowed customer roles"
-msgstr "نقشهای مجاز مشتری"
+msgstr "نقش‌های مجاز مشتری"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:260
 msgid "Allowed shipping zones"
@@ -441,8 +455,10 @@ msgid "Amount"
 msgstr "مبلغ"
 
 #: admin-app/src/routes/Dashboard.tsx:78
-msgid "An overview of your cart missions and the plugin status. Full analytics arrive in a later phase."
-msgstr "نمای کلی ماموریت‌های سبد خرید و وضعیت افزونه. تحلیل کامل در فاز بعدی ارائه می‌شود."
+msgid ""
+"An overview of your cart missions and the plugin status. Full analytics arrive in a later phase."
+msgstr ""
+"نمای کلی ماموریت‌های سبد خرید و وضعیت افزونه. تحلیل کامل در فاز بعدی ارائه می‌شود."
 
 #: admin-app/src/routes/MissionPerformance.tsx:131
 msgid "Analysis is based on a healthy number of customer sessions."
@@ -506,8 +522,10 @@ msgstr "به شیوه‌نامهٔ ویجت فروشگاه اضافه می‌ش�
 #: includes/Templates/Mission/Template4.php:177
 #: includes/Templates/Mission/Template5.php:182
 #: includes/Templates/Mission/Template6.php:170
-msgid "Appended to the widget styles. Applied only while this template renders."
-msgstr "به استایل‌های ویجت اضافه می‌شود. فقط تا زمانی که این قالب نمایش داده می‌شود اعمال می‌گردد."
+msgid ""
+"Appended to the widget styles. Applied only while this template renders."
+msgstr ""
+"به استایل‌های ویجت اضافه می‌شود. فقط تا زمانی که این قالب نمایش داده می‌شود اعمال می‌گردد."
 
 #: admin-app/src/routes/MissionPerformance.tsx:323
 #: admin-app/src/routes/Recommendations.tsx:734
@@ -578,7 +596,8 @@ msgid "Assisted revenue"
 msgstr "فروش کمکی"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:435
-msgid "At least one of these coupon codes must be applied for the mission to count."
+msgid ""
+"At least one of these coupon codes must be applied for the mission to count."
 msgstr "برای محاسبهٔ ماموریت باید حداقل یکی از این کدهای تخفیف اعمال شده باشد."
 
 #: admin-app/src/components/mission-builder/missionTypes.tsx:75
@@ -607,7 +626,7 @@ msgstr "فروش منتسب‌شده"
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:199
 msgid "Attributes"
-msgstr "ویژگیها"
+msgstr "ویژگی‌ها"
 
 #: admin-app/src/routes/MissionPerformance.tsx:607
 msgid "Attribution model"
@@ -658,8 +677,10 @@ msgstr "افزایش میانگین سبد خرید"
 
 #: admin-app/src/routes/MissionPerformance.tsx:580
 #: admin-app/src/routes/RevenueOverview.tsx:617
-msgid "Average cart value after mission exposure minus the value at first exposure, per session."
-msgstr "میانگین ارزش سبد پس از دیدن ماموریت منهای ارزش در اولین نمایش، به ازای هر نشست."
+msgid ""
+"Average cart value after mission exposure minus the value at first exposure, per session."
+msgstr ""
+"میانگین ارزش سبد پس از دیدن ماموریت منهای ارزش در اولین نمایش، به ازای هر نشست."
 
 #: admin-app/src/routes/AttributionDashboard.tsx:167
 msgid "Average lift per session"
@@ -678,8 +699,10 @@ msgid "Average order value of the attributed purchased orders."
 msgstr "میانگین ارزش سفارش خریدهای منتسب."
 
 #: includes/Analytics/MissionRecommendationEngine.php:721
-msgid "Average shipping cost is %s — a free-shipping mission absorbs this cost."
-msgstr "میانگین هزینهٔ ارسال %s است — ماموریت ارسال رایگان این هزینه را پوشش می‌دهد."
+msgid ""
+"Average shipping cost is %s — a free-shipping mission absorbs this cost."
+msgstr ""
+"میانگین هزینهٔ ارسال %s است — ماموریت ارسال رایگان این هزینه را پوشش می‌دهد."
 
 #: admin-app/src/routes/Recommendations.tsx:422
 msgid "Avg. margin"
@@ -873,8 +896,10 @@ msgid "Campaigns"
 msgstr "کمپین‌ها"
 
 #: admin-app/src/routes/Campaigns.tsx:149
-msgid "Campaigns bundle multiple missions into scheduled, prioritized milestones. Create your first campaign to group missions around an event or season."
-msgstr "کمپین‌ها چندین ماموریت را در نقاط عطف زمان‌بندی‌شده و اولویت‌بندی‌شده جمع می‌کنند. اولین کمپین خود را بسازید تا ماموریت‌ها را حول یک رویداد یا فصل گروه‌بندی کنید."
+msgid ""
+"Campaigns bundle multiple missions into scheduled, prioritized milestones. Create your first campaign to group missions around an event or season."
+msgstr ""
+"کمپین‌ها چندین ماموریت را در نقاط عطف زمان‌بندی‌شده و اولویت‌بندی‌شده جمع می‌کنند. اولین کمپین خود را بسازید تا ماموریت‌ها را حول یک رویداد یا فصل گروه‌بندی کنید."
 
 #: admin-app/src/components/ConfirmDialog.tsx:59
 #: admin-app/src/routes/CampaignBuilder.tsx:286
@@ -893,7 +918,8 @@ msgstr "کارت"
 
 #: admin-app/src/routes/Missions.tsx:198
 msgid "Cart missions drive the storefront progress bars and rewards."
-msgstr "ماموریت‌های سبد خرید، نوارهای پیشرفت و پاداش‌های فروشگاه را هدایت می‌کنند."
+msgstr ""
+"ماموریت‌های سبد خرید، نوارهای پیشرفت و پاداش‌های فروشگاه را هدایت می‌کنند."
 
 #: admin-app/src/routes/Settings.tsx:158
 msgid "Cart page"
@@ -938,7 +964,7 @@ msgstr "مرکز راست"
 
 #: admin-app/src/routes/Settings.tsx:820
 msgid "Cheapest first"
-msgstr "ارزانترین اول"
+msgstr "ارزان‌ترین اول"
 
 #: admin-app/src/routes/Settings.tsx:160
 msgid "Checkout"
@@ -949,16 +975,19 @@ msgid "Child type"
 msgstr "نوع زیرشرط"
 
 #: admin-app/src/routes/MissionBuilder.tsx:387
-msgid "Children are evaluated against the same cart. AND requires every child, OR completes at the best child."
-msgstr "زیرشرط‌ها روی همان سبد ارزیابی می‌شوند. «و» به همهٔ زیرشرط‌ها نیاز دارد و «یا» با بهترین زیرشرط تکمیل می‌شود."
+msgid ""
+"Children are evaluated against the same cart. AND requires every child, OR completes at the best child."
+msgstr ""
+"زیرشرط‌ها روی همان سبد ارزیابی می‌شوند. «و» به همهٔ زیرشرط‌ها نیاز دارد و «یا» با بهترین زیرشرط تکمیل می‌شود."
 
 #: admin-app/src/components/date-range/CustomRangePicker.tsx:229
 msgid "Choose a start and end date."
 msgstr "تاریخ شروع و پایان را انتخاب کنید."
 
 #: includes/Templates/Mission/RingTemplate.php:47
-msgid "Circular gauge — the target as a filled ring with the percentage centered."
-msgstr "نمودار حلقه‌ای — ماموریت به‌صورت حلقه پر شده با درصد در مرکز."
+msgid ""
+"Circular gauge — the target as a filled ring with the percentage centered."
+msgstr "نمودار حلقه‌ای — آستانه به‌صورت حلقهٔ پر شده، با درصد در مرکز."
 
 #: admin-app/src/components/wheel-picker/WheelField.tsx:42
 #: admin-app/src/components/wheel-picker/WheelField.tsx:43
@@ -989,8 +1018,10 @@ msgid "Collapse all"
 msgstr "بستن همه"
 
 #: admin-app/src/routes/Settings.tsx:796
-msgid "Collect mission and suggestion events. Keep the missions running while turning event collection off."
-msgstr "رویدادهای ماموریت و پیشنهاد را جمع‌آوری کنید. ماموریت‌ها را فعال نگه دارید در حالی که جمع‌آوری رویداد خاموش است."
+msgid ""
+"Collect mission and suggestion events. Keep the missions running while turning event collection off."
+msgstr ""
+"رویدادهای ماموریت و پیشنهاد را جمع‌آوری کنید. ماموریت‌ها را فعال نگه دارید در حالی که جمع‌آوری رویداد خاموش است."
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:101
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:107
@@ -1083,8 +1114,10 @@ msgid "Completion"
 msgstr "تکمیل"
 
 #: admin-app/src/routes/Analytics.tsx:273
-msgid "Completion is strong, but purchase conversion is weak — only %1$s of completed missions were followed by an attributed purchase."
-msgstr "تکمیل قوی است، اما تبدیل به خرید ضعیف است — تنها %1$s از ماموریت‌های تکمیل‌شده با یک خرید منتسب دنبال شد."
+msgid ""
+"Completion is strong, but purchase conversion is weak — only %1$s of completed missions were followed by an attributed purchase."
+msgstr ""
+"تکمیل قوی است، اما تبدیل به خرید ضعیف است — تنها %1$s از ماموریت‌های تکمیل‌شده با یک خرید منتسب دنبال شد."
 
 #: admin-app/src/routes/MissionBuilder.tsx:441
 msgid "Completion limit"
@@ -1100,8 +1133,10 @@ msgid "Completions"
 msgstr "تکمیل‌ها"
 
 #: admin-app/src/routes/MissionPerformance.tsx:94
-msgid "Completions where the customer also saw a product recommendation for this mission in the same session (UPSELL_REFACTOR §30)."
-msgstr "تکمیل‌هایی که مشتری در همان نشست، پیشنهاد خریدی را نیز برای این ماموریت دیده است (UPSELL_REFACTOR §30)."
+msgid ""
+"Completions where the customer also saw a product recommendation for this mission in the same session (UPSELL_REFACTOR §30)."
+msgstr ""
+"تکمیل‌هایی که مشتری در همان نشست، پیشنهاد خریدی را نیز برای این ماموریت دیده است (UPSELL_REFACTOR §30)."
 
 #: admin-app/src/components/mission-builder/missionTypes.tsx:63
 #: admin-app/src/routes/Missions.tsx:56
@@ -1190,8 +1225,10 @@ msgid "Cost data coverage"
 msgstr "پوشش قیمت تمام‌شده"
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:152
-msgid "Cost data coverage: %1$s — profit is calculated only for orders with complete cost data."
-msgstr "پوشش قیمت تمام‌شده: %1$s — سود فقط برای سفارش‌هایی با دادهٔ کامل قیمت تمام‌شده محاسبه می‌شود."
+msgid ""
+"Cost data coverage: %1$s — profit is calculated only for orders with complete cost data."
+msgstr ""
+"پوشش قیمت تمام‌شده: %1$s — سود فقط برای سفارش‌هایی با دادهٔ کامل قیمت تمام‌شده محاسبه می‌شود."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:26
 msgid "Cost of goods field (_wc_cog_cost)"
@@ -1312,8 +1349,10 @@ msgid "Create your first Mission"
 msgstr "اولین ماموریت خود را بسازید"
 
 #: admin-app/src/routes/Dashboard.tsx:99
-msgid "Create your first mission to start increasing the average order value — progress bars and rewards appear on the storefront once a mission is active."
-msgstr "اولین ماموریت خود را ایجاد کنید تا میانگین ارزش سفارش افزایش یابد — نوارهای پیشرفت و پاداش‌ها پس از فعال شدن ماموریت در فروشگاه ظاهر می‌شوند."
+msgid ""
+"Create your first mission to start increasing the average order value — progress bars and rewards appear on the storefront once a mission is active."
+msgstr ""
+"اولین ماموریت خود را ایجاد کنید تا میانگین ارزش سفارش افزایش یابد — نوارهای پیشرفت و پاداش‌ها پس از فعال شدن ماموریت در فروشگاه ظاهر می‌شوند."
 
 #: admin-app/src/routes/Settings.tsx:590
 msgid "Cumulative — all rewards stack"
@@ -1337,8 +1376,10 @@ msgid "Current target"
 msgstr "آستانهٔ فعلی"
 
 #: admin-app/src/routes/MissionPerformance.tsx:313
-msgid "Current target %1$s → recommended target %2$s? This changes a production mission — the action is not reversible from here."
-msgstr "آستانهٔ فعلی %1$s → آستانهٔ پیشنهادی %2$s؟ این کار یک ماموریت در حال اجرا را تغییر می‌دهد — این اقدام از اینجا قابل بازگشت نیست."
+msgid ""
+"Current target %1$s → recommended target %2$s? This changes a production mission — the action is not reversible from here."
+msgstr ""
+"آستانهٔ فعلی %1$s → آستانهٔ پیشنهادی %2$s؟ این کار یک ماموریت در حال اجرا را تغییر می‌دهد — این اقدام از اینجا قابل بازگشت نیست."
 
 #: admin-app/src/routes/Recommendations.tsx:714
 msgid "Current target: %1$s"
@@ -1380,20 +1421,28 @@ msgstr "مشتریان"
 
 #: admin-app/src/routes/Analytics.tsx:623
 #: admin-app/src/routes/RevenueOverview.tsx:329
-msgid "Customers are interacting with your missions, but no attributed purchases have been recorded for this period."
-msgstr "مشتری‌ها با ماموریت‌های شما در تعامل هستند، اما در این بازهٔ زمانی خریدی مرتبط ثبت نشده است."
+msgid ""
+"Customers are interacting with your missions, but no attributed purchases have been recorded for this period."
+msgstr ""
+"مشتری‌ها با ماموریت‌های شما در تعامل هستند، اما در این بازهٔ زمانی خریدی مرتبط ثبت نشده است."
 
 #: admin-app/src/routes/RevenueOverview.tsx:105
-msgid "Customers interacting with FaraCart spent %1$s less per order on average (observed impact)."
-msgstr "مشتریانی که با فراکارت تعامل داشتند، به‌طور میانگین %1$s کمتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
+msgid ""
+"Customers interacting with FaraCart spent %1$s less per order on average (observed impact)."
+msgstr ""
+"مشتریانی که با فراکارت تعامل داشتند، به‌طور میانگین %1$s کمتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
 
 #: admin-app/src/routes/RevenueOverview.tsx:100
-msgid "Customers interacting with FaraCart spent %1$s more per order on average (observed impact)."
-msgstr "مشتریانی که با فراکارت تعامل داشتند، به‌طور میانگین %1$s بیشتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
+msgid ""
+"Customers interacting with FaraCart spent %1$s more per order on average (observed impact)."
+msgstr ""
+"مشتریانی که با فراکارت تعامل داشتند، به‌طور میانگین %1$s بیشتر در هر سفارش خرج کردند (تأثیر مشاهده‌شده)."
 
 #: admin-app/src/routes/MissionPerformance.tsx:609
-msgid "Customers who progressed or completed the mission before ordering are direct; exposure-only sessions are assisted."
-msgstr "مشتریانی که پیش از سفارش به ماموریت پیشرفت کردند یا آن را تکمیل کردند، مستقیم هستند؛ نشست‌های فقط-مشاهده، کمکی هستند."
+msgid ""
+"Customers who progressed or completed the mission before ordering are direct; exposure-only sessions are assisted."
+msgstr ""
+"مشتریانی که پیش از سفارش به ماموریت پیشرفت کردند یا آن را تکمیل کردند، مستقیم هستند؛ نشست‌های فقط-مشاهده، کمکی هستند."
 
 #: admin-app/src/routes/Appearance.tsx:608
 #: admin-app/src/routes/Appearance.tsx:626
@@ -1471,8 +1520,10 @@ msgid "Default money basis for missions that do not set their own."
 msgstr "مبنای پولی پیش‌فرض برای ماموریت‌هایی که مبنای خود را تعیین نمی‌کنند."
 
 #: admin-app/src/routes/MissionBuilder.tsx:301
-msgid "Define what shoppers need to reach and what they earn for getting there."
-msgstr "تعیین کنید مشتریان باید به چه چیزی برسند و در ازای آن چه پاداشی بگیرند."
+msgid ""
+"Define what shoppers need to reach and what they earn for getting there."
+msgstr ""
+"تعیین کنید مشتریان باید به چه چیزی برسند و در ازای آن چه پاداشی بگیرند."
 
 #: admin-app/src/routes/Campaigns.tsx:256
 #: admin-app/src/routes/Campaigns.tsx:298
@@ -1541,8 +1592,10 @@ msgid "Direct revenue"
 msgstr "فروش مستقیم"
 
 #: admin-app/src/routes/MissionPerformance.tsx:586
-msgid "Direct revenue is the incremental amount this mission moved — it is a slice of the influenced total, not an extra value on top of it."
-msgstr "فروش مستقیم، مقدار افزایشی‌ای است که این ماموریت ایجاد کرده — بخشی از کل تأثیرگذار است، نه ارزش اضافی روی آن."
+msgid ""
+"Direct revenue is the incremental amount this mission moved — it is a slice of the influenced total, not an extra value on top of it."
+msgstr ""
+"فروش مستقیم، مقدار افزایشی‌ای است که این ماموریت ایجاد کرده — بخشی از کل تأثیرگذار است، نه ارزش اضافی روی آن."
 
 #: admin-app/src/routes/Campaigns.tsx:201
 #: admin-app/src/routes/Missions.tsx:338
@@ -1611,7 +1664,8 @@ msgid "Distinct orders associated with a mission in the selected period."
 msgstr "سفارش‌های متمایز مرتبط با یک ماموریت در بازهٔ انتخابی."
 
 #: admin-app/src/routes/Analytics.tsx:652
-msgid "Distinct orders associated with a mission — a purchase, not a mission completion."
+msgid ""
+"Distinct orders associated with a mission — a purchase, not a mission completion."
 msgstr "سفارش‌های متمایز مرتبط با یک ماموریت — یک خرید، نه یک تکمیل ماموریت."
 
 #: admin-app/src/routes/MissionPerformance.tsx:638
@@ -1759,7 +1813,8 @@ msgstr "تأثیر تخمینی بر سود"
 
 #: admin-app/src/routes/Analytics.tsx:1011
 msgid "Estimated profit is calculated only for orders with complete cost data."
-msgstr "سود تخمینی فقط برای سفارش‌هایی محاسبه می‌شود که قیمت تمام‌شدهٔ کامل دارند."
+msgstr ""
+"سود تخمینی فقط برای سفارش‌هایی محاسبه می‌شود که قیمت تمام‌شدهٔ کامل دارند."
 
 #: admin-app/src/routes/Recommendations.tsx:137
 msgid "Estimated reward cost"
@@ -1776,24 +1831,32 @@ msgstr "تخمینی، نه قطعی"
 
 #: admin-app/src/routes/Analytics.tsx:214
 #: admin-app/src/routes/MissionPerformance.tsx:112
-msgid "Estimated, not guaranteed — based on available product cost, reward and shipping data."
-msgstr "تخمینی، نه قطعی — بر پایهٔ داده‌های موجود قیمت تمام‌شده، پاداش و ارسال."
+msgid ""
+"Estimated, not guaranteed — based on available product cost, reward and shipping data."
+msgstr ""
+"تخمینی، نه قطعی — بر پایهٔ داده‌های موجود قیمت تمام‌شده، پاداش و ارسال."
 
 #: admin-app/src/routes/Analytics.tsx:796
 msgid "Estimated, not guaranteed."
 msgstr "تخمینی، نه قطعی."
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:83
-msgid "Example: if the target is 10 items, a cart with 7 items is 70% of the way there."
-msgstr "مثال: اگر ماموریت ۱۰ عدد باشد، سبدی با ۷ عدد معادل ۷۰٪ مسیر ماموریت است."
+msgid ""
+"Example: if the target is 10 items, a cart with 7 items is 70% of the way there."
+msgstr ""
+"مثال: اگر آستانه ۱۰ عدد باشد، سبدی با ۷ عدد معادل ۷۰٪ مسیر رسیدن به آستانه است."
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:77
-msgid "Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there."
-msgstr "مثال: اگر ماموریت ۱۰ کیلوگرم باشد، سبدی با ۷ کیلوگرم معادل ۷۰٪ مسیر ماموریت است."
+msgid ""
+"Example: if the target is 10 kg, a cart weighing 7 kg is 70% of the way there."
+msgstr ""
+"مثال: اگر آستانه ۱۰ کیلوگرم باشد، سبدی با ۷ کیلوگرم معادل ۷۰٪ مسیر رسیدن به آستانه است."
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:88
-msgid "Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there."
-msgstr "مثال: اگر ماموریت ۲٬۰۰۰٬۰۰۰ باشد، سبدی با ۱٬۵۰۰٬۰۰۰ معادل ۷۵٪ مسیر ماموریت است."
+msgid ""
+"Example: if the target is 2,000,000, a cart of 1,500,000 is 75% of the way there."
+msgstr ""
+"مثال: اگر آستانه ۲٬۰۰۰٬۰۰۰ باشد، سبدی با ۱٬۵۰۰٬۰۰۰ معادل ۷۵٪ مسیر رسیدن به آستانه است."
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:99
 msgid "Excluded products"
@@ -1816,8 +1879,10 @@ msgid "Exclusive rewards never combine."
 msgstr "پاداش‌های انحصاری هرگز ترکیب نمی‌شوند."
 
 #: admin-app/src/routes/Missions.tsx:302
-msgid "Exclusive: when this mission is reached, lower-priority missions are skipped."
-msgstr "انحصاری: وقتی این ماموریت محقق شود، ماموریت‌ها با اولویت پایین‌تر رد می‌شوند."
+msgid ""
+"Exclusive: when this mission is reached, lower-priority missions are skipped."
+msgstr ""
+"انحصاری: وقتی این ماموریت محقق شود، ماموریت‌ها با اولویت پایین‌تر رد می‌شوند."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:434
 msgid "Existing coupon code"
@@ -1859,8 +1924,10 @@ msgid "Farvardin"
 msgstr "فروردین"
 
 #: admin-app/src/routes/Dashboard.tsx:209
-msgid "Find better Mission targets and reward configurations using your store data."
-msgstr "با استفاده از داده‌های فروشگاه‌تان، آستانهٔ ماموریت و پیکربندی پاداش بهتری بیابید."
+msgid ""
+"Find better Mission targets and reward configurations using your store data."
+msgstr ""
+"با استفاده از داده‌های فروشگاه‌تان، آستانهٔ ماموریت و پیکربندی پاداش بهتری بیابید."
 
 #: admin-app/src/routes/Settings.tsx:594
 msgid "First matching mission only"
@@ -2023,11 +2090,12 @@ msgstr "عملکرد فروش فراکارت"
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:216
 msgid "FaraCart does not invent product costs."
-msgstr "فراکارت قیمت تمام‌شده را اختراع نمی‌کند."
+msgstr "فراکارت قیمت تمام‌شده را حدس نمی‌زند."
 
 #: admin-app/src/routes/Analytics.tsx:318
 #: admin-app/src/routes/RevenueOverview.tsx:141
-msgid "FaraCart generated an estimated profit of %1$s after reward and shipping costs."
+msgid ""
+"FaraCart generated an estimated profit of %1$s after reward and shipping costs."
 msgstr "فراکارت پس از کسر هزینه‌های پاداش و ارسال، سود تخمینی %1$s ایجاد کرد."
 
 #: admin-app/src/routes/RevenueOverview.tsx:83
@@ -2129,8 +2197,10 @@ msgid "Missions Completed"
 msgstr "ماموریت‌های تکمیل‌شده"
 
 #: admin-app/src/routes/Missions.tsx:261
-msgid "Missions define what you want shoppers to reach — a cart amount, quantity, category spend and more. Create your first mission to start."
-msgstr "ماموریت‌ها مشخص می‌کنند که می‌خواهید مشتریان به چه چیزی برسند — مبلغ سبد، تعداد، هزینه در دسته‌بندی و موارد دیگر. برای شروع، اولین ماموریت خود را ایجاد کنید."
+msgid ""
+"Missions define what you want shoppers to reach — a cart amount, quantity, category spend and more. Create your first mission to start."
+msgstr ""
+"ماموریت‌ها مشخص می‌کنند که می‌خواهید مشتریان به چه چیزی برسند — مبلغ سبد، تعداد، هزینه در دسته‌بندی و موارد دیگر. برای شروع، اولین ماموریت خود را ایجاد کنید."
 
 #: admin-app/src/routes/MissionPerformance.tsx:130
 #: admin-app/src/routes/Recommendations.tsx:49
@@ -2142,16 +2212,20 @@ msgid "Good performance"
 msgstr "عملکرد خوب"
 
 #: admin-app/src/routes/CampaignBuilder.tsx:324
-msgid "Group missions into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds."
-msgstr "ماموریت‌ها را در نقاط عطف زمان‌بندی‌شده گروه‌بندی کنید — مثلاً فروش تابستانی با ارسال رایگان، هدیه و تخفیف در آستانه‌های مختلف."
+msgid ""
+"Group missions into scheduled milestones — e.g. a summer sale with free shipping, a gift and a discount at different thresholds."
+msgstr ""
+"ماموریت‌ها را در نقاط عطف زمان‌بندی‌شده گروه‌بندی کنید — مثلاً فروش تابستانی با ارسال رایگان، هدیه و تخفیف در آستانه‌های مختلف."
 
 #: admin-app/src/routes/Campaigns.tsx:118
-msgid "Group missions into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M."
-msgstr "ماموریت‌ها را در نقاط عطف زمان‌بندی‌شده و اولویت‌بندی‌شده گروه‌بندی کنید — مثلاً ارسال رایگان در ۵۰۰ هزار، هدیه در ۱ میلیون و تخفیف در ۱.۵ میلیون."
+msgid ""
+"Group missions into scheduled, prioritized milestones — e.g. free shipping at 500K, a gift at 1M, a discount at 1.5M."
+msgstr ""
+"ماموریت‌ها را در نقاط عطف زمان‌بندی‌شده و اولویت‌بندی‌شده گروه‌بندی کنید — مثلاً ارسال رایگان در ۵۰۰ هزار، هدیه در ۱ میلیون و تخفیف در ۱.۵ میلیون."
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:156
 msgid "Guests (not logged in)"
-msgstr "مهمانها (وارد نشدهاند)"
+msgstr "مهمان‌ها (وارد نشده‌اند)"
 
 #: includes/Analytics/UpsellRanker.php:1191
 msgid "Healthy stock levels."
@@ -2170,8 +2244,10 @@ msgid "Hide on mobile"
 msgstr "مخفی در موبایل"
 
 #: admin-app/src/routes/Settings.tsx:629
-msgid "Hide the WordPress admin chrome and let the dashboard fill the whole browser window."
-msgstr "قاب مدیریت وردپرس را مخفی کنید و اجازه دهید داشبورد کل پنجرهٔ مرورگر را پر کند."
+msgid ""
+"Hide the WordPress admin chrome and let the dashboard fill the whole browser window."
+msgstr ""
+"قاب مدیریت وردپرس را مخفی کنید و اجازه دهید داشبورد کل پنجرهٔ مرورگر را پر کند."
 
 #: admin-app/src/routes/MissionPerformance.tsx:152
 #: admin-app/src/routes/Recommendations.tsx:38
@@ -2195,7 +2271,8 @@ msgid "Historical performance"
 msgstr "عملکرد تاریخی"
 
 #: includes/Analytics/UpsellRanker.php:1209
-msgid "Historical upsell performance: %d impressions, %d orders (%s conversion)."
+msgid ""
+"Historical upsell performance: %d impressions, %d orders (%s conversion)."
 msgstr "عملکرد تاریخی پیشنهاد خرید: %d نمایش، %d سفارش (%s تبدیل)."
 
 #: admin-app/src/routes/Recommendations.tsx:156
@@ -2215,12 +2292,16 @@ msgid "How FaraCart works"
 msgstr "فراکارت چگونه کار می‌کند"
 
 #: admin-app/src/routes/Settings.tsx:583
-msgid "How completed missions grant rewards when several compete: combine them, grant only the highest-priority matching mission, or grant only the best reward. Per-mission exclusive flags and priorities are respected in every mode."
-msgstr "نحوهٔ اعطای پاداش ماموریت‌های تکمیل‌شده وقتی چند ماموریت رقابت می‌کنند: ترکیب آن‌ها، اعطای فقط به ماموریت منطبق با بالاترین اولویت، یا اعطای فقط بهترین پاداش. پرچم‌های انحصاری و اولویت‌های هر ماموریت در هر حالت رعایت می‌شوند."
+msgid ""
+"How completed missions grant rewards when several compete: combine them, grant only the highest-priority matching mission, or grant only the best reward. Per-mission exclusive flags and priorities are respected in every mode."
+msgstr ""
+"نحوهٔ اعطای پاداش ماموریت‌های تکمیل‌شده وقتی چند ماموریت رقابت می‌کنند: ترکیب آن‌ها، اعطای فقط به ماموریت منطبق با بالاترین اولویت، یا اعطای فقط بهترین پاداش. پرچم‌های انحصاری و اولویت‌های هر ماموریت در هر حالت رعایت می‌شوند."
 
 #: admin-app/src/routes/RevenueOverview.tsx:285
-msgid "How did FaraCart perform? Sales attributed, purchased orders, average basket and estimated profit."
-msgstr "فراکارت چه عملکردی داشت؟ فروش منتسب، سفارش‌های خریداری‌شده، میانگین سبد و سود تخمینی."
+msgid ""
+"How did FaraCart perform? Sales attributed, purchased orders, average basket and estimated profit."
+msgstr ""
+"فراکارت چه عملکردی داشت؟ فروش منتسب، سفارش‌های خریداری‌شده، میانگین سبد و سود تخمینی."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:170
 #: admin-app/src/routes/RevenueOverview.tsx:663
@@ -2228,7 +2309,8 @@ msgid "How is this calculated?"
 msgstr "این چگونه محاسبه می‌شود؟"
 
 #: admin-app/src/routes/Analytics.tsx:708
-msgid "How many times customers reached a mission target. Completion is not the same as purchase."
+msgid ""
+"How many times customers reached a mission target. Completion is not the same as purchase."
 msgstr "چند بار مشتریان به آستانهٔ ماموریت رسیدند. تکمیل با خرید یکی نیست."
 
 #: admin-app/src/routes/Analytics.tsx:702
@@ -2236,15 +2318,18 @@ msgid "How many times mission widgets were seen."
 msgstr "چند بار ویجت‌های ماموریت دیده شدند."
 
 #: admin-app/src/routes/MissionBuilder.tsx:442
-msgid "How many times the same shopper may complete this mission. Each completion cycle grants the reward once; after the limit is reached the mission no longer appears as completable for that shopper."
-msgstr "تعیین می‌کند هر خریدار حداکثر چند بار می‌تواند این ماموریت را تکمیل کند. هر چرخهٔ تکمیل یک بار پاداش می‌دهد؛ پس از رسیدن به سقف، ماموریت دیگر برای آن خریدار قابل تکمیل نمایش داده نمی‌شود."
+msgid ""
+"How many times the same shopper may complete this mission. Each completion cycle grants the reward once; after the limit is reached the mission no longer appears as completable for that shopper."
+msgstr ""
+"تعیین می‌کند هر خریدار حداکثر چند بار می‌تواند این ماموریت را تکمیل کند. هر چرخهٔ تکمیل یک بار پاداش می‌دهد؛ پس از رسیدن به سقف، ماموریت دیگر برای آن خریدار قابل تکمیل نمایش داده نمی‌شود."
 
 #: admin-app/src/routes/Settings.tsx:391
 msgid "How money amounts are shown on the storefront widgets."
 msgstr "نحوهٔ نمایش مبالغ پولی در ویجت‌های فروشگاه."
 
 #: admin-app/src/routes/Settings.tsx:569
-msgid "How multiple active missions are presented when the shopper has no campaign."
+msgid ""
+"How multiple active missions are presented when the shopper has no campaign."
 msgstr "نحوهٔ نمایش چند ماموریت فعال وقتی مشتری کمپینی ندارد."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:89
@@ -2252,20 +2337,25 @@ msgid "How often this product has actually led to an order when suggested."
 msgstr "نشان می‌دهد این محصول هنگام پیشنهاد، چقدر به ثبت سفارش منجر شده است."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:63
-msgid "How related this product is to the items already in the customer’s cart."
+msgid ""
+"How related this product is to the items already in the customer’s cart."
 msgstr "میزان ارتباط این محصول با کالاهایی که مشتری در سبد خود دارد."
 
 #: admin-app/src/routes/Settings.tsx:814
 msgid "How suggested products are ordered (Phase 32 advanced upsell ranking)."
-msgstr "نحوهٔ مرتبسازی محصولات پیشنهادی (رتبهبندی فروش پیشرفتهٔ فاز ۳۲)."
+msgstr "نحوهٔ مرتب‌سازی محصولات پیشنهادی (رتبه‌بندی فروش پیشرفتهٔ فاز ۳۲)."
 
 #: admin-app/src/routes/CampaignBuilder.tsx:499
-msgid "How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own mission card."
-msgstr "نحوه نمایش کمپین در فروشگاه. قالب کمپین کل کمپین را مدیریت می‌کند (مثلاً زنجیره نقاط عطف)؛ بدون آن، هر نقطه عطف به‌صورت کارت ماموریت جداگانه نمایش داده می‌شود."
+msgid ""
+"How the campaign renders on the storefront. A campaign template governs the whole campaign (e.g. the milestone chain); without one, each milestone renders as its own mission card."
+msgstr ""
+"نحوهٔ نمایش کمپین در فروشگاه. قالب کمپین کل کمپین را مدیریت می‌کند (مثلاً زنجیرهٔ نقاط عطف)؛ بدون آن، هر نقطهٔ عطف به‌صورت کارت ماموریت جداگانه نمایش داده می‌شود."
 
 #: admin-app/src/routes/MissionBuilder.tsx:505
-msgid "How this mission competes when several missions are active. Lower priority numbers win first; a mission inside a campaign is also ordered by its campaign priority."
-msgstr "نحوهٔ رقابت این ماموریت وقتی چند ماموریت فعال هستند. اعداد اولویت پایین‌تر اول برنده می‌شوند؛ ماموریت داخل کمپین نیز با اولویت کمپینش مرتب می‌شود."
+msgid ""
+"How this mission competes when several missions are active. Lower priority numbers win first; a mission inside a campaign is also ordered by its campaign priority."
+msgstr ""
+"نحوهٔ رقابت این ماموریت وقتی چند ماموریت فعال هستند. اعداد اولویت پایین‌تر اول برنده می‌شوند؛ ماموریت داخل کمپین نیز با اولویت کمپینش مرتب می‌شود."
 
 #: admin-app/src/components/mission-builder/DisplayFields.tsx:167
 msgid "Icon"
@@ -2284,8 +2374,10 @@ msgid "Impressions"
 msgstr "نمایش‌ها"
 
 #: admin-app/src/routes/Recommendations.tsx:596
-msgid "Improve your Missions using store performance data — which target and reward configuration to use, and why."
-msgstr "ماموریت‌های خود را با داده‌های عملکرد فروشگاه بهبود دهید — از کدام آستانه و پیکربندی پاداش استفاده کنید و چرا."
+msgid ""
+"Improve your Missions using store performance data — which target and reward configuration to use, and why."
+msgstr ""
+"ماموریت‌های خود را با داده‌های عملکرد فروشگاه بهبود دهید — از کدام آستانه و پیکربندی پاداش استفاده کنید و چرا."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:76
 msgid "In-stock products are prioritized."
@@ -2348,12 +2440,16 @@ msgid "Incremental margin at this threshold covers the reward cost."
 msgstr "حاشیهٔ سود افزایشی در این آستانه هزینهٔ پاداش را پوشش می‌دهد."
 
 #: includes/Analytics/MissionRecommendationEngine.php:736
-msgid "Incremental margin at this threshold does not fully cover the reward cost."
-msgstr "حاشیهٔ سود افزایشی در این آستانه هزینهٔ پاداش را به‌طور کامل پوشش نمی‌دهد."
+msgid ""
+"Incremental margin at this threshold does not fully cover the reward cost."
+msgstr ""
+"حاشیهٔ سود افزایشی در این آستانه هزینهٔ پاداش را به‌طور کامل پوشش نمی‌دهد."
 
 #: admin-app/src/routes/RevenueOverview.tsx:680
-msgid "Incremental revenue is the direct revenue shown above — the additional order value the missions moved. Attribution follows the FaraCart model: progressed/completed missions are direct, exposure-only missions are assisted, and every associated order is counted once."
-msgstr "فروش افزایشی همان فروش مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که ماموریت‌ها ایجاد کرده‌اند. انتساب از مدل فراکارت پیروی می‌کند: ماموریت‌های پیشرفته/تکمیل‌شده مستقیم‌اند، ماموریت‌های فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
+msgid ""
+"Incremental revenue is the direct revenue shown above — the additional order value the missions moved. Attribution follows the FaraCart model: progressed/completed missions are direct, exposure-only missions are assisted, and every associated order is counted once."
+msgstr ""
+"فروش افزایشی همان فروش مستقیم نمایش‌داده‌شده در بالا است — ارزش سفارش اضافی‌ای که ماموریت‌ها ایجاد کرده‌اند. انتساب از مدل فراکارت پیروی می‌کند: ماموریت‌های پیشرفته/تکمیل‌شده مستقیم‌اند، ماموریت‌های فقط-مشاهده کمکی‌اند و هر سفارش مرتبط یک بار شمارش می‌شود."
 
 #: admin-app/src/routes/Analytics.tsx:972
 #: admin-app/src/routes/AttributionDashboard.tsx:141
@@ -2434,8 +2530,10 @@ msgid "Learn how"
 msgstr "یاد بگیرید چگونه"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:333
-msgid "Leave both empty to run the mission at all times. Local site time is used."
-msgstr "برای اجرای همیشگی ماموریت، هر دو را خالی بگذارید. زمان محلی سایت استفاده می‌شود."
+msgid ""
+"Leave both empty to run the mission at all times. Local site time is used."
+msgstr ""
+"برای اجرای همیشگی ماموریت، هر دو را خالی بگذارید. زمان محلی سایت استفاده می‌شود."
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:175
 msgid "Leave both unchecked to allow everyone."
@@ -2443,7 +2541,8 @@ msgstr "برای اجازه به همه، هر دو را خالی بگذارید
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:132
 msgid "Leave empty to allow every role. Guests never match a role restriction."
-msgstr "برای اجازه به همهٔ نقشها خالی بگذارید. مهمانها هرگز با محدودیت نقش مطابقت ندارند."
+msgstr ""
+"برای اجازه به همهٔ نقش‌ها خالی بگذارید. مهمان‌ها هرگز با محدودیت نقش مطابقت ندارند."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:166
 #: admin-app/src/components/mission-builder/RewardFields.tsx:173
@@ -2504,8 +2603,10 @@ msgid "Logged-in customers"
 msgstr "مشتریان واردشده"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:216
-msgid "Logged-in customers whose lifetime spend and order count meet the thresholds below."
-msgstr "مشتریان واردشده که مجموع خرید و تعداد سفارش آنها آستانههای زیر را برآورده می‌کنند."
+msgid ""
+"Logged-in customers whose lifetime spend and order count meet the thresholds below."
+msgstr ""
+"مشتریان واردشده که مجموع خرید و تعداد سفارش آن‌ها آستانه‌های زیر را برآورده می‌کنند."
 
 #: admin-app/src/routes/Settings.tsx:848
 msgid "Logging"
@@ -2530,8 +2631,10 @@ msgid "Main navigation"
 msgstr "ناوبری اصلی"
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:193
-msgid "Makes every shipping rate free once the mission is reached. Zone/method-specific rules are configured in a later phase."
-msgstr "پس از تکمیل ماموریت، همهٔ نرخ‌های ارسال رایگان می‌شوند. قوانین ویژهٔ مناطق/روش‌ها در فاز بعدی پیکربندی می‌شوند."
+msgid ""
+"Makes every shipping rate free once the mission is reached. Zone/method-specific rules are configured in a later phase."
+msgstr ""
+"پس از تکمیل ماموریت، همهٔ نرخ‌های ارسال رایگان می‌شوند. قوانین ویژهٔ مناطق/روش‌ها در فاز بعدی پیکربندی می‌شوند."
 
 #: admin-app/src/routes/Recommendations.tsx:673
 msgid "Manage product costs"
@@ -2595,7 +2698,7 @@ msgstr "مینی‌سبد"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:240
 msgid "Minimum completed orders"
-msgstr "حداقل سفارشهای تکمیلشده"
+msgstr "حداقل سفارش‌های تکمیل‌شده"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:278
 msgid "Minimum items in cart"
@@ -2614,8 +2717,10 @@ msgid "Mobile behavior"
 msgstr "رفتار موبایل"
 
 #: admin-app/src/routes/Settings.tsx:995
-msgid "Mobile reuses the desktop position. Turn the toggle above off to configure a separate mobile position."
-msgstr "موبایل از موقعیت دسکتاپ استفاده می‌کند. برای تنظیم موقعیت جداگانهٔ موبایل، کلید بالا را خاموش کنید."
+msgid ""
+"Mobile reuses the desktop position. Turn the toggle above off to configure a separate mobile position."
+msgstr ""
+"موبایل از موقعیت دسکتاپ استفاده می‌کند. برای تنظیم موقعیت جداگانهٔ موبایل، کلید بالا را خاموش کنید."
 
 #: admin-app/src/routes/MissionPerformance.tsx:126
 #: admin-app/src/routes/Recommendations.tsx:52
@@ -2682,8 +2787,10 @@ msgid "No campaign template"
 msgstr "بدون قالب کمپین"
 
 #: admin-app/src/routes/Appearance.tsx:181
-msgid "No campaign template selected — each milestone renders as its own mission card on the storefront."
-msgstr "قالب کمپینی انتخاب نشده است — هر نقطه عطف در فروشگاه به‌صورت کارت ماموریت جداگانه نمایش داده می‌شود."
+msgid ""
+"No campaign template selected — each milestone renders as its own mission card on the storefront."
+msgstr ""
+"قالب کمپینی انتخاب نشده است — هر نقطهٔ عطف در فروشگاه به‌صورت کارت ماموریت جداگانه نمایش داده می‌شود."
 
 #: admin-app/src/routes/Campaigns.tsx:148
 msgid "No campaigns yet"
@@ -2702,8 +2809,10 @@ msgid "No cart contents provided — relevance scored from the mission only."
 msgstr "محتوایی برای سبد ارائه نشد — ارتباط فقط از روی ماموریت سنجیده شد."
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:65
-msgid "No child missions yet. Add at least one condition to build the composite mission."
-msgstr "هنوز ماموریت زیرشرطی وجود ندارد. برای ساخت ماموریت ترکیبی حداقل یک شرط اضافه کنید."
+msgid ""
+"No child missions yet. Add at least one condition to build the composite mission."
+msgstr ""
+"هنوز ماموریت زیرشرطی وجود ندارد. برای ساخت ماموریت ترکیبی حداقل یک شرط اضافه کنید."
 
 #: admin-app/src/routes/MissionPerformance.tsx:750
 msgid "No mission performance yet"
@@ -2727,11 +2836,13 @@ msgstr "هنوز ماموریتی وجود ندارد"
 
 #: admin-app/src/routes/CampaignBuilder.tsx:614
 msgid "No missions yet — create a mission on the Missions page first."
-msgstr "هنوز ماموریتی وجود ندارد — ابتدا در صفحهٔ «ماموریت‌ها» یک ماموریت ایجاد کنید."
+msgstr ""
+"هنوز ماموریتی وجود ندارد — ابتدا در صفحهٔ «ماموریت‌ها» یک ماموریت ایجاد کنید."
 
 #: includes/Analytics/UpsellRanker.php:1215
 msgid "No historical upsell performance data yet — conversion scored neutral."
-msgstr "هنوز دادهٔ عملکرد تاریخی پیشنهاد خرید وجود ندارد — تبدیل خنثی در نظر گرفته شد."
+msgstr ""
+"هنوز دادهٔ عملکرد تاریخی پیشنهاد خرید وجود ندارد — تبدیل خنثی در نظر گرفته شد."
 
 #: admin-app/src/components/preview/PreviewPanel.tsx:100
 msgid "No milestones in this campaign yet."
@@ -2779,8 +2890,10 @@ msgid "No suggestion activity in this range."
 msgstr "هیچ فعالیت پیشنهادی در این بازه نیست."
 
 #: admin-app/src/routes/Appearance.tsx:748
-msgid "No templates are registered for this scope yet. Add one on the backend template registry."
-msgstr "هنوز قالبی برای این محدوده ثبت نشده است. یکی را در فهرست قالب‌های بک‌اند اضافه کنید."
+msgid ""
+"No templates are registered for this scope yet. Add one on the backend template registry."
+msgstr ""
+"هنوز قالبی برای این محدوده ثبت نشده است. یکی را در فهرست قالب‌های بک‌اند اضافه کنید."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:415
 msgid "No upsell activity yet"
@@ -2812,8 +2925,10 @@ msgid "Not enough data for a reliable recommendation."
 msgstr "دادهٔ کافی برای یک پیشنهاد قابل اعتماد وجود ندارد."
 
 #: includes/Analytics/MissionRecommendationEngine.php:266
-msgid "Not enough order data for a reliable recommendation (%d orders in the window; at least %d required)."
-msgstr "دادهٔ سفارش کافی برای یک پیشنهاد قابل اعتماد وجود ندارد (%d سفارش در بازه؛ حداقل %d مورد نیاز است)."
+msgid ""
+"Not enough order data for a reliable recommendation (%d orders in the window; at least %d required)."
+msgstr ""
+"دادهٔ سفارش کافی برای یک پیشنهاد قابل اعتماد وجود ندارد (%d سفارش در بازه؛ حداقل %d مورد نیاز است)."
 
 #: admin-app/src/routes/MissionBuilder.tsx:401
 msgid "OR (any child completes)"
@@ -2824,12 +2939,16 @@ msgid "Observed impact"
 msgstr "تأثیر مشاهده‌شده"
 
 #: admin-app/src/routes/MissionPerformance.tsx:630
-msgid "Observed impact — incremental cart value relative to the baseline. It does not prove that FaraCart caused the difference."
-msgstr "تأثیر مشاهده‌شده — ارزش افزایشی سبد نسبت به خط مبنا. ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
+msgid ""
+"Observed impact — incremental cart value relative to the baseline. It does not prove that FaraCart caused the difference."
+msgstr ""
+"تأثیر مشاهده‌شده — ارزش افزایشی سبد نسبت به خط مبنا. ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
 
 #: admin-app/src/routes/RevenueOverview.tsx:717
-msgid "Observed impact — this comparison does not prove that FaraCart caused the difference."
-msgstr "تأثیر مشاهده‌شده — این مقایسه ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
+msgid ""
+"Observed impact — this comparison does not prove that FaraCart caused the difference."
+msgstr ""
+"تأثیر مشاهده‌شده — این مقایسه ثابت نمی‌کند که فراکارت باعث این تفاوت شده است."
 
 #: admin-app/src/routes/Missions.tsx:108
 msgid "Once"
@@ -2840,64 +2959,86 @@ msgid "Once Weekly"
 msgstr "هفته‌ای یک بار"
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:231
-msgid "Once cost data exists, Estimated Profit becomes available automatically."
+msgid ""
+"Once cost data exists, Estimated Profit becomes available automatically."
 msgstr "به محض وجود قیمت تمام‌شده، سود تخمینی به‌طور خودکار در دسترس می‌شود."
 
 #: admin-app/src/routes/Dashboard.tsx:614
-msgid "Once customers interact with your Missions, performance data will appear here."
-msgstr "وقتی مشتریان با ماموریت‌های شما تعامل کنند، داده‌های عملکرد اینجا نمایش داده می‌شوند."
+msgid ""
+"Once customers interact with your Missions, performance data will appear here."
+msgstr ""
+"وقتی مشتریان با ماموریت‌های شما تعامل کنند، داده‌های عملکرد اینجا نمایش داده می‌شوند."
 
 #: admin-app/src/routes/Analytics.tsx:614
-msgid "Once customers start interacting with your missions, FaraCart will show purchases, sales and profit insights here."
-msgstr "به محض اینکه مشتریان با ماموریت‌های شما تعامل کنند، فراکارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
+msgid ""
+"Once customers start interacting with your missions, FaraCart will show purchases, sales and profit insights here."
+msgstr ""
+"به محض اینکه مشتریان با ماموریت‌های شما تعامل کنند، فراکارت خریدها، فروش و بینش‌های سود را اینجا نشان می‌دهد."
 
 #: admin-app/src/routes/MissionPerformance.tsx:751
-msgid "Once customers start interacting with your missions, FaraCart will show purchases, sales and profit per mission here."
-msgstr "به محض اینکه مشتریان با ماموریت‌های شما تعامل کنند، فراکارت خرید، فروش و سود هر ماموریت را اینجا نشان می‌دهد."
+msgid ""
+"Once customers start interacting with your missions, FaraCart will show purchases, sales and profit per mission here."
+msgstr ""
+"به محض اینکه مشتریان با ماموریت‌های شما تعامل کنند، فراکارت خرید، فروش و سود هر ماموریت را اینجا نشان می‌دهد."
 
 #: admin-app/src/routes/RevenueOverview.tsx:320
-msgid "Once customers start interacting with your missions, FaraCart will show sales, purchases and profit insights here."
-msgstr "به محض اینکه مشتریان با ماموریت‌های شما تعامل کنند، فراکارت فروش، خریدها و بینش‌های سود را اینجا نشان می‌دهد."
+msgid ""
+"Once customers start interacting with your missions, FaraCart will show sales, purchases and profit insights here."
+msgstr ""
+"به محض اینکه مشتریان با ماموریت‌های شما تعامل کنند، فراکارت فروش، خریدها و بینش‌های سود را اینجا نشان می‌دهد."
 
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:47
-msgid "One overall progress bar for the whole campaign, with a milestone counter and the rewards still on display."
-msgstr "یک نوار پیشرفت کلی برای کل کمپین، همراه با شمارندهٔ نقاط عطف و پاداش‌های در حال نمایش."
+msgid ""
+"One overall progress bar for the whole campaign, with a milestone counter and the rewards still on display."
+msgstr ""
+"یک نوار پیشرفت کلی برای کل کمپین، همراه با شمارندهٔ نقاط عطف و پاداش‌های در حال نمایش."
 
 #: admin-app/src/routes/Appearance.tsx:59
 msgid "Only $57.00 left to reach your mission"
 msgstr "تنها ۵۷٫۰۰ دلار تا تکمیل ماموریت باقی مانده است"
 
 #: admin-app/src/routes/RevenueOverview.tsx:118
-msgid "Only %1$s of completed missions were followed by an attributed purchase."
+msgid ""
+"Only %1$s of completed missions were followed by an attributed purchase."
 msgstr "تنها %1$s از ماموریت‌های تکمیل‌شده با یک خرید منتسب دنبال شد."
 
 #: admin-app/src/routes/Dashboard.tsx:126
-msgid "Only %s of completed missions were followed by a purchase. Review your mission targets."
-msgstr "تنها %s از ماموریت‌های تکمیل‌شده به خرید منجر شده‌اند. ماموریت‌گذاری‌های خود را بازبینی کنید."
+msgid ""
+"Only %s of completed missions were followed by a purchase. Review your mission targets."
+msgstr ""
+"تنها %s از ماموریت‌های تکمیل‌شده به خرید منجر شده‌اند. آستانه‌های ماموریت‌های خود را بازبینی کنید."
 
 #: admin-app/src/routes/Analytics.tsx:994
-msgid "Only mission events within this window before an order are attributed to it."
+msgid ""
+"Only mission events within this window before an order are attributed to it."
 msgstr "فقط رویدادهای ماموریت در این بازه قبل از سفارش به آن منتسب می‌شوند."
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:304
-msgid "Only products carrying any of these tags count toward the mission. Leave empty to count every product."
-msgstr "فقط محصولاتی که هر یک از این برچسبها را دارند در ماموریت محاسبه می‌شوند. برای شمارش همهٔ محصولات خالی بگذارید."
+msgid ""
+"Only products carrying any of these tags count toward the mission. Leave empty to count every product."
+msgstr ""
+"فقط محصولاتی که هر یک از این برچسب‌ها را دارند در ماموریت محاسبه می‌شوند. برای شمارش همهٔ محصولات خالی بگذارید."
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:188
 msgid "Only products carrying any of these tags count toward the target."
-msgstr "فقط محصولاتی که هر یک از این برچسبها را دارند در ماموریت محاسبه می‌شوند."
+msgstr ""
+"فقط محصولاتی که هر یک از این برچسب‌ها را دارند به سمت آستانه محاسبه می‌شوند."
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:158
 msgid "Only products in these categories count toward the target."
-msgstr "فقط محصولات این دسته‌بندی‌ها به سمت ماموریت محاسبه می‌شوند."
+msgstr "فقط محصولات این دسته‌بندی‌ها به سمت آستانه محاسبه می‌شوند."
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:194
-msgid "Only shoppers with no completed orders see this mission. Guests always qualify."
-msgstr "فقط خریدارانی که سفارش تکمیلشده ندارند این ماموریت را می‌بینند. مهمانها همیشه واجد شرایط هستند."
+msgid ""
+"Only shoppers with no completed orders see this mission. Guests always qualify."
+msgstr ""
+"فقط خریدارانی که سفارش تکمیل‌شده ندارند این ماموریت را می‌بینند. مهمان‌ها همیشه واجد شرایط هستند."
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:173
-msgid "Only these products count toward the target. Variations are matched by their parent product."
-msgstr "فقط این محصولات به سمت ماموریت محاسبه می‌شوند. تغییرات (variations) با محصول والدشان مطابقت داده می‌شوند."
+msgid ""
+"Only these products count toward the target. Variations are matched by their parent product."
+msgstr ""
+"فقط این محصولات به سمت آستانه محاسبه می‌شوند. تغییرات (variations) با محصول والدشان مطابقت داده می‌شوند."
 
 #: includes/Missions/MessageEngine.php:224
 msgid "Only {remaining} left to reach your mission"
@@ -2936,8 +3077,10 @@ msgid "Optimization opportunity"
 msgstr "فرصت بهینه‌سازی"
 
 #: admin-app/src/routes/CampaignBuilder.tsx:436
-msgid "Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Missions inherit these rules unless they pin their own."
-msgstr "قوانین اختیاری فاز ۳۲: کمپین را فقط در روزهای انتخابشده و/یا در یک بازهٔ زمانی روزانه اجرا کنید. ماموریت‌ها این قوانین را به ارث می‌برند مگر اینکه قوانین خودشان را داشته باشند."
+msgid ""
+"Optional Phase 32 rules: run the campaign only on selected weekdays and/or inside a daily time window. Missions inherit these rules unless they pin their own."
+msgstr ""
+"قوانین اختیاری فاز ۳۲: کمپین را فقط در روزهای انتخاب‌شده و/یا در یک بازهٔ زمانی روزانه اجرا کنید. ماموریت‌ها این قوانین را به ارث می‌برند مگر اینکه قوانین خودشان را داشته باشند."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:148
 #: admin-app/src/components/mission-builder/RewardFields.tsx:402
@@ -2954,21 +3097,28 @@ msgstr "شروع اختیاری بازهٔ روزانه."
 
 #: admin-app/src/routes/Analytics.tsx:966
 #: admin-app/src/routes/RevenueOverview.tsx:601
-msgid "Order totals from orders that were only exposed to a mission, never progressed."
+msgid ""
+"Order totals from orders that were only exposed to a mission, never progressed."
 msgstr "مجموع سفارش‌هایی که فقط در معرض ماموریت بودند و هرگز پیشرفت نکردند."
 
 #: admin-app/src/routes/MissionPerformance.tsx:564
-msgid "Order totals from orders that were only exposed to this mission, never progressed."
-msgstr "مجموع سفارش‌هایی که فقط در معرض این ماموریت بودند و هرگز پیشرفت نکردند."
+msgid ""
+"Order totals from orders that were only exposed to this mission, never progressed."
+msgstr ""
+"مجموع سفارش‌هایی که فقط در معرض این ماموریت بودند و هرگز پیشرفت نکردند."
 
 #: admin-app/src/routes/Analytics.tsx:978
 #: admin-app/src/routes/RevenueOverview.tsx:609
-msgid "Order totals of every order associated with a mission — distinct orders, never double counted."
-msgstr "مجموع همهٔ سفارش‌های مرتبط با یک ماموریت — سفارش‌های متمایز، هرگز دوبار شمارش نمی‌شوند."
+msgid ""
+"Order totals of every order associated with a mission — distinct orders, never double counted."
+msgstr ""
+"مجموع همهٔ سفارش‌های مرتبط با یک ماموریت — سفارش‌های متمایز، هرگز دوبار شمارش نمی‌شوند."
 
 #: admin-app/src/routes/MissionPerformance.tsx:572
-msgid "Order totals of every order associated with this mission — distinct orders, never double counted."
-msgstr "مجموع همهٔ سفارش‌های مرتبط با این ماموریت — سفارش‌های متمایز، هرگز دوبار شمارش نمی‌شوند."
+msgid ""
+"Order totals of every order associated with this mission — distinct orders, never double counted."
+msgstr ""
+"مجموع همهٔ سفارش‌های مرتبط با این ماموریت — سفارش‌های متمایز، هرگز دوبار شمارش نمی‌شوند."
 
 #: admin-app/src/routes/Recommendations.tsx:446
 msgid "Order value distribution (share of orders)"
@@ -2983,8 +3133,10 @@ msgid "Orders analyzed"
 msgstr "سفارش‌های تحلیل‌شده"
 
 #: admin-app/src/routes/AttributionDashboard.tsx:116
-msgid "Orders are attributed once they reach a revenue-producing status. No mission-influenced orders were found in this range."
-msgstr "سفارش‌ها پس از رسیدن به وضعیت فروشزا انتساب داده می‌شوند. در این بازه هیچ سفارش متأثر از ماموریتی یافت نشد."
+msgid ""
+"Orders are attributed once they reach a revenue-producing status. No mission-influenced orders were found in this range."
+msgstr ""
+"سفارش‌ها پس از رسیدن به وضعیت فروشزا انتساب داده می‌شوند. در این بازه هیچ سفارش متأثر از ماموریتی یافت نشد."
 
 #: admin-app/src/lib/calendar.ts:127
 msgid "Ordibehesht"
@@ -3028,7 +3180,8 @@ msgstr "تخفیف درصدی"
 #: admin-app/src/routes/Analytics.tsx:196
 #: admin-app/src/routes/Analytics.tsx:661
 #: admin-app/src/routes/MissionPerformance.tsx:85
-msgid "Percentage of completed missions that were followed by an attributed purchase."
+msgid ""
+"Percentage of completed missions that were followed by an attributed purchase."
 msgstr "درصد ماموریت‌های تکمیل‌شده‌ای که پس از آن یک خرید منتسب رخ داده است."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:42
@@ -3045,8 +3198,10 @@ msgid "Performance Summary"
 msgstr "خلاصهٔ عملکرد"
 
 #: admin-app/src/routes/Appearance.tsx:651
-msgid "Pick the default progress template and tune its appearance — separately for Missions and Campaigns."
-msgstr "قالب پیشرفت پیش‌فرض را انتخاب کنید و ظاهر آن را تنظیم نمایید — جداگانه برای ماموریت‌ها و کمپین‌ها."
+msgid ""
+"Pick the default progress template and tune its appearance — separately for Missions and Campaigns."
+msgstr ""
+"قالب پیشرفت پیش‌فرض را انتخاب کنید و ظاهر آن را تنظیم نمایید — جداگانه برای ماموریت‌ها و کمپین‌ها."
 
 #: includes/Frontend/ProgressUI.php:1037
 msgid "Pick your free gift"
@@ -3143,7 +3298,7 @@ msgstr "اولویت و تداخل‌ها"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:245
 msgid "Processing + completed orders."
-msgstr "سفارشهای در حال پردازش + تکمیلشده."
+msgstr "سفارش‌های در حال پردازش + تکمیل‌شده."
 
 #: admin-app/src/components/mission-builder/missionTypes.tsx:51
 #: admin-app/src/routes/Analytics.tsx:565
@@ -3155,8 +3310,10 @@ msgid "Product"
 msgstr "محصول"
 
 #: admin-app/src/routes/Recommendations.tsx:680
-msgid "Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Mission economics."
-msgstr "پوشش قیمت تمام‌شده: %1$s از %2$s محصول (%3$s). تخمین سود به دادهٔ قیمت تمام‌شده نیاز دارد — برای فعال‌سازی اقتصاد ماموریت، آن را اضافه کنید."
+msgid ""
+"Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Mission economics."
+msgstr ""
+"پوشش قیمت تمام‌شده: %1$s از %2$s محصول (%3$s). تخمین سود به دادهٔ قیمت تمام‌شده نیاز دارد — برای فعال‌سازی اقتصاد ماموریت، آن را اضافه کنید."
 
 #: includes/Admin/ProductCostField.php:75
 #: includes/Admin/ProductCostField.php:106
@@ -3168,12 +3325,16 @@ msgid "Product cost data is incomplete"
 msgstr "داده‌های قیمت تمام‌شده ناقص است"
 
 #: includes/Analytics/RewardCostEstimator.php:571
-msgid "Product cost data is not available — profit impact unavailable (revenue-only analytics)."
-msgstr "دادهٔ قیمت تمام‌شده در دسترس نیست — تأثیر بر سود در دسترس نیست (تحلیل‌های صرفاً مبتنی بر فروش)."
+msgid ""
+"Product cost data is not available — profit impact unavailable (revenue-only analytics)."
+msgstr ""
+"دادهٔ قیمت تمام‌شده در دسترس نیست — تأثیر بر سود در دسترس نیست (تحلیل‌های صرفاً مبتنی بر فروش)."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:218
-msgid "Product cost must come from WooCommerce or your product-cost data. FaraCart reads, in order:"
-msgstr "قیمت تمام‌شده باید از ووکامرس یا داده‌های قیمت تمام‌شده شما باشد. فراکارت به ترتیب می‌خواند:"
+msgid ""
+"Product cost must come from WooCommerce or your product-cost data. FaraCart reads, in order:"
+msgstr ""
+"قیمت تمام‌شده باید از ووکامرس یا داده‌های قیمت تمام‌شده شما باشد. فراکارت به ترتیب می‌خواند:"
 
 #: includes/Analytics/MissionRecommendationEngine.php:743
 msgid "Product margin data is not available — profit estimates are excluded."
@@ -3193,7 +3354,7 @@ msgstr "پیشنهادهای محصول"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:297
 msgid "Product tags"
-msgstr "برچسبهای محصول"
+msgstr "برچسب‌های محصول"
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:164
 #: admin-app/src/components/mission-builder/TargetFields.tsx:169
@@ -3202,12 +3363,16 @@ msgid "Products"
 msgstr "محصولات"
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:203
-msgid "Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target."
-msgstr "محصولاتی که هر یک از این ویژگیها (مثلاً pa_color) را دارند در ماموریت محاسبه می‌شوند."
+msgid ""
+"Products carrying any of these attribute taxonomies (e.g. pa_color) count toward the target."
+msgstr ""
+"محصولاتی که هر یک از این ویژگی‌ها (مثلاً pa_color) را دارند به سمت آستانه محاسبه می‌شوند."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:55
-msgid "Products priced close to the amount remaining until the mission usually make a better suggestion."
-msgstr "محصولاتی که قیمتشان به مبلغ باقی‌مانده تا ماموریت نزدیک‌تر است، معمولاً پیشنهاد مناسب‌تری هستند."
+msgid ""
+"Products priced close to the amount remaining until the mission usually make a better suggestion."
+msgstr ""
+"محصولاتی که قیمتشان به مبلغ باقی‌مانده تا ماموریت نزدیک‌تر است، معمولاً پیشنهاد مناسب‌تری هستند."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:71
 msgid "Products purchased more often in your store rank higher."
@@ -3215,22 +3380,26 @@ msgstr "محصولاتی که در فروشگاه بیشتر خریداری شد
 
 #: admin-app/src/routes/MissionPerformance.tsx:498
 msgid "Products recommended to customers who were working toward this mission."
-msgstr "محصولاتی که به مشتریانی که روی این ماموریت کار می‌کردند پیشنهاد شده‌اند."
+msgstr ""
+"محصولاتی که به مشتریانی که روی این ماموریت کار می‌کردند پیشنهاد شده‌اند."
 
 #: includes/Frontend/ProgressUI.php:518
 msgid "Products suggested for you"
 msgstr "محصولات پیشنهادی برای شما"
 
 #: admin-app/src/routes/Recommendations.tsx:687
-msgid "Profit estimates need product cost data. Add product costs on your products to enable Mission economics."
-msgstr "تخمین سود به دادهٔ قیمت تمام‌شده نیاز دارد. برای فعال‌سازی اقتصاد ماموریت، قیمت تمام‌شدهات خود را ثبت کنید."
+msgid ""
+"Profit estimates need product cost data. Add product costs on your products to enable Mission economics."
+msgstr ""
+"تخمین سود به دادهٔ قیمت تمام‌شده نیاز دارد. برای فعال‌سازی اقتصاد ماموریت، قیمت تمام‌شدهٔ محصولات خود را ثبت کنید."
 
 #: includes/Analytics/MissionRecommendationEngine.php:745
 msgid "Profit impact could not be estimated for this threshold."
 msgstr "تأثیر بر سود برای این آستانه قابل تخمین نبود."
 
 #: admin-app/src/routes/AttributionDashboard.tsx:238
-msgid "Profit impact is unavailable because product cost data is not available."
+msgid ""
+"Profit impact is unavailable because product cost data is not available."
 msgstr "تأثیر بر سود در دسترس نیست، زیرا دادهٔ قیمت تمام‌شده موجود نیست."
 
 #: admin-app/src/routes/Analytics.tsx:331
@@ -3249,8 +3418,10 @@ msgid "Progressed"
 msgstr "پیشرفته"
 
 #: includes/REST/PreviewController.php:295
-msgid "Provide exactly one of mission_id, campaign_id, mission or campaign to preview."
-msgstr "برای پیش‌نمایش، دقیقاً یکی از mission_id، campaign_id، mission یا campaign را ارائه دهید."
+msgid ""
+"Provide exactly one of mission_id, campaign_id, mission or campaign to preview."
+msgstr ""
+"برای پیش‌نمایش، دقیقاً یکی از mission_id، campaign_id، mission یا campaign را ارائه دهید."
 
 #: admin-app/src/routes/Analytics.tsx:748
 msgid "Purchase Analysis"
@@ -3265,8 +3436,10 @@ msgid "Purchase Rate"
 msgstr "نرخ خرید"
 
 #: admin-app/src/routes/Analytics.tsx:632
-msgid "Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and mission comparison."
-msgstr "تحلیل خرید برای این فیلتر محصول در دسترس نیست. برای دیدن قیف، خریدها و مقایسهٔ ماموریت‌ها، فیلتر محصول را حذف کنید."
+msgid ""
+"Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and mission comparison."
+msgstr ""
+"تحلیل خرید برای این فیلتر محصول در دسترس نیست. برای دیدن قیف، خریدها و مقایسهٔ ماموریت‌ها، فیلتر محصول را حذف کنید."
 
 #: admin-app/src/routes/Analytics.tsx:270
 msgid "Purchase conversion"
@@ -3324,8 +3497,10 @@ msgid "Quantity"
 msgstr "تعداد"
 
 #: admin-app/src/routes/Analytics.tsx:1049
-msgid "Raw interaction metrics from the event log — impressions, completions, revenue and suggestions."
-msgstr "شاخص‌های خام تعامل از گزارش رویداد — نمایش‌ها، تکمیل‌ها، فروش و پیشنهادها."
+msgid ""
+"Raw interaction metrics from the event log — impressions, completions, revenue and suggestions."
+msgstr ""
+"شاخص‌های خام تعامل از گزارش رویداد — نمایش‌ها، تکمیل‌ها، فروش و پیشنهادها."
 
 #: admin-app/src/components/mission-builder/missionTypes.tsx:28
 msgid "Reach a cart amount — subtotal, total or discounted subtotal."
@@ -3349,11 +3524,11 @@ msgstr "رسیدن به مبلغ یا تعداد در دسته‌بندی‌ها
 
 #: admin-app/src/components/mission-builder/missionTypes.tsx:76
 msgid "Reach an amount or quantity across products with chosen attributes."
-msgstr "رسیدن به یک مبلغ یا تعداد در میان محصولاتی با ویژگیهای انتخابشده."
+msgstr "رسیدن به یک مبلغ یا تعداد در میان محصولاتی با ویژگی‌های انتخاب‌شده."
 
 #: admin-app/src/components/mission-builder/missionTypes.tsx:70
 msgid "Reach an amount or quantity across products with chosen tags."
-msgstr "رسیدن به یک مبلغ یا تعداد در میان محصولاتی با برچسبهای انتخابشده."
+msgstr "رسیدن به یک مبلغ یا تعداد در میان محصولاتی با برچسب‌های انتخاب‌شده."
 
 #: admin-app/src/components/mission-builder/missionTypes.tsx:82
 msgid "Reach an amount or quantity of one brand (a product attribute)."
@@ -3381,7 +3556,8 @@ msgstr "رنگ نقطهٔ رسیده"
 
 #: admin-app/src/routes/Dashboard.tsx:213
 msgid "Recommend products that help customers reach those Missions."
-msgstr "محصولاتی پیشنهاد دهید که به مشتریان در رسیدن به آن ماموریت‌ها کمک می‌کنند."
+msgstr ""
+"محصولاتی پیشنهاد دهید که به مشتریان در رسیدن به آن ماموریت‌ها کمک می‌کنند."
 
 #: admin-app/src/components/layout/navigation.ts:61
 #: admin-app/src/routes/MissionPerformance.tsx:240
@@ -3390,8 +3566,10 @@ msgid "Recommendations"
 msgstr "پیشنهادها"
 
 #: admin-app/src/routes/Recommendations.tsx:603
-msgid "Recommendations helps you choose better Mission targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells."
-msgstr "پیشنهادها به شما کمک می‌کنند ماموریت‌ها و پیکربندی پاداش بهتری انتخاب کنید. این بخش محصول پیشنهاد نمی‌دهد — پیشنهاد خرید به مشتریان در بخش «پیشنهاد خرید» است."
+msgid ""
+"Recommendations helps you choose better Mission targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells."
+msgstr ""
+"پیشنهادها به شما کمک می‌کنند آستانه و پیکربندی پاداش بهتری برای ماموریت‌هایتان انتخاب کنید. این بخش محصول پیشنهاد نمی‌دهد — پیشنهاد خرید به مشتریان در بخش «پیشنهاد خرید» است."
 
 #: admin-app/src/routes/Recommendations.tsx:269
 msgid "Recommended Mission Target"
@@ -3403,7 +3581,7 @@ msgstr "آستانهٔ پیشنهادی"
 
 #: admin-app/src/routes/CampaignBuilder.tsx:435
 msgid "Recurring schedule"
-msgstr "زمانبندی تکراری"
+msgstr "زمان‌بندی تکراری"
 
 #: admin-app/src/routes/Dashboard.tsx:586
 #: admin-app/src/routes/Dashboard.tsx:587
@@ -3438,7 +3616,7 @@ msgstr "کدهای تخفیف الزامی در سبد"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:300
 msgid "Required product tags"
-msgstr "برچسبهای محصول الزامی"
+msgstr "برچسب‌های محصول الزامی"
 
 #: admin-app/src/routes/Appearance.tsx:341
 msgid "Reset to template defaults"
@@ -3459,8 +3637,10 @@ msgstr "انتساب فروش"
 
 #: admin-app/src/routes/Analytics.tsx:956
 #: admin-app/src/routes/RevenueOverview.tsx:593
-msgid "Revenue from the incremental value of orders where customers progressed toward or completed a mission before ordering."
-msgstr "فروش حاصل از ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به سمت ماموریت پیشرفت کردند یا آن را تکمیل کردند."
+msgid ""
+"Revenue from the incremental value of orders where customers progressed toward or completed a mission before ordering."
+msgstr ""
+"فروش حاصل از ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به سمت ماموریت پیشرفت کردند یا آن را تکمیل کردند."
 
 #: admin-app/src/routes/AttributionDashboard.tsx:239
 msgid "Revenue-only analytics continue to work."
@@ -3482,8 +3662,10 @@ msgid "Reward cost"
 msgstr "هزینهٔ پاداش"
 
 #: includes/Analytics/MissionRecommendationEngine.php:739
-msgid "Reward cost cannot be estimated from the available data — economics scored neutral."
-msgstr "هزینهٔ پاداش از داده‌های موجود قابل تخمین نیست — امتیاز اقتصادی خنثی در نظر گرفته شد."
+msgid ""
+"Reward cost cannot be estimated from the available data — economics scored neutral."
+msgstr ""
+"هزینهٔ پاداش از داده‌های موجود قابل تخمین نیست — امتیاز اقتصادی خنثی در نظر گرفته شد."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:280
 msgid "Reward label"
@@ -3498,7 +3680,8 @@ msgid "Reward unlocked: {reward}"
 msgstr "پاداش فعال شد: {reward}"
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:121
-msgid "Rewards and shipping costs were higher than the estimated incremental margin."
+msgid ""
+"Rewards and shipping costs were higher than the estimated incremental margin."
 msgstr "هزینه‌های پاداش و ارسال بیشتر از حاشیهٔ افزایشی تخمینی بودند."
 
 #: includes/Templates/Mission/Template3.php:106
@@ -3549,7 +3732,8 @@ msgstr "فروش منتسب به فراکارت"
 
 #: admin-app/src/routes/Analytics.tsx:205
 #: admin-app/src/routes/MissionPerformance.tsx:103
-msgid "Sales attributed to FaraCart — the incremental order value driven by this mission."
+msgid ""
+"Sales attributed to FaraCart — the incremental order value driven by this mission."
 msgstr "فروش منتسب به فراکارت — ارزش افزایشی سفارش ناشی از این ماموریت."
 
 #: admin-app/src/routes/Analytics.tsx:774
@@ -3617,7 +3801,7 @@ msgstr "جستجو و انتخاب…"
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:325
 msgid "Search attributes…"
-msgstr "جستجوی ویژگیها…"
+msgstr "جستجوی ویژگی‌ها…"
 
 #: admin-app/src/routes/Missions.tsx:216
 msgid "Search missions"
@@ -3628,8 +3812,10 @@ msgid "Search…"
 msgstr "جستجو…"
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:207
-msgid "Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront."
-msgstr "یک محصول هدیه انتخاب کنید — بدون آن، هدیه هرگز به سبد خرید اضافه نمی‌شود و جایزه در فروشگاه در دسترس باقی نمی‌ماند."
+msgid ""
+"Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront."
+msgstr ""
+"یک محصول هدیه انتخاب کنید — بدون آن، هدیه هرگز به سبد خرید اضافه نمی‌شود و جایزه در فروشگاه در دسترس باقی نمی‌ماند."
 
 #: admin-app/src/components/revenue/RevenueToolbar.tsx:65
 #: admin-app/src/routes/Recommendations.tsx:614
@@ -3641,8 +3827,10 @@ msgid "Select a mission to apply the recommendation to."
 msgstr "ماموریتی را برای اعمال پیشنهاد انتخاب کنید."
 
 #: admin-app/src/routes/Settings.tsx:787
-msgid "Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer mission evaluations, at the cost of a brief staleness window after cart changes."
-msgstr "ارائهٔ درخواست‌های مکرر ویجت از یک حافظهٔ موقت کوتاه‌مدت (۱۰ ثانیه) کلیدخورده با سبد — ارزیابی‌های ماموریت کمتر، با هزینهٔ یک پنجرهٔ کوتاه قدیمی شدن پس از تغییرات سبد."
+msgid ""
+"Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer mission evaluations, at the cost of a brief staleness window after cart changes."
+msgstr ""
+"ارائهٔ درخواست‌های مکرر ویجت از یک حافظهٔ موقت کوتاه‌مدت (۱۰ ثانیه) کلیدخورده با سبد — ارزیابی‌های ماموریت کمتر، با هزینهٔ یک پنجرهٔ کوتاه قدیمی شدن پس از تغییرات سبد."
 
 #: admin-app/src/routes/AttributionDashboard.tsx:191
 msgid "Sessions"
@@ -3650,7 +3838,7 @@ msgstr "نشست‌ها"
 
 #: admin-app/src/components/preview/PreviewPanel.tsx:109
 msgid "Set a target to preview progress."
-msgstr "برای پیش‌نمایش پیشرفت، یک ماموریت تعیین کنید."
+msgstr "برای پیش‌نمایش پیشرفت، یک آستانه تعیین کنید."
 
 #: admin-app/src/routes/Recommendations.tsx:726
 msgid "Set the mission target to %s?"
@@ -3719,7 +3907,8 @@ msgstr "نمایش نام کمپین"
 
 #: includes/Frontend/ProgressUI.php:210
 msgid "Show cart missions, progress and rewards (FaraCart)."
-msgstr "ماموریت‌های سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (فراکارت)."
+msgstr ""
+"ماموریت‌های سبد خرید، میزان پیشرفت و پاداش‌ها را نمایش می‌دهد (فراکارت)."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:395
 msgid "Show interaction details"
@@ -3740,7 +3929,7 @@ msgstr "نمایش پاداش‌های نقاط عطف"
 
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:89
 msgid "Show milestone targets"
-msgstr "نمایش ماموریت‌های نقاط عطف"
+msgstr "نمایش آستانه‌های نقاط عطف"
 
 #: admin-app/src/routes/Settings.tsx:937
 msgid "Show on desktop"
@@ -3764,8 +3953,10 @@ msgid "Show the first mission only"
 msgstr "فقط اولین ماموریت را نمایش بده"
 
 #: admin-app/src/routes/Settings.tsx:927
-msgid "Show the floating button on widget pages whenever the cart has an eligible mission."
-msgstr "هرگاه سبد خرید ماموریتی واجد شرایط داشته باشد، دکمهٔ شناور را در صفحات ویجت نمایش بده."
+msgid ""
+"Show the floating button on widget pages whenever the cart has an eligible mission."
+msgstr ""
+"هرگاه سبد خرید ماموریتی واجد شرایط داشته باشد، دکمهٔ شناور را در صفحات ویجت نمایش بده."
 
 #: includes/Templates/Mission/Template3.php:151
 msgid "Show the percentage in the center"
@@ -3786,7 +3977,7 @@ msgstr "نمایش نشان پاداش"
 
 #: includes/Templates/Mission/MilestoneTemplate.php:67
 msgid "Show the target labels"
-msgstr "نمایش برچسب‌های ماموریت"
+msgstr "نمایش برچسب‌های آستانه"
 
 #: admin-app/src/routes/Recommendations.tsx:694
 msgid "Show the top recommendation again"
@@ -3925,7 +4116,7 @@ msgstr "جمع فرعی (پیش از تخفیف‌ها)"
 
 #: admin-app/src/routes/Settings.tsx:813
 msgid "Suggestion ranking"
-msgstr "رتبهبندی پیشنهادها"
+msgstr "رتبه‌بندی پیشنهادها"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:31
 msgid "Sun"
@@ -3936,15 +4127,18 @@ msgid "Sunday"
 msgstr "یکشنبه"
 
 #: admin-app/src/components/mission-builder/DisplayFields.tsx:145
-msgid "Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {mission_name}."
-msgstr "از {current}، {target}، {remaining}، {percentage}، {quantity}، {reward} و {mission_name} پشتیبانی می‌کند."
+msgid ""
+"Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {mission_name}."
+msgstr ""
+"از {current}، {target}، {remaining}، {percentage}، {quantity}، {reward} و {mission_name} پشتیبانی می‌کند."
 
 #: admin-app/src/routes/Settings.tsx:396
 msgid "Symbol ($100)"
 msgstr "نماد ($100)"
 
 #: admin-app/src/routes/Settings.tsx:1074
-msgid "The accessible label and tooltip for the button (leave empty for the default)."
+msgid ""
+"The accessible label and tooltip for the button (leave empty for the default)."
 msgstr "برچسب و راهنمای در دسترس دکمه (برای پیش‌فرض، خالی بگذارید)."
 
 #: admin-app/src/routes/Settings.tsx:294
@@ -3952,12 +4146,16 @@ msgid "The button position on desktop screens."
 msgstr "موقعیت دکمه در صفحه‌نمایش‌های دسکتاپ."
 
 #: admin-app/src/routes/Settings.tsx:295
-msgid "The button position on mobile screens — handy when the button must clear mobile navigation or sticky cart buttons."
-msgstr "موقعیت دکمه در صفحه‌نمایش‌های موبایل — زمانی مفید است که دکمه باید از ناوبری موبایل یا دکمه‌های چسبان سبد خرید فاصله بگیرد."
+msgid ""
+"The button position on mobile screens — handy when the button must clear mobile navigation or sticky cart buttons."
+msgstr ""
+"موقعیت دکمه در صفحه‌نمایش‌های موبایل — زمانی مفید است که دکمه باید از ناوبری موبایل یا دکمه‌های چسبان سبد خرید فاصله بگیرد."
 
 #: admin-app/src/routes/Settings.tsx:559
-msgid "The currency unit shown on FaraCart amounts. “Auto” follows the store currency."
-msgstr "واحد پول نمایشی مبالغ فاراکارت. «خودکار» از واحد پول فروشگاه پیروی می‌کند."
+msgid ""
+"The currency unit shown on FaraCart amounts. “Auto” follows the store currency."
+msgstr ""
+"واحد پول نمایشی مبالغ فاراکارت. «خودکار» از واحد پول فروشگاه پیروی می‌کند."
 
 #: admin-app/src/components/CampaignPreviewDialog.tsx:58
 #: admin-app/src/components/GoalPreviewDialog.tsx:47
@@ -3971,7 +4169,7 @@ msgstr "برچسب"
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:184
 msgid "Tags"
-msgstr "برچسبها"
+msgstr "برچسب‌ها"
 
 #: admin-app/src/components/mission-builder/CompositeChildrenEditor.tsx:102
 #: admin-app/src/components/mission-builder/TargetFields.tsx:122
@@ -4007,12 +4205,16 @@ msgid "Text"
 msgstr "متن"
 
 #: includes/Admin/AssetLoader.php:112
-msgid "The admin app is not built yet (%s is missing). Run npm install && npm run build inside the admin-app directory, or start npm run dev in a local/development environment for hot reload."
-msgstr "برنامهٔ مدیریت هنوز ساخته نشده است (%s وجود ندارد). در پوشهٔ admin-app دستور npm install && npm run build را اجرا کنید، یا برای بارگذاری خودکار در محیط محلی/توسعه، npm run dev را اجرا کنید."
+msgid ""
+"The admin app is not built yet (%s is missing). Run npm install && npm run build inside the admin-app directory, or start npm run dev in a local/development environment for hot reload."
+msgstr ""
+"برنامهٔ مدیریت هنوز ساخته نشده است (%s وجود ندارد). در پوشهٔ admin-app دستور npm install && npm run build را اجرا کنید، یا برای بارگذاری خودکار در محیط محلی/توسعه، npm run dev را اجرا کنید."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:234
-msgid "The calculation includes product cost/margin, reward cost, shipping cost and incremental revenue."
-msgstr "محاسبه شامل هزینه/حاشیهٔ محصول، هزینهٔ پاداش، هزینهٔ ارسال و فروش افزایشی است."
+msgid ""
+"The calculation includes product cost/margin, reward cost, shipping cost and incremental revenue."
+msgstr ""
+"محاسبه شامل هزینه/حاشیهٔ محصول، هزینهٔ پاداش، هزینهٔ ارسال و فروش افزایشی است."
 
 #: includes/REST/CampaignsController.php:208
 msgid "The campaign could not be created."
@@ -4058,23 +4260,30 @@ msgid "The cart must contain at least this many items."
 msgstr "سبد باید حداقل این تعداد اقلام داشته باشد."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:225
-msgid "The customer chooses one free gift from this list once the mission is reached. The first product is the storefront default."
-msgstr "مشتری پس از تکمیل ماموریت، یک هدیهٔ رایگان از این فهرست انتخاب می‌کند. اولین محصول، پیش‌فرض فروشگاه است."
+msgid ""
+"The customer chooses one free gift from this list once the mission is reached. The first product is the storefront default."
+msgstr ""
+"مشتری پس از تکمیل ماموریت، یک هدیهٔ رایگان از این فهرست انتخاب می‌کند. اولین محصول، پیش‌فرض فروشگاه است."
 
 #: admin-app/src/routes/Appearance.tsx:704
-msgid "The default template for every mission that does not pin its own on the Mission Builder."
-msgstr "قالب پیش‌فرض برای هر ماموریتی که در سازنده ماموریت، قالب خودش را مشخص نکرده باشد."
+msgid ""
+"The default template for every mission that does not pin its own on the Mission Builder."
+msgstr ""
+"قالب پیش‌فرض برای هر ماموریتی که در سازنده ماموریت، قالب خودش را مشخص نکرده باشد."
 
 #: admin-app/src/routes/Appearance.tsx:700
-msgid "The default template that renders a whole campaign on the storefront (e.g. the milestone chain)."
-msgstr "قالب پیش‌فرضی که کل کمپین را در فروشگاه نمایش می‌دهد (مثلاً زنجیره نقاط عطف)."
+msgid ""
+"The default template that renders a whole campaign on the storefront (e.g. the milestone chain)."
+msgstr ""
+"قالب پیش‌فرضی که کل کمپین را در فروشگاه نمایش می‌دهد (مثلاً زنجیرهٔ نقاط عطف)."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:184
 msgid "The discount never applies to these products."
 msgstr "این تخفیف هرگز روی این محصولات اعمال نمی‌شود."
 
 #: admin-app/src/routes/AttributionDashboard.tsx:88
-msgid "The funnel and the direct vs assisted models behind FaraCart’s attributed revenue."
+msgid ""
+"The funnel and the direct vs assisted models behind FaraCart’s attributed revenue."
 msgstr "قیف و مدل‌های مستقیم در برابر کمکی پشت فروش منتسب فراکارت."
 
 #: includes/REST/MissionsController.php:244
@@ -4103,11 +4312,13 @@ msgstr "به‌روزرسانی ماموریت ممکن نشد."
 
 #: includes/Analytics/UpsellRanker.php:294
 msgid "The mission gap is already closed — no upsells needed."
-msgstr "شکاف ماموریت از قبل بسته شده است — نیازی به پیشنهاد خرید نیست."
+msgstr "دیگر فاصله‌ای تا این ماموریت باقی نمانده — نیازی به پیشنهاد خرید نیست."
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:264
-msgid "The mission only applies when the cart ships to one of these zones. Leave empty for every zone."
-msgstr "ماموریت فقط زمانی اعمال می‌شود که سبد به یکی از این مناطق ارسال شود. برای همهٔ مناطق خالی بگذارید."
+msgid ""
+"The mission only applies when the cart ships to one of these zones. Leave empty for every zone."
+msgstr ""
+"ماموریت فقط زمانی اعمال می‌شود که سبد به یکی از این مناطق ارسال شود. برای همهٔ مناطق خالی بگذارید."
 
 #: includes/REST/PreviewController.php:314
 msgid "The mission or campaign could not be found."
@@ -4138,28 +4349,36 @@ msgid "The identity and lifecycle of the campaign."
 msgstr "هویت و چرخهٔ حیات کمپین."
 
 #: admin-app/src/routes/Analytics.tsx:673
-msgid "The incremental order value from orders where customers interacted with a mission before purchasing."
-msgstr "ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید با یک ماموریت تعامل کردند."
+msgid ""
+"The incremental order value from orders where customers interacted with a mission before purchasing."
+msgstr ""
+"ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید با یک ماموریت تعامل کردند."
 
 #: admin-app/src/routes/MissionPerformance.tsx:556
-msgid "The incremental order value from orders where customers progressed or completed this mission before ordering."
-msgstr "ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به این ماموریت پیشرفت کردند یا آن را تکمیل کردند."
+msgid ""
+"The incremental order value from orders where customers progressed or completed this mission before ordering."
+msgstr ""
+"ارزش افزایشی سفارش‌هایی که مشتریان پیش از خرید به این ماموریت پیشرفت کردند یا آن را تکمیل کردند."
 
 #: admin-app/src/routes/MissionBuilder.tsx:318
 msgid "The internal identity of the mission."
 msgstr "نامی برای شناسایی این ماموریت در مدیریت فروشگاه."
 
 #: admin-app/src/routes/CampaignBuilder.tsx:513
-msgid "The ordered missions of the campaign. Shoppers unlock each mission in order as their cart grows."
-msgstr "ماموریت‌های مرتب‌شدهٔ کمپین. مشتریان با رشد سبدشان هر ماموریت را به ترتیب باز می‌کنند."
+msgid ""
+"The ordered missions of the campaign. Shoppers unlock each mission in order as their cart grows."
+msgstr ""
+"ماموریت‌های مرتب‌شدهٔ کمپین. مشتریان با رشد سبدشان هر ماموریت را به ترتیب باز می‌کنند."
 
 #: admin-app/src/routes/NotFound.tsx:17
 msgid "The page you are looking for does not exist."
 msgstr "صفحه‌ای که به دنبال آن هستید وجود ندارد."
 
 #: admin-app/src/routes/Settings.tsx:893
-msgid "The plugin’s public actions and filters — a reference for theme and plugin developers."
-msgstr "اقدام‌ها و فیلترهای عمومی افزونه — مرجعی برای توسعه‌دهندگان قالب و افزونه."
+msgid ""
+"The plugin’s public actions and filters — a reference for theme and plugin developers."
+msgstr ""
+"اقدام‌ها و فیلترهای عمومی افزونه — مرجعی برای توسعه‌دهندگان قالب و افزونه."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:239
 msgid "The product added to the cart as a gift."
@@ -4179,7 +4398,7 @@ msgstr "محصول یافت نشد."
 
 #: includes/REST/RecommendationsController.php:157
 msgid "The recommended target must be greater than zero."
-msgstr "ماموریت پیشنهادی باید بیشتر از صفر باشد."
+msgstr "آستانهٔ پیشنهادی باید بیشتر از صفر باشد."
 
 #: admin-app/src/routes/Settings.tsx:1031
 msgid "The round button diameter (32–96)."
@@ -4194,8 +4413,10 @@ msgid "The selected mission could not be found."
 msgstr "ماموریت انتخاب‌شده پیدا نشد."
 
 #: admin-app/src/routes/MissionBuilder.tsx:467
-msgid "The shopper may complete this mission as many times as they want (default for existing missions)."
-msgstr "خریدار می‌تواند این ماموریت را هر چند بار که بخواهد تکمیل کند (پیش‌فرض ماموریت‌های موجود)."
+msgid ""
+"The shopper may complete this mission as many times as they want (default for existing missions)."
+msgstr ""
+"خریدار می‌تواند این ماموریت را هر چند بار که بخواهد تکمیل کند (پیش‌فرض ماموریت‌های موجود)."
 
 #: admin-app/src/routes/Missions.tsx:377
 msgid "The shopper may complete this mission as many times as they want."
@@ -4203,35 +4424,45 @@ msgstr "خریدار می‌تواند این ماموریت را هر چند ب
 
 #: admin-app/src/components/mission-builder/TargetFields.tsx:127
 msgid "The threshold shoppers need to reach"
-msgstr "مبلغی که مشتری باید به آن برسد تا ماموریت را تکمیل کند."
+msgstr "آستانه‌ای که مشتریان باید به آن برسند"
 
 #: admin-app/src/routes/MissionBuilder.tsx:378
 msgid "The threshold shoppers need to reach."
 msgstr "آستانه‌ای که مشتریان باید به آن برسند."
 
 #: includes/Admin/ProductCostField.php:76
-msgid "The unit cost FaraCart uses for Estimated Profit, Mission economics and upsell margin scoring. Leave empty when unknown."
-msgstr "هزینهٔ هر واحدی که فراکارت برای «سود تخمینی»، اقتصاد ماموریت و امتیازدهی حاشیهٔ سودِ پیشنهاد خرید به کار می‌برد. اگر نامشخص است خالی بگذارید."
+msgid ""
+"The unit cost FaraCart uses for Estimated Profit, Mission economics and upsell margin scoring. Leave empty when unknown."
+msgstr ""
+"هزینهٔ هر واحدی که فراکارت برای «سود تخمینی»، اقتصاد ماموریت و امتیازدهی حاشیهٔ سودِ پیشنهاد خرید به کار می‌برد. اگر نامشخص است خالی بگذارید."
 
 #: admin-app/src/routes/Analytics.tsx:1023
-msgid "These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting."
-msgstr "این شاخص‌ها از مدل انتساب فراکارت استفاده می‌کنند — مستقیم در برابر کمکی، سفارش‌های متمایز، بدون شمارش دوبار."
+msgid ""
+"These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting."
+msgstr ""
+"این شاخص‌ها از مدل انتساب فراکارت استفاده می‌کنند — مستقیم در برابر کمکی، سفارش‌های متمایز، بدون شمارش دوبار."
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:103
-msgid "These products never count toward the mission, even when they would otherwise qualify."
-msgstr "این محصولات هرگز به سمت ماموریت محاسبه نمی‌شوند، حتی وقتی در غیر این صورت واجد شرایط باشند."
+msgid ""
+"These products never count toward the mission, even when they would otherwise qualify."
+msgstr ""
+"این محصولات هرگز به سمت ماموریت محاسبه نمی‌شوند، حتی وقتی در غیر این صورت واجد شرایط باشند."
 
 #: admin-app/src/routes/Recommendations.tsx:730
-msgid "This changes a production mission — the action is not reversible from here."
-msgstr "این کار یک ماموریت فعال را تغییر می‌دهد — این عمل از اینجا قابل بازگشت نیست."
+msgid ""
+"This changes a production mission — the action is not reversible from here."
+msgstr ""
+"این کار یک ماموریت فعال را تغییر می‌دهد — این عمل از اینجا قابل بازگشت نیست."
 
 #: includes/REST/GiftController.php:170
 msgid "This gift is no longer available for the mission."
 msgstr "این هدیه دیگر برای این ماموریت در دسترس نیست."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:191
-msgid "This is an analytical estimate based on available WooCommerce cost and order data. It is not accounting profit."
-msgstr "این یک برآورد تحلیلی بر پایهٔ داده‌های موجود هزینه و سفارش ووکامرس است. سود حسابداری نیست."
+msgid ""
+"This is an analytical estimate based on available WooCommerce cost and order data. It is not accounting profit."
+msgstr ""
+"این یک برآورد تحلیلی بر پایهٔ داده‌های موجود هزینه و سفارش ووکامرس است. سود حسابداری نیست."
 
 #: admin-app/src/date-range/dateRange.ts:110
 msgid "This month"
@@ -4278,8 +4509,10 @@ msgid "To"
 msgstr "تا"
 
 #: admin-app/src/routes/Recommendations.tsx:615
-msgid "To see the best optimization recommendation for a mission, first choose one of your store missions."
-msgstr "برای مشاهده بهترین پیشنهاد بهینه‌سازی برای یک ماموریت، ابتدا یکی از ماموریت‌های فروشگاه را انتخاب کنید."
+msgid ""
+"To see the best optimization recommendation for a mission, first choose one of your store missions."
+msgstr ""
+"برای مشاهده بهترین پیشنهاد بهینه‌سازی برای یک ماموریت، ابتدا یکی از ماموریت‌های فروشگاه را انتخاب کنید."
 
 #: admin-app/src/date-range/dateRange.ts:102
 msgid "Today"
@@ -4337,7 +4570,7 @@ msgstr "افزایش کل"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:234
 msgid "Total paid across all orders."
-msgstr "مجموع پرداختی در همهٔ سفارشها."
+msgstr "مجموع پرداختی در همهٔ سفارش‌ها."
 
 #: includes/Templates/Mission/Template3.php:75
 msgid "Track color"
@@ -4361,11 +4594,11 @@ msgstr "تلاش دوباره"
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:26
 msgid "Tue"
-msgstr "سهشنبه"
+msgstr "سه‌شنبه"
 
 #: admin-app/src/routes/CampaignBuilder.tsx:51
 msgid "Tuesday"
-msgstr "سهشنبه"
+msgstr "سه‌شنبه"
 
 #: admin-app/src/routes/Settings.tsx:550
 msgid "Turn the storefront missions, rewards and progress bars on or off."
@@ -4417,8 +4650,10 @@ msgid "Upsell Performance"
 msgstr "عملکرد پیشنهاد خرید"
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:416
-msgid "Upsell impressions and orders are recorded once the storefront reports them. Widen the date range or check that tracking is enabled."
-msgstr "نمایش‌ها و سفارش‌های پیشنهاد خرید پس از گزارش‌دهی فروشگاه ثبت می‌شوند. بازهٔ تاریخ را گسترش دهید یا مطمئن شوید ردیابی فعال است."
+msgid ""
+"Upsell impressions and orders are recorded once the storefront reports them. Widen the date range or check that tracking is enabled."
+msgstr ""
+"نمایش‌ها و سفارش‌های پیشنهاد خرید پس از گزارش‌دهی فروشگاه ثبت می‌شوند. بازهٔ تاریخ را گسترش دهید یا مطمئن شوید ردیابی فعال است."
 
 #: admin-app/src/routes/MissionPerformance.tsx:92
 msgid "Upsell-assisted"
@@ -4439,8 +4674,10 @@ msgid "Upsells are assisting completions"
 msgstr "پیشنهادها در حال کمک به تکمیل ماموریت‌ها هستند"
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:338
-msgid "Upsells shows which products help customers reach Missions and generate additional sales — purchases, sales and estimated profit per product."
-msgstr "پیشنهاد خرید نشان می‌دهد کدام محصولات به مشتریان در تکمیل ماموریت‌ها کمک می‌کنند و فروش بیشتری ایجاد می‌کنند — خرید، فروش و سود تخمینی هر محصول."
+msgid ""
+"Upsells shows which products help customers reach Missions and generate additional sales — purchases, sales and estimated profit per product."
+msgstr ""
+"پیشنهاد خرید نشان می‌دهد کدام محصولات به مشتریان در تکمیل ماموریت‌ها کمک می‌کنند و فروش بیشتری ایجاد می‌کنند — خرید، فروش و سود تخمینی هر محصول."
 
 #: admin-app/src/components/mission-builder/DisplayFields.tsx:125
 #: admin-app/src/routes/CampaignBuilder.tsx:750
@@ -4507,8 +4744,10 @@ msgid "Views"
 msgstr "مشاهدات"
 
 #: admin-app/src/routes/Dashboard.tsx:604
-msgid "We couldn’t load your analytics. Your Missions are still working normally."
-msgstr "نتوانستیم تحلیل‌های شما را بارگیری کنیم. ماموریت‌های شما همچنان به‌درستی کار می‌کنند."
+msgid ""
+"We couldn’t load your analytics. Your Missions are still working normally."
+msgstr ""
+"نتوانستیم تحلیل‌های شما را بارگیری کنیم. ماموریت‌های شما همچنان به‌درستی کار می‌کنند."
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:27
 msgid "Wed"
@@ -4532,8 +4771,10 @@ msgid "What happened?"
 msgstr "چه اتفاقی افتاد؟"
 
 #: admin-app/src/routes/Analytics.tsx:502
-msgid "What happens after customers see and complete your missions — purchases, sales and profit."
-msgstr "پس از دیدن و تکمیل ماموریت‌های شما توسط مشتریان چه اتفاقی می‌افتد — خریدها، فروش و سود."
+msgid ""
+"What happens after customers see and complete your missions — purchases, sales and profit."
+msgstr ""
+"پس از دیدن و تکمیل ماموریت‌های شما توسط مشتریان چه اتفاقی می‌افتد — خریدها، فروش و سود."
 
 #: admin-app/src/routes/Dashboard.tsx:151
 msgid "What is FaraCart?"
@@ -4541,47 +4782,59 @@ msgstr "فراکارت چیست؟"
 
 #: admin-app/src/routes/MissionPerformance.tsx:242
 msgid "What target should this mission use — based on real store data."
-msgstr "این ماموریت باید از کدام آستانه استفاده کند — بر اساس داده‌های واقعی فروشگاه."
+msgstr ""
+"این ماموریت باید از کدام آستانه استفاده کند — بر اساس داده‌های واقعی فروشگاه."
 
 #: admin-app/src/routes/MissionBuilder.tsx:415
 msgid "What the customer earns when the mission is reached."
-msgstr "پاداشی که مشتری بعد از تکمیل ماموریت دریافت می‌کند؛ مثلاً ارسال رایگان، تخفیف یا هدیه."
+msgstr ""
+"پاداشی که مشتری بعد از تکمیل ماموریت دریافت می‌کند؛ مثلاً ارسال رایگان، تخفیف یا هدیه."
 
 #: admin-app/src/routes/MissionBuilder.tsx:370
 msgid "What the mission measures."
 msgstr "مشخص می‌کند مشتری برای دریافت پاداش باید چه کاری انجام دهد."
 
 #: admin-app/src/routes/Settings.tsx:739
-msgid "When off, cart coupons and discounts do not reduce the discounted-subtotal basis."
-msgstr "وقتی خاموش است، کوپن‌ها و تخفیف‌های سبد، مبنای جمع فرعی پس از تخفیف را کاهش نمی‌دهند."
+msgid ""
+"When off, cart coupons and discounts do not reduce the discounted-subtotal basis."
+msgstr ""
+"وقتی خاموش است، کوپن‌ها و تخفیف‌های سبد، مبنای جمع فرعی پس از تخفیف را کاهش نمی‌دهند."
 
 #: admin-app/src/routes/Settings.tsx:757
 msgid "When off, products currently on sale are excluded from every mission."
 msgstr "وقتی خاموش است، محصولات در حال حراج از همهٔ ماموریت‌ها مستثنی می‌شوند."
 
 #: admin-app/src/routes/Settings.tsx:766
-msgid "When off, virtual and downloadable products are excluded from every mission."
-msgstr "وقتی خاموش است، محصولات مجازی و قابل دانلود از همهٔ ماموریت‌ها مستثنی می‌شوند."
+msgid ""
+"When off, virtual and downloadable products are excluded from every mission."
+msgstr ""
+"وقتی خاموش است، محصولات مجازی و قابل دانلود از همهٔ ماموریت‌ها مستثنی می‌شوند."
 
 #: admin-app/src/routes/Settings.tsx:965
-msgid "When on, mobile reuses the desktop position and the separate mobile fields are hidden."
-msgstr "وقتی روشن باشد، موبایل از موقعیت دسکتاپ استفاده می‌کند و فیلدهای جداگانهٔ موبایل پنهان می‌شوند."
+msgid ""
+"When on, mobile reuses the desktop position and the separate mobile fields are hidden."
+msgstr ""
+"وقتی روشن باشد، موبایل از موقعیت دسکتاپ استفاده می‌کند و فیلدهای جداگانهٔ موبایل پنهان می‌شوند."
 
 #: admin-app/src/routes/Settings.tsx:748
 msgid "When on, shipping charges count toward the cart-total basis."
 msgstr "وقتی روشن است، هزینه‌های ارسال به سمت مبنای کل سبد محاسبه می‌شوند."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:81
-msgid "When product cost is recorded, its profit is also considered in the ranking."
-msgstr "اگر قیمت تمام‌شده محصول ثبت شده باشد، سود آن نیز در اولویت‌بندی پیشنهادها در نظر گرفته می‌شود."
+msgid ""
+"When product cost is recorded, its profit is also considered in the ranking."
+msgstr ""
+"اگر قیمت تمام‌شده محصول ثبت شده باشد، سود آن نیز در اولویت‌بندی پیشنهادها در نظر گرفته می‌شود."
 
 #: admin-app/src/routes/CampaignBuilder.tsx:395
 msgid "When the campaign runs, and how it competes with other campaigns."
 msgstr "زمان اجرای کمپین و نحوهٔ رقابت آن با کمپین‌های دیگر."
 
 #: admin-app/src/routes/MissionBuilder.tsx:535
-msgid "When this mission is reached, every lower-priority mission is skipped and never grants its reward. Higher-priority missions are unaffected."
-msgstr "وقتی این ماموریت محقق شود، همهٔ ماموریت‌ها با اولویت پایین‌تر رد می‌شوند و هرگز پاداش خود را اعطا نمی‌کنند. ماموریت‌ها با اولویت بالاتر تحت تأثیر قرار نمی‌گیرند."
+msgid ""
+"When this mission is reached, every lower-priority mission is skipped and never grants its reward. Higher-priority missions are unaffected."
+msgstr ""
+"وقتی این ماموریت محقق شود، همهٔ ماموریت‌ها با اولویت پایین‌تر رد می‌شوند و هرگز پاداش خود را اعطا نمی‌کنند. ماموریت‌ها با اولویت بالاتر تحت تأثیر قرار نمی‌گیرند."
 
 #: admin-app/src/routes/Settings.tsx:643
 msgid "Where and how the storefront widgets appear."
@@ -4592,11 +4845,14 @@ msgid "Whether the widgets render on small screens (≤782px)."
 msgstr "آیا ویجت‌ها در صفحه‌های کوچک (≤۷۸۲ پیکسل) نمایش داده می‌شوند."
 
 #: admin-app/src/routes/Settings.tsx:720
-msgid "Which cart money counts toward missions. Defaults match the storefront behavior before these options existed."
-msgstr "کدام مبلغ سبد به سمت ماموریت‌ها محاسبه می‌شود. پیش‌فرض‌ها با رفتار فروشگاه پیش از وجود این گزینه‌ها مطابقت دارند."
+msgid ""
+"Which cart money counts toward missions. Defaults match the storefront behavior before these options existed."
+msgstr ""
+"کدام مبلغ سبد به سمت ماموریت‌ها محاسبه می‌شود. پیش‌فرض‌ها با رفتار فروشگاه پیش از وجود این گزینه‌ها مطابقت دارند."
 
 #: admin-app/src/routes/MissionPerformance.tsx:727
-msgid "Which missions generated purchases, sales and profit? Completion is not the same as purchase."
+msgid ""
+"Which missions generated purchases, sales and profit? Completion is not the same as purchase."
 msgstr "کدام ماموریت‌ها خرید، فروش و سود ایجاد کردند؟ تکمیل با خرید یکی نیست."
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:240
@@ -4625,7 +4881,8 @@ msgid "WooCommerce must be installed and activated."
 msgstr "ووکامرس باید نصب و فعال باشد."
 
 #: includes/Analytics/MissionRecommendationEngine.php:257
-msgid "WooCommerce order data is not available — no recommendation can be computed."
+msgid ""
+"WooCommerce order data is not available — no recommendation can be computed."
 msgstr "دادهٔ سفارش‌های ووکامرس در دسترس نیست — هیچ پیشنهادی قابل محاسبه نیست."
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:25
@@ -4641,12 +4898,15 @@ msgid "WordPress %1$s or newer is required (current: %2$s)."
 msgstr "نسخهٔ وردپرس %1$s یا جدیدتر لازم است (فعلی: %2$s)."
 
 #: admin-app/src/routes/Settings.tsx:840
-msgid "Write detailed (debug-level) entries to the plugin log when logging is enabled."
-msgstr "وقتی ثبت گزارش فعال است، ورودی‌های دقیق (سطح اشکال‌زدایی) را در گزارش افزونه بنویسید."
+msgid ""
+"Write detailed (debug-level) entries to the plugin log when logging is enabled."
+msgstr ""
+"وقتی ثبت گزارش فعال است، ورودی‌های دقیق (سطح اشکال‌زدایی) را در گزارش افزونه بنویسید."
 
 #: admin-app/src/routes/Settings.tsx:849
 msgid "Write errors (and debug entries when debug mode is on) to a log file."
-msgstr "خطاها (و ورودی‌های اشکال‌زدایی وقتی حالت اشکال‌زدایی روشن است) را در یک فایل گزارش بنویسید."
+msgstr ""
+"خطاها (و ورودی‌های اشکال‌زدایی وقتی حالت اشکال‌زدایی روشن است) را در یک فایل گزارش بنویسید."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:33
 msgid "Yes (stack with other rewards)"
@@ -4766,8 +5026,10 @@ msgid "vs previous period"
 msgstr "نسبت به دورهٔ قبل"
 
 #: admin-app/src/routes/Campaigns.tsx:290
-msgid "“%s” will be permanently deleted. Its missions are kept and detached — they can be reused by other campaigns."
-msgstr "«%s» برای همیشه حذف می‌شود. ماموریت‌های آن حفظ و جدا می‌شوند و می‌توانند توسط کمپین‌های دیگر استفاده شوند."
+msgid ""
+"“%s” will be permanently deleted. Its missions are kept and detached — they can be reused by other campaigns."
+msgstr ""
+"«%s» برای همیشه حذف می‌شود. ماموریت‌های آن حفظ و جدا می‌شوند و می‌توانند توسط کمپین‌های دیگر استفاده شوند."
 
 #: admin-app/src/routes/Missions.tsx:468
 msgid "“%s” will be permanently deleted. This cannot be undone."
@@ -4895,8 +5157,10 @@ msgid "Template 6"
 msgstr "قالب ۶"
 
 #: admin-app/src/routes/Appearance.tsx:757
-msgid "The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here."
-msgstr "قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا زمانی که قالب دیگری را انتخاب کنید، به قالب پیش‌فرض برمی‌گردد."
+msgid ""
+"The stored default template is no longer registered. The storefront falls back to the default template until you pick another one here."
+msgstr ""
+"قالب پیش‌فرض ذخیره‌شده دیگر ثبت نشده است. فروشگاه تا زمانی که قالب دیگری را انتخاب کنید، به قالب پیش‌فرض برمی‌گردد."
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:52
 #: includes/Frontend/ProgressUI.php:1054
@@ -4998,8 +5262,10 @@ msgid "Compact dark bar — icon, progress, remaining amount and a small CTA."
 msgstr "نوار تیره فشرده — آیکون، پیشرفت، مبلغ باقی‌مانده و یک دکمه کوچک."
 
 #: admin-app/src/routes/Settings.tsx:358
-msgid "Distance from the chosen edge — or from the midline when the preset is centered (0–200)."
-msgstr "فاصله از لبهٔ انتخابی — یا از خط وسط وقتی پیش‌تنظیم «مرکز» است (۰–۲۰۰)."
+msgid ""
+"Distance from the chosen edge — or from the midline when the preset is centered (0–200)."
+msgstr ""
+"فاصله از لبهٔ انتخابی — یا از خط وسط وقتی پیش‌تنظیم «مرکز» است (۰–۲۰۰)."
 
 #: includes/Templates/Mission/Template6.php:69
 msgid "Gold accent color"
@@ -5028,7 +5294,8 @@ msgid "Outline"
 msgstr "خطی"
 
 #: includes/Templates/Mission/Template6.php:45
-msgid "Premium card — gold accents, elegant progress and a refined call-to-action."
+msgid ""
+"Premium card — gold accents, elegant progress and a refined call-to-action."
 msgstr "کارت لوکس — تأکید طلایی، پیشرفت ظریف و فراخوان شیک."
 
 #: includes/Templates/Mission/Template4.php:142
@@ -5036,7 +5303,8 @@ msgid "Product image size (px)"
 msgstr "اندازه تصویر محصول (پیکسل)"
 
 #: includes/Templates/Mission/Template1.php:45
-msgid "Progress card with icon, title, percentage, amounts and a call-to-action."
+msgid ""
+"Progress card with icon, title, percentage, amounts and a call-to-action."
 msgstr "کارت پیشرفت با آیکون، عنوان، درصد، مبالغ و فراخوان."
 
 #: includes/Templates/Mission/Template6.php:75
@@ -5122,13 +5390,18 @@ msgid "Text color"
 msgstr "رنگ متن"
 
 #: admin-app/src/routes/Settings.tsx:317
-msgid "The button corner/edge — the drawer always opens toward the screen center from it. The offsets below fine-tune the exact spot."
-msgstr "گوشه/لبهٔ دکمه — کشو همیشه از آن به سمت مرکز صفحه باز می‌شود. آفست‌های زیر نقطهٔ دقیق را تنظیم می‌کنند."
+msgid ""
+"The button corner/edge — the drawer always opens toward the screen center from it. The offsets below fine-tune the exact spot."
+msgstr ""
+"گوشه/لبهٔ دکمه — کشو همیشه از آن به سمت مرکز صفحه باز می‌شود. آفست‌های زیر نقطهٔ دقیق را تنظیم می‌کنند."
 
 #: admin-app/src/routes/Settings.tsx:1018
 msgid "The button look."
 msgstr "ظاهر دکمه."
 
 #: admin-app/src/routes/Settings.tsx:955
-msgid "Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons. The progress drawer always opens toward the screen center."
-msgstr "جای دکمه — به‌طور جداگانه برای دسکتاپ و موبایل. موبایل می‌تواند از موقعیت دسکتاپ استفاده کند یا موقعیت خودش را داشته باشد تا هرگز با ناوبری موبایل یا دکمه‌های چسبان سبد خرید تداخل نکند. کشوی پیشرفت همیشه به سمت مرکز صفحه باز می‌شود."
+msgid ""
+"Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons. The progress drawer always opens toward the screen center."
+msgstr ""
+"جای دکمه — به‌طور جداگانه برای دسکتاپ و موبایل. موبایل می‌تواند از موقعیت دسکتاپ استفاده کند یا موقعیت خودش را داشته باشد تا هرگز با ناوبری موبایل یا دکمه‌های چسبان سبد خرید تداخل نکند. کشوی پیشرفت همیشه به سمت مرکز صفحه باز می‌شود."
+
