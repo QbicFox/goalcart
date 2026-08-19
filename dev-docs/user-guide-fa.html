@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>راهنمای کاربری فراکارت — FaraCart User Guide</title>
+    <style>
+        :root {
+            --primary: #2271b1;
+            --primary-light: #e7f0fb;
+            --accent: #2271b1;
+            --success: #00a32a;
+            --warning: #dba617;
+            --danger: #d63638;
+            --text: #1d2327;
+            --text-muted: #50575e;
+            --bg: #f0f0f1;
+            --card-bg: #ffffff;
+            --border: #dcdcde;
+            --radius: 8px;
+            --shadow: 0 1px 3px rgba(0,0,0,.08);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Tahoma, 'B Nazanin', 'IRANSans', 'Vazir', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.8;
+            direction: rtl;
+            text-align: right;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary), #1a5dab);
+            color: #fff;
+            padding: 48px 24px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.2rem; margin-bottom: 12px; }
+        .header p { font-size: 1.1rem; opacity: .9; max-width: 700px; margin: 0 auto; }
+        .header .version {
+            display: inline-block;
+            background: rgba(255,255,255,.2);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: .85rem;
+            margin-top: 16px;
+        }
+
+        /* Layout */
+        .container { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+
+        /* TOC */
+        .toc {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 32px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+        .toc h2 {
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+        .toc ol { padding-right: 20px; }
+        .toc li { margin-bottom: 8px; }
+        .toc a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: color .2s;
+        }
+        .toc a:hover { color: var(--accent); text-decoration: underline; }
+
+        /* Sections */
+        .section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow);
+        }
+        .section h2 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--primary-light);
+        }
+        .section h3 {
+            font-size: 1.15rem;
+            color: var(--text);
+            margin: 24px 0 12px;
+            padding-right: 12px;
+            border-right: 3px solid var(--accent);
+        }
+        .section h4 {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            margin: 16px 0 8px;
+        }
+        .section p { margin-bottom: 14px; }
+        .section ul, .section ol { padding-right: 24px; margin-bottom: 14px; }
+        .section li { margin-bottom: 6px; }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: .92rem;
+        }
+        th, td {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            text-align: right;
+        }
+        th {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 700;
+        }
+        tr:nth-child(even) { background: #fafafa; }
+
+        /* Code */
+        code {
+            background: #f1f1f1;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: .88rem;
+            direction: ltr;
+            display: inline-block;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 16px 20px;
+            border-radius: var(--radius);
+            overflow-x: auto;
+            margin: 14px 0;
+            font-size: .85rem;
+            direction: ltr;
+            text-align: left;
+            line-height: 1.6;
+        }
+        pre code { background: none; color: inherit; padding: 0; }
+
+        /* Info boxes */
+        .info-box {
+            padding: 16px 20px;
+            border-radius: var(--radius);
+            margin: 16px 0;
+            border-right: 4px solid;
+        }
+        .info-box.tip {
+            background: #edfaef;
+            border-color: var(--success);
+        }
+        .info-box.warning {
+            background: #fef8ee;
+            border-color: var(--warning);
+        }
+        .info-box.danger {
+            background: #fceeee;
+            border-color: var(--danger);
+        }
+        .info-box strong { display: block; margin-bottom: 4px; }
+
+        /* Steps */
+        .steps { counter-reset: step; padding-right: 0; list-style: none; }
+        .steps li {
+            counter-increment: step;
+            padding: 12px 16px 12px 16px;
+            margin-bottom: 10px;
+            background: #f9f9f9;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            position: relative;
+            padding-right: 56px;
+        }
+        .steps li::before {
+            content: counter(step);
+            position: absolute;
+            right: 16px;
+            top: 12px;
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: .85rem;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: .78rem;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        .badge.active { background: #edfaef; color: var(--success); }
+        .badge.inactive { background: #f1f1f1; color: var(--text-muted); }
+        .badge.new { background: #fff3cd; color: #856404; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 32px 20px;
+            color: var(--text-muted);
+            font-size: .85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 40px;
+        }
+
+        /* Print */
+        @media print {
+            .header { background: var(--primary) !important; -webkit-print-color-adjust: exact; }
+            .section { break-inside: avoid; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.6rem; }
+            .section { padding: 20px; }
+            table { font-size: .82rem; }
+            th, td { padding: 8px 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<header class="header">
+    <h1>🛍️ راهنمای کاربری فراکارت</h1>
+    <p>افزونه بهینه‌سازی درآمد سبد خرید ووکامرس — افزایش ارزش سفارش با ماموریت‌ها، نوارهای پیشرفت و پاداش‌ها</p>
+    <span class="version">نسخه ۰٫۶ — مرداد ۱۴۰۵</span>
+</header>
+
+<div class="container">
+
+<!-- ==================== TABLE OF CONTENTS ==================== -->
+<nav class="toc">
+    <h2>فهرست مطالب</h2>
+    <ol>
+        <li><a href="#intro">معرفی فراکارت</a></li>
+        <li><a href="#install">نصب و راه‌اندازی</a></li>
+        <li><a href="#missions">ماموریت‌ها (Missions)</a></li>
+        <li><a href="#rewards">پاداش‌ها (Rewards)</a></li>
+        <li><a href="#campaigns">کمپین‌ها (Campaigns)</a></li>
+        <li><a href="#appearance">ظاهر و قالب‌ها</a></li>
+        <li><a href="#upsells">پیشنهادهای خرید هوشمند</a></li>
+        <li><a href="#analytics">تحلیل‌ها و گزارش‌ها</a></li>
+        <li><a href="#settings">تنظیمات</a></li>
+        <li><a href="#faq">سؤالات متداول</a></li>
+    </ol>
+</nav>
+
+<!-- ==================== 1. INTRODUCTION ==================== -->
+<section class="section" id="intro">
+    <h2>۱. معرفی فراکارت</h2>
+
+    <p><strong>فراکارت</strong> یک افزونه رایگان وردپرس است که با ایجاد <strong>ماموریت‌های سبد خرید</strong>، <strong>نوارهای پیشرفت</strong> و <strong>پاداش‌های خودکار</strong>، ارزش میانگین سفارش (AOV) فروشگاه شما را افزایش می‌دهد.</p>
+
+    <h3>فراکارت چگونه کار می‌کند؟</h3>
+    <p>وقتی مشتری محصولی به سبد خرید اضافه می‌کند، فراکارت یک <strong>نوار پیشرفت</strong> در صفحه سبد خرید نمایش می‌دهد. اگر مشتری به هدف ماموریت نرسیده باشد، پیامی مثل <em>«تنها ۲۵۰٬۰۰۰ تومان تا ارسال رایگان باقی مانده»</em> نشان می‌دهد. با رسیدن به هدف، <strong>پاداش</strong> (ارسال رایگان، تخفیف، هدیه و …) به صورت خودکار فعال می‌شود.</p>
+
+    <h3>ویژگی‌های اصلی</h3>
+    <ul>
+        <li><strong>ماموریت‌های متنوع:</strong> مبلغ سبد، تعداد اقلام، هزینه در دسته‌بندی، وزن و ترکیبی</li>
+        <li><strong>پاداش‌های خودکار:</strong> ارسال رایگان، تخفیف درصدی، تخفیف مبلغی، هدیه رایگان، کوپن</li>
+        <li><strong>کمپین‌ها:</strong> گروه‌بندی ماموریت‌ها در نقاط عطف زمان‌بندی‌شده</li>
+        <li><strong>پیشنهادهای هوشمند:</strong> نمایش محصولات پیشنهادی برای رسیدن به هدف</li>
+        <li><strong>قالب‌های متنوع:</strong> ۶ قالب طراحی مختلف برای نوار پیشرفت</li>
+        <li><strong>تحلیل‌های پیشرفته:</strong> اندازه‌گیری فروش منتسب و سود تخمینی</li>
+        <li><strong>پشتیبانی RTL:</strong> سازگار کامل با زبان فارسی و اعداد فارسی</li>
+    </ul>
+</section>
+
+<!-- ==================== 2. INSTALLATION ==================== -->
+<section class="section" id="install">
+    <h2>۲. نصب و راه‌اندازی</h2>
+
+    <h3>پیش‌نیازها</h3>
+    <table>
+        <tr><th>نرم‌افزار</th><th>حداقل نسخه</th><th>نسخه تست‌شده</th></tr>
+        <tr><td>وردپرس</td><td>۶٫۳</td><td>۷٫۰</td></tr>
+        <tr><td>PHP</td><td>۷٫۴</td><td>۸٫۴</td></tr>
+        <tr><td>ووکامرس</td><td>۸٫۰</td><td>۱۱٫۰</td></tr>
+    </table>
+
+    <h3>مراحل نصب</h3>
+    <ol class="steps">
+        <li>از بخش <strong>افزونه‌ها → افزودن</strong> در مدیریت وردپرس، فایل zip افزونه را آپلود کنید.</li>
+        <li>روی <strong>فعال‌سازی</strong> کلیک کنید. افزونه به صورت خودکار جداول پایگاه داده را ایجاد می‌کند.</li>
+        <li>منوی <strong>فراکارت</strong> در نوار کناری مدیریت وردپرس ظاهر می‌شود.</li>
+        <li>از بخش <strong>فراکارت → تنظیمات</strong>، افزونه را فعال کنید (<em>فعال‌سازی فراکارت</em>).</li>
+    </ol>
+
+    <div class="info-box tip">
+        <strong>💡 نکته:</strong>
+        افزونه پس از نصب غیرفعال است. باید از بخش تنظیمات آن را فعال کنید تا نوار پیشرفت در فروشگاه نمایش داده شود.
+    </div>
+</section>
+
+<!-- ==================== 3. MISSIONS ==================== -->
+<section class="section" id="missions">
+    <h2>۳. ماموریت‌ها (Missions)</h2>
+
+    <p>ماموریت هدفی است که مشتری باید به آن برسد. برای مثال: «سبد خرید خود را به ۵۰۰٬۰۰۰ تومان برسانید تا ارسال رایگان دریافت کنید.»</p>
+
+    <h3>انواع ماموریت</h3>
+    <table>
+        <tr><th>نوع</th><th>توضیح</th><th>مثال</th></tr>
+        <tr><td>مبلغ</td><td>بر اساس ارزش سبد خرید</td><td>سبد خود را به ۱٬۰۰۰٬۰۰۰ تومان برسانید</td></tr>
+        <tr><td>تعداد</td><td>بر اساس تعداد اقلام</td><td>حداقل ۳ محصول به سبد اضافه کنید</td></tr>
+        <tr><td>تعداد متمایز</td><td>تعداد محصولات متفاوت</td><td>۳ محصول متفاوت به سبد اضافه کنید</td></tr>
+        <tr><td>دسته‌بندی</td><td>مبلغ یا تعداد در یک دسته خاص</td><td>۲۰۰٬۰۰۰ تومان از دسته پوشاک بخرید</td></tr>
+        <tr><td>محصول</td><td>مبلغ یا تعداد محصولات خاص</td><td>۲ عدد از محصول X بخرید</td></tr>
+        <tr><td>وزن</td><td>بر اساس وزن سبد</td><td>سبد خود را به ۵ کیلوگرم برسانید</td></tr>
+        <tr><td>ترکیبی</td><td>ترکیب چند شرط با منطق و/یا</td><td>هم مبلغ و هم تعداد شرط داشته باشد</td></tr>
+    </table>
+
+    <h3>ایجاد ماموریت جدید</h3>
+    <ol class="steps">
+        <li>از منوی <strong>فراکارت → ماموریت‌ها</strong> روی <strong>افزودن ماموریت</strong> کلیک کنید.</li>
+        <li>در بخش <strong>اطلاعات پایه</strong> نام و توضیحات ماموریت را وارد کنید.</li>
+        <li>در بخش <strong>نوع ماموریت</strong> نوع مناسب را انتخاب کنید (مبلغ، تعداد، دسته‌بندی و …).</li>
+        <li>در بخش <strong>هدف</strong> مقدار هدف را تعیین کنید (مثلاً ۵۰۰٬۰۰۰ تومان).</li>
+        <li>در بخش <strong>پاداش</strong> نوع پاداش و تنظیمات آن را مشخص کنید.</li>
+        <li>در بخش <strong>شرایط</strong> دسته‌بندی‌ها، محصولات مستثنی، نقش مشتریان و زمان‌بندی را تنظیم کنید.</li>
+        <li>در بخش <strong>نمایش</strong> پیام، قالب و آیکن را انتخاب کنید.</li>
+        <li>روی <strong>ذخیره</strong> کلیک کنید و وضعیت ماموریت را روی <strong>فعال</strong> قرار دهید.</li>
+    </ol>
+
+    <h3>شرایط پیشرفته</h3>
+    <ul>
+        <li><strong>نقش مشتری:</strong> محدود کردن به مشتریان خاص ( مدیر فروشگاه، مشتری VIP و …)</li>
+        <li><strong>اولین سفارش:</strong> فقط برای اولین سفارش مشتری</li>
+        <li><strong>VIP:</strong> بر اساس مجموع خرید یا تعداد سفارش‌های قبلی</li>
+        <li><strong>منطقه ارسال:</strong> محدود به مناطق ارسال خاص</li>
+        <li><strong>زمان‌بندی:</strong> روزها و ساعات تکراری (مثلاً فقط جمعه‌ها از ۱۰ تا ۱۴)</li>
+        <li><strong>کوپن اعمال شده:</strong> فقط وقتی کوپن خاصی اعمال شده باشد</li>
+        <li><strong>تعداد حداقل اقلام:</strong> حداقل تعداد اقلام در سبد</li>
+    </ul>
+
+    <h3>اولویت و تعارض</h3>
+    <p>وقتی چند ماموریت فعال باشند، فراکارت به صورت خودکار تعارض‌ها را حل می‌کند:</p>
+    <ul>
+        <li><strong>تجمعی (پیش‌فرض):</strong> همه ماموریت‌های تکمیل‌شده پاداش می‌دهند</li>
+        <li><strong>اولین:</strong> فقط اولین ماموریت منطبق پاداش می‌دهد</li>
+        <li><strong>بهترین:</strong> فقط ماموریتی با بهترین پاداش پاداش می‌دهد</li>
+    </ul>
+
+    <h3>ماموریت انحصاری</h3>
+    <p>با فعال کردن گزینه <strong>انحصاری</strong> در ماموریت، وقتی این ماموریت تکمیل شود، ماموریت‌های با اولویت پایین‌تر مسدود می‌شوند.</p>
+
+    <h3>محدودیت تکمیل</h3>
+    <p>می‌توانید تعیین کنید هر مشتری حداکثر چند بار بتواند یک ماموریت را تکمیل کند. مثلاً «هر مشتری فقط ۳ بار می‌تواند این ماموریت را تکمیل کند.»</p>
+</section>
+
+<!-- ==================== 4. REWARDS ==================== -->
+<section class="section" id="rewards">
+    <h2>۴. پاداش‌ها (Rewards)</h2>
+
+    <p>پاداش مزیتی است که با تکمیل ماموریت برای مشتری فعال می‌شود.</p>
+
+    <h3>انواع پاداش</h3>
+    <table>
+        <tr><th>نوع</th><th>توضیح</th><th>تنظیمات</th></tr>
+        <tr>
+            <td>ارسال رایگان</td>
+            <td>هزینه ارسال صفر می‌شود</td>
+            <td>محدود به مناطق/روش‌های خاص (اختیاری)</td>
+        </tr>
+        <tr>
+            <td>تخفیف درصدی</td>
+            <td>تخفیف به صورت درصد از مبلغ سبد</td>
+            <td>درصد، حداکثر تخفیف، محصولات واجد شرایط</td>
+        </tr>
+        <tr>
+            <td>تخفیف مبلغی</td>
+            <td>تخفیف به صورت مبلغ ثابت</td>
+            <td>مبلغ، محصولات واجد شرایط</td>
+        </tr>
+        <tr>
+            <td>هدیه رایگان</td>
+            <td>محصول هدیه به سبد اضافه می‌شود</td>
+            <td>خودکار یا انتخابی توسط مشتری</td>
+        </tr>
+        <tr>
+            <td>کوپن</td>
+            <td>کوپن تخفیف اعمال یا ایجاد می‌شود</td>
+            <td>کوپن موجود یا ایجاد خودکار</td>
+        </tr>
+    </table>
+
+    <h3>هدیه رایگان — حالت انتخابی</h3>
+    <p>در حالت <strong>انتخابی</strong>، مشتری می‌تواند یکی از چند محصول هدیه را انتخاب کند. از بخش تنظیمات هدیه، لیست محصولات هدیه را مشخص کنید.</p>
+
+    <div class="info-box warning">
+        <strong>⚠️ نکته امنیتی:</strong>
+        فراکارت از تکرار پاداش‌ها، حلقه‌های پاداش و اعمال پاداش به محصولات مستثنی جلوگیری می‌کند. پاداش‌ها فقط تا زمانی فعال هستند که ماموریت تکمیل باشد.
+    </div>
+
+    <h3>نحوه عملکرد</h3>
+    <ul>
+        <li><strong>ارسال رایگان:</strong> نرخ‌های ارسال در بسته‌های منطبق صفر می‌شوند (store shipping settings تغییر نمی‌کند)</li>
+        <li><strong>تخفیف‌ها:</strong> به صورت هزینه منفی در سبد خرید اعمال می‌شوند و با هر بار محاسبه مجدد بازسازی می‌شوند</li>
+        <li><strong>هدیه:</strong> خط هدیه با قیمت صفر اضافه می‌شود و با ناکامل شدن ماموریت حذف می‌شود</li>
+        <li><strong>کوپن:</strong> کوپن‌های ایجادشده به صورت قطعی و یکسان برای هر ماموریت ساخته می‌شوند</li>
+    </ul>
+</section>
+
+<!-- ==================== 5. CAMPAIGNS ==================== -->
+<section class="section" id="campaigns">
+    <h2>۵. کمپین‌ها (Campaigns)</h2>
+
+    <p>کمپین مجموعه‌ای از ماموریت‌هاست که تحت شرایط و زمان‌بندی خاصی فعال می‌شوند.</p>
+
+    <h3>مثال</h3>
+    <div style="background:#f9f9f9; padding:16px; border-radius:8px; margin:12px 0; border:1px solid var(--border);">
+        <strong>کمپین: حراج تابستانی</strong><br>
+        ● ۵۰۰٬۰۰۰ تومان → ارسال رایگان<br>
+        ● ۱٬۰۰۰٬۰۰۰ تومان → هدیه رایگان<br>
+        ● ۱٬۵۰۰٬۰۰۰ تومان → ۱۰٪ تخفیف<br>
+        ● ۲٬۰۰۰٬۰۰۰ تومان → هدیه ویژه
+    </div>
+
+    <h3>ایجاد کمپین</h3>
+    <ol class="steps">
+        <li>از منوی <strong>فراکارت → کمپین‌ها</strong> روی <strong>افزودن کمپین</strong> کلیک کنید.</li>
+        <li>نام کمپین را وارد کنید (مثلاً «حراج تابستانی»).</li>
+        <li>تاریخ شروع و پایان را تنظیم کنید (اختیاری).</li>
+        <li>اولویت کمپین را تعیین کنید (عدد کمتر = اولویت بالاتر).</li>
+        <li>نقاط عطف (ماموریت‌ها) را به ترتیب اضافه و مرتب کنید.</li>
+        <li>قالب کمپین را انتخاب کنید (زنجیره نقاط عطف یا پیشرفت کمپین).</li>
+        <li>کمپین را ذخیره و فعال کنید.</li>
+    </ol>
+
+    <h3>قالب‌های کمپین</h3>
+    <table>
+        <tr><th>قالب</th><th>توضیح</th></tr>
+        <tr><td>زنجیره نقاط عطف</td><td>نقاط عطف به صورت زنجیره متصل با نوار پیشرفت کلی</td></tr>
+        <tr><td>پیشرفت کمپین</td><td>یک نوار پیشرفت کلی با شمارنده نقاط عطف</td></tr>
+        <tr><td>پیش‌فرض</td><td>هر نقطه عطف به صورت کارت ماموریت جداگانه</td></tr>
+    </table>
+
+    <h3>زمان‌بندی تکراری</h3>
+    <p>کمپین‌ها می‌توانند قوانین زمانی تکراری داشته باشند. مثلاً: «هر جمعه از ساعت ۱۰ تا ۱۴» یا «شنبه تا چهارشنبه».</p>
+</section>
+
+<!-- ==================== 6. APPEARANCE ==================== -->
+<section class="section" id="appearance">
+    <h2>۶. ظاهر و قالب‌ها</h2>
+
+    <p>فراکارت ۶ قالب طراحی مختلف برای نوار پیشرفت ارائه می‌دهد که هر کدام ظاهر متفاوتی دارند.</p>
+
+    <h3>قالب‌های موجود</h3>
+    <table>
+        <tr><th>قالب</th><th>توضیح</th></tr>
+        <tr><td>قالب ۱</td><td>کارت کلاسیک با آیکون، عنوان، نوار پیشرفت، مبالغ و دکمه</td></tr>
+        <tr><td>قالب ۲</td><td>نوار فشرده و مینیمال برای قرارگیری بین محتوای سبد و جمع کل</td></tr>
+        <tr><td>قالب ۳</td><td>پیشرفت دایره‌ای با درصد در مرکز حلقه</td></tr>
+        <tr><td>قالب ۴</td><td>پیشنهاد محصولات + ماموریت با هدر گرادیانت</td></tr>
+        <tr><td>قالب ۵</td><td>نوار فشرده شناور/چسبان با پس‌زمینه تیره</td></tr>
+        <tr><td>قالب ۶</td><td>سبک پریمیوم و شیک با لهجه‌های طلایی</td></tr>
+    </table>
+
+    <h3>تنظیمات ظاهر</h3>
+    <p>از بخش <strong>فراکارت → ظاهر</strong> می‌توانید تنظیمات زیر را تغییر دهید:</p>
+    <ul>
+        <li><strong>قالب پیش‌فرض مأموریت:</strong> قالب پیش‌فرض برای همه ماموریت‌ها</li>
+        <li><strong>قالب پیش‌فرض کمپین:</strong> قالب پیش‌فرض برای کمپین‌ها</li>
+        <li><strong>رنگ تأکید:</strong> رنگ اصلی نوار پیشرفت</li>
+        <li><strong>پس‌زمینه:</strong> رنگ پس‌زمینه کارت</li>
+        <li><strong>حاشیه:</strong> رنگ و شعاع گوشه کارت</li>
+        <li><strong>ارتفاع نوار:</strong> ارتفاع نوار پیشرفت (پیکسل)</li>
+        <li><strong>انیمیشن:</strong> فعال/غیرفعال کردن انیمیشن‌ها</li>
+        <li><strong>CSS سفارشی:</strong> کد CSS دلخواه برای شخصی‌سازی بیشتر</li>
+    </ul>
+
+    <div class="info-box tip">
+        <strong>💡 نکته:</strong>
+        هر ماموریت می‌تواند قالب مخصوص خود را داشته باشد. از بخش ویرایش ماموریت → نمایش، قالب آن ماموریت خاص را تغییر دهید.
+    </div>
+
+    <h3>مکان‌های نمایش</h3>
+    <table>
+        <tr><th>مکان</th><th>توضیح</th></tr>
+        <tr><td>صفحه سبد خرید</td><td>بالای سبد خرید</td></tr>
+        <tr><td>مینی سبد</td><td>در کشوی سبد خرید</td></tr>
+        <tr><td>تسویه‌حساب</td><td>بالای فرم تسویه‌حساب</td></tr>
+        <tr><td>فروشگاه</td><td>در صفحه محصولات</td></tr>
+        <tr><td>محصول</td><td>در صفحه تکی محصول</td></tr>
+        <tr><td>نوار چسبان</td><td>نوار ثابت پایین صفحه</td></tr>
+    </table>
+
+    <h3>رفتار موبایل</h3>
+    <p>از بخش تنظیمات → فرانت‌اند می‌توانید رفتار نوار پیشرفت در موبایل را تعیین کنید:</p>
+    <ul>
+        <li><strong>نمایش:</strong> نوار پیشرفت در موبایل نمایش داده می‌شود</li>
+        <li><strong>مخفی:</strong> نوار پیشرفت در موبایل مخفی می‌شود</li>
+    </ul>
+</section>
+
+<!-- ==================== 7. UPSELLS ==================== -->
+<section class="section" id="upsells">
+    <h2>۷. پیشنهادهای خرید هوشمند</h2>
+
+    <p>فراکارت به صورت خودکار محصولاتی را به مشتری پیشنهاد می‌دهد که به رسیدن به هدف ماموریت کمک کنند.</p>
+
+    <h3>نحوه عملکرد</h3>
+    <ul>
+        <li>محصولات از منابع مختلف جمع‌آوری می‌شوند: محصولات ماموریت، دسته‌بندی‌ها، فروش‌های بالا، محصولات مرتبط</li>
+        <li>هر محصول بر اساس ۶ معیار رتبه‌بندی می‌شود: فاصله قیمتی، ارتباط، محبوبیت، موجودی، حاشیه سود، تبدیل تاریخی</li>
+        <li>محصولات مناسب‌ترین قیمت نسبت به مبلغ باقیمانده اولویت دارند</li>
+        <li>محصولات ناموجود، محصولات سبد خرید و محصولات مستثنی هرگز پیشنهاد نمی‌شوند</li>
+    </ul>
+
+    <h3>صفحه بهینه‌سازی</h3>
+    <p>از بخش <strong>فراکارت → بهینه‌سازی</strong> می‌توانید:</p>
+    <ul>
+        <li><strong>پیشنهادهای مأموریت:</strong> آستانه بهینه هر ماموریت را ببینید و اعمال کنید</li>
+        <li><strong>پیشنهادهای خرید:</strong> عملکرد محصولات پیشنهادی و نرخ تبدیل آن‌ها را بررسی کنید</li>
+    </ul>
+
+    <div class="info-box tip">
+        <strong>💡 نکته:</strong>
+        برای فعال‌سازی پیشنهادهای هوشمند، از بخش تنظیمات → عملکرد، گزینه <em>پیشنهادهای محصول</em> را فعال کنید.
+    </div>
+</section>
+
+<!-- ==================== 8. ANALYTICS ==================== -->
+<section class="section" id="analytics">
+    <h2>۸. تحلیل‌ها و گزارش‌ها</h2>
+
+    <p>فراکارت به صورت خودکار عملکرد ماموریت‌ها و تأثیر آن‌ها بر فروش را اندازه‌گیری می‌کند.</p>
+
+    <h3>عملکرد فروش</h3>
+    <p>از بخش <strong>فراکارت → عملکرد فروش</strong> می‌توانید:</p>
+    <ul>
+        <li><strong>فروش منتسب:</strong> مبلغ فروشی که فراکارت ایجاد کرده</li>
+        <li><strong>افزایش میانگین سبد:</strong> تفاوت میانگین ارزش سفارش مشتریان در معرض ماموریت</li>
+        <li><strong>سفارش‌های خریداری‌شده:</strong> تعداد سفارش‌های واقعی مرتبط با ماموریت‌ها</li>
+        <li><strong>سود تخمینی:</strong> سود پس از کسر هزینه پاداش و ارسال (نیاز به داده قیمت تمام‌شده)</li>
+    </ul>
+
+    <h3>metrical</h3>
+    <table>
+        <tr><th>شاخص</th><th>توضیح</th></tr>
+        <tr><td>نمایش‌ها</td><td>تعداد دفعاتی که ماموریت‌ها نمایش داده شده‌اند</td></tr>
+        <tr><td>تکمیل‌ها</td><td>تعداد دفعاتی که مشتریان به هدف رسیده‌اند</td></tr>
+        <tr><td>نرخ تکمیل</td><td>درصد ماموریت‌های تکمیل‌شده از کل نمایش‌ها</td></tr>
+        <tr><td>فروش منتسب</td><td>فروشی که مستقیماً به ماموریت‌ها نسبت داده می‌شود</td></tr>
+        <tr><td>فروش کمکی</td><td>فروشی که مشتری فقط ماموریت را دیده ولی پیشرفت نکرده</td></tr>
+        <tr><td>نرخ کلیک پیشنهادات</td><td>درصد کلیک روی محصولات پیشنهادی</td></tr>
+        <tr><td>نرخ افزودن به سبد</td><td>درصد افزودن محصولات پیشنهادی به سبد</td></tr>
+    </table>
+
+    <h3>فیلترها</h3>
+    <p>می‌توانید گزارش‌ها را بر اساس فیلترهای زیر مشاهده کنید:</p>
+    <ul>
+        <li><strong>بازه تاریخ:</strong> آخرین ۷، ۳۰ یا ۹۰ روز یا بازه سفارشی</li>
+        <li><strong>کمپین:</strong> فیلتر بر اساس کمپین خاص</li>
+        <li><strong>ماموریت:</strong> فیلتر بر اساس ماموریت خاص</li>
+        <li><strong>نوع پاداش:</strong> فیلتر بر اساس نوع پاداش</li>
+        <li><strong>محصول:</strong> فیلتر بر اساس محصول خاص</li>
+    </ul>
+
+    <div class="info-box warning">
+        <strong>⚠️ نکته:</strong>
+        مقایسه میانگین ارزش سفارش، تأثیر مشاهده‌شده است و ثابت نمی‌کند که فراکارت باعث این تفاوت شده است.
+    </div>
+</section>
+
+<!-- ==================== 9. SETTINGS ==================== -->
+<section class="section" id="settings">
+    <h2>۹. تنظیمات</h2>
+
+    <p>تنظیمات فراکارت در ۵ بخش اصلی تقسیم شده است:</p>
+
+    <h3>۱. عمومی</h3>
+    <table>
+        <tr><th>تنظیم</th><th>توضیح</th><th>پیش‌فرض</th></tr>
+        <tr><td>فعال‌سازی فراکارت</td><td>روشن/خاموش کلی افزونه</td><td>غیرفعال</td></tr>
+        <tr><td>داشبورد تمام‌صفحه</td><td>پنهان کردن قاب مدیریت وردپرس</td><td>غیرفعال</td></tr>
+        <tr><td>نمایش واحد پول</td><td>نماد، کد یا نام ارز</td><td>نماد</td></tr>
+        <tr><td>رفتار پیش‌فرض ماموریت</td><td>همه، اولین یا نزدیک‌ترین</td><td>همه</td></tr>
+        <tr><td>حل تعارض</td><td>تجمعی، بهترین یا اولین</td><td>تجمعی</td></tr>
+        <tr><td>حالت محاسبه پیش‌فرض</td><td>جمع فرعی، جمع فرعی پس از تخفیف یا کل</td><td>جمع فرعی</td></tr>
+    </table>
+
+    <h3>۲. فرانت‌اند</h3>
+    <table>
+        <tr><th>تنظیم</th><th>توضیح</th><th>پیش‌فرض</th></tr>
+        <tr><td>مکان‌های نمایش</td><td>صفحاتی که نوار پیشرفت نمایش داده می‌شود</td><td>همه</td></tr>
+        <tr><td>رفتار موبایل</td><td>نمایش یا مخفی در موبایل</td><td>نمایش</td></tr>
+        <tr><td>قالب</td><td>قالب پیش‌فرض نوار پیشرفت</td><td>قالب ۱</td></tr>
+        <tr><td>انیمیشن</td><td>فعال/غیرفعال کردن انیمیشن‌ها</td><td>فعال</td></tr>
+        <tr><td>ارتفاع نوار</td><td>ارتفاع نوار پیشرفت (پیکسل)</td><td>۱۰</td></tr>
+        <tr><td>رنگ‌ها</td><td>رنگ تأکید، پس‌زمینه، حاشیه، متن</td><td>پیش‌فرض وردپرس</td></tr>
+        <tr><td>شعاع گوشه</td><td>گردی گوشه‌های کارت (پیکسل)</td><td>۱۰</td></tr>
+    </table>
+
+    <h3>۳. محاسبه ماموریت</h3>
+    <table>
+        <tr><th>تنظیم</th><th>توضیح</th><th>پیش‌فرض</th></tr>
+        <tr><td>شامل مالیات</td><td>مالیات ردیف‌ها در مبناهای پولی</td><td>غیرفعال</td></tr>
+        <tr><td>شامل تخفیف</td><td>تخفیف‌ها در مبناهای پولی</td><td>فعال</td></tr>
+        <tr><td>شامل ارسال</td><td>هزینه ارسال در مبنا کل</td><td>فعال</td></tr>
+        <tr><td>شامل اقلام حراج</td><td>اقلام حراج در محاسبات</td><td>فعال</td></tr>
+        <tr><td>شامل محصولات مجازی</td><td>اقلام مجازی در محاسبات</td><td>فعال</td></tr>
+    </table>
+
+    <h3>۴. عملکرد</h3>
+    <table>
+        <tr><th>تنظیم</th><th>توضیح</th><th>پیش‌فرض</th></tr>
+        <tr><td>ذخیره‌سازی موقت پیشرفت</td><td>کش داده‌های پیشرفت (۱۰ ثانیه)</td><td>غیرفعال</td></tr>
+        <tr><td>ردیابی تحلیل‌ها</td><td>جمع‌آوری رویدادهای تحلیلی</td><td>فعال</td></tr>
+        <tr><td>پیشنهادهای محصول</td><td>پیشنهادهای هوشمند خرید</td><td>فعال</td></tr>
+    </table>
+
+    <h3>۵. پیشرفته</h3>
+    <table>
+        <tr><th>تنظیم</th><th>توضیح</th><th>پیش‌فرض</th></tr>
+        <tr><td>حالت اشکال‌زدایی</td><td>نمایش اطلاعات اشکال‌زدایی</td><td>غیرفعال</td></tr>
+        <tr><td>ثبت گزارش</td><td>ذخیره گزارش در فایل</td><td>غیرفعال</td></tr>
+        <tr><td>قلاب‌های توسعه‌دهنده</td><td>فعال‌سازی hooks برای توسعه‌دهندگان</td><td>فعال</td></tr>
+    </table>
+</section>
+
+<!-- ==================== 10. FAQ ==================== -->
+<section class="section" id="faq">
+    <h2>۱۰. سؤالات متداول</h2>
+
+    <h3>آیا فراکارت با صفحه‌سازها سازگار است؟</h3>
+    <p>بله. فراکارت با گوتنبرگ (بلوک faracart/progress)، بلوک‌های ووکامرس (سبد، تسویه‌حساب، مینی سبد)، المنتور و بریکس از طریق شورت‌کد <code>[faracart_progress]</code> سازگار است.</p>
+
+    <h3>آیا فراکارت با حالت HPOS ووکامرس سازگار است؟</h3>
+    <p>بله. فراکارت سازگاری با جداول سفارش عملکرد بالا (HPOS) را اعلام کرده و فقط از API‌های عمومی وردپرس/ووکامرس استفاده می‌کند.</p>
+
+    <h3>آیا فراکارت روی سایت‌های چندسایته کار می‌کند؟</h3>
+    <p>بله. تمام جداول از پیشوند سایت استفاده می‌کنند و تنظیمات به صورت سایت‌محور ذخیره می‌شوند.</p>
+
+    <h3>چگونه سود تخمینی را فعال کنم؟</h3>
+    <p>باید <strong>داده قیمت تمام‌شده محصولات</strong> را وارد کنید. فراکارت از فیلدهای <code>_faracart_product_cost</code>، <code>_cost</code> یا <code>_wc_cog_cost</code> استفاده می‌کند. بدون این داده‌ها، سود تخمینی نمایش داده نمی‌شود.</p>
+
+    <h3>آیا مشتریان می‌توانند پاداش را حذف کنند؟</h3>
+    <p>هدیه‌های خودکار قابل حذف نیستند. هدیه‌های حالت انتخابی قابل حذف هستند. تخفیف‌ها با ناکامل شدن ماموریت به صورت خودکار حذف می‌شوند.</p>
+
+    <h3>آیا فراکارت روی سرعت سایت تأثیر می‌گذارد؟</h3>
+    <p>فراکارت طوری طراحی شده که حداقل تأثیر را داشته باشد: کش درخواستی، بارگذاری دسته‌ای دسته‌بندی‌ها، و به‌روزرسانی فقط تغییرات. می‌توانید کش پیشرفت را از بخش تنظیمات فعال کنید.</p>
+
+    <h3>آیا می‌توانم ظاهر نوار پیشرفت را شخصی‌سازی کنم؟</h3>
+    <p>بله. ۶ قالب مختلف، رنگ‌ها، ارتفاع نوار، شعاع گوشه، انیمیشن و CSS سفارشی در دسترس هستند. هر ماموریت هم می‌تواند قالب مخصوص خود را داشته باشد.</p>
+
+    <h3>چگونه از مشکلات رایج عیب‌یابی کنم؟</h3>
+    <p>از بخش تنظیمات → پیشرفته، <strong>حالت اشکال‌زدایی</strong> و <strong>ثبت گزارش</strong> را فعال کنید. فایل گزارش در <code>wp-content/faracart-debug.log</code> ذخیره می‌شود.</p>
+
+    <h3>آیا فراکارت با RTL سازگار است؟</h3>
+    <p>بله. فراکارت کاملاً با زبان فارسی و راست‌چین سازگار است. اعداد فارسی، تاریخ شمسی و قالب‌بندی پول محلی پشتیبانی می‌شوند.</p>
+
+    <h3>آیا می‌توانم ماموریت‌ها را در زمان خاصی فعال/غیرفعال کنم؟</h3>
+    <p>بله. هر ماموریت دارای فیلدهای <strong>تاریخ شروع</strong> و <strong>تاریخ پایان</strong> است. همچنین می‌توانید زمان‌بندی تکراری (روزها و ساعات) تنظیم کنید.</p>
+</section>
+
+</div>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="footer">
+    <p>راهنمای کاربری فراکارت — نسخه ۰٫۶</p>
+    <p>تاریخ آخرین به‌روزرسانی: مرداد ۱۴۰۵</p>
+    <p>برای اطلاعات بیشتر به <a href="https://faracart.com" style="color:var(--primary);">faracart.com</a> مراجعه کنید.</p>
+</footer>
+
+</body>
+</html>
