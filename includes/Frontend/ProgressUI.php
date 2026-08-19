@@ -164,7 +164,17 @@ final class ProgressUI {
 		// public WordPress API: append the full widget after the Cart and
 		// Checkout blocks. The duplicate-render registry already guarantees
 		// at most one widget per location, so a page can never show it twice.
-		$hooks->add_filter( 'render_block', array( $this, 'render_block_widget' ), 10, 2 );
+		//
+		// Priority 20 (not the default 10): WooCommerce's own render_block
+		// filter (BlockTypesController::add_data_attributes, priority 10)
+		// stamps `data-block-name` onto the FIRST HTML tag of the block
+		// content. With the widget prepended at priority 10 (top position),
+		// that attribute lands on our widget container instead of the Cart
+		// / Checkout block, so the block's client-side app hydrates the
+		// widget as if it were the checkout and the page never finishes
+		// loading. Running after WooCommerce lets it tag the real block
+		// first, then the widget is inserted as a clean sibling.
+		$hooks->add_filter( 'render_block', array( $this, 'render_block_widget' ), 20, 2 );
 
 		// Floating missions/campaigns button + drawer (on widget pages).
 		$hooks->add_action( 'wp_footer', array( $this, 'render_floating_button' ), 20 );
