@@ -557,7 +557,7 @@ final class Plugin {
 		// Public track endpoint: nonce-guarded, per-IP rate
 		// limited — the storefront JS reports events through it.
 		$this->container->singleton( TrackController::class, function ( Container $container ) {
-			return new TrackController( $container->get( Tracker::class ) );
+			return new TrackController( $container->get( Tracker::class ), $container->get( RevenueTracker::class ) );
 		} );
 
 		// Public gift-selection endpoint: nonce-guarded, per-IP

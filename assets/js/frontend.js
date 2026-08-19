@@ -1172,10 +1172,11 @@
 		request.onload = () => {
 			var ok = request.status >= 200 && request.status < 300;
 			var errored = false;
+			var parsed = null;
 
 			if ( ok ) {
 				safe( () => {
-					var parsed = JSON.parse( request.responseText );
+					parsed = JSON.parse( request.responseText );
 
 					if ( parsed && ( parsed.error || parsed.result === 'error' ) ) {
 						errored = true;
@@ -1184,6 +1185,21 @@
 			}
 
 			if ( ok && ! errored ) {
+				// Notify WooCommerce so its cart fragments (mini-cart,
+				// cart count badge, cart widget) update immediately.
+				// When the response carries fragments we fire the standard
+				// added_to_cart jQuery event with them; otherwise (and as
+				// a catch-all) we request a full fragment refresh so
+				// WooCommerce re-fetches the cart HTML from the server.
+				if ( window.jQuery ) {
+					safe( () => {
+						if ( parsed && parsed.fragments ) {
+							window.jQuery( document.body ).trigger( 'added_to_cart', [ parsed.fragments, parsed.cart_hash || '', parsed ] );
+						} else {
+							window.jQuery( document.body ).trigger( 'wc_fragment_refresh' );
+						}
+					} );
+				}
 				success();
 			} else {
 				// The item needs a choice (variation) or is not purchasable
@@ -1303,6 +1319,11 @@
 
 		request.onload = () => {
 			if ( request.status >= 200 && request.status < 300 ) {
+				// Trigger WooCommerce fragment refresh so the mini-cart
+				// and cart widget update with the added gift item.
+				if ( window.jQuery ) {
+					safe( () => { window.jQuery( document.body ).trigger( 'wc_fragment_refresh' ); } );
+				}
 				emitCartChanged();
 				return;
 			}

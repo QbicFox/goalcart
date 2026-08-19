@@ -7,6 +7,7 @@
 
 namespace FaraCart\REST;
 
+use FaraCart\Analytics\RevenueTracker;
 use FaraCart\Analytics\Session;
 use FaraCart\Analytics\Tracker;
 use FaraCart\Hooks\HookManager;
@@ -58,19 +59,44 @@ class TrackController extends BaseController {
 	const TRACK_RATE_LIMIT_COUNT = 300;
 
 	/**
-	 * Tracker instance.
+	 * Tracker instance (analytics_events).
 	 *
 	 * @var Tracker
 	 */
 	protected $tracker;
 
 	/**
+	 * RevenueTracker instance (revenue_events).
+	 *
+	 * @var RevenueTracker
+	 */
+	protected $revenue_tracker;
+
+	/**
+	 * Mapping from frontend analytics event types to revenue event types.
+	 *
+	 * When the frontend reports an impression/progress/completion, we also
+	 * record the corresponding revenue event so the mission funnel stats
+	 * (views, completed, ordered) have data.
+	 *
+	 * @var array<string, string>
+	 */
+	const ANALYTICS_TO_REVENUE_MAP = array(
+		'mission_impression' => RevenueTracker::EVENT_MISSION_VIEW,
+		'mission_progress'   => RevenueTracker::EVENT_MISSION_PROGRESS,
+		'mission_completed'  => RevenueTracker::EVENT_MISSION_COMPLETED,
+		'reward_activated'   => RevenueTracker::EVENT_MISSION_COMPLETED,
+	);
+
+	/**
 	 * Constructor.
 	 *
-	 * @param Tracker $tracker Tracker instance.
+	 * @param Tracker          $tracker          Tracker instance.
+	 * @param RevenueTracker   $revenue_tracker  RevenueTracker instance.
 	 */
-	public function __construct( Tracker $tracker ) {
-		$this->tracker = $tracker;
+	public function __construct( Tracker $tracker, RevenueTracker $revenue_tracker ) {
+		$this->tracker          = $tracker;
+		$this->revenue_tracker  = $revenue_tracker;
 	}
 
 	/**
@@ -254,6 +280,22 @@ class TrackController extends BaseController {
 				'faracart_track_failed',
 				__( 'Could not record the event.', 'faracart' ),
 				500
+			);
+		}
+
+		// Bridge frontend analytics events into the revenue event pipeline
+		// so the mission funnel stats (views, completed, ordered) read
+		// real data. Without this, frontend impressions/completions only
+		// land in analytics_events and the revenue funnel stays empty.
+		if ( isset( self::ANALYTICS_TO_REVENUE_MAP[ $event_type ] ) ) {
+			$this->revenue_tracker->record(
+				self::ANALYTICS_TO_REVENUE_MAP[ $event_type ],
+				array(
+					'mission_id'     => $mission_id,
+					'campaign_id' => (int) $request->get_param( 'campaign_id' ),
+					'cart_value'  => max( 0.0, (float) $request->get_param( 'cart_value' ) ),
+					'session_id'  => $session_id,
+				)
 			);
 		}
 
