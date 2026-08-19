@@ -59,38 +59,7 @@ if ( ! defined( 'FARACART_BASENAME' ) ) {
 if ( ! defined( 'FARACART_DB_VERSION' ) ) {
 	/**
 	 * Database schema version. Bump this to trigger Installer migrations.
-	 * 0.2.0 = Phase 3: missions, campaigns and analytics_events tables.
-	 * 0.2.1 = Phase 22: composite analytics indexes (mission_event,
-	 *         campaign_event) — dbDelta cannot add indexes to existing
-	 *         tables, so Installer::maybe_add_indexes() applies them.
-	 * 0.3.0 = Phase 26: missions.exclusive (mutually exclusive missions) —
-	 *         dbDelta adds the missing column on upgrade.
-	 * 0.4.0 = Pluggable template engine (display_settings.template_id +
-	 *         template_settings storage shape).
-	 * 0.5.0 = Phase 33 (Revenue Optimization): revenue_events,
-	 *         revenue_daily, mission_attribution, upsell_events and
-	 *         upsell_stats tables plus the daily aggregation cron. * 0.6.0 = Phase 36 (Per-User Mission Completion Limit):
- *         missions.max_completions_per_user (NULL = unlimited) plus the
- *         mission_completions history table — dbDelta adds the column
- *         and table on upgrade.
- * 0.7.0 = Goal → Mission terminology migration: renames the goals /
- *         goal_attribution / goal_completions tables to missions /
- *         mission_attribution / mission_completions, every goal_id /
- *         goal_target / goal_completed column to mission_id /
- *         mission_target / mission_completed, and the matching indexes
- *         and foreign keys. Data is preserved in place.
- * 0.7.1 = One-time repair of the stored settings option: values older
- *         versions could persist that the current REST schema rejects
- *         (retired template ids in frontend_template, the retired 'sticky'
- *         location, pre-preset floating axes, and the pre-rename 'goal'
- *         scope keys) are sanitized during the upgrade — the read-time
- *         self-healing in Settings::all() was removed in favor of this
- *         migration.
- * 0.7.2 = Rewrite the stored Goal analytics event names (goal_view /
- *         goal_impression / goal_progress / goal_completed) to their
- *         Mission equivalents in the analytics_events and revenue_events
- *         event_type values. Data is preserved in place.
- */
+	 */
 	define( 'FARACART_DB_VERSION', '0.7.2' );
 }
 

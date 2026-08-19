@@ -42,8 +42,7 @@ class Settings
 	 * accepts. Single source of truth shared by the REST schema
 	 * (SettingsController::save_args) and the save sanitizer. Only the six
 	 * current design templates are valid; retired pre-design ids (basic /
-	 * percentage / milestone / card / ring) are never mapped — the
-	 * Installer 0.7.1 migration repairs stored values, and consumers
+	 * percentage / milestone / card / ring) are never mapped and consumers
 	 * (TemplateEngine, ProgressUI) fall back to template-1 for anything
 	 * unregistered.
 	 *
@@ -355,8 +354,8 @@ class Settings
 	 * visual result — the preset is the authoritative position control.
 	 *
 	 * Shared by the REST save sanitizer (SettingsController::
-	 * sanitize_floating_position) and the Installer 0.7.1 settings-option
-	 * migration, so the normalization logic lives in exactly one place.
+	 * sanitize_floating_position) so the normalization logic lives in
+	 * exactly one place.
 	 *
 	 * @param mixed $value   Raw position value.
 	 * @param mixed $default The setting's default position array.

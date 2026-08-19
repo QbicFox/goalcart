@@ -574,8 +574,7 @@ final class ProgressUI {
 	 *
 	 * The preset is the only position control; unknown presets fall back to
 	 * the default and offsets are clamped so a malformed stored value can
-	 * never reach the JS. (Pre-preset horizontal/vertical values were
-	 * migrated once by the Installer 0.7.1 settings-option repair.)
+	 * never reach the JS.
 	 *
 	 * @param string $scope 'desktop' | 'mobile'.
 	 * @return array<string, string|int>
