@@ -4,7 +4,7 @@ import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 import { Fragment } from 'react';
 
-import { formatNumber } from '../../lib/format';
+import { formatNumber, formatPercentValue } from '../../lib/format';
 import type { RevenueFunnel } from '../../types';
 
 interface FunnelStage {
@@ -28,7 +28,7 @@ const STAGES: FunnelStage[] = [
 
 /** Format a 0–1 rate as a percentage ('' when no data). */
 function formatRate(rate: number | null): string {
-  return rate === null ? '—' : `${(rate * 100).toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
+  return rate === null ? '—' : formatPercentValue(rate * 100);
 }
 
 /** Percentage from the previous stage to this one (null when no previous). */
@@ -77,7 +77,7 @@ export default function FunnelVisual({ funnel, compact = false, showTransitions 
                     /* translators: 1: stage label, 2: percentage. */
                     __('%1$s carries %2$s of the previous stage', 'faracart'),
                     stage.label,
-                    pct === null ? '—' : `${pct.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`
+                    pct === null ? '—' : formatPercentValue(pct)
                   )}
                   sx={{
                     display: 'flex',
@@ -90,7 +90,7 @@ export default function FunnelVisual({ funnel, compact = false, showTransitions 
                 >
                   <ArrowDownwardIcon sx={{ fontSize: 14 }} />
                   <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                    {pct === null ? '—' : `${pct.toLocaleString(undefined, { maximumFractionDigits: 1 })}%`}
+                    {pct === null ? '—' : formatPercentValue(pct)}
                   </Typography>
                 </Box>
               )}

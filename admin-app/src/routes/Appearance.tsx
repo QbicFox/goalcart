@@ -33,6 +33,7 @@ import {
 } from "../components/preview/types";
 import { useStickyBarActions } from "../providers/ActionBarProvider";
 import { useFullscreen } from "../providers/FullscreenProvider";
+import { formatInline } from "../lib/format";
 import SchemaForm from "../templates/SchemaForm";
 import { templateById, useTemplates } from "../templates/useTemplates";
 import { bool } from "../templates/utils";
@@ -86,7 +87,7 @@ function sampleMissionAt(
 			? __("You reached your mission!", "faracart")
 			: __("Only %s left to reach your mission", "faracart").replace(
 					"%s",
-					remaining.toLocaleString(),
+					formatInline(remaining),
 				),
 		reward: { type: "free_shipping", value: null, max_value: null, meta: {} },
 		suggestions: [
