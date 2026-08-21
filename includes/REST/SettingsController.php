@@ -143,9 +143,9 @@ class SettingsController extends BaseController
 			'roles' => $this->role_options(),
 		);
 
-		if ($this->settings->get('logging_enabled', false)) {
-			$meta['log_path'] = Logger::path();
-		}
+		// Debug logging is a developer feature (FARACART_LOGGING constant or
+		// faracart_logging_enabled filter) — no admin log-path meta is
+		// exposed; developers read Logger::path().
 
 		return $this->success($this->settings->all(), $meta);
 	}
@@ -217,9 +217,11 @@ class SettingsController extends BaseController
 			);
 		}
 
-		// Advanced → logging: record the save when logging is
-		// enabled, and fire the developer-hooks action (API) so
-		// integrations can react to configuration changes.
+		// Record the save when developer logging is enabled (the Logger's
+		// master/debug switches come from the FARACART_LOGGING /
+		// FARACART_DEBUG constants or faracart_* filters, not settings), and
+		// fire the developer-hooks action (API) so integrations can react to
+		// configuration changes.
 		Logger::write('Settings saved: ' . wp_json_encode($clean), 'debug');
 
 		/**
@@ -317,9 +319,10 @@ class SettingsController extends BaseController
 				'enum' => array('balanced', 'price', 'popularity'),
 			),
 
-			// Advanced (P18-T05).
-			'debug_mode'      => $bool,
-			'logging_enabled' => $bool,
+			// Advanced (P18-T05). Debug mode / logging have no settings keys
+			// anymore — they are developer-controlled via the FARACART_DEBUG /
+			// FARACART_LOGGING constants or the faracart_debug_mode /
+			// faracart_logging_enabled filters (Utils\Logger).
 			'developer_hooks' => $bool,
 
 			// Template engine (pluggable progress templates).
@@ -529,8 +532,6 @@ class SettingsController extends BaseController
 			case 'performance_caching':
 			case 'analytics_enabled':
 			case 'performance_suggestions':
-			case 'debug_mode':
-			case 'logging_enabled':
 			case 'developer_hooks':
 				return (bool) $value;
 

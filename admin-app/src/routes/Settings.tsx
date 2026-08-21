@@ -459,11 +459,8 @@ export default function Settings() {
 	const saveMutation = useMutation({
 		mutationFn: (values: FaraCartSettings) => saveSettings(values),
 		onSuccess: (saved) => {
-			notify(__("Settings saved.", "faracart"));
-
-			// Re-sync the form and refresh the meta (the debug log path appears
-			// once logging is enabled).
-			void queryClient.setQueryData(["settings"], { data: saved, meta });
+			notify(__("Settings saved.", "faracart"));				// Re-sync the form and refresh the meta (developer hooks reference).
+				void queryClient.setQueryData(["settings"], { data: saved, meta });
 			void settingsQuery.refetch();
 
 			// Apply the full-screen toggle live (no page reload): the provider
@@ -1132,43 +1129,15 @@ export default function Settings() {
 							<SectionCard
 								title={__("Advanced", "faracart")}
 								description={__(
-									"Debugging, logging and the developer surface.",
+									"Storefront customization and the developer surface.",
 									"faracart",
 								)}
 							>
 								<Stack spacing={2}>
-									<BooleanField
-										control={control}
-										name="debug_mode"
-										label={__("Debug mode", "faracart")}
-										description={__(
-											"Write detailed (debug-level) entries to the plugin log when logging is enabled.",
-											"faracart",
-										)}
-									/>
-									<BooleanField
-										control={control}
-										name="logging_enabled"
-										label={__("Logging", "faracart")}
-										description={__(
-											"Write errors (and debug entries when debug mode is on) to a log file.",
-											"faracart",
-										)}
-									/>
-									{meta.log_path && (
-										<Box>
-											<Typography variant="body2" sx={{ fontWeight: 600 }}>
-												{__("Log file", "faracart")}
-											</Typography>
-											<Typography
-												variant="caption"
-												color="text.secondary"
-												sx={{ fontFamily: "monospace", wordBreak: "break-all" }}
-											>
-												{meta.log_path}
-											</Typography>
-										</Box>
-									)}
+									{/* Debug logging is a developer feature, not a settings toggle —
+                    enable it with the FARACART_DEBUG / FARACART_LOGGING
+                    constants or the faracart_debug_mode /
+                    faracart_logging_enabled filters (Utils\Logger). */}
 									<Controller
 										control={control}
 										name="frontend_custom_css"

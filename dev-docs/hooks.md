@@ -64,6 +64,16 @@ FaraCart exposes a comprehensive set of WordPress hooks (actions and filters) fo
 | `faracart_upsells` | `$payload`, `$args`, `$ranker` | Modify upsell ranking payload |
 | `faracart_upsell_weights` | `$weights` | Override upsell scoring weights |
 
+### Logging & Debugging
+
+Debug logging is a developer feature (no admin toggle). Enable it with the
+`FARACART_LOGGING` / `FARACART_DEBUG` constants, or these filters:
+
+| Filter | Args | Description |
+|---|---|---|
+| `faracart_logging_enabled` | `$enabled` | Master switch for the debug log file (default: off) |
+| `faracart_debug_mode` | `$enabled` | Write debug-level entries too (default: off; errors always log when logging is on) |
+
 ### Analytics & Attribution
 
 | Filter | Args | Description |

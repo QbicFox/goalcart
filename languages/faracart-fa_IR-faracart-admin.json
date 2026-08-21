@@ -892,12 +892,6 @@
             "Day window starts": [
                 "شروع بازهٔ روزانه"
             ],
-            "Debug mode": [
-                "حالت اشکال‌زدایی"
-            ],
-            "Debugging, logging and the developer surface.": [
-                "اشکال‌زدایی، ثبت گزارش و سطح توسعه‌دهنده."
-            ],
             "Default (mission templates)": [
                 "پیش‌فرض (قالب‌های ماموریت)"
             ],
@@ -1516,17 +1510,11 @@
             "Locations not covered by your other zones": [
                 "مکان‌هایی که مناطق دیگر شما پوشش نمی‌دهند"
             ],
-            "Log file": [
-                "فایل گزارش"
-            ],
             "Logged-in customers": [
                 "مشتریان واردشده"
             ],
             "Logged-in customers whose lifetime spend and order count meet the thresholds below.": [
                 "مشتریان واردشده که مجموع خرید و تعداد سفارش آن‌ها آستانه‌های زیر را برآورده می‌کنند."
-            ],
-            "Logging": [
-                "ثبت گزارش"
             ],
             "Low": [
                 "پایین"
@@ -2572,6 +2560,9 @@
             "Store-wide progress widget variant.": [
                 "نسخهٔ ویجت پیشرفت در کل فروشگاه."
             ],
+            "Storefront customization and the developer surface.": [
+                "شخصی‌سازی فروشگاه و سطح توسعه‌دهنده."
+            ],
             "Subtotal (before discounts)": [
                 "جمع فرعی (پیش از تخفیف‌ها)"
             ],
@@ -3115,12 +3106,6 @@
             "WordPress %1$s or newer is required (current: %2$s).": [
                 "نسخهٔ وردپرس %1$s یا جدیدتر لازم است (فعلی: %2$s)."
             ],
-            "Write detailed (debug-level) entries to the plugin log when logging is enabled.": [
-                "وقتی ثبت گزارش فعال است، ورودی‌های دقیق (سطح اشکال‌زدایی) را در گزارش افزونه بنویسید."
-            ],
-            "Write errors (and debug entries when debug mode is on) to a log file.": [
-                "خطاها (و ورودی‌های اشکال‌زدایی وقتی حالت اشکال‌زدایی روشن است) را در یک فایل گزارش بنویسید."
-            ],
             "Year": [
                 "سال"
             ],
@@ -3216,6 +3201,138 @@
             ],
             "→ %1$s": [
                 "→ %1$s"
+            ],
+            "Fires after the plugin has fully bootstrapped.": [
+                "پس از راه‌اندازی کامل افزونه اجرا می‌شود."
+            ],
+            "Fires after settings are persisted through the REST API.": [
+                "پس از ذخیره‌شدن تنظیمات از طریق REST API اجرا می‌شود."
+            ],
+            "Capability required for the admin REST endpoints.": [
+                "سطح دسترسی لازم برای نقاط پایانی REST مدیریت."
+            ],
+            "Capability required for the admin menu page.": [
+                "سطح دسترسی لازم برای صفحهٔ منوی مدیریت."
+            ],
+            "Master storefront widget toggle.": [
+                "کلید اصلی روشن\/خاموش ویجت فروشگاه."
+            ],
+            "Enabled widget display locations.": [
+                "موقعیت‌های نمایش فعال ویجت."
+            ],
+            "Page widget position (top|bottom).": [
+                "موقعیت ویجت در صفحه (بالا|پایین)."
+            ],
+            "Store-wide widget template variant.": [
+                "گونهٔ قالب ویجت در کل فروشگاه."
+            ],
+            "Storefront progress-bar animation flag.": [
+                "پرچم انیمیشن نوار پیشرفت فروشگاه."
+            ],
+            "Storefront mobile behavior (show|hide).": [
+                "رفتار ویجت در موبایل (نمایش|پنهان)."
+            ],
+            "Resolved display currency unit (uppercase ISO-4217 code) — the currency every FaraCart amount is labelled with.": [
+                "واحد ارز نمایشی حل‌شده (کد ISO-4217 با حروف بزرگ) — ارزی که همهٔ مبالغ FaraCart با آن برچسب می‌خورند."
+            ],
+            "Storefront currency display style (symbol|code|name).": [
+                "سبک نمایش ارز فروشگاه (نماد|کد|نام)."
+            ],
+            "Widget poll interval in seconds.": [
+                "بازهٔ بررسی خودکار ویجت بر حسب ثانیه."
+            ],
+            "Analytics tracking consent for the current request.": [
+                "رضایت ردیابی تحلیلی برای درخواست جاری."
+            ],
+            "Whether product suggestions render on the storefront.": [
+                "آیا پیشنهادهای محصول در فروشگاه نمایش داده می‌شوند."
+            ],
+            "Store-wide default money calculation basis.": [
+                "مبنای پیش‌فرض محاسبهٔ مبالغ در کل فروشگاه."
+            ],
+            "The shaped suggestion items for a mission.": [
+                "اقلام پیشنهادی شکل‌گرفته برای یک ماموریت."
+            ],
+            "The progress template class map (id => Template class). Register a new Mission or Campaign template here.": [
+                "نقشهٔ کلاس‌های قالب پیشرفت (id => کلاس قالب). قالب ماموریت یا کمپین جدید را اینجا ثبت کنید."
+            ],
+            "Whether the Phase 33 revenue event pipeline records events.": [
+                "آیا خط لولهٔ رویدادهای درآمدی فاز ۳۳ رویدادها را ثبت می‌کند."
+            ],
+            "Retention window (days) for the revenue\/upsell event logs before the weekly cleanup purges them.": [
+                "بازهٔ نگهداری (روز) برای گزارش‌های رویداد درآمد\/پیشنهاد پیش از پاک‌سازی هفتگی."
+            ],
+            "Whether Phase 33.2 revenue attribution (order association) is on.": [
+                "آیا انتساب درآمد فاز ۳۳٫۲ (ارتباط سفارش) فعال است."
+            ],
+            "Product cost used by the Phase 33.2 reward-cost \/ profit estimation (null = no cost data).": [
+                "هزینهٔ محصول مورد استفاده در تخمین هزینهٔ پاداش\/سود فاز ۳۳٫۲ (null = بدون دادهٔ هزینه)."
+            ],
+            "The order-item unit-cost snapshot written at checkout (UPSELL_REFACTOR §21) — return a float to stamp it, null to leave the line without a snapshot.": [
+                "عکس لحظه‌ای هزینهٔ واحد اقلام سفارش که هنگام تسویه ثبت می‌شود (UPSELL_REFACTOR §21) — برای ثبت آن یک عدد اعشاری برگردانید؛ null یعنی خط بدون عکس لحظه‌ای بماند."
+            ],
+            "Row cap for the bounded Phase 33.2 metric reads.": [
+                "سقف سطرها برای خوانش‌های محدود متریک فاز ۳۳٫۲."
+            ],
+            "Page cap for the Phase 33.2 store-wide order scans (AOV, shipping).": [
+                "سقف صفحات برای پویش سفارش کل فروشگاه فاز ۳۳٫۲ (میانگین ارزش سفارش، حمل‌ونقل)."
+            ],
+            "Master switch for the debug log file (default off; FARACART_LOGGING constant wins).": [
+                "کلید اصلی فایل گزارش اشکال‌زدایی (پیش‌فرض خاموش؛ ثابت FARACART_LOGGING اولویت دارد)."
+            ],
+            "Whether debug-level entries are written to the debug log (default off; FARACART_DEBUG constant wins).": [
+                "آیا ورودی‌های سطح اشکال‌زدایی در گزارش نوشته می‌شوند (پیش‌فرض خاموش؛ ثابت FARACART_DEBUG اولویت دارد)."
+            ],
+            "Fires after a mission is created, updated or deleted (cache invalidation).": [
+                "پس از ایجاد، ویرایش یا حذف ماموریت اجرا می‌شود (باطل‌سازی حافظهٔ کش)."
+            ],
+            "Fires after the Phase 33.3 daily aggregation run completes.": [
+                "پس از تکمیل اجرای تجمیع روزانهٔ فاز ۳۳٫۳ اجرا می‌شود."
+            ],
+            "Max days the Phase 33.3 aggregation job processes per run.": [
+                "حداکثر روزهایی که کار تجمیع فاز ۳۳٫۳ در هر اجرا پردازش می‌کند."
+            ],
+            "Lookback floor for the Phase 33.3 aggregation catch-up window.": [
+                "حداقل بازهٔ نگاه‌به‌عقب برای پنجرهٔ جبران تجمیع فاز ۳۳٫۳."
+            ],
+            "Whether the Phase 33.3 revenue summary cache is on.": [
+                "آیا حافظهٔ کش خلاصهٔ درآمد فاز ۳۳٫۳ فعال است."
+            ],
+            "TTL (seconds) for the Phase 33.3 revenue summary transients.": [
+                "TTL (ثانیه) برای ترنزینت‌های خلاصهٔ درآمد فاز ۳۳٫۳."
+            ],
+            "Whether Phase 33.4 smart mission recommendations are on.": [
+                "آیا پیشنهادهای هوشمند ماموریت فاز ۳۳٫۴ فعال هستند."
+            ],
+            "Minimum order count before Phase 33.4 recommendations are generated.": [
+                "حداقل تعداد سفارش پیش از تولید پیشنهادهای فاز ۳۳٫۴."
+            ],
+            "The candidate thresholds generated for Phase 33.4 scoring.": [
+                "آستانه‌های نامزد تولیدشده برای امتیازدهی فاز ۳۳٫۴."
+            ],
+            "The Phase 33.4 composite scoring weights (reachability\/distance\/economics\/history).": [
+                "وزن‌های امتیازدهی ترکیبی فاز ۳۳٫۴ (دسترس‌پذیری\/فاصله\/اقتصاد\/تاریخچه)."
+            ],
+            "Product sample size for the Phase 33.4 margin analyzer.": [
+                "حجم نمونهٔ محصول برای تحلیلگر حاشیهٔ فاز ۳۳٫۴."
+            ],
+            "The full Phase 33.4 recommendation payload before it is served.": [
+                "محتوای کامل پیشنهاد فاز ۳۳٫۴ پیش از ارائه."
+            ],
+            "TTL (seconds) for the Phase 33.4 recommendation cache.": [
+                "TTL (ثانیه) برای حافظهٔ کش پیشنهاد فاز ۳۳٫۴."
+            ],
+            "Whether Phase 33.5 smart upsell ranking is on.": [
+                "آیا رتبه‌بندی هوشمند پیشنهاد خرید فاز ۳۳٫۵ فعال است."
+            ],
+            "The candidate product ids collected for Phase 33.5 upsell scoring.": [
+                "شناسه‌های محصول نامزد جمع‌آوری‌شده برای امتیازدهی پیشنهاد فاز ۳۳٫۵."
+            ],
+            "The Phase 33.5 composite scoring weights (price_gap\/relevance\/popularity\/inventory\/margin\/conversion).": [
+                "وزن‌های امتیازدهی ترکیبی فاز ۳۳٫۵ (شکاف قیمت\/ارتباط\/محبوبیت\/موجودی\/حاشیه\/تبدیل)."
+            ],
+            "The full Phase 33.5 upsell ranking payload before it is served.": [
+                "محتوای کامل رتبه‌بندی پیشنهاد فاز ۳۳٫۵ پیش از ارائه."
             ]
         }
     }

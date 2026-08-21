@@ -7,30 +7,45 @@
 
 namespace FaraCart\Utils;
 
-use FaraCart\Settings\Settings;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Class Logger
  *
- * (Settings → Advanced → logging / debug mode) — a small file
- * logger for the plugin's operational messages.
+ * A small file logger for the plugin's operational messages. There is no
+ * admin UI for it — logging is a developer feature, controlled by code:
  *
- * Gating (both read straight from the settings option so any service can
- * log without holding the Settings instance):
+ *  - Master switch (off means no file is ever touched): the
+ *    `FARACART_LOGGING` constant or the `faracart_logging_enabled` filter.
+ *  - Debug level (only `error`-level entries are written when off): the
+ *    `FARACART_DEBUG` constant or the `faracart_debug_mode` filter.
  *
- *  - `logging_enabled` — master switch; off means no file is ever touched.
- *  - `debug_mode`      — when off, only `error`-level entries are written;
- *                        when on, `debug`-level entries are written too.
+ * A defined constant always wins over the filter, and both default to off.
+ * Example:
+ *
+ *     define( 'FARACART_LOGGING', true );  // errors land in the log.
+ *     define( 'FARACART_DEBUG', true );    // debug entries too.
  *
  * Entries are appended to a single `faracart-debug.log` file in
- * WP_CONTENT_DIR, one line per entry, UTC-timestamped. The path is
- * surfaced in the admin Settings page when logging is enabled.
+ * WP_CONTENT_DIR, one line per entry, UTC-timestamped. See Logger::path().
  *
  * Mirrors the reference plugin's includes/Utils helper-folder convention.
  */
 class Logger {
+
+	/**
+	 * Filter that gates the master logging switch (default off).
+	 *
+	 * @var string
+	 */
+	const LOGGING_ENABLED_FILTER = 'faracart_logging_enabled';
+
+	/**
+	 * Filter that gates debug-level entries (default off).
+	 *
+	 * @var string
+	 */
+	const DEBUG_MODE_FILTER = 'faracart_debug_mode';
 
 	/**
 	 * Debug log file name (inside WP_CONTENT_DIR).
@@ -55,19 +70,48 @@ class Logger {
 	 * @return bool
 	 */
 	public static function enabled( $level ) {
-		$settings = get_option( Settings::OPTION_NAME, array() );
-		$settings = is_array( $settings ) ? $settings : array();
-
-		if ( empty( $settings['logging_enabled'] ) ) {
+		if ( ! self::logging_enabled() ) {
 			return false;
 		}
 
-		// Errors always land in the log; debug lines need debug_mode on.
-		if ( 'error' !== $level && empty( $settings['debug_mode'] ) ) {
+		// Errors always land in the log; debug lines need debug mode on.
+		if ( 'error' !== $level && ! self::debug_mode() ) {
 			return false;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Master logging switch (developer-controlled).
+	 *
+	 * The `FARACART_LOGGING` constant wins when defined; otherwise the
+	 * `faracart_logging_enabled` filter decides. Both default to off.
+	 *
+	 * @return bool
+	 */
+	public static function logging_enabled() {
+		if ( defined( 'FARACART_LOGGING' ) ) {
+			return (bool) FARACART_LOGGING;
+		}
+
+		return (bool) apply_filters( self::LOGGING_ENABLED_FILTER, false );
+	}
+
+	/**
+	 * Debug-mode switch (developer-controlled): writes debug-level entries.
+	 *
+	 * The `FARACART_DEBUG` constant wins when defined; otherwise the
+	 * `faracart_debug_mode` filter decides. Both default to off.
+	 *
+	 * @return bool
+	 */
+	public static function debug_mode() {
+		if ( defined( 'FARACART_DEBUG' ) ) {
+			return (bool) FARACART_DEBUG;
+		}
+
+		return (bool) apply_filters( self::DEBUG_MODE_FILTER, false );
 	}
 
 	/**

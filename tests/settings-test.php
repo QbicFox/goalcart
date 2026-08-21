@@ -23,7 +23,9 @@
  *  - performance (P18-T04): the analytics toggle gates the tracker and
  *    the suggestions toggle empties the storefront suggestion list
  *  - advanced (P18-T05): the GET settings meta carries the developer-hooks
- *    reference, and the Logger respects logging_enabled + debug_mode
+ *    reference (including the two logging filters), the settings no longer
+ *    expose debug/logging keys, and the Logger respects the developer
+ *    switches (faracart_logging_enabled / faracart_debug_mode filters)
  *
  * Settings flips are in-memory and restored; the only real writes
  * (missions, the settings option, the progress-cache transient, the debug
@@ -174,8 +176,10 @@ check( 'include_virtual defaults true', true === $d['calculation_include_virtual
 check( 'performance_caching defaults false', false === $d['performance_caching'] );
 check( 'analytics_enabled defaults true', true === $d['analytics_enabled'] );
 check( 'performance_suggestions defaults true', true === $d['performance_suggestions'] );
-check( 'debug_mode defaults false', false === $d['debug_mode'] );
-check( 'logging_enabled defaults false', false === $d['logging_enabled'] );
+// Debug mode / logging are developer features now (constants or filters),
+// so the settings surface carries no debug/logging keys.
+check( 'no debug_mode settings key', ! array_key_exists( 'debug_mode', $d ) );
+check( 'no logging_enabled settings key', ! array_key_exists( 'logging_enabled', $d ) );
 check( 'developer_hooks defaults true', true === $d['developer_hooks'] );
 
 // Store-wide calculation mode: amount missions follow it, quantity-style
@@ -228,8 +232,9 @@ check( 'calculation_include_tax boolean schema', 'boolean' === $save['calculatio
 check( 'performance_caching boolean schema', 'boolean' === $save['performance_caching']['type'] );
 check( 'analytics_enabled boolean schema', 'boolean' === $save['analytics_enabled']['type'] );
 check( 'performance_suggestions boolean schema', 'boolean' === $save['performance_suggestions']['type'] );
-check( 'debug_mode boolean schema', 'boolean' === $save['debug_mode']['type'] );
-check( 'logging_enabled boolean schema', 'boolean' === $save['logging_enabled']['type'] );
+// No debug/logging keys in the save schema either.
+check( 'no debug_mode schema key', ! isset( $save['debug_mode'] ) );
+check( 'no logging_enabled schema key', ! isset( $save['logging_enabled'] ) );
 check( 'developer_hooks boolean schema', 'boolean' === $save['developer_hooks']['type'] );
 
 // Sanitizer normalization through direct handler calls (no schema pass).
@@ -255,8 +260,6 @@ try {
 	$req->set_param( 'performance_caching', true );
 	$req->set_param( 'analytics_enabled', false );
 	$req->set_param( 'performance_suggestions', false );
-	$req->set_param( 'debug_mode', true );
-	$req->set_param( 'logging_enabled', false );
 	$req->set_param( 'developer_hooks', false );
 
 	$resp = $settings_ctrl->handle_save( $req );
@@ -285,8 +288,7 @@ try {
 	check( 'caching persisted true', true === $data['performance_caching'] );
 	check( 'analytics persisted false', false === $data['analytics_enabled'] );
 	check( 'suggestions persisted false', false === $data['performance_suggestions'] );
-	check( 'debug persisted true', true === $data['debug_mode'] );
-	check( 'logging persisted false', false === $data['logging_enabled'] );
+	check( 'debug/logging keys never persisted', ! array_key_exists( 'debug_mode', $data ) && ! array_key_exists( 'logging_enabled', $data ) );
 	check( 'developer hooks persisted false', false === $data['developer_hooks'] );
 } finally {
 	$wpdb->query( 'ROLLBACK' );
@@ -685,7 +687,9 @@ check( 'suggestions_enabled hook documented', in_array( 'faracart_suggestions_en
 check( 'default_calculation_mode hook documented', in_array( 'faracart_default_calculation_mode', $hooks, true ) );
 check( 'frontend_mobile hook documented', in_array( 'faracart_frontend_mobile', $hooks, true ) );
 check( 'settings_saved action documented', in_array( 'faracart_settings_saved', $hooks, true ) );
-check( 'log path absent when logging off', ! isset( $data['meta']['log_path'] ) );
+check( 'logging_enabled filter documented', in_array( 'faracart_logging_enabled', $hooks, true ) );
+check( 'debug_mode filter documented', in_array( 'faracart_debug_mode', $hooks, true ) );
+check( 'no log path meta is exposed', ! isset( $data['meta']['log_path'] ) );
 
 // ---------------------------------------------------------------------------
 // 8. Logger (P18-T05)
@@ -697,21 +701,20 @@ $log = Logger::path();
 
 // Deterministic start: the option row is gone (section 2 rolled back) and
 // the service is back at the defaults snapshot; make sure no stale cache
-// entry or log file survives either.
+// entry, filter switch or log file survives either.
 @unlink( $log );
 wp_cache_delete( $option_name, 'options' );
 wp_cache_delete( 'alloptions', 'options' );
-$settings->set_many( array( 'logging_enabled' => false, 'debug_mode' => false ) );
+remove_filter( 'faracart_logging_enabled', '__return_true' );
+remove_filter( 'faracart_debug_mode', '__return_true' );
 
 // Logging off: no file is ever touched.
 Logger::write( 'should-not-appear', 'error' );
 check( 'no file when logging disabled', ! file_exists( $log ) );
 
-// Logging on, debug off: errors write, debug lines are skipped. Persist
-// through the Settings service (the production path) so the in-memory
-// cache drives handle_get() consistently.
-$settings->set_many( array( 'logging_enabled' => true, 'debug_mode' => false ) );
-$settings->save();
+// Logging on, debug off: errors write, debug lines are skipped (the
+// developer switches are the filters, not a settings key).
+add_filter( 'faracart_logging_enabled', '__return_true' );
 Logger::error( 'settings-test-error' );
 Logger::debug( 'settings-test-debug' );
 $content = file_exists( $log ) ? (string) file_get_contents( $log ) : '';
@@ -719,29 +722,29 @@ check( 'error level written', false !== strpos( $content, 'settings-test-error' 
 check( 'debug level skipped without debug mode', false === strpos( $content, 'settings-test-debug' ) );
 
 // Debug mode on: debug lines land too.
-$settings->set_many( array( 'logging_enabled' => true, 'debug_mode' => true ) );
-$settings->save();
+add_filter( 'faracart_debug_mode', '__return_true' );
 Logger::debug( 'settings-test-debug2' );
 $content = (string) file_get_contents( $log );
 check( 'debug level written with debug mode', false !== strpos( $content, 'settings-test-debug2' ) );
 
-// Log path is surfaced in the settings meta while logging is on.
+// The log path is never exposed through the settings meta anymore.
 $resp = $settings_ctrl->handle_get( new \WP_REST_Request( 'GET', '/faracart/v1/settings' ) );
-check( 'log path in meta when logging on', isset( $resp->get_data()['meta']['log_path'] ) && false !== strpos( $resp->get_data()['meta']['log_path'], 'faracart-debug.log' ) );
-
-// Restore the option to its top-of-test state and remove the log file;
-// drop the caches again so the restored value is visible.
-if ( null === $option_before ) {
-	delete_option( $option_name );
-} else {
-	update_option( $option_name, $option_before );
-}
-wp_cache_delete( $option_name, 'options' );
-wp_cache_delete( 'alloptions', 'options' );
-$settings->set_many( $all_before );
-@unlink( $log );
-check( 'log file cleaned up', ! file_exists( $log ) );
-check( 'settings option restored', $option_before === get_option( $option_name, null ) );
+check( 'no log path meta when logging on', ! isset( $resp->get_data()['meta']['log_path'] ) );	// Restore the option to its top-of-test state and remove the log file
+	// and the filter switches; drop the caches again so the restored value
+	// is visible.
+	remove_filter( 'faracart_logging_enabled', '__return_true' );
+	remove_filter( 'faracart_debug_mode', '__return_true' );
+	if ( null === $option_before ) {
+		delete_option( $option_name );
+	} else {
+		update_option( $option_name, $option_before );
+	}
+	wp_cache_delete( $option_name, 'options' );
+	wp_cache_delete( 'alloptions', 'options' );
+	$settings->set_many( $all_before );
+	@unlink( $log );
+	check( 'log file cleaned up', ! file_exists( $log ) );
+	check( 'settings option restored', $option_before === get_option( $option_name, null ) );
 
 // ---------------------------------------------------------------------------
 // Summary

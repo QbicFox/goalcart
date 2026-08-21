@@ -733,9 +733,9 @@ export interface FaraCartSettings {
   /** advanced upsell ranking: balanced | price | popularity. */
   suggestions_ranking: 'balanced' | 'price' | 'popularity';
 
-  // Advanced (P18-T05).
-  debug_mode: boolean;
-  logging_enabled: boolean;
+  // Advanced (P18-T05). Debug mode / logging have no settings keys — they
+  // are developer-controlled (FARACART_DEBUG / FARACART_LOGGING constants
+  // or the faracart_debug_mode / faracart_logging_enabled filters).
   developer_hooks: boolean;
 }
 
@@ -1130,8 +1130,6 @@ export interface MissionRecommendationsPayload {
 export interface SettingsMeta {
   /** Public faracart_* hooks reference (developer hooks). */
   hooks?: DeveloperHook[];
-  /** Absolute path of the debug log file (present when logging is on). */
-  log_path?: string;
   /** Site roles (slug → display name) for the role conditions. */
   roles?: Record<string, string>;
 }

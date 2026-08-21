@@ -173,9 +173,10 @@ class Settings
 			'campaign' => array(),
 		),
 
-		// Advanced (P18-T05).
-		'debug_mode'      => false,
-		'logging_enabled' => false,
+		// Advanced (P18-T05). Debug mode / logging are developer features
+		// now — controlled by the FARACART_DEBUG / FARACART_LOGGING constants
+		// or the faracart_debug_mode / faracart_logging_enabled filters (see
+		// Utils\Logger), not by a settings option.
 		'developer_hooks' => true,
 	);
 
@@ -242,13 +243,19 @@ class Settings
 	/**
 	 * Get all settings, merged with defaults.
 	 *
+	 * Only keys that exist in the defaults are returned — a stored option
+	 * that carries legacy/unknown keys (e.g. debug_mode / logging_enabled
+	 * from before they became developer features) is filtered, so the API
+	 * surface never advertises settings the UI no longer has.
+	 *
 	 * @return array<string, mixed>
 	 */
 	public function all()
 	{
 		if (null === $this->settings) {
 			$stored = get_option(self::OPTION_NAME, array());
-			$this->settings = wp_parse_args(is_array($stored) ? $stored : array(), $this->defaults);
+			$stored = is_array($stored) ? array_intersect_key($stored, $this->defaults) : array();
+			$this->settings = wp_parse_args($stored, $this->defaults);
 		}
 
 		return $this->settings;
