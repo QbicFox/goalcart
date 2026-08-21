@@ -24,7 +24,6 @@ import EmptyState from '../components/EmptyState';
 import PageContainer from '../components/PageContainer';
 import RevenueToolbar from '../components/revenue/RevenueToolbar';
 import { useSnackbar } from '../components/notifications/SnackbarProvider';
-import { useDateRange } from '../date-range/DateRangeContext';
 import { formatCurrency, formatNumber, formatPercent, formatPercentValue } from '../lib/format';
 import { REWARD_LABELS } from '../templates/rewardLabel';
 import type { CostCoveragePayload, MissionRecommendationsPayload, RecommendationCandidate, RecommendationMissionHistory } from '../types';
@@ -499,7 +498,6 @@ function AnalyzedData({ payload }: { payload: MissionRecommendationsPayload }) {
  * recommendation can never survive a mission change.
  */
 export default function Recommendations() {
-  const { range } = useDateRange();
   const queryClient = useQueryClient();
   const { notify } = useSnackbar();
 
@@ -533,12 +531,13 @@ export default function Recommendations() {
     setApplyTarget(null);
   };
 
+  // Recommendations always analyze a stable 90-day window — the date-range
+  // filter is not forwarded to the engine because short windows (last7 etc.)
+  // fall below the minimum-order threshold and produce no recommendation.
   const query = useQuery({
-    queryKey: ['revenue', 'recommendations', { from: range.from, to: range.to, missionId }],
+    queryKey: ['revenue', 'recommendations', { missionId }],
     queryFn: () =>
       fetchMissionRecommendations({
-        from: range.from,
-        to: range.to,
         mission_id: missionId,
         window_days: 90,
       }),

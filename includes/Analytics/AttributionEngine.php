@@ -1020,12 +1020,16 @@ final class AttributionEngine {
 		// The window applies to the completion event (revenue_where); the
 		// upsell join is window-free but session+mission-scoped, which is the
 		// reliable linkage the metric requires.
-		list( $event_sql, $event_params ) = $this->revenue_where( $args );
 
 		// The completion is always scoped to THIS mission (`r.mission_id = %d`) —
 		// the join pins the upsell side to the same mission via
 		// `u.mission_id = r.mission_id`, so a session counts only when it both
 		// completed this mission and saw a recommendation for this mission.
+		// The window fragment is built with the `r.` alias because the join
+		// brings in upsell_events (u), which carries the same column names —
+		// an unqualified created_at would be ambiguous.
+		list( $event_sql, $event_params ) = $this->revenue_where( $args, 'r.' );
+
 		$assisted = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(DISTINCT r.session_id)
@@ -1565,27 +1569,31 @@ final class AttributionEngine {
 	/**
 	 * WHERE clause for revenue_events reads (mission_id + date range).
 	 *
-	 * @param array<string, mixed> $args Optional: mission_id, mission_ids, from, to.
+	 * @param array<string, mixed> $args  Optional: mission_id, mission_ids, from, to.
+	 * @param string               $alias Optional table alias prefix (e.g. 'r.')
+	 *                                    for queries that JOIN another table
+	 *                                    carrying the same column names.
 	 * @return array{0: string, 1: array<int, mixed>}
 	 */
-	protected function revenue_where( array $args ) {
+	protected function revenue_where( array $args, $alias = '' ) {
 		$where  = '1=1';
 		$params = array();
+		$prefix = (string) $alias;
 
 		if ( ! empty( $args['mission_id'] ) ) {
-			$where .= ' AND mission_id = %d';
+			$where .= " AND {$prefix}mission_id = %d";
 			$params[] = (int) $args['mission_id'];
 		}
 
-		list( $where, $params ) = $this->append_mission_ids( $args, $where, $params );
+		list( $where, $params ) = $this->append_mission_ids( $args, $where, $params, $prefix );
 
 		if ( ! empty( $args['from'] ) ) {
-			$where .= ' AND created_at >= %s';
+			$where .= " AND {$prefix}created_at >= %s";
 			$params[] = date( 'Y-m-d 00:00:00', strtotime( (string) $args['from'] ) );
 		}
 
 		if ( ! empty( $args['to'] ) ) {
-			$where .= ' AND created_at <= %s';
+			$where .= " AND {$prefix}created_at <= %s";
 			$params[] = date( 'Y-m-d 23:59:59', strtotime( (string) $args['to'] ) );
 		}
 
@@ -1633,9 +1641,10 @@ final class AttributionEngine {
 	 * @param array<string, mixed> $args   Args (may carry mission_ids).
 	 * @param string               $where  Current WHERE string.
 	 * @param array<int, mixed>    $params Current bound values.
+	 * @param string               $prefix Optional table alias prefix (e.g. 'r.').
 	 * @return array{0: string, 1: array<int, mixed>}
 	 */
-	protected function append_mission_ids( array $args, $where, array $params ) {
+	protected function append_mission_ids( array $args, $where, array $params, $prefix = '' ) {
 		if ( empty( $args['mission_ids'] ) || ! is_array( $args['mission_ids'] ) ) {
 			return array( $where, $params );
 		}
@@ -1648,7 +1657,7 @@ final class AttributionEngine {
 			return array( $where, $params );
 		}
 
-		$where .= ' AND mission_id IN (' . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+		$where .= " AND {$prefix}mission_id IN (" . implode( ', ', array_fill( 0, count( $ids ), '%d' ) ) . ')';
 		$params = array_merge( $params, $ids );
 
 		return array( $where, $params );
