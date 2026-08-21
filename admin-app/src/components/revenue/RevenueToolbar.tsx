@@ -6,7 +6,6 @@ import { __ } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
 
 import { fetchMissions } from '../../api/missions';
-import DateRangeFilter from '../date-range/DateRangeFilter';
 
 interface RevenueToolbarProps {
   /** Currently selected mission id (0 = none / all missions). */
@@ -14,12 +13,6 @@ interface RevenueToolbarProps {
   onMissionChange: (missionId: number) => void;
   /** Hide the mission selector (pages that do not support mission filtering). */
   showMission?: boolean;
-  /**
-   * Hide the global date-range filter. Defaults to true; pages whose data
-   * ignores the range (Recommendations always analyzes a fixed 90-day
-   * window) pass false so an inert control is never shown.
-   */
-  showDateRange?: boolean;
   /**
    * Required-mission mode (Recommendations): hide the "All missions" option and
    * show a "Select a mission" placeholder — a mission must be chosen before the
@@ -31,16 +24,14 @@ interface RevenueToolbarProps {
 }
 
 /**
- * Shared filter toolbar for the Revenue pages: the global
- * date-range filter (DateRangeContext) plus a mission selector and any
- * page-specific extra controls. Keeps every revenue page's filter
- * behavior consistent with the existing Analytics page.
+ * Shared filter toolbar for the Revenue pages: the mission selector plus
+ * any page-specific extra controls. The global date-range filter lives in
+ * the dashboard header (AdminLayout), so it is never duplicated here.
  */
 export default function RevenueToolbar({
   missionId,
   onMissionChange,
   showMission = true,
-  showDateRange = true,
   missionRequired = false,
   children,
 }: RevenueToolbarProps) {
@@ -56,8 +47,6 @@ export default function RevenueToolbar({
       useFlexGap
       sx={{ alignItems: { xs: 'stretch', lg: 'center' }, flexWrap: 'wrap' }}
     >
-      {showDateRange && <DateRangeFilter />}
-
       {showMission && (
         <TextField
           select

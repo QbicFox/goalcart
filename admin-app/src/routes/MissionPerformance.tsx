@@ -209,11 +209,24 @@ function MissionOptimizationSection({
 }) {
   const queryClient = useQueryClient();
   const { notify } = useSnackbar();
+  const { range } = useDateRange();
   const [applyTarget, setApplyTarget] = useState<RecommendationCandidate | null>(null);
 
+  // The drawer recommendation follows the same global date range as the
+  // Recommendations page — it must never show a recommendation computed
+  // for a different period than the one displayed.
   const recQuery = useQuery({
-    queryKey: ['revenue', 'recommendations', { missionId, drawer: true }],
-    queryFn: () => fetchMissionRecommendations({ mission_id: missionId }),
+    queryKey: [
+      'revenue',
+      'recommendations',
+      { missionId, drawer: true, from: range.from, to: range.to },
+    ],
+    queryFn: () =>
+      fetchMissionRecommendations({
+        mission_id: missionId,
+        from: range.from,
+        to: range.to,
+      }),
     enabled: missionId > 0,
   });
 

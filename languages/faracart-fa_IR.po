@@ -3764,11 +3764,6 @@ msgstr "آستانهٔ پیشنهادی"
 msgid "Recurring schedule"
 msgstr "زمان‌بندی تکراری"
 
-#: admin-app/src/routes/Dashboard.tsx:586
-#: admin-app/src/routes/Dashboard.tsx:587
-msgid "Refresh"
-msgstr "به‌روزرسانی"
-
 #: admin-app/src/routes/Dashboard.tsx:604
 #: admin-app/src/routes/Dashboard.tsx:612
 msgid "Calculate Analytics"

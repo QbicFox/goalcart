@@ -26,6 +26,8 @@ import {
 	fetchMissionRecommendations,
 } from "../api/revenue";
 import { getBootData } from "../boot";
+import { daysBetween } from "../date-range/dateRange";
+import { useDateRange } from "../date-range/DateRangeContext";
 import ConfirmDialog from "../components/ConfirmDialog";
 import EmptyState from "../components/EmptyState";
 import { useSnackbar } from "../components/notifications/SnackbarProvider";
@@ -757,6 +759,7 @@ function AnalyzedData({ payload }: { payload: MissionRecommendationsPayload }) {
 export default function Recommendations() {
 	const queryClient = useQueryClient();
 	const { notify } = useSnackbar();
+	const { range } = useDateRange();
 
 	// Mission selection is REQUIRED (0 = no mission selected): the page never
 	// analyzes an "all missions" context and never picks a mission automatically.
@@ -793,17 +796,25 @@ export default function Recommendations() {
 		setApplyTarget(null);
 	};
 
-	// Recommendations always analyze a stable 90-day window — the date-range
-	// filter is not forwarded to the engine because short windows (last7 etc.)
-	// fall below the minimum-order threshold and produce no recommendation.
-	// The filter is hidden from the toolbar (showDateRange={false}) so an
-	// inert control is never shown.
+	// The recommendation engine analyzes exactly the selected period: the
+	// global date-range filter is forwarded as an explicit from/to window, so
+	// Last 90 days and Last 30 days can produce different recommendations.
+	// A short window that falls below the engine's minimum-order guard simply
+	// explains why no recommendation is available (never a stale one).
+	// window_days mirrors the range length so the payload's "Window" stat
+	// matches the selection shown in the header.
 	const query = useQuery({
-		queryKey: ["revenue", "recommendations", { missionId }],
+		queryKey: [
+			"revenue",
+			"recommendations",
+			{ from: range.from, to: range.to, missionId },
+		],
 		queryFn: () =>
 			fetchMissionRecommendations({
 				mission_id: missionId,
-				window_days: 90,
+				from: range.from,
+				to: range.to,
+				window_days: daysBetween(range.from, range.to),
 			}),
 		// No recommendations without a selected mission: the API is not called
 		// (and no fake loading state shown) until a valid mission is chosen.
@@ -881,7 +892,6 @@ export default function Recommendations() {
 				missionId={missionId}
 				onMissionChange={handleMissionChange}
 				missionRequired
-				showDateRange={true}
 			/>
 
 			{missionId < 1 ? (

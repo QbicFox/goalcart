@@ -8,14 +8,14 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-21T07:33:54Z\n"
+"POT-Creation-Date: 2026-08-21T08:05:27Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Domain: faracart\n"
 
-#: admin-app/src/routes/Analytics.tsx:85
+#: admin-app/src/routes/Analytics.tsx:84
 #: admin-app/src/routes/CampaignBuilder.tsx:45
 #: admin-app/src/routes/Missions.tsx:43
 #: admin-app/src/templates/rewardLabel.ts:9
@@ -43,7 +43,7 @@ msgstr ""
 msgid "%1$s distinct orders"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:303
+#: admin-app/src/routes/Analytics.tsx:302
 msgid "%1$s generated the highest attributed sales (%2$s)."
 msgstr ""
 
@@ -51,16 +51,16 @@ msgstr ""
 msgid "%1$s impressions · %2$s orders · %3$s conversion"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:286
+#: admin-app/src/routes/Analytics.tsx:285
 #: admin-app/src/routes/RevenueOverview.tsx:128
 msgid "%1$s of completed missions were followed by an attributed purchase."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:259
+#: admin-app/src/routes/Analytics.tsx:258
 msgid "%1$s of customers who viewed a mission did not progress toward it."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1007
+#: admin-app/src/routes/Analytics.tsx:1004
 msgid "%1$s of eligible order value"
 msgstr ""
 
@@ -68,15 +68,15 @@ msgstr ""
 msgid "%1$s purchased orders"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:268
+#: admin-app/src/routes/Dashboard.tsx:337
 msgid "%1$s purchases · %2$s sales"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:497
+#: admin-app/src/routes/Recommendations.tsx:654
 msgid "%d days"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:618
+#: admin-app/src/routes/MissionPerformance.tsx:631
 msgid "%d days before the order"
 msgstr ""
 
@@ -99,7 +99,7 @@ msgstr ""
 msgid "%s (copy)"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:682
+#: admin-app/src/routes/Dashboard.tsx:861
 msgid "%s completion rate"
 msgstr ""
 
@@ -107,7 +107,7 @@ msgstr ""
 msgid "%s is active"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:152
+#: admin-app/src/routes/Dashboard.tsx:171
 msgid "%s is your top performer"
 msgstr ""
 
@@ -120,7 +120,7 @@ msgstr ""
 msgid "%s of existing orders are within reach of this threshold (below it by up to %s%%)."
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:660
+#: admin-app/src/routes/Dashboard.tsx:839
 msgid "%s purchased orders"
 msgstr ""
 
@@ -152,7 +152,7 @@ msgstr ""
 msgid "10% off"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:993
+#: admin-app/src/routes/Analytics.tsx:990
 #: admin-app/src/routes/RevenueOverview.tsx:635
 msgid "30 days before the order"
 msgstr ""
@@ -165,12 +165,12 @@ msgstr ""
 msgid "> 1.5× AOV"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:595
+#: admin-app/src/routes/Dashboard.tsx:771
 msgid "A business summary of your Missions and Smart Upsells."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:734
-#: admin-app/src/routes/MissionPerformance.tsx:461
+#: admin-app/src/routes/Analytics.tsx:731
+#: admin-app/src/routes/MissionPerformance.tsx:474
 #: admin-app/src/routes/RevenueOverview.tsx:197
 msgid "A completion means the customer reached the mission target. A purchase means a qualifying order was actually associated with the mission."
 msgstr ""
@@ -199,7 +199,7 @@ msgstr ""
 msgid "A positive whole number. When the shopper reaches this many completions, further completions (and rewards) are blocked server-side."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:187
+#: admin-app/src/routes/Analytics.tsx:186
 #: admin-app/src/routes/MissionPerformance.tsx:76
 msgid "A qualifying WooCommerce order was actually associated with this mission — a purchase, not a mission completion."
 msgstr ""
@@ -220,7 +220,7 @@ msgstr ""
 msgid "AOV comparisons are observed impact — they do not prove that FaraCart caused the difference."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:163
+#: admin-app/src/routes/Recommendations.tsx:223
 msgid "AOV ratio"
 msgstr ""
 
@@ -228,7 +228,7 @@ msgstr ""
 msgid "Aban"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:384
+#: admin-app/src/routes/Recommendations.tsx:528
 msgid "About %d%% of recent orders are close to this target."
 msgstr ""
 
@@ -283,7 +283,7 @@ msgstr ""
 msgid "Add condition"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:116
+#: admin-app/src/routes/Dashboard.tsx:122
 msgid "Add costs"
 msgstr ""
 
@@ -296,22 +296,22 @@ msgstr ""
 msgid "Add mission"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:798
-#: admin-app/src/routes/MissionPerformance.tsx:365
-#: admin-app/src/routes/MissionPerformance.tsx:835
+#: admin-app/src/routes/Analytics.tsx:795
+#: admin-app/src/routes/MissionPerformance.tsx:378
+#: admin-app/src/routes/MissionPerformance.tsx:848
 msgid "Add product cost data to estimate profit."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:372
+#: admin-app/src/routes/Recommendations.tsx:513
 msgid "Add product cost data to estimate profitability."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:332
+#: admin-app/src/routes/Analytics.tsx:331
 #: admin-app/src/routes/RevenueOverview.tsx:149
 msgid "Add product cost data to see the estimated profit of FaraCart."
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:112
+#: admin-app/src/routes/Dashboard.tsx:118
 msgid "Add product costs to unlock Estimated Profit — FaraCart never invents a margin."
 msgstr ""
 
@@ -332,18 +332,18 @@ msgstr ""
 msgid "Add your first mission"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1219
+#: admin-app/src/routes/Analytics.tsx:1216
 #: admin-app/src/routes/UpsellAnalytics.tsx:489
 msgid "Add-to-cart"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1217
+#: admin-app/src/routes/Analytics.tsx:1214
 #: includes/Frontend/ProgressUI.php:531
 msgid "Added"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:301
-#: admin-app/src/routes/MissionPerformance.tsx:513
+#: admin-app/src/routes/Dashboard.tsx:378
+#: admin-app/src/routes/MissionPerformance.tsx:526
 msgid "Added to cart"
 msgstr ""
 
@@ -360,7 +360,7 @@ msgstr ""
 msgid "Adds"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:602
+#: admin-app/src/routes/MissionPerformance.tsx:615
 #: admin-app/src/routes/RevenueOverview.tsx:440
 #: admin-app/src/routes/Settings.tsx:586
 #: admin-app/src/routes/Settings.tsx:1133
@@ -383,11 +383,11 @@ msgstr ""
 msgid "Advanced"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:944
+#: admin-app/src/routes/Analytics.tsx:941
 msgid "Advanced Analytics"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:437
+#: admin-app/src/routes/Recommendations.tsx:588
 msgid "Advanced analysis"
 msgstr ""
 
@@ -395,20 +395,20 @@ msgstr ""
 msgid "Advanced attribution"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:549
+#: admin-app/src/routes/MissionPerformance.tsx:562
 msgid "Advanced attribution details"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:115
+#: admin-app/src/routes/Recommendations.tsx:151
 msgid "Advanced details"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:524
+#: admin-app/src/routes/Analytics.tsx:521
 msgid "All campaigns"
 msgstr ""
 
-#: admin-app/src/components/revenue/RevenueToolbar.tsx:68
-#: admin-app/src/routes/Analytics.tsx:540
+#: admin-app/src/components/revenue/RevenueToolbar.tsx:64
+#: admin-app/src/routes/Analytics.tsx:537
 msgid "All missions"
 msgstr ""
 
@@ -416,11 +416,11 @@ msgstr ""
 msgid "All missions are already milestones of this campaign."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:570
+#: admin-app/src/routes/Analytics.tsx:567
 msgid "All products"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:83
+#: admin-app/src/routes/Analytics.tsx:82
 msgid "All rewards"
 msgstr ""
 
@@ -448,7 +448,7 @@ msgstr ""
 msgid "Almost there! Only {remaining} left"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:169
+#: admin-app/src/routes/Recommendations.tsx:238
 msgid "Already at share"
 msgstr ""
 
@@ -469,11 +469,11 @@ msgstr ""
 msgid "Analytics tracking"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:462
+#: admin-app/src/routes/Recommendations.tsx:613
 msgid "Analyzed store data"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:579
+#: admin-app/src/routes/Analytics.tsx:576
 msgid "Analyzing: %1$s – %2$s"
 msgstr ""
 
@@ -525,8 +525,8 @@ msgstr ""
 #: admin-app/src/components/wheel-picker/WheelDateField.tsx:115
 #: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:117
 #: admin-app/src/components/wheel-picker/WheelTimeField.tsx:113
-#: admin-app/src/routes/MissionPerformance.tsx:323
-#: admin-app/src/routes/Recommendations.tsx:823
+#: admin-app/src/routes/MissionPerformance.tsx:336
+#: admin-app/src/routes/Recommendations.tsx:1031
 msgid "Apply"
 msgstr ""
 
@@ -534,28 +534,28 @@ msgstr ""
 msgid "Apply range"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:299
-#: admin-app/src/routes/Recommendations.tsx:399
+#: admin-app/src/routes/MissionPerformance.tsx:312
+#: admin-app/src/routes/Recommendations.tsx:546
 msgid "Apply recommendation"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:307
-#: admin-app/src/routes/Recommendations.tsx:795
+#: admin-app/src/routes/MissionPerformance.tsx:320
+#: admin-app/src/routes/Recommendations.tsx:1000
 msgid "Apply recommendation?"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:303
-#: admin-app/src/routes/MissionPerformance.tsx:521
+#: admin-app/src/routes/Dashboard.tsx:383
+#: admin-app/src/routes/MissionPerformance.tsx:534
 msgid "Assisted completions"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:525
+#: admin-app/src/routes/MissionPerformance.tsx:538
 msgid "Assisted rate"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:962
+#: admin-app/src/routes/Analytics.tsx:959
 #: admin-app/src/routes/AttributionDashboard.tsx:135
-#: admin-app/src/routes/MissionPerformance.tsx:562
+#: admin-app/src/routes/MissionPerformance.tsx:575
 #: admin-app/src/routes/RevenueOverview.tsx:599
 #: admin-app/src/routes/RevenueOverview.tsx:672
 msgid "Assisted revenue"
@@ -569,23 +569,23 @@ msgstr ""
 msgid "Attribute"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:667
-#: admin-app/src/routes/Analytics.tsx:768
-#: admin-app/src/routes/Dashboard.tsx:222
-#: admin-app/src/routes/MissionPerformance.tsx:433
+#: admin-app/src/routes/Analytics.tsx:664
+#: admin-app/src/routes/Analytics.tsx:765
+#: admin-app/src/routes/Dashboard.tsx:266
+#: admin-app/src/routes/MissionPerformance.tsx:446
 #: admin-app/src/routes/RevenueOverview.tsx:166
 #: admin-app/src/routes/RevenueOverview.tsx:520
 msgid "Attributed Sales"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:984
-#: admin-app/src/routes/MissionPerformance.tsx:636
+#: admin-app/src/routes/Analytics.tsx:981
+#: admin-app/src/routes/MissionPerformance.tsx:649
 #: admin-app/src/routes/RevenueOverview.tsx:624
 msgid "Attributed orders"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:304
-#: admin-app/src/routes/Recommendations.tsx:215
+#: admin-app/src/routes/Dashboard.tsx:387
+#: admin-app/src/routes/Recommendations.tsx:316
 msgid "Attributed sales"
 msgstr ""
 
@@ -593,12 +593,12 @@ msgstr ""
 msgid "Attributes"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:607
+#: admin-app/src/routes/MissionPerformance.tsx:620
 msgid "Attribution model"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:992
-#: admin-app/src/routes/MissionPerformance.tsx:615
+#: admin-app/src/routes/Analytics.tsx:989
+#: admin-app/src/routes/MissionPerformance.tsx:628
 #: admin-app/src/routes/RevenueOverview.tsx:632
 msgid "Attribution window"
 msgstr ""
@@ -611,11 +611,11 @@ msgstr ""
 msgid "Average Basket Increase"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:700
+#: admin-app/src/routes/Dashboard.tsx:879
 msgid "Average Order Value"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:777
+#: admin-app/src/routes/Analytics.tsx:774
 msgid "Average Purchased Order"
 msgstr ""
 
@@ -627,11 +627,11 @@ msgstr ""
 msgid "Average basket"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:628
+#: admin-app/src/routes/MissionPerformance.tsx:641
 msgid "Average basket increase"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:580
+#: admin-app/src/routes/MissionPerformance.tsx:593
 #: admin-app/src/routes/RevenueOverview.tsx:617
 msgid "Average cart value after mission exposure minus the value at first exposure, per session."
 msgstr ""
@@ -640,7 +640,7 @@ msgstr ""
 msgid "Average lift per session"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:468
+#: admin-app/src/routes/Recommendations.tsx:625
 msgid "Average order value"
 msgstr ""
 
@@ -648,7 +648,7 @@ msgstr ""
 msgid "Average order value is %s over %d orders."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:781
+#: admin-app/src/routes/Analytics.tsx:778
 msgid "Average order value of the attributed purchased orders."
 msgstr ""
 
@@ -656,11 +656,11 @@ msgstr ""
 msgid "Average shipping cost is %s — a free-shipping mission absorbs this cost."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:515
+#: admin-app/src/routes/Recommendations.tsx:672
 msgid "Avg. margin"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:505
+#: admin-app/src/routes/Recommendations.tsx:662
 msgid "Avg. shipping"
 msgstr ""
 
@@ -672,7 +672,7 @@ msgstr ""
 msgid "Back to Dashboard"
 msgstr ""
 
-#: admin-app/src/components/layout/AdminLayout.tsx:410
+#: admin-app/src/components/layout/AdminLayout.tsx:434
 msgid "Back to WordPress Admin"
 msgstr ""
 
@@ -720,7 +720,7 @@ msgstr ""
 msgid "Baseball cap"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:344
+#: admin-app/src/routes/Recommendations.tsx:476
 msgid "Based on your recent order history, this target provides a good balance between increasing order value and keeping the mission achievable."
 msgstr ""
 
@@ -744,7 +744,7 @@ msgstr ""
 msgid "Best conversion"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:300
+#: admin-app/src/routes/Analytics.tsx:299
 msgid "Best performer"
 msgstr ""
 
@@ -842,7 +842,7 @@ msgstr ""
 msgid "Button text color"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1218
+#: admin-app/src/routes/Analytics.tsx:1215
 #: admin-app/src/routes/UpsellAnalytics.tsx:488
 msgid "CTR"
 msgstr ""
@@ -855,8 +855,8 @@ msgstr ""
 msgid "Caching and what the storefront measures."
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:604
-#: admin-app/src/routes/Dashboard.tsx:612
+#: admin-app/src/routes/Dashboard.tsx:776
+#: admin-app/src/routes/Dashboard.tsx:786
 msgid "Calculate Analytics"
 msgstr ""
 
@@ -865,7 +865,7 @@ msgstr ""
 msgid "Calculate against"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:612
+#: admin-app/src/routes/Dashboard.tsx:785
 msgid "Calculating…"
 msgstr ""
 
@@ -873,7 +873,7 @@ msgstr ""
 msgid "Calculation mode"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:518
+#: admin-app/src/routes/Analytics.tsx:515
 #: admin-app/src/routes/Appearance.tsx:681
 msgid "Campaign"
 msgstr ""
@@ -1010,9 +1010,9 @@ msgstr ""
 msgid "Click a product row for its full score breakdown."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1216
-#: admin-app/src/routes/Dashboard.tsx:300
-#: admin-app/src/routes/MissionPerformance.tsx:509
+#: admin-app/src/routes/Analytics.tsx:1213
+#: admin-app/src/routes/Dashboard.tsx:376
+#: admin-app/src/routes/MissionPerformance.tsx:522
 #: admin-app/src/routes/UpsellAnalytics.tsx:486
 msgid "Clicks"
 msgstr ""
@@ -1021,7 +1021,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: admin-app/src/components/layout/AdminLayout.tsx:290
+#: admin-app/src/components/layout/AdminLayout.tsx:307
 msgid "Collapse all"
 msgstr ""
 
@@ -1108,9 +1108,9 @@ msgid "Complete"
 msgstr ""
 
 #: admin-app/src/components/revenue/FunnelVisual.tsx:25
-#: admin-app/src/routes/Analytics.tsx:182
+#: admin-app/src/routes/Analytics.tsx:181
 #: admin-app/src/routes/MissionPerformance.tsx:71
-#: admin-app/src/routes/MissionPerformance.tsx:426
+#: admin-app/src/routes/MissionPerformance.tsx:439
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:59
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:82
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:86
@@ -1127,7 +1127,7 @@ msgstr ""
 msgid "Completion"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:273
+#: admin-app/src/routes/Analytics.tsx:272
 msgid "Completion is strong, but purchase conversion is weak — only %1$s of completed missions were followed by an attributed purchase."
 msgstr ""
 
@@ -1135,12 +1135,12 @@ msgstr ""
 msgid "Completion limit"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:208
+#: admin-app/src/routes/Recommendations.tsx:300
 msgid "Completion rate"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1115
-#: admin-app/src/routes/Analytics.tsx:1190
+#: admin-app/src/routes/Analytics.tsx:1112
+#: admin-app/src/routes/Analytics.tsx:1187
 msgid "Completions"
 msgstr ""
 
@@ -1161,11 +1161,11 @@ msgstr ""
 msgid "Conditions"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:127
+#: admin-app/src/routes/Recommendations.tsx:167
 msgid "Confidence"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:273
+#: admin-app/src/routes/MissionPerformance.tsx:286
 msgid "Confidence: %1$s"
 msgstr ""
 
@@ -1173,7 +1173,7 @@ msgstr ""
 msgid "Configuration"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:427
+#: admin-app/src/routes/Dashboard.tsx:549
 msgid "Configure Smart Upsells"
 msgstr ""
 
@@ -1234,7 +1234,7 @@ msgstr ""
 msgid "Corner radius (px)"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1001
+#: admin-app/src/routes/Analytics.tsx:998
 msgid "Cost data coverage"
 msgstr ""
 
@@ -1250,19 +1250,19 @@ msgstr ""
 msgid "Cost per unit (FaraCart)"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:473
+#: admin-app/src/routes/MissionPerformance.tsx:486
 msgid "Costs"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:738
+#: admin-app/src/routes/MissionPerformance.tsx:751
 msgid "Could not load mission performance."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:725
+#: admin-app/src/routes/Recommendations.tsx:916
 msgid "Could not load recommendations."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:589
+#: admin-app/src/routes/Analytics.tsx:586
 msgid "Could not load the analytics."
 msgstr ""
 
@@ -1319,7 +1319,7 @@ msgid "Countdown timer"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:28
-#: admin-app/src/routes/Analytics.tsx:88
+#: admin-app/src/routes/Analytics.tsx:87
 #: admin-app/src/routes/CampaignBuilder.tsx:48
 #: admin-app/src/routes/Missions.tsx:46
 #: admin-app/src/templates/rewardLabel.ts:12
@@ -1340,7 +1340,7 @@ msgstr ""
 msgid "Coupon value"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:478
+#: admin-app/src/routes/Dashboard.tsx:620
 msgid "Create Mission"
 msgstr ""
 
@@ -1352,7 +1352,7 @@ msgstr ""
 msgid "Create mission"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:426
+#: admin-app/src/routes/Dashboard.tsx:548
 msgid "Create your first Mission"
 msgstr ""
 
@@ -1364,21 +1364,21 @@ msgstr ""
 msgid "Currency"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:199
+#: admin-app/src/routes/Recommendations.tsx:277
 msgid "Current mission"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:256
-#: admin-app/src/routes/Recommendations.tsx:202
-#: admin-app/src/routes/Recommendations.tsx:323
+#: admin-app/src/routes/MissionPerformance.tsx:269
+#: admin-app/src/routes/Recommendations.tsx:288
+#: admin-app/src/routes/Recommendations.tsx:451
 msgid "Current target"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:313
+#: admin-app/src/routes/MissionPerformance.tsx:326
 msgid "Current target %1$s → recommended target %2$s? This changes a production mission — the action is not reversible from here."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:803
+#: admin-app/src/routes/Recommendations.tsx:1008
 msgid "Current target: %1$s"
 msgstr ""
 
@@ -1398,8 +1398,8 @@ msgstr ""
 msgid "Custom range…"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:720
-#: admin-app/src/routes/MissionPerformance.tsx:446
+#: admin-app/src/routes/Analytics.tsx:717
+#: admin-app/src/routes/MissionPerformance.tsx:459
 #: admin-app/src/routes/RevenueOverview.tsx:183
 msgid "Customer Journey"
 msgstr ""
@@ -1416,7 +1416,7 @@ msgstr ""
 msgid "Customers"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:623
+#: admin-app/src/routes/Analytics.tsx:620
 #: admin-app/src/routes/RevenueOverview.tsx:329
 msgid "Customers are interacting with your missions, but no attributed purchases have been recorded for this period."
 msgstr ""
@@ -1429,7 +1429,7 @@ msgstr ""
 msgid "Customers interacting with FaraCart spent %1$s more per order on average (observed impact)."
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:609
+#: admin-app/src/routes/MissionPerformance.tsx:622
 msgid "Customers who progressed or completed the mission before ordering are direct; exposure-only sessions are assisted."
 msgstr ""
 
@@ -1438,7 +1438,7 @@ msgstr ""
 msgid "Customize how the cart progress UI looks on your storefront."
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:174
+#: admin-app/src/routes/Dashboard.tsx:199
 msgid "Daily attributed sales and mission completions trend"
 msgstr ""
 
@@ -1450,7 +1450,7 @@ msgstr ""
 msgid "Daily from"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1056
+#: admin-app/src/routes/Analytics.tsx:1053
 msgid "Daily impressions, completions and revenue trend"
 msgstr ""
 
@@ -1463,8 +1463,8 @@ msgid "Dashboard"
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:199
-#: admin-app/src/routes/MissionPerformance.tsx:623
-#: admin-app/src/routes/Recommendations.tsx:526
+#: admin-app/src/routes/MissionPerformance.tsx:636
+#: admin-app/src/routes/Recommendations.tsx:683
 msgid "Data sufficiency"
 msgstr ""
 
@@ -1553,7 +1553,7 @@ msgstr ""
 msgid "Desktop"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1042
+#: admin-app/src/routes/Analytics.tsx:1039
 msgid "Detailed Activity"
 msgstr ""
 
@@ -1569,7 +1569,7 @@ msgstr ""
 msgid "Difference"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:608
+#: admin-app/src/routes/MissionPerformance.tsx:621
 msgid "Direct & assisted"
 msgstr ""
 
@@ -1577,15 +1577,15 @@ msgstr ""
 msgid "Direct incremental value"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:950
+#: admin-app/src/routes/Analytics.tsx:947
 #: admin-app/src/routes/AttributionDashboard.tsx:129
-#: admin-app/src/routes/MissionPerformance.tsx:554
+#: admin-app/src/routes/MissionPerformance.tsx:567
 #: admin-app/src/routes/RevenueOverview.tsx:591
 #: admin-app/src/routes/RevenueOverview.tsx:668
 msgid "Direct revenue"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:586
+#: admin-app/src/routes/MissionPerformance.tsx:599
 msgid "Direct revenue is the incremental amount this mission moved — it is a slice of the influenced total, not an extra value on top of it."
 msgstr ""
 
@@ -1634,7 +1634,7 @@ msgstr ""
 msgid "Display the button on mobile screens."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:157
+#: admin-app/src/routes/Recommendations.tsx:208
 msgid "Distance"
 msgstr ""
 
@@ -1646,15 +1646,15 @@ msgstr ""
 msgid "Distance from the chosen side (0–200)."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:986
+#: admin-app/src/routes/Analytics.tsx:983
 msgid "Distinct orders associated with a mission in the selected period."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:652
+#: admin-app/src/routes/Analytics.tsx:649
 msgid "Distinct orders associated with a mission — a purchase, not a mission completion."
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:638
+#: admin-app/src/routes/MissionPerformance.tsx:651
 msgid "Distinct orders associated with this mission in the selected period."
 msgstr ""
 
@@ -1682,7 +1682,7 @@ msgstr ""
 msgid "Each shopper may complete this mission at most %d times."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:158
+#: admin-app/src/routes/Recommendations.tsx:212
 msgid "Economics"
 msgstr ""
 
@@ -1708,7 +1708,7 @@ msgstr ""
 msgid "Edit mission"
 msgstr ""
 
-#: admin-app/src/components/layout/AdminLayout.tsx:417
+#: admin-app/src/components/layout/AdminLayout.tsx:441
 msgid "Edit profile"
 msgstr ""
 
@@ -1759,10 +1759,10 @@ msgid "Est. profit %1$s"
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:93
-#: admin-app/src/routes/Analytics.tsx:212
-#: admin-app/src/routes/Analytics.tsx:788
+#: admin-app/src/routes/Analytics.tsx:211
+#: admin-app/src/routes/Analytics.tsx:785
 #: admin-app/src/routes/MissionPerformance.tsx:110
-#: admin-app/src/routes/MissionPerformance.tsx:437
+#: admin-app/src/routes/MissionPerformance.tsx:450
 msgid "Estimated Profit"
 msgstr ""
 
@@ -1775,8 +1775,8 @@ msgid "Estimated product margin"
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:188
-#: admin-app/src/routes/Analytics.tsx:315
-#: admin-app/src/routes/Recommendations.tsx:216
+#: admin-app/src/routes/Analytics.tsx:314
+#: admin-app/src/routes/Recommendations.tsx:320
 #: admin-app/src/routes/RevenueOverview.tsx:138
 #: admin-app/src/routes/UpsellAnalytics.tsx:481
 msgid "Estimated profit"
@@ -1786,11 +1786,11 @@ msgstr ""
 msgid "Estimated profit impact"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1011
+#: admin-app/src/routes/Analytics.tsx:1008
 msgid "Estimated profit is calculated only for orders with complete cost data."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:140
+#: admin-app/src/routes/Recommendations.tsx:181
 msgid "Estimated reward cost"
 msgstr ""
 
@@ -1799,16 +1799,16 @@ msgid "Estimated reward cost at this threshold is %s."
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:113
-#: admin-app/src/routes/MissionPerformance.tsx:363
+#: admin-app/src/routes/MissionPerformance.tsx:376
 msgid "Estimated, not guaranteed"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:214
+#: admin-app/src/routes/Analytics.tsx:213
 #: admin-app/src/routes/MissionPerformance.tsx:112
 msgid "Estimated, not guaranteed — based on available product cost, reward and shipping data."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:796
+#: admin-app/src/routes/Analytics.tsx:793
 msgid "Estimated, not guaranteed."
 msgstr ""
 
@@ -1852,19 +1852,19 @@ msgstr ""
 msgid "Existing coupon code"
 msgstr ""
 
-#: admin-app/src/components/layout/AdminLayout.tsx:291
+#: admin-app/src/components/layout/AdminLayout.tsx:308
 msgid "Expand all"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:132
+#: admin-app/src/routes/Recommendations.tsx:172
 msgid "Expected completion"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:354
+#: admin-app/src/routes/Recommendations.tsx:493
 msgid "Expected impact"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:365
+#: admin-app/src/routes/Recommendations.tsx:504
 msgid "Expected profit"
 msgstr ""
 
@@ -1885,7 +1885,7 @@ msgstr ""
 msgid "Extra CSS class"
 msgstr ""
 
-#: admin-app/src/components/layout/AdminLayout.tsx:354
+#: admin-app/src/components/layout/AdminLayout.tsx:371
 #: admin-app/src/components/layout/navigation.ts:44
 #: includes/Admin/Admin.php:113
 #: includes/Admin/Admin.php:114
@@ -1906,7 +1906,7 @@ msgstr ""
 msgid "FaraCart does not invent product costs."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:318
+#: admin-app/src/routes/Analytics.tsx:317
 #: admin-app/src/routes/RevenueOverview.tsx:141
 msgid "FaraCart generated an estimated profit of %1$s after reward and shipping costs."
 msgstr ""
@@ -1959,7 +1959,7 @@ msgid "Fixed amount off"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:26
-#: admin-app/src/routes/Analytics.tsx:86
+#: admin-app/src/routes/Analytics.tsx:85
 #: admin-app/src/routes/CampaignBuilder.tsx:46
 #: admin-app/src/routes/Missions.tsx:44
 #: admin-app/src/templates/rewardLabel.ts:10
@@ -1977,7 +1977,7 @@ msgid "Floating widget"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:27
-#: admin-app/src/routes/Analytics.tsx:87
+#: admin-app/src/routes/Analytics.tsx:86
 #: admin-app/src/routes/Appearance.tsx:134
 #: admin-app/src/routes/CampaignBuilder.tsx:47
 #: admin-app/src/routes/Missions.tsx:45
@@ -1988,7 +1988,7 @@ msgid "Free gift"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:24
-#: admin-app/src/routes/Analytics.tsx:84
+#: admin-app/src/routes/Analytics.tsx:83
 #: admin-app/src/routes/Appearance.tsx:70
 #: admin-app/src/routes/Appearance.tsx:128
 #: admin-app/src/routes/CampaignBuilder.tsx:44
@@ -2066,7 +2066,7 @@ msgid "Gold accent color"
 msgstr ""
 
 #: admin-app/src/routes/MissionPerformance.tsx:130
-#: admin-app/src/routes/Recommendations.tsx:52
+#: admin-app/src/routes/Recommendations.tsx:84
 msgid "Good data"
 msgstr ""
 
@@ -2110,7 +2110,7 @@ msgstr ""
 msgid "High"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:41
+#: admin-app/src/routes/Recommendations.tsx:62
 msgid "High confidence"
 msgstr ""
 
@@ -2134,7 +2134,7 @@ msgstr ""
 msgid "Historical upsell performance: %d impressions, %d orders (%s conversion)."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:159
+#: admin-app/src/routes/Recommendations.tsx:216
 msgid "History"
 msgstr ""
 
@@ -2163,11 +2163,11 @@ msgstr ""
 msgid "How is this calculated?"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:708
+#: admin-app/src/routes/Analytics.tsx:705
 msgid "How many times customers reached a mission target. Completion is not the same as purchase."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:702
+#: admin-app/src/routes/Analytics.tsx:699
 msgid "How many times mission widgets were seen."
 msgstr ""
 
@@ -2219,15 +2219,15 @@ msgstr ""
 msgid "Icon color"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1108
-#: admin-app/src/routes/Analytics.tsx:1215
-#: admin-app/src/routes/Dashboard.tsx:299
-#: admin-app/src/routes/MissionPerformance.tsx:505
+#: admin-app/src/routes/Analytics.tsx:1105
+#: admin-app/src/routes/Analytics.tsx:1212
+#: admin-app/src/routes/Dashboard.tsx:373
+#: admin-app/src/routes/MissionPerformance.tsx:518
 #: admin-app/src/routes/UpsellAnalytics.tsx:485
 msgid "Impressions"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:691
+#: admin-app/src/routes/Recommendations.tsx:874
 msgid "Improve your Missions using store performance data — which target and reward configuration to use, and why."
 msgstr ""
 
@@ -2269,12 +2269,12 @@ msgstr ""
 msgid "Include virtual products"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:440
+#: admin-app/src/routes/Dashboard.tsx:573
 msgid "Increase cart value with Missions and Smart Upsells."
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:162
-#: admin-app/src/routes/MissionPerformance.tsx:578
+#: admin-app/src/routes/MissionPerformance.tsx:591
 #: admin-app/src/routes/RevenueOverview.tsx:615
 msgid "Incremental cart value"
 msgstr ""
@@ -2291,9 +2291,9 @@ msgstr ""
 msgid "Incremental revenue is the direct revenue shown above — the additional order value the missions moved. Attribution follows the FaraCart model: progressed/completed missions are direct, exposure-only missions are assisted, and every associated order is counted once."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:972
+#: admin-app/src/routes/Analytics.tsx:969
 #: admin-app/src/routes/AttributionDashboard.tsx:141
-#: admin-app/src/routes/MissionPerformance.tsx:570
+#: admin-app/src/routes/MissionPerformance.tsx:583
 #: admin-app/src/routes/RevenueOverview.tsx:607
 #: admin-app/src/routes/RevenueOverview.tsx:676
 msgid "Influenced sales"
@@ -2329,11 +2329,11 @@ msgstr ""
 msgid "Inventory"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:157
+#: admin-app/src/routes/Dashboard.tsx:176
 msgid "It generated %s in attributed sales this period."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:897
+#: admin-app/src/routes/Analytics.tsx:894
 msgid "Key Insights"
 msgstr ""
 
@@ -2341,7 +2341,7 @@ msgstr ""
 msgid "Khordad"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:256
+#: admin-app/src/routes/Analytics.tsx:255
 msgid "Largest drop-off"
 msgstr ""
 
@@ -2395,7 +2395,7 @@ msgid "Limit"
 msgstr ""
 
 #: admin-app/src/routes/MissionPerformance.tsx:122
-#: admin-app/src/routes/Recommendations.tsx:57
+#: admin-app/src/routes/Recommendations.tsx:89
 msgid "Limited data"
 msgstr ""
 
@@ -2451,7 +2451,7 @@ msgstr ""
 msgid "Low"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:46
+#: admin-app/src/routes/Recommendations.tsx:75
 msgid "Low confidence"
 msgstr ""
 
@@ -2464,7 +2464,7 @@ msgstr ""
 msgid "Lowest performing"
 msgstr ""
 
-#: admin-app/src/components/layout/AdminLayout.tsx:183
+#: admin-app/src/components/layout/AdminLayout.tsx:200
 msgid "Main navigation"
 msgstr ""
 
@@ -2472,15 +2472,15 @@ msgstr ""
 msgid "Makes every shipping rate free once the mission is reached. Zone/method-specific rules are configured in a later phase."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:769
+#: admin-app/src/routes/Recommendations.tsx:965
 msgid "Manage product costs"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:124
+#: admin-app/src/routes/Dashboard.tsx:134
 msgid "Many completions don’t become purchases"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:173
+#: admin-app/src/routes/Recommendations.tsx:245
 #: admin-app/src/routes/UpsellAnalytics.tsx:80
 msgid "Margin"
 msgstr ""
@@ -2493,11 +2493,11 @@ msgstr ""
 msgid "Maximum discount"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:476
+#: admin-app/src/routes/Recommendations.tsx:633
 msgid "Median order value"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:166
+#: admin-app/src/routes/Recommendations.tsx:229
 msgid "Median ratio"
 msgstr ""
 
@@ -2505,7 +2505,7 @@ msgstr ""
 msgid "Medium"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:44
+#: admin-app/src/routes/Recommendations.tsx:69
 msgid "Medium confidence"
 msgstr ""
 
@@ -2550,9 +2550,9 @@ msgstr ""
 msgid "Minute"
 msgstr ""
 
-#: admin-app/src/components/revenue/RevenueToolbar.tsx:57
-#: admin-app/src/routes/Analytics.tsx:180
-#: admin-app/src/routes/Analytics.tsx:534
+#: admin-app/src/components/revenue/RevenueToolbar.tsx:53
+#: admin-app/src/routes/Analytics.tsx:179
+#: admin-app/src/routes/Analytics.tsx:531
 #: admin-app/src/routes/Appearance.tsx:674
 #: admin-app/src/routes/MissionPerformance.tsx:68
 msgid "Mission"
@@ -2563,29 +2563,29 @@ msgstr ""
 msgid "Mission Calculation"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:813
+#: admin-app/src/routes/Analytics.tsx:810
 msgid "Mission Comparison"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:705
-#: admin-app/src/routes/Dashboard.tsx:215
-#: admin-app/src/routes/Dashboard.tsx:676
+#: admin-app/src/routes/Analytics.tsx:702
+#: admin-app/src/routes/Dashboard.tsx:259
+#: admin-app/src/routes/Dashboard.tsx:855
 #: admin-app/src/routes/RevenueOverview.tsx:168
 #: admin-app/src/routes/RevenueOverview.tsx:500
 msgid "Mission Completions"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:501
+#: admin-app/src/routes/Analytics.tsx:500
 msgid "Mission Conversion & Purchase Analysis"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:55
-#: admin-app/src/routes/Dashboard.tsx:241
-#: admin-app/src/routes/MissionPerformance.tsx:726
+#: admin-app/src/routes/Dashboard.tsx:298
+#: admin-app/src/routes/MissionPerformance.tsx:739
 msgid "Mission Performance"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:699
+#: admin-app/src/routes/Analytics.tsx:696
 msgid "Mission Views"
 msgstr ""
 
@@ -2602,7 +2602,7 @@ msgstr ""
 msgid "Mission funnel: views, progressed, completed, purchased"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:377
+#: admin-app/src/routes/MissionPerformance.tsx:390
 msgid "Mission performance details"
 msgstr ""
 
@@ -2614,8 +2614,8 @@ msgstr ""
 msgid "Mission reward"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:225
-#: admin-app/src/routes/Recommendations.tsx:673
+#: admin-app/src/routes/MissionPerformance.tsx:238
+#: admin-app/src/routes/Recommendations.tsx:856
 msgid "Mission target updated."
 msgstr ""
 
@@ -2638,7 +2638,7 @@ msgstr ""
 msgid "Missions"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:752
+#: admin-app/src/routes/Analytics.tsx:749
 msgid "Missions Completed"
 msgstr ""
 
@@ -2659,7 +2659,7 @@ msgid "Mobile reuses the desktop position. Turn the toggle above off to configur
 msgstr ""
 
 #: admin-app/src/routes/MissionPerformance.tsx:126
-#: admin-app/src/routes/Recommendations.tsx:55
+#: admin-app/src/routes/Recommendations.tsx:87
 msgid "Moderate data"
 msgstr ""
 
@@ -2710,7 +2710,7 @@ msgstr ""
 msgid "No attributed orders yet"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1147
+#: admin-app/src/routes/Analytics.tsx:1144
 msgid "No campaign activity in this range."
 msgstr ""
 
@@ -2750,15 +2750,15 @@ msgstr ""
 msgid "No milestones in this campaign yet."
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:750
+#: admin-app/src/routes/MissionPerformance.tsx:763
 msgid "No mission performance yet"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:255
+#: admin-app/src/routes/Dashboard.tsx:312
 msgid "No mission performance yet."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:818
+#: admin-app/src/routes/Analytics.tsx:815
 msgid "No mission purchase activity in this range."
 msgstr ""
 
@@ -2774,16 +2774,16 @@ msgstr ""
 msgid "No missions yet — create a mission on the Missions page first."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:622
+#: admin-app/src/routes/Analytics.tsx:619
 #: admin-app/src/routes/RevenueOverview.tsx:328
 msgid "No purchases yet"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:735
+#: admin-app/src/routes/Recommendations.tsx:926
 msgid "No recommendation available"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:250
+#: admin-app/src/routes/MissionPerformance.tsx:263
 msgid "No recommendation is available for this mission yet."
 msgstr ""
 
@@ -2802,7 +2802,7 @@ msgstr ""
 msgid "No rows"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:613
+#: admin-app/src/routes/Analytics.tsx:610
 #: admin-app/src/routes/RevenueOverview.tsx:319
 msgid "No sales data yet"
 msgstr ""
@@ -2811,7 +2811,7 @@ msgstr ""
 msgid "No settings were provided to save."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1206
+#: admin-app/src/routes/Analytics.tsx:1203
 msgid "No suggestion activity in this range."
 msgstr ""
 
@@ -2824,14 +2824,14 @@ msgid "No upsell activity yet"
 msgstr ""
 
 #: admin-app/src/routes/Missions.tsx:69
-#: admin-app/src/routes/Recommendations.tsx:205
+#: admin-app/src/routes/Recommendations.tsx:296
 msgid "None"
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:103
-#: admin-app/src/routes/MissionPerformance.tsx:358
-#: admin-app/src/routes/Recommendations.tsx:194
-#: admin-app/src/routes/Recommendations.tsx:368
+#: admin-app/src/routes/MissionPerformance.tsx:371
+#: admin-app/src/routes/Recommendations.tsx:272
+#: admin-app/src/routes/Recommendations.tsx:509
 msgid "Not available"
 msgstr ""
 
@@ -2840,11 +2840,11 @@ msgid "Not enough attributed order data to estimate profit yet."
 msgstr ""
 
 #: admin-app/src/components/revenue/EstimatedProfitCard.tsx:115
-#: admin-app/src/routes/MissionPerformance.tsx:841
+#: admin-app/src/routes/MissionPerformance.tsx:854
 msgid "Not enough attributed order data yet."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:736
+#: admin-app/src/routes/Recommendations.tsx:929
 msgid "Not enough data for a reliable recommendation."
 msgstr ""
 
@@ -2860,7 +2860,7 @@ msgstr ""
 msgid "Observed impact"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:630
+#: admin-app/src/routes/MissionPerformance.tsx:643
 msgid "Observed impact — incremental cart value relative to the baseline. It does not prove that FaraCart caused the difference."
 msgstr ""
 
@@ -2880,15 +2880,15 @@ msgstr ""
 msgid "Once cost data exists, Estimated Profit becomes available automatically."
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:638
+#: admin-app/src/routes/Dashboard.tsx:814
 msgid "Once customers interact with your Missions, performance data will appear here."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:614
+#: admin-app/src/routes/Analytics.tsx:611
 msgid "Once customers start interacting with your missions, FaraCart will show purchases, sales and profit insights here."
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:751
+#: admin-app/src/routes/MissionPerformance.tsx:764
 msgid "Once customers start interacting with your missions, FaraCart will show purchases, sales and profit per mission here."
 msgstr ""
 
@@ -2913,11 +2913,11 @@ msgstr ""
 msgid "Only %s left to reach your mission"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:127
+#: admin-app/src/routes/Dashboard.tsx:137
 msgid "Only %s of completed missions were followed by a purchase. Review your mission targets."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:994
+#: admin-app/src/routes/Analytics.tsx:991
 msgid "Only mission events within this window before an order are attributed to it."
 msgstr ""
 
@@ -2949,11 +2949,11 @@ msgstr ""
 msgid "Only {remaining} left to unlock {reward}!"
 msgstr ""
 
-#: admin-app/src/components/layout/AdminLayout.tsx:344
+#: admin-app/src/components/layout/AdminLayout.tsx:361
 msgid "Open navigation"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:814
+#: admin-app/src/routes/MissionPerformance.tsx:827
 msgid "Open performance details for %s"
 msgstr ""
 
@@ -2969,7 +2969,7 @@ msgstr ""
 msgid "Optimization"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:353
+#: admin-app/src/routes/Dashboard.tsx:467
 msgid "Optimization Opportunities"
 msgstr ""
 
@@ -2994,25 +2994,25 @@ msgstr ""
 msgid "Optional start of the daily window."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:966
+#: admin-app/src/routes/Analytics.tsx:963
 #: admin-app/src/routes/RevenueOverview.tsx:601
 msgid "Order totals from orders that were only exposed to a mission, never progressed."
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:564
+#: admin-app/src/routes/MissionPerformance.tsx:577
 msgid "Order totals from orders that were only exposed to this mission, never progressed."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:978
+#: admin-app/src/routes/Analytics.tsx:975
 #: admin-app/src/routes/RevenueOverview.tsx:609
 msgid "Order totals of every order associated with a mission — distinct orders, never double counted."
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:572
+#: admin-app/src/routes/MissionPerformance.tsx:585
 msgid "Order totals of every order associated with this mission — distinct orders, never double counted."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:539
+#: admin-app/src/routes/Recommendations.tsx:696
 msgid "Order value distribution (share of orders)"
 msgstr ""
 
@@ -3020,7 +3020,7 @@ msgstr ""
 msgid "Orders"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:484
+#: admin-app/src/routes/Recommendations.tsx:641
 msgid "Orders analyzed"
 msgstr ""
 
@@ -3039,7 +3039,7 @@ msgid "Outline"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:54
-#: admin-app/src/routes/Dashboard.tsx:594
+#: admin-app/src/routes/Dashboard.tsx:770
 msgid "Overview"
 msgstr ""
 
@@ -3071,8 +3071,8 @@ msgstr ""
 msgid "Percentage discount"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:196
-#: admin-app/src/routes/Analytics.tsx:661
+#: admin-app/src/routes/Analytics.tsx:195
+#: admin-app/src/routes/Analytics.tsx:658
 #: admin-app/src/routes/MissionPerformance.tsx:85
 msgid "Percentage of completed missions that were followed by an attributed purchase."
 msgstr ""
@@ -3086,7 +3086,7 @@ msgstr ""
 msgid "Performance"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:415
+#: admin-app/src/routes/MissionPerformance.tsx:428
 msgid "Performance Summary"
 msgstr ""
 
@@ -3102,7 +3102,7 @@ msgstr ""
 msgid "Play a confetti burst when a mission is reached (Phase 32)."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:719
+#: admin-app/src/routes/Recommendations.tsx:910
 msgid "Please select another mission."
 msgstr ""
 
@@ -3176,15 +3176,15 @@ msgid "Processing + completed orders."
 msgstr ""
 
 #: admin-app/src/components/mission-builder/missionTypes.tsx:50
-#: admin-app/src/routes/Analytics.tsx:565
-#: admin-app/src/routes/Analytics.tsx:1214
+#: admin-app/src/routes/Analytics.tsx:562
+#: admin-app/src/routes/Analytics.tsx:1211
 #: admin-app/src/routes/Missions.tsx:54
 #: admin-app/src/routes/UpsellAnalytics.tsx:154
 #: admin-app/src/routes/UpsellAnalytics.tsx:478
 msgid "Product"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:776
+#: admin-app/src/routes/Recommendations.tsx:972
 msgid "Product Cost Coverage: %1$s / %2$s products (%3$s). Profit estimates need product cost data — add it to enable Mission economics."
 msgstr ""
 
@@ -3193,7 +3193,7 @@ msgstr ""
 msgid "Product cost"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:111
+#: admin-app/src/routes/Dashboard.tsx:117
 msgid "Product cost data is incomplete"
 msgstr ""
 
@@ -3247,7 +3247,7 @@ msgstr ""
 msgid "Products purchased more often in your store rank higher."
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:498
+#: admin-app/src/routes/MissionPerformance.tsx:511
 msgid "Products recommended to customers who were working toward this mission."
 msgstr ""
 
@@ -3255,7 +3255,7 @@ msgstr ""
 msgid "Products suggested for you"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:783
+#: admin-app/src/routes/Recommendations.tsx:986
 msgid "Profit estimates need product cost data. Add product costs on your products to enable Mission economics."
 msgstr ""
 
@@ -3267,7 +3267,7 @@ msgstr ""
 msgid "Profit impact is unavailable because product cost data is not available."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:331
+#: admin-app/src/routes/Analytics.tsx:330
 #: admin-app/src/routes/RevenueOverview.tsx:148
 msgid "Profit not estimated yet"
 msgstr ""
@@ -3295,7 +3295,7 @@ msgstr ""
 
 #: admin-app/src/components/revenue/FunnelVisual.tsx:24
 #: admin-app/src/routes/MissionPerformance.tsx:70
-#: admin-app/src/routes/MissionPerformance.tsx:425
+#: admin-app/src/routes/MissionPerformance.tsx:438
 msgid "Progressed"
 msgstr ""
 
@@ -3303,45 +3303,45 @@ msgstr ""
 msgid "Provide exactly one of mission_id, campaign_id, mission or campaign to preview."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:748
+#: admin-app/src/routes/Analytics.tsx:745
 msgid "Purchase Analysis"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:194
-#: admin-app/src/routes/Analytics.tsx:658
-#: admin-app/src/routes/Analytics.tsx:760
-#: admin-app/src/routes/Dashboard.tsx:694
+#: admin-app/src/routes/Analytics.tsx:193
+#: admin-app/src/routes/Analytics.tsx:655
+#: admin-app/src/routes/Analytics.tsx:757
+#: admin-app/src/routes/Dashboard.tsx:873
 #: admin-app/src/routes/MissionPerformance.tsx:83
 msgid "Purchase Rate"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:632
+#: admin-app/src/routes/Analytics.tsx:629
 msgid "Purchase analysis is not available for this product filter. Remove the product filter to see the funnel, purchases and mission comparison."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:270
+#: admin-app/src/routes/Analytics.tsx:269
 msgid "Purchase conversion"
 msgstr ""
 
 #: admin-app/src/components/revenue/FunnelVisual.tsx:130
-#: admin-app/src/routes/Recommendations.tsx:212
+#: admin-app/src/routes/Recommendations.tsx:308
 msgid "Purchase rate"
 msgstr ""
 
 #: admin-app/src/components/revenue/FunnelVisual.tsx:26
-#: admin-app/src/routes/Analytics.tsx:185
+#: admin-app/src/routes/Analytics.tsx:184
 #: admin-app/src/routes/MissionPerformance.tsx:74
-#: admin-app/src/routes/MissionPerformance.tsx:428
-#: admin-app/src/routes/MissionPerformance.tsx:517
+#: admin-app/src/routes/MissionPerformance.tsx:441
+#: admin-app/src/routes/MissionPerformance.tsx:530
 msgid "Purchased"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:756
+#: admin-app/src/routes/Analytics.tsx:753
 msgid "Purchased After Completion"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:648
-#: admin-app/src/routes/Dashboard.tsx:687
+#: admin-app/src/routes/Analytics.tsx:645
+#: admin-app/src/routes/Dashboard.tsx:866
 #: admin-app/src/routes/RevenueOverview.tsx:167
 #: admin-app/src/routes/RevenueOverview.tsx:379
 #: admin-app/src/routes/RevenueOverview.tsx:509
@@ -3349,12 +3349,12 @@ msgstr ""
 msgid "Purchased Orders"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:764
+#: admin-app/src/routes/Analytics.tsx:761
 msgid "Purchased orders ÷ completed missions."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:283
-#: admin-app/src/routes/Dashboard.tsx:302
+#: admin-app/src/routes/Analytics.tsx:282
+#: admin-app/src/routes/Dashboard.tsx:381
 #: admin-app/src/routes/RevenueOverview.tsx:125
 msgid "Purchases"
 msgstr ""
@@ -3373,7 +3373,7 @@ msgstr ""
 msgid "Quantity"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1049
+#: admin-app/src/routes/Analytics.tsx:1046
 msgid "Raw interaction metrics from the event log — impressions, completions, revenue and suggestions."
 msgstr ""
 
@@ -3409,15 +3409,15 @@ msgstr ""
 msgid "Reach an amount or quantity of specific products."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:168
+#: admin-app/src/routes/Recommendations.tsx:234
 msgid "Reach share"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:156
+#: admin-app/src/routes/Recommendations.tsx:204
 msgid "Reachability"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:136
+#: admin-app/src/routes/Recommendations.tsx:176
 msgid "Reachable orders"
 msgstr ""
 
@@ -3426,31 +3426,26 @@ msgid "Reached dot color"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:61
-#: admin-app/src/routes/MissionPerformance.tsx:240
-#: admin-app/src/routes/Recommendations.tsx:690
+#: admin-app/src/routes/MissionPerformance.tsx:253
+#: admin-app/src/routes/Recommendations.tsx:873
 msgid "Recommendations"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:698
+#: admin-app/src/routes/Recommendations.tsx:885
 msgid "Recommendations helps you choose better Mission targets and reward configurations. It does not recommend products — product recommendations for customers live under Upsells."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:295
+#: admin-app/src/routes/Recommendations.tsx:412
 msgid "Recommended Mission Target"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:260
-#: admin-app/src/routes/Recommendations.tsx:332
+#: admin-app/src/routes/MissionPerformance.tsx:273
+#: admin-app/src/routes/Recommendations.tsx:460
 msgid "Recommended target"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:437
 msgid "Recurring schedule"
-msgstr ""
-
-#: admin-app/src/routes/Dashboard.tsx:599
-#: admin-app/src/routes/Dashboard.tsx:600
-msgid "Refresh"
 msgstr ""
 
 #: admin-app/src/routes/UpsellAnalytics.tsx:62
@@ -3497,8 +3492,8 @@ msgstr ""
 msgid "Restrictions and schedule for this mission."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1097
-#: admin-app/src/routes/Analytics.tsx:1122
+#: admin-app/src/routes/Analytics.tsx:1094
+#: admin-app/src/routes/Analytics.tsx:1119
 msgid "Revenue"
 msgstr ""
 
@@ -3506,7 +3501,7 @@ msgstr ""
 msgid "Revenue Attribution"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:956
+#: admin-app/src/routes/Analytics.tsx:953
 #: admin-app/src/routes/RevenueOverview.tsx:593
 msgid "Revenue from the incremental value of orders where customers progressed toward or completed a mission before ordering."
 msgstr ""
@@ -3515,14 +3510,14 @@ msgstr ""
 msgid "Revenue-only analytics continue to work."
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:130
+#: admin-app/src/routes/Dashboard.tsx:143
 msgid "Review"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:550
+#: admin-app/src/routes/Analytics.tsx:547
 #: admin-app/src/routes/MissionBuilder.tsx:414
 #: admin-app/src/routes/Missions.tsx:283
-#: admin-app/src/routes/Recommendations.tsx:204
+#: admin-app/src/routes/Recommendations.tsx:292
 msgid "Reward"
 msgstr ""
 
@@ -3571,18 +3566,18 @@ msgstr ""
 msgid "Rows per page"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:203
+#: admin-app/src/routes/Analytics.tsx:202
 #: admin-app/src/routes/MissionPerformance.tsx:101
 #: admin-app/src/routes/UpsellAnalytics.tsx:455
 #: admin-app/src/routes/UpsellAnalytics.tsx:480
 msgid "Sales"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:711
+#: admin-app/src/routes/Dashboard.tsx:890
 msgid "Sales & Mission Performance"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:654
+#: admin-app/src/routes/Dashboard.tsx:833
 #: admin-app/src/routes/RevenueOverview.tsx:345
 msgid "Sales Attributed to FaraCart"
 msgstr ""
@@ -3596,16 +3591,16 @@ msgstr ""
 msgid "Sales attributed"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:672
+#: admin-app/src/routes/Analytics.tsx:669
 msgid "Sales attributed to FaraCart"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:205
+#: admin-app/src/routes/Analytics.tsx:204
 #: admin-app/src/routes/MissionPerformance.tsx:103
 msgid "Sales attributed to FaraCart — the incremental order value driven by this mission."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:774
+#: admin-app/src/routes/Analytics.tsx:771
 msgid "Sales generated after FaraCart interaction."
 msgstr ""
 
@@ -3651,7 +3646,7 @@ msgstr ""
 msgid "Schedule & priority"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:125
+#: admin-app/src/routes/Recommendations.tsx:162
 #: admin-app/src/routes/UpsellAnalytics.tsx:490
 msgid "Score"
 msgstr ""
@@ -3660,7 +3655,7 @@ msgstr ""
 msgid "Score breakdown"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:146
+#: admin-app/src/routes/Recommendations.tsx:193
 msgid "Scoring factors"
 msgstr ""
 
@@ -3693,12 +3688,12 @@ msgstr ""
 msgid "Select a gift product — without one the gift can never be added to the cart, so the reward stays unavailable on the storefront."
 msgstr ""
 
-#: admin-app/src/components/revenue/RevenueToolbar.tsx:65
-#: admin-app/src/routes/Recommendations.tsx:709
+#: admin-app/src/components/revenue/RevenueToolbar.tsx:61
+#: admin-app/src/routes/Recommendations.tsx:900
 msgid "Select a mission"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:667
+#: admin-app/src/routes/Recommendations.tsx:849
 msgid "Select a mission to apply the recommendation to."
 msgstr ""
 
@@ -3714,7 +3709,7 @@ msgstr ""
 msgid "Set a target to preview progress."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:815
+#: admin-app/src/routes/Recommendations.tsx:1020
 msgid "Set the mission target to %s?"
 msgstr ""
 
@@ -3894,7 +3889,7 @@ msgstr ""
 msgid "Shown to the customer (fee/coupon name)."
 msgstr ""
 
-#: admin-app/src/components/layout/AdminLayout.tsx:445
+#: admin-app/src/components/layout/AdminLayout.tsx:469
 msgid "Sidebar"
 msgstr ""
 
@@ -3918,7 +3913,7 @@ msgstr ""
 msgid "Slide the progress-bar fill on updates."
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:140
+#: admin-app/src/routes/Dashboard.tsx:153
 msgid "Smart Upsells assisted %s mission completions this period."
 msgstr ""
 
@@ -3944,7 +3939,7 @@ msgstr ""
 msgid "Solid"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:837
+#: admin-app/src/routes/MissionPerformance.tsx:850
 msgid "Some orders do not have complete cost information."
 msgstr ""
 
@@ -3964,7 +3959,7 @@ msgstr ""
 msgid "Stack with other rewards?"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:428
+#: admin-app/src/routes/Dashboard.tsx:550
 msgid "Start collecting performance data"
 msgstr ""
 
@@ -4031,7 +4026,7 @@ msgstr ""
 msgid "Target"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:405
+#: admin-app/src/routes/MissionPerformance.tsx:418
 msgid "Target: %s"
 msgstr ""
 
@@ -4195,11 +4190,11 @@ msgstr ""
 msgid "The identity and lifecycle of the campaign."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:673
+#: admin-app/src/routes/Analytics.tsx:670
 msgid "The incremental order value from orders where customers interacted with a mission before purchasing."
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:556
+#: admin-app/src/routes/MissionPerformance.tsx:569
 msgid "The incremental order value from orders where customers progressed or completed this mission before ordering."
 msgstr ""
 
@@ -4291,7 +4286,7 @@ msgstr ""
 msgid "The round button diameter (32–96)."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:718
+#: admin-app/src/routes/Recommendations.tsx:909
 msgid "The selected mission could not be found"
 msgstr ""
 
@@ -4323,7 +4318,7 @@ msgstr ""
 msgid "The unit cost FaraCart uses for Estimated Profit, Mission economics and upsell margin scoring. Leave empty when unknown."
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1023
+#: admin-app/src/routes/Analytics.tsx:1020
 msgid "These metrics use the FaraCart attribution model — direct vs assisted, distinct orders, no double counting."
 msgstr ""
 
@@ -4331,7 +4326,7 @@ msgstr ""
 msgid "These products never count toward the mission, even when they would otherwise qualify."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:819
+#: admin-app/src/routes/Recommendations.tsx:1024
 msgid "This changes a production mission — the action is not reversible from here."
 msgstr ""
 
@@ -4396,7 +4391,7 @@ msgstr ""
 msgid "To"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:710
+#: admin-app/src/routes/Recommendations.tsx:901
 msgid "To see the best optimization recommendation for a mission, first choose one of your store missions."
 msgstr ""
 
@@ -4418,11 +4413,11 @@ msgstr ""
 msgid "Top"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1143
+#: admin-app/src/routes/Analytics.tsx:1140
 msgid "Top campaigns"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1152
+#: admin-app/src/routes/Analytics.tsx:1149
 msgid "Top campaigns by completions"
 msgstr ""
 
@@ -4434,7 +4429,7 @@ msgstr ""
 msgid "Top performing"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:279
+#: admin-app/src/routes/Recommendations.tsx:396
 msgid "Top recommendation"
 msgstr ""
 
@@ -4442,7 +4437,7 @@ msgstr ""
 msgid "Top right"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:1202
+#: admin-app/src/routes/Analytics.tsx:1199
 msgid "Top suggested products"
 msgstr ""
 
@@ -4470,7 +4465,7 @@ msgid "Trend metrics"
 msgstr ""
 
 #: admin-app/src/components/ErrorBoundary.tsx:58
-#: admin-app/src/routes/Dashboard.tsx:624
+#: admin-app/src/routes/Dashboard.tsx:797
 msgid "Try again"
 msgstr ""
 
@@ -4515,7 +4510,7 @@ msgstr ""
 msgid "Updating…"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:312
+#: admin-app/src/routes/Dashboard.tsx:404
 msgid "Upsell Performance"
 msgstr ""
 
@@ -4527,17 +4522,17 @@ msgstr ""
 msgid "Upsell-assisted"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:218
+#: admin-app/src/routes/Recommendations.tsx:324
 msgid "Upsell-assisted completions"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:62
-#: admin-app/src/routes/MissionPerformance.tsx:496
+#: admin-app/src/routes/MissionPerformance.tsx:509
 #: admin-app/src/routes/UpsellAnalytics.tsx:337
 msgid "Upsells"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:137
+#: admin-app/src/routes/Dashboard.tsx:150
 msgid "Upsells are assisting completions"
 msgstr ""
 
@@ -4554,7 +4549,7 @@ msgstr ""
 msgid "Use the desktop position on mobile"
 msgstr ""
 
-#: admin-app/src/components/layout/AdminLayout.tsx:373
+#: admin-app/src/components/layout/AdminLayout.tsx:397
 msgid "User menu"
 msgstr ""
 
@@ -4570,19 +4565,19 @@ msgstr ""
 msgid "Vertical offset (px)"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:315
+#: admin-app/src/routes/Dashboard.tsx:411
 msgid "View"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:244
+#: admin-app/src/routes/Dashboard.tsx:301
 msgid "View all"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:160
+#: admin-app/src/routes/Dashboard.tsx:180
 msgid "View missions"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:143
+#: admin-app/src/routes/Dashboard.tsx:160
 msgid "View performance"
 msgstr ""
 
@@ -4592,8 +4587,8 @@ msgstr ""
 msgid "View products"
 msgstr ""
 
-#: admin-app/src/components/layout/AdminLayout.tsx:359
-#: admin-app/src/components/layout/AdminLayout.tsx:365
+#: admin-app/src/components/layout/AdminLayout.tsx:383
+#: admin-app/src/components/layout/AdminLayout.tsx:389
 msgid "View store"
 msgstr ""
 
@@ -4602,16 +4597,16 @@ msgid "View your cart missions"
 msgstr ""
 
 #: admin-app/src/routes/MissionPerformance.tsx:69
-#: admin-app/src/routes/MissionPerformance.tsx:424
+#: admin-app/src/routes/MissionPerformance.tsx:437
 msgid "Viewed"
 msgstr ""
 
 #: admin-app/src/components/revenue/FunnelVisual.tsx:23
-#: admin-app/src/routes/Analytics.tsx:181
+#: admin-app/src/routes/Analytics.tsx:180
 msgid "Views"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:628
+#: admin-app/src/routes/Dashboard.tsx:801
 msgid "We couldn’t load your analytics. Your Missions are still working normally."
 msgstr ""
 
@@ -4628,7 +4623,7 @@ msgstr ""
 msgid "Weight"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:437
+#: admin-app/src/routes/Dashboard.tsx:566
 msgid "Welcome to FaraCart"
 msgstr ""
 
@@ -4636,11 +4631,11 @@ msgstr ""
 msgid "What happened?"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:502
+#: admin-app/src/routes/Analytics.tsx:501
 msgid "What happens after customers see and complete your missions — purchases, sales and profit."
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:242
+#: admin-app/src/routes/MissionPerformance.tsx:255
 msgid "What target should this mission use — based on real store data."
 msgstr ""
 
@@ -4700,7 +4695,7 @@ msgstr ""
 msgid "Which cart money counts toward missions. Defaults match the storefront behavior before these options existed."
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:727
+#: admin-app/src/routes/MissionPerformance.tsx:740
 msgid "Which missions generated purchases, sales and profit? Completion is not the same as purchase."
 msgstr ""
 
@@ -4708,15 +4703,15 @@ msgstr ""
 msgid "Why this product"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:415
+#: admin-app/src/routes/Recommendations.tsx:562
 msgid "Why this recommendation?"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:281
+#: admin-app/src/routes/MissionPerformance.tsx:294
 msgid "Why?"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:492
+#: admin-app/src/routes/Recommendations.tsx:649
 msgid "Window"
 msgstr ""
 
@@ -4791,7 +4786,7 @@ msgstr ""
 msgid "You reached your mission!"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:637
+#: admin-app/src/routes/Dashboard.tsx:813
 msgid "Your analytics are getting ready"
 msgstr ""
 
@@ -4803,9 +4798,9 @@ msgstr ""
 msgid "after %1$s estimated reward cost"
 msgstr ""
 
-#: admin-app/src/routes/Analytics.tsx:651
-#: admin-app/src/routes/Dashboard.tsx:691
-#: admin-app/src/routes/MissionPerformance.tsx:430
+#: admin-app/src/routes/Analytics.tsx:648
+#: admin-app/src/routes/Dashboard.tsx:870
+#: admin-app/src/routes/MissionPerformance.tsx:443
 #: admin-app/src/routes/RevenueOverview.tsx:383
 msgid "after FaraCart interaction"
 msgstr ""
@@ -4814,7 +4809,7 @@ msgstr ""
 msgid "almost exactly"
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:360
+#: admin-app/src/routes/Recommendations.tsx:499
 msgid "average basket value"
 msgstr ""
 
@@ -4846,11 +4841,11 @@ msgstr ""
 msgid "manually selected for this mission"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:703
+#: admin-app/src/routes/Dashboard.tsx:882
 msgid "mission-exposed customers"
 msgstr ""
 
-#: admin-app/src/routes/MissionPerformance.tsx:529
+#: admin-app/src/routes/MissionPerformance.tsx:542
 msgid "of completions that saw a recommendation"
 msgstr ""
 
@@ -4862,7 +4857,7 @@ msgstr ""
 msgid "previously recommended for this mission"
 msgstr ""
 
-#: admin-app/src/routes/Dashboard.tsx:697
+#: admin-app/src/routes/Dashboard.tsx:876
 msgid "purchases per completed mission"
 msgstr ""
 
@@ -4894,7 +4889,7 @@ msgstr ""
 msgid "“%s” will be permanently deleted. This cannot be undone."
 msgstr ""
 
-#: admin-app/src/routes/Recommendations.tsx:808
+#: admin-app/src/routes/Recommendations.tsx:1013
 msgid "→ %1$s"
 msgstr ""
 

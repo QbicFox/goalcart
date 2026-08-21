@@ -30,6 +30,7 @@ import { Outlet, Link as RouterLink, useLocation } from "react-router-dom";
 
 import { getBootData } from "../../boot";
 import { useFullscreen } from "../../providers/FullscreenProvider";
+import DateRangeFilter from "../date-range/DateRangeFilter";
 import ErrorBoundary from "../ErrorBoundary";
 import ActionBar from "./ActionBar";
 import { NAV_SECTIONS, type NavItem } from "./navigation";
@@ -38,6 +39,22 @@ export const DRAWER_WIDTH = 260;
 
 /** localStorage key holding which sidebar groups are expanded. */
 const NAV_EXPANDED_KEY = "faracart:navExpanded";
+
+/**
+ * Routes whose data follows the global date range — the header shows the
+ * shared date-range filter there. Non-analytics pages (Missions, Campaigns,
+ * Appearance, Settings, builders) do not filter by period, so the header
+ * stays clean on them.
+ */
+const DATE_FILTER_ROUTES: string[] = [
+	"/dashboard",
+	"/revenue",
+	"/revenue/missions",
+	"/revenue/attribution",
+	"/optimization/missions",
+	"/optimization/upsells",
+	"/analytics",
+];
 
 /**
  * Thin, theme-aware scrollbar shared by the sidebar nav area and the
@@ -353,6 +370,13 @@ export default function AdminLayout() {
 					>
 						{__('FaraCart', 'faracart')}
 					</Typography>
+
+					{/* Global date-range filter — one picker for every analytics
+              page; the selection is shared via DateRangeContext and drives
+              every range-keyed query below it. */}
+					{DATE_FILTER_ROUTES.includes(location.pathname) && (
+						<DateRangeFilter />
+					)}
 
 					{fullscreen && (
 						<>

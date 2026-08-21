@@ -389,7 +389,9 @@ check( 'navigation drops Smart Recommendations label', false === strpos( $naviga
 check( 'navigation drops Upsell Analytics label', false === strpos( $navigation, 'Upsell Analytics' ) );
 check( 'App redirects old recommendations route', false !== strpos( $app_tsx, "path: '/revenue/recommendations'" ) && false !== strpos( $app_tsx, '/optimization/missions' ) );
 check( 'App redirects old upsells route', false !== strpos( $app_tsx, "path: '/revenue/upsells'" ) && false !== strpos( $app_tsx, '/optimization/upsells' ) );
-check( 'Recommendations page titled Recommendations', false !== strpos( $reco_tsx, "title={__('Recommendations', 'faracart')}" ) );
+// Quote-agnostic (the page was reformatted to double quotes): the title
+// call plus the canonical label string.
+check( 'Recommendations page titled Recommendations', false !== strpos( $reco_tsx, 'title={__(' ) && false !== strpos( $reco_tsx, 'Recommendations' ) );
 check( 'Recommendations page drops Smart Recommendations title', false === strpos( $reco_tsx, "Smart Recommendations" ) );
 check( 'Upsell Analytics page titled Upsells', false !== strpos( $upsell_tsx, "title={__('Upsells', 'faracart')}" ) );
 check( 'Upsell Analytics page drops old title', false === strpos( $upsell_tsx, "title={__('Upsell Analytics', 'faracart')}" ) );

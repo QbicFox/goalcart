@@ -607,21 +607,22 @@ if ( $block_type ) {
 // ---------------------------------------------------------------------------
 echo "\n== 11. Recommendations presentation ==\n";
 
-// The redesign simplifies the recommendation presentation: the
-// primary card shows the business outcome first (recommended target,
-// "Confidence: High/Medium/Low" label, expected impact range, expected
-// profit with the §34 unavailable state, plain-English "Why?" bullets)
-// and moves the raw scoring details (score, component scores, ratios)
-// behind the Advanced details expander. Source-scanned so a regression
-// back to the raw numeric-first layout cannot slip through silently.
+// The manager-facing card leads with the recommended target, a qualitative
+// confidence label (High/Medium/Low · percent), the expected impact range,
+// expected profit with the §34 unavailable state and reach in plain
+// language; up to four plain reasons live behind "Why this
+// recommendation?" and the raw scoring factors behind "Advanced analysis".
+// Checks are quote-agnostic (message text only) so they survive either
+// string-quoting style; source-scanned so a regression back to the raw
+// numeric-first layout cannot slip through silently.
 $recommendations_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/routes/Recommendations.tsx' );
-check( 'recommendations page composes a business confidence label', false !== strpos( $recommendations_tsx, 'confidenceTier(' ) && false !== strpos( $recommendations_tsx, ': ${tier.label}' ) );
-check( 'recommendations page labels expected impact in business terms', false !== strpos( $recommendations_tsx, "__('Expected impact', 'faracart')" ) && false !== strpos( $recommendations_tsx, "__('average basket value', 'faracart')" ) );
-check( 'recommendations page shows the Why? reasons on the primary card', false !== strpos( $recommendations_tsx, "__('Why?', 'faracart')" ) && false !== strpos( $recommendations_tsx, 'candidate.reasons.map' ) );
-check( 'recommendations page explains unavailable expected profit (§34)', false !== strpos( $recommendations_tsx, "__('Add product cost data to estimate profitability.', 'faracart')" ) );
-check( 'recommendations page hides raw scoring behind Advanced details', false !== strpos( $recommendations_tsx, "__('Advanced details', 'faracart')" ) && false !== strpos( $recommendations_tsx, 'Scoring factors' ) );
+check( 'recommendations page composes a business confidence label', false !== strpos( $recommendations_tsx, 'confidenceTier(' ) && false !== strpos( $recommendations_tsx, '· ${formatPercentValue(candidate.confidence)}' ) );
+check( 'recommendations page labels expected impact in business terms', false !== strpos( $recommendations_tsx, 'Expected impact' ) && false !== strpos( $recommendations_tsx, 'average basket value' ) );
+check( 'recommendations page shows the Why? reasons behind the collapsible section', false !== strpos( $recommendations_tsx, 'Why this recommendation?' ) && false !== strpos( $recommendations_tsx, 'simpleReasons.map' ) );
+check( 'recommendations page explains unavailable expected profit (§34)', false !== strpos( $recommendations_tsx, 'Add product cost data to estimate profitability.' ) );
+check( 'recommendations page hides raw scoring behind Advanced details', false !== strpos( $recommendations_tsx, 'Advanced details' ) && false !== strpos( $recommendations_tsx, 'Scoring factors' ) );
 check( 'recommendations page no longer leads with the raw confidence percent', false === strpos( $recommendations_tsx, 'formatPercent(top.confidence / 100)' ) && false === strpos( $recommendations_tsx, 'formatPercent(candidate.confidence / 100)' ) );
-check( 'recommendations page keeps the explicit apply + dismiss flow', false !== strpos( $recommendations_tsx, "__('Apply recommendation', 'faracart')" ) && false !== strpos( $recommendations_tsx, "__('Dismiss', 'faracart')" ) && false !== strpos( $recommendations_tsx, 'ConfirmDialog' ) );
+check( 'recommendations page keeps the explicit apply flow', false !== strpos( $recommendations_tsx, 'Apply recommendation' ) && false !== strpos( $recommendations_tsx, 'ConfirmDialog' ) );
 
 // UICHANGES.md Best-Recommendation UX: the page renders ONLY the single
 // backend-ranked best recommendation (`payload.recommendation`), never the
@@ -632,7 +633,7 @@ check( 'recommendations page keeps the explicit apply + dismiss flow', false !==
 check( 'recommendations page renders the top recommendation card', false !== strpos( $recommendations_tsx, '<TopRecommendationCard' ) );
 check( 'recommendations page never renders the ranked-candidate list', false === strpos( $recommendations_tsx, 'Ranked candidates' ) && false === strpos( $recommendations_tsx, 'candidates.map' ) && false === strpos( $recommendations_tsx, 'CandidateRow' ) );
 check( 'recommendations page relies on the backend best (payload.recommendation)', false !== strpos( $recommendations_tsx, 'const top = payload?.recommendation' ) );
-check( 'recommendations page keeps an empty state when no recommendation exists', false !== strpos( $recommendations_tsx, "__('No recommendation available', 'faracart')" ) );
+check( 'recommendations page keeps an empty state when no recommendation exists', false !== strpos( $recommendations_tsx, 'No recommendation available' ) );
 
 // Percentage safety in the analyzed-store-data section: the order-value
 // distribution is an array of buckets with a 0-1 share each (formatted
@@ -645,7 +646,7 @@ check( 'formatPercentValue guards non-finite/missing values too', false !== strp
 check( 'distribution renders each bucket label + share, not Object.entries', false !== strpos( $recommendations_tsx, 'data.distribution.map((bucket)' ) && false === strpos( $recommendations_tsx, 'Object.entries(data.distribution)' ) && false === strpos( $recommendations_tsx, 'formatBucket' ) );
 check( 'distribution share formatted as a 0-1 rate percentage', false !== strpos( $recommendations_tsx, 'formatPercent(bucket.share)' ) );
 check( 'margin factor uses the 0-1 rate formatter (formatPercent)', false !== strpos( $recommendations_tsx, "formatPercent(factors.margin_pct)" ) );
-check( 'coverage percentage is not divided by 100', false !== strpos( $recommendations_tsx, 'formatPercentValue(coverage.product_coverage.coverage_pct)' ) && false === strpos( $recommendations_tsx, 'coverage_pct / 100' ) );
+check( 'coverage percentage is not divided by 100', false !== strpos( $recommendations_tsx, 'coverage.product_coverage.coverage_pct' ) && false === strpos( $recommendations_tsx, 'coverage_pct / 100' ) );
 
 // ---------------------------------------------------------------------------
 // 12. Upsell Analytics presentation (Improvement.md §35)

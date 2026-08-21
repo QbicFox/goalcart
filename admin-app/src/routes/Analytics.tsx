@@ -51,7 +51,6 @@ import { fetchCampaigns } from '../api/campaigns';
 import { fetchMissions } from '../api/missions';
 import { searchProducts } from '../api/search';
 import { getBootData } from '../boot';
-import DateRangeFilter from '../components/date-range/DateRangeFilter';
 import EmptyState from '../components/EmptyState';
 import NumberPagination from '../components/NumberPagination';
 import EntityAutocomplete from '../components/mission-builder/EntityAutocomplete';
@@ -511,8 +510,6 @@ export default function Analytics() {
         useFlexGap
         sx={{ alignItems: { xs: 'stretch', lg: 'center' }, flexWrap: 'wrap' }}
       >
-        <DateRangeFilter />
-
         <TextField
           select
           label={__('Campaign', 'faracart')}
