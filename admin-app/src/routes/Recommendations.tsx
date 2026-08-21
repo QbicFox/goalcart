@@ -1,4 +1,7 @@
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import TipsAndUpdatesIcon from '@mui/icons-material/TipsAndUpdates';
 import Alert from '@mui/material/Alert';
@@ -29,17 +32,18 @@ import { REWARD_LABELS } from '../templates/rewardLabel';
 import type { CostCoveragePayload, MissionRecommendationsPayload, RecommendationCandidate, RecommendationMissionHistory } from '../types';
 
 /**
- * Business-friendly confidence label (Improvement.md §33 — the raw 0–100
- * score stays in the Advanced details). High ≥ 75, Medium ≥ 60, else Low.
+ * Business-friendly confidence label — the qualitative status is the primary
+ * message, the raw 0–100 score stays as secondary text next to it
+ * (80–100 High, 60–79 Medium, <60 Low).
  */
 function confidenceTier(confidence: number): { label: string; color: 'success' | 'warning' | 'default'; icon: ReactElement } {
-  if (confidence >= 75) {
-    return { label: __('High', 'faracart'), color: 'success', icon: <CheckCircleOutlineOutlinedIcon fontSize="small" /> };
+  if (confidence >= 80) {
+    return { label: __('High confidence', 'faracart'), color: 'success', icon: <CheckCircleOutlineOutlinedIcon fontSize="small" /> };
   }
   if (confidence >= 60) {
-    return { label: __('Medium', 'faracart'), color: 'warning', icon: <InfoOutlinedIcon fontSize="small" /> };
+    return { label: __('Medium confidence', 'faracart'), color: 'warning', icon: <InfoOutlinedIcon fontSize="small" /> };
   }
-  return { label: __('Low', 'faracart'), color: 'default', icon: <InfoOutlinedIcon fontSize="small" /> };
+  return { label: __('Low confidence', 'faracart'), color: 'default', icon: <InfoOutlinedIcon fontSize="small" /> };
 }
 
 /** Data-sufficiency tier translated to business language (§45). */
@@ -219,14 +223,24 @@ function CurrentMissionBlock({ history }: { history: RecommendationMissionHistor
   );
 }
 
-/** The primary recommendation card (§33) — business outcome first. */
+/**
+ * The primary recommendation card — one clear business action (§33).
+ *
+ * Manager-facing hierarchy: recommended target (dominant) → current vs
+ * recommended → expected impact + profit → confidence → reach in plain
+ * language → Apply. Detail lives behind two collapsed sections:
+ * "Why this recommendation?" (max 4 plain reasons) and "Advanced
+ * analysis" (current-mission stats + raw scoring factors).
+ */
 function TopRecommendationCard({
   candidate,
   missionId,
   missionName,
   missionHistory,
-  detailsOpen,
-  onToggleDetails,
+  reasonsOpen,
+  advancedOpen,
+  onToggleReasons,
+  onToggleAdvanced,
   onApply,
   onDismiss,
 }: {
@@ -235,13 +249,28 @@ function TopRecommendationCard({
   /** The selected mission's name — makes it unmistakable which mission the card belongs to. */
   missionName: string | null;
   missionHistory: RecommendationMissionHistory | null;
-  detailsOpen: boolean;
-  onToggleDetails: () => void;
+  reasonsOpen: boolean;
+  advancedOpen: boolean;
+  onToggleReasons: () => void;
+  onToggleAdvanced: () => void;
   onApply: (candidate: RecommendationCandidate) => void;
   onDismiss: () => void;
 }) {
   const tier = confidenceTier(candidate.confidence);
   const profitAvailable = candidate.expected_profit_available && candidate.expected_profit !== null;
+
+  // Plain-language values: rounded to whole percents so a manager never
+  // reads 23.38% or 7.02% — the exact numbers stay in the payload/advanced
+  // details.
+  const reachPct = Math.round(candidate.reachable_orders_pct);
+  const impactLow = Math.round(candidate.expected_aov_impact.low);
+  const impactHigh = Math.round(candidate.expected_aov_impact.high);
+  const simpleReasons = candidate.reasons.slice(0, 4);
+
+  // Current → recommended comparison; hidden when the mission has no
+  // recorded history (nothing to compare against).
+  const currentTarget = missionHistory ? missionHistory.current_target : null;
+  const hasComparison = currentTarget !== null && Math.abs(currentTarget - candidate.threshold) > 0.0001;
 
   return (
     <Paper variant="outlined" sx={{ p: 2.5, borderColor: 'primary.main', borderWidth: 2, position: 'relative' }}>
@@ -262,38 +291,77 @@ function TopRecommendationCard({
         />
       )}
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, alignItems: 'flex-end' }}>
-        <Box sx={{ minWidth: 190 }}>
-          <Typography variant="caption" color="text.secondary">
-            {__('Recommended Mission Target', 'faracart')}
-          </Typography>
-          <Typography variant="h4" component="p" sx={{ m: 0, fontWeight: 700 }}>
+      {/* Recommended target — the dominant message. */}
+      <Box>
+        <Typography variant="caption" color="text.secondary">
+          {__('Recommended Mission Target', 'faracart')}
+        </Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
+          <Typography variant="h3" component="p" sx={{ m: 0, fontWeight: 700 }}>
             {formatCurrency(candidate.threshold)}
           </Typography>
-        </Box>
-
-        <Box>
+          {/* Qualitative confidence first; the raw percent is secondary. */}
           <Chip
             size="small"
             variant="outlined"
             color={tier.color}
             icon={tier.icon}
-            label={`${__('Confidence', 'faracart')}: ${tier.label}`}
+            label={`${tier.label} · ${formatPercentValue(candidate.confidence)}`}
           />
         </Box>
+      </Box>
 
+      {/* Current vs recommended at a glance (§10). */}
+      {hasComparison && (
+        <Box sx={{ mt: 2, p: 1.5, bgcolor: 'action.hover', borderRadius: 1 }}>
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1}
+            useFlexGap
+            sx={{ alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}
+          >
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="caption" color="text.secondary">
+                {__('Current target', 'faracart')}
+              </Typography>
+              <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                {formatCurrency(currentTarget as number)}
+              </Typography>
+            </Box>
+            <ArrowForwardIcon fontSize="small" color="action" />
+            <Box sx={{ textAlign: 'center' }}>
+              <Typography variant="caption" color="text.secondary">
+                {__('Recommended target', 'faracart')}
+              </Typography>
+              <Typography variant="h6" component="p" sx={{ m: 0, fontWeight: 700, color: 'primary.main' }}>
+                {formatCurrency(candidate.threshold)}
+              </Typography>
+            </Box>
+          </Stack>
+        </Box>
+      )}
+
+      {/* One short sentence that explains the change in business terms. */}
+      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+        {__(
+          'Based on your recent order history, this target provides a good balance between increasing order value and keeping the mission achievable.',
+          'faracart'
+        )}
+      </Typography>
+
+      {/* Expected impact + profit — the outcome, not the math. */}
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)' }, gap: 2, mt: 2.5 }}>
         <Box>
           <Typography variant="caption" color="text.secondary">
             {__('Expected impact', 'faracart')}
           </Typography>
           <Typography variant="h6" component="p" sx={{ m: 0 }}>
-            +{formatPercentValue(candidate.expected_aov_impact.low)} – +{formatPercentValue(candidate.expected_aov_impact.high)}
+            +{formatNumber(impactLow)}% – +{formatNumber(impactHigh)}%
           </Typography>
           <Typography variant="caption" color="text.secondary">
             {__('average basket value', 'faracart')}
           </Typography>
         </Box>
-
         <Box>
           <Typography variant="caption" color="text.secondary">
             {__('Expected profit', 'faracart')}
@@ -309,45 +377,76 @@ function TopRecommendationCard({
         </Box>
       </Box>
 
-      {/* Why? — the plain-English reasons belong on the primary view (§33). */}
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {__('Why?', 'faracart')}
+      {/* Reachability in plain language (§7) — never the internal definition. */}
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 2 }}>
+        <InfoOutlinedIcon fontSize="small" color="action" sx={{ mt: 0.25 }} />
+        <Typography variant="body2" color="text.secondary">
+          {sprintf(
+            /* translators: %d: share of recent orders close to the target (percent, rounded). */
+            __('About %d%% of recent orders are close to this target.', 'faracart'),
+            reachPct
+          )}
         </Typography>
-        <Stack spacing={0.5} sx={{ mt: 0.5 }}>
-          {candidate.reasons.map((reason, index) => (
-            <Typography key={`${reason}-${index}`} variant="body2" color="text.secondary">
-              • {reason}
-            </Typography>
-          ))}
-        </Stack>
       </Box>
 
-      <Collapse in={detailsOpen} timeout="auto" unmountOnExit>
-        <Box sx={{ mt: 1.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
-          <CurrentMissionBlock history={missionHistory} />
-          <AdvancedDetails candidate={candidate} />
-        </Box>
-      </Collapse>
-
-      <Divider sx={{ my: 2 }} />
-
-      <Stack direction="row" spacing={1}>
+      {/* Action — the manager acts here; the detail lives behind collapses. */}
+      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ mt: 2.5 }}>
         <Button
           variant="contained"
+          size="large"
           startIcon={<CheckCircleOutlineOutlinedIcon />}
           disabled={missionId < 1}
           onClick={() => onApply(candidate)}
         >
           {__('Apply recommendation', 'faracart')}
         </Button>
-        <Button variant="outlined" onClick={onToggleDetails} aria-expanded={detailsOpen}>
-          {detailsOpen ? __('Hide details', 'faracart') : __('View details', 'faracart')}
-        </Button>
         <Button variant="text" color="inherit" onClick={onDismiss}>
           {__('Dismiss', 'faracart')}
         </Button>
       </Stack>
+
+      <Divider sx={{ my: 2 }} />
+
+      {/* Why this recommendation? — max 4 concise business reasons. */}
+      {simpleReasons.length > 0 && (
+        <>
+          <Button
+            size="small"
+            startIcon={reasonsOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            onClick={onToggleReasons}
+            aria-expanded={reasonsOpen}
+            sx={{ textTransform: 'none', color: 'text.primary' }}
+          >
+            {__('Why this recommendation?', 'faracart')}
+          </Button>
+          <Collapse in={reasonsOpen} timeout="auto" unmountOnExit>
+            <Stack spacing={0.5} sx={{ mt: 1 }}>
+              {simpleReasons.map((reason, index) => (
+                <Typography key={`${reason}-${index}`} variant="body2" color="text.secondary">
+                  • {reason}
+                </Typography>
+              ))}
+            </Stack>
+          </Collapse>
+        </>
+      )}
+
+      {/* Advanced analysis — technical factors, collapsed by default. */}
+      <Button
+        size="small"
+        startIcon={advancedOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        onClick={onToggleAdvanced}
+        aria-expanded={advancedOpen}
+        sx={{ textTransform: 'none', color: 'text.primary', mt: 1 }}
+      >
+        {__('Advanced analysis', 'faracart')}
+      </Button>
+      <Collapse in={advancedOpen} timeout="auto" unmountOnExit>
+        <Box sx={{ mt: 1.5, pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
+          <CurrentMissionBlock history={missionHistory} />
+          <AdvancedDetails candidate={candidate} />
+        </Box>
+      </Collapse>
     </Paper>
   );
 }
@@ -478,14 +577,16 @@ function AnalyzedData({ payload }: { payload: MissionRecommendationsPayload }) {
  * `recommendation`; this page renders ONLY that one — never a list of
  * competing candidates (UICHANGES.md Best-Recommendation UX). It
  * recommends Mission targets and reward economics only — never products
- * (product recommendations belong to Upsells, §11/§59). The card answers
- * "what threshold should I use and why?" (§9: Current Mission → Recommended
- * Mission → Why?), the raw scoring details live behind the Advanced details
- * expander, and an unavailable expected profit explains how to enable it
- * (§24). Applying is always an explicit admin action (ConfirmDialog → the
- * dedicated apply endpoint, which changes only the mission target and
- * records the feedback-loop event) — the engine itself never modifies a
- * mission (§10/§41).
+ * (product recommendations belong to Upsells, §11/§59). The card is
+ * manager-facing, not a debugging screen: recommended target first, then
+ * current → recommended, expected impact, profit, a qualitative confidence
+ * label and reach in plain language — the raw scoring factors stay behind
+ * the collapsed "Advanced analysis" expander, and up to four plain reasons
+ * live behind "Why this recommendation?". An unavailable expected profit
+ * explains how to enable it (§24). Applying is always an explicit admin
+ * action (ConfirmDialog → the dedicated apply endpoint, which changes only
+ * the mission target and records the feedback-loop event) — the engine
+ * itself never modifies a mission (§10/§41).
  *
  * Mission selection is REQUIRED: the page opens with no mission selected and
  * shows an instruction state (the API is not called, no fake loading),
@@ -506,7 +607,8 @@ export default function Recommendations() {
   const [missionId, setMissionId] = useState<number>(0);
   const [applyTarget, setApplyTarget] = useState<RecommendationCandidate | null>(null);
   const [topDismissed, setTopDismissed] = useState<boolean>(false);
-  const [showTopDetails, setShowTopDetails] = useState<boolean>(false);
+  const [showReasons, setShowReasons] = useState<boolean>(false);
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
   // The store's missions (same query key RevenueToolbar uses, so it is a
   // shared cache): validates that the selected mission still exists and
@@ -524,10 +626,11 @@ export default function Recommendations() {
 
   const handleMissionChange = (nextMissionId: number) => {
     setMissionId(nextMissionId);
-    // Clear every mission-scoped UI state so a previous mission's card, details
-    // or apply dialog can never linger while the new mission loads.
+    // Clear every mission-scoped UI state so a previous mission's card,
+    // expanders or apply dialog can never linger while the new mission loads.
     setTopDismissed(false);
-    setShowTopDetails(false);
+    setShowReasons(false);
+    setShowAdvanced(false);
     setApplyTarget(null);
   };
 
@@ -648,8 +751,10 @@ export default function Recommendations() {
               missionId={missionId}
               missionName={selectedMission?.name ?? null}
               missionHistory={missionHistory}
-              detailsOpen={showTopDetails}
-              onToggleDetails={() => setShowTopDetails((current) => !current)}
+              reasonsOpen={showReasons}
+              advancedOpen={showAdvanced}
+              onToggleReasons={() => setShowReasons((current) => !current)}
+              onToggleAdvanced={() => setShowAdvanced((current) => !current)}
               onApply={handleApply}
               onDismiss={() => setTopDismissed(true)}
             />

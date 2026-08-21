@@ -157,6 +157,9 @@
             "Aban": [
                 "آبان"
             ],
+            "About %d%% of recent orders are close to this target.": [
+                "حدود %d٪ از سفارش‌های اخیر به این آستانه نزدیک هستند."
+            ],
             "Accent color": [
                 "رنگ تأکید"
             ],
@@ -240,6 +243,9 @@
             ],
             "Advanced Analytics": [
                 "تحلیل‌های پیشرفته"
+            ],
+            "Advanced analysis": [
+                "تحلیل پیشرفته"
             ],
             "Advanced attribution": [
                 "انتساب پیشرفته"
@@ -447,6 +453,9 @@
             ],
             "Baseball cap": [
                 "کلاه بیسبال"
+            ],
+            "Based on your recent order history, this target provides a good balance between increasing order value and keeping the mission achievable.": [
+                "بر اساس تاریخچهٔ سفارش‌های اخیر شما، این آستانه تعادلی خوب بین افزایش ارزش سفارش و دستیافتنی بودن ماموریت ایجاد می‌کند."
             ],
             "Basic information": [
                 "اطلاعات پایه"
@@ -1288,6 +1297,9 @@
             "High": [
                 "بالا"
             ],
+            "High confidence": [
+                "اطمینان بالا"
+            ],
             "Highest margin": [
                 "بیشترین حاشیهٔ سود"
             ],
@@ -1522,6 +1534,9 @@
             "Low": [
                 "پایین"
             ],
+            "Low confidence": [
+                "اطمینان کم"
+            ],
             "Lower numbers win conflicts.": [
                 "اعداد کمتر در تداخل‌ها برنده می‌شوند."
             ],
@@ -1557,6 +1572,9 @@
             ],
             "Medium": [
                 "متوسط"
+            ],
+            "Medium confidence": [
+                "اطمینان متوسط"
             ],
             "Mehr": [
                 "مهر"
@@ -3072,6 +3090,9 @@
             ],
             "Why?": [
                 "چرا؟"
+            ],
+            "Why this recommendation?": [
+                "چرا این پیشنهاد؟"
             ],
             "Window": [
                 "بازه"

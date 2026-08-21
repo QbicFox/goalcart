@@ -267,6 +267,10 @@ msgstr "نسبت میانگین ارزش سفارش"
 msgid "Aban"
 msgstr "آبان"
 
+#: admin-app/src/routes/Recommendations.tsx:386
+msgid "About %d%% of recent orders are close to this target."
+msgstr "حدود %d٪ از سفارش‌های اخیر به این آستانه نزدیک هستند."
+
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:100
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:119
 #: includes/Templates/Mission/Template1.php:69
@@ -421,6 +425,10 @@ msgstr "پیشرفته"
 #: admin-app/src/routes/Analytics.tsx:944
 msgid "Advanced Analytics"
 msgstr "تحلیل‌های پیشرفته"
+
+#: admin-app/src/routes/Recommendations.tsx:442
+msgid "Advanced analysis"
+msgstr "تحلیل پیشرفته"
 
 #: admin-app/src/routes/RevenueOverview.tsx:585
 msgid "Advanced attribution"
@@ -760,6 +768,10 @@ msgstr "ارتفاع نوار (پیکسل)"
 #: admin-app/src/routes/Appearance.tsx:105
 msgid "Baseball cap"
 msgstr "کلاه بیسبال"
+
+#: admin-app/src/routes/Recommendations.tsx:346
+msgid "Based on your recent order history, this target provides a good balance between increasing order value and keeping the mission achievable."
+msgstr "بر اساس تاریخچهٔ سفارش‌های اخیر شما، این آستانه تعادلی خوب بین افزایش ارزش سفارش و دستیافتنی بودن ماموریت ایجاد می‌کند."
 
 #: admin-app/src/routes/CampaignBuilder.tsx:342
 #: admin-app/src/routes/MissionBuilder.tsx:317
@@ -2219,6 +2231,10 @@ msgstr ""
 msgid "High"
 msgstr "بالا"
 
+#: admin-app/src/routes/Recommendations.tsx:41
+msgid "High confidence"
+msgstr "اطمینان بالا"
+
 #: admin-app/src/routes/UpsellAnalytics.tsx:48
 msgid "Highest margin"
 msgstr "بیشترین حاشیهٔ سود"
@@ -2610,6 +2626,10 @@ msgstr "ثبت گزارش"
 msgid "Low"
 msgstr "پایین"
 
+#: admin-app/src/routes/Recommendations.tsx:46
+msgid "Low confidence"
+msgstr "اطمینان کم"
+
 #: admin-app/src/routes/CampaignBuilder.tsx:424
 #: admin-app/src/routes/MissionBuilder.tsx:517
 msgid "Lower numbers win conflicts."
@@ -2664,6 +2684,10 @@ msgstr "نسبت میانهٔ ارزش سفارش"
 #: admin-app/src/routes/Recommendations.tsx:41
 msgid "Medium"
 msgstr "متوسط"
+
+#: admin-app/src/routes/Recommendations.tsx:44
+msgid "Medium confidence"
+msgstr "اطمینان متوسط"
 
 #: admin-app/src/lib/calendar.ts:132
 msgid "Mehr"
@@ -5180,6 +5204,10 @@ msgstr "چرا این محصول"
 #: admin-app/src/routes/Recommendations.tsx:316
 msgid "Why?"
 msgstr "چرا؟"
+
+#: admin-app/src/routes/Recommendations.tsx:420
+msgid "Why this recommendation?"
+msgstr "چرا این پیشنهاد؟"
 
 #: admin-app/src/routes/Recommendations.tsx:399
 msgid "Window"
