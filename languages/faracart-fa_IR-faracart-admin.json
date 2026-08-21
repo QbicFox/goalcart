@@ -970,9 +970,6 @@
             "Discounted subtotal": [
                 "جمع فرعی پس از تخفیف"
             ],
-            "Dismiss": [
-                "رد کردن"
-            ],
             "Display": [
                 "نمایش"
             ],
@@ -2502,9 +2499,6 @@
             ],
             "Show the remaining amount": [
                 "نمایش مبلغ باقی‌مانده"
-            ],
-            "Show the top recommendation again": [
-                "نمایش دوبارهٔ پیشنهاد برتر"
             ],
             "Showing %d–%d of %d": [
                 "نمایش %d–%d از %d"

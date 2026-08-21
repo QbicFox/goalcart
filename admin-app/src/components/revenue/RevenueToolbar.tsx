@@ -15,6 +15,12 @@ interface RevenueToolbarProps {
   /** Hide the mission selector (pages that do not support mission filtering). */
   showMission?: boolean;
   /**
+   * Hide the global date-range filter. Defaults to true; pages whose data
+   * ignores the range (Recommendations always analyzes a fixed 90-day
+   * window) pass false so an inert control is never shown.
+   */
+  showDateRange?: boolean;
+  /**
    * Required-mission mode (Recommendations): hide the "All missions" option and
    * show a "Select a mission" placeholder — a mission must be chosen before the
    * page can do anything.
@@ -34,6 +40,7 @@ export default function RevenueToolbar({
   missionId,
   onMissionChange,
   showMission = true,
+  showDateRange = true,
   missionRequired = false,
   children,
 }: RevenueToolbarProps) {
@@ -49,7 +56,7 @@ export default function RevenueToolbar({
       useFlexGap
       sx={{ alignItems: { xs: 'stretch', lg: 'center' }, flexWrap: 'wrap' }}
     >
-      <DateRangeFilter />
+      {showDateRange && <DateRangeFilter />}
 
       {showMission && (
         <TextField

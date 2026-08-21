@@ -1704,10 +1704,6 @@ msgstr "درصد تخفیف"
 msgid "Discounted subtotal"
 msgstr "جمع فرعی پس از تخفیف"
 
-#: admin-app/src/routes/Recommendations.tsx:349
-msgid "Dismiss"
-msgstr "رد کردن"
-
 #: admin-app/src/routes/CampaignBuilder.tsx:493
 #: admin-app/src/routes/MissionBuilder.tsx:430
 #: admin-app/src/routes/Settings.tsx:933
@@ -4236,10 +4232,6 @@ msgstr "نمایش عنوان پیشنهادها"
 #: includes/Templates/Mission/Template5.php:155
 msgid "Show the remaining amount"
 msgstr "نمایش مبلغ باقی‌مانده"
-
-#: admin-app/src/routes/Recommendations.tsx:694
-msgid "Show the top recommendation again"
-msgstr "نمایش دوبارهٔ پیشنهاد برتر"
 
 #: admin-app/src/components/NumberPagination.tsx:69
 msgid "Showing %d–%d of %d"
