@@ -182,6 +182,14 @@
 			return null;
 		}
 
+		// WordPress KSES normalizes attribute names to lowercase. Restore
+		// SVG's case-sensitive viewBox name before importing the node, or
+		// exported icons can use the browser's default coordinate system.
+		if ( root.hasAttribute( 'viewbox' ) && ! root.hasAttribute( 'viewBox' ) ) {
+			root.setAttribute( 'viewBox', root.getAttribute( 'viewbox' ) || '' );
+			root.removeAttribute( 'viewbox' );
+		}
+
 		var nodes = [ root ].concat( Array.from( root.querySelectorAll( '*' ) ) );
 
 		for ( var i = 0; i < nodes.length; i++ ) {
@@ -199,7 +207,9 @@
 			}
 		}
 
-		return document.importNode( root, true );
+		var imported = document.importNode( root, true );
+		imported.setAttribute( 'class', 'faracart-floating__custom-svg' );
+		return imported;
 	}
 
 	// The template ids the floating drawer accepts when resolving a mission's

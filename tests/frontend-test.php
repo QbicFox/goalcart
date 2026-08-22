@@ -481,8 +481,10 @@ $frontend_js = (string) file_get_contents( FARACART_PATH . 'assets/js/frontend.j
 $frontend_css = (string) file_get_contents( FARACART_PATH . 'assets/css/frontend.css' );
 check( 'floating widget builds an inline SVG checklist icon', false !== strpos( $frontend_js, 'createFloatingIcon' ) && false !== strpos( $frontend_js, "createElementNS( NS, 'svg' )" ) );
 check( 'floating SVG is currentColor-driven', false !== strpos( $frontend_js, "'stroke', 'currentColor'" ) && false !== strpos( $frontend_js, "'fill', 'currentColor'" ) );
-check( 'floating widget parses custom SVG without HTML injection', false !== strpos( $frontend_js, 'parseFloatingIcon' ) && false === strpos( $frontend_js, 'innerHTML' ) );
-check( 'floating drawer has a primary-color header', false !== strpos( $frontend_js, 'faracart-floating__header' ) && false !== strpos( $frontend_css, '.faracart-floating__header' ) );
+check( 'floating widget parses custom SVG without HTML injection', false !== strpos( $frontend_js, 'parseFloatingIcon' ) && false === strpos( $frontend_js, 'innerHTML' ) );check( 'custom SVG dimensions are normalized to the FAB', false !== strpos( $frontend_js, 'faracart-floating__custom-svg' ) && false !== strpos( $frontend_css, '.faracart-floating__custom-svg' ) );
+check( 'custom SVG viewBox casing is restored after sanitization', false !== strpos( $frontend_js, "root.hasAttribute( 'viewbox' )" ) && false !== strpos( $frontend_js, "setAttribute( 'viewBox'" ) );
+check( 'floating drawer has a primary-color header',
+ false !== strpos( $frontend_js, 'faracart-floating__header' ) && false !== strpos( $frontend_css, '.faracart-floating__header' ) );
 $settings_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/routes/Settings.tsx' );
 check( 'floating settings accept custom SVG code', false !== strpos( $settings_tsx, 'Custom SVG icon' ) && false !== strpos( $settings_tsx, 'multiline' ) );
 $settings->set( 'floating_primary_color', '#2271b1' );
