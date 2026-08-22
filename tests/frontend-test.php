@@ -113,6 +113,7 @@ check( 'default locations include cart/mini-cart/checkout/shop/product', array()
 echo "\n== 2. Hook registration ==\n";
 
 check( 'wp_enqueue_scripts hooked', false !== has_action( 'wp_enqueue_scripts', array( $ui, 'enqueue_assets' ) ) );
+check( 'Settings API registration hooked', false !== has_action( 'admin_init', array( $settings, 'register_wp_settings' ) ) );
 check( 'wp_footer config print hooked at 5', 5 === hook_priority( 'wp_footer', array( $ui, 'print_config' ) ) );
 check( 'init shortcode registration hooked', false !== has_action( 'init', array( $ui, 'register_shortcode' ) ) );
 check( 'cart location hooked', false !== has_action( 'woocommerce_before_cart', array( $ui, 'render_cart_widget' ) ) );
@@ -463,6 +464,22 @@ check( 'config carries the animation flag', array_key_exists( 'animation', $conf
 check( 'config appearance has accent', isset( $config['appearance']['accent'] ) && '#2271b1' === $config['appearance']['accent'] );
 check( 'config appearance has radius', isset( $config['appearance']['radius'] ) && 10 === $config['appearance']['radius'] );
 check( 'config appearance has bar height', isset( $config['appearance']['barHeight'] ) && 10 === $config['appearance']['barHeight'] );
+check( 'floating config carries the primary color', isset( $config['floating']['primaryColor'] ) && '#2271b1' === $config['floating']['primaryColor'] );
+
+$settings->set( 'floating_primary_color', '#7e22ce' );
+$floating_config = $ui->frontend_config()['floating'];
+check( 'floating primary color follows settings', '#7e22ce' === $floating_config['primaryColor'] );
+$css = $ui->appearance_css();
+check( 'floating primary color is emitted as a scoped token', false !== strpos( $css, '--faracart-floating-primary:#7e22ce' ) );
+$settings->set( 'floating_primary_color', 'invalid-color' );
+check( 'invalid floating primary color falls back', '#2271b1' === $ui->frontend_config()['floating']['primaryColor'] );
+
+$frontend_js = (string) file_get_contents( FARACART_PATH . 'assets/js/frontend.js' );
+$frontend_css = (string) file_get_contents( FARACART_PATH . 'assets/css/frontend.css' );
+check( 'floating widget builds an inline SVG checklist icon', false !== strpos( $frontend_js, 'createFloatingIcon' ) && false !== strpos( $frontend_js, "createElementNS( NS, 'svg' )" ) );
+check( 'floating SVG is currentColor-driven', false !== strpos( $frontend_js, "'stroke', 'currentColor'" ) && false !== strpos( $frontend_js, "'fill', 'currentColor'" ) );
+check( 'floating drawer has a primary-color header', false !== strpos( $frontend_js, 'faracart-floating__header' ) && false !== strpos( $frontend_css, '.faracart-floating__header' ) );
+$settings->set( 'floating_primary_color', '#2271b1' );
 
 // Shortcode template override lands on the container (per-widget template).
 $out = do_shortcode( '[faracart_progress template="template-2"]' );

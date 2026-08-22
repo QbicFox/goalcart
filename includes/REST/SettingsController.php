@@ -299,6 +299,7 @@ class SettingsController extends BaseController
 			'floating_show_mobile'        => $bool,
 			'floating_button_size'        => array('type' => 'integer', 'minimum' => 32, 'maximum' => 96),
 			'floating_animation'          => $bool,
+			'floating_primary_color'      => array('type' => 'string'),
 			'floating_icon'               => array('type' => 'string'),
 			'floating_label'              => array('type' => 'string'),
 
@@ -556,6 +557,11 @@ class SettingsController extends BaseController
 
 			case 'floating_button_size':
 				return min(96, max(32, (int) $value));
+
+			case 'floating_primary_color':
+				$color = sanitize_hex_color($value);
+
+				return $color ? $color : $defaults['floating_primary_color'];
 
 			case 'floating_icon':
 				return trim(sanitize_text_field((string) $value));

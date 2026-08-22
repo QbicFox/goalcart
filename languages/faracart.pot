@@ -526,6 +526,10 @@ msgstr ""
 msgid "Appended to the widget styles. Applied only while this template renders."
 msgstr ""
 
+#: admin-app/src/routes/Settings.tsx:925
+msgid "Applies to the floating button, drawer header, borders and active states."
+msgstr ""
+
 #: admin-app/src/components/wheel-picker/WheelDateField.tsx:115
 #: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:117
 #: admin-app/src/components/wheel-picker/WheelTimeField.tsx:113
@@ -3310,6 +3314,10 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:100
 #: includes/Frontend/ProgressUI.php:1016
+#: admin-app/src/routes/Settings.tsx:924
+msgid "Primary color"
+msgstr ""
+
 msgid "Progress"
 msgstr ""
 
@@ -4920,6 +4928,10 @@ msgstr ""
 
 #: includes/REST/GiftController.php:159
 msgid "Your cart is empty."
+msgstr ""
+
+#: includes/Frontend/ProgressUI.php:579
+msgid "Your missions"
 msgstr ""
 
 #: admin-app/src/routes/AttributionDashboard.tsx:230

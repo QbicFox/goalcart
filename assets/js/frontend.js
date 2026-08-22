@@ -105,7 +105,56 @@
 	// The button side remembered at open time for the resize handler.
 	// (Named *State so it never shadows the floatingButtonSide() resolver.)
 	var floatingButtonSideState = 'right';
-	var FLOATING_DEFAULT_ICON = '\uD83D\uDED2'; // shopping cart
+	/**
+	 * Build the default mission/checklist icon as a real inline SVG.
+	 *
+	 * Every painted part uses `currentColor`, so the icon inherits the
+	 * floating button's CSS color derived from the selected primary color.
+	 * No image or external asset is needed.
+	 *
+	 * @return {SVGElement}
+	 */
+	const createFloatingIcon = () => {
+		var NS = 'http://www.w3.org/2000/svg';
+		var svg = document.createElementNS( NS, 'svg' );
+		svg.setAttribute( 'viewBox', '0 0 24 24' );
+		svg.setAttribute( 'width', '24' );
+		svg.setAttribute( 'height', '24' );
+		svg.setAttribute( 'fill', 'none' );
+		svg.setAttribute( 'stroke', 'currentColor' );
+		svg.setAttribute( 'stroke-width', '1.8' );
+		svg.setAttribute( 'stroke-linecap', 'round' );
+		svg.setAttribute( 'stroke-linejoin', 'round' );
+		svg.setAttribute( 'aria-hidden', 'true' );
+		svg.setAttribute( 'focusable', 'false' );
+
+		var outline = document.createElementNS( NS, 'rect' );
+		outline.setAttribute( 'x', '4' );
+		outline.setAttribute( 'y', '3' );
+		outline.setAttribute( 'width', '16' );
+		outline.setAttribute( 'height', '18' );
+		outline.setAttribute( 'rx', '2' );
+
+		var check = document.createElementNS( NS, 'path' );
+		check.setAttribute( 'd', 'm8 9 1.5 1.5L12 8' );
+		check.setAttribute( 'fill', 'currentColor' );
+
+		var lineOne = document.createElementNS( NS, 'path' );
+		lineOne.setAttribute( 'd', 'M13.5 9H17' );
+		var lineTwo = document.createElementNS( NS, 'path' );
+		lineTwo.setAttribute( 'd', 'm8 14 1.5 1.5L12 13' );
+		lineTwo.setAttribute( 'fill', 'currentColor' );
+		var lineThree = document.createElementNS( NS, 'path' );
+		lineThree.setAttribute( 'd', 'M13.5 14H17' );
+
+		svg.appendChild( outline );
+		svg.appendChild( check );
+		svg.appendChild( lineOne );
+		svg.appendChild( lineTwo );
+		svg.appendChild( lineThree );
+
+		return svg;
+	}
 
 	// The template ids the floating drawer accepts when resolving a mission's
 	// card (the same ids widgetTemplate honors, minus per-container overrides).
@@ -2615,6 +2664,7 @@
 				? floating.showMobile !== false
 				: floating.showDesktop !== false,
 			buttonSize: Math.min( 96, Math.max( 32, Number( floating.buttonSize ) || 56 ) ),
+			primaryColor: /^#[0-9a-f]{6}$/i.test( String( floating.primaryColor || '' ) ) ? String( floating.primaryColor ) : '#2271b1',
 			animation: floating.animation !== false,
 			icon: String( floating.icon || '' ),
 			label: String( floating.label || '' ),
@@ -2921,6 +2971,11 @@
 		}
 
 		floatingOpen = !! open;
+		var toggleButton = container.querySelector( '.faracart-floating__button' );
+
+		if ( toggleButton ) {
+			toggleButton.setAttribute( 'aria-expanded', floatingOpen ? 'true' : 'false' );
+		}
 
 		if ( floatingOpen ) {
 			var drawer = container.querySelector( '.faracart-floating__drawer' );
@@ -2993,11 +3048,11 @@
 			return;
 		}
 
-		var close = drawer.querySelector( '.faracart-floating__close' );
+		var header = drawer.querySelector( '.faracart-floating__header' );
 		drawer.replaceChildren();
 
-		if ( close ) {
-			drawer.appendChild( close );
+		if ( header ) {
+			drawer.appendChild( header );
 		}
 
 		var missions = ( data && data.missions ) || [];
@@ -3046,12 +3101,19 @@
 
 		var drawer = el( 'div', 'faracart-floating__drawer' );
 		drawer.setAttribute( 'role', 'dialog' );
+		drawer.setAttribute( 'aria-label', floatingConfig().labels.title || 'Your missions' );
 		container.appendChild( drawer );
+
+		var header = el( 'div', 'faracart-floating__header' );
+		var title = el( 'span', 'faracart-floating__title', floatingConfig().labels.title || 'Your missions' );
+		header.appendChild( title );
 
 		var close = el( 'button', 'faracart-floating__close' );
 		close.type = 'button';
 		close.textContent = '\u00D7';
-		drawer.appendChild( close );
+		close.setAttribute( 'aria-label', floatingConfig().labels.close || 'Close' );
+		header.appendChild( close );
+		drawer.appendChild( header );
 
 		button.addEventListener( 'click', () => {
 			setFloatingOpen( ! floatingOpen );
@@ -3129,11 +3191,18 @@
 
 		container.classList.toggle( 'faracart-floating--no-anim', ! floating.animation );
 		container.style.setProperty( '--faracart-floating-size', floating.buttonSize + 'px' );
+		container.style.setProperty( '--faracart-floating-primary', floating.primaryColor );
+		container.style.setProperty( '--faracart-accent', floating.primaryColor );
 
 		var icon = container.querySelector( '.faracart-floating__icon' );
 
 		if ( icon ) {
-			icon.textContent = floating.icon || FLOATING_DEFAULT_ICON;
+			icon.replaceChildren();
+			if ( floating.icon ) {
+				icon.textContent = floating.icon;
+			} else {
+				icon.appendChild( createFloatingIcon() );
+			}
 		}
 
 		var button = container.querySelector( '.faracart-floating__button' );
@@ -3142,6 +3211,19 @@
 			var label = floating.label || floating.labels.open || 'View your cart missions';
 			button.setAttribute( 'aria-label', label );
 			button.title = label;
+		}
+
+		var drawer = container.querySelector( '.faracart-floating__drawer' );
+		var title = container.querySelector( '.faracart-floating__title' );
+		var close = container.querySelector( '.faracart-floating__close' );
+		if ( drawer ) {
+			drawer.setAttribute( 'aria-label', floating.labels.title || 'Your missions' );
+		}
+		if ( title ) {
+			title.textContent = floating.labels.title || 'Your missions';
+		}
+		if ( close ) {
+			close.setAttribute( 'aria-label', floating.labels.close || 'Close' );
 		}
 
 		var fingerprint = payloadFingerprint( data );

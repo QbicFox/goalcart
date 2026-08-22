@@ -44,6 +44,7 @@ import {
 import SectionCard from "../components/mission-builder/SectionCard";
 import { useSnackbar } from "../components/notifications/SnackbarProvider";
 import PageContainer from "../components/PageContainer";
+import ColorField from "../templates/ColorField";
 import { useStickyBarActions } from "../providers/ActionBarProvider";
 import { useFullscreen } from "../providers/FullscreenProvider";
 import type { FaraCartSettings, FrontendLocation } from "../types";
@@ -907,6 +908,20 @@ export default function Settings() {
 												}
 												slotProps={{ htmlInput: { min: 32, max: 96 } }}
 												sx={{ maxWidth: 360 }}
+											/>
+										)}
+									/>
+									<Controller
+										control={control}
+										name="floating_primary_color"
+										render={({ field }) => (
+											<ColorField
+												label={__("Primary color", "faracart")}
+												value={String(field.value || "#2271b1")}
+												onChange={field.onChange}													helperText={__(
+													"Applies to the floating button, drawer header, borders and active states.",
+													"faracart",
+												)}
 											/>
 										)}
 									/>

@@ -404,12 +404,25 @@ try {
 	check( 'css class stripped of tags', 'my class' === $data['frontend_css_class'] );
 	check( 'custom css stripped of tags', false === strpos( $data['frontend_custom_css'], '<script' ) );
 
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
+	$req->set_param( 'floating_primary_color', '#7e22ce' );
+	$resp = $settings_ctrl->handle_save( $req );
+	$data = $resp->get_data()['data'];
+	check( 'floating primary color persisted', '#7e22ce' === $data['floating_primary_color'] );
+
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
+	$req->set_param( 'floating_primary_color', 'not-a-color' );
+	$resp = $settings_ctrl->handle_save( $req );
+	$data = $resp->get_data()['data'];
+	check( 'invalid floating primary color falls back', '#2271b1' === $data['floating_primary_color'] );
+
 	// The REST schema validates the template enum + ranges on dispatch.
 	$save = $settings_ctrl->save_args();
 	check( 'template enum in schema', isset( $save['frontend_template']['enum'] ) );
 	check( 'invalid template rejected by schema', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['frontend_template'], 'frontend_template' ) ) );
 	check( 'valid template accepted by schema', true === rest_validate_value_from_schema( 'template-3', $save['frontend_template'], 'frontend_template' ) );
 	check( 'bar height range in schema', is_wp_error( rest_validate_value_from_schema( 999, $save['frontend_bar_height'], 'frontend_bar_height' ) ) );
+	check( 'floating primary color in schema', isset( $save['floating_primary_color'] ) );
 
 	// 5.13 Campaign CRUD + milestone ordering.
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/campaigns' );

@@ -569,12 +569,14 @@ final class ProgressUI {
 			'showDesktop'      => (bool) $this->settings->get( 'floating_show_desktop', true ),
 			'showMobile'       => (bool) $this->settings->get( 'floating_show_mobile', true ),
 			'buttonSize'       => min( 96, max( 32, (int) $this->settings->get( 'floating_button_size', 56 ) ) ),
+			'primaryColor'     => $this->floating_primary_color(),
 			'animation'        => (bool) $this->settings->get( 'floating_animation', true ),
 			'icon'             => trim( sanitize_text_field( (string) $this->settings->get( 'floating_icon', '' ) ) ),
 			'label'            => trim( sanitize_text_field( (string) $this->settings->get( 'floating_label', '' ) ) ),
 			'labels'           => array(
 				'open'   => __( 'View your cart missions', 'faracart' ),
 				'close'  => __( 'Close', 'faracart' ),
+				'title'  => __( 'Your missions', 'faracart' ),
 			),
 		);
 	}
@@ -645,6 +647,23 @@ final class ProgressUI {
 	}
 
 	/**
+	 * Resolve the floating widget's primary color.
+	 *
+	 * This setting is intentionally separate from the regular progress
+	 * widget accent: the FAB and its drawer form their own visual surface.
+	 * Invalid stored values fall back to the same WordPress-admin blue used
+	 * by the existing storefront defaults.
+	 *
+	 * @return string
+	 */
+	public function floating_primary_color() {
+		$defaults = $this->settings->defaults();
+		$color    = sanitize_hex_color( $this->settings->get( 'floating_primary_color', $defaults['floating_primary_color'] ?? '#2271b1' ) );
+
+		return $color ? $color : ( $defaults['floating_primary_color'] ?? '#2271b1' );
+	}
+
+	/**
 	 * The resolved appearance tokens (colors, radius, bar height).
 	 *
 	 * Every value is normalized (hex colors fall back to their defaults)
@@ -692,6 +711,11 @@ final class ProgressUI {
 			$a['text'],
 			(int) $a['radius'],
 			(int) $a['barHeight']
+		);
+
+		$css .= sprintf(
+			'\n#faracart-floating { --faracart-floating-primary:%1$s; --faracart-accent:%1$s; --faracart-button-bg:%1$s; --faracart-header-bg:%1$s; }',
+			esc_attr( $this->floating_primary_color() )
 		);
 
 		$custom = trim( (string) $this->settings->get( 'frontend_custom_css', '' ) );

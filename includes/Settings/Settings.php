@@ -131,6 +131,7 @@ class Settings
 		'floating_show_mobile'        => true,
 		'floating_button_size'        => 56,            // px (diameter)
 		'floating_animation'          => true,
+		'floating_primary_color'      => '#2271b1',     // primary FAB/drawer accent
 		'floating_icon'               => '',            // custom glyph/emoji ('' = default)
 		'floating_label'              => '',            // custom tooltip/label ('' = default)
 
@@ -199,6 +200,11 @@ class Settings
 	 */
 	public function register(HookManager $hooks)
 	{
+		// Keep the option available to WordPress's native Settings API as
+		// well as the REST-backed admin screen. The REST sanitizer remains
+		// the primary path used by FaraCart's React settings form.
+		$hooks->add_action('admin_init', array($this, 'register_wp_settings'));
+
 		$hooks->add_filter(
 			'faracart_default_calculation_mode',
 			array($this, 'apply_default_calculation_mode'),
@@ -219,6 +225,59 @@ class Settings
 	 * @param string $type Mission type.
 	 * @return string
 	 */
+	/**
+	 * Register the shared option with WordPress's Settings API.
+	 *
+	 * The plugin stores settings in one option; registering that existing
+	 * option avoids creating a second color-specific option while allowing
+	 * native WordPress settings integrations to discover it.
+	 *
+	 * @return void
+	 */
+	public function register_wp_settings()
+	{
+		if (! function_exists('register_setting')) {
+			return;
+		}
+
+		register_setting(
+			'faracart_settings',
+			self::OPTION_NAME,
+			array(
+				'type'              => 'array',
+				'default'           => array(),
+				'show_in_rest'      => false,
+				'sanitize_callback' => array($this, 'sanitize_wp_settings'),
+			)
+		);
+	}
+
+	/**
+	 * Sanitize values submitted through the native Settings API.
+	 *
+	 * The React REST route performs the full per-key validation. This
+	 * callback specifically guarantees that native Settings API writes
+	 * cannot persist an unsafe floating primary color, while preserving
+	 * the other values in the shared option.
+	 *
+	 * @param mixed $value Submitted option value.
+	 * @return array<string, mixed>
+	 */
+	public function sanitize_wp_settings($value)
+	{
+		$stored = get_option(self::OPTION_NAME, array());
+		$stored = is_array($stored) ? $stored : array();
+		$value  = is_array($value) ? $value : array();
+		$merged = array_merge($stored, $value);
+
+		if (array_key_exists('floating_primary_color', $merged)) {
+			$color = sanitize_hex_color($merged['floating_primary_color']);
+			$merged['floating_primary_color'] = $color ? $color : $this->defaults['floating_primary_color'];
+		}
+
+		return $merged;
+	}
+
 	public function apply_default_calculation_mode($mode, $type)
 	{
 		if (in_array(

@@ -711,6 +711,8 @@ export interface FaraCartSettings {
   floating_show_mobile: boolean;
   floating_button_size: number;
   floating_animation: boolean;
+  /** Primary color shared by the floating button, drawer header and accents. */
+  floating_primary_color: string;
   /** Custom button glyph/emoji ('' = the default cart glyph). */
   floating_icon: string;
   /** Custom button tooltip/label ('' = the default label). */

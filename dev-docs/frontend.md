@@ -43,6 +43,7 @@ GET /faracart/v1/progress               public progress payload
 - **RewardStatus** — locked/unlocked reward chip
 - **UnifiedRecommendations** — merged suggestions + upsells panel
 - **StickyMissionBar** — fixed bottom bar with featured mission
+- **FloatingWidget** — inline-SVG FAB with a primary-color drawer header and mission list
 
 ### Template Engine
 
@@ -72,6 +73,7 @@ Printed as `window.faracartFrontend` at `wp_footer` priority 5:
   endpoint, refresh, currency, currencySymbol, currencyPosition,
   currencyDecimals, currencyDecimalSeparator, currencyThousandSeparator,
   locale, isRtl, labels, template, animation, appearance, mobile,
+  floating: { enabled, position, buttonSize, primaryColor, labels },
   upsells: { endpoint, track, limit, labels }
 }
 ```

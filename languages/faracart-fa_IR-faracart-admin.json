@@ -331,6 +331,9 @@
             "Appended to the widget styles. Applied only while this template renders.": [
                 "به استایل‌های ویجت اضافه می‌شود. فقط تا زمانی که این قالب نمایش داده می‌شود اعمال می‌گردد."
             ],
+            "Applies to the floating button, drawer header, borders and active states.": [
+                "برای دکمهٔ شناور، سربرگ کشو، حاشیه‌ها و وضعیت‌های فعال اعمال می‌شود."
+            ],
             "Apply": [
                 "اعمال"
             ],
@@ -1987,6 +1990,9 @@
             "Popularity": [
                 "محبوبیت"
             ],
+            "Primary color": [
+                "رنگ اصلی"
+            ],
             "Position": [
                 "موقعیت"
             ],
@@ -2991,6 +2997,9 @@
             ],
             "View your cart missions": [
                 "ماموریت‌های سبد خرید خود را ببینید"
+            ],
+            "Your missions": [
+                "ماموریت‌های شما"
             ],
             "Viewed": [
                 "بازدیدشده"

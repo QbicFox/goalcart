@@ -564,6 +564,10 @@ msgstr ""
 "به استایل‌های ویجت اضافه می‌شود. فقط تا زمانی که این قالب نمایش داده می‌شود "
 "اعمال می‌گردد."
 
+#: admin-app/src/routes/Settings.tsx:925
+msgid "Applies to the floating button, drawer header, borders and active states."
+msgstr "برای دکمهٔ شناور، سربرگ کشو، حاشیه‌ها و وضعیت‌های فعال اعمال می‌شود."
+
 #: admin-app/src/components/wheel-picker/WheelDateField.tsx:115
 #: admin-app/src/components/wheel-picker/WheelDateTimeField.tsx:117
 #: admin-app/src/components/wheel-picker/WheelTimeField.tsx:113
@@ -3384,6 +3388,10 @@ msgstr "محصول محبوب (%d واحد فروخته‌شده، امتیاز 
 msgid "Popularity"
 msgstr "محبوبیت"
 
+#: admin-app/src/routes/Settings.tsx:924
+msgid "Primary color"
+msgstr "رنگ اصلی"
+
 #: admin-app/src/routes/Settings.tsx:723
 msgid "Position"
 msgstr "موقعیت"
@@ -5262,6 +5270,10 @@ msgstr "تحلیل‌های شما در حال آماده‌سازی است"
 #: includes/REST/GiftController.php:159
 msgid "Your cart is empty."
 msgstr "سبد خرید شما خالی است."
+
+#: includes/Frontend/ProgressUI.php:579
+msgid "Your missions"
+msgstr "ماموریت‌های شما"
 
 #: admin-app/src/routes/AttributionDashboard.tsx:230
 msgid "after %1$s estimated reward cost"

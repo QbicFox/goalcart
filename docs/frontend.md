@@ -309,8 +309,13 @@ responsive, motion-safe (respects `prefers-reduced-motion`), and
 `--faracart-bg`, `--faracart-border`, `--faracart-text`,
 `--faracart-text-muted`, `--faracart-radius`, `--faracart-shadow`,
 `--faracart-bar-height`, …) — the Phase 12 Appearance controls override
-the same tokens, and the `frontend_custom_css` setting appends custom CSS
-to the same inline style block (`ProgressUI::appearance_css()`).
+the same tokens, andthe `frontend_custom_css` setting appends custom CSS to the same inline style block (`ProgressUI::appearance_css()`).
+
+The Floating settings tab also exposes `floating_primary_color`. It is
+sanitized as a six-digit hex color, emitted as `--faracart-floating-primary`
+for `#faracart-floating`, and shared by the FAB background, drawer border,
+drawer title bar, hover/active states and the default inline SVG icon.
+
 
 ---
 
