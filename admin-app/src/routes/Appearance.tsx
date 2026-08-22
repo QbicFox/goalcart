@@ -33,7 +33,7 @@ import {
 } from "../components/preview/types";
 import { useStickyBarActions } from "../providers/ActionBarProvider";
 import { useFullscreen } from "../providers/FullscreenProvider";
-import { formatInline } from "../lib/format";
+import { formatDashboardDigits, formatInline } from "../lib/format";
 import SchemaForm from "../templates/SchemaForm";
 import { templateById, useTemplates } from "../templates/useTemplates";
 import { bool } from "../templates/utils";
@@ -220,7 +220,7 @@ function ScopeLivePreview({
 
 	const completedCount = missions.filter((mission) => mission.completed).length;
 	const percent = Math.round(missions[0].percentage);
-	const stateLabel =
+	const stateLabel = formatDashboardDigits(
 		scope === "campaign"
 			? sprintf(
 					/* translators: %1$d: completed milestones, %2$d: total milestones. */
@@ -228,7 +228,8 @@ function ScopeLivePreview({
 					completedCount,
 					missions.length,
 				)
-			: sprintf(__("%d%% progress", "faracart"), percent);
+			: sprintf(__("%d%% progress", "faracart"), percent),
+	);
 
 	return (
 		<Stack spacing={2}>

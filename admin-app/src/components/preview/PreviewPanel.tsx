@@ -7,6 +7,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 
+import { formatDashboardDigits } from '../../lib/format';
 import { templateById } from '../../templates/useTemplates';
 import type { TemplateScope } from '../../types';
 import PreviewControls from './PreviewControls';
@@ -59,7 +60,7 @@ export default function PreviewPanel({ scope, preview }: PreviewPanelProps) {
     templateById(templates, 'mission', resolvedTemplate)?.label ??
     (resolvedTemplate || undefined);
 
-  const rewardLabel =
+  const rewardLabel = formatDashboardDigits(
     scope === 'campaign'
       ? sprintf(
           /* translators: %1$d: completed milestones, %2$d: total milestones. */
@@ -67,7 +68,8 @@ export default function PreviewPanel({ scope, preview }: PreviewPanelProps) {
           completedCount,
           missions.length
         )
-      : sprintf(__('%d%% progress', 'faracart'), percent);
+      : sprintf(__('%d%% progress', 'faracart'), percent)
+  );
 
   return (
     <Stack spacing={2}>

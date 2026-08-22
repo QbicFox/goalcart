@@ -66,12 +66,27 @@
 	var uiLocale = ( cfg && cfg.locale ) ? String( cfg.locale ).replace( '_', '-' ) : undefined;
 
 	// WooCommerce symbols and legacy price labels can arrive as HTML
-	// entities. Decode them before assigning to textContent, otherwise the
-	// entity source is shown literally to shoppers.
+	// entities. Decode only numeric/named entities for text rendering;
+	// never parse server data as markup.
 	const decodeHtmlEntities = ( value ) => {
-		var textarea = document.createElement( 'textarea' );
-		textarea.innerHTML = String( value || '' );
-		return textarea.value;
+		var named = {
+			amp: '&',
+			apos: "'",
+			gt: '>',
+			lt: '<',
+			nbsp: '\u00a0',
+			quot: '"',
+		};
+		return String( value || '' ).replace( /&#x([\da-f]+);|&#(\d+);|&([a-z]+);/gi, ( entity, hex, decimal, name ) => {
+			if ( hex ) {
+				return String.fromCodePoint( parseInt( hex, 16 ) );
+			}
+			if ( decimal ) {
+				return String.fromCodePoint( parseInt( decimal, 10 ) );
+			}
+			var key = String( name ).toLowerCase();
+			return Object.prototype.hasOwnProperty.call( named, key ) ? named[ key ] : entity;
+		} );
 	}
 
 	var WIDGET_SELECTOR = '[data-faracart-widget]';

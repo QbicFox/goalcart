@@ -11,11 +11,35 @@ function siteLocale(): string {
   return raw ? raw.replace('_', '-') : 'en';
 }
 
-/** Decode WooCommerce symbols returned as HTML entities for text rendering. */
+/** Render dashboard digits in the native numeral system of Persian locales. */
+export function formatDashboardDigits(value: string): string {
+  if (!/^fa(?:-|$)/i.test(siteLocale())) {
+    return value;
+  }
+
+  return value.replace(/\d/g, (digit) => String.fromCharCode(0x06f0 + Number(digit)));
+}
+
+/** Decode the numeric and named entities WooCommerce may use for symbols. */
 export function decodeHtmlEntities(value: string): string {
-  const textarea = document.createElement('textarea');
-  textarea.innerHTML = value;
-  return textarea.value;
+  const named: Record<string, string> = {
+    amp: '&',
+    apos: "'",
+    gt: '>',
+    lt: '<',
+    nbsp: '\u00a0',
+    quot: '"',
+  };
+
+  return String(value).replace(/&#x([\da-f]+);|&#(\d+);|&([a-z]+);/gi, (entity, hex, decimal, name) => {
+    if (hex) {
+      return String.fromCodePoint(parseInt(hex, 16));
+    }
+    if (decimal) {
+      return String.fromCodePoint(parseInt(decimal, 10));
+    }
+    return named[String(name).toLowerCase()] ?? entity;
+  });
 }
 
 /**
@@ -66,7 +90,7 @@ export function formatCurrency(value: number, config?: WooCommerceCurrencyConfig
       break;
   }
 
-  return formatted;
+  return formatDashboardDigits(formatted);
 }
 
 /** Format a plain number with the site locale (quantity, weight, …). */
@@ -76,10 +100,10 @@ export function formatNumber(value: number): string {
       maximumFractionDigits: 2,
     }).format(value);
 
-    return formatted;
+    return formatDashboardDigits(formatted);
   } catch {
     const fallback = value.toLocaleString(siteLocale());
-    return fallback;
+    return formatDashboardDigits(fallback);
   }
 }
 
@@ -96,7 +120,7 @@ export function formatPercent(value: number | null | undefined): string {
   }
   const raw = (value * 100).toLocaleString(siteLocale(), { maximumFractionDigits: 1 });
   const formatted = `${raw}%`;
-  return formatted;
+  return formatDashboardDigits(formatted);
 }
 
 /**
@@ -110,7 +134,7 @@ export function formatPercentValue(value: number | null | undefined): string {
   }
   const raw = value.toLocaleString(siteLocale(), { maximumFractionDigits: 1 });
   const formatted = `${raw}%`;
-  return formatted;
+  return formatDashboardDigits(formatted);
 }
 
 /**
@@ -145,10 +169,10 @@ export function formatCompact(value: number): string {
       maximumFractionDigits: 1,
     }).format(value);
 
-    return formatted;
+    return formatDashboardDigits(formatted);
   } catch {
     const fallback = String(Math.round(value));
-    return fallback;
+    return formatDashboardDigits(fallback);
   }
 }
 
@@ -161,10 +185,10 @@ export function formatCompact(value: number): string {
 export function formatInline(value: number, options?: Intl.NumberFormatOptions): string {
   try {
     const formatted = new Intl.NumberFormat(siteLocale(), options).format(value);
-    return formatted;
+    return formatDashboardDigits(formatted);
   } catch {
     const fallback = value.toLocaleString(siteLocale());
-    return fallback;
+    return formatDashboardDigits(fallback);
   }
 }
 
@@ -175,12 +199,12 @@ export function formatShortDay(dateStr: string): string {
   const boot = getBootData();
 
   try {
-    return new Intl.DateTimeFormat(boot.locale.replace('_', '-'), {
+    return formatDashboardDigits(new Intl.DateTimeFormat(boot.locale.replace('_', '-'), {
       month: 'short',
       day: 'numeric',
-    }).format(new Date(`${dateStr}T12:00:00`));
+    }).format(new Date(`${dateStr}T12:00:00`)));
   } catch {
-    return dateStr.slice(5);
+    return formatDashboardDigits(dateStr.slice(5));
   }
 }
 
@@ -189,13 +213,13 @@ export function formatSchedule(startsAt: string | null, endsAt: string | null): 
   const day = (value: string | null) => (value ? value.slice(0, 10) : '');
 
   if (startsAt && endsAt) {
-    return `${day(startsAt)} – ${day(endsAt)}`;
+    return formatDashboardDigits(`${day(startsAt)} – ${day(endsAt)}`);
   }
   if (startsAt) {
-    return `${day(startsAt)} →`;
+    return formatDashboardDigits(`${day(startsAt)} →`);
   }
   if (endsAt) {
-    return `→ ${day(endsAt)}`;
+    return formatDashboardDigits(`→ ${day(endsAt)}`);
   }
   return '—';
 }
