@@ -20,6 +20,7 @@ use FaraCart\Rewards\RewardEngine;
 use FaraCart\Rewards\RewardResult;
 use FaraCart\Settings\Settings;
 use FaraCart\Templates\TemplateEngine;
+use FaraCart\Utils\Currency;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -348,18 +349,20 @@ class PreviewController extends BaseController {
 		}
 
 		return $this->success(
-			array(
+			array_merge(
+				Currency::frontend_config(),
+				array(
 				'missions'    => $items,
 				// Campaign template group (pluggable engine) — mirrors the
 				// live /progress payload so the preview renders a configured
 				// campaign template (e.g. the milestone chain) exactly like
 				// the storefront.
 				'campaigns' => $this->campaign_groups( $mission_id, $campaign_id, $campaign_payload ),
-				'currency' => $this->settings->currency(),
 				'simulated' => array(
 					'amount'   => $amount,
 					'quantity' => $quantity,
 				),
+				)
 			),
 			array(
 				'mode' => ( $campaign_id > 0 || ! empty( $campaign_payload ) ) ? 'campaign' : 'mission',
@@ -716,7 +719,7 @@ class PreviewController extends BaseController {
 			array(
 				'subtotal' => $amount,
 				'total'    => $amount,
-				'currency' => $this->settings->currency(),
+				'currency' => Currency::code(),
 				'items'    => $items,
 			)
 		);

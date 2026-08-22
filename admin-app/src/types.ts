@@ -12,6 +12,15 @@ export interface FaraCartCaps {
  * Boot data injected by WordPress via `wp_localize_script()` (see
  * `includes/Admin/AssetLoader.php` → `boot_data()`).
  */
+export interface WooCommerceCurrencyConfig {
+  currency: string;
+  symbol: string;
+  position: 'left' | 'right' | 'left_space' | 'right_space';
+  decimals: number;
+  decimal_separator: string;
+  thousand_separator: string;
+}
+
 export interface FaraCartBootData {
   nonce: string;
   restBase: string;
@@ -22,8 +31,11 @@ export interface FaraCartBootData {
   locale: string;
   isRtl: boolean;
   currency: string;
-  /** Storefront/dashboard currency display style from FaraCart settings. */
-  currencyDisplay: 'symbol' | 'code' | 'name';
+  currencySymbol: string;
+  currencyPosition: WooCommerceCurrencyConfig['position'];
+  currencyDecimals: number;
+  currencyDecimalSeparator: string;
+  currencyThousandSeparator: string;
   /** Site-local today (Y-m-d), so date math matches the backend timezone. */
   currentDate: string;
   userId: number;
@@ -450,9 +462,6 @@ export type FrontendTemplate =
 /** Storefront widget display locations (frontend_locations). */
 export type FrontendLocation = 'cart' | 'mini-cart' | 'checkout' | 'shop' | 'product';
 
-/** Storefront currency display style (currency_display). */
-export type CurrencyDisplay = 'symbol' | 'code' | 'name';
-
 /** How multiple active missions are presented (default_mission_behavior). */
 export type MissionBehavior = 'all' | 'first' | 'closest';
 
@@ -667,12 +676,6 @@ export interface FaraCartSettings {
   // General (P18-T01).
   enabled: boolean;
   fullscreen_dashboard: boolean;
-  /**
-   * Display currency unit override — an uppercase ISO-4217 code, or '' to
-   * follow the WooCommerce store currency (Settings::currency()).
-   */
-  currency: string;
-  currency_display: CurrencyDisplay;
   default_mission_behavior: MissionBehavior;
   conflict_resolution: ConflictResolution;
   calculation_mode: CalculationMode;

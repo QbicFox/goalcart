@@ -9,6 +9,7 @@ namespace FaraCart\Frontend;
 
 use FaraCart\Hooks\HookManager;
 use FaraCart\Settings\Settings;
+use FaraCart\Utils\Currency;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -426,8 +427,9 @@ final class ProgressUI {
 	 * adds the active template, the animation flag and the
 	 * resolved appearance tokens so the JS can render template variants
 	 * and mirror the Appearance settings without another round-trip.
-	 * adds the currency display style and the mobile behavior so
-	 * the JS formats money and hides widgets per the Settings page.
+	 * adds the WooCommerce currency configuration and the mobile behavior
+	 * so the JS formats money from the store settings and hides widgets
+	 * per the FaraCart display settings.
 	 * adds the countdown + celebration toggles and the
 	 * gift-selection endpoint/nonce.
 	 * Kept as its own method so tests can assert the shape without
@@ -438,10 +440,19 @@ final class ProgressUI {
 	public function frontend_config() {
 		$appearance = $this->appearance();
 
+		// Currency follows WooCommerce's own configuration — the single
+		// source of truth for the storefront JS money formatter.
+		$currency = Currency::frontend_config();
+
 		return array(
 			'endpoint'  => esc_url_raw( rest_url( 'faracart/v1/progress' ) ),
 			'refresh'   => (int) apply_filters( 'faracart_frontend_refresh_interval', 0 ),
-			'currency'  => $this->settings->currency(),
+			'currency'  => $currency['currency'],
+			'currencySymbol' => $currency['currencySymbol'],
+			'currencyPosition' => $currency['currencyPosition'],
+			'currencyDecimals' => $currency['currencyDecimals'],
+			'currencyDecimalSeparator' => $currency['currencyDecimalSeparator'],
+			'currencyThousandSeparator' => $currency['currencyThousandSeparator'],
 			// Internationalization: the site locale reaches the
 			// JS so Intl.NumberFormat renders locale-aware digits and
 			// grouping (e.g. Persian digits for fa_IR) instead of the
@@ -451,7 +462,6 @@ final class ProgressUI {
 			'position'  => $this->position(),
 			'template'  => $this->template(),
 			'animation' => (bool) apply_filters( 'faracart_frontend_animation', $this->settings->get( 'frontend_animation', true ) ),
-			'currencyDisplay' => $this->currency_display(),
 			'mobile'    => $this->mobile_behavior(),
 			'appearance' => $appearance,
 			'labels'    => $this->reward_labels(),
@@ -596,21 +606,6 @@ final class ProgressUI {
 			'offset_x' => isset( $stored['offset_x'] ) ? min( 200, max( 0, (int) $stored['offset_x'] ) ) : (int) ( $default['offset_x'] ?? 20 ),
 			'offset_y' => isset( $stored['offset_y'] ) ? min( 200, max( 0, (int) $stored['offset_y'] ) ) : (int) ( $default['offset_y'] ?? 80 ),
 		);
-	}
-
-	/**
-	 * The storefront currency display style.
-	 *
-	 * Settings → General: symbol | code | name — passed to the
-	 * JS so Intl.NumberFormat renders the store currency the configured
-	 * way. Filterable via faracart_currency_display.
-	 *
-	 * @return string
-	 */
-	public function currency_display() {
-		$display = apply_filters( 'faracart_currency_display', $this->settings->get( 'currency_display', 'symbol' ) );
-
-		return in_array( $display, array( 'symbol', 'code', 'name' ), true ) ? $display : 'symbol';
 	}
 
 	/**

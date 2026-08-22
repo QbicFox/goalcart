@@ -1808,19 +1808,19 @@ The plugin is translation-ready end to end. Implemented and verified in
 - **RTL** — admin `dir` attribute from `is_rtl()`, MUI theme direction
   on `boot.isRtl`, the stylis RTL Emotion flip, storefront `isRtl`
   config, and physical-direction-free (logical-property) frontend CSS.
-- **locale-aware number formatting** — storefront `formatMoney` /
-  `formatNumber` pass the site locale to `Intl.NumberFormat` (Persian
-  digits for `fa_IR`, verified behaviorally: `۱٬۲۳۴٫۵`); admin
-  `lib/format.ts` uses `boot.locale`.
-- **currency formatting** — the storefront `currencyDisplay` modes
-  render through the locale-aware Intl currency formatter.
+- **locale-aware number formatting** — storefront `formatNumber` and the
+  admin `lib/format.ts` use the site locale with `Intl.NumberFormat`.
+- **WooCommerce currency formatting** — the backend exposes the active
+  WooCommerce code, symbol, position, separators and decimal precision;
+  the storefront and admin consume one shared configuration-backed
+  formatter, while server-rendered amounts use `wc_price()`.
 - **date/time formatting** — admin date range + analytics render via
   `Intl.DateTimeFormat( boot.locale … )`; PHP timestamps use
   `current_time()`; message-engine money uses `wc_price()`.
 
-Persian is supported well (RTL, Persian digits, plural forms) with zero
-hard-coded Persian strings — the suite scans every PHP/TS/JS source for
-Persian/Arabic script characters.
+RTL locales are supported through WordPress translations and locale-aware
+formatting with zero hard-coded Persian strings — the suite scans every
+PHP/TS/JS source for Persian/Arabic script characters.
 
 ---
 

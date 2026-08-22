@@ -14,7 +14,6 @@ FaraCart exposes a comprehensive set of WordPress hooks (actions and filters) fo
 |---|---|---|
 | `faracart_admin_capability` | `$capability` | Admin menu and capability check (default: `manage_options`) |
 | `faracart_rest_capability` | `$capability` | REST API permission callback (default: `manage_options`) |
-| `faracart_currency` | `$currency`, `$context` | Override store currency code |
 | `faracart_loaded` | `$plugin` | Action: fires after plugin boots |
 
 ### Frontend
@@ -32,7 +31,6 @@ FaraCart exposes a comprehensive set of WordPress hooks (actions and filters) fo
 | `faracart_frontend_mobile` | `$behavior` | Mobile behavior (`show` \| `hide`) |
 | `faracart_frontend_refresh_interval` | `$seconds` | Poll interval in seconds |
 | `faracart_frontend_upsell_limit` | `$limit` | Max suggestions per mission (1–6) |
-| `faracart_currency_display` | `$mode` | Currency display mode (`symbol` \| `code` \| `name`) |
 
 ### Mission Engine
 

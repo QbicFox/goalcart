@@ -1,31 +1,5 @@
 import { getBootData } from '../boot';
-
-/**
- * Persian (Farsi) digit map: Western Arabic → Eastern Arabic/Persian.
- * Used to render all numeric output in Persian script when the site
- * locale is RTL (fa_IR). The conversion is safe on already-Persian
- * strings (idempotent) so it can be applied unconditionally.
- */
-const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-
-/**
- * Convert Western Arabic digits (0-9) in a string to Persian digits.
- * Non-digit characters (separators, commas, dots, text) are untouched.
- * Idempotent — a string that already contains Persian digits passes
- * through unchanged.
- */
-export function toPersianDigits(value: string): string {
-  return value.replace(/[0-9]/g, (d) => PERSIAN_DIGITS[Number(d)]);
-}
-
-/**
- * Whether the current site locale uses Persian digits (RTL).
- * True for fa_IR / fa_IR建筑材料 and similar locales.
- */
-function usesPersianDigits(): boolean {
-  const locale = getBootData().locale;
-  return locale === 'fa_IR' || locale.startsWith('fa_') || locale === 'fa';
-}
+import type { WooCommerceCurrencyConfig } from '../types';
 
 /**
  * Normalize the WordPress locale (e.g. `fa_IR`) to an `Intl`-compatible
@@ -37,27 +11,62 @@ function siteLocale(): string {
   return raw ? raw.replace('_', '-') : 'en';
 }
 
+/** Decode WooCommerce symbols returned as HTML entities for text rendering. */
+export function decodeHtmlEntities(value: string): string {
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = value;
+  return textarea.value;
+}
+
 /**
- * Format a number as store currency using the site locale + currency from
- * the boot data (currency-aware formatting). Falls back to a
- * plain "1,234" when Intl cannot handle the locale/currency pair.
+ * Format a number with WooCommerce's exact currency configuration.
+ *
+ * Intl currency formatting is deliberately not used here: its symbol,
+ * position, precision and separators are locale defaults and can differ
+ * from WooCommerce's settings. The config is supplied by WordPress and
+ * refreshed from REST metadata by apiFetch.
  */
-export function formatCurrency(value: number, currency?: string): string {
+export function formatCurrency(value: number, config?: WooCommerceCurrencyConfig): string {
   const boot = getBootData();
+  const currency: WooCommerceCurrencyConfig = config ?? {
+    currency: boot.currency,
+    symbol: boot.currencySymbol,
+    position: boot.currencyPosition,
+    decimals: boot.currencyDecimals,
+    decimal_separator: boot.currencyDecimalSeparator,
+    thousand_separator: boot.currencyThousandSeparator,
+  };
+  const amount = Number.isFinite(value) ? value : 0;
+  const decimals = Math.max(0, Math.floor(Number(currency.decimals) || 0));
+  const fixed = amount.toFixed(decimals);
+  const negative = fixed.startsWith('-');
+  const unsigned = negative ? fixed.slice(1) : fixed;
+  const [integer, fraction] = unsigned.split('.');
+  const grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, currency.thousand_separator);
+  const number = `${negative ? '-' : ''}${grouped}${decimals ? currency.decimal_separator + fraction : ''}`;
+  const symbol = decodeHtmlEntities(
+    typeof currency.symbol === 'string' ? currency.symbol : currency.currency
+  );
 
-  try {
-    const formatted = new Intl.NumberFormat(siteLocale(), {
-      style: 'currency',
-      currency: currency || boot.currency,
-      currencyDisplay: boot.currencyDisplay || 'symbol',
-      maximumFractionDigits: 0,
-    }).format(value);
+  let formatted: string;
 
-    return usesPersianDigits() ? toPersianDigits(formatted) : formatted;
-  } catch {
-    const fallback = value.toLocaleString(siteLocale());
-    return usesPersianDigits() ? toPersianDigits(fallback) : fallback;
+  switch (currency.position) {
+    case 'right':
+      formatted = `${number}${symbol}`;
+      break;
+    case 'left_space':
+      formatted = `${symbol} ${number}`;
+      break;
+    case 'right_space':
+      formatted = `${number} ${symbol}`;
+      break;
+    case 'left':
+    default:
+      formatted = `${symbol}${number}`;
+      break;
   }
+
+  return formatted;
 }
 
 /** Format a plain number with the site locale (quantity, weight, …). */
@@ -67,10 +76,10 @@ export function formatNumber(value: number): string {
       maximumFractionDigits: 2,
     }).format(value);
 
-    return usesPersianDigits() ? toPersianDigits(formatted) : formatted;
+    return formatted;
   } catch {
     const fallback = value.toLocaleString(siteLocale());
-    return usesPersianDigits() ? toPersianDigits(fallback) : fallback;
+    return fallback;
   }
 }
 
@@ -87,7 +96,7 @@ export function formatPercent(value: number | null | undefined): string {
   }
   const raw = (value * 100).toLocaleString(siteLocale(), { maximumFractionDigits: 1 });
   const formatted = `${raw}%`;
-  return usesPersianDigits() ? toPersianDigits(formatted) : formatted;
+  return formatted;
 }
 
 /**
@@ -101,7 +110,7 @@ export function formatPercentValue(value: number | null | undefined): string {
   }
   const raw = value.toLocaleString(siteLocale(), { maximumFractionDigits: 1 });
   const formatted = `${raw}%`;
-  return usesPersianDigits() ? toPersianDigits(formatted) : formatted;
+  return formatted;
 }
 
 /**
@@ -136,10 +145,10 @@ export function formatCompact(value: number): string {
       maximumFractionDigits: 1,
     }).format(value);
 
-    return usesPersianDigits() ? toPersianDigits(formatted) : formatted;
+    return formatted;
   } catch {
     const fallback = String(Math.round(value));
-    return usesPersianDigits() ? toPersianDigits(fallback) : fallback;
+    return fallback;
   }
 }
 
@@ -152,10 +161,10 @@ export function formatCompact(value: number): string {
 export function formatInline(value: number, options?: Intl.NumberFormatOptions): string {
   try {
     const formatted = new Intl.NumberFormat(siteLocale(), options).format(value);
-    return usesPersianDigits() ? toPersianDigits(formatted) : formatted;
+    return formatted;
   } catch {
     const fallback = value.toLocaleString(siteLocale());
-    return usesPersianDigits() ? toPersianDigits(fallback) : fallback;
+    return fallback;
   }
 }
 

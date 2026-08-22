@@ -253,9 +253,9 @@ class SettingsController extends BaseController
 			// General (P18-T01).
 			'enabled'               => $bool,
 			'fullscreen_dashboard'  => $bool,
-			// Display currency unit override ('' = follow the store currency).
-			'currency'              => array('type' => 'string'),
-			'currency_display'      => array('type' => 'string', 'enum' => array('symbol', 'code', 'name')),
+			// Currency is not a FaraCart setting: it follows WooCommerce's
+			// own currency configuration (unit, symbol, position,
+			// separators, decimals).
 			'default_mission_behavior' => array('type' => 'string', 'enum' => array('all', 'first', 'closest')),
 			'conflict_resolution'   => array('type' => 'string', 'enum' => array('cumulative', 'best', 'first')),
 			'calculation_mode'      => array(
@@ -534,17 +534,6 @@ class SettingsController extends BaseController
 			case 'performance_suggestions':
 			case 'developer_hooks':
 				return (bool) $value;
-
-			case 'currency':
-				// An uppercase 3-letter ISO-4217 code, or '' to follow the
-				// WooCommerce store currency. Anything else falls back to the
-				// default (empty = store currency).
-				$code = strtoupper(trim((string) $value));
-
-				return '' !== $code && preg_match('/^[A-Z]{3}$/', $code) ? $code : $defaults['currency'];
-
-			case 'currency_display':
-				return in_array($value, array('symbol', 'code', 'name'), true) ? $value : $defaults['currency_display'];
 
 			case 'default_mission_behavior':
 				return in_array($value, array('all', 'first', 'closest'), true) ? $value : $defaults['default_mission_behavior'];

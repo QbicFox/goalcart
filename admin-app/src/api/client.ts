@@ -1,5 +1,6 @@
 import { getBootData } from '../boot';
-import type { ApiEnvelope } from '../types';
+import { setBootCurrencyConfig } from '../boot';
+import type { ApiEnvelope, WooCommerceCurrencyConfig } from '../types';
 
 export class ApiError extends Error {
   readonly status: number;
@@ -63,6 +64,23 @@ export async function apiFetch<T>(
     payload = await response.json();
   } catch {
     // Non-JSON body (e.g. an HTML error page) — fall through to a generic error.
+  }
+
+  const currency = (payload as { meta?: { currency?: unknown } } | null)?.meta?.currency;
+
+  if (currency && typeof currency === 'object') {
+    const config = currency as Partial<WooCommerceCurrencyConfig>;
+
+    if (
+      typeof config.currency === 'string' &&
+      typeof config.symbol === 'string' &&
+      typeof config.position === 'string' &&
+      typeof config.decimals === 'number' &&
+      typeof config.decimal_separator === 'string' &&
+      typeof config.thousand_separator === 'string'
+    ) {
+      setBootCurrencyConfig(config as WooCommerceCurrencyConfig);
+    }
   }
 
   if (!response.ok) {

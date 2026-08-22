@@ -8,7 +8,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-21T08:30:46Z\n"
+"POT-Creation-Date: 2026-08-22T04:48:21Z\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -85,7 +85,7 @@ msgid "%d times"
 msgstr ""
 
 #: admin-app/src/templates/rewardLabel.ts:22
-#: includes/Missions/MessageEngine.php:333
+#: includes/Missions/MessageEngine.php:323
 msgid "%d%% discount"
 msgstr ""
 
@@ -103,7 +103,7 @@ msgstr ""
 msgid "%s completion rate"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1033
+#: includes/Frontend/ProgressUI.php:1027
 msgid "%s is active"
 msgstr ""
 
@@ -112,11 +112,11 @@ msgid "%s is your top performer"
 msgstr ""
 
 #: admin-app/src/templates/renderers/missionShared.tsx:30
-#: includes/Frontend/ProgressUI.php:1025
+#: includes/Frontend/ProgressUI.php:1019
 msgid "%s left"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:706
+#: includes/Analytics/MissionRecommendationEngine.php:707
 msgid "%s of existing orders are within reach of this threshold (below it by up to %s%%)."
 msgstr ""
 
@@ -136,15 +136,15 @@ msgstr ""
 msgid "(weight units)"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:823
+#: includes/Analytics/MissionRecommendationEngine.php:824
 msgid "0.5–0.75× AOV"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:824
+#: includes/Analytics/MissionRecommendationEngine.php:825
 msgid "0.75–1.0× AOV"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:825
+#: includes/Analytics/MissionRecommendationEngine.php:826
 msgid "1.0–1.5× AOV"
 msgstr ""
 
@@ -157,11 +157,11 @@ msgstr ""
 msgid "30 days before the order"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:822
+#: includes/Analytics/MissionRecommendationEngine.php:823
 msgid "< 0.5× AOV"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:826
+#: includes/Analytics/MissionRecommendationEngine.php:827
 msgid "> 1.5× AOV"
 msgstr ""
 
@@ -179,7 +179,7 @@ msgstr ""
 msgid "A connected ladder of the campaign milestones — dots, targets and rewards — with an overall progress bar."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:975
+#: admin-app/src/routes/Settings.tsx:931
 msgid "A custom glyph/emoji shown inside the button (leave empty for the default cart icon)."
 msgstr ""
 
@@ -187,11 +187,11 @@ msgstr ""
 msgid "A deterministic coupon is created per customer."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:816
+#: admin-app/src/routes/Settings.tsx:772
 msgid "A floating missions/campaigns button with a progress drawer — always reachable while shopping."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:292
+#: includes/Analytics/UpsellRanker.php:293
 msgid "A mission target or an explicit remaining amount is required to rank upsells."
 msgstr ""
 
@@ -257,12 +257,12 @@ msgstr ""
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:91
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:119
 #: admin-app/src/templates/renderers/missionShared.tsx:317
-#: includes/Frontend/ProgressUI.php:1026
+#: includes/Frontend/ProgressUI.php:1020
 msgid "Add"
 msgstr ""
 
 #: admin-app/src/templates/renderers/missionShared.tsx:39
-#: includes/Frontend/ProgressUI.php:1027
+#: includes/Frontend/ProgressUI.php:1021
 msgid "Add %s more"
 msgstr ""
 
@@ -287,7 +287,7 @@ msgstr ""
 msgid "Add costs"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1019
+#: admin-app/src/routes/Settings.tsx:975
 msgid "Add line taxes to the subtotal-style money bases."
 msgstr ""
 
@@ -316,11 +316,11 @@ msgid "Add product costs to unlock Estimated Profit — FaraCart never invents a
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:103
-#: includes/Frontend/ProgressUI.php:1030
+#: includes/Frontend/ProgressUI.php:1024
 msgid "Add these products to reach your mission faster:"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:529
+#: includes/Frontend/ProgressUI.php:538
 msgid "Add to cart"
 msgstr ""
 
@@ -338,7 +338,7 @@ msgid "Add-to-cart"
 msgstr ""
 
 #: admin-app/src/routes/Analytics.tsx:1214
-#: includes/Frontend/ProgressUI.php:531
+#: includes/Frontend/ProgressUI.php:540
 msgid "Added"
 msgstr ""
 
@@ -347,7 +347,7 @@ msgstr ""
 msgid "Added to cart"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:530
+#: includes/Frontend/ProgressUI.php:539
 msgid "Adding…"
 msgstr ""
 
@@ -362,8 +362,8 @@ msgstr ""
 
 #: admin-app/src/routes/MissionPerformance.tsx:615
 #: admin-app/src/routes/RevenueOverview.tsx:440
-#: admin-app/src/routes/Settings.tsx:583
-#: admin-app/src/routes/Settings.tsx:1130
+#: admin-app/src/routes/Settings.tsx:549
+#: admin-app/src/routes/Settings.tsx:1086
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:147
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:153
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:166
@@ -436,7 +436,7 @@ msgstr ""
 msgid "Allowed shipping zones"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1036
+#: includes/Frontend/ProgressUI.php:1030
 msgid "Almost there!"
 msgstr ""
 
@@ -444,7 +444,7 @@ msgstr ""
 msgid "Almost there! Only %s left"
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:202
+#: includes/Missions/MessageEngine.php:192
 msgid "Almost there! Only {remaining} left"
 msgstr ""
 
@@ -465,11 +465,11 @@ msgstr ""
 msgid "Analysis is based on a moderate number of customer sessions."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1087
+#: admin-app/src/routes/Settings.tsx:1043
 msgid "Analytics tracking"
 msgstr ""
 
-#: includes/Hooks/HookManager.php:103
+#: includes/Hooks/HookManager.php:101
 msgid "Analytics tracking consent for the current request."
 msgstr ""
 
@@ -481,7 +481,7 @@ msgstr ""
 msgid "Analyzing: %1$s – %2$s"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:764
+#: admin-app/src/routes/Settings.tsx:720
 msgid "Animate progress"
 msgstr ""
 
@@ -496,7 +496,7 @@ msgstr ""
 msgid "Animate progress updates"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:960
+#: admin-app/src/routes/Settings.tsx:916
 msgid "Animate the button and drawer"
 msgstr ""
 
@@ -511,7 +511,7 @@ msgstr ""
 msgid "Appearance saved."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1152
+#: admin-app/src/routes/Settings.tsx:1108
 msgid "Appended to the storefront widget stylesheet (tags are stripped)."
 msgstr ""
 
@@ -607,10 +607,6 @@ msgstr ""
 msgid "Attribution window"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:147
-msgid "Auto (store currency)"
-msgstr ""
-
 #: admin-app/src/routes/RevenueOverview.tsx:359
 msgid "Average Basket Increase"
 msgstr ""
@@ -648,7 +644,7 @@ msgstr ""
 msgid "Average order value"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:713
+#: includes/Analytics/MissionRecommendationEngine.php:714
 msgid "Average order value is %s over %d orders."
 msgstr ""
 
@@ -656,7 +652,7 @@ msgstr ""
 msgid "Average order value of the attributed purchased orders."
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:721
+#: includes/Analytics/MissionRecommendationEngine.php:722
 msgid "Average shipping cost is %s — a free-shipping mission absorbs this cost."
 msgstr ""
 
@@ -702,7 +698,7 @@ msgstr ""
 msgid "Bahman"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1111
+#: admin-app/src/routes/Settings.tsx:1067
 msgid "Balanced"
 msgstr ""
 
@@ -752,7 +748,7 @@ msgstr ""
 msgid "Best performer"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:658
+#: admin-app/src/routes/Settings.tsx:614
 msgid "Best reward only"
 msgstr ""
 
@@ -771,7 +767,7 @@ msgstr ""
 msgid "Border"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:723
+#: admin-app/src/routes/Settings.tsx:679
 msgid "Bottom"
 msgstr ""
 
@@ -813,11 +809,11 @@ msgstr ""
 msgid "Button color"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:974
+#: admin-app/src/routes/Settings.tsx:930
 msgid "Button icon"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:991
+#: admin-app/src/routes/Settings.tsx:947
 msgid "Button label / tooltip"
 msgstr ""
 
@@ -827,7 +823,7 @@ msgstr ""
 msgid "Button radius (px)"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:943
+#: admin-app/src/routes/Settings.tsx:899
 msgid "Button size (px)"
 msgstr ""
 
@@ -851,11 +847,11 @@ msgstr ""
 msgid "CTR"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1078
+#: admin-app/src/routes/Settings.tsx:1034
 msgid "Cache progress payloads"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1069
+#: admin-app/src/routes/Settings.tsx:1025
 msgid "Caching and what the storefront measures."
 msgstr ""
 
@@ -873,7 +869,7 @@ msgstr ""
 msgid "Calculating…"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:665
+#: admin-app/src/routes/Settings.tsx:621
 msgid "Calculation mode"
 msgstr ""
 
@@ -939,7 +935,7 @@ msgstr ""
 msgid "Cart missions drive the storefront progress bars and rewards."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:165
+#: admin-app/src/routes/Settings.tsx:140
 msgid "Cart page"
 msgstr ""
 
@@ -953,7 +949,7 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:36
 #: admin-app/src/components/mission-builder/TargetFields.tsx:43
 #: admin-app/src/components/mission-builder/TargetFields.tsx:49
-#: admin-app/src/routes/Settings.tsx:681
+#: admin-app/src/routes/Settings.tsx:637
 msgid "Cart total (incl. tax & shipping)"
 msgstr ""
 
@@ -967,7 +963,7 @@ msgstr ""
 msgid "Category"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:801
+#: admin-app/src/routes/Settings.tsx:757
 msgid "Celebration animation"
 msgstr ""
 
@@ -979,11 +975,11 @@ msgstr ""
 msgid "Center right"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1114
+#: admin-app/src/routes/Settings.tsx:1070
 msgid "Cheapest first"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:167
+#: admin-app/src/routes/Settings.tsx:142
 msgid "Checkout"
 msgstr ""
 
@@ -1029,7 +1025,7 @@ msgstr ""
 msgid "Clicks"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:567
+#: includes/Frontend/ProgressUI.php:576
 msgid "Close"
 msgstr ""
 
@@ -1037,7 +1033,7 @@ msgstr ""
 msgid "Collapse all"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1088
+#: admin-app/src/routes/Settings.tsx:1044
 msgid "Collect mission and suggestion events. Keep the missions running while turning event collection off."
 msgstr ""
 
@@ -1126,7 +1122,7 @@ msgstr ""
 #: admin-app/src/templates/renderers/Template2Renderer.tsx:59
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:82
 #: admin-app/src/templates/renderers/Template5Renderer.tsx:86
-#: includes/Frontend/ProgressUI.php:1031
+#: includes/Frontend/ProgressUI.php:1025
 msgid "Completed"
 msgstr ""
 
@@ -1193,12 +1189,12 @@ msgstr ""
 msgid "Confirm"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:642
+#: admin-app/src/routes/Settings.tsx:598
 msgid "Conflict resolution"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:55
-#: includes/Frontend/ProgressUI.php:1037
+#: includes/Frontend/ProgressUI.php:1031
 msgid "Congratulations!"
 msgstr ""
 
@@ -1310,7 +1306,7 @@ msgstr ""
 msgid "Could not load the sales overview."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:529
+#: admin-app/src/routes/Settings.tsx:495
 msgid "Could not load the settings."
 msgstr ""
 
@@ -1326,7 +1322,7 @@ msgstr ""
 msgid "Could not save the settings. Please try again."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:792
+#: admin-app/src/routes/Settings.tsx:748
 msgid "Countdown timer"
 msgstr ""
 
@@ -1335,8 +1331,8 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:48
 #: admin-app/src/routes/Missions.tsx:46
 #: admin-app/src/templates/rewardLabel.ts:12
-#: includes/Frontend/ProgressUI.php:1015
-#: includes/Missions/MessageEngine.php:352
+#: includes/Frontend/ProgressUI.php:1009
+#: includes/Missions/MessageEngine.php:342
 msgid "Coupon"
 msgstr ""
 
@@ -1368,12 +1364,8 @@ msgstr ""
 msgid "Create your first Mission"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:650
+#: admin-app/src/routes/Settings.tsx:606
 msgid "Cumulative — all rewards stack"
-msgstr ""
-
-#: admin-app/src/routes/Settings.tsx:609
-msgid "Currency"
 msgstr ""
 
 #: admin-app/src/routes/Recommendations.tsx:277
@@ -1394,7 +1386,7 @@ msgstr ""
 msgid "Current target: %1$s"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1151
+#: admin-app/src/routes/Settings.tsx:1107
 #: includes/Templates/Campaign/CampaignProgressTemplate.php:152
 #: includes/Templates/Campaign/MilestoneChainTemplate.php:171
 #: includes/Templates/Mission/Template1.php:201
@@ -1516,11 +1508,11 @@ msgstr ""
 msgid "Default (no campaign template)"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:619
+#: admin-app/src/routes/Settings.tsx:575
 msgid "Default mission behavior"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:666
+#: admin-app/src/routes/Settings.tsx:622
 msgid "Default money basis for missions that do not set their own."
 msgstr ""
 
@@ -1553,7 +1545,7 @@ msgstr ""
 msgid "Description"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:312
+#: admin-app/src/routes/Settings.tsx:287
 msgid "Desktop"
 msgstr ""
 
@@ -1561,7 +1553,7 @@ msgstr ""
 msgid "Detailed Activity"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1165
+#: admin-app/src/routes/Settings.tsx:1121
 msgid "Developer hooks"
 msgstr ""
 
@@ -1616,25 +1608,25 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:35
 #: admin-app/src/components/mission-builder/TargetFields.tsx:42
 #: admin-app/src/components/mission-builder/TargetFields.tsx:48
-#: admin-app/src/routes/Settings.tsx:677
+#: admin-app/src/routes/Settings.tsx:633
 msgid "Discounted subtotal"
 msgstr ""
 
 #: admin-app/src/routes/CampaignBuilder.tsx:493
 #: admin-app/src/routes/MissionBuilder.tsx:430
-#: admin-app/src/routes/Settings.tsx:930
+#: admin-app/src/routes/Settings.tsx:886
 msgid "Display"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:715
+#: admin-app/src/routes/Settings.tsx:671
 msgid "Display locations"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:841
+#: admin-app/src/routes/Settings.tsx:797
 msgid "Display the button on desktop screens."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:852
+#: admin-app/src/routes/Settings.tsx:808
 msgid "Display the button on mobile screens."
 msgstr ""
 
@@ -1642,11 +1634,11 @@ msgstr ""
 msgid "Distance"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:386
+#: admin-app/src/routes/Settings.tsx:361
 msgid "Distance from the chosen edge — or from the midline when the preset is centered (0–200)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:363
+#: admin-app/src/routes/Settings.tsx:338
 msgid "Distance from the chosen side (0–200)."
 msgstr ""
 
@@ -1733,11 +1725,11 @@ msgstr ""
 msgid "Enable"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:600
+#: admin-app/src/routes/Settings.tsx:566
 msgid "Enable FaraCart"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:825
+#: admin-app/src/routes/Settings.tsx:781
 msgid "Enable floating widget"
 msgstr ""
 
@@ -1745,7 +1737,7 @@ msgstr ""
 msgid "Enabled widget display locations."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1017
+#: includes/Frontend/ProgressUI.php:1011
 msgid "Ended"
 msgstr ""
 
@@ -1754,7 +1746,7 @@ msgstr ""
 msgid "Ends at"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1016
+#: includes/Frontend/ProgressUI.php:1010
 msgid "Ends in"
 msgstr ""
 
@@ -1774,7 +1766,7 @@ msgstr ""
 msgid "Estimated Profit"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1198
+#: includes/Analytics/UpsellRanker.php:1199
 msgid "Estimated margin %s%% on the product price."
 msgstr ""
 
@@ -1802,7 +1794,7 @@ msgstr ""
 msgid "Estimated reward cost"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:729
+#: includes/Analytics/MissionRecommendationEngine.php:730
 msgid "Estimated reward cost at this threshold is %s."
 msgstr ""
 
@@ -1878,7 +1870,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:49
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:67
-#: includes/Frontend/ProgressUI.php:1034
+#: includes/Frontend/ProgressUI.php:1028
 msgid "Expired"
 msgstr ""
 
@@ -1902,7 +1894,7 @@ msgstr ""
 msgid "FaraCart"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:217
+#: includes/Frontend/ProgressUI.php:218
 msgid "FaraCart Progress"
 msgstr ""
 
@@ -1944,11 +1936,11 @@ msgid "Farvardin"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:184
-#: includes/Frontend/ProgressUI.php:1039
+#: includes/Frontend/ProgressUI.php:1033
 msgid "Finish today — your reward is waiting"
 msgstr ""
 
-#: includes/Hooks/HookManager.php:117
+#: includes/Hooks/HookManager.php:115
 msgid "Fires after a mission is created, updated or deleted (cache invalidation)."
 msgstr ""
 
@@ -1956,7 +1948,7 @@ msgstr ""
 msgid "Fires after settings are persisted through the REST API."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:118
+#: includes/Hooks/HookManager.php:116
 msgid "Fires after the Phase 33.3 daily aggregation run completes."
 msgstr ""
 
@@ -1964,7 +1956,7 @@ msgstr ""
 msgid "Fires after the plugin has fully bootstrapped."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:654
+#: admin-app/src/routes/Settings.tsx:610
 msgid "First matching mission only"
 msgstr ""
 
@@ -1973,7 +1965,7 @@ msgid "First order only"
 msgstr ""
 
 #: admin-app/src/templates/rewardLabel.ts:30
-#: includes/Missions/MessageEngine.php:344
+#: includes/Missions/MessageEngine.php:334
 msgid "Fixed %s off"
 msgstr ""
 
@@ -1987,16 +1979,16 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:46
 #: admin-app/src/routes/Missions.tsx:44
 #: admin-app/src/templates/rewardLabel.ts:10
-#: includes/Frontend/ProgressUI.php:1013
-#: includes/Missions/MessageEngine.php:339
+#: includes/Frontend/ProgressUI.php:1007
+#: includes/Missions/MessageEngine.php:329
 msgid "Fixed discount"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:568
+#: admin-app/src/routes/Settings.tsx:534
 msgid "Floating"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:815
+#: admin-app/src/routes/Settings.tsx:771
 msgid "Floating widget"
 msgstr ""
 
@@ -2006,8 +1998,8 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:47
 #: admin-app/src/routes/Missions.tsx:45
 #: admin-app/src/templates/rewardLabel.ts:11
-#: includes/Frontend/ProgressUI.php:1014
-#: includes/Missions/MessageEngine.php:349
+#: includes/Frontend/ProgressUI.php:1008
+#: includes/Missions/MessageEngine.php:339
 msgid "Free gift"
 msgstr ""
 
@@ -2018,8 +2010,8 @@ msgstr ""
 #: admin-app/src/routes/CampaignBuilder.tsx:44
 #: admin-app/src/routes/Missions.tsx:42
 #: admin-app/src/templates/rewardLabel.ts:8
-#: includes/Frontend/ProgressUI.php:1011
-#: includes/Missions/MessageEngine.php:326
+#: includes/Frontend/ProgressUI.php:1005
+#: includes/Missions/MessageEngine.php:316
 msgid "Free shipping"
 msgstr ""
 
@@ -2039,12 +2031,12 @@ msgstr ""
 msgid "From"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:563
-#: admin-app/src/routes/Settings.tsx:705
+#: admin-app/src/routes/Settings.tsx:529
+#: admin-app/src/routes/Settings.tsx:661
 msgid "Frontend"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:691
+#: admin-app/src/routes/Settings.tsx:647
 msgid "Full-screen dashboard"
 msgstr ""
 
@@ -2052,8 +2044,8 @@ msgstr ""
 msgid "Funnel"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:558
-#: admin-app/src/routes/Settings.tsx:590
+#: admin-app/src/routes/Settings.tsx:524
+#: admin-app/src/routes/Settings.tsx:556
 msgid "General"
 msgstr ""
 
@@ -2061,7 +2053,7 @@ msgstr ""
 msgid "Generate a coupon from these rules"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1019
+#: includes/Frontend/ProgressUI.php:1013
 msgid "Gift added to your cart"
 msgstr ""
 
@@ -2114,7 +2106,7 @@ msgstr ""
 msgid "Header color"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1190
+#: includes/Analytics/UpsellRanker.php:1191
 msgid "Healthy stock levels."
 msgstr ""
 
@@ -2122,11 +2114,11 @@ msgstr ""
 msgid "Hide interaction details"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:785
+#: admin-app/src/routes/Settings.tsx:741
 msgid "Hide on mobile"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:692
+#: admin-app/src/routes/Settings.tsx:648
 msgid "Hide the WordPress admin chrome and let the dashboard fill the whole browser window."
 msgstr ""
 
@@ -2142,11 +2134,11 @@ msgstr ""
 msgid "Highest margin"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1175
+#: includes/Analytics/UpsellRanker.php:1176
 msgid "Highly relevant to the mission and the current cart contents."
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:751
+#: includes/Analytics/MissionRecommendationEngine.php:752
 msgid "Historical mission completion rate is %s."
 msgstr ""
 
@@ -2154,7 +2146,7 @@ msgstr ""
 msgid "Historical performance"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1208
+#: includes/Analytics/UpsellRanker.php:1209
 msgid "Historical upsell performance: %d impressions, %d orders (%s conversion)."
 msgstr ""
 
@@ -2162,7 +2154,7 @@ msgstr ""
 msgid "History"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:362
+#: admin-app/src/routes/Settings.tsx:337
 msgid "Horizontal offset (px)"
 msgstr ""
 
@@ -2174,7 +2166,7 @@ msgstr ""
 msgid "How Estimated Profit becomes available"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:643
+#: admin-app/src/routes/Settings.tsx:599
 msgid "How completed missions grant rewards when several compete: combine them, grant only the highest-priority matching mission, or grant only the best reward. Per-mission exclusive flags and priorities are respected in every mode."
 msgstr ""
 
@@ -2199,7 +2191,7 @@ msgstr ""
 msgid "How many times the same shopper may complete this mission. Each completion cycle grants the reward once; after the limit is reached the mission no longer appears as completable for that shopper."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:620
+#: admin-app/src/routes/Settings.tsx:576
 msgid "How multiple active missions are presented when the shopper has no campaign."
 msgstr ""
 
@@ -2211,7 +2203,7 @@ msgstr ""
 msgid "How related this product is to the items already in the customer’s cart."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1106
+#: admin-app/src/routes/Settings.tsx:1062
 msgid "How suggested products are ordered (Phase 32 advanced upsell ranking)."
 msgstr ""
 
@@ -2221,14 +2213,6 @@ msgstr ""
 
 #: admin-app/src/routes/MissionBuilder.tsx:505
 msgid "How this mission competes when several missions are active. Lower priority numbers win first; a mission inside a campaign is also ordered by its campaign priority."
-msgstr ""
-
-#: admin-app/src/routes/Settings.tsx:149
-msgid "IRR — Iranian rial"
-msgstr ""
-
-#: admin-app/src/routes/Settings.tsx:148
-msgid "IRT — Iranian toman"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/DisplayFields.tsx:167
@@ -2273,23 +2257,23 @@ msgstr ""
 msgid "Inactive missions never evaluate on the storefront."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1027
+#: admin-app/src/routes/Settings.tsx:983
 msgid "Include discounts"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1045
+#: admin-app/src/routes/Settings.tsx:1001
 msgid "Include sale items"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1036
+#: admin-app/src/routes/Settings.tsx:992
 msgid "Include shipping"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1018
+#: admin-app/src/routes/Settings.tsx:974
 msgid "Include taxes"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1054
+#: admin-app/src/routes/Settings.tsx:1010
 msgid "Include virtual products"
 msgstr ""
 
@@ -2303,11 +2287,11 @@ msgstr ""
 msgid "Incremental cart value"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:735
+#: includes/Analytics/MissionRecommendationEngine.php:736
 msgid "Incremental margin at this threshold covers the reward cost."
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:736
+#: includes/Analytics/MissionRecommendationEngine.php:737
 msgid "Incremental margin at this threshold does not fully cover the reward cost."
 msgstr ""
 
@@ -2427,7 +2411,7 @@ msgstr ""
 msgid "Limited data — based on orders with complete cost information"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1192
+#: includes/Analytics/UpsellRanker.php:1193
 msgid "Limited stock remaining."
 msgstr ""
 
@@ -2463,7 +2447,7 @@ msgstr ""
 msgid "Logged-in customers whose lifetime spend and order count meet the thresholds below."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:120
+#: includes/Hooks/HookManager.php:118
 msgid "Lookback floor for the Phase 33.3 aggregation catch-up window."
 msgstr ""
 
@@ -2509,15 +2493,15 @@ msgstr ""
 msgid "Master storefront widget toggle."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:115
+#: includes/Hooks/HookManager.php:113
 msgid "Master switch for the debug log file (default off; FARACART_LOGGING constant wins)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:591
+#: admin-app/src/routes/Settings.tsx:557
 msgid "Master toggle, display and default behavior."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:119
+#: includes/Hooks/HookManager.php:117
 msgid "Max days the Phase 33.3 aggregation job processes per run."
 msgstr ""
 
@@ -2558,7 +2542,7 @@ msgstr ""
 msgid "Milestones"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:166
+#: admin-app/src/routes/Settings.tsx:141
 msgid "Mini cart"
 msgstr ""
 
@@ -2578,7 +2562,7 @@ msgstr ""
 msgid "Minimum lifetime spend"
 msgstr ""
 
-#: includes/Hooks/HookManager.php:124
+#: includes/Hooks/HookManager.php:122
 msgid "Minimum order count before Phase 33.4 recommendations are generated."
 msgstr ""
 
@@ -2594,8 +2578,8 @@ msgstr ""
 msgid "Mission"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:573
-#: admin-app/src/routes/Settings.tsx:1008
+#: admin-app/src/routes/Settings.tsx:539
+#: admin-app/src/routes/Settings.tsx:964
 msgid "Mission Calculation"
 msgstr ""
 
@@ -2626,7 +2610,7 @@ msgid "Mission Views"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:94
-#: includes/Frontend/ProgressUI.php:1032
+#: includes/Frontend/ProgressUI.php:1026
 msgid "Mission completed"
 msgstr ""
 
@@ -2682,15 +2666,15 @@ msgstr ""
 msgid "Missions define what you want shoppers to reach — a cart amount, quantity, category spend and more. Create your first mission to start."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:313
+#: admin-app/src/routes/Settings.tsx:288
 msgid "Mobile"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:773
+#: admin-app/src/routes/Settings.tsx:729
 msgid "Mobile behavior"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:908
+#: admin-app/src/routes/Settings.tsx:864
 msgid "Mobile reuses the desktop position. Turn the toggle above off to configure a separate mobile position."
 msgstr ""
 
@@ -2719,7 +2703,7 @@ msgstr ""
 msgid "More customer activity is needed for a more reliable analysis."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1118
+#: admin-app/src/routes/Settings.tsx:1074
 msgid "Most popular first"
 msgstr ""
 
@@ -2762,15 +2746,15 @@ msgstr ""
 msgid "No campaigns yet"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:313
+#: includes/Analytics/UpsellRanker.php:314
 msgid "No candidate products could be collected for this cart and mission."
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:297
+#: includes/Analytics/MissionRecommendationEngine.php:298
 msgid "No candidate thresholds could be generated from the order data."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1218
+#: includes/Analytics/UpsellRanker.php:1219
 msgid "No cart contents provided — relevance scored from the mission only."
 msgstr ""
 
@@ -2778,7 +2762,7 @@ msgstr ""
 msgid "No child missions yet. Add at least one condition to build the composite mission."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1214
+#: includes/Analytics/UpsellRanker.php:1215
 msgid "No historical upsell performance data yet — conversion scored neutral."
 msgstr ""
 
@@ -2824,8 +2808,8 @@ msgid "No recommendation is available for this mission yet."
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template4Renderer.tsx:109
-#: includes/Frontend/ProgressUI.php:532
-#: includes/Frontend/ProgressUI.php:1040
+#: includes/Frontend/ProgressUI.php:541
+#: includes/Frontend/ProgressUI.php:1034
 msgid "No recommendations available right now."
 msgstr ""
 
@@ -2884,7 +2868,7 @@ msgstr ""
 msgid "Not enough data for a reliable recommendation."
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:266
+#: includes/Analytics/MissionRecommendationEngine.php:267
 msgid "Not enough order data for a reliable recommendation (%d orders in the window; at least %d required)."
 msgstr ""
 
@@ -2941,7 +2925,7 @@ msgid "Only %1$s of completed missions were followed by an attributed purchase."
 msgstr ""
 
 #: admin-app/src/templates/renderers/missionShared.tsx:294
-#: includes/Frontend/ProgressUI.php:1029
+#: includes/Frontend/ProgressUI.php:1023
 msgid "Only %s"
 msgstr ""
 
@@ -2977,7 +2961,7 @@ msgstr ""
 msgid "Only these products count toward the target. Variations are matched by their parent product."
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:220
+#: includes/Missions/MessageEngine.php:210
 msgid "Only {remaining} left to reach your mission"
 msgstr ""
 
@@ -3083,7 +3067,7 @@ msgstr ""
 msgid "PHP %1$s or newer is required (current: %2$s)."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:114
+#: includes/Hooks/HookManager.php:112
 msgid "Page cap for the Phase 33.2 store-wide order scans (AOV, shipping)."
 msgstr ""
 
@@ -3097,7 +3081,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:131
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:116
-#: includes/Frontend/ProgressUI.php:1023
+#: includes/Frontend/ProgressUI.php:1017
 msgid "Paid"
 msgstr ""
 
@@ -3110,8 +3094,8 @@ msgid "Percentage"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:25
-#: includes/Frontend/ProgressUI.php:1012
-#: includes/Missions/MessageEngine.php:330
+#: includes/Frontend/ProgressUI.php:1006
+#: includes/Missions/MessageEngine.php:320
 msgid "Percentage discount"
 msgstr ""
 
@@ -3125,8 +3109,8 @@ msgstr ""
 msgid "Percentage off"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:578
-#: admin-app/src/routes/Settings.tsx:1068
+#: admin-app/src/routes/Settings.tsx:544
+#: admin-app/src/routes/Settings.tsx:1024
 msgid "Performance"
 msgstr ""
 
@@ -3138,11 +3122,11 @@ msgstr ""
 msgid "Pick the default progress template and tune its appearance — separately for Missions and Campaigns."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:1018
+#: includes/Frontend/ProgressUI.php:1012
 msgid "Pick your free gift"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:802
+#: admin-app/src/routes/Settings.tsx:758
 msgid "Play a confetti burst when a mission is reached (Phase 32)."
 msgstr ""
 
@@ -3150,16 +3134,16 @@ msgstr ""
 msgid "Please select another mission."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:510
-#: admin-app/src/routes/Settings.tsx:524
+#: admin-app/src/routes/Settings.tsx:476
+#: admin-app/src/routes/Settings.tsx:490
 msgid "Plugin-wide configuration."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:538
+#: admin-app/src/routes/Settings.tsx:504
 msgid "Plugin-wide configuration. Changes apply immediately."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1183
+#: includes/Analytics/UpsellRanker.php:1184
 msgid "Popular product (%d units sold, %s rating)."
 msgstr ""
 
@@ -3167,15 +3151,15 @@ msgstr ""
 msgid "Popularity"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:720
+#: admin-app/src/routes/Settings.tsx:676
 msgid "Position"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:863
+#: admin-app/src/routes/Settings.tsx:819
 msgid "Position & display"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:329
+#: admin-app/src/routes/Settings.tsx:304
 msgid "Position preset"
 msgstr ""
 
@@ -3183,7 +3167,7 @@ msgstr ""
 msgid "Premium card — gold accents, elegant progress and a refined call-to-action."
 msgstr ""
 
-#: includes/REST/PreviewController.php:791
+#: includes/REST/PreviewController.php:794
 msgid "Preview item"
 msgstr ""
 
@@ -3196,7 +3180,7 @@ msgstr ""
 msgid "Previous month"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1161
+#: includes/Analytics/UpsellRanker.php:1162
 msgid "Price %s fits the remaining %s %s."
 msgstr ""
 
@@ -3249,7 +3233,7 @@ msgstr ""
 msgid "Product cost must come from WooCommerce or your product-cost data. FaraCart reads, in order:"
 msgstr ""
 
-#: includes/Hooks/HookManager.php:111
+#: includes/Hooks/HookManager.php:109
 msgid "Product cost used by the Phase 33.2 reward-cost / profit estimation (null = no cost data)."
 msgstr ""
 
@@ -3257,23 +3241,23 @@ msgstr ""
 msgid "Product image size (px)"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:743
+#: includes/Analytics/MissionRecommendationEngine.php:744
 msgid "Product margin data is not available — profit estimates are excluded."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1202
+#: includes/Analytics/UpsellRanker.php:1203
 msgid "Product margin data is not available — profitability scored neutral."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:169
+#: admin-app/src/routes/Settings.tsx:144
 msgid "Product pages"
 msgstr ""
 
-#: includes/Hooks/HookManager.php:127
+#: includes/Hooks/HookManager.php:125
 msgid "Product sample size for the Phase 33.4 margin analyzer."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1096
+#: admin-app/src/routes/Settings.tsx:1052
 msgid "Product suggestions"
 msgstr ""
 
@@ -3303,7 +3287,7 @@ msgstr ""
 msgid "Products recommended to customers who were working toward this mission."
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:528
+#: includes/Frontend/ProgressUI.php:537
 msgid "Products suggested for you"
 msgstr ""
 
@@ -3311,7 +3295,7 @@ msgstr ""
 msgid "Profit estimates need product cost data. Add product costs on your products to enable Mission economics."
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:745
+#: includes/Analytics/MissionRecommendationEngine.php:746
 msgid "Profit impact could not be estimated for this threshold."
 msgstr ""
 
@@ -3325,7 +3309,7 @@ msgid "Profit not estimated yet"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:100
-#: includes/Frontend/ProgressUI.php:1022
+#: includes/Frontend/ProgressUI.php:1016
 msgid "Progress"
 msgstr ""
 
@@ -3351,7 +3335,7 @@ msgstr ""
 msgid "Progressed"
 msgstr ""
 
-#: includes/REST/PreviewController.php:294
+#: includes/REST/PreviewController.php:295
 msgid "Provide exactly one of mission_id, campaign_id, mission or campaign to preview."
 msgstr ""
 
@@ -3504,13 +3488,13 @@ msgstr ""
 msgid "Relevance"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1177
+#: includes/Analytics/UpsellRanker.php:1178
 msgid "Relevant to the mission or the current cart contents."
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:137
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:124
-#: includes/Frontend/ProgressUI.php:1024
+#: includes/Frontend/ProgressUI.php:1018
 msgid "Remaining"
 msgstr ""
 
@@ -3540,15 +3524,11 @@ msgstr ""
 msgid "Reset to template defaults"
 msgstr ""
 
-#: includes/Hooks/HookManager.php:100
-msgid "Resolved display currency unit (uppercase ISO-4217 code) — the currency every FaraCart amount is labelled with."
-msgstr ""
-
 #: admin-app/src/routes/MissionBuilder.tsx:423
 msgid "Restrictions and schedule for this mission."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:109
+#: includes/Hooks/HookManager.php:107
 msgid "Retention window (days) for the revenue/upsell event logs before the weekly cleanup purges them."
 msgstr ""
 
@@ -3585,7 +3565,7 @@ msgstr ""
 msgid "Reward cost"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:739
+#: includes/Analytics/MissionRecommendationEngine.php:740
 msgid "Reward cost cannot be estimated from the available data — economics scored neutral."
 msgstr ""
 
@@ -3597,7 +3577,7 @@ msgstr ""
 msgid "Reward type"
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:211
+#: includes/Missions/MessageEngine.php:201
 msgid "Reward unlocked: {reward}"
 msgstr ""
 
@@ -3622,7 +3602,7 @@ msgstr ""
 msgid "Ring thickness (px)"
 msgstr ""
 
-#: includes/Hooks/HookManager.php:113
+#: includes/Hooks/HookManager.php:111
 msgid "Row cap for the bounded Phase 33.2 metric reads."
 msgstr ""
 
@@ -3689,14 +3669,14 @@ msgstr ""
 msgid "Save changes"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:501
+#: admin-app/src/routes/Settings.tsx:467
 msgid "Save settings"
 msgstr ""
 
 #: admin-app/src/routes/Appearance.tsx:589
 #: admin-app/src/routes/CampaignBuilder.tsx:282
 #: admin-app/src/routes/MissionBuilder.tsx:256
-#: admin-app/src/routes/Settings.tsx:500
+#: admin-app/src/routes/Settings.tsx:466
 msgid "Saving…"
 msgstr ""
 
@@ -3761,7 +3741,7 @@ msgstr ""
 msgid "Select a mission to apply the recommendation to."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1079
+#: admin-app/src/routes/Settings.tsx:1035
 msgid "Serve repeat widget polls from a short-lived cache (10s) keyed by the cart — fewer mission evaluations, at the cost of a brief staleness window after cart changes."
 msgstr ""
 
@@ -3782,13 +3762,13 @@ msgid "Set up product costs"
 msgstr ""
 
 #: admin-app/src/components/layout/navigation.ts:69
-#: admin-app/src/routes/Settings.tsx:509
-#: admin-app/src/routes/Settings.tsx:523
-#: admin-app/src/routes/Settings.tsx:537
+#: admin-app/src/routes/Settings.tsx:475
+#: admin-app/src/routes/Settings.tsx:489
+#: admin-app/src/routes/Settings.tsx:503
 msgid "Settings"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:462
+#: admin-app/src/routes/Settings.tsx:437
 msgid "Settings saved."
 msgstr ""
 
@@ -3826,21 +3806,21 @@ msgstr ""
 msgid "Shipping destination"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:168
+#: admin-app/src/routes/Settings.tsx:143
 msgid "Shop / archives"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:129
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:65
-#: includes/Frontend/ProgressUI.php:1021
+#: includes/Frontend/ProgressUI.php:1015
 msgid "Shopping mission"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:793
+#: admin-app/src/routes/Settings.tsx:749
 msgid "Show a live countdown to the mission/campaign deadline (Phase 32)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:627
+#: admin-app/src/routes/Settings.tsx:583
 msgid "Show all missions"
 msgstr ""
 
@@ -3848,7 +3828,7 @@ msgstr ""
 msgid "Show campaign name"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:220
+#: includes/Frontend/ProgressUI.php:221
 msgid "Show cart missions, progress and rewards (FaraCart)."
 msgstr ""
 
@@ -3873,16 +3853,16 @@ msgstr ""
 msgid "Show milestone targets"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:840
+#: admin-app/src/routes/Settings.tsx:796
 msgid "Show on desktop"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:781
-#: admin-app/src/routes/Settings.tsx:851
+#: admin-app/src/routes/Settings.tsx:737
+#: admin-app/src/routes/Settings.tsx:807
 msgid "Show on mobile"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1097
+#: admin-app/src/routes/Settings.tsx:1053
 msgid "Show recommended products that help reach the mission."
 msgstr ""
 
@@ -3900,15 +3880,15 @@ msgstr ""
 msgid "Show the call-to-action"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:635
+#: admin-app/src/routes/Settings.tsx:591
 msgid "Show the closest mission only"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:631
+#: admin-app/src/routes/Settings.tsx:587
 msgid "Show the first mission only"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:826
+#: admin-app/src/routes/Settings.tsx:782
 msgid "Show the floating button on widget pages whenever the cart has an eligible mission."
 msgstr ""
 
@@ -3973,7 +3953,7 @@ msgstr ""
 msgid "Skipped — lower priority"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:765
+#: admin-app/src/routes/Settings.tsx:721
 msgid "Slide the progress-bar fill on updates."
 msgstr ""
 
@@ -3981,7 +3961,7 @@ msgstr ""
 msgid "Smart Upsells assisted %s mission completions this period."
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:226
+#: includes/Analytics/MissionRecommendationEngine.php:227
 msgid "Smart mission recommendations are disabled."
 msgstr ""
 
@@ -3989,11 +3969,11 @@ msgstr ""
 msgid "Smart upsell ranking is not available."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:276
+#: includes/Analytics/UpsellRanker.php:277
 msgid "Smart upsells are disabled."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:961
+#: admin-app/src/routes/Settings.tsx:917
 msgid "Smooth open/close transitions for the floating button and its drawer."
 msgstr ""
 
@@ -4015,7 +3995,7 @@ msgstr ""
 msgid "Sort products"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1171
+#: includes/Analytics/UpsellRanker.php:1172
 msgid "Source: %s."
 msgstr ""
 
@@ -4046,11 +4026,11 @@ msgstr ""
 msgid "Store-wide comparison is not available in this window."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:105
+#: includes/Hooks/HookManager.php:103
 msgid "Store-wide default money calculation basis."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:730
+#: admin-app/src/routes/Settings.tsx:686
 msgid "Store-wide progress widget variant."
 msgstr ""
 
@@ -4058,11 +4038,7 @@ msgstr ""
 msgid "Store-wide widget template variant."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:101
-msgid "Storefront currency display style (symbol|code|name)."
-msgstr ""
-
-#: admin-app/src/routes/Settings.tsx:1131
+#: admin-app/src/routes/Settings.tsx:1087
 msgid "Storefront customization and the developer surface."
 msgstr ""
 
@@ -4080,11 +4056,11 @@ msgstr ""
 #: admin-app/src/components/mission-builder/TargetFields.tsx:34
 #: admin-app/src/components/mission-builder/TargetFields.tsx:41
 #: admin-app/src/components/mission-builder/TargetFields.tsx:47
-#: admin-app/src/routes/Settings.tsx:673
+#: admin-app/src/routes/Settings.tsx:629
 msgid "Subtotal (before discounts)"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1105
+#: admin-app/src/routes/Settings.tsx:1061
 msgid "Suggestion ranking"
 msgstr ""
 
@@ -4100,11 +4076,11 @@ msgstr ""
 msgid "Supports {current}, {target}, {remaining}, {percentage}, {quantity}, {reward} and {mission_name}."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:122
+#: includes/Hooks/HookManager.php:120
 msgid "TTL (seconds) for the Phase 33.3 revenue summary transients."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:129
+#: includes/Hooks/HookManager.php:127
 msgid "TTL (seconds) for the Phase 33.4 recommendation cache."
 msgstr ""
 
@@ -4127,36 +4103,36 @@ msgid "Target: %s"
 msgstr ""
 
 #: admin-app/src/components/mission-builder/DisplayFields.tsx:76
-#: admin-app/src/routes/Settings.tsx:729
+#: admin-app/src/routes/Settings.tsx:685
 msgid "Template"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:737
+#: admin-app/src/routes/Settings.tsx:693
 #: includes/Templates/Mission/Template1.php:38
 msgid "Template 1"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:741
+#: admin-app/src/routes/Settings.tsx:697
 #: includes/Templates/Mission/Template2.php:39
 msgid "Template 2"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:745
+#: admin-app/src/routes/Settings.tsx:701
 #: includes/Templates/Mission/Template3.php:38
 msgid "Template 3"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:749
+#: admin-app/src/routes/Settings.tsx:705
 #: includes/Templates/Mission/Template4.php:39
 msgid "Template 4"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:753
+#: admin-app/src/routes/Settings.tsx:709
 #: includes/Templates/Mission/Template5.php:38
 msgid "Template 5"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:757
+#: admin-app/src/routes/Settings.tsx:713
 #: includes/Templates/Mission/Template6.php:38
 msgid "Template 6"
 msgstr ""
@@ -4183,15 +4159,15 @@ msgstr ""
 msgid "Text color"
 msgstr ""
 
-#: includes/Hooks/HookManager.php:126
+#: includes/Hooks/HookManager.php:124
 msgid "The Phase 33.4 composite scoring weights (reachability/distance/economics/history)."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:132
+#: includes/Hooks/HookManager.php:130
 msgid "The Phase 33.5 composite scoring weights (price_gap/relevance/popularity/inventory/margin/conversion)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:992
+#: admin-app/src/routes/Settings.tsx:948
 msgid "The accessible label and tooltip for the button (leave empty for the default)."
 msgstr ""
 
@@ -4199,19 +4175,19 @@ msgstr ""
 msgid "The admin app is not built yet (%s is missing). Run npm install && npm run build inside the admin-app directory, or start npm run dev in a local/development environment for hot reload."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:340
+#: admin-app/src/routes/Settings.tsx:315
 msgid "The button corner/edge — the drawer always opens toward the screen center from it. The offsets below fine-tune the exact spot."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:931
+#: admin-app/src/routes/Settings.tsx:887
 msgid "The button look."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:317
+#: admin-app/src/routes/Settings.tsx:292
 msgid "The button position on desktop screens."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:318
+#: admin-app/src/routes/Settings.tsx:293
 msgid "The button position on mobile screens — handy when the button must clear mobile navigation or sticky cart buttons."
 msgstr ""
 
@@ -4258,20 +4234,16 @@ msgstr ""
 msgid "The campaign was updated."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:131
+#: includes/Hooks/HookManager.php:129
 msgid "The candidate product ids collected for Phase 33.5 upsell scoring."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:125
+#: includes/Hooks/HookManager.php:123
 msgid "The candidate thresholds generated for Phase 33.4 scoring."
 msgstr ""
 
 #: admin-app/src/components/mission-builder/ConditionFields.tsx:283
 msgid "The cart must contain at least this many items."
-msgstr ""
-
-#: admin-app/src/routes/Settings.tsx:610
-msgid "The currency unit shown on FaraCart amounts. “Auto” follows the store currency."
 msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:225
@@ -4294,11 +4266,11 @@ msgstr ""
 msgid "The faracart_product_cost filter"
 msgstr ""
 
-#: includes/Hooks/HookManager.php:128
+#: includes/Hooks/HookManager.php:126
 msgid "The full Phase 33.4 recommendation payload before it is served."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:133
+#: includes/Hooks/HookManager.php:131
 msgid "The full Phase 33.5 upsell ranking payload before it is served."
 msgstr ""
 
@@ -4346,7 +4318,7 @@ msgstr ""
 msgid "The mission could not be updated."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:293
+#: includes/Analytics/UpsellRanker.php:294
 msgid "The mission gap is already closed — no upsells needed."
 msgstr ""
 
@@ -4354,7 +4326,7 @@ msgstr ""
 msgid "The mission only applies when the cart ships to one of these zones. Leave empty for every zone."
 msgstr ""
 
-#: includes/REST/PreviewController.php:313
+#: includes/REST/PreviewController.php:314
 msgid "The mission or campaign could not be found."
 msgstr ""
 
@@ -4374,7 +4346,7 @@ msgstr ""
 msgid "The mission was updated."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:112
+#: includes/Hooks/HookManager.php:110
 msgid "The order-item unit-cost snapshot written at checkout (UPSELL_REFACTOR §21) — return a float to stamp it, null to leave the line without a snapshot."
 msgstr ""
 
@@ -4386,7 +4358,7 @@ msgstr ""
 msgid "The page you are looking for does not exist."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1166
+#: admin-app/src/routes/Settings.tsx:1122
 msgid "The plugin’s public actions and filters — a reference for theme and plugin developers."
 msgstr ""
 
@@ -4402,7 +4374,7 @@ msgstr ""
 msgid "The product could not be found."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:107
+#: includes/Hooks/HookManager.php:105
 msgid "The progress template class map (id => Template class). Register a new Mission or Campaign template here."
 msgstr ""
 
@@ -4410,7 +4382,7 @@ msgstr ""
 msgid "The recommended target must be greater than zero."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:944
+#: admin-app/src/routes/Settings.tsx:900
 msgid "The round button diameter (32–96)."
 msgstr ""
 
@@ -4418,11 +4390,11 @@ msgstr ""
 msgid "The selected mission could not be found"
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:238
+#: includes/Analytics/MissionRecommendationEngine.php:239
 msgid "The selected mission could not be found."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:106
+#: includes/Hooks/HookManager.php:104
 msgid "The shaped suggestion items for a mission."
 msgstr ""
 
@@ -4471,7 +4443,7 @@ msgid "This is an analytical estimate based on available WooCommerce cost and or
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template1Renderer.tsx:52
-#: includes/Frontend/ProgressUI.php:1035
+#: includes/Frontend/ProgressUI.php:1029
 msgid "This mission has ended"
 msgstr ""
 
@@ -4479,11 +4451,11 @@ msgstr ""
 msgid "This month"
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:185
+#: includes/Missions/MessageEngine.php:175
 msgid "This offer is not active right now."
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:188
+#: includes/Missions/MessageEngine.php:178
 msgid "This offer is not available for your cart."
 msgstr ""
 
@@ -4491,7 +4463,7 @@ msgstr ""
 msgid "This product could not be scored."
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:698
+#: includes/Analytics/MissionRecommendationEngine.php:699
 msgid "This threshold is %s above the median order value (%s)."
 msgstr ""
 
@@ -4536,12 +4508,12 @@ msgstr ""
 msgid "Toggle %s"
 msgstr ""
 
-#: includes/REST/BaseController.php:238
-#: includes/REST/BaseController.php:291
+#: includes/REST/BaseController.php:239
+#: includes/REST/BaseController.php:292
 msgid "Too many requests. Please try again shortly."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:722
+#: admin-app/src/routes/Settings.tsx:678
 msgid "Top"
 msgstr ""
 
@@ -4609,7 +4581,7 @@ msgstr ""
 msgid "Tuesday"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:601
+#: admin-app/src/routes/Settings.tsx:567
 msgid "Turn the storefront missions, rewards and progress bars on or off."
 msgstr ""
 
@@ -4677,7 +4649,7 @@ msgstr ""
 msgid "Use global default"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:873
+#: admin-app/src/routes/Settings.tsx:829
 msgid "Use the desktop position on mobile"
 msgstr ""
 
@@ -4693,7 +4665,7 @@ msgstr ""
 msgid "Variation falls back to its parent product"
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:385
+#: admin-app/src/routes/Settings.tsx:360
 msgid "Vertical offset (px)"
 msgstr ""
 
@@ -4715,7 +4687,7 @@ msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:168
 #: admin-app/src/templates/renderers/Template6Renderer.tsx:155
-#: includes/Frontend/ProgressUI.php:1028
+#: includes/Frontend/ProgressUI.php:1022
 msgid "View products"
 msgstr ""
 
@@ -4724,7 +4696,7 @@ msgstr ""
 msgid "View store"
 msgstr ""
 
-#: includes/Frontend/ProgressUI.php:566
+#: includes/Frontend/ProgressUI.php:575
 msgid "View your cart missions"
 msgstr ""
 
@@ -4779,23 +4751,23 @@ msgstr ""
 msgid "What the mission measures."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1028
+#: admin-app/src/routes/Settings.tsx:984
 msgid "When off, cart coupons and discounts do not reduce the discounted-subtotal basis."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1046
+#: admin-app/src/routes/Settings.tsx:1002
 msgid "When off, products currently on sale are excluded from every mission."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1055
+#: admin-app/src/routes/Settings.tsx:1011
 msgid "When off, virtual and downloadable products are excluded from every mission."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:874
+#: admin-app/src/routes/Settings.tsx:830
 msgid "When on, mobile reuses the desktop position and the separate mobile fields are hidden."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1037
+#: admin-app/src/routes/Settings.tsx:993
 msgid "When on, shipping charges count toward the cart-total basis."
 msgstr ""
 
@@ -4811,47 +4783,47 @@ msgstr ""
 msgid "When this mission is reached, every lower-priority mission is skipped and never grants its reward. Higher-priority missions are unaffected."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:706
+#: admin-app/src/routes/Settings.tsx:662
 msgid "Where and how the storefront widgets appear."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:864
+#: admin-app/src/routes/Settings.tsx:820
 msgid "Where the button sits — separately for desktop and mobile. Mobile can reuse the desktop position, or pin its own so it never clashes with mobile navigation or sticky cart buttons. The progress drawer always opens toward the screen center."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:110
+#: includes/Hooks/HookManager.php:108
 msgid "Whether Phase 33.2 revenue attribution (order association) is on."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:123
+#: includes/Hooks/HookManager.php:121
 msgid "Whether Phase 33.4 smart mission recommendations are on."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:130
+#: includes/Hooks/HookManager.php:128
 msgid "Whether Phase 33.5 smart upsell ranking is on."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:116
+#: includes/Hooks/HookManager.php:114
 msgid "Whether debug-level entries are written to the debug log (default off; FARACART_DEBUG constant wins)."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:104
+#: includes/Hooks/HookManager.php:102
 msgid "Whether product suggestions render on the storefront."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:108
+#: includes/Hooks/HookManager.php:106
 msgid "Whether the Phase 33 revenue event pipeline records events."
 msgstr ""
 
-#: includes/Hooks/HookManager.php:121
+#: includes/Hooks/HookManager.php:119
 msgid "Whether the Phase 33.3 revenue summary cache is on."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:774
+#: admin-app/src/routes/Settings.tsx:730
 msgid "Whether the widgets render on small screens (≤782px)."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:1009
+#: admin-app/src/routes/Settings.tsx:965
 msgid "Which cart money counts toward missions. Defaults match the storefront behavior before these options existed."
 msgstr ""
 
@@ -4871,7 +4843,7 @@ msgstr ""
 msgid "Why?"
 msgstr ""
 
-#: includes/Hooks/HookManager.php:102
+#: includes/Hooks/HookManager.php:100
 msgid "Widget poll interval in seconds."
 msgstr ""
 
@@ -4880,7 +4852,7 @@ msgid "Window"
 msgstr ""
 
 #: admin-app/src/templates/renderers/Template3Renderer.tsx:177
-#: includes/Frontend/ProgressUI.php:1038
+#: includes/Frontend/ProgressUI.php:1032
 msgid "With a purchase of"
 msgstr ""
 
@@ -4892,7 +4864,7 @@ msgstr ""
 msgid "WooCommerce %1$s or newer is required (current: %2$s)."
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1236
+#: includes/Analytics/UpsellRanker.php:1237
 msgid "WooCommerce cross-sell of a cart item"
 msgstr ""
 
@@ -4900,7 +4872,7 @@ msgstr ""
 msgid "WooCommerce must be installed and activated."
 msgstr ""
 
-#: includes/Analytics/MissionRecommendationEngine.php:257
+#: includes/Analytics/MissionRecommendationEngine.php:258
 msgid "WooCommerce order data is not available — no recommendation can be computed."
 msgstr ""
 
@@ -4908,7 +4880,7 @@ msgstr ""
 msgid "WooCommerce product cost field (_cost)"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1235
+#: includes/Analytics/UpsellRanker.php:1236
 msgid "WooCommerce upsell of a cart item"
 msgstr ""
 
@@ -4928,17 +4900,17 @@ msgstr ""
 msgid "Yesterday"
 msgstr ""
 
-#: includes/REST/BaseController.php:105
-#: includes/REST/PreviewController.php:204
+#: includes/REST/BaseController.php:106
+#: includes/REST/PreviewController.php:205
 msgid "You are not allowed to access this endpoint."
 msgstr ""
 
-#: includes/Missions/MessageEngine.php:197
+#: includes/Missions/MessageEngine.php:187
 msgid "You have already completed this mission."
 msgstr ""
 
 #: admin-app/src/routes/Appearance.tsx:87
-#: includes/Missions/MessageEngine.php:214
+#: includes/Missions/MessageEngine.php:204
 msgid "You reached your mission!"
 msgstr ""
 
@@ -4961,7 +4933,7 @@ msgstr ""
 msgid "after FaraCart interaction"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1164
+#: includes/Analytics/UpsellRanker.php:1165
 msgid "almost exactly"
 msgstr ""
 
@@ -4969,7 +4941,7 @@ msgstr ""
 msgid "average basket value"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1240
+#: includes/Analytics/UpsellRanker.php:1241
 msgid "best seller"
 msgstr ""
 
@@ -4989,11 +4961,11 @@ msgstr ""
 msgid "e.g. 🎁 or a dashicon name"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1234
+#: includes/Analytics/UpsellRanker.php:1235
 msgid "inside the mission's categories"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1232
+#: includes/Analytics/UpsellRanker.php:1233
 msgid "manually selected for this mission"
 msgstr ""
 
@@ -5005,11 +4977,11 @@ msgstr ""
 msgid "of completions that saw a recommendation"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1164
+#: includes/Analytics/UpsellRanker.php:1165
 msgid "partially"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1233
+#: includes/Analytics/UpsellRanker.php:1234
 msgid "previously recommended for this mission"
 msgstr ""
 
@@ -5017,15 +4989,15 @@ msgstr ""
 msgid "purchases per completed mission"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1237
+#: includes/Analytics/UpsellRanker.php:1238
 msgid "related to a cart item"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1238
+#: includes/Analytics/UpsellRanker.php:1239
 msgid "shares a category with the cart"
 msgstr ""
 
-#: includes/Analytics/UpsellRanker.php:1239
+#: includes/Analytics/UpsellRanker.php:1240
 msgid "shares a tag with the cart"
 msgstr ""
 

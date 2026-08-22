@@ -29,7 +29,9 @@ Every successful response uses the standard envelope (mirroring
 }
 ```
 
-`meta` and `pagination` are present only when meaningful.
+`meta` is present on every successful response and includes the current
+WooCommerce currency configuration. `pagination` is included for paginated
+responses.
 
 ### 1.2 Errors
 
@@ -187,7 +189,6 @@ category/product/composite missions evaluate correctly.
   "data": {
     "enabled": true,
     "fullscreen_dashboard": true,
-    "currency_display": "symbol",
     "default_mission_behavior": "all",
     "conflict_resolution": "cumulative",
     "calculation_mode": "subtotal",
@@ -211,22 +212,29 @@ category/product/composite missions evaluate correctly.
     "performance_caching": false,
     "analytics_enabled": true,
     "performance_suggestions": true,
-    "debug_mode": false,
-    "logging_enabled": false,
     "developer_hooks": true
   },
   "meta": {
     "hooks": [
       { "type": "filter", "hook": "faracart_suggestions_enabled", "description": "..." }
     ],
-    "log_path": "/path/to/wp-content/faracart-debug.log"
+    "currency": {
+      "currency": "<woocommerce-currency-code>",
+      "symbol": "<woocommerce-currency-symbol>",
+      "position": "left",
+      "decimals": 2,
+      "decimal_separator": ".",
+      "thousand_separator": ","
+    }
   }
 }
 ```
 
 `meta.hooks` (Phase 18 Advanced → developer hooks) carries the public
-`faracart_*` hooks reference rendered by the Settings page;
-`meta.log_path` is present only while `logging_enabled` is on.
+`faracart_*` hooks reference rendered by the Settings page. `meta.currency`
+is WooCommerce's current currency configuration and is included on every
+FaraCart REST response so admin clients can refresh formatting without a
+second settings system.
 
 #### `POST /settings`
 
@@ -241,7 +249,6 @@ sanitizer (direct handler saves included). The full Phase 18 surface:
 | Key | Type / constraints | Sanitization |
 |---|---|---|
 | `enabled` / `fullscreen_dashboard` | boolean | cast |
-| `currency_display` | enum `symbol` `code` `name` | unknown → `symbol` |
 | `default_mission_behavior` | enum `all` `first` `closest` | unknown → `all` |
 | `conflict_resolution` | enum `cumulative` `best` `first` | unknown → `cumulative` |
 | `calculation_mode` | enum `subtotal` `discounted_subtotal` `total` | unknown → `subtotal` |
@@ -383,7 +390,12 @@ Response:
         "conflict": { "resolved": true, "reason": "" }
       }
     ],
-    "currency": "IRR",
+    "currency": "<woocommerce-currency-code>",
+    "currencySymbol": "<woocommerce-currency-symbol>",
+    "currencyPosition": "<woocommerce-currency-position>",
+    "currencyDecimals": 2,
+    "currencyDecimalSeparator": "<woocommerce-decimal-separator>",
+    "currencyThousandSeparator": "<woocommerce-thousand-separator>",
     "simulated": { "amount": 500000, "quantity": 1 }
   },
   "meta": { "mode": "mission" }
@@ -529,7 +541,7 @@ exposes only the minimum data the widgets need:
         "remaining": 250000,
         "percentage": 50,
         "completed": false,
-        "state": "progressing",		"message": "Only ۲۵۰٬۰۰۰ left to reach your mission",
+        "state": "progressing",		"message": "Only <formatted-store-amount> left to reach your mission",
 		"reward": { "type": "free_shipping", "value": null, "max_value": null, "meta": {} },
 		"suggestions": [
 			{
@@ -537,7 +549,7 @@ exposes only the minimum data the widgets need:
 				"name": "Wireless Charger",
 				"permalink": "https://site/product/wireless-charger/",
 				"price": 150000,
-				"price_html": "۱۵۰٬۰۰۰ تومان",
+				"price_html": "<formatted-store-price>",
 				"image": "",
 				"stock_status": "instock",
 				"source": "upsell"
@@ -550,7 +562,12 @@ exposes only the minimum data the widgets need:
         "completion": { "completion_limit": null, "completion_count": 0, "remaining_completions": null, "can_complete": true }
       }
     ],
-    "currency": "IRR",
+    "currency": "<woocommerce-currency-code>",
+    "currencySymbol": "<woocommerce-currency-symbol>",
+    "currencyPosition": "<woocommerce-currency-position>",
+    "currencyDecimals": 2,
+    "currencyDecimalSeparator": "<woocommerce-decimal-separator>",
+    "currencyThousandSeparator": "<woocommerce-thousand-separator>",
     "tracking_nonce": "<fresh faracart_track nonce — see below>"
   },
   "meta": { "total_missions": 1 }
@@ -928,8 +945,8 @@ no-matching-items ineligibility), weight and composite (AND) missions
   `include_virtual` (items dropped and bases rebased), plus
   `CartIntegration` applying the settings to a live cart snapshot
 - frontend: locations follow the setting, sticky gated on the 'sticky'
-  location, the locations filter override, and the config carrying
-  `currencyDisplay` + `mobile`
+  location, the locations filter override, and the config carrying the
+  WooCommerce currency fields + `mobile`
 - mission behavior `all` / `first` / `closest` narrowing the progress
   payload, and progress caching (off → no transient, on → payload
   written, sentinel payload served verbatim on read)

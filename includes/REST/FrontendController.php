@@ -25,6 +25,7 @@ use FaraCart\Recommendations\ProductRecommendationEngine;
 use FaraCart\Rewards\RewardResult;
 use FaraCart\Settings\Settings;
 use FaraCart\Templates\TemplateEngine;
+use FaraCart\Utils\Currency;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -246,6 +247,7 @@ class FrontendController extends BaseController {
 				// ones here — a cached payload can never serve a stale or
 				// another user's nonce.
 				if ( isset( $cached['data'] ) && is_array( $cached['data'] ) ) {
+					$cached['data'] = array_merge( Currency::frontend_config(), $cached['data'] );
 					$cached['data']['tracking_nonce'] = $this->tracking_nonce();
 					$cached['data']['gift_nonce']     = $this->gift_nonce();
 				}
@@ -287,7 +289,9 @@ class FrontendController extends BaseController {
 		}
 
 		$response = $this->success(
-			array(
+			array_merge(
+				Currency::frontend_config(),
+				array(
 				'missions'    => $items,
 				// Campaign template groups (pluggable engine): only campaigns
 				// with a configured campaign-scoped template are listed — the
@@ -295,7 +299,6 @@ class FrontendController extends BaseController {
 				// campaign template (e.g. the milestone chain) instead of
 				// per-mission cards.
 				'campaigns' => $this->campaign_groups( $missions ),
-				'currency' => $this->settings->currency(),
 				// Self-healing tracking nonce: a freshly minted faracart_track
 				// nonce rides on every progress response so the storefront JS
 				// can adopt it before reporting events — a cached page serving
@@ -308,6 +311,7 @@ class FrontendController extends BaseController {
 				// adopt it before claiming a gift — a long-lived cart page
 				// never outlives its gift nonce window.
 				'gift_nonce'     => $this->gift_nonce(),
+				)
 			),
 			array(
 				'total_missions' => count( $items ),
@@ -891,7 +895,7 @@ class FrontendController extends BaseController {
 				'image'      => $image_id ? (string) wp_get_attachment_image_url( $image_id, 'woocommerce_thumbnail' ) : '',
 				'price'      => '' !== $price ? (float) $price : null,
 				'price_html' => '' !== $price && function_exists( 'wc_price' )
-					? html_entity_decode( wp_strip_all_tags( wc_price( (float) $price, array( 'currency' => $this->settings->currency() ) ) ), ENT_QUOTES, 'UTF-8' )
+					? Currency::price( (float) $price )
 					: '',
 			);
 		}

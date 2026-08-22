@@ -16,7 +16,7 @@ import type { CampaignTemplateProps } from '../registry';
 export default function MilestoneChainTemplateRenderer({
   campaign,
   missions,
-  currency,
+  currency: _currency,
   settings,
   animation,
 }: CampaignTemplateProps) {
@@ -100,7 +100,7 @@ export default function MilestoneChainTemplateRenderer({
               {showTargets && (
                 <Typography sx={{ fontSize: 12, color: '#646970', lineHeight: 1.3 }}>
                   {mission.is_money
-                    ? formatCurrency(mission.target, currency)
+                    ? formatCurrency(mission.target)
                     : formatNumber(mission.target)}
                 </Typography>
               )}

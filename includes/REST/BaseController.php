@@ -8,6 +8,7 @@
 namespace FaraCart\REST;
 
 use FaraCart\Hooks\HookManager;
+use FaraCart\Utils\Currency;
 use FaraCart\Utils\Logger;
 
 defined( 'ABSPATH' ) || exit;
@@ -147,10 +148,10 @@ abstract class BaseController {
 	 */
 	protected function success( $data, array $meta = array() ) {
 		$response = array( 'data' => $data );
-
-		if ( ! empty( $meta ) ) {
-			$response['meta'] = $meta;
-		}
+		$response['meta'] = array_merge(
+			array( 'currency' => Currency::config() ),
+			$meta
+		);
 
 		return rest_ensure_response( $response );
 	}
@@ -171,7 +172,7 @@ abstract class BaseController {
 		return rest_ensure_response(
 			array(
 				'data'       => $data,
-				'meta'       => $meta,
+				'meta'       => array_merge( array( 'currency' => Currency::config() ), $meta ),
 				'pagination' => array(
 					'page'        => (int) $page,
 					'per_page'    => $per_page,

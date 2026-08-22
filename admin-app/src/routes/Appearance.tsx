@@ -385,7 +385,7 @@ export default function Appearance() {
 		try {
 			return getBootData().currency;
 		} catch {
-			return "USD";
+			return "";
 		}
 	}, []);
 

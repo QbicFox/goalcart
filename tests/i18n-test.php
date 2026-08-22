@@ -320,7 +320,7 @@ check( 'storefront config is RTL-aware', array_key_exists( 'isRtl', $config ) &&
 
 $frontend_js = read_source( $root . '/assets/js/frontend.js' );
 check( 'frontend JS derives uiLocale from cfg.locale', false !== strpos( $frontend_js, 'String( cfg.locale ).replace( \'_\', \'-\' )' ) );
-check( 'formatMoney uses the site locale', false !== strpos( $frontend_js, 'new Intl.NumberFormat( uiLocale, {' ) );
+check( 'formatMoney uses WooCommerce currency fields', false !== strpos( $frontend_js, 'cfg.currencyDecimals' ) && false !== strpos( $frontend_js, 'cfg.currencyPosition' ) );
 check( 'formatNumber uses the site locale', false !== strpos( $frontend_js, 'new Intl.NumberFormat( uiLocale )' ) );
 
 // ---------------------------------------------------------------------------

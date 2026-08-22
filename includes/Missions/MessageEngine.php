@@ -7,6 +7,8 @@
 
 namespace FaraCart\Missions;
 
+use FaraCart\Utils\Currency;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -37,27 +39,15 @@ defined( 'ABSPATH' ) || exit;
 final class MessageEngine {
 
 	/**
-	 * Display currency unit override ('' = the WooCommerce store currency).
-	 *
-	 * Resolved by Settings::currency() and injected by the container, so
-	 * server-rendered message amounts (e.g. "Only {remaining} left") are
-	 * labelled with the same currency the storefront widgets and the admin
-	 * dashboard use. Empty keeps wc_price's store-currency behavior, so
-	 * bare constructions (tests) and stores without a configured override
-	 * render exactly as before.
-	 *
-	 * @var string
-	 */
-	protected $currency;
-
-	/**
 	 * Constructor.
 	 *
-	 * @param string $currency Display currency code ('' = store currency).
+	 * The optional argument remains accepted for source compatibility with
+	 * integrations from older versions, but is intentionally ignored: all
+	 * money formatting now comes from WooCommerce's active configuration.
+	 *
+	 * @param string $legacy_currency Deprecated legacy argument.
 	 */
-	public function __construct( $currency = '' ) {
-		$this->currency = strtoupper( trim( (string) $currency ) );
-	}
+	public function __construct( $legacy_currency = '' ) {}
 
 	/**
 	 * Message states.
@@ -376,36 +366,19 @@ final class MessageEngine {
 	 * and currency symbol apply. The result is plain text (messages and
 	 * reward labels are inserted into the DOM via `textContent`, never
 	 * parsed as HTML), so the symbol's markup must be stripped AND its
-	 * entities decoded — WooCommerce ships symbols like the IRT
-	 * "\u062A\u0648\u0645\u0627\u0646" as an HTML entity
-	 * (`&#x062A;&#x0648;&#x0645;&#x0627;&#x0646;`), which would otherwise
-	 * render to the shopper as literal entity text.
+	 * entities decoded — WooCommerce may ship localized symbols as HTML
+	 * entities, which would otherwise render to the shopper as literal
+	 * entity text.
 	 *
 	 * @param float  $value   Number.
 	 * @param bool   $is_money Whether to format as currency.
 	 * @return string
 	 */
 	protected function format_number( $value, $is_money ) {
-		if ( $is_money && function_exists( 'wc_price' ) ) {
-			$args = array();
-
-			// The configured display currency overrides the store currency
-			// for this single wc_price call (never a global change): wc_price
-			// falls back to get_woocommerce_currency() when empty.
-			if ( '' !== $this->currency ) {
-				$args['currency'] = $this->currency;
-			}
-
-			return html_entity_decode(
-				wp_strip_all_tags( wc_price( (float) $value, $args ) ),
-				ENT_QUOTES,
-				'UTF-8'
-			);
+		if ( $is_money ) {
+			return Currency::price( $value );
 		}
 
-		// Currency without WooCommerce: 2 decimals, locale-aware.
-		$decimals = $is_money ? 2 : 0;
-
-		return (string) number_format_i18n( (float) $value, $decimals );
+		return (string) number_format_i18n( (float) $value, 0 );
 	}
 }

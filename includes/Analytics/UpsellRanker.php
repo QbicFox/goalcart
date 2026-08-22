@@ -12,6 +12,7 @@ use FaraCart\Missions\Mission;
 use FaraCart\Missions\MissionRepository;
 use FaraCart\Hooks\HookManager;
 use FaraCart\Settings\Settings;
+use FaraCart\Utils\Currency;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1182,7 +1183,7 @@ final class UpsellRanker {
 				/* translators: 1: units sold, 2: average rating. */
 				__( 'Popular product (%d units sold, %s rating).', 'faracart' ),
 				(int) $product->get_total_sales(),
-				$this->fmt_amount( method_exists( $product, 'get_average_rating' ) ? (float) $product->get_average_rating() : 0.0 )
+				$this->fmt_decimal( method_exists( $product, 'get_average_rating' ) ? (float) $product->get_average_rating() : 0.0 )
 			);
 		}
 
@@ -1563,11 +1564,7 @@ final class UpsellRanker {
 			return '';
 		}
 
-		return html_entity_decode(
-			wp_strip_all_tags( wc_price( (float) $price, array( 'currency' => $this->settings ? $this->settings->currency() : '' ) ) ),
-			ENT_QUOTES,
-			'UTF-8'
-		);
+		return Currency::price( (float) $price );
 	}
 
 	/**
@@ -1605,6 +1602,16 @@ final class UpsellRanker {
 	 * @return string
 	 */
 	protected function fmt_amount( $amount ) {
-		return number_format( round( (float) $amount, 0 ), 0, '.', ',' );
+		return Currency::price( (float) $amount );
+	}
+
+	/**
+	 * Format a non-monetary decimal for a recommendation reason.
+	 *
+	 * @param float $value Value.
+	 * @return string
+	 */
+	protected function fmt_decimal( $value ) {
+		return (string) number_format_i18n( (float) $value, 1 );
 	}
 }

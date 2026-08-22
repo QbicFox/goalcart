@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import { __ } from '@wordpress/i18n';
 import type { ComponentType } from 'react';
 
-import { formatCurrency } from '../../lib/format';
+import { decodeHtmlEntities, formatCurrency } from '../../lib/format';
 import { CAMPAIGN_RENDERERS, MISSION_RENDERERS } from '../../templates/registry';
 import type { CampaignTemplateProps } from '../../templates/registry';
 import { rewardLabel } from '../../templates/rewardLabel';
@@ -113,7 +113,7 @@ function RewardChip({ label, state }: { label: string; state: 'locked' | 'unlock
 /** The suggestion list (name + server-formatted price). */
 function SuggestionList({
   mission,
-  currency,
+  currency: _currency,
   tokens,
 }: {
   mission: ProgressMission;
@@ -151,7 +151,7 @@ function SuggestionList({
             {item.name}
           </Box>
           <Box component="span" sx={{ color: '#646970', whiteSpace: 'nowrap' }}>
-            {item.price !== null ? formatCurrency(item.price, currency) : item.price_html}
+            {item.price !== null ? formatCurrency(item.price) : decodeHtmlEntities(item.price_html)}
           </Box>
         </Box>
       ))}

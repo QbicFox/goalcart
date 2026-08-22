@@ -32,7 +32,7 @@ import {
 } from "react-hook-form";
 
 import { fetchSettingsEnvelope, saveSettings } from "../api/settings";
-import { setBootCurrency, setBootCurrencyDisplay } from "../boot";
+
 import {
 	FLOATING_PRESETS,
 	type FloatingDevice,
@@ -133,31 +133,6 @@ function SelectField({
 			)}
 		/>
 	);
-}
-
-/**
- * The display currency unit options (Settings → General → Currency).
- *
- * '' = follow the WooCommerce store currency; the preset list covers the
- * Iranian store units (IRT renders as the toman symbol, IRR as the rial
- * symbol, in fa_IR). A stored custom ISO-4217 code (saved via the API) is
- * appended so the select always shows the current value.
- */
-const CURRENCY_OPTIONS: Array<{ value: string; label: string }> = [
-	{ value: "", label: __("Auto (store currency)", "faracart") },
-	{ value: "IRT", label: __("IRT — Iranian toman", "faracart") },
-	{ value: "IRR", label: __("IRR — Iranian rial", "faracart") },
-];
-
-/** The select options for the currency setting, including a stored custom code. */
-function currencyOptions(
-	current?: string,
-): Array<{ value: string; label: string }> {
-	if (!current || CURRENCY_OPTIONS.some((option) => option.value === current)) {
-		return CURRENCY_OPTIONS;
-	}
-
-	return [...CURRENCY_OPTIONS, { value: current, label: current }];
 }
 
 /** The storefront widget locations as a checkbox group. */
@@ -469,15 +444,6 @@ export default function Settings() {
 				setFullscreen(saved.fullscreen_dashboard);
 			}
 
-			if (saved.currency_display) {
-				setBootCurrencyDisplay(saved.currency_display);
-			}
-
-			// Apply the display currency unit live: formatCurrency reads
-			// boot.currency, so every dashboard amount re-renders immediately.
-			if (typeof saved.currency === "string") {
-				setBootCurrency(saved.currency || "");
-			}
 		},
 		onError: (error: Error) => {
 			notify(error.message, "error");
@@ -602,16 +568,6 @@ export default function Settings() {
 											"Turn the storefront missions, rewards and progress bars on or off.",
 											"faracart",
 										)}
-									/>
-									<SelectField
-										control={control}
-										name="currency"
-										label={__("Currency", "faracart")}
-										description={__(
-											"The currency unit shown on FaraCart amounts. “Auto” follows the store currency.",
-											"faracart",
-										)}
-										options={currencyOptions(data?.currency)}
 									/>
 									<SelectField
 										control={control}

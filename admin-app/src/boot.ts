@@ -1,4 +1,4 @@
-import type { FaraCartBootData } from './types';
+import type { FaraCartBootData, WooCommerceCurrencyConfig } from './types';
 
 let cached: FaraCartBootData | null = null;
 
@@ -24,16 +24,19 @@ export function getBootData(): FaraCartBootData {
   return cached;
 }
 
-/** Update boot data that can change without a full admin-page reload. */
-export function setBootCurrencyDisplay(display: FaraCartBootData['currencyDisplay']): void {
-  getBootData().currencyDisplay = display;
-}
-
 /**
- * Update the resolved display currency unit in boot data (after a
- * Settings save). formatCurrency reads boot.currency, so every dashboard
- * amount re-renders with the new unit immediately.
+ * Apply the latest WooCommerce currency configuration to the shared boot
+ * object. REST responses carry this metadata so changing WooCommerce
+ * settings is reflected on the next dashboard request without a FaraCart
+ * setting or page reload.
  */
-export function setBootCurrency(currency: string): void {
-  getBootData().currency = currency;
+export function setBootCurrencyConfig(config: WooCommerceCurrencyConfig): void {
+  const boot = getBootData();
+
+  boot.currency = config.currency;
+  boot.currencySymbol = config.symbol;
+  boot.currencyPosition = config.position;
+  boot.currencyDecimals = config.decimals;
+  boot.currencyDecimalSeparator = config.decimal_separator;
+  boot.currencyThousandSeparator = config.thousand_separator;
 }

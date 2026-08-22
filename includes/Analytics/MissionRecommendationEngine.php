@@ -10,6 +10,7 @@ namespace FaraCart\Analytics;
 use FaraCart\Missions\Mission;
 use FaraCart\Missions\MissionRepository;
 use FaraCart\Rewards\Reward;
+use FaraCart\Utils\Currency;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1145,6 +1146,6 @@ final class MissionRecommendationEngine {
 	 * @return string
 	 */
 	protected function fmt_amount( $amount ) {
-		return number_format( round( (float) $amount, 0 ), 0, '.', ',' );
+		return Currency::price( (float) $amount );
 	}
 }

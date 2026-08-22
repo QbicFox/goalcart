@@ -4,13 +4,13 @@ import Typography from '@mui/material/Typography';
 import { __, sprintf } from '@wordpress/i18n';
 import type { ComponentType, ReactNode } from 'react';
 
-import { formatCurrency, formatNumber } from '../../lib/format';
+import { decodeHtmlEntities, formatCurrency, formatNumber } from '../../lib/format';
 import type { ProgressMission, SuggestionProduct, TemplateSettingsValue } from '../../types';
 import { num, str } from '../utils';
 
 /** Format a mission value: currency for money missions, plain number otherwise. */
-export function formatMissionAmount(mission: ProgressMission, value: number, currency: string): string {
-  return mission.is_money ? formatCurrency(value, currency) : formatNumber(value);
+export function formatMissionAmount(mission: ProgressMission, value: number, _currency: string): string {
+  return mission.is_money ? formatCurrency(value) : formatNumber(value);
 }
 
 /** The clamped 0–100 progress percentage. */
@@ -247,7 +247,7 @@ export function MissionCta({
 export function RecommendedProductItem({
   item,
   settings,
-  currency,
+  currency: _currency,
   accent,
 }: {
   item: SuggestionProduct;
@@ -293,8 +293,8 @@ export function RecommendedProductItem({
             /* translators: %s: formatted price. */
             __('Only %s', 'faracart'),
             item.price !== null && item.price !== undefined
-              ? formatCurrency(item.price, currency)
-              : item.price_html
+              ? formatCurrency(item.price)
+              : decodeHtmlEntities(item.price_html)
           )}
         </Typography>
       </Box>

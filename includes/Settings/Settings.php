@@ -10,6 +10,7 @@ namespace FaraCart\Settings;
 
 use FaraCart\Missions\Mission;
 use FaraCart\Hooks\HookManager;
+use FaraCart\Utils\Currency;
 
 defined('ABSPATH') || exit;
 
@@ -17,8 +18,8 @@ defined('ABSPATH') || exit;
  * Class Settings
  *
  * Loads, caches, and persists plugin settings in a single WordPress option.
- * Settings ships the full surface: general (currency display,
- * default mission behavior, default calculation basis), frontend (locations,
+ * Settings ships the full surface: general (mission behavior, default
+ * calculation basis), frontend (locations,
  * template, animation, mobile behavior), mission calculation (tax / discount /
  * shipping / sale / virtual inclusion), performance (caching, analytics,
  * suggestions) and advanced (debug mode, logging, custom CSS, developer
@@ -83,12 +84,9 @@ class Settings
 		// General (P18-T01).
 		'enabled'               => true,
 		'fullscreen_dashboard'  => true,
-		// Display currency unit override: '' = follow the WooCommerce store
-		// currency (get_woocommerce_currency). A 3-letter ISO code overrides
-		// it for every FaraCart-rendered amount (admin dashboard, storefront
-		// widgets, previews, server-rendered messages) — see currency().
-		'currency'              => '',
-		'currency_display'      => 'symbol',           // symbol | code | name
+		// Currency is NOT a FaraCart setting: every FaraCart-rendered
+		// amount follows WooCommerce's own currency configuration (unit,
+		// symbol, position, separators, decimals) via Utils\Currency.
 		'default_mission_behavior' => 'all',              // all | first | closest
 		'conflict_resolution'   => 'cumulative',       // cumulative | best | first 
 		'calculation_mode'      => 'subtotal',         // subtotal | discounted_subtotal | total
@@ -285,7 +283,10 @@ class Settings
 	public function set($key, $value)
 	{
 		$this->all();
-		$this->settings[$key] = $value;
+
+		if (array_key_exists($key, $this->defaults)) {
+			$this->settings[$key] = $value;
+		}
 
 		return $this;
 	}
@@ -301,7 +302,9 @@ class Settings
 		$this->all();
 
 		foreach ($values as $key => $value) {
-			$this->settings[$key] = $value;
+			if (array_key_exists($key, $this->defaults)) {
+				$this->settings[$key] = $value;
+			}
 		}
 
 		return $this;
@@ -423,32 +426,15 @@ class Settings
 	/**
 	 * Resolve the display currency unit.
 	 *
-	 * Single source of truth for the currency every FaraCart-rendered
-	 * amount is labelled with (admin dashboard, storefront widgets,
-	 * previews and server-rendered messages). An empty `currency` setting
-	 * follows the WooCommerce store currency; a configured 3-letter ISO
-	 * code overrides it. Filterable via `faracart_currency` so
-	 * integrations can pin the display unit without touching the option.
+	 * Backward-compatible accessor that now delegates to WooCommerce's
+	 * own currency configuration (Utils\Currency::code()), the single
+	 * source of truth. Kept so existing consumers (boot data, frontend
+	 * config, payloads) need no signature change.
 	 *
 	 * @return string Uppercase ISO-4217 code.
 	 */
 	public function currency()
 	{
-		$configured = strtoupper(trim((string) $this->get('currency', '')));
-
-		if ('' !== $configured) {
-			$configured = (string) apply_filters('faracart_currency', $configured);
-
-			return '' !== $configured ? $configured : 'USD';
-		}
-
-		$store = function_exists('get_woocommerce_currency') ? (string) get_woocommerce_currency() : 'USD';
-
-		/**
-		 * Filter the resolved display currency.
-		 *
-		 * @param string $currency Uppercase ISO-4217 code.
-		 */
-		return (string) apply_filters('faracart_currency', $store);
+		return Currency::code();
 	}
 }

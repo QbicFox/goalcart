@@ -69,8 +69,9 @@ Printed as `window.faracartFrontend` at `wp_footer` priority 5:
 
 ```js
 {
-  endpoint, refresh, currency, locale, isRtl, labels,
-  template, animation, appearance, currencyDisplay, mobile,
+  endpoint, refresh, currency, currencySymbol, currencyPosition,
+  currencyDecimals, currencyDecimalSeparator, currencyThousandSeparator,
+  locale, isRtl, labels, template, animation, appearance, mobile,
   upsells: { endpoint, track, limit, labels }
 }
 ```

@@ -97,8 +97,6 @@ class HookManager {
 			array( 'type' => 'filter', 'hook' => 'faracart_frontend_template', 'description' => __( 'Store-wide widget template variant.', 'faracart' ) ),
 			array( 'type' => 'filter', 'hook' => 'faracart_frontend_animation', 'description' => __( 'Storefront progress-bar animation flag.', 'faracart' ) ),
 			array( 'type' => 'filter', 'hook' => 'faracart_frontend_mobile', 'description' => __( 'Storefront mobile behavior (show|hide).', 'faracart' ) ),
-			array( 'type' => 'filter', 'hook' => 'faracart_currency', 'description' => __( 'Resolved display currency unit (uppercase ISO-4217 code) — the currency every FaraCart amount is labelled with.', 'faracart' ) ),
-			array( 'type' => 'filter', 'hook' => 'faracart_currency_display', 'description' => __( 'Storefront currency display style (symbol|code|name).', 'faracart' ) ),
 			array( 'type' => 'filter', 'hook' => 'faracart_frontend_refresh_interval', 'description' => __( 'Widget poll interval in seconds.', 'faracart' ) ),
 			array( 'type' => 'filter', 'hook' => 'faracart_tracking_enabled', 'description' => __( 'Analytics tracking consent for the current request.', 'faracart' ) ),
 			array( 'type' => 'filter', 'hook' => 'faracart_suggestions_enabled', 'description' => __( 'Whether product suggestions render on the storefront.', 'faracart' ) ),

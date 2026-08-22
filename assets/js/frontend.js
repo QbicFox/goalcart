@@ -65,6 +65,15 @@
 	// the browser default, preserving the previous behavior.
 	var uiLocale = ( cfg && cfg.locale ) ? String( cfg.locale ).replace( '_', '-' ) : undefined;
 
+	// WooCommerce symbols and legacy price labels can arrive as HTML
+	// entities. Decode them before assigning to textContent, otherwise the
+	// entity source is shown literally to shoppers.
+	const decodeHtmlEntities = ( value ) => {
+		var textarea = document.createElement( 'textarea' );
+		textarea.innerHTML = String( value || '' );
+		return textarea.value;
+	}
+
 	var WIDGET_SELECTOR = '[data-faracart-widget]';
 	var FLOATING_ID = 'faracart-floating';
 
@@ -231,6 +240,15 @@
 			safe( () => {
 				var payload = JSON.parse( request.responseText );
 				if ( payload && payload.data ) {
+					// WooCommerce currency settings can change while a page is
+					// open. Adopt the latest backend configuration before the
+					// next render so no FaraCart setting or reload is required.
+					[ 'currency', 'currencySymbol', 'currencyPosition', 'currencyDecimals', 'currencyDecimalSeparator', 'currencyThousandSeparator', 'locale', 'isRtl' ].forEach( ( key ) => {
+						if ( Object.prototype.hasOwnProperty.call( payload.data, key ) ) {
+							cfg[ key ] = payload.data[ key ];
+						}
+					} );
+
 					// Self-healing tracking nonce: every /progress response
 					// carries a freshly minted faracart_track nonce. Adopt it
 					// before the next event report so a cached page's expired
@@ -520,23 +538,51 @@
 	}
 
 	/**
-	 * Format a money amount with the store currency.
+	 * Format a money amount with WooCommerce's exact configuration.
 	 *
-	 * Settings → General → currency display: the config's
-	 * currencyDisplay (symbol | code | name) becomes Intl's currencyDisplay
-	 * option, so stores can show $100, USD 100 or US dollars.
+	 * Intl currency formatting is not used because its defaults can differ
+	 * from WooCommerce's symbol, position, separators and decimal count.
 	 *
-	 * @param {number} value    Amount.
-	 * @param {string} currency ISO code.
+	 * @param {number} value Amount.
 	 * @return {string}
 	 */
-	const formatMoney = ( value, currency ) => {
+	const formatMoney = ( value ) => {
 		try {
-			return new Intl.NumberFormat( uiLocale, {
-				style: 'currency',
-				currency: currency || cfg.currency || 'USD',
-				currencyDisplay: cfg.currencyDisplay || 'symbol',
-			} ).format( Number( value ) || 0 );
+			var amount = Number( value );
+			var decimals = Math.max( 0, Math.floor( Number( cfg.currencyDecimals ) || 0 ) );
+			var fixed = ( isFinite( amount ) ? amount : 0 ).toFixed( decimals );
+			var negative = fixed.indexOf( '-' ) === 0;
+			var unsigned = negative ? fixed.slice( 1 ) : fixed;
+			var pieces = unsigned.split( '.' );
+			var thousandSeparator = typeof cfg.currencyThousandSeparator === 'string' ? cfg.currencyThousandSeparator : ',';
+			var decimalSeparator = typeof cfg.currencyDecimalSeparator === 'string' ? cfg.currencyDecimalSeparator : '.';
+			var integer = pieces[ 0 ].replace( /\B(?=(\d{3})+(?!\d))/g, thousandSeparator );
+			var number = ( negative ? '-' : '' ) + integer;
+
+			if ( decimals > 0 ) {
+				number += decimalSeparator + pieces[ 1 ];
+			}
+
+			var symbol = decodeHtmlEntities( typeof cfg.currencySymbol === 'string' ? cfg.currencySymbol : ( cfg.currency || '' ) );
+			var formatted;
+
+			switch ( cfg.currencyPosition ) {
+				case 'right':
+					formatted = number + symbol;
+					break;
+				case 'left_space':
+					formatted = symbol + ' ' + number;
+					break;
+				case 'right_space':
+					formatted = number + ' ' + symbol;
+					break;
+				case 'left':
+				default:
+					formatted = symbol + number;
+					break;
+			}
+
+			return formatted;
 		} catch ( error ) {
 			return String( value );
 		}
@@ -554,10 +600,10 @@
 	 */
 	const formatProductPrice = ( item ) => {
 		if ( item && item.price !== null && item.price !== undefined && item.price !== '' ) {
-			return formatMoney( item.price, cfg.currency );
+			return formatMoney( item.price );
 		}
 
-		return String( ( item && item.price_html ) || '' );
+		return decodeHtmlEntities( ( item && item.price_html ) || '' );
 	}
 
 	/**
@@ -1267,9 +1313,9 @@
 			button.appendChild( el( 'span', 'faracart-gift-picker__name', String( item.name || '' ) ) );
 
 			if ( item.price !== null && item.price !== undefined && item.price !== '' ) {
-				button.appendChild( el( 'span', 'faracart-gift-picker__price', formatMoney( item.price, cfg.currency ) ) );
+				button.appendChild( el( 'span', 'faracart-gift-picker__price', formatMoney( item.price ) ) );
 			} else if ( item.price_html ) {
-				button.appendChild( el( 'span', 'faracart-gift-picker__price', String( item.price_html ) ) );
+				button.appendChild( el( 'span', 'faracart-gift-picker__price', decodeHtmlEntities( item.price_html ) ) );
 			}
 
 			li.appendChild( button );
@@ -1543,7 +1589,7 @@
 	 */
 	const remainingLabel = ( mission, currency ) => {
 		var amount = mission.is_money
-			? formatMoney( mission.remaining, currency )
+			? formatMoney( mission.remaining )
 			: formatNumber( mission.remaining );
 
 		return uiLabel( 'left', '%s left' ).replace( '%s', amount );
@@ -1558,7 +1604,7 @@
 	 */
 	const addMoreLabel = ( mission, currency ) => {
 		var amount = mission.is_money
-			? formatMoney( mission.remaining, currency )
+			? formatMoney( mission.remaining )
 			: formatNumber( mission.remaining );
 
 		return uiLabel( 'add_more', 'Add %s more' ).replace( '%s', amount );
@@ -1756,7 +1802,7 @@
 
 		if ( settings.showAmounts !== false ) {
 			var amounts = el( 'div', 'faracart-t1__amounts' );
-			amounts.appendChild( el( 'span', 'faracart-t1__current', mission.is_money ? formatMoney( mission.current, currency ) : formatNumber( mission.current ) ) );
+			amounts.appendChild( el( 'span', 'faracart-t1__current', mission.is_money ? formatMoney( mission.current ) : formatNumber( mission.current ) ) );
 
 			if ( settings.showRemaining !== false ) {
 				amounts.appendChild( el( 'span', 'faracart-t1__remaining', remainingLabel( mission, currency ) ) );
@@ -1863,18 +1909,18 @@
 		info.appendChild( titleRow );
 
 		if ( settings.showDescription !== false ) {
-			info.appendChild( el( 'p', 'faracart-t3__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( mission.is_money ? formatMoney( mission.target, currency ) : formatNumber( mission.target ) ) ) );
+			info.appendChild( el( 'p', 'faracart-t3__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( mission.is_money ? formatMoney( mission.target ) : formatNumber( mission.target ) ) ) );
 		}
 
 		if ( settings.showAmounts !== false ) {
 			var paid = el( 'div', 'faracart-t3__amount' );
 			paid.appendChild( el( 'span', 'faracart-t3__amount-label', uiLabel( 'paid', 'Paid' ) ) );
-			paid.appendChild( el( 'span', 'faracart-t3__amount-value', mission.is_money ? formatMoney( mission.current, currency ) : formatNumber( mission.current ) ) );
+			paid.appendChild( el( 'span', 'faracart-t3__amount-value', mission.is_money ? formatMoney( mission.current ) : formatNumber( mission.current ) ) );
 			info.appendChild( paid );
 
 			var left = el( 'div', 'faracart-t3__amount' );
 			left.appendChild( el( 'span', 'faracart-t3__amount-label', uiLabel( 'remaining', 'Remaining' ) ) );
-			left.appendChild( el( 'span', 'faracart-t3__amount-value faracart-t3__amount-value--accent', mission.is_money ? formatMoney( mission.remaining, currency ) : formatNumber( mission.remaining ) ) );
+			left.appendChild( el( 'span', 'faracart-t3__amount-value faracart-t3__amount-value--accent', mission.is_money ? formatMoney( mission.remaining ) : formatNumber( mission.remaining ) ) );
 			info.appendChild( left );
 		}
 
@@ -2024,7 +2070,7 @@
 		panel.appendChild( header );
 
 		panel.appendChild( el( 'h4', 'faracart-t6__title', String( mission.mission_name || '' ) ) );
-		panel.appendChild( el( 'p', 'faracart-t6__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( mission.is_money ? formatMoney( mission.target, currency ) : formatNumber( mission.target ) ) ) );
+		panel.appendChild( el( 'p', 'faracart-t6__desc', uiLabel( 'with_purchase', 'With a purchase of' ) + ' ' + ( mission.is_money ? formatMoney( mission.target ) : formatNumber( mission.target ) ) ) );
 
 		// Elegant progress with a marker dot at the end.
 		var progress = el( 'div', 'faracart-t6__progress' );
@@ -2042,12 +2088,12 @@
 			var amounts = el( 'div', 'faracart-t6__amounts' );
 			var paid = el( 'div', 'faracart-t6__amount' );
 			paid.appendChild( el( 'span', 'faracart-t6__amount-label', uiLabel( 'paid', 'Paid' ) ) );
-			paid.appendChild( el( 'span', 'faracart-t6__amount-value', mission.is_money ? formatMoney( mission.current, currency ) : formatNumber( mission.current ) ) );
+			paid.appendChild( el( 'span', 'faracart-t6__amount-value', mission.is_money ? formatMoney( mission.current ) : formatNumber( mission.current ) ) );
 			amounts.appendChild( paid );
 
 			var left = el( 'div', 'faracart-t6__amount faracart-t6__amount--end' );
 			left.appendChild( el( 'span', 'faracart-t6__amount-label', uiLabel( 'remaining', 'Remaining' ) ) );
-			left.appendChild( el( 'span', 'faracart-t6__amount-value faracart-t6__amount-value--gold', mission.is_money ? formatMoney( mission.remaining, currency ) : formatNumber( mission.remaining ) ) );
+			left.appendChild( el( 'span', 'faracart-t6__amount-value faracart-t6__amount-value--gold', mission.is_money ? formatMoney( mission.remaining ) : formatNumber( mission.remaining ) ) );
 			amounts.appendChild( left );
 			panel.appendChild( amounts );
 		}
@@ -2276,7 +2322,7 @@
 
 			if ( settings.showTargets !== false ) {
 				var target = mission.is_money
-					? formatMoney( mission.target, currency )
+					? formatMoney( mission.target )
 					: formatNumber( mission.target );
 				step.appendChild( el( 'span', 'faracart-chain__target', target ) );
 			}

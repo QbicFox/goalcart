@@ -233,8 +233,9 @@ class AssetLoader {
 	public function boot_data() {
 		$user = wp_get_current_user();
 
-		$currency_display = apply_filters( 'faracart_currency_display', $this->settings->get( 'currency_display', 'symbol' ) );
-		$currency_display = in_array( $currency_display, array( 'symbol', 'code', 'name' ), true ) ? $currency_display : 'symbol';
+		// Currency follows WooCommerce's own configuration — the single
+		// source of truth for the React dashboard's money formatting.
+		$currency_config = \FaraCart\Utils\Currency::frontend_config();
 
 		$data = array(
 			'nonce'    => wp_create_nonce( 'wp_rest' ),
@@ -245,8 +246,12 @@ class AssetLoader {
 			'siteName' => get_bloginfo( 'name' ),
 			'locale'       => get_locale(),
 			'isRtl'        => is_rtl(),
-			'currency'     => $this->settings->currency(),
-			'currencyDisplay' => $currency_display,
+			'currency'     => $currency_config['currency'],
+			'currencySymbol' => $currency_config['currencySymbol'],
+			'currencyPosition' => $currency_config['currencyPosition'],
+			'currencyDecimals' => $currency_config['currencyDecimals'],
+			'currencyDecimalSeparator' => $currency_config['currencyDecimalSeparator'],
+			'currencyThousandSeparator' => $currency_config['currencyThousandSeparator'],
 			'currentDate'  => current_time( 'Y-m-d' ),
 			'userId'   => (int) $user->ID,
 			'user'     => array(

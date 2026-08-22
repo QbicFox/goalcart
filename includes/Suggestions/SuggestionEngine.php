@@ -7,6 +7,8 @@
 
 namespace FaraCart\Suggestions;
 
+use FaraCart\Utils\Currency;
+
 use FaraCart\Missions\CartContext;
 use FaraCart\Missions\Mission;
 use FaraCart\Missions\MissionResult;
@@ -433,8 +435,8 @@ final class SuggestionEngine {
 	 *
 	 * The price label is plain text — the storefront inserts it via
 	 * `textContent` — so the stripped `wc_price` markup has its entities
-	 * decoded too (WooCommerce ships the IRT "\u062A\u0648\u0645\u0627\u0646"
-	 * symbol as an entity, which would otherwise render literally).
+	 * decoded too (WooCommerce may ship localized symbols as entities,
+	 * which would otherwise render literally).
 	 *
 	 * @param \WC_Product $product Product.
 	 * @param string      $source  Source key.
@@ -449,11 +451,7 @@ final class SuggestionEngine {
 			'permalink'    => $product->get_permalink(),
 			'price'        => '' !== $price ? (float) $price : null,
 			'price_html'   => '' !== $price && function_exists( 'wc_price' )
-				? html_entity_decode(
-					wp_strip_all_tags( wc_price( (float) $price, array( 'currency' => $this->settings ? $this->settings->currency() : '' ) ) ),
-					ENT_QUOTES,
-					'UTF-8'
-				)
+				? Currency::price( (float) $price )
 				: '',
 			'image'        => $this->image_url( $product ),
 			'stock_status' => $product->get_stock_status(),

@@ -7,8 +7,8 @@
  *
  *  - defaults: every new setting key ships with the documented default
  *    (each preserves the previous behavior)
- *  - the REST schema covers the new keys (enums for currency display /
- *    mission behavior / calculation mode / mobile, the location enum,
+ *  - the REST schema covers the new keys (enums for mission behavior /
+ *    calculation mode / mobile, the location enum,
  *    booleans) and the sanitizer normalizes invalid values
  *  - mission calculation (P18-T03): CartContext::from_cart honors
  *    include_tax / include_discount / include_shipping / include_sale /
@@ -16,7 +16,7 @@
  *  - the store-wide calculation mode filter (amount missions follow it,
  *    quantity-style missions stay untouched)
  *  - frontend (P18-T02): locations follow the frontend_locations setting,
- *    and the frontend config carries currencyDisplay + mobile
+ *    and the frontend config carries WooCommerce currency metadata + mobile
  *  - general (P18-T01): default_mission_behavior (all | first | closest)
  *    narrows the progress payload, and the progress cache serves the
  *    stored payload (P18-T04 performance caching)
@@ -160,8 +160,7 @@ check( 'settings filter registered', false !== has_filter( 'faracart_default_cal
 
 $d = $settings->defaults();
 
-check( 'currency defaults to empty (store currency)', '' === $d['currency'] );
-check( 'currency_display defaults to symbol', 'symbol' === $d['currency_display'] );
+check( 'currency settings are not part of FaraCart defaults', ! array_key_exists( 'currency', $d ) && ! array_key_exists( 'currency_display', $d ) );
 check( 'default_mission_behavior defaults to all', 'all' === $d['default_mission_behavior'] );
 check( 'conflict_resolution defaults to cumulative', 'cumulative' === $d['conflict_resolution'] );
 check( 'calculation_mode defaults to subtotal', 'subtotal' === $d['calculation_mode'] );
@@ -200,13 +199,7 @@ echo "\n== 2. Schema & sanitizer ==\n";
 
 $save = $settings_ctrl->save_args();
 
-check( 'currency_display schema enum', isset( $save['currency_display']['enum'] ) );
-check( 'invalid currency_display rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['currency_display'], 'currency_display' ) ) );
-check( 'valid currency_display accepted', true === rest_validate_value_from_schema( 'name', $save['currency_display'], 'currency_display' ) );
-
-check( 'currency schema is a string', 'string' === $save['currency']['type'] );
-check( 'currency accepts a 3-letter code', true === rest_validate_value_from_schema( 'IRR', $save['currency'], 'currency' ) );
-check( 'currency rejects a number', is_wp_error( rest_validate_value_from_schema( 123, $save['currency'], 'currency' ) ) );
+check( 'currency settings are not in the REST schema', ! isset( $save['currency'], $save['currency_display'] ) );
 
 check( 'default_mission_behavior schema enum', isset( $save['default_mission_behavior']['enum'] ) );
 check( 'invalid behavior rejected', is_wp_error( rest_validate_value_from_schema( 'bogus', $save['default_mission_behavior'], 'default_mission_behavior' ) ) );
@@ -243,9 +236,7 @@ $wpdb->query( 'START TRANSACTION' );
 
 try {
 	$req = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
-	$req->set_param( 'currency_display', 'bogus' );
-	$req->set_param( 'currency', 'irt' );
-	$req->set_param( 'currency_invalid', 'bogus!' );
+	$req->set_param( 'currency', 'XYZ' ); // Legacy key must be ignored.
 	$req->set_param( 'default_mission_behavior', 'bogus' );
 	$req->set_param( 'conflict_resolution', 'bogus' );
 	$req->set_param( 'calculation_mode', 'bogus' );
@@ -265,15 +256,8 @@ try {
 	$resp = $settings_ctrl->handle_save( $req );
 	$data = $resp->get_data()['data'];
 
-	check( 'lowercase currency normalized to uppercase', 'IRT' === $data['currency'] );
+	check( 'legacy currency key is ignored', ! array_key_exists( 'currency', $data ) && ! array_key_exists( 'currency_display', $data ) );
 
-	// A malformed currency code falls back to '' (store currency).
-	$req2 = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
-	$req2->set_param( 'currency', 'bogus!' );
-	$resp2 = $settings_ctrl->handle_save( $req2 );
-	check( 'invalid currency code falls back to store currency', '' === $resp2->get_data()['data']['currency'] );
-
-	check( 'invalid currency falls back to symbol', 'symbol' === $data['currency_display'] );
 	check( 'invalid behavior falls back to all', 'all' === $data['default_mission_behavior'] );
 	check( 'invalid conflict mode falls back to cumulative', 'cumulative' === $data['conflict_resolution'] );
 	check( 'invalid mode falls back to subtotal', 'subtotal' === $data['calculation_mode'] );
@@ -411,47 +395,21 @@ add_filter( 'faracart_frontend_locations', function () {
 check( 'locations filter overrides', array( 'shop' ) === $ui->locations() );
 remove_all_filters( 'faracart_frontend_locations' );
 
-$settings->set( 'frontend_locations', array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' ) );	// Deterministic baseline: the stored option may already hold non-default
-	// values (e.g. a dev site saved currency 'name'), so pin the settings
-	// before asserting the config passthrough.
-	$settings->set( 'currency_display', 'symbol' );
-	$settings->set( 'frontend_position', 'top' );
-	$settings->set( 'frontend_mobile', 'show' );
-	$config = $ui->frontend_config();
-	check( 'config carries currencyDisplay', isset( $config['currencyDisplay'] ) && 'symbol' === $config['currencyDisplay'] );
-	check( 'config carries page position', isset( $config['position'] ) && 'top' === $config['position'] );
-	check( 'config carries mobile', isset( $config['mobile'] ) && 'show' === $config['mobile'] );
-
-	$settings->set( 'currency_display', 'code' );
-	$settings->set( 'frontend_position', 'bottom' );
-	$settings->set( 'frontend_mobile', 'hide' );
+$settings->set( 'frontend_locations', array( 'cart', 'mini-cart', 'checkout', 'shop', 'product' ) );
+$settings->set( 'frontend_position', 'top' );
+$settings->set( 'frontend_mobile', 'show' );
 $config = $ui->frontend_config();
-check( 'currencyDisplay follows setting', 'code' === $config['currencyDisplay'] );
-check( 'page position follows setting', 'bottom' === $config['position'] );
-check( 'admin boot currencyDisplay follows setting', 'code' === ( new AssetLoader( $settings ) )->boot_data()['currencyDisplay'] );
-check( 'mobile follows setting', 'hide' === $config['mobile'] );
+$wc_currency = \FaraCart\Utils\Currency::frontend_config();
+check( 'config carries WooCommerce currency code', $wc_currency['currency'] === $config['currency'] );
+check( 'config carries WooCommerce symbol', $wc_currency['currencySymbol'] === $config['currencySymbol'] );
+check( 'config carries WooCommerce position', $wc_currency['currencyPosition'] === $config['currencyPosition'] );
+check( 'config carries WooCommerce decimals', $wc_currency['currencyDecimals'] === $config['currencyDecimals'] );
+check( 'config carries WooCommerce separators', $wc_currency['currencyDecimalSeparator'] === $config['currencyDecimalSeparator'] && $wc_currency['currencyThousandSeparator'] === $config['currencyThousandSeparator'] );
+check( 'admin boot carries the same WooCommerce config', $config['currencyPosition'] === ( new AssetLoader( $settings ) )->boot_data()['currencyPosition'] );
+check( 'config carries page position', isset( $config['position'] ) && 'top' === $config['position'] );
+check( 'config carries mobile', isset( $config['mobile'] ) && 'show' === $config['mobile'] );
+check( 'legacy currency controls remain absent after attempted set', ! array_key_exists( 'currency', $settings->all() ) && ! array_key_exists( 'currency_display', $settings->all() ) );
 $settings->set_many( $all_before );
-
-// The resolved display currency (Settings::currency()) is the single
-// source of truth: '' follows the store currency, a configured code
-// overrides it everywhere — boot data, frontend config and payloads.
-$store_currency = function_exists( 'get_woocommerce_currency' ) ? (string) get_woocommerce_currency() : 'USD';
-$settings->set( 'currency', '' );
-check( 'currency resolver follows the store currency', $store_currency === $settings->currency() );
-
-add_filter( 'faracart_currency', function () {
-	return 'XYZ';
-} );
-check( 'currency filter can pin the display unit', 'XYZ' === $settings->currency() );
-remove_all_filters( 'faracart_currency' );
-
-$settings->set( 'currency', 'irt' );
-check( 'currency resolver uppercases the override', 'IRT' === $settings->currency() );
-check( 'boot currency follows the override', 'IRT' === ( new AssetLoader( $settings ) )->boot_data()['currency'] );
-check( 'frontend config currency follows the override', 'IRT' === $ui->frontend_config()['currency'] );
-
-$settings->set( 'currency', '' );
-check( 'boot currency follows the store currency again', $store_currency === ( new AssetLoader( $settings ) )->boot_data()['currency'] );
 
 // ---------------------------------------------------------------------------
 // 5. Mission behavior + progress caching (P18-T01 / P18-T04)

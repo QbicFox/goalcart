@@ -141,17 +141,16 @@ layers are asserted by `tests/frontend-test.php`.
 - **Animation:** the `frontend_animation` setting, filterable via
   `faracart_frontend_animation` (offs add the no-transition classes).
 - **Config payload** (`frontend_config()`): `endpoint`, `refresh`,
-  `currency`, `locale`, `isRtl`, `labels` — printed as
-  `window.faracartFrontend` at `wp_footer` priority 5, before the
-  enqueued footer script. Phase 12 adds `template` (active variant),
-  `animation` and `appearance` (resolved tokens); Phase 18 adds
-  `currencyDisplay` (`symbol` | `code` | `name` — the widget's amount
-  formatter uses it) and `mobile` (`show` | `hide`); Phase 27 adds
-  `locale` (`get_locale()`), which the JS passes to `Intl.NumberFormat`
-  so amounts and numbers render with the site locale's digits and
-  grouping (Persian digits for `fa_IR` — see `docs/i18n.md`). The Phase
-  16 Tracker prints a second object, `window.faracartTracking`, at
-  priority 4 (see “Analytics Events”).
+  `currency`, `currencySymbol`, `currencyPosition`, `currencyDecimals`,
+  `currencyDecimalSeparator`, `currencyThousandSeparator`, `locale`,
+  `isRtl` and `labels` — printed as `window.faracartFrontend` at
+  `wp_footer` priority 5, before the enqueued footer script. The money
+  formatter consumes these WooCommerce values directly, so the storefront
+  follows the store's symbol, position, separators and precision. Phase 12
+  adds `template` (active variant), `animation` and `appearance` (resolved
+  tokens); `mobile` controls the responsive widget behavior. The Phase 16
+  Tracker prints a second object, `window.faracartTracking`, at priority 4
+  (see “Analytics Events”).
 - Assets load only on pages that can render a widget (cart / checkout /
   shop / product / a page containing the shortcode) via
   `page_needs_widget()`.
@@ -193,7 +192,8 @@ plus the raw `state` for styling.
 - `quantity`/`remaining_quantity` come from the cart (the controller
   passes the cart's total quantity) and fall back to current/remaining for
   quantity-mode missions.
-- `reward` is value-aware (“10% discount”, “Fixed $20.00 off”).
+- `reward` is value-aware (for example, a percentage or fixed discount using
+  the store's configured currency formatting).
 - `campaign_name` is folded into the mission by the repository's campaign
   join (`Mission::campaign_name()`).
 - Unknown placeholders are left untouched — a template can never render
@@ -210,7 +210,7 @@ complete), `display_settings.completed_message` drives completion copy
 Only {remaining} left until {reward}
 ```
 
-renders as “Only $38.00 left until Free shipping”. The payload `state`
+renders with the store's configured amount in “Only [formatted amount] left until Free shipping”. The payload `state`
 lands as a `faracart-state--{state}` class on the widget card, so themes
 can highlight near-completion (`faracart-state--nearly_complete`) etc.
 
@@ -399,8 +399,7 @@ The widget renders each item's name + server-formatted price
 (`price_html`, falling back to the raw price for hand-built payloads)
 linked to the product. Money labels are plain text: the `wc_price`
 markup is stripped **and** its HTML entities decoded (WooCommerce ships
-symbols like the IRT "تومان" as an entity), so the label never shows raw
-entity text.
+localized symbols as entities), so the label never shows raw entity text.
 
 ## Sources
 

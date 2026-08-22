@@ -306,13 +306,11 @@ final class Plugin {
 			);
 		} );
 
-		// Message engine: stateless dynamic-message template
-		// engine — state detection, variable substitution and localized
-		// per-state copy, consumed by the frontend REST layer. The resolved
-		// display currency rides along so server-rendered amounts are
-		// labelled with the same unit the storefront widgets use.
+		// Message engine: stateless dynamic-message template engine. It
+		// formats money through WooCommerce directly; no FaraCart currency
+		// override is injected.
 		$this->container->singleton( MessageEngine::class, function ( Container $container ) {
-			return new MessageEngine( $container->get( Settings::class )->currency() );
+			return new MessageEngine();
 		} );
 
 		// Suggestion engine: product recommendations that close
