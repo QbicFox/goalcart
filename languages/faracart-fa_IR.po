@@ -190,13 +190,13 @@ msgstr ""
 "نردبانی متصل از نقاط عطف کمپین — نقاط، آستانه‌ها و پاداش‌ها — همراه با نوار "
 "پیشرفت کلی."
 
-#: admin-app/src/routes/Settings.tsx:978
-msgid ""
-"A custom glyph/emoji shown inside the button (leave empty for the default "
-"cart icon)."
-msgstr ""
-"نمادی سفارشی داخل دکمه نمایش داده می‌شود (برای آیکن پیش‌فرض سبد خرید، خالی "
-"بگذارید)."
+#: admin-app/src/routes/Settings.tsx:946
+msgid "Custom SVG icon"
+msgstr "آیکن SVG سفارشی"
+
+#: admin-app/src/routes/Settings.tsx:950
+msgid "Paste an inline SVG for the button, or leave empty for the default checklist icon. Scripts, external images and inline CSS are removed."
+msgstr "یک SVG درون‌خطی برای دکمه جای‌گذاری کنید یا برای استفاده از آیکن پیش‌فرض فهرست کارها، این بخش را خالی بگذارید. اسکریپت‌ها، تصاویر خارجی و CSS درون‌خطی حذف می‌شوند."
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:360
 msgid "A deterministic coupon is created per customer."
@@ -861,10 +861,6 @@ msgstr "دکمه"
 #: includes/Templates/Mission/Template6.php:121
 msgid "Button color"
 msgstr "رنگ دکمه"
-
-#: admin-app/src/routes/Settings.tsx:977
-msgid "Button icon"
-msgstr "آیکن دکمه"
 
 #: admin-app/src/routes/Settings.tsx:994
 msgid "Button label / tooltip"

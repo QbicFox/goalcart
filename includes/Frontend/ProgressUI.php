@@ -571,7 +571,7 @@ final class ProgressUI {
 			'buttonSize'       => min( 96, max( 32, (int) $this->settings->get( 'floating_button_size', 56 ) ) ),
 			'primaryColor'     => $this->floating_primary_color(),
 			'animation'        => (bool) $this->settings->get( 'floating_animation', true ),
-			'icon'             => trim( sanitize_text_field( (string) $this->settings->get( 'floating_icon', '' ) ) ),
+			'icon'             => Settings::sanitize_floating_icon( $this->settings->get( 'floating_icon', '' ) ),
 			'label'            => trim( sanitize_text_field( (string) $this->settings->get( 'floating_label', '' ) ) ),
 			'labels'           => array(
 				'open'   => __( 'View your cart missions', 'faracart' ),

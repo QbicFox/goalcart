@@ -458,6 +458,9 @@ check( 'Preview controls keep no simulated reward control', false === strpos( $p
 check( 'Preview controls keep no device-width control', false === strpos( $preview_controls_tsx, 'Device width' ) );
 check( 'Preview controls keep no template selector', false === strpos( $preview_controls_tsx, 'Template' ) );
 
+// Pin the new color setting so this source-level assertion is independent
+// of a developer's stored test-site appearance.
+$settings->set( 'floating_primary_color', '#2271b1' );
 $config = $ui->frontend_config();
 check( 'config carries the template', isset( $config['template'] ) && 'template-1' === $config['template'] );
 check( 'config carries the animation flag', array_key_exists( 'animation', $config ) && true === $config['animation'] );
@@ -478,7 +481,10 @@ $frontend_js = (string) file_get_contents( FARACART_PATH . 'assets/js/frontend.j
 $frontend_css = (string) file_get_contents( FARACART_PATH . 'assets/css/frontend.css' );
 check( 'floating widget builds an inline SVG checklist icon', false !== strpos( $frontend_js, 'createFloatingIcon' ) && false !== strpos( $frontend_js, "createElementNS( NS, 'svg' )" ) );
 check( 'floating SVG is currentColor-driven', false !== strpos( $frontend_js, "'stroke', 'currentColor'" ) && false !== strpos( $frontend_js, "'fill', 'currentColor'" ) );
+check( 'floating widget parses custom SVG without HTML injection', false !== strpos( $frontend_js, 'parseFloatingIcon' ) && false === strpos( $frontend_js, 'innerHTML' ) );
 check( 'floating drawer has a primary-color header', false !== strpos( $frontend_js, 'faracart-floating__header' ) && false !== strpos( $frontend_css, '.faracart-floating__header' ) );
+$settings_tsx = (string) file_get_contents( FARACART_PATH . 'admin-app/src/routes/Settings.tsx' );
+check( 'floating settings accept custom SVG code', false !== strpos( $settings_tsx, 'Custom SVG icon' ) && false !== strpos( $settings_tsx, 'multiline' ) );
 $settings->set( 'floating_primary_color', '#2271b1' );
 
 // Shortcode template override lands on the container (per-widget template).

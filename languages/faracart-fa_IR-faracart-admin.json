@@ -121,8 +121,11 @@
             "A connected ladder of the campaign milestones — dots, targets and rewards — with an overall progress bar.": [
                 "نردبانی متصل از نقاط عطف کمپین — نقاط، آستانه‌ها و پاداش‌ها — همراه با نوار پیشرفت کلی."
             ],
-            "A custom glyph\/emoji shown inside the button (leave empty for the default cart icon).": [
-                "نمادی سفارشی داخل دکمه نمایش داده می‌شود (برای آیکن پیش‌فرض سبد خرید، خالی بگذارید)."
+            "Custom SVG icon": [
+                "آیکن SVG سفارشی"
+            ],
+            "Paste an inline SVG for the button, or leave empty for the default checklist icon. Scripts, external images and inline CSS are removed.": [
+                "یک SVG درون‌خطی برای دکمه جای‌گذاری کنید یا برای استفاده از آیکن پیش‌فرض فهرست کارها، این بخش را خالی بگذارید. اسکریپت‌ها، تصاویر خارجی و CSS درون‌خطی حذف می‌شوند."
             ],
             "A deterministic coupon is created per customer.": [
                 "برای هر مشتری یک کد تخفیف ثابت و همیشه یکسان ساخته می‌شود."
@@ -495,9 +498,6 @@
             ],
             "Button color": [
                 "رنگ دکمه"
-            ],
-            "Button icon": [
-                "آیکن دکمه"
             ],
             "Button label \/ tooltip": [
                 "برچسب \/ راهنمای دکمه"

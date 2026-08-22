@@ -132,7 +132,7 @@ class Settings
 		'floating_button_size'        => 56,            // px (diameter)
 		'floating_animation'          => true,
 		'floating_primary_color'      => '#2271b1',     // primary FAB/drawer accent
-		'floating_icon'               => '',            // custom glyph/emoji ('' = default)
+		'floating_icon'               => '',            // inline SVG markup ('' = default checklist icon)
 		'floating_label'              => '',            // custom tooltip/label ('' = default)
 
 		// Mission Calculation (P18-T03). Each default preserves the
@@ -275,7 +275,71 @@ class Settings
 			$merged['floating_primary_color'] = $color ? $color : $this->defaults['floating_primary_color'];
 		}
 
+		if (array_key_exists('floating_icon', $merged)) {
+			$merged['floating_icon'] = self::sanitize_floating_icon($merged['floating_icon']);
+		}
+
 		return $merged;
+	}
+
+	/**
+	 * Sanitize custom floating SVG markup while preserving legacy text icons.
+	 *
+	 * Only presentation-oriented SVG elements and attributes are allowed.
+	 * Scriptable elements, event-handler attributes, external references and
+	 * inline CSS are deliberately excluded before the value reaches REST or
+	 * the storefront DOM.
+	 *
+	 * @param mixed $value Raw icon value.
+	 * @return string
+	 */
+	public static function sanitize_floating_icon($value)
+	{
+		$value = trim((string) $value);
+
+		if ('' === $value) {
+			return '';
+		}
+
+		// Preserve old text/emoji icons for existing installations; new
+		// markup is accepted only as a single SVG root.
+		if (false === stripos($value, '<svg')) {
+			return trim(sanitize_text_field($value));
+		}
+
+		if (! preg_match('/^\s*<svg\b[\s\S]*<\/svg>\s*$/i', $value)) {
+			return '';
+		}
+
+		$allowed = array(
+			'svg' => array(
+				'xmlns'         => true,
+				'viewbox'       => true,
+				'width'         => true,
+				'height'        => true,
+				'fill'          => true,
+				'stroke'        => true,
+				'stroke-width'  => true,
+				'stroke-linecap' => true,
+				'stroke-linejoin' => true,
+				'role'          => true,
+				'aria-hidden'   => true,
+				'focusable'     => true,
+			),
+			'g'        => array('fill' => true, 'stroke' => true, 'stroke-width' => true, 'transform' => true),
+			'path'     => array('d' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true, 'stroke-linecap' => true, 'stroke-linejoin' => true, 'transform' => true),
+			'rect'     => array('x' => true, 'y' => true, 'width' => true, 'height' => true, 'rx' => true, 'ry' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true),
+			'circle'   => array('cx' => true, 'cy' => true, 'r' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true),
+			'ellipse'  => array('cx' => true, 'cy' => true, 'rx' => true, 'ry' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true),
+			'line'     => array('x1' => true, 'x2' => true, 'y1' => true, 'y2' => true, 'stroke' => true, 'stroke-width' => true, 'stroke-linecap' => true),
+			'polyline' => array('points' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true),
+			'polygon'  => array('points' => true, 'fill' => true, 'stroke' => true, 'stroke-width' => true),
+			'title'    => array(),
+		);
+
+		$clean = trim(wp_kses($value, $allowed));
+
+		return preg_match('/^\s*<svg\b[\s\S]*<\/svg>\s*$/i', $clean) ? $clean : '';
 	}
 
 	public function apply_default_calculation_mode($mode, $type)

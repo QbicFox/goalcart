@@ -933,24 +933,27 @@ export default function Settings() {
 											"Smooth open/close transitions for the floating button and its drawer.",
 											"faracart",
 										)}
-									/>
-									<Controller
-										control={control}
-										name="floating_icon"
-										render={({ field }) => (
-											<TextField
-												{...field}
-												size="small"
-												fullWidth
-												label={__("Button icon", "faracart")}
-												helperText={__(
-													"A custom glyph/emoji shown inside the button (leave empty for the default cart icon).",
-													"faracart",
-												)}
-												sx={{ maxWidth: 360 }}
-											/>
-										)}
-									/>
+									/>					<Controller
+						control={control}
+						name="floating_icon"
+						render={({ field }) => (
+							<TextField
+								{...field}
+								size="small"
+								fullWidth
+								multiline
+								minRows={4}
+								maxRows={8}
+								label={__("Custom SVG icon", "faracart")}
+								helperText={__(
+									"Paste an inline SVG for the button, or leave empty for the default checklist icon. Scripts, external images and inline CSS are removed.",
+									"faracart",
+								)}
+								sx={{ maxWidth: 520 }}
+							/>
+						)}
+					/>
+
 									<Controller
 										control={control}
 										name="floating_label"

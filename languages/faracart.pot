@@ -179,8 +179,12 @@ msgstr ""
 msgid "A connected ladder of the campaign milestones — dots, targets and rewards — with an overall progress bar."
 msgstr ""
 
-#: admin-app/src/routes/Settings.tsx:931
-msgid "A custom glyph/emoji shown inside the button (leave empty for the default cart icon)."
+#: admin-app/src/routes/Settings.tsx:946
+msgid "Custom SVG icon"
+msgstr ""
+
+#: admin-app/src/routes/Settings.tsx:950
+msgid "Paste an inline SVG for the button, or leave empty for the default checklist icon. Scripts, external images and inline CSS are removed."
 msgstr ""
 
 #: admin-app/src/components/mission-builder/RewardFields.tsx:360
@@ -811,10 +815,6 @@ msgstr ""
 #: includes/Templates/Mission/Template5.php:121
 #: includes/Templates/Mission/Template6.php:121
 msgid "Button color"
-msgstr ""
-
-#: admin-app/src/routes/Settings.tsx:930
-msgid "Button icon"
 msgstr ""
 
 #: admin-app/src/routes/Settings.tsx:947

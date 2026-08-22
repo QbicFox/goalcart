@@ -564,7 +564,7 @@ class SettingsController extends BaseController
 				return $color ? $color : $defaults['floating_primary_color'];
 
 			case 'floating_icon':
-				return trim(sanitize_text_field((string) $value));
+				return Settings::sanitize_floating_icon($value);
 
 			case 'floating_label':
 				return trim(sanitize_text_field((string) $value));

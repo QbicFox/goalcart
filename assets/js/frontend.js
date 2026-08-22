@@ -156,6 +156,52 @@
 		return svg;
 	}
 
+	/**
+	 * Parse sanitized custom SVG markup without using HTML injection APIs.
+	 *
+	 * The backend already applies a strict WordPress KSES allow-list. This
+	 * second allow-list protects against stale/cached payloads and keeps
+	 * arbitrary event handlers, URLs and CSS out of the inline icon.
+	 *
+	 * @param {string} markup Custom SVG markup.
+	 * @return {SVGElement|null}
+	 */
+	const parseFloatingIcon = ( markup ) => {
+		var source = String( markup || '' ).trim();
+
+		if ( source.slice( 0, 4 ).toLowerCase() !== '<svg' || ! window.DOMParser ) {
+			return null;
+		}
+
+		var parsed = new DOMParser().parseFromString( source, 'image/svg+xml' );
+		var root = parsed && parsed.documentElement;
+		var elements = [ 'svg', 'g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polyline', 'polygon', 'title' ];
+		var attributes = [ 'xmlns', 'viewbox', 'width', 'height', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin', 'role', 'aria-hidden', 'focusable', 'd', 'x', 'y', 'rx', 'ry', 'cx', 'cy', 'r', 'x1', 'x2', 'y1', 'y2', 'points', 'transform', 'stroke-dasharray', 'stroke-dashoffset', 'fill-rule', 'clip-rule', 'opacity' ];
+
+		if ( ! root || root.nodeName.toLowerCase() !== 'svg' || parsed.querySelector( 'parsererror' ) ) {
+			return null;
+		}
+
+		var nodes = [ root ].concat( Array.from( root.querySelectorAll( '*' ) ) );
+
+		for ( var i = 0; i < nodes.length; i++ ) {
+			var node = nodes[ i ];
+
+			if ( elements.indexOf( node.nodeName.toLowerCase() ) === -1 ) {
+				return null;
+			}
+
+			var nodeAttributes = Array.from( node.attributes || [] );
+			for ( var j = 0; j < nodeAttributes.length; j++ ) {
+				if ( attributes.indexOf( nodeAttributes[ j ].name.toLowerCase() ) === -1 ) {
+					node.removeAttribute( nodeAttributes[ j ].name );
+				}
+			}
+		}
+
+		return document.importNode( root, true );
+	}
+
 	// The template ids the floating drawer accepts when resolving a mission's
 	// card (the same ids widgetTemplate honors, minus per-container overrides).
 	var FLOATING_TEMPLATES = [ 'template-1', 'template-2', 'template-3', 'template-4', 'template-5', 'template-6', 'milestone_chain', 'campaign_progress' ];
@@ -3096,6 +3142,7 @@
 		var button = el( 'button', 'faracart-floating__button' );
 		button.type = 'button';
 		button.setAttribute( 'aria-haspopup', 'dialog' );
+		button.setAttribute( 'aria-expanded', 'false' );
 		button.appendChild( el( 'span', 'faracart-floating__icon' ) );
 		container.appendChild( button );
 
@@ -3198,7 +3245,11 @@
 
 		if ( icon ) {
 			icon.replaceChildren();
-			if ( floating.icon ) {
+			var customIcon = parseFloatingIcon( floating.icon );
+			if ( customIcon ) {
+				icon.appendChild( customIcon );
+			} else if ( floating.icon && floating.icon.trim().slice( 0, 4 ).toLowerCase() !== '<svg' ) {
+				// Legacy text/emoji values remain safe through textContent.
 				icon.textContent = floating.icon;
 			} else {
 				icon.appendChild( createFloatingIcon() );

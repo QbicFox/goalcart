@@ -416,6 +416,14 @@ try {
 	$data = $resp->get_data()['data'];
 	check( 'invalid floating primary color falls back', '#2271b1' === $data['floating_primary_color'] );
 
+	$req = new \WP_REST_Request( 'POST', '/faracart/v1/settings' );
+	$req->set_param( 'floating_icon', '<svg viewBox="0 0 24 24" onload="alert(1)" style="color:red"><path d="M1 1" fill="currentColor"/><script>alert(1)</script><image href="https://evil.test/icon.svg" /></svg>' );
+	$resp = $settings_ctrl->handle_save( $req );
+	$data = $resp->get_data()['data'];
+	check( 'custom floating SVG is preserved', false !== strpos( $data['floating_icon'], '<svg' ) && false !== strpos( $data['floating_icon'], '<path' ) );
+	check( 'custom floating SVG removes scripts and event handlers', false === strpos( $data['floating_icon'], '<script' ) && false === strpos( $data['floating_icon'], 'onload' ) );
+	check( 'custom floating SVG removes external images and inline CSS', false === strpos( $data['floating_icon'], '<image' ) && false === strpos( $data['floating_icon'], 'style=' ) );
+
 	// The REST schema validates the template enum + ranges on dispatch.
 	$save = $settings_ctrl->save_args();
 	check( 'template enum in schema', isset( $save['frontend_template']['enum'] ) );
